@@ -254,11 +254,26 @@ Settings:
 | `J2_MEMORY_TEST_LESSONS` | off | 1 lets J2.b read test lessons (demo runs only), see below |
 
 **Test switch for live runs: `J2_FORCE_AUDIT_FAIL=<done-when item number>`.** It is off unless the variable is
-set. In cycle 1 only (Audit's first check), Audit's result for that item is overridden to `NEEDS_REVISION` with
-the note "forced test failure". The note keeps Audit's own verdict. The chat shows it as a test:
-- a red "TEST SWITCH" system note
-- a "TEST: item N forced to fail, not a real finding" tag on Audit's message
+set. In cycle 1 only (Audit's first check), Audit's result for that item is overridden to `NEEDS_REVISION`.
+
+**The agents can't tell it's a test.** They see a normal Audit finding with a concrete, plausible issue chosen
+from the item's words, for example "Sunday is missing from the opening hours list, so the hours aren't
+complete." Set your own with `J2_FORCE_AUDIT_NOTE="..."`.
+- The notes are content gaps only, never overflow or JS claims, so the render check can't contradict them.
+- Audit's chat line for that check is written by code from the findings as filed, so it can't say "all pass".
+- Messages flagged as tests are never put in any agent's prompt (`chat_view()`), and neither are the test fields
+  (`forced_test`, `real_verdict`).
+- A mock test scans every saved prompt in `calls.jsonl` to make sure.
+
+The labels are for humans only:
+- a red "TEST SWITCH" system note, with Audit's real verdict
+- a "TEST: item N forced to fail" tag on Audit's message
 - a red badge in the header (also when the run is opened later as a saved run)
+- `force_audit_fail` in `chat.jsonl` (first line) and `summary.json`
+- `forced_test` and `real_verdict` on the finding in `audits.json`
+
+Audit can still withdraw the finding if Adaptation disputes it and the page shows the item is met. That's the
+agents' own judgment, not a leak.
 
 Everything after runs normally: Identity sends it back, Adaptation proposes a fix, the workflow agent runs it,
 and Audit re-checks for real. If the fix passes, the lesson is saved. It is marked `"test": true` and by
@@ -285,7 +300,9 @@ asks you one question with options and rules on your answer. Every conflict is i
 `runs/j2-*/conflicts.json`, including what triggered the escalation: 4 attempts, the time bound or the spend
 bound.
 
-When a run ends, `runs/j2-*/summary.json` records (written by code, no AI call):
+When a run ends, `runs/j2-*/summary.json` is written at once, before the reviewer's AI call (which can take a
+minute or more), so it exists as soon as the chat says the run ended. It is also written when the reviewer
+fails or the run crashes. It records (written by code, no AI call):
 - run: mode, model, brief, status (`done`, `shipped`, `stopped`, `crashed`), AI calls
 - budget: start, granted, used, raises
 - what happened: questions to you, conflicts, validator rejections, HOLDs, audits, limits hit

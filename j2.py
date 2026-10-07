@@ -311,6 +311,26 @@ def parse_section(raw):
     return head, body
 
 
+FORCED_NOTES = ((r"price|menu", "Two items on the menu have no price next to them, so the menu with prices isn't complete."),
+                (r"hour|open", "Sunday is missing from the opening hours list, so the hours aren't complete."),
+                (r"address|map|where|direction", "The address is shown, but the map link has no destination, so it "
+                                                 "opens an empty map."),
+                (r"form|order|book", "After the form is submitted nothing tells the visitor it went through: no "
+                                     "confirmation message is shown."),
+                (r"loyal|card|stamp", "The loyalty explainer doesn't say when the free item is given, so the rule "
+                                      "isn't clear."))
+
+
+def forced_note(criterion):
+    """A concrete, plausible issue for J2_FORCE_AUDIT_FAIL, chosen from the item's words; J2_FORCE_AUDIT_NOTE sets it.
+    Kept to content gaps the render check can't contradict (no overflow or JS claims)."""
+    if os.getenv("J2_FORCE_AUDIT_NOTE"):
+        return os.getenv("J2_FORCE_AUDIT_NOTE")
+    return next((n for pat, n in FORCED_NOTES if re.search(pat, criterion, re.I)),
+                f"The section for this item is on the page but leaves out details a visitor needs, so \"{criterion}\" "
+                "isn't fully met.")
+
+
 def workable(audit):
     """Code's verdict on the latest audit, no model: what stops the site being workable ([] = workable).
     Every done-when item passes Audit (a "to be confirmed" item never does), and the render check found no JS
@@ -658,8 +678,9 @@ class J2Run:
                                          if RATES and not blind else None)}, ensure_ascii=False)
 
     def chat_view(self):
-        """Whole chat while it's short; otherwise a running summary of the older part plus the recent messages."""
-        full = "\n".join(line(m) for m in self.chat)
+        """Whole chat while it's short; otherwise a running summary of the older part plus the recent messages.
+        Messages flagged test (J2_FORCE_AUDIT_FAIL, test lessons) are for humans only and never reach an agent."""
+        full = "\n".join(line(m) for m in self.chat if not m.get("test"))
         if len(full) <= CHAT_FULL_CHARS:
             return full
         older = self.chat[:-CHAT_TAIL]
@@ -667,7 +688,7 @@ class J2Run:
             return full
         if not self.summary or len(older) - self.summary_upto >= SUMMARY_REFRESH:
             self._summarize(older)
-        recent = self.chat[self.summary_upto:]
+        recent = [m for m in self.chat[self.summary_upto:] if not m.get("test")]
         return (f"(Long chat: messages 1-{self.summary_upto} are summarised, the last {len(recent)} are in full.)\n"
                 f"SUMMARY OF EARLIER MESSAGES:\n{self.summary}\n\nRECENT MESSAGES:\n"
                 + "\n".join(line(m) for m in recent))
@@ -676,7 +697,7 @@ class J2Run:
         if self.calls and DELAY:
             time.sleep(DELAY)
         self.calls += 1
-        new = older[self.summary_upto:]
+        new = [m for m in older[self.summary_upto:] if not m.get("test")]
         self.summary = llm.ask(
             "You keep a running summary of a team's group chat. Write at most 12 short bullets: decisions, workflows "
             "agreed or refused, conflicts and how they were settled, audit results, open issues. Facts only.",
@@ -846,8 +867,8 @@ class J2Run:
                 self.post("system", f"Stopped: {self.error}")
                 self.outcome = f"Crashed: {self.error}"
                 try:
+                    self._write_summary()      # code only, before the slow reviewer call
                     self._make_report()
-                    self._write_summary()
                 except Exception as e2:  # noqa: BLE001
                     self.post("system", f"Run report failed: {type(e2).__name__}: {str(e2)[:200]}")
                 self.turn = None
@@ -941,9 +962,11 @@ class J2Run:
         self.post("system", (self.outcome or "Stopped.") + f" Site v{len(self.sites)} is in the preview. "
                   + ("Answer Identity's question above to continue." if self.paused else
                      "Tell us if you want changes."))
-        self._make_report(review=not self.paused)
+        # summary.json first (code only): the reviewer call in _make_report can take minutes or hang, and the run
+        # must have its summary the moment it ends.
         if not self.paused:
             self._write_summary()
+        self._make_report(review=not self.paused)
         self.feedback = None
         self.status = "waiting"
 
@@ -1706,8 +1729,9 @@ class J2Run:
                       "(STATE.site_sections): to change what's inside an earlier workflow's section, set revises to that "
                       "workflow's id; otherwise the workflow adds a new section."
                       + (f"\nLESSONS FROM EARLIER WORK (most relevant first): {json.dumps(offered, ensure_ascii=False)}\n"
-                         "If one applies, use it, set lesson_used to its id and say in one clause which one you used. "
-                         "A lesson marked test came from a forced test failure; if you use one, call it a test lesson."
+                         "If one applies, use it, set lesson_used to its id and say in one clause which one you used."
+                         + (" A lesson marked test is a demo lesson; if you use one, call it a test lesson."
+                            if any(x.get("test") for x in offered) else "")   # only with J2_MEMORY_TEST_LESSONS=1
                          if offered else "") + (" Price every workflow with rate-card parts (see STATE.rate_card); its cost is "
                                       "fixed by them." if RATES else ""), mock)
         act = str(r.get("act", "")).upper()
@@ -2385,6 +2409,9 @@ class J2Run:
         nxt, note = self._pick("audit", r.get("next"), ("identity",), "identity",
                                "Audit files its findings to Identity, who decides J2.h")
         fails = workable(audit)
+        if forced:   # Audit's own line may say "all pass": code writes it from the findings as filed
+            r["say"] = f"@Identity Site v{len(self.sites)} checked. " + " ".join(
+                f"{x['id']} item {x['item']} {x['verdict']}: {x['note']}" for x in results if not x["pass"])
         self._say("audit", r.get("say", "") + "\n" + self._audit_tally(results, extras)
                   + (" Workable (code): yes." if not fails else f" Workable (code): no, {len(fails)} problem(s)."),
                   nxt, note, audit=audit["all_pass"], version=len(self.sites), workable=not fails,
@@ -2397,8 +2424,8 @@ class J2Run:
 
     def _force_fail(self, results):
         """J2_FORCE_AUDIT_FAIL=<item>: a test switch for live runs. In cycle 1 only (Audit's first check), the item's
-        result is overridden to NEEDS_REVISION with the note "forced test failure"; Audit's own verdict is kept in
-        the note. Everything after runs normally, and later audits are real. Returns the item number when applied."""
+        result is overridden to NEEDS_REVISION with a plausible note (forced_note()), so agents treat it as a real
+        finding; Audit's own verdict is kept in real_verdict, for humans only. Everything after runs normally, and later audits are real. Returns the item number when applied."""
         n = self.force_fail
         if not n or self.forced or self.cycle != 1:
             return None
@@ -2406,24 +2433,27 @@ class J2Run:
         row = next((x for x in results if x["item"] == n), None)
         if not row:
             self.post("system", f"TEST SWITCH J2_FORCE_AUDIT_FAIL={n} ignored: the charter has no done-when item {n} "
-                                f"(it has {len(results)}).", warning=True)
+                                f"(it has {len(results)}).", warning=True, test=True)
             return None
         real = f"{row['verdict']}: {row.get('note') or 'no note'}"
-        row.update(verdict="NEEDS_REVISION", severity="medium", forced_test=True, **{"pass": False},
-                   note=f"forced test failure (J2_FORCE_AUDIT_FAIL={n}; Audit's own verdict was {real})")
+        # Agents see only a normal-looking finding. The test labels (forced_test, real_verdict, the TEST SWITCH note,
+        # the UI tag) are for humans: state(), _findings() and chat_view() never pass them to an agent.
+        row.update(verdict="NEEDS_REVISION", severity="medium", forced_test=True, real_verdict=real,
+                   note=forced_note(row["criterion"]), **{"pass": False})
         self._event("system", "forced_test", f"item {n} forced to NEEDS_REVISION (Audit's own verdict: {real})")
-        self.post("system", f"TEST SWITCH J2_FORCE_AUDIT_FAIL={n}: Audit's result for done-when item {n} "
-                            f"(\"{row['criterion']}\") is overridden to NEEDS_REVISION. This is a test, not a real "
-                            f"finding (Audit's own verdict: {real}). Later audits are real.", warning=True, test=True)
+        self.post("system", f"TEST SWITCH J2_FORCE_AUDIT_FAIL={n} (humans only, agents don't see this): Audit's "
+                            f"result for done-when item {n} (\"{row['criterion']}\") is overridden to NEEDS_REVISION "
+                            f"with the note \"{row['note']}\". Audit's own verdict: {real}. Later audits are real.",
+                  warning=True, test=True)
         return n
 
     def _learn(self, prev, cur):
         """J2.h learns: Audit confirmed a fix worked (a problem in the previous audit is gone, and a workflow ran in
         between), so Adaptation writes a lesson (problem, cause, fix) and code saves it to memory/lessons.jsonl."""
         now_ok = {r["criterion"] for r in cur["results"] if r["verdict"] in ("PASS", "PASS_WITH_WARNING")}
-        fixed = [{"id": r["id"], "criterion": r["criterion"], "verdict": r["verdict"], "note": r.get("note"),
-                  **({"forced": True} if r.get("forced_test") else {})}
+        fixed = [{"id": r["id"], "criterion": r["criterion"], "verdict": r["verdict"], "note": r.get("note")}
                  for r in prev["results"] if not r["pass"] and r["criterion"] in now_ok]
+        test = any(r.get("forced_test") for r in prev["results"] if r["criterion"] in now_ok)   # kept out of the prompt
         gone = set(j2_check.problems(prev.get("mechanical") or {})) - set(j2_check.problems(cur.get("mechanical") or {}))
         fixed += [{"id": "mechanical", "criterion": p, "verdict": "render check", "note": p} for p in sorted(gone)
                   if (cur.get("mechanical") or {}).get("available")]
@@ -2445,7 +2475,7 @@ class J2Run:
         saved = []
         for x in [x for x in r.get("lessons") or [] if isinstance(x, dict) and x.get("problem") and x.get("fix")][:len(fixed)]:
             lesson = {"id": f"L-{self.run_id}-{len(self.lessons_saved) + 1}", "problem": str(x["problem"]),
-                      **({"test": True} if any(f.get("forced") for f in fixed) else {}),
+                      **({"test": True} if test else {}),
                       "cause": str(x.get("cause") or ""), "fix": str(x["fix"]), "run": self.run_id, "cycle": self.cycle,
                       "versions": [prev["version"], cur["version"]], "workflows": [w["id"] for w in ran],
                       "t": time.strftime("%Y-%m-%d %H:%M:%S")}

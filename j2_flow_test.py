@@ -14,7 +14,8 @@ C. Workable loop: the same failure twice, the cycle limit and to-be-confirmed fa
    (keep working, drop, ship); the J2.c bargain's time bound escalates to Identity; workable() unit checks.
 D. Memory: a confirmed fix saves a lesson, the next run's Adaptation uses it, J2_MEMORY=0 reads and writes nothing.
 E. The page: Agents and Lessons tabs, the state they read, and the clear-memory endpoint.
-F. J2_FORCE_AUDIT_FAIL=<item>: a forced cycle-1 failure, then a real fix, a real re-check and a saved lesson.
+F. J2_FORCE_AUDIT_FAIL=<item>: a forced cycle-1 failure that agents can't tell from a real finding (no test label in
+   any prompt), then a real fix, a real re-check and a saved lesson. summary.json exists before the reviewer call.
    J2_MEMORY_TEST_LESSONS=1 lets J2.b read test lessons (off by default), flagged in the chat and the lanes.
 Runs are written to runs/ (or J2_RUNS_DIR); each ended run has summary.json. Memory is off (J2_MEMORY=0) except in
 the memory test, which uses its own lessons file.
@@ -406,10 +407,24 @@ def forced_fail():
         add_budget_if_asked(run)
         first, last = run.audits[0], run.audits[-1]
         r1 = next(x for x in first["results"] if x["item"] == 2)
-        assert r1["verdict"] == "NEEDS_REVISION" and r1["note"].startswith("forced test failure") and r1["forced_test"], r1
-        assert "Audit's own verdict was PASS" in r1["note"], r1["note"]
+        assert r1["verdict"] == "NEEDS_REVISION" and r1["forced_test"] and r1["real_verdict"].startswith("PASS"), r1
+        assert r1["note"] == j2.forced_note(r1["criterion"]) and "Sunday" in r1["note"], r1["note"]   # item 2: hours
+        # humans see the test: the red note, the tag, chat.jsonl and summary.json
         assert any(m.get("test") and m["text"].startswith("TEST SWITCH J2_FORCE_AUDIT_FAIL=2") for m in run.chat)
-        assert next(m for m in run.chat if m["who"] == "audit").get("forced_test") == 2
+        audit_msg = next(m for m in run.chat if m["who"] == "audit")
+        assert audit_msg.get("forced_test") == 2 and "F-2 item 2 NEEDS_REVISION" in audit_msg["text"], audit_msg["text"]
+        with open(os.path.join(run.dir, "chat.jsonl"), encoding="utf-8") as f:
+            assert json.loads(f.readline())["force_audit_fail"] == 2
+        # agents can't tell: no prompt or reply format of any AI call carries a test label or Audit's real verdict
+        with open(os.path.join(run.dir, "calls.jsonl"), encoding="utf-8") as f:
+            calls = [json.loads(ln) for ln in f]
+        for c in calls:
+            seen = (c["system"] + c["prompt"]).lower()
+            for bad in ("forced test", "test switch", "j2_force_audit_fail", "forced_test", "real_verdict", "own verdict",
+                        "test failure", "not a real finding"):
+                assert bad not in seen, (c["id"], c["fn"], bad)
+        ident = next(c for c in calls if c["fn"] == "identity" and "AUDIT'S FINDINGS" in c["prompt"])
+        assert r1["note"] in ident["prompt"], "Identity must see the forced finding as a normal one"
         fix = next(w for w in run.workflows if w["name"] == "Fix item 2")
         assert fix["status"] == "done" and fix["revises"] == "W-2" and fix["cycle"] > 1, fix
         r2 = next(x for x in last["results"] if x["item"] == 2)
@@ -469,6 +484,26 @@ def test_lessons():
         j2.MEMORY_FILE = old
         os.environ["J2_MEMORY"] = "0"
         os.environ.pop("J2_MEMORY_TEST_LESSONS", None)
+
+
+def summary_before_review():
+    """summary.json is written the moment a run ends, before the slow reviewer call (runs/j2-20261007-134200 had none
+    for 98 s after "Done", and none at all if the server stopped then). Also when the reviewer fails or a turn crashes."""
+    run = j2.J2Run()
+    seen = []
+
+    def review(metrics):
+        seen.append(os.path.exists(os.path.join(run.dir, "summary.json")))
+        raise RuntimeError("reviewer down")
+    run._review = review
+    say(run, BREW_LAB)
+    add_budget_if_asked(run)
+    assert seen and all(seen), seen
+    assert summary(run)["status"] == "done" and "Reviewer call failed" in run.report["review"]["verdict"]
+    run = j2.J2Run()                                     # a crash mid-run still leaves summary.json
+    run._turn_coordination = lambda h: (_ for _ in ()).throw(RuntimeError("boom"))
+    say(run, BREW_LAB)
+    assert run.outcome.startswith("Crashed") and summary(run)["status"] == "crashed", run.outcome
 
 
 def page():
@@ -570,7 +605,8 @@ if __name__ == "__main__":
         memory()
         forced_fail()
         test_lessons()
-        print(f"J2_FIXES={mode}: B workflow agents, C workable loop and limits, D memory, F forced audit failure and test lessons ok")
+        summary_before_review()
+        print(f"J2_FIXES={mode}: B workflow agents, C workable loop and limits, D memory, F forced audit failure (hidden from agents) and test lessons, summary before review ok")
     ruling_over_budget()
     redirect()
     workable_unit()
