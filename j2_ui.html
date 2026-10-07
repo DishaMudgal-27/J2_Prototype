@@ -226,6 +226,14 @@ const isWf = k => /^W-\d+$/.test(k || "");
 const who = k => WHO[k] || (isWf(k) ? [k + " Builder", k.replace("-", "")] : [k, "?"]);
 const col = k => isWf(k) ? `var(--wf${(+k.slice(2) - 1) % 6})` : `var(--${k})`;
 const $ = id => document.getElementById(id);
+// Panes are re-rendered on every poll. Leave a pane alone when its HTML is unchanged, and when it does change, reopen
+// any <details> the user had open (matched by data-key), so an opened screenshot or log stays open until closed.
+function paint(el, html){
+  if (el.__html === html) return;
+  const open = new Set([...el.querySelectorAll("details[open][data-key]")].map(d => d.dataset.key));
+  el.innerHTML = html; el.__html = html;
+  open.forEach(k => { const d = el.querySelector(`details[data-key="${CSS.escape(k)}"]`); if (d) d.open = true; });
+}
 // Example briefs for both views: different kinds of business, so nothing assumes a cafe.
 const EXAMPLES = ["A website for my cafe", "A website for Sweet Crumbs Bakery in Pune: menu, cake orders, contact",
   "A website for Petal & Stem, a florist in Jaipur: bouquets, same-day delivery, wedding flowers",
@@ -331,7 +339,7 @@ function renderAudit(s){
     <td class="${r.pass?"pass":"fail"}">${esc(r.verdict || (r.pass?"PASS":"FAIL"))}</td><td>${esc(r.note)}</td></tr>`).join("")}</table>
     ${(a.rubric || []).length ? `<h3>Design and usability rubric</h3><table><tr><th>Item</th><th>Result</th><th>Evidence</th></tr>${a.rubric.map(r =>
       `<tr><td><b>${esc(r.id)}</b> ${esc(r.criterion)}</td><td class="${r.pass?"pass":"fail"}">${esc(r.verdict)}</td><td>${esc(r.note)}</td></tr>`).join("")}</table>` : ""}
-    ${a.screenshot ? `<details><summary>Screenshot Audit looked at (360px left, 1280px right)</summary><img alt="Site v${a.version} at 360px and 1280px" style="max-width:100%;border:1px solid var(--line)" src="/shot/${a.version}${runQ().replace("&", "?")}"></details>` : ""}`).join("");
+    ${a.screenshot ? `<details data-key="shot-v${a.version}"><summary>Screenshot Audit looked at (360px left, 1280px right)</summary><img alt="Site v${a.version} at 360px and 1280px" style="max-width:100%;border:1px solid var(--line)" src="/shot/${a.version}${runQ().replace("&", "?")}"></details>` : ""}`).join("");
 }
 const ROLE = {identity:"J2.a charter, J2.d rulings, J2.h workable?", adaptation:"J2.b proposes, disputes, saves lessons",
   priority:"J2.c prices, checks run envelopes", coordination:"J2.f schedules, holds the write lock", audit:"J2.g checks the site",
@@ -588,7 +596,7 @@ function renderReport(s){
       <td class="${(a.mechanical||[]).length?"fail":""}">${!a.mechanical_ran ? "not run" : (a.mechanical||[]).length ? esc(a.mechanical.join("; ")) : "clean"}</td></tr>`).join("")}</table>
     ${est ? `<h3>Agent estimate vs charged</h3><table><tr><th>ID</th><th>Workflow</th><th>Agent estimate</th><th>Charged</th></tr>${est}</table>` : ""}
     ${list("What went well (reviewer)", r.went_well)}${list("Problems (reviewer)", r.problems)}${list("Learnings (reviewer)", r.learnings)}
-    <details><summary>Event log (${R.events.length})</summary><ul>${R.events.map(e => `<li>[${e.msg}] ${esc(e.agent)} · ${esc(e.type)}: ${esc(e.detail)}</li>`).join("")}</ul></details>
+    <details data-key="events"><summary>Event log (${R.events.length})</summary><ul>${R.events.map(e => `<li>[${e.msg}] ${esc(e.agent)} · ${esc(e.type)}: ${esc(e.detail)}</li>`).join("")}</ul></details>
     <p class="empty">Saved as report.json and report.md in the run folder. Scores and learnings are one reviewer model's judgment; counts are exact.</p>`;
 }
 function quick(s){
@@ -610,7 +618,7 @@ async function poll(){
     const busy = s.status === "running" || !!s.saved, p = s.paused;
     $("banner").hidden = !s.saved;
     if (s.saved) $("banner").textContent = `Viewing saved run ${s.saved} (read only). ${s.outcome || ""}`;
-    $("lanes").innerHTML = renderLanes(s);
+    paint($("lanes"), renderLanes(s));
     $("waiting").hidden = !p || busy;
     if (p) $("waiting").innerHTML = `<b>Identity is waiting on your answer</b> · ${esc(p.label)} <span class="empty">(message ${p.msg})</span>`
       + (p.questions.length ? `<ol>${p.questions.map(q => `<li>${esc(q.question)}${q.options.map((o,i) => `<div class="opt">Option ${i+1}: ${esc(o)}</div>`).join("")}</li>`).join("")}</ol>` : "");
@@ -630,11 +638,11 @@ async function poll(){
       $("ver").innerHTML = Array.from({length:versions}, (_,i) => `<option value="v${i+1}">v${i+1}</option>`).join("") || "<option>no site yet</option>";
       $("ver").value = versions ? "v"+versions : ""; $("frame").src = `/site/${versions ? "v"+versions : "latest"}?t=${Date.now()}${runQ()}`;
     }
-    $("pane-goal").innerHTML = renderGoal(s); $("pane-workflows").innerHTML = renderWorkflows(s);
-    $("pane-conflicts").innerHTML = renderConflicts(s); $("pane-audit").innerHTML = renderAudit(s);
-    $("pane-report").innerHTML = renderReport(s);
-    $("pane-timeline").innerHTML = renderTimeline(s); $("pane-lessons").innerHTML = renderLessons(s);
-    $("pane-style").innerHTML = renderStyle(s); $("pane-playbooks").innerHTML = renderPlaybooks(s);
+    paint($("pane-goal"), renderGoal(s)); paint($("pane-workflows"), renderWorkflows(s));
+    paint($("pane-conflicts"), renderConflicts(s)); paint($("pane-audit"), renderAudit(s));
+    paint($("pane-report"), renderReport(s));
+    paint($("pane-timeline"), renderTimeline(s)); paint($("pane-lessons"), renderLessons(s));
+    paint($("pane-style"), renderStyle(s)); paint($("pane-playbooks"), renderPlaybooks(s));
     renderSimple(s);
     if (!state || state.status !== s.status || state.total !== s.total) quick(s);
     state = s;

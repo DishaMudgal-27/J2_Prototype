@@ -619,6 +619,67 @@ def simple_view():
         os.environ["J2_FIXES"] = "0"
 
 
+def detail_stays_open():
+    """The Detailed view re-renders on every poll. An opened screenshot (under Audit), the report's event log, and an
+    opened message detail view (with its full text) must stay open while the run changes, until the user closes them.
+    Real browser: the page opens them, then the server changes the run (a new audit and a new message) mid-test."""
+    import html as htmllib
+    import shutil
+    import subprocess
+    import threading
+    import j2_server
+    chrome = j2.j2_check.find_chrome()
+    if not chrome:
+        print("detail view test skipped: Chrome not found")
+        return
+    run = j2.J2Run()
+    say(run, BREW_LAB)
+    add_budget_if_asked(run)
+    v = run.audits[-1]["version"]
+    os.makedirs(os.path.join(run.dir, "site", "shots"), exist_ok=True)
+    shutil.copy(os.path.join(j2.HERE, "docs", "ui-simple-start-390.png"), os.path.join(run.dir, "site", "shots", f"v{v}.png"))
+    run.audits[-1]["screenshot"] = f"site/shots/v{v}.png"
+    msg = next(m["id"] for m in run.chat if m.get("calls"))
+    # found by their visible text, so the same test also runs against an older page
+    hook = ("const pick = (pane, t) => [...document.querySelectorAll(pane + ' details')].find(d => d.textContent.includes(t));\n"
+            "setTimeout(async () => { const q = s => document.querySelector(s);\n"
+            "  pick('#pane-audit', 'Screenshot').open = true; pick('#pane-report', 'Event log').open = true;\n"
+            f"  await openDetail({msg}); q('#full').open = true;\n"
+            "  await fetch('/test/bump');   // the server changes the run: a new audit and a new message\n"
+            "  setTimeout(() => { document.body.dataset.r = JSON.stringify({shot: !!pick('#pane-audit', 'Screenshot')?.open,"
+            " events: !!pick('#pane-report', 'Event log')?.open, dialog: q('#detail').open, full: q('#full').open,"
+            " audits: q('#pane-audit').innerText.split('Cycle ').length - 1}); }, 4000); }, 1500);")
+    ui = open(os.path.join(j2.HERE, "j2_ui.html"), encoding="utf-8").read().replace("poll();\n</script>", f"poll();\n{hook}\n</script>")
+    orig = j2_server.Handler.do_GET
+
+    def do_GET(self):
+        if self.path.startswith("/?"):
+            return self._send(200, ui, "text/html")
+        if self.path == "/test/bump":
+            run.audits.append({**run.audits[-1], "version": v, "cycle": run.audits[-1]["cycle"] + 1})
+            run.post("system", "A new message while the detail view is open.")
+            return self._send(200, "{}")
+        return orig(self)
+    j2_server.Handler.do_GET = do_GET
+    keep, j2_server.RUN = j2_server.RUN, run
+    srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        before = len(run.audits)
+        out = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=12000", "--dump-dom",
+                              f"http://127.0.0.1:{srv.server_address[1]}/?view=detail"],
+                             capture_output=True, text=True, timeout=120).stdout
+        m = re.search(r'data-r="([^"]*)"', out)
+        assert m, "the page never reported"
+        r = json.loads(htmllib.unescape(m.group(1)))
+        assert len(run.audits) == before + 1 and r["audits"] == before + 1, (r, "the Audit pane didn't re-render")
+        assert r == {**r, "shot": True, "events": True, "dialog": True, "full": True}, r
+    finally:
+        j2_server.Handler.do_GET = orig
+        j2_server.RUN = keep
+        srv.shutdown()
+
+
 def plain_words():
     """The Simple view's word list (fallback only): Audit becomes "our checks", never "the team", so nothing reads
     "after the team"; other function names become "the team"; budget becomes effort. Runs the page's own JS in node."""
@@ -924,6 +985,8 @@ if __name__ == "__main__":
     page()
     print("E behind-the-scenes view (lanes, detail, timeline, saved runs, redaction, lessons) ok")
     generalist_units()
+    detail_stays_open()
+    print("Detailed view: opened screenshot, event log and message detail stay open while the run updates ok")
     simple_view()
     plain_words()
     identity_prompt_is_plain()
