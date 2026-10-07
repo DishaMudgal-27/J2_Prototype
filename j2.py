@@ -475,6 +475,7 @@ def load_lessons():
 def save_lesson(lesson):
     if not memory_on():
         return
+    lesson = {**lesson, **({"mock": True} if llm.MOCK else {})}   # mock memory never reaches a live run
     os.makedirs(os.path.dirname(MEMORY_FILE), exist_ok=True)
     with open(MEMORY_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(lesson, ensure_ascii=False) + "\n")
@@ -501,6 +502,7 @@ def save_playbook(pb):
     """One playbook per run: a later Done in the same run (after a change request) replaces it."""
     if not memory_on():
         return
+    pb = {**pb, **({"mock": True} if llm.MOCK else {})}       # mock memory never reaches a live run
     keep = [x for x in load_playbooks() if x.get("id") != pb["id"]]
     os.makedirs(os.path.dirname(PLAYBOOK_FILE), exist_ok=True)
     with open(PLAYBOOK_FILE, "w", encoding="utf-8") as f:
@@ -516,19 +518,21 @@ def clear_playbooks():
     return n
 
 
+def btype(x):
+    return " ".join(str(x or "").lower().split())
+
+
 def relevant_playbooks(pbs, business_type, text, n=MAX_PLAYBOOKS, include_test=False):
-    """Playbooks for similar businesses: the same business type first, then shared words with the brief; newest
-    first on a tie. Test playbooks (from a J2_FORCE_AUDIT_FAIL run) only with include_test."""
-    bt, want = str(business_type or "").lower(), set(WORD.findall(str(text).lower()))
-    scored = []
-    for i, x in enumerate(pbs):
-        if x.get("test") and not include_test:
-            continue
-        same = str(x.get("business_type") or "").lower() == bt and bt not in ("", "business")
-        words = len(want & set(WORD.findall(" ".join([str(x.get("business_type")), str(x.get("brief"))]).lower())))
-        if same or words >= 2:
-            scored.append((same, words, i, x))
-    return [x for *_, x in sorted(scored, key=lambda t: (-t[0], -t[1], -t[2]))][:n]
+    """Playbooks for the same business type only (a cafe's plan doesn't fit a clothing shop); among those, the ones
+    sharing most words with the brief, newest first on a tie. Test playbooks (J2_FORCE_AUDIT_FAIL runs) only with
+    include_test; playbooks written by mock runs never reach a live run."""
+    bt, want = btype(business_type), set(WORD.findall(str(text).lower()))
+    if bt in ("", "business"):
+        return []
+    scored = [(len(want & set(WORD.findall(str(x.get("brief")).lower()))), i, x) for i, x in enumerate(pbs)
+              if btype(x.get("business_type")) == bt and (include_test or not x.get("test"))
+              and (llm.MOCK or not x.get("mock"))]
+    return [x for *_, x in sorted(scored, key=lambda t: (-t[0], -t[1]))][:n]
 
 
 WORD = re.compile(r"[a-z]{4,}")
@@ -539,7 +543,7 @@ def relevant_lessons(lessons, text, n=MAX_LESSONS, include_test=False):
     J2_FORCE_AUDIT_FAIL run) are left out unless include_test (J2_MEMORY_TEST_LESSONS=1, demo runs only).
     ponytail: word overlap, swap for embeddings if the lesson file grows past a few hundred lines."""
     want = set(WORD.findall(text.lower()))
-    lessons = [x for x in lessons if include_test or not x.get("test")]
+    lessons = [x for x in lessons if (include_test or not x.get("test")) and (llm.MOCK or not x.get("mock"))]
     scored = [(len(want & set(WORD.findall(" ".join(str(x.get(k, "")) for k in ("problem", "cause", "fix")).lower()))),
                i, x) for i, x in enumerate(lessons)]
     return [x for sc, i, x in sorted(scored, key=lambda t: (-t[0], -t[1])) if sc > 0][:n]
@@ -1878,7 +1882,10 @@ class J2Run:
                                           "mechanical check found no overflow at 360px.", "act": "DISPUTE",
                                    "next": "Audit", "dispute": {"with": "Audit", "about": phone["id"],
                                                                 "reason": "Fluid layout, no overflow at 360px"}})
-            others = [{"name": f"Fix item {f['item']}", "goal_gap": f["criterion"], "parts": ["fix"], "revises": "W-2",
+            others = [{"name": f"Cover item {f['item']}", "goal_gap": f["criterion"], "covers": [f["item"]],
+                       "parts": [item_kind(f["criterion"])], "outputs": ["index.html"], "completion_check": f["criterion"]}
+                      if f.get("verdict") == "UNPAID" else
+                      {"name": f"Fix item {f['item']}", "goal_gap": f["criterion"], "parts": ["fix"], "revises": "W-2",
                        "fixes": [f["id"]],
                        "outputs": ["index.html"], "completion_check": f["criterion"]} for f in fails
                       if f is not phone and f.get("item") and f.get("verdict") != "TO_BE_CONFIRMED"]
@@ -2028,7 +2035,9 @@ class J2Run:
 
         def mock():
             if dec == "refuse" or self.exchanges in (1, 3) and self.cycle == 1:
+                beans = [i for i, c in enumerate((self.goal or {}).get("done_when") or [], 1) if re.search(r"bean|farm", c, re.I)]
                 stories = {"name": "Stories section", "goal_gap": "Warm content: the beans, the farms and the people",
+                           "covers": beans,
                            "parts": ["blog_post"] * 2, "outputs": ["stories section"], "completion_check": "2 stories"}
                 say = ("@Priority The stories are what make a small cafe feel warm and personal. I can shrink them to "
                        "two (20)." if self.exchanges == 1 else
@@ -2725,6 +2734,7 @@ class J2Run:
                       max_tokens=1600, images=[shot] if shot else None)
         results, extras = self._audit_findings(r.get("findings") or r.get("results") or [], crit)
         forced = self._force_fail(results)
+        self._flag_unpaid(results)
         rubric = self._audit_rubric(r.get("rubric") or [], measured)
         audit = {"cycle": self.cycle, "version": len(self.sites), "results": results, "extra_issues": extras,
                  "rubric": rubric, "mechanical": mech, "screenshot": os.path.relpath(shot, self.dir) if shot else None,
@@ -2746,6 +2756,28 @@ class J2Run:
         failed = [f"workflow {w['id']} {w['name']} failed (envelope limits)" for w in self.workflows
                   if w["status"] == "failed" and w["cycle"] == self.cycle]
         self._handoff("identity", kind="audit", why=f"Failed workflows this cycle: {failed}" if failed else "")
+
+    def paid_items(self):
+        """Done-when items some built workflow paid for: its covers, plus the items of the findings it fixed."""
+        by_finding = {r["id"]: r["item"] for a in self.audits for r in a["results"] if isinstance(r.get("item"), int)}
+        return {i for w in self.workflows if w["status"] == "done"
+                for i in list(w.get("covers") or []) + [by_finding.get(f) for f in w.get("fixes") or []] if i}
+
+    def _flag_unpaid(self, results):
+        """Cost follows the work, checked on the page: a done-when item that passes although no workflow paid for it
+        (an agent built it without declaring it) becomes a normal finding, UNPAID. It loops back: a workflow covering
+        it at its rate-card minimum makes it paid."""
+        if not RATES:
+            return
+        paid = self.paid_items()
+        for row in results:
+            if row["pass"] and row["item"] not in paid:
+                kind = item_kind(row["criterion"])
+                row.update(verdict="UNPAID", **{"pass": False}, severity="medium",
+                           note=f"Built on the page, but no workflow covers item {row['item']}, so nobody paid for it. "
+                                f"Register a workflow that covers it at its rate-card minimum ({kind}, "
+                                f"{RATES.get(kind, 0)}). (Audit's own note: {row.get('note') or 'none'})")
+                self._event("validator", "unpaid", f"item {row['item']} passes but no workflow covers it")
 
     def _audit_rubric(self, rows, measured):
         """One result per rubric item. Missing, or a PASS without evidence, is BLOCKED_BY_EVIDENCE; an item code

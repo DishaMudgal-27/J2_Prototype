@@ -200,7 +200,11 @@ are never edited by this code.
 
    Items an earlier workflow already paid for aren't charged again. Priority sees each proposal's cost per
    covered item against those minimums and is told to question plans far below them. Each workflow agent is told
-   to build only the items it covers. This came from `runs/j2-20261007-190411`, where 13 items cost 35 at
+   to build only the items it covers.
+
+   Audit checks this on the page too. A done-when item that passes although no built workflow paid for it gets
+   the verdict `UNPAID`, a normal finding that loops back. An item counts as paid if a built workflow covers it,
+   or fixed a finding on it. A workflow that covers the item at its rate-card minimum makes it paid. This came from `runs/j2-20261007-190411`, where 13 items cost 35 at
    budget 40: everything was bundled into two workflows, and a fix (8) was relabelled as styling (5).
 5. **J2.f** Coordination schedules and holds the write lock. Priority checks the envelope. The workflow's agent
    writes its marked section (`<!-- J2:W-3 start (owner W-3) -->` ... `end`, plus an optional head block).
@@ -268,8 +272,9 @@ the open problems listed.
     (cycles, whether Audit passed the first time, AI calls, the changes you asked for)
   - written by Adaptation: the sections, mistakes to avoid and advice
 
-  At its first J2.b for a brief, Adaptation reads up to 2 playbooks for the same business type, or briefs that
-  share words. It says which it used (`playbook_used`) and what it changed (`playbook_changes`). Only Done runs
+  At its first J2.b for a brief, Adaptation reads up to 2 playbooks for the **same business type only**,
+  closest brief first. A cafe's plan is never offered to a clothing shop. Lessons and playbooks written by mock
+  runs are marked `mock` and never reach a live run. It says which it used (`playbook_used`) and what it changed (`playbook_changes`). Only Done runs
   save one. A `J2_FORCE_AUDIT_FAIL` run's playbook is marked test and follows the test-lesson rule.
   `J2_MEMORY=0` turns off lessons and playbooks alike.
 - The **Playbooks** tab lists them, with a progress record per business type: runs, first-pass Audit rate,
@@ -393,6 +398,11 @@ python j2_flow_test.py            # offline, mock mode, both J2_FIXES modes; --c
 python j2_check.py site.html      # the render check on any page
 ```
 
+`j2_flow_test.py` keeps every lesson and playbook in a temp folder, set before `j2` is imported. It ends by
+checking that the real `memory/` files are byte-for-byte unchanged. An earlier version wrote 109 mock cafe
+playbooks into the real file, and a live clothing run reused one. Those are now in
+`_backup/2026-10-07-playbooks-before-cleanup/`, next to a full copy of the file.
+
 `j2_flow_test.py` covers:
 - the original flows
 - B: one agent per workflow, sections and order, retry within the envelope, failure past the retry limit,
@@ -408,6 +418,9 @@ python j2_check.py site.html      # the render check on any page
   "after the team" or other internals. A question with buttons appears once. The phone toggle appears only once
   a site exists. The ready card has its three buttons. Also checked: the word list (run in node: Audit becomes
   "our checks"), and that every Identity prompt, and no other, carries the plain-language rule
+- I: unpaid items. A passing item no workflow paid for is flagged `UNPAID`, paid for and passes. Playbooks:
+  same business type only (a clothing brief that shares words with a cafe brief gets nothing), mock memory
+  kept away from live runs, test memory isolated
 - I: pricing. A bundled plan (6 items for 20) is rejected while the same work at 65 passes; a fix relabelled as
   styling is rejected; a fix isn't charged again for items already paid for; Priority's prompt carries the cost
   per item
@@ -431,9 +444,8 @@ python j2_check.py site.html      # the render check on any page
 - **Audit timing**: Audit runs once the build queue is empty, not after every workflow (fewer calls).
 - **"Core" done-when items**: every done-when item counts as core; the charter has no core / optional split.
 - **"Its spend" in J2.c**: our number (8 AI calls), see above.
-- **Item kinds for pricing**: a keyword match on the done-when text. The validator trusts each workflow's
-  `covers` list: an agent could still build items it didn't declare. The workflow agent is told not to, but
-  nothing checks the built page against `covers` yet.
+- **Item kinds for pricing**: a keyword match on the done-when text. A fix of a failing item pays for that
+  item at the fix price, even when the item's own minimum is higher (e.g. a form item at 15).
 - **Lesson relevance**: word overlap, not meaning; fine for a small file. Playbooks match on business type
   first, then shared words.
 - **Rubric R-1, R-4, R-5** (styling, main action, navigation) are Audit's judgment on the screenshot. Only R-2,

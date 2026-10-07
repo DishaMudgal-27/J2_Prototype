@@ -33,10 +33,24 @@ import re
 import sys
 import time
 
+import hashlib
 import tempfile
 
 os.environ["STUDIO_MOCK"] = "1"
-os.environ["J2_MEMORY"] = "0"        # clean runs: the memory test turns it on with its own file
+os.environ["J2_MEMORY"] = "0"        # clean runs: the memory tests turn it on
+# Every memory file of this test session lives in a temp folder, set before j2 is imported, so no test can write
+# lessons or playbooks into the real memory/ (it once wrote 109 mock cafe playbooks there; a live run reused one).
+SESSION_MEMORY = tempfile.mkdtemp(prefix="j2-test-memory-")
+os.environ["J2_MEMORY_FILE"] = os.path.join(SESSION_MEMORY, "lessons.jsonl")
+os.environ["J2_PLAYBOOK_FILE"] = os.path.join(SESSION_MEMORY, "playbooks.jsonl")
+REAL_MEMORY = [os.path.join(os.path.dirname(os.path.abspath(__file__)), "memory", f) for f in ("lessons.jsonl", "playbooks.jsonl")]
+
+
+def fingerprint(paths):
+    return {p: hashlib.sha256(open(p, "rb").read()).hexdigest() if os.path.exists(p) else None for p in paths}
+
+
+REAL_BEFORE = fingerprint(REAL_MEMORY)
 import j2  # noqa: E402
 
 BREW_LAB = ("A one-page website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru. Visitors should "
@@ -792,12 +806,16 @@ def lone_rubric_failure():
     if not j2.j2_check.find_chrome():
         print("lone rubric failure test skipped: Chrome not found")
         return
+    os.environ["J2_FIXES"], mode = "1", os.environ.get("J2_FIXES", "0")    # stories funded: the beans item is paid
     run = j2.J2Run()
+    os.environ["J2_FIXES"] = mode
     run.budget = 150
     orig, done = run.call, set()
 
     def call(fn, fmt, task, mock, **k):
         raw = orig(fn, fmt, task, mock, **k)
+        if fn == "adaptation" and isinstance(raw, dict) and raw.get("workflows") and not run.workflows:
+            raw["workflows"][0]["covers"] = raw["workflows"][0].get("covers", []) + [7]   # the scaffold pays for item 7
         if fn == "W-1" and fn not in done:          # the scaffold already has the viewport tag: phones pass
             done.add(fn)
             raw = raw.replace("```head\n", '```head\n<meta name="viewport" content="width=device-width, initial-scale=1">\n', 1)
@@ -856,6 +874,67 @@ def pricing():
     assert "COST PER DONE-WHEN ITEM" in p["prompt"] and "rate_card_minimum_for_items" in p["prompt"], p["prompt"][-800:]
     assert "far below the rate-card minimums" in p["prompt"]
     assert all(w.get("covers") or w.get("fixes") or w["name"] in ("Stories section", "Animations") for w in run.workflows)
+
+
+def unpaid_items():
+    """Cost follows the work, on the page: a done-when item that passes although no workflow paid for it is a normal
+    finding (UNPAID). Baseline Brew Lab: the stories workflow (covering the beans item) is refused, yet the mock
+    builds that item anyway. Audit flags it, Adaptation registers a workflow that covers it, and the run ends Done."""
+    os.environ["J2_FIXES"], mode = "0", os.environ.get("J2_FIXES", "0")
+    try:
+        run = j2.J2Run()
+        say(run, BREW_LAB)
+        finish(run)
+        beans = next(i for i, c in enumerate(run.goal["done_when"], 1) if "bean" in c.lower())
+        first = next(r for r in run.audits[0]["results"] if r["item"] == beans)
+        assert first["verdict"] == "UNPAID" and not first["pass"] and "no workflow covers" in first["note"], first
+        assert any(x.startswith(f"done-when item {beans}") and "UNPAID" in x for x in j2.workable(run.audits[0]))
+        pay = next(w for w in run.workflows if w.get("covers") == [beans] and w["status"] == "done")
+        assert pay["cost"] >= j2.item_min(run.goal["done_when"][beans - 1]), pay
+        assert beans in run.paid_items() and run.outcome.startswith("Done"), run.outcome
+        assert not any(r["verdict"] == "UNPAID" for r in run.audits[-1]["results"])
+        # unit: an item a fix paid for (via its finding) isn't flagged; an undeclared one is
+        run = j2.J2Run()
+        run.goal = {"done_when": ["A", "B"]}
+        run.audits = [{"results": [{"id": "F-2", "item": 2}]}]
+        run.workflows = [{"status": "done", "covers": [1]}, {"status": "done", "fixes": ["F-2"]}]
+        rows = [{"item": 1, "pass": True, "criterion": "A"}, {"item": 2, "pass": True, "criterion": "B"}]
+        run._flag_unpaid(rows)
+        assert all(r["pass"] for r in rows), rows
+        run.workflows = run.workflows[:1]
+        run._flag_unpaid(rows)
+        assert rows[0]["pass"] and rows[1]["verdict"] == "UNPAID", rows
+    finally:
+        os.environ["J2_FIXES"] = mode
+
+
+def playbook_matching():
+    """Playbooks: the same business type only; mock playbooks never reach a live run; tests write to a temp folder."""
+    assert j2.PLAYBOOK_FILE.startswith(SESSION_MEMORY) and j2.MEMORY_FILE.startswith(SESSION_MEMORY), j2.PLAYBOOK_FILE
+    cafe = {"id": "P-cafe", "business_type": "cafe", "brief": "A website for a cafe shop in Pune with a menu"}
+    boutique = {"id": "P-shop", "business_type": "Clothing  Boutique", "brief": "A clothing boutique in Pune"}
+    pbs = [cafe, boutique]
+    # a clothing brief that shares words with the cafe brief still doesn't get the cafe playbook
+    assert [x["id"] for x in j2.relevant_playbooks(pbs, "clothing boutique", "A website for a shop in Pune")] == ["P-shop"]
+    assert j2.relevant_playbooks(pbs, "florist", cafe["brief"]) == []
+    assert j2.relevant_playbooks(pbs, "", cafe["brief"]) == [] and j2.relevant_playbooks(pbs, "business", "x") == []
+    # a playbook written by a mock run is never offered to a live run
+    mock_pb = {**cafe, "id": "P-mock", "mock": True}
+    live = j2.llm.MOCK
+    try:
+        j2.llm.MOCK = False
+        assert j2.relevant_playbooks([mock_pb, cafe], "cafe", "cafe") == [cafe]
+        assert j2.relevant_lessons([{"id": "L-m", "mock": True, "problem": "cafe menu", "fix": "x"}], "cafe menu") == []
+    finally:
+        j2.llm.MOCK = live
+    # what mock runs save is marked mock
+    os.environ["J2_MEMORY"] = "1"
+    try:
+        j2.save_playbook({"id": "P-t", "business_type": "cafe"})
+        assert j2.load_playbooks()[-1]["mock"] is True
+    finally:
+        os.environ["J2_MEMORY"] = "0"
+        j2.clear_playbooks()
 
 
 def intake_needs():
@@ -1052,13 +1131,15 @@ if __name__ == "__main__":
         rubric_loop()
         lone_rubric_failure()
         pricing()
+        unpaid_items()
         intake_needs()
         playbooks()
         summary_before_review()
-        print(f"J2_FIXES={mode}: B workflow agents, C workable loop and limits, D memory, F forced audit failure (hidden from agents) and test lessons, summary before review, H style guide, rubric loop, needs, playbooks, I pricing ok")
+        print(f"J2_FIXES={mode}: B workflow agents, C workable loop and limits, D memory, F forced audit failure (hidden from agents) and test lessons, summary before review, H style guide, rubric loop, needs, playbooks, I pricing and unpaid items ok")
     ruling_over_budget()
     redirect()
     workable_unit()
+    playbook_matching()
     page()
     print("E behind-the-scenes view (lanes, detail, timeline, saved runs, redaction, lessons) ok")
     generalist_units()
@@ -1068,4 +1149,6 @@ if __name__ == "__main__":
     plain_words()
     identity_prompt_is_plain()
     print("G simple view (plain words at the source and as fallback, buttons once, phone toggle, ready card) ok")
+    assert fingerprint(REAL_MEMORY) == REAL_BEFORE, "the tests changed the real memory/ files"
+    print("playbooks: same business type only, mock memory kept from live runs; real memory/ untouched ok")
     print("j2 flow checks passed")
