@@ -106,6 +106,7 @@ pre{white-space:pre-wrap;word-wrap:break-word;font:12px/1.45 var(--mono);backgro
   <h1>J2 Department</h1>
   <span class="meta" id="mode"></span>
   <span class="warn" id="fixes"></span>
+  <span class="warn" id="forced" hidden style="color:var(--bad)"></span>
   <span class="warn" id="ph" hidden></span>
   <span class="lock" id="lock"></span>
   <span class="meta" id="mem"></span>
@@ -168,7 +169,8 @@ const runQ = () => viewRun ? "&run=" + encodeURIComponent(viewRun) : "";
 
 function addMsg(m){
   const el = document.createElement("div");
-  if (m.who === "system"){ el.className = "sys"; el.textContent = m.text; $("msgs").appendChild(el); return; }
+  if (m.who === "system"){ el.className = "sys"; if (m.test) el.style.cssText = "color:var(--bad);font-weight:700";
+    el.textContent = m.text; $("msgs").appendChild(el); return; }
   el.className = "msg " + m.who + (m.to_user ? " touser" : ""); el.style.setProperty("--c", col(m.who)); el.dataset.id = m.id;
   let t = "";
   if (m.act) t += `<span class="tag ${m.act==="PARK"||m.act==="DISPUTE"?"bad":m.act==="LESSON"?"ok":""}">${m.act}</span>`;
@@ -186,6 +188,7 @@ function addMsg(m){
   if (m.decision && m.who === "priority") t += `<span class="tag ${m.decision==="grant"?"ok":"bad"}">${m.decision.toUpperCase()} · ${m.exchange==="ruling"?"after ruling":"exchange "+m.exchange+"/4"}</span>`;
   if (m.accept !== undefined) t += `<span class="tag ${m.accept?"ok":"bad"}">${m.accept?"accepts":"pushes back"} · exchange ${m.exchange}/4</span>`;
   if (m.conflict) t += `<span class="tag bad">${m.conflict}${m.decision === true ? " · ruling" : ""}</span>`;
+  if (m.forced_test) t += `<span class="tag bad">TEST: item ${m.forced_test} forced to fail, not a real finding</span>`;
   if (m.check) t += `<span class="tag ${m.ok?"ok":"bad"}">charter check: ${m.ok?"ok":"issues"}</span>`;
   if (m.schedule) t += `<span class="tag">schedule: ${m.schedule.join(" → ")}</span>`;
   if (m.done !== undefined) t += `<span class="tag ${m.done?"ok":"bad"}">${m.done?"done-when holds":"not done"}</span>`;
@@ -387,6 +390,8 @@ async function poll(){
     $("box").disabled = busy; $("send").disabled = busy;
     $("mode").textContent = (s.mock ? "mock functions" : `model: ${s.model}`) + ` · ${s.calls} AI calls · cycle ${s.cycle}`;
     $("fixes").textContent = s.fixes ? "J2_FIXES=1 (fixes)" : "J2_FIXES=0 (baseline, as in the diagram)";
+    $("forced").hidden = !s.force_audit_fail;
+    $("forced").textContent = `TEST: J2_FORCE_AUDIT_FAIL=${s.force_audit_fail} (cycle 1 Audit result forced)`;
     $("lock").textContent = s.write_lock ? `write lock: ${who(s.write_lock)[0]}` : "";
     $("mem").textContent = s.memory ? `memory on · ${s.lessons.length} lesson(s)` : "memory off";
     $("ph").hidden = !s.placeholders.length;

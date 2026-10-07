@@ -250,6 +250,23 @@ Settings:
 | `J2_MEMORY` | 1 | 0 turns lessons off |
 | `J2_MAX_TURNS` | 30 | Agent turns per cycle |
 | `J2_RATES` | 1 | 0 turns the rate card off |
+| `J2_FORCE_AUDIT_FAIL` | off | Test switch, see below |
+
+**Test switch for live runs: `J2_FORCE_AUDIT_FAIL=<done-when item number>`.** It is off unless the variable is
+set. In cycle 1 only (Audit's first check), Audit's result for that item is overridden to `NEEDS_REVISION` with
+the note "forced test failure". The note keeps Audit's own verdict. The chat shows it as a test:
+- a red "TEST SWITCH" system note
+- a "TEST: item N forced to fail, not a real finding" tag on Audit's message
+- a red badge in the header (also when the run is opened later as a saved run)
+
+Everything after runs normally: Identity sends it back, Adaptation proposes a fix, the workflow agent runs it,
+and Audit re-checks for real. If the fix passes, the lesson is saved. It is marked `"test": true` and is never
+read back at J2.b, so a forced failure can't steer real runs. An item number the charter doesn't have is
+ignored, with a warning. The switch is recorded in `chat.jsonl` (first line) and in `summary.json`.
+
+```bash
+J2_FORCE_AUDIT_FAIL=2 STUDIO_PROVIDER=claude-cli python j2_server.py   # exercise the fix-and-learn loop live
+```
 
 **Our interpretation of "its spend" in J2.c:** the J2 page bounds the bargain by "four hops, fifteen minutes and
 its spend" but gives no number for the spend. We read it as the AI calls the bargain itself uses and set the
@@ -282,6 +299,8 @@ python j2_check.py site.html      # the render check on any page
 - C: same failure twice (drop and ship), the cycle limit (keep working), to-be-confirmed facts, the J2.c time
   bound, out of budget (add budget), `workable()` cases
 - D: a lesson saved, then used by the next run; `J2_MEMORY=0` reads and writes nothing; clear
+- F: `J2_FORCE_AUDIT_FAIL`: forced once in cycle 1 and marked as a test, real fix and re-check, test lesson saved
+  and not reused, an unknown item ignored, off when unset
 - E: the page's tabs, lanes and their statuses, call links with reasons and no invented tokens, the full call
   record, saved runs opened read-only, path tricks refused, a fake key redacted, clear memory
 

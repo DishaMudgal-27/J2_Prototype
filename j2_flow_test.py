@@ -14,6 +14,7 @@ C. Workable loop: the same failure twice, the cycle limit and to-be-confirmed fa
    (keep working, drop, ship); the J2.c bargain's time bound escalates to Identity; workable() unit checks.
 D. Memory: a confirmed fix saves a lesson, the next run's Adaptation uses it, J2_MEMORY=0 reads and writes nothing.
 E. The page: Agents and Lessons tabs, the state they read, and the clear-memory endpoint.
+F. J2_FORCE_AUDIT_FAIL=<item>: a forced cycle-1 failure, then a real fix, a real re-check and a saved lesson.
 Runs are written to runs/ (or J2_RUNS_DIR); each ended run has summary.json. Memory is off (J2_MEMORY=0) except in
 the memory test, which uses its own lessons file.
 """
@@ -390,6 +391,49 @@ def memory():
         os.environ["J2_MEMORY"] = "0"
 
 
+def forced_fail():
+    """F: J2_FORCE_AUDIT_FAIL=2 forces item 2 to NEEDS_REVISION in cycle 1 only, marked as a test. Identity sends it
+    back, Adaptation proposes a fix, its workflow agent runs, Audit re-checks for real, the lesson is saved (flagged
+    as a test lesson, so later runs don't read it). Off when unset; an item number the charter lacks is ignored."""
+    tmp = tempfile.mkdtemp()
+    old, j2.MEMORY_FILE = j2.MEMORY_FILE, os.path.join(tmp, "lessons.jsonl")
+    os.environ.update(J2_MEMORY="1", J2_FORCE_AUDIT_FAIL="2")
+    try:
+        run = j2.J2Run()
+        run.budget = 150      # room for the extra fix in both modes (J2_FIXES=1 also funds the stories)
+        say(run, BREW_LAB)
+        add_budget_if_asked(run)
+        first, last = run.audits[0], run.audits[-1]
+        r1 = next(x for x in first["results"] if x["item"] == 2)
+        assert r1["verdict"] == "NEEDS_REVISION" and r1["note"].startswith("forced test failure") and r1["forced_test"], r1
+        assert "Audit's own verdict was PASS" in r1["note"], r1["note"]
+        assert any(m.get("test") and m["text"].startswith("TEST SWITCH J2_FORCE_AUDIT_FAIL=2") for m in run.chat)
+        assert next(m for m in run.chat if m["who"] == "audit").get("forced_test") == 2
+        fix = next(w for w in run.workflows if w["name"] == "Fix item 2")
+        assert fix["status"] == "done" and fix["revises"] == "W-2" and fix["cycle"] > 1, fix
+        r2 = next(x for x in last["results"] if x["item"] == 2)
+        assert last["cycle"] > 1 and r2["verdict"] == "PASS" and not r2.get("forced_test"), r2   # the re-check is real
+        assert sum(1 for a in run.audits for x in a["results"] if x.get("forced_test")) == 1, "forced more than once"
+        assert run.outcome.startswith("Done"), run.outcome
+        test_lessons = [x for x in j2.load_lessons() if x.get("test")]
+        assert test_lessons and fix["id"] in test_lessons[0]["workflows"], j2.load_lessons()
+        assert not any(x.get("test") for x in j2.relevant_lessons(j2.load_lessons(), "forced test failure item opening hours"))
+        s = summary(run)
+        assert s["force_audit_fail"] == 2 and s["status"] == "done", s
+        os.environ["J2_FORCE_AUDIT_FAIL"] = "99"            # no such item: a warning, nothing forced
+        run = j2.J2Run()
+        say(run, BREW_LAB)
+        add_budget_if_asked(run)
+        assert any("J2_FORCE_AUDIT_FAIL=99 ignored" in m["text"] for m in run.chat) and run.outcome.startswith("Done")
+        os.environ.pop("J2_FORCE_AUDIT_FAIL")                # unset: off
+        run = j2.J2Run()
+        assert run.force_fail == 0 and run.snapshot()["force_audit_fail"] is None
+    finally:
+        j2.MEMORY_FILE = old
+        os.environ["J2_MEMORY"] = "0"
+        os.environ.pop("J2_FORCE_AUDIT_FAIL", None)
+
+
 def page():
     """E: the behind-the-scenes view. Lanes with live status, a detail view per agent message (inputs, decision,
     reason, cost), the timeline's J2 steps, workflow-agent progress, saved runs opened afterwards, no secrets."""
@@ -487,7 +531,8 @@ if __name__ == "__main__":
         to_be_confirmed()
         bargain_time()
         memory()
-        print(f"J2_FIXES={mode}: B workflow agents, C workable loop and limits, D memory ok")
+        forced_fail()
+        print(f"J2_FIXES={mode}: B workflow agents, C workable loop and limits, D memory, F forced audit failure ok")
     ruling_over_budget()
     redirect()
     workable_unit()

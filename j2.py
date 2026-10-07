@@ -373,6 +373,7 @@ def relevant_lessons(lessons, text, n=MAX_LESSONS):
     """The n lessons sharing the most words with the current gap; newest first on a tie.
     ponytail: word overlap, swap for embeddings if the lesson file grows past a few hundred lines."""
     want = set(WORD.findall(text.lower()))
+    lessons = [x for x in lessons if not x.get("test")]     # lessons from a J2_FORCE_AUDIT_FAIL run aren't reused
     scored = [(len(want & set(WORD.findall(" ".join(str(x.get(k, "")) for k in ("problem", "cause", "fix")).lower()))),
                i, x) for i, x in enumerate(lessons)]
     return [x for sc, i, x in sorted(scored, key=lambda t: (-t[0], -t[1])) if sc > 0][:n]
@@ -487,6 +488,7 @@ def saved_snapshot(name, since=0):
             "audits": audits, "versions": versions, "cycle": s.get("cycles") or 0, "calls": s.get("ai_calls") or len(calls),
             "error": None, "done": True, "turn": None, "cycle_turns": 0, "max_turns": MAX_TURNS, "paused": None,
             "mock": head.get("mock"), "model": head.get("model"), "fixes": head.get("j2_fixes", 0), "placeholders": [],
+            "force_audit_fail": head.get("force_audit_fail"),
             "report": _read(d, "report.json"), "outcome": s.get("outcome"),
             "sections": [{"id": k, "owner": x["owner"], "workflow": x.get("workflow"),
                           "bytes": len((x["head"] + x["body"]).encode("utf-8"))} for k, x in sections.items()],
@@ -527,6 +529,9 @@ class J2Run:
         self.intake, self.decisions = [], []   # J2.a question rounds; every Requester answer to Identity
         self.drop_answer, self.relay, self.a_msg = None, None, None
         self.fixes = os.getenv("J2_FIXES", "0") == "1"   # read per run, so one process can test both modes
+        # Test switch, off unless set: in cycle 1, Audit's result for this done-when item is forced to NEEDS_REVISION
+        self.force_fail = as_int(os.getenv("J2_FORCE_AUDIT_FAIL"), 0) if os.getenv("J2_FORCE_AUDIT_FAIL") else 0
+        self.forced = False
         self.p_refused = {}         # workflow name -> why: what Priority refused in the current negotiation
         self.rejections = []        # every validator rejection, with its exact reason
         self.events, self.agent_turns, self.report, self.started = [], {}, None, None   # for the run report
@@ -557,6 +562,7 @@ class J2Run:
                 "paused": ({k: self.paused[k] for k in ("kind", "questions", "msg")}
                            | {"label": PAUSES.get(self.paused["kind"], "")}) if self.paused else None,
                 "mock": llm.MOCK, "model": None if llm.MOCK else llm.MODEL, "fixes": int(self.fixes),
+                "force_audit_fail": self.force_fail or None,
                 "placeholders": self._placeholders(), "report": self.report,
                 "sections": [{"id": k, "owner": x["owner"], "workflow": x.get("workflow"),
                               "bytes": len((x["head"] + x["body"]).encode("utf-8"))} for k, x in self.sections.items()],
@@ -608,6 +614,7 @@ class J2Run:
         with open(os.path.join(self.dir, "chat.jsonl"), "a", encoding="utf-8") as f:
             if m["id"] == 1:   # first line of the file: which mode and model produced this run
                 f.write(json.dumps({"meta": True, "run": self.run_id, "j2_fixes": int(self.fixes),
+                                    "force_audit_fail": self.force_fail or None,
                                     "provider": None if llm.MOCK else llm.PROVIDER, "model": None if llm.MOCK else llm.MODEL,
                                     "mock": llm.MOCK}) + "\n")
             f.write(json.dumps(m, ensure_ascii=False) + "\n")
@@ -1638,12 +1645,19 @@ class J2Run:
                                           "mechanical check found no overflow at 360px.", "act": "DISPUTE",
                                    "next": "Audit", "dispute": {"with": "Audit", "about": phone["id"],
                                                                 "reason": "Fluid layout, no overflow at 360px"}})
+            others = [{"name": f"Fix item {f['item']}", "goal_gap": f["criterion"], "parts": ["fix"], "revises": "W-2",
+                       "outputs": ["index.html"], "completion_check": f["criterion"]} for f in fails
+                      if f is not phone and f.get("item") and f.get("verdict") != "TO_BE_CONFIRMED"]
             if phone:
                 return json.dumps({"say": f"@Priority {phone['id']} stands. One small fix closes it: add the viewport "
-                                          "meta tag.", "act": "PROPOSE", "next": "Priority",
+                                          "meta tag." + (" Plus a fix for each other failing item." if others else ""),
+                                   "act": "PROPOSE", "next": "Priority",
                                    "workflows": [{"name": "Viewport fix", "goal_gap": phone["criterion"], "parts": ["fix"],
                                                   "outputs": ["index.html"],
-                                                  "completion_check": "viewport meta tag present"}]})
+                                                  "completion_check": "viewport meta tag present"}] + others})
+            if others and self.cycle > 1:
+                return json.dumps({"say": "@Priority One fix per failing item.", "act": "PROPOSE", "next": "Priority",
+                                   "workflows": others})
             if self.cycle == 1 and not self.workflows:
                 return json.dumps({"say": "@Priority Proposal for cycle 1: scaffold and styling, the charter's core "
                                           "sections, a stories section for warmth, and subtle animations.",
@@ -2348,6 +2362,7 @@ class J2Run:
                       f"SITE v{len(self.sites)}:\n{site[:SITE_LIMIT]}", mock,
                       max_tokens=1200)
         results, extras = self._audit_findings(r.get("findings") or r.get("results") or [], crit)
+        forced = self._force_fail(results)
         audit = {"cycle": self.cycle, "version": len(self.sites), "results": results, "extra_issues": extras,
                  "mechanical": mech, "all_pass": bool(results) and all(x.get("pass") for x in results)}
         self.audits.append(audit)
@@ -2357,18 +2372,42 @@ class J2Run:
         fails = workable(audit)
         self._say("audit", r.get("say", "") + "\n" + self._audit_tally(results, extras)
                   + (" Workable (code): yes." if not fails else f" Workable (code): no, {len(fails)} problem(s)."),
-                  nxt, note, audit=audit["all_pass"], version=len(self.sites), workable=not fails)
+                  nxt, note, audit=audit["all_pass"], version=len(self.sites), workable=not fails,
+                  **({"forced_test": forced} if forced else {}))
         if self.memory and len(self.audits) >= 2:
             self._learn(self.audits[-2], audit)
         failed = [f"workflow {w['id']} {w['name']} failed (envelope limits)" for w in self.workflows
                   if w["status"] == "failed" and w["cycle"] == self.cycle]
         self._handoff("identity", kind="audit", why=f"Failed workflows this cycle: {failed}" if failed else "")
 
+    def _force_fail(self, results):
+        """J2_FORCE_AUDIT_FAIL=<item>: a test switch for live runs. In cycle 1 only (Audit's first check), the item's
+        result is overridden to NEEDS_REVISION with the note "forced test failure"; Audit's own verdict is kept in
+        the note. Everything after runs normally, and later audits are real. Returns the item number when applied."""
+        n = self.force_fail
+        if not n or self.forced or self.cycle != 1:
+            return None
+        self.forced = True
+        row = next((x for x in results if x["item"] == n), None)
+        if not row:
+            self.post("system", f"TEST SWITCH J2_FORCE_AUDIT_FAIL={n} ignored: the charter has no done-when item {n} "
+                                f"(it has {len(results)}).", warning=True)
+            return None
+        real = f"{row['verdict']}: {row.get('note') or 'no note'}"
+        row.update(verdict="NEEDS_REVISION", severity="medium", forced_test=True, **{"pass": False},
+                   note=f"forced test failure (J2_FORCE_AUDIT_FAIL={n}; Audit's own verdict was {real})")
+        self._event("system", "forced_test", f"item {n} forced to NEEDS_REVISION (Audit's own verdict: {real})")
+        self.post("system", f"TEST SWITCH J2_FORCE_AUDIT_FAIL={n}: Audit's result for done-when item {n} "
+                            f"(\"{row['criterion']}\") is overridden to NEEDS_REVISION. This is a test, not a real "
+                            f"finding (Audit's own verdict: {real}). Later audits are real.", warning=True, test=True)
+        return n
+
     def _learn(self, prev, cur):
         """J2.h learns: Audit confirmed a fix worked (a problem in the previous audit is gone, and a workflow ran in
         between), so Adaptation writes a lesson (problem, cause, fix) and code saves it to memory/lessons.jsonl."""
         now_ok = {r["criterion"] for r in cur["results"] if r["verdict"] in ("PASS", "PASS_WITH_WARNING")}
-        fixed = [{"id": r["id"], "criterion": r["criterion"], "verdict": r["verdict"], "note": r.get("note")}
+        fixed = [{"id": r["id"], "criterion": r["criterion"], "verdict": r["verdict"], "note": r.get("note"),
+                  **({"forced": True} if r.get("forced_test") else {})}
                  for r in prev["results"] if not r["pass"] and r["criterion"] in now_ok]
         gone = set(j2_check.problems(prev.get("mechanical") or {})) - set(j2_check.problems(cur.get("mechanical") or {}))
         fixed += [{"id": "mechanical", "criterion": p, "verdict": "render check", "note": p} for p in sorted(gone)
@@ -2391,6 +2430,7 @@ class J2Run:
         saved = []
         for x in [x for x in r.get("lessons") or [] if isinstance(x, dict) and x.get("problem") and x.get("fix")][:len(fixed)]:
             lesson = {"id": f"L-{self.run_id}-{len(self.lessons_saved) + 1}", "problem": str(x["problem"]),
+                      **({"test": True} if any(f.get("forced") for f in fixed) else {}),
                       "cause": str(x.get("cause") or ""), "fix": str(x["fix"]), "run": self.run_id, "cycle": self.cycle,
                       "versions": [prev["version"], cur["version"]], "workflows": [w["id"] for w in ran],
                       "t": time.strftime("%Y-%m-%d %H:%M:%S")}
@@ -2470,6 +2510,7 @@ class J2Run:
         last = self.audits[-1] if self.audits else None
         self.save("summary.json", {
             "run": self.run_id, "j2_fixes": int(self.fixes), "provider": None if llm.MOCK else llm.PROVIDER,
+            "force_audit_fail": self.force_fail or None,
             "model": None if llm.MOCK else llm.MODEL, "mock": llm.MOCK, "brief": self.request,
             "change_requests": [m["text"] for m in self.chat if m["who"] == "user" and m.get("change")],
             "status": status, "outcome": o,
