@@ -512,7 +512,8 @@ def summary_before_review():
 SIMPLE_FORBIDDEN = re.compile(r"\b(Identity|Adaptation|Priority|Coordination|Audit|Validator|Builder|Requester)\b|J2|"
                               r"budget|\bW-\d|@|\bcycles?\b|AI calls?|\bmock\b|charter|done[-_ ]when|workflow|\bthe you\b",
                               re.I)
-SIMPLE_FORBIDDEN_CASE = re.compile(r"\b(COUNTER|GRANT|REFUSE|Clause|NEEDS_REVISION|PASS)\b")
+SIMPLE_FORBIDDEN_CASE = re.compile(r"\b(COUNTER|GRANT|REFUSE|Clause|NEEDS_REVISION|PASS)\b"
+                                   r"|\b(?:after|before|by|from|until|than) the team\b")   # e.g. "after Audit" -> not "after the team"
 
 
 def simple_text(base):
@@ -547,7 +548,8 @@ def simple_text(base):
     p = P()
     p.text, p.buttons = [], []
     p.feed(out)
-    return " ".join(" ".join(p.text).split()), p.buttons
+    body = re.search(r'<body class="([^"]*)"', out)
+    return " ".join(" ".join(p.text).split()), p.buttons, (body.group(1).split() if body else [])
 
 
 def simple_view():
@@ -562,40 +564,81 @@ def simple_view():
     base = f"http://127.0.0.1:{srv.server_address[1]}"
     keep = j2_server.RUN
 
-    def check(run, *want, opts=0):
+    def check(run, *want, opts=0, once=(), site=None):
         j2_server.RUN = run
-        text, buttons = simple_text(base)
+        text, buttons, cls = simple_text(base)
         bad = SIMPLE_FORBIDDEN.findall(text) + SIMPLE_FORBIDDEN_CASE.findall(text)
         assert not bad, (bad, text[:600])
         for w in want:
             assert w in text, (w, text[:600])
         assert sum(1 for b in buttons if b.get("data-opt")) >= opts, (opts, buttons)
+        for w in once:                         # a question with buttons is shown once, not also as a numbered list
+            assert text.count(w) == 1, (w, text.count(w), text[-500:])
+        if site is not None:                   # phone: the Chat | Preview toggle only once a site exists
+            assert ("has-site" in cls) == site, cls
         return text
     try:
         os.environ["J2_FIXES"] = "0"
-        check(j2.J2Run(), "Describe the website you want", "A website for my cafe", "Understanding your request")
+        check(j2.J2Run(), "Describe the website you want", "A website for my cafe", "Understanding your request",
+              site=False)
         run = j2.J2Run()
         say(run, "a website for my cafe")
-        check(run, "Your website team", "What is the business called")                     # J2.a questions
+        check(run, "Your website team", "What is the business called", site=False)          # J2.a questions
         say(run, "It's called Little Fig, in Koramangala, Bengaluru. Visitors should see our menu with prices, opening "
                  "hours and where to find us. Cozy and simple, and it must work on phones.")
-        t = check(run, "Fund a stories section", opts=2)                                     # a conflict, as buttons
-        assert "effort" in t or "units" not in t, t
+        check(run, opts=2, once=("Do you want a section about your coffee's story?",
+                                 "Add a section about your coffee's story (takes a bit longer)",
+                                 "Keep it simple, no story section"))                       # a conflict: once, as buttons
         say(run, "Option 2")
         check(run, "Your website is ready", "Open full screen", "Download the HTML file", "Ask for a change",
-              "No stories section")                                                          # the chosen label shows
+              "Keep it simple, no story section", site=True)                                # the chosen label shows
         os.environ["J2_FIXES"] = "1"
         run = j2.J2Run()
         run.budget = 85
         say(run, BREW_LAB)
         say(run, "Option 1")                                                                 # ruling: add effort
         assert run.paused and run.paused["kind"] == "limit", run.outcome
-        check(run, "This needs a bit more work than planned", "Continue (uses a little more effort)",
-              "Finish as it is", opts=2)
+        check(run, "This needs a bit more work than planned", "What would you like to do?", opts=2,
+              once=("Continue (uses a little more effort)", "Finish as it is"))
     finally:
         j2_server.RUN = keep
         srv.shutdown()
         os.environ["J2_FIXES"] = "0"
+
+
+def plain_words():
+    """The Simple view's word list (fallback only): Audit becomes "our checks", never "the team", so nothing reads
+    "after the team"; other function names become "the team"; budget becomes effort. Runs the page's own JS in node."""
+    import shutil
+    import subprocess
+    if not shutil.which("node"):
+        print("plain-words check skipped: node not found")
+        return
+    with open(os.path.join(j2.HERE, "j2_ui.html"), encoding="utf-8") as f:
+        ui = f.read()
+    js = ui[ui.index("const AGENT ="):ui.index("const STAGES =")]
+    cases = {"only 10 units stay for fixes after Audit": "Only 10 effort points stay for fixes after our checks",
+             "Every done-when item passes with Audit's evidence.": "Every checklist item passes with our checks' evidence.",
+             "@Adaptation Priority's final answer was COUNTER.": "The team's final answer was a smaller offer.",
+             "The Requester picked; the budget is over budget.": "You picked; the effort is more than planned."}
+    out = subprocess.run(["node", "-e", js + "\nconst c = " + json.dumps(list(cases)) +
+                          ";\nprocess.stdout.write(JSON.stringify(c.map(plain)));"], capture_output=True, text=True)
+    got = json.loads(out.stdout or "null") or sys.exit(out.stderr)
+    for (src, want), g in zip(cases.items(), got):
+        assert g == want, (src, g, want)
+        assert not re.search(r"\b(?:after|before|by|from|until|than) the team\b", g), g
+
+
+def identity_prompt_is_plain():
+    """Item 1: every Identity call carries the plain-language rule for what it writes to the Requester; no one else's."""
+    run = j2.J2Run()
+    say(run, BREW_LAB)
+    add_budget_if_asked(run)
+    with open(os.path.join(run.dir, "calls.jsonl"), encoding="utf-8") as f:
+        calls = [json.loads(ln) for ln in f]
+    assert any(c["fn"] == "identity" for c in calls)
+    for c in calls:
+        assert ("college student with no tech background" in c["prompt"]) == (c["fn"] == "identity"), (c["id"], c["fn"])
 
 
 def page():
@@ -705,5 +748,7 @@ if __name__ == "__main__":
     page()
     print("E behind-the-scenes view (lanes, detail, timeline, saved runs, redaction, lessons) ok")
     simple_view()
-    print("G simple view (plain words, buttons, ready card) ok")
+    plain_words()
+    identity_prompt_is_plain()
+    print("G simple view (plain words at the source and as fallback, buttons once, phone toggle, ready card) ok")
     print("j2 flow checks passed")

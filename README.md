@@ -131,17 +131,23 @@ STUDIO_MOCK=1 python j2_server.py                # offline demo, scripted agents
 
 The page opens in the **Simple view**, made for someone who knows nothing about agents (screenshots in
 `docs/ui-simple-*.png`):
-- **Layout:** chat on the left, a large preview of the site on the right. On a phone the chat is on top and the
-  preview below.
+- **Layout:** chat on the left, a large preview of the site on the right. On a phone the preview stays hidden
+  until a site exists; then a "Chat | Preview" toggle at the top shows one at a time.
 - **One voice:** only the messages addressed to you, from one assistant called "Your website team". No agent
   names, @mentions, step codes or internal messages.
-- **Plain words:** budget becomes "effort", the checklist replaces "done-when", and there are no model names,
-  AI-call counts, cycles or badges. When the effort runs out, it asks: "This needs a bit more work than
-  planned. Continue (uses a little more effort), skip …, or finish as it is?"
-- **Progress:** a 5-step bar above the chat (Understanding your request, Planning, Building, Checking, Ready),
+- **Plain words at the source:** every Identity prompt says that anything written to you must suit a college
+  student with no tech background: no internal terms, at most two short sentences of context, and each option
+  says what you get and what it costs ("Add a section about your coffee's story (takes a bit longer)" / "Keep
+  it simple, no story section").
+- **Word list (fallback only):** a word list in the page rewrites whatever still slips through. Function names
+  become "the team", Audit becomes "our checks" (so never "after the team"), budget becomes "effort". There are
+  no model names, AI-call counts, cycles or badges. When the effort runs out it asks "This needs a bit more work
+  than planned. What would you like to do?" with Continue (uses a little more effort) / Skip … / Finish as it
+  is.
+- **Progress:** a 5-step bar above the chat (solid background, so messages never show through it) (Understanding your request, Planning, Building, Checking, Ready),
   plus one friendly line while the team works, e.g. "Building your menu section…".
-- **Questions:** every option is a button, so you never type an option number; a text box is there for your
-  own answer.
+- **Questions:** a question with options is shown once, followed by its buttons, so you never type an option
+  number; a text box is there for your own answer.
 - **Start screen:** the three example briefs as cards.
 - **When done:** "Your website is ready" with Open full screen, Download the HTML file and Ask for a change.
 - **Errors:** a plain "Something went wrong. Try again."; the details stay in the Detailed view.
@@ -349,8 +355,10 @@ python j2_check.py site.html      # the render check on any page
   and not reused, an unknown item ignored, off when unset. `J2_MEMORY_TEST_LESSONS`: test lessons filtered by
   default; with the opt-in one is used and flagged in the chat, the lane and `summary.json`
 - G: the Simple view rendered in headless Chrome in five states (start, intake questions, a conflict question, a
-  limit question, ready). Its visible text never contains agent names, J2 codes, "budget", COUNTER/GRANT/REFUSE
-  or other internals; options are buttons; the ready card has its three buttons
+  limit question, ready). Its visible text never contains agent names, J2 codes, "budget", COUNTER/GRANT/REFUSE,
+  "after the team" or other internals. A question with buttons appears once. The phone toggle appears only once
+  a site exists. The ready card has its three buttons. Also checked: the word list (run in node: Audit becomes
+  "our checks"), and that every Identity prompt, and no other, carries the plain-language rule
 - E: the page's tabs, lanes and their statuses, call links with reasons and no invented tokens, the full call
   record, saved runs opened read-only, path tricks refused, a fake key redacted, clear memory
 

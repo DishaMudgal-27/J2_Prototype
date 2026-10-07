@@ -109,7 +109,9 @@ body.simple #dview{display:none}body:not(.simple) #sview{display:none}
 .smain{flex:1;display:grid;grid-template-columns:minmax(320px,1fr) minmax(0,1.6fr);min-height:0}
 .smain>*{min-width:0}
 .schat{display:flex;flex-direction:column;min-height:0;border-right:1px solid var(--line)}
-.sprog{display:flex;gap:4px;padding:12px 14px 8px}
+.sprog{display:flex;gap:4px;padding:12px 14px 10px;background:var(--bg);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:2;flex:0 0 auto}
+.sq{margin:6px 0 0}
+.stoggle{display:none}
 .sprog div{flex:1;text-align:center;font-size:12px;color:var(--muted)}
 .sprog div i{display:block;height:6px;border-radius:3px;background:var(--panel2);margin-bottom:5px}
 .sprog div.done i,.sprog div.on i{background:var(--accent)}.sprog div.on{color:var(--ink);font-weight:600}
@@ -132,13 +134,21 @@ body.simple #dview{display:none}body:not(.simple) #sview{display:none}
 .ready a,.ready button{border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:8px;padding:7px 11px;font-size:13.5px;text-decoration:none}
 .oops{border:2px solid var(--bad);border-radius:12px;padding:12px;background:var(--panel)}
 .sprev{min-height:0;background:#fff}
-@media (max-width:900px){.smain{grid-template-columns:minmax(0,1fr);grid-template-rows:62vh 75vh}.schat{border-right:0;border-bottom:1px solid var(--line)}}
+@media (max-width:900px){
+  /* phone: one pane at a time; the preview only once a site exists, via the Chat | Preview toggle */
+  .smain{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+  .schat{border-right:0;grid-row:2}.sprev{display:none;grid-row:2}
+  body.has-site .stoggle{display:flex;grid-row:1;border-bottom:1px solid var(--line);background:var(--panel)}
+  .stoggle button{flex:1;border:0;background:none;color:var(--muted);padding:10px;font-weight:600;border-bottom:2px solid transparent}
+  .stoggle button[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
+  body.sp-preview .schat{display:none}body.sp-preview .sprev{display:block}}
 </style>
 </head>
 <body class="simple">
 <div id="sview">
   <header class="shead"><b>Your website team</b><span class="spacer"></span><a href="?view=detail" class="slink" id="to-detail">See how it works</a></header>
   <main class="smain">
+    <div class="stoggle" role="tablist" aria-label="Show"><button type="button" role="tab" data-pane="chat" aria-selected="true">Chat</button><button type="button" role="tab" data-pane="preview" aria-selected="false">Preview</button></div>
     <section class="schat">
       <div class="sprog" id="sprog" aria-label="Progress"></div>
       <div class="smsgs" id="smsgs" aria-live="polite"></div>
@@ -386,10 +396,10 @@ function renderLessons(s){
 }
 // ================= Simple view: one voice ("Your website team"), plain words, no internals =================
 // Order matters: specific phrases first, then names and words. Internals become plain words; nothing is invented.
-const AGENT = "(?:Identity|Adaptation|Priority|Coordination|Audit|Validator|W-\\d+(?: Builder)?|Builder)";
+const AGENT = "(?:Identity|Adaptation|Priority|Coordination|Validator|W-\\d+(?: Builder)?|Builder)";
 const PLAIN = [[/@[\w-]+[,:]?/g, ""], [/\(?\bJ2(?:\.[a-h]|_[A-Z_]+(?:=\S*)?)?\)?/g, ""], [/\bClause:\s*/g, ""],
   [/\s+(?:on|in|for|of) [CFW]-\d+\b/g, ""], [/\b[CF]-\d+\b/g, ""],
-  [/\bthe Requester\b/g, "you"], [/\bRequester's\b/g, "your"], [/\bRequester\b/g, "you"],
+  [/\b[Tt]he Requester\b/g, "you"], [/\bRequester's\b/g, "your"], [/\bRequester\b/g, "you"],
   [/\bCOUNTER\b/g, "a smaller offer"], [/\bGRANT\b/g, "a yes"], [/\bREFUSE\b/g, "a no"],
   [/\bover (?:the )?budget\b/gi, "more than planned"], [/\bout of budget\b/gi, "out of planned effort"],
   [/\bbudgets?\b/gi, "effort"], [/\bunits?\b/g, "effort points"],
@@ -398,6 +408,7 @@ const PLAIN = [[/@[\w-]+[,:]?/g, ""], [/\(?\bJ2(?:\.[a-h]|_[A-Z_]+(?:=\S*)?)?\)?
   [/\bworkable\b/gi, "ready to use"], [/\bcharter\b/gi, "plan"], [/\bworkflows\b/gi, "tasks"], [/\bworkflow\b/gi, "task"],
   [/\bcycles\b/gi, "rounds"], [/\bcycle\b/gi, "round"], [/\benvelope\b/gi, "limit"], [/\brate[- ]card\b/gi, "price list"],
   [/\bAI calls?\b/gi, "steps"], [/\bmock\b/gi, "sample"],
+  [/\bAudit's\b/g, "our checks'"], [/\bAudit\b/g, "our checks"],
   [new RegExp(`\\b${AGENT}'s\\b`, "g"), "the team's"], [new RegExp(`\\b${AGENT}\\b`, "g"), "the team"]];
 const plain = t => PLAIN.reduce((a, [r, w]) => a.replace(r, w), String(t || "")).replace(/[ \t]{2,}/g, " ")
   .replace(/\s+([.,;:!?])/g, "$1").replace(/\(\s*\)/g, "").trim().replace(/(^|[.!?]\s+|\n)([a-z])/g, (m, a, b) => a + b.toUpperCase());
@@ -427,12 +438,18 @@ function askBubble(m, live){
   let body = `<small>Your website team</small>${esc(say)}`;
   if (kind === "limit" && a.qs[0]){
     const ls = a.qs[0].opts.map(o => optLabel(kind, o));
-    body += `\n${esc(ls.map((l, i) => i === ls.length - 1 && i ? "or " + l.charAt(0).toLowerCase() + l.slice(1) : l).join(", "))}?`;
-  } else if (a.qs.length) body += `<ol>${a.qs.map(q => `<li>${esc(plain(q.q))}</li>`).join("")}</ol>`;
-  if (live) a.qs.forEach((q, i) => { if (!q.opts.length) return;
-    body += `<div class="opts" data-q="${i + 1}" data-n="${a.qs.length}">${q.opts.map((o, j) =>
-      `<button type="button" data-opt="${j + 1}">${esc(optLabel(kind, o))}</button>`).join("")}</div>`; });
+    // live: the buttons are the options, so the sentence doesn't list them again
+    body += live ? " What would you like to do?" + optButtons(a, 0, kind)
+      : `\n${esc(ls.map((l, i) => i === ls.length - 1 && i ? "or " + l.charAt(0).toLowerCase() + l.slice(1) : l).join(", "))}?`;
+  } else if (a.qs.length === 1 || a.qs.some(q => q.opts.length)){
+    // a question with options: the question once, then its buttons (no numbered list)
+    a.qs.forEach((q, i) => { body += `<p class="sq">${esc(plain(q.q))}</p>` + (live && q.opts.length ? optButtons(a, i, kind) : ""); });
+  } else body += `<ol>${a.qs.map(q => `<li>${esc(plain(q.q))}</li>`).join("")}</ol>`;
   return `<div class="sb team">${body}</div>`;
+}
+function optButtons(a, i, kind){
+  return `<div class="opts" data-q="${i + 1}" data-n="${a.qs.length}">${a.qs[i].opts.map((o, j) =>
+    `<button type="button" data-opt="${j + 1}">${esc(optLabel(kind, o))}</button>`).join("")}</div>`;
 }
 function renderSimple(s){
   const st = stage(s);
@@ -456,7 +473,9 @@ function renderSimple(s){
     <a href="/site/latest${runQ().replace("&", "?")}" download="my-website.html">Download the HTML file</a>
     <button type="button" id="sask-change">Ask for a change</button></div></div>`;
   if (failed(s)) out += `<div class="oops">Something went wrong. Try again.<div class="acts" style="margin-top:8px"><button type="button" class="ghost" id="sretry">Start over</button></div></div>`;
-  if (out !== simpleHTML){ simpleHTML = out; $("smsgs").innerHTML = out; $("smsgs").scrollTop = $("smsgs").scrollHeight; }
+  if (out !== simpleHTML){ simpleHTML = out; $("smsgs").innerHTML = out;
+    const end = () => { $("smsgs").scrollTop = $("smsgs").scrollHeight; };   // again after layout and fonts settle
+    end(); requestAnimationFrame(end); setTimeout(end, 300); }
   const w = s.workflows.find(x => x.id === s.thinking || x.status === "running");
   $("sstatus").textContent = s.status !== "running" ? "" : w ? `Building your ${plain(w.name).toLowerCase()}…`
     : ["Reading your request…", "Reading your request…", "Planning your website…", "Planning your website…", "Planning your website…",
@@ -465,12 +484,17 @@ function renderSimple(s){
   $("sbox").disabled = $("ssend").disabled = busy;
   $("sbox").placeholder = s.paused ? "Or type your own answer…" : isReady(s) ? "Describe a change…" : s.allChat.length ? "Write a message…" : "Describe the website you want…";
   if (s.versions !== sversions){ sversions = s.versions; $("sframe").src = `/site/latest?t=${Date.now()}${runQ()}`; }
+  document.body.classList.toggle("has-site", s.versions > 0);
+  if (!s.versions) document.body.classList.remove("sp-preview");
 }
 let simpleHTML = null, sversions = -1;
 async function sendText(text){
   if (!text) return;
   await fetch("/api/say", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({text})});
 }
+document.querySelector(".stoggle").addEventListener("click", e => { const b = e.target.closest("[data-pane]"); if (!b) return;
+  document.body.classList.toggle("sp-preview", b.dataset.pane === "preview");
+  document.querySelectorAll(".stoggle [data-pane]").forEach(x => x.setAttribute("aria-selected", x === b)); });
 $("ssend").onclick = () => { const t = $("sbox").value.trim(); $("sbox").value = ""; sendText(t); };
 $("sbox").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey){ e.preventDefault(); $("ssend").click(); }});
 $("smsgs").addEventListener("click", async e => {

@@ -715,6 +715,16 @@ class J2Run:
         return f"STATE:\n{self.state(fn)}\n\nCHAT:\n{self.chat_view()}"
 
     REASON = '"reason": str (one short sentence: why you decided this)'
+    # Every Identity call gets this: anything Identity writes to the Requester must read plainly at the source.
+    # (The Simple view's word list is only a fallback.) Messages to other agents keep their precise terms.
+    PLAIN_TO_REQUESTER = (
+        "\nWHEN YOU WRITE TO THE REQUESTER (any say addressed to them, any question or option for them): they are a "
+        "college student with no tech background. Use everyday words. Never use internal terms: charter, done-when, "
+        "checklist, standards, reserve, fix, effort, budget, units, workflow, cycle, finding, audit, ruling, envelope, "
+        "content types such as \"warmth content\", or the names of the functions (Identity, Adaptation, Priority, "
+        "Coordination, Audit). At most two short sentences of context. Each option says what they get and what it costs, "
+        "in plain words, e.g. \"Add a section about your coffee's story (takes a bit longer)\" / \"Keep it simple, no "
+        "story section\". No recommendation.")
     MOCK_REASON = "Scripted mock reply: no model reasoning."
 
     def call(self, fn, reply_format, task, mock, max_tokens=900, json_reply=True):
@@ -722,7 +732,7 @@ class J2Run:
         (inputs, reply, reason, tokens, time) and linked to the agent's next chat message for the detail view."""
         if json_reply and reply_format.rstrip().endswith("}") and '"reason"' not in reply_format:
             reply_format = reply_format.rstrip()[:-1] + ", " + self.REASON + "}"
-        user = f"{self.context(fn)}\n\nYOUR TURN:\n{task}"
+        user = f"{self.context(fn)}\n\nYOUR TURN:\n{task}" + (self.PLAIN_TO_REQUESTER if fn == "identity" else "")
         system = system_prompt(fn, reply_format)
         if self.calls and DELAY:
             time.sleep(DELAY)
@@ -1010,8 +1020,8 @@ class J2Run:
                                                                   + [f"Change: {change}"]}})
             text = " ".join([self.request] + [x["answer"] for x in self.intake])
             if not self.intake and len(self.request.split()) < 25 and not last:
-                return json.dumps({"say": "Before we start I need a few facts the brief doesn't give. I won't guess "
-                                          "them.", "enough": False, "next": "Requester", "questions": [
+                return json.dumps({"say": "Before we start, a few quick questions so we build the right thing.",
+                                   "enough": False, "next": "Requester", "questions": [
                     {"question": "What is the business called, and where is it?", "options": []},
                     {"question": "What must visitors be able to see or do on the site?", "options": []},
                     {"question": "How should it feel, and must it work well on phones?", "options": []}]})
@@ -1165,7 +1175,7 @@ class J2Run:
                 return json.dumps({"say": f"Clause: done_when. {NAMES[b]}'s position stands.", "clause": "done_when",
                                    "resolved": True, "ruling": b, "instruction": "Carry on."})
             if answer:
-                fund = re.search(r"\b1\b|fund|include", answer, re.I)
+                fund = re.search(r"\b1\b|fund|include|add a section", answer, re.I)
                 return json.dumps({"say": "The Requester chose. " + ("The stories section is funded as Adaptation "
                                    "proposed; Priority's other cuts stand." if fund else "Priority's position stands: "
                                    "no stories section, the reserve stays."), "clause": "Requester's decision",
@@ -1176,15 +1186,12 @@ class J2Run:
                                           "Priority's cut to the animations stands.", "clause": f"done_when: {beans}",
                                    "facts": ["The charter names the beans and farms content"], "resolved": True,
                                    "instruction": "Register the split.", **split})
-            return json.dumps({"say": "Clause: done_when has no stories item, and the standards don't settle whether "
-                                      "warmth content is worth the fix reserve. The charter can't decide this, so I'm "
-                                      "asking the Requester.", "clause": "done_when; standards", "resolved": False,
-                               "ruling": None, "instruction": "", "user_question": {
-                                   "question": "Fund a stories section, or keep the reserve for fixes?",
-                                   "options": ["Fund the stories section (20 units): warmer page, but only 10 units "
-                                               "stay for fixes after Audit",
-                                               "No stories section: the page has only the charter's sections, and 30 "
-                                               "units stay for fixes"]}})
+            return json.dumps({"say": "@Requester One choice is up to you. A story section makes the site feel more "
+                                      "personal, but it takes longer to build.", "clause": "done_when; standards",
+                               "resolved": False, "ruling": None, "instruction": "", "user_question": {
+                                   "question": "Do you want a section about your coffee's story?",
+                                   "options": ["Add a section about your coffee's story (takes a bit longer)",
+                                               "Keep it simple, no story section"]}})
         r = self.call("identity", fmt, task, mock)
         ruling = key(r.get("ruling"))
         c["identity"].append({"say": r.get("say"), "clause": r.get("clause"), "resolved": bool(r.get("resolved")),
@@ -1424,8 +1431,8 @@ class J2Run:
 
         def mock():
             if not fails:
-                return json.dumps({"say": "@Requester Goal reached: the site is workable. Every done-when item passes "
-                                          "with Audit's evidence and the render check is clean.", "clause": "done_when",
+                return json.dumps({"say": "@Requester Your website is ready. Everything you asked for is on the page, and "
+                                          "it works on phones and computers.", "clause": "done_when",
                                    "done": True, "next": "Requester"})
             return json.dumps({"say": "@Adaptation Not workable yet; the failing findings need rework.",
                                "clause": "done_when", "done": False, "needs_requester": bool(facts),
