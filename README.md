@@ -129,6 +129,27 @@ python j2_server.py                              # same page, uses the API keys 
 STUDIO_MOCK=1 python j2_server.py                # offline demo, scripted agents
 ```
 
+The page opens in the **Simple view**, made for someone who knows nothing about agents (screenshots in
+`docs/ui-simple-*.png`):
+- **Layout:** chat on the left, a large preview of the site on the right. On a phone the chat is on top and the
+  preview below.
+- **One voice:** only the messages addressed to you, from one assistant called "Your website team". No agent
+  names, @mentions, step codes or internal messages.
+- **Plain words:** budget becomes "effort", the checklist replaces "done-when", and there are no model names,
+  AI-call counts, cycles or badges. When the effort runs out, it asks: "This needs a bit more work than
+  planned. Continue (uses a little more effort), skip …, or finish as it is?"
+- **Progress:** a 5-step bar above the chat (Understanding your request, Planning, Building, Checking, Ready),
+  plus one friendly line while the team works, e.g. "Building your menu section…".
+- **Questions:** every option is a button, so you never type an option number; a text box is there for your
+  own answer.
+- **Start screen:** the three example briefs as cards.
+- **When done:** "Your website is ready" with Open full screen, Download the HTML file and Ask for a change.
+- **Errors:** a plain "Something went wrong. Try again."; the details stay in the Detailed view.
+
+"See how it works" (top right) opens the **Detailed view**: everything described below, and "Back to simple
+view" from there. The choice is remembered in the browser, and `?view=simple` / `?view=detail` in the URL
+picks one. The Simple view only changes how the run is shown; the agents and `j2.py` behave the same in both.
+
 You type the brief as the Requester. The flow follows `docs/j2-flow.jpg` and the
 [J2 page](https://sankalpasawa.github.io/asawa-site/native/system/department.html) (J2.a to J2.h). Only Identity
 talks to you. The run pauses until you answer.
@@ -327,6 +348,9 @@ python j2_check.py site.html      # the render check on any page
 - F: `J2_FORCE_AUDIT_FAIL`: forced once in cycle 1 and marked as a test, real fix and re-check, test lesson saved
   and not reused, an unknown item ignored, off when unset. `J2_MEMORY_TEST_LESSONS`: test lessons filtered by
   default; with the opt-in one is used and flagged in the chat, the lane and `summary.json`
+- G: the Simple view rendered in headless Chrome in five states (start, intake questions, a conflict question, a
+  limit question, ready). Its visible text never contains agent names, J2 codes, "budget", COUNTER/GRANT/REFUSE
+  or other internals; options are buttons; the ready card has its three buttons
 - E: the page's tabs, lanes and their statuses, call links with reasons and no invented tokens, the full call
   record, saved runs opened read-only, path tricks refused, a fake key redacted, clear memory
 

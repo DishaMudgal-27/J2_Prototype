@@ -585,7 +585,9 @@ class J2Run:
                 "cycle": self.cycle, "calls": self.calls, "error": self.error, "done": self.done,
                 "turn": self.turn, "cycle_turns": self.cycle_turns, "max_turns": MAX_TURNS,
                 "paused": ({k: self.paused[k] for k in ("kind", "questions", "msg")}
-                           | {"label": PAUSES.get(self.paused["kind"], "")}) if self.paused else None,
+                           | {"label": PAUSES.get(self.paused["kind"], ""),
+                              "choices": self.paused["handoff"].get("choices")}) if self.paused else None,
+                "outcome": self.outcome,          # read-only, for the Simple view
                 "mock": llm.MOCK, "model": None if llm.MOCK else llm.MODEL, "fixes": int(self.fixes),
                 "force_audit_fail": self.force_fail or None, "test_lessons": self.test_lessons,
                 "placeholders": self._placeholders(), "report": self.report,
@@ -838,7 +840,7 @@ class J2Run:
         if kind in ("approval", "ruling_budget"):   # these apply their own amount after the answer; don't apply twice
             questions = [{k: v for k, v in q.items() if k != "budget"} for q in questions]
         m = self.post("identity", "@Requester " + say + ("\n" + numbered(questions) if questions else ""),
-                      act="ASK_REQUESTER", to_user=True, next="user", **meta)
+                      act="ASK_REQUESTER", to_user=True, next="user", pause=kind, **meta)
         self.paused = {"kind": kind, "questions": questions, "to": to, "handoff": handoff or {}, "msg": m["id"]}
         self._event("identity", "pause", f"{kind}: {len(questions)} question(s) for the Requester", pause=kind)
         self.outcome = f"Paused: Identity is waiting on the Requester ({PAUSES[kind]})."

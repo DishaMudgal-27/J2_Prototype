@@ -77,8 +77,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 return self._send(200, f.read(), "text/html")
         if u.path.startswith("/site/"):
             if not RUN.sites:
-                return self._send(200, "<p style='font:14px system-ui;color:#667;padding:24px'>No site yet. "
-                                       "Coordination builds it after the plan is agreed.</p>", "text/html")
+                return self._send(200, "<p style='font:15px system-ui;color:#667;padding:24px'>Your website will appear "
+                                       "here once it's built.</p>", "text/html")
             key = u.path.rsplit("/", 1)[-1]
             i = len(RUN.sites) if key == "latest" else int(key.lstrip("v") or 0)
             if not 1 <= i <= len(RUN.sites):

@@ -14,6 +14,8 @@ C. Workable loop: the same failure twice, the cycle limit and to-be-confirmed fa
    (keep working, drop, ship); the J2.c bargain's time bound escalates to Identity; workable() unit checks.
 D. Memory: a confirmed fix saves a lesson, the next run's Adaptation uses it, J2_MEMORY=0 reads and writes nothing.
 E. The page: Agents and Lessons tabs, the state they read, and the clear-memory endpoint.
+G. The Simple view (default page): rendered in headless Chrome for a start screen, questions, a limit question and a
+   finished run; its visible text never has agent names, J2 codes, "budget" or other internals.
 F. J2_FORCE_AUDIT_FAIL=<item>: a forced cycle-1 failure that agents can't tell from a real finding (no test label in
    any prompt), then a real fix, a real re-check and a saved lesson. summary.json exists before the reviewer call.
    J2_MEMORY_TEST_LESSONS=1 lets J2.b read test lessons (off by default), flagged in the chat and the lanes.
@@ -22,6 +24,7 @@ the memory test, which uses its own lessons file.
 """
 import json
 import os
+import re
 import sys
 import time
 
@@ -506,6 +509,95 @@ def summary_before_review():
     assert run.outcome.startswith("Crashed") and summary(run)["status"] == "crashed", run.outcome
 
 
+SIMPLE_FORBIDDEN = re.compile(r"\b(Identity|Adaptation|Priority|Coordination|Audit|Validator|Builder|Requester)\b|J2|"
+                              r"budget|\bW-\d|@|\bcycles?\b|AI calls?|\bmock\b|charter|done[-_ ]when|workflow|\bthe you\b",
+                              re.I)
+SIMPLE_FORBIDDEN_CASE = re.compile(r"\b(COUNTER|GRANT|REFUSE|Clause|NEEDS_REVISION|PASS)\b")
+
+
+def simple_text(base):
+    """Visible text of the Simple view (#sview) after the page has rendered, from headless Chrome's DOM."""
+    import html.parser
+    import subprocess
+    chrome = j2.j2_check.find_chrome()
+    out = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=6000", "--dump-dom",
+                          base + "/?view=simple"], capture_output=True, text=True, timeout=90).stdout
+
+    class P(html.parser.HTMLParser):
+        depth, skip, text, buttons = 0, 0, [], []
+
+        def handle_starttag(self, tag, attrs):
+            a = dict(attrs)
+            if self.depth or a.get("id") == "sview":
+                self.depth += 1
+                if tag in ("script", "style") or "hidden" in a:
+                    self.skip += 1
+                if tag == "button":
+                    self.buttons.append(a)
+
+        def handle_endtag(self, tag):
+            if self.depth:
+                self.depth -= 1
+                if self.skip and tag in ("script", "style"):
+                    self.skip -= 1
+
+        def handle_data(self, d):
+            if self.depth and not self.skip:
+                self.text.append(d)
+    p = P()
+    p.text, p.buttons = [], []
+    p.feed(out)
+    return " ".join(" ".join(p.text).split()), p.buttons
+
+
+def simple_view():
+    """G: the Simple view in five states. Plain words only; options are buttons; ready card when done."""
+    import threading
+    import j2_server
+    if not j2.j2_check.find_chrome():
+        print("Simple view test skipped: Chrome not found")
+        return
+    srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{srv.server_address[1]}"
+    keep = j2_server.RUN
+
+    def check(run, *want, opts=0):
+        j2_server.RUN = run
+        text, buttons = simple_text(base)
+        bad = SIMPLE_FORBIDDEN.findall(text) + SIMPLE_FORBIDDEN_CASE.findall(text)
+        assert not bad, (bad, text[:600])
+        for w in want:
+            assert w in text, (w, text[:600])
+        assert sum(1 for b in buttons if b.get("data-opt")) >= opts, (opts, buttons)
+        return text
+    try:
+        os.environ["J2_FIXES"] = "0"
+        check(j2.J2Run(), "Describe the website you want", "A website for my cafe", "Understanding your request")
+        run = j2.J2Run()
+        say(run, "a website for my cafe")
+        check(run, "Your website team", "What is the business called")                     # J2.a questions
+        say(run, "It's called Little Fig, in Koramangala, Bengaluru. Visitors should see our menu with prices, opening "
+                 "hours and where to find us. Cozy and simple, and it must work on phones.")
+        t = check(run, "Fund a stories section", opts=2)                                     # a conflict, as buttons
+        assert "effort" in t or "units" not in t, t
+        say(run, "Option 2")
+        check(run, "Your website is ready", "Open full screen", "Download the HTML file", "Ask for a change",
+              "No stories section")                                                          # the chosen label shows
+        os.environ["J2_FIXES"] = "1"
+        run = j2.J2Run()
+        run.budget = 85
+        say(run, BREW_LAB)
+        say(run, "Option 1")                                                                 # ruling: add effort
+        assert run.paused and run.paused["kind"] == "limit", run.outcome
+        check(run, "This needs a bit more work than planned", "Continue (uses a little more effort)",
+              "Finish as it is", opts=2)
+    finally:
+        j2_server.RUN = keep
+        srv.shutdown()
+        os.environ["J2_FIXES"] = "0"
+
+
 def page():
     """E: the behind-the-scenes view. Lanes with live status, a detail view per agent message (inputs, decision,
     reason, cost), the timeline's J2 steps, workflow-agent progress, saved runs opened afterwards, no secrets."""
@@ -612,4 +704,6 @@ if __name__ == "__main__":
     workable_unit()
     page()
     print("E behind-the-scenes view (lanes, detail, timeline, saved runs, redaction, lessons) ok")
+    simple_view()
+    print("G simple view (plain words, buttons, ready card) ok")
     print("j2 flow checks passed")
