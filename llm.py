@@ -7,6 +7,7 @@ Replies are streamed so the UI can show progress; pass on_progress(event) to rec
   {"chars": int, "text": str}                      as text arrives
   {"note": str}                                    retries and model switches
 """
+import base64
 import json
 import os
 import re
@@ -57,24 +58,26 @@ LAST_META = {}  # model, finish reason and token counts of the latest Gemini rep
 _client = None
 
 
-def ask(system, user, mock, max_tokens=1500, effort="high", on_progress=None, json_mode=False):
+def ask(system, user, mock, max_tokens=1500, effort="high", on_progress=None, json_mode=False, images=None):
     """effort="low" caps Gemini thinking; use it for short structured replies.
-    json_mode=True makes Gemini return a JSON object only (Claude follows the prompt's format)."""
+    json_mode=True makes Gemini return a JSON object only (Claude follows the prompt's format).
+    images: PNG paths sent with the prompt (Audit's screenshots); every provider takes them, mock ignores them."""
+    images = [p for p in images or [] if p and os.path.exists(p)]
     progress = on_progress or (lambda e: None)
     LAST_META.clear()   # each provider fills in what it reports (tokens included); mock reports nothing
     if MOCK:
         return _stream_mock(mock(), progress)
     if PROVIDER == "gemini":
-        return _ask_gemini(system, user, max_tokens, effort, progress, json_mode)
+        return _ask_gemini(system, user, max_tokens, effort, progress, json_mode, images)
     if PROVIDER == "claude-cli":
-        return _ask_claude_cli(system, user, effort, progress)
+        return _ask_claude_cli(system, user, effort, progress, images)
     global _client
     if _client is None:
         import anthropic
         _client = anthropic.Anthropic()
     text = ""
     with _client.messages.stream(model=MODEL, max_tokens=max_tokens, system=system,
-                                 messages=[{"role": "user", "content": user}]) as stream:
+                                 messages=[{"role": "user", "content": _blocks(user, images)}]) as stream:
         for piece in stream.text_stream:
             text += piece
             progress({"chars": len(text), "text": text})
@@ -83,19 +86,41 @@ def ask(system, user, mock, max_tokens=1500, effort="high", on_progress=None, js
     return text.strip()
 
 
-def _ask_claude_cli(system, user, effort, progress):
+def _blocks(user, images):
+    """Anthropic message content: the images first, then the prompt text."""
+    if not images:
+        return user
+    out = []
+    for path in images:
+        with open(path, "rb") as f:
+            out.append({"type": "image", "source": {"type": "base64", "media_type": "image/png",
+                                                    "data": base64.b64encode(f.read()).decode()}})
+    return out + [{"type": "text", "text": user}]
+
+
+def _ask_claude_cli(system, user, effort, progress, images=None):
     """One non-interactive `claude -p` call with no tools, MCP, skills or settings: a plain completion.
-    The CLI has no max-tokens flag, so the reply format in the prompt is what keeps replies short."""
+    The CLI has no max-tokens flag, so the reply format in the prompt is what keeps replies short.
+    With images the prompt goes in as one stream-json user message (image blocks + text) and the result line is read
+    from the stream-json output."""
     env = {k: v for k, v in os.environ.items() if k not in ("ANTHROPIC_API_KEY", "CLAUDECODE")}
-    cmd = ["claude", "-p", "--output-format", "json", "--system-prompt", system, "--tools", "", "--model", MODEL,
+    io = (["--input-format", "stream-json", "--output-format", "stream-json", "--verbose"] if images
+          else ["--output-format", "json"])
+    cmd = ["claude", "-p", *io, "--system-prompt", system, "--tools", "", "--model", MODEL,
            "--effort", "low" if effort == "low" else "high", "--no-session-persistence", "--strict-mcp-config",
            "--disable-slash-commands", "--setting-sources", ""]
+    stdin = (json.dumps({"type": "user", "message": {"role": "user", "content": _blocks(user, images)}}) + "\n"
+             if images else user)
     last = None
     for attempt in range(2):
         try:
-            p = subprocess.run(cmd, input=user, capture_output=True, text=True, env=env, timeout=900,
+            p = subprocess.run(cmd, input=stdin, capture_output=True, text=True, env=env, timeout=900,
                                cwd=tempfile.gettempdir())
-            d = json.loads(p.stdout or "{}")
+            if images:   # stream-json: one JSON event per line; the reply is the "result" event
+                lines = [json.loads(x) for x in (p.stdout or "").splitlines() if x.strip().startswith("{")]
+                d = next((x for x in reversed(lines) if x.get("type") == "result"), {})
+            else:
+                d = json.loads(p.stdout or "{}")
             if p.returncode == 0 and not d.get("is_error") and (d.get("result") or "").strip():
                 text = d["result"].strip()
                 LAST_META.clear()
@@ -123,7 +148,7 @@ def _stream_mock(text, progress):
     return text
 
 
-def _ask_gemini(system, user, max_tokens, effort, progress, json_mode=False):
+def _ask_gemini(system, user, max_tokens, effort, progress, json_mode=False, images=None):
     global _client
     from google import genai
     from google.genai import errors, types
@@ -142,7 +167,11 @@ def _ask_gemini(system, user, max_tokens, effort, progress, json_mode=False):
                                                  response_mime_type="application/json" if json_mode else None)
             try:
                 text, finish, usage = "", None, None
-                for chunk in _client.models.generate_content_stream(model=model, contents=user, config=config):
+                contents = user
+                if images:
+                    contents = [types.Part.from_bytes(data=open(p, "rb").read(), mime_type="image/png") for p in images] \
+                        + [user]
+                for chunk in _client.models.generate_content_stream(model=model, contents=contents, config=config):
                     text += chunk.text or ""
                     if chunk.candidates and chunk.candidates[0].finish_reason:
                         finish = chunk.candidates[0].finish_reason
@@ -164,7 +193,7 @@ def _ask_gemini(system, user, max_tokens, effort, progress, json_mode=False):
                 if e.code == 400 and thinking is not None and "thinking" in str(e).lower():
                     # This model does not accept a thinking budget; retry without one.
                     progress({"note": f"{model} rejected the thinking budget, retrying without it"})
-                    return _ask_gemini(system, user, max_tokens, "high", progress, json_mode)
+                    return _ask_gemini(system, user, max_tokens, "high", progress, json_mode, images)
                 if e.code not in (404, 429, 500, 503):
                     raise
                 last = e

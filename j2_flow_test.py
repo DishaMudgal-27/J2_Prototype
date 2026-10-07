@@ -14,6 +14,9 @@ C. Workable loop: the same failure twice, the cycle limit and to-be-confirmed fa
    (keep working, drop, ship); the J2.c bargain's time bound escalates to Identity; workable() unit checks.
 D. Memory: a confirmed fix saves a lesson, the next run's Adaptation uses it, J2_MEMORY=0 reads and writes nothing.
 E. The page: Agents and Lessons tabs, the state they read, and the clear-memory endpoint.
+H. Any business, better each run: J2.a proposes visitor needs for the business type; the first workflow writes the
+   style guide everyone follows; Audit's design rubric loops a measured failure back; playbooks saved at Done and
+   reused for a similar business; no cafe examples in live prompts.
 G. The Simple view (default page): rendered in headless Chrome for a start screen, questions, a limit question and a
    finished run; its visible text never has agent names, J2 codes, "budget" or other internals.
 F. J2_FORCE_AUDIT_FAIL=<item>: a forced cycle-1 failure that agents can't tell from a real finding (no test label in
@@ -52,6 +55,15 @@ def show(run):
         print(f"\n===== {run.dir}")
         for m in run.chat:
             print(f"[{m['id']}] {j2.NAMES.get(m['who'], m['who'])}: {m['text']}")
+
+
+def finish(run):
+    """Answer what a person would, until the run ends: a conflict question with the simpler option, a budget
+    limit with "keep working"."""
+    for _ in range(6):
+        if not run.paused:
+            return
+        say(run, "Option 2" if run.paused["kind"] == "conflict" else "1")
 
 
 def add_budget_if_asked(run):
@@ -332,7 +344,8 @@ def to_be_confirmed():
     assert run.goal["to_be_confirmed"][0]["criterion"] == run.goal["done_when"][0]
     first = run.audits[0]["results"][0]
     assert first["verdict"] == "TO_BE_CONFIRMED" and not first["pass"], first
-    assert run.paused and run.paused["kind"] == "limit" and run.paused["handoff"]["limit"].startswith("Only you"), run.outcome
+    assert run.paused and run.paused["kind"] == "limit" and run.paused["handoff"]["limit"].startswith("Only you"), \
+        (run.paused or {}).get("handoff", {}).get("limit") or run.outcome
     say(run, "1. Espresso 120, latte 180")
     assert not run.goal["to_be_confirmed"] and run.goal["confirmed_facts"], run.goal
     add_budget_if_asked(run)
@@ -641,6 +654,165 @@ def identity_prompt_is_plain():
         assert ("college student with no tech background" in c["prompt"]) == (c["fn"] == "identity"), (c["id"], c["fn"])
 
 
+FLORIST = "A website for Petal & Stem, a florist in Jaipur"
+
+
+def calls_of(run):
+    with open(os.path.join(run.dir, "calls.jsonl"), encoding="utf-8") as f:
+        return [json.loads(ln) for ln in f]
+
+
+def style_guide():
+    """H: the first workflow that runs writes the style guide (retrying within its envelope if it leaves it out);
+    code puts it first in the head; every later workflow agent gets it and is told to follow it."""
+    run = j2.J2Run()
+    orig, dropped = run.call, []
+
+    def call(fn, fmt, task, mock, **k):              # W-1's first reply leaves the style guide out: it retries
+        raw = orig(fn, fmt, task, mock, **k)
+        if fn == "W-1" and not dropped:
+            dropped.append(1)
+            raw = re.sub(r"```style.*?```", "", raw, flags=re.S)
+        return raw
+    run.call = call
+    say(run, BREW_LAB)
+    add_budget_if_asked(run)
+    w1 = run._wf("W-1")
+    assert run.style and run.style["palette"]["primary"] and w1["retries_used"] == 1 and w1.get("style_guide"), w1
+    assert list(run.sections)[0] == "style" and run.sections["style"]["owner"] == "W-1"
+    site = run.sites[-1]
+    assert "--j2-primary" in site and site.index("<!-- J2:style head start") < site.index("</head>")
+    assert os.path.exists(os.path.join(run.dir, "style.json")) and run.snapshot()["style"] == run.style
+    cs = calls_of(run)
+    w1_calls = [c for c in cs if c["fn"] == "W-1"]
+    assert all("YOU RUN FIRST, SO YOU ALSO WRITE THE STYLE GUIDE" in c["prompt"] for c in w1_calls), "W-1 not told"
+    later = [c for c in cs if j2.is_wf_agent(c["fn"]) and c["fn"] != "W-1"]
+    assert later and all("STYLE GUIDE (follow it exactly)" in c["prompt"] for c in later), [c["fn"] for c in later]
+    assert any("the reply has no ```style block" in m["text"] for m in run.chat), "retry reason not shown"
+
+
+def rubric_loop():
+    """H: W-2's first build has a tap target too small for a phone. Code measures it, Audit's R-6 can't pass, the
+    site isn't workable, Identity sends it back, Adaptation proposes a fix, the re-check passes, Done."""
+    if not j2.j2_check.find_chrome():
+        print("rubric loop skipped: Chrome not found")
+        return
+    run = j2.J2Run()
+    run.budget = 150      # room for the extra fix in both modes (J2_FIXES=1 also funds the stories)
+    orig, planted = run.call, []
+
+    def call(fn, fmt, task, mock, **k):
+        raw = orig(fn, fmt, task, mock, **k)
+        if fn == "W-2" and not planted:
+            planted.append(1)
+            raw = raw.replace("```section\n", '```section\n<a href="https://example.com" style="display:inline-block;'
+                                              'font-size:10px">Book</a>\n', 1)
+        return raw
+    run.call = call
+    say(run, BREW_LAB)
+    add_budget_if_asked(run)
+    first, last = run.audits[0], run.audits[-1]
+    assert [r["id"] for r in first["rubric"]] == [rid for rid, _ in j2.RUBRIC]
+    r6 = next(r for r in first["rubric"] if r["id"] == "R-6")
+    assert r6["verdict"] == "NEEDS_REVISION" and r6["note"].startswith("Measured by code") and "Book" in r6["note"], r6
+    assert any(x.startswith("design rubric R-6") for x in j2.workable(first))
+    fix = next(w for w in run.workflows if w["name"] == "Fix item R-6")
+    assert fix["status"] == "done" and fix["revises"] == "W-2", fix
+    assert next(r for r in last["rubric"] if r["id"] == "R-6")["pass"] and run.outcome.startswith("Done"), run.outcome
+    assert any("DESIGN AND USABILITY RUBRIC" in c["prompt"] for c in calls_of(run) if c["fn"] == "audit")
+
+
+def intake_needs():
+    """H: at J2.a Identity proposes what this kind of business's visitors need and asks the Requester to confirm."""
+    run = j2.J2Run()
+    say(run, FLORIST)
+    q = " ".join(x["question"] for x in run.paused["questions"])
+    assert "florist" in q and "browse bouquets" in q and "Is that right" in q, q
+    say(run, "Yes, and add wedding flowers. Petal & Stem, Jaipur. Elegant, must work on phones.")
+    finish(run)
+    assert run.goal["business_type"] == "florist" and run.goal["visitor_needs"], run.goal
+
+
+def playbooks():
+    """H: a Done run saves a playbook for its business type with the measured outcome; the next run for the same
+    type reads it at J2.b and says which it used and what it changed; another type doesn't get it; a forced-failure
+    run's playbook is a test playbook and isn't reused; J2_MEMORY=0 reads and writes nothing."""
+    tmp = tempfile.mkdtemp()
+    old = j2.MEMORY_FILE, j2.PLAYBOOK_FILE
+    j2.MEMORY_FILE, j2.PLAYBOOK_FILE = os.path.join(tmp, "lessons.jsonl"), os.path.join(tmp, "playbooks.jsonl")
+    os.environ["J2_MEMORY"] = "1"
+    try:
+        run = j2.J2Run()
+        say(run, BREW_LAB)
+        add_budget_if_asked(run)
+        pb = j2.load_playbooks()[-1]
+        assert pb["id"] == f"P-{run.run_id}" and pb["business_type"] == "cafe" and pb["build_order"], pb
+        o = pb["outcome"]
+        assert o["first_pass_audit"] is False and o["cycles"] >= 2 and o["ai_calls"] > 0 and pb["what_failed"], o
+        assert any(m.get("act") == "PLAYBOOK" for m in run.chat) and summary(run)["playbooks"]["saved"] == pb["id"]
+        first_id = pb["id"]
+        run = j2.J2Run()                                   # a florist: the cafe playbook isn't offered
+        say(run, FLORIST)
+        say(run, "Yes. Petal & Stem, Jaipur. Elegant, must work on phones.")
+        finish(run)
+        assert run.outcome.startswith("Done"), run.outcome
+        assert not any(m.get("playbooks_offered") for m in run.chat), "cafe playbook offered to a florist"
+        assert j2.load_playbooks()[-1]["business_type"] == "florist"
+        run = j2.J2Run()                                   # another cafe: reads it, says which, and what changed
+        say(run, BREW_LAB)
+        add_budget_if_asked(run)
+        m = next(m for m in run.chat if m.get("playbook_used"))
+        assert m["who"] == "adaptation" and m["playbook_used"] == first_id and first_id in m["text"] and m["playbook_changes"]
+        assert run.playbooks_used[0]["playbook"] == first_id and summary(run)["playbooks"]["used"][0]["playbook"] == first_id
+        assert j2.load_playbooks()[-1]["used_playbook"] == first_id
+        n = len(j2.load_playbooks())
+        os.environ["J2_FORCE_AUDIT_FAIL"] = "2"            # a test run: its playbook is flagged and not reused
+        run = j2.J2Run()
+        run.budget = 150
+        say(run, BREW_LAB)
+        add_budget_if_asked(run)
+        os.environ.pop("J2_FORCE_AUDIT_FAIL")
+        assert j2.load_playbooks()[-1]["test"] and len(j2.load_playbooks()) == n + 1
+        assert not any(x.get("test") for x in j2.relevant_playbooks(j2.load_playbooks(), "cafe", BREW_LAB, n=10))
+        os.environ["J2_MEMORY"] = "0"                      # memory off: nothing read, nothing written
+        run = j2.J2Run()
+        say(run, BREW_LAB)
+        assert not any(m.get("playbooks_offered") or m.get("act") == "PLAYBOOK" for m in run.chat)
+        os.environ["J2_MEMORY"] = "1"
+        assert len(j2.load_playbooks()) == n + 1
+        assert j2.clear_playbooks() == n + 1 and j2.load_playbooks() == []
+    finally:
+        j2.MEMORY_FILE, j2.PLAYBOOK_FILE = old
+        os.environ["J2_MEMORY"] = "0"
+        os.environ.pop("J2_FORCE_AUDIT_FAIL", None)
+
+
+def generalist_units():
+    """H: the design measurements and the screenshot on a planted page; no cafe examples in any live prompt of a
+    florist run; the start screen lists a florist and a photographer."""
+    if j2.j2_check.find_chrome():
+        bad = ('<!doctype html><html><head><meta name="viewport" content="width=device-width"></head><body>'
+               '<h1>A</h1><h1>B</h1><p style="color:#bbb">pale text</p><nav><a href="https://example.com" '
+               'style="display:inline-block;font-size:10px">tiny</a></nav><img src="x.png"></body></html>')
+        dp = j2.j2_check.design_problems(j2.j2_check.check(bad))
+        assert set(dp) == {"R-2", "R-3", "R-6", "R-7"}, dp
+        shot = os.path.join(tempfile.mkdtemp(), "s.png")
+        assert j2.j2_check.screenshot(bad, shot) and os.path.getsize(shot) > 1000
+    run = j2.J2Run()
+    say(run, FLORIST)
+    say(run, "Yes. Petal & Stem, Jaipur.")
+    finish(run)
+    # Our instructions carry no cafe examples: every system prompt (role files + reply formats, incl. Audit's) and the
+    # plain-language rule. Chat history may still quote mock replies, which can stay.
+    for bad in ("coffee's story", "cafe's phone"):
+        assert bad not in j2.J2Run.PLAIN_TO_REQUESTER, bad
+        for c in calls_of(run):
+            assert bad not in c["system"], (c["fn"], bad)
+    with open(os.path.join(j2.HERE, "j2_ui.html"), encoding="utf-8") as f:
+        ui = f.read()
+    assert "a florist in Jaipur" in ui and "wedding and portrait photographer" in ui
+
+
 def page():
     """E: the behind-the-scenes view. Lanes with live status, a detail view per agent message (inputs, decision,
     reason, cost), the timeline's J2 steps, workflow-agent progress, saved runs opened afterwards, no secrets."""
@@ -675,7 +847,7 @@ def page():
         assert ids[:6] == list(j2.FUNCTIONS) and set(ids[6:]) == {w["id"] for w in st["workflows"]}, ids
         assert all(x["status"] == "idle" for x in st["lanes"]), [x["status"] for x in st["lanes"]]
         w1 = next(x for x in st["lanes"] if x["id"] == "W-1")["progress"]
-        assert w1["section"] == "W-1" and w1["attempts"] == 1 and w1["last_check"].startswith("usable"), w1
+        assert w1["section"] == "W-1" and w1["attempts"] == 1 and "usable section" in w1["last_check"], w1
         # detail view data: every AI message links its calls; each call has inputs, a reason, time; tokens or None
         ai = [m for m in st["chat"] if m.get("calls")]
         assert ai and all(m["step"] for m in st["chat"] if m["who"] not in ("user", "system")), \
@@ -740,13 +912,18 @@ if __name__ == "__main__":
         memory()
         forced_fail()
         test_lessons()
+        style_guide()
+        rubric_loop()
+        intake_needs()
+        playbooks()
         summary_before_review()
-        print(f"J2_FIXES={mode}: B workflow agents, C workable loop and limits, D memory, F forced audit failure (hidden from agents) and test lessons, summary before review ok")
+        print(f"J2_FIXES={mode}: B workflow agents, C workable loop and limits, D memory, F forced audit failure (hidden from agents) and test lessons, summary before review, H style guide, rubric loop, needs, playbooks ok")
     ruling_over_budget()
     redirect()
     workable_unit()
     page()
     print("E behind-the-scenes view (lanes, detail, timeline, saved runs, redaction, lessons) ok")
+    generalist_units()
     simple_view()
     plain_words()
     identity_prompt_is_plain()

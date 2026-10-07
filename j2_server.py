@@ -40,6 +40,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
         pass
 
     def _send(self, code, body, ctype="application/json"):
+        if ctype == "image/png":        # a screenshot: binary, no text to redact
+            self.send_response(code)
+            self.send_header("Content-Type", ctype)
+            self.end_headers()
+            return self.wfile.write(body)
         data = redact(body if isinstance(body, str) else body.decode("utf-8", "replace")).encode("utf-8")
         self.send_response(code)
         self.send_header("Content-Type", ctype + "; charset=utf-8")
@@ -64,6 +69,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
             d = j2.saved_dir(run) if run else RUN.dir
             rec = j2.call_record(d, int(q.get("id", "0") or 0))
             return self._send(200, json.dumps(rec, ensure_ascii=False)) if rec else self._send(404, '{"error": "no such call"}')
+        if u.path.startswith("/shot/"):        # the screenshot Audit looked at for site vN
+            d, n = (j2.saved_dir(run) if run else RUN.dir), u.path.rsplit("/", 1)[-1]
+            path = os.path.join(d or "", "site", "shots", f"v{n}.png")
+            if not (d and n.isdigit() and os.path.exists(path)):
+                return self._send(404, "not found", "text/plain")
+            with open(path, "rb") as f:
+                return self._send(200, f.read(), "image/png")
         if u.path.startswith("/site/") and run:
             d, key = j2.saved_dir(run), u.path.rsplit("/", 1)[-1]
             site = os.path.join(d or "", "site")
@@ -95,6 +107,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 return self._send(400, '{"error": "empty"}')
             ok = RUN.user_says(text)
             return self._send(200 if ok else 409, json.dumps({"ok": ok}))
+        if self.path == "/api/playbooks/clear":    # the Playbooks tab's "Clear playbooks" (the page confirms first)
+            return self._send(200, json.dumps({"ok": True, "cleared": j2.clear_playbooks()}))
         if self.path == "/api/lessons/clear":      # the Lessons tab's "Clear memory" (the page confirms first)
             return self._send(200, json.dumps({"ok": True, "cleared": clear_lessons()}))
         if self.path == "/api/reset":

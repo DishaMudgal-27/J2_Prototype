@@ -197,7 +197,9 @@ body.simple #dview{display:none}body:not(.simple) #sview{display:none}
       <button role="tab" data-tab="conflicts" aria-selected="false">Conflicts</button>
       <button role="tab" data-tab="timeline" aria-selected="false">Timeline</button>
       <button role="tab" data-tab="audit" aria-selected="false">Audit</button>
+      <button role="tab" data-tab="style" aria-selected="false">Style guide</button>
       <button role="tab" data-tab="lessons" aria-selected="false">Lessons</button>
+      <button role="tab" data-tab="playbooks" aria-selected="false">Playbooks</button>
       <button role="tab" data-tab="report" aria-selected="false">Report</button>
       <select id="ver" aria-label="Version"></select>
     </div>
@@ -207,7 +209,9 @@ body.simple #dview{display:none}body:not(.simple) #sview{display:none}
     <div class="pane" id="pane-conflicts" hidden></div>
     <div class="pane" id="pane-timeline" hidden></div>
     <div class="pane" id="pane-audit" hidden></div>
+    <div class="pane" id="pane-style" hidden></div>
     <div class="pane" id="pane-lessons" hidden></div>
+    <div class="pane" id="pane-playbooks" hidden></div>
     <div class="pane" id="pane-report" hidden></div>
   </section>
 </main>
@@ -222,7 +226,11 @@ const isWf = k => /^W-\d+$/.test(k || "");
 const who = k => WHO[k] || (isWf(k) ? [k + " Builder", k.replace("-", "")] : [k, "?"]);
 const col = k => isWf(k) ? `var(--wf${(+k.slice(2) - 1) % 6})` : `var(--${k})`;
 const $ = id => document.getElementById(id);
-const esc = s => String(s ?? "").replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+// Example briefs for both views: different kinds of business, so nothing assumes a cafe.
+const EXAMPLES = ["A website for my cafe", "A website for Sweet Crumbs Bakery in Pune: menu, cake orders, contact",
+  "A website for Petal & Stem, a florist in Jaipur: bouquets, same-day delivery, wedding flowers",
+  "A website for Asha Rao Photography, a wedding and portrait photographer in Mumbai: portfolio, packages, booking"];
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const md = s => esc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/@(\w+)/g,"<b>@$1</b>");
 let seen = 0, state = null, versions = 0, allChat = [], viewRun = new URLSearchParams(location.search).get("run") || "";
 const runQ = () => viewRun ? "&run=" + encodeURIComponent(viewRun) : "";
@@ -241,6 +249,8 @@ function addMsg(m){
   if (m.lesson_used) t += m.lesson_test ? `<span class="tag bad">used TEST LESSON ${esc(m.lesson_used)} (from a forced failure, demo only)</span>`
     : `<span class="tag ok">used lesson ${esc(m.lesson_used)}</span>`;
   if (m.lessons) t += `<span class="tag ok">saved ${esc(m.lessons.join(", "))}</span>`;
+  if (m.playbook) t += `<span class="tag ok">saved playbook ${esc(m.playbook)}</span>`;
+  if (m.playbook_used) t += `<span class="tag ok">used playbook ${esc(m.playbook_used)}${m.playbook_changes ? ": " + esc(m.playbook_changes) : ""}</span>`;
   if (m.section) t += `<span class="tag">section ${esc(m.section)}</span>`;
   if (m.workable !== undefined) t += `<span class="tag ${m.workable?"ok":"bad"}">${m.workable?"workable":"not workable"}</span>`;
   if (m.stamp === true) t += `<span class="tag ok">charter valid</span>`;
@@ -318,7 +328,10 @@ function renderAudit(s){
     : `<h3 class="pass">Workable (checked by code)</h3>`) : "";
   return wk + s.audits.slice().reverse().map(a => `<h3>Cycle ${a.cycle} · site v${a.version} · ${a.all_pass ? '<span class="pass">all pass</span>' : '<span class="fail">failing</span>'}</h3>
     <table><tr><th>Criterion</th><th>Result</th><th>Evidence</th></tr>${a.results.concat(a.extra_issues||[]).map(r => `<tr><td>${r.id ? `<b>${esc(r.id)}</b> ` : ""}${r.item ? r.item + ". " : "extra: "}${esc(r.criterion)}</td>
-    <td class="${r.pass?"pass":"fail"}">${esc(r.verdict || (r.pass?"PASS":"FAIL"))}</td><td>${esc(r.note)}</td></tr>`).join("")}</table>`).join("");
+    <td class="${r.pass?"pass":"fail"}">${esc(r.verdict || (r.pass?"PASS":"FAIL"))}</td><td>${esc(r.note)}</td></tr>`).join("")}</table>
+    ${(a.rubric || []).length ? `<h3>Design and usability rubric</h3><table><tr><th>Item</th><th>Result</th><th>Evidence</th></tr>${a.rubric.map(r =>
+      `<tr><td><b>${esc(r.id)}</b> ${esc(r.criterion)}</td><td class="${r.pass?"pass":"fail"}">${esc(r.verdict)}</td><td>${esc(r.note)}</td></tr>`).join("")}</table>` : ""}
+    ${a.screenshot ? `<details><summary>Screenshot Audit looked at (360px left, 1280px right)</summary><img alt="Site v${a.version} at 360px and 1280px" style="max-width:100%;border:1px solid var(--line)" src="/shot/${a.version}${runQ().replace("&", "?")}"></details>` : ""}`).join("");
 }
 const ROLE = {identity:"J2.a charter, J2.d rulings, J2.h workable?", adaptation:"J2.b proposes, disputes, saves lessons",
   priority:"J2.c prices, checks run envelopes", coordination:"J2.f schedules, holds the write lock", audit:"J2.g checks the site",
@@ -384,6 +397,39 @@ async function openDetail(id){
     const c = r.ok ? await r.json() : null;
     $("fulltext").textContent = c ? `SYSTEM PROMPT\n${c.system}\n\nPROMPT\n${c.prompt}\n\nRAW REPLY\n${c.raw}` : "Not found.";
     $("fulltext").dataset.ok = 1; });
+}
+function renderStyle(s){
+  const g = s.style;
+  if (!g) return `<p class="empty">The first workflow that runs writes the style guide (palette, fonts, spacing, buttons, cards) before any section is built. Every workflow agent follows it.</p>`;
+  const sw = Object.entries(g.palette || {}).map(([k, v]) => `<div style="display:inline-block;margin:0 10px 10px 0;text-align:center;font-size:12px"><div style="width:64px;height:44px;border-radius:8px;border:1px solid var(--line);background:${esc(v)}"></div>${esc(k)}<br><span class="empty">${esc(v)}</span></div>`).join("");
+  // values were checked by code (no <, >, { or }), so they are safe as inline styles
+  return `<h3>Style guide</h3><p>${esc(g.notes || "")}</p><div>${sw}</div>
+    <dl><dt>heading font</dt><dd style="font-family:${esc(g.fonts.heading)};font-size:20px">${esc(g.fonts.heading)}</dd>
+    <dt>body font</dt><dd style="font-family:${esc(g.fonts.body)}">${esc(g.fonts.body)}</dd>
+    <dt>spacing</dt><dd>${esc(JSON.stringify(g.spacing || {}))} · radius ${esc(g.radius || "")}</dd></dl>
+    <div style="background:${esc(g.palette.background)};padding:16px;border-radius:10px;border:1px solid var(--line)">
+      <span style="display:inline-block;${esc((g.buttons || {}).primary || "")}">Primary button</span>
+      <span style="display:inline-block;margin-left:8px;${esc((g.buttons || {}).secondary || "")}">Secondary</span>
+      <div style="margin-top:12px;color:${esc(g.palette.text)};${esc(g.card || "")}">A card in this style</div></div>`;
+}
+function renderPlaybooks(s){
+  if (!s.memory) return `<p class="empty">Memory is off (J2_MEMORY=0): no playbooks are read or saved in this run.</p>`;
+  const pbs = s.playbooks || [], used = new Set((s.playbooks_used || []).map(x => x.playbook));
+  const byType = {};
+  pbs.filter(p => !p.test).forEach(p => (byType[p.business_type] = byType[p.business_type] || []).push(p));
+  const avg = xs => xs.length ? (xs.reduce((a, b) => a + b, 0) / xs.length).toFixed(1) : "–";
+  const prog = Object.entries(byType).map(([t, xs]) => `<tr><td><b>${esc(t)}</b></td><td>${xs.length}</td>
+    <td>${Math.round(100 * xs.filter(p => p.outcome.first_pass_audit).length / xs.length)}%</td>
+    <td>${avg(xs.map(p => p.outcome.cycles))}</td><td>${avg(xs.map(p => p.outcome.ai_calls))}</td>
+    <td>${xs.map(p => `${p.outcome.first_pass_audit ? "✓" : "✗"} ${p.outcome.cycles}c/${p.outcome.ai_calls}`).join(" → ")}</td></tr>`).join("");
+  const rows = pbs.slice().reverse().map(p => `<tr><td><b>${esc(p.id)}</b>${p.id === s.playbook_saved ? ' <span class="pill done">this run</span>' : ""}${used.has(p.id) ? ' <span class="pill running">used this run</span>' : ""}${p.test ? ' <span class="pill" style="color:var(--bad)">test</span>' : ""}<br><span class="empty">${esc(p.t)}</span></td>
+    <td>${esc(p.business_type)}</td><td>${esc((p.sections || []).join(" → "))}</td><td>${esc((p.watch_out || []).join("; "))}</td>
+    <td>${p.outcome.first_pass_audit ? "passed first time" : "needed fixes"} · ${p.outcome.cycles} cycles · ${p.outcome.ai_calls} AI calls${(p.outcome.change_requests || []).length ? " · " + p.outcome.change_requests.length + " change(s)" : ""}</td></tr>`).join("");
+  return `<h3>Progress by business type <span class="empty">(Done runs; test runs left out)</span></h3>
+    ${prog ? `<table><tr><th>Type</th><th>Runs</th><th>First-pass Audit</th><th>Cycles / run</th><th>AI calls / run</th><th>Run by run (oldest first: audit, cycles/calls)</th></tr>${prog}</table>` : '<p class="empty">No Done runs yet.</p>'}
+    <h3>Playbooks (${pbs.length}) <button type="button" class="ghost" id="clear-playbooks">Clear playbooks</button></h3>
+    <p class="empty">Saved when a run ends Done; Adaptation reads the closest ones at its first J2.b and says which it used. Stored in memory/playbooks.jsonl.</p>
+    ${rows ? `<table><tr><th>Playbook</th><th>Type</th><th>Sections in build order</th><th>Watch out</th><th>Outcome</th></tr>${rows}</table>` : ""}`;
 }
 function renderLessons(s){
   if (!s.memory) return `<p class="empty">Memory is off (J2_MEMORY=0): no lessons are read or saved in this run.</p>`;
@@ -456,8 +502,7 @@ function renderSimple(s){
   $("sprog").innerHTML = STAGES.map((x, i) => `<div class="${i < st ? "done" : i === st ? "on" : ""}"><i></i>${x}</div>`).join("");
   let out = "", lastAsk = null;
   if (!s.allChat.length) out = `<div class="sb team"><small>Your website team</small>Describe the website you want. We'll ask a few questions, then build it.
-    <div class="cards">${["A website for my cafe", "A website for Sweet Crumbs Bakery in Pune: menu, cake orders, contact",
-      "A portfolio site for a wedding photographer"].map(t => `<button type="button" data-brief="${esc(t)}">${esc(t)}</button>`).join("")}</div></div>`;
+    <div class="cards">${EXAMPLES.map(t => `<button type="button" data-brief="${esc(t)}">${esc(t)}</button>`).join("")}</div></div>`;
   s.allChat.forEach(m => {
     if (m.who === "user"){
       const k = String(m.text).match(/^Option (\d+)$/), a = lastAsk && parseAsk(lastAsk.text);
@@ -548,7 +593,7 @@ function renderReport(s){
 }
 function quick(s){
   let items = [];
-  if (!s.total) items = ["A website for my cafe", "A website for Sweet Crumbs Bakery in Pune: menu, cake orders, contact", "A portfolio site for a wedding photographer"];
+  if (!s.total) items = EXAMPLES;
   else if (s.status === "waiting" && s.done && !s.paused) items = ["Add a section for visiting hours", "Looks good"];
   $("quick").innerHTML = items.map(t => `<button type="button">${esc(t)}</button>`).join("");
   [...$("quick").children].forEach(b => b.onclick = () => { $("box").value = b.textContent; send(); });
@@ -589,6 +634,7 @@ async function poll(){
     $("pane-conflicts").innerHTML = renderConflicts(s); $("pane-audit").innerHTML = renderAudit(s);
     $("pane-report").innerHTML = renderReport(s);
     $("pane-timeline").innerHTML = renderTimeline(s); $("pane-lessons").innerHTML = renderLessons(s);
+    $("pane-style").innerHTML = renderStyle(s); $("pane-playbooks").innerHTML = renderPlaybooks(s);
     renderSimple(s);
     if (!state || state.status !== s.status || state.total !== s.total) quick(s);
     state = s;
@@ -598,7 +644,7 @@ async function poll(){
 $("ver").onchange = () => $("frame").src = `/site/${$("ver").value}?t=${Date.now()}${runQ()}`;
 document.querySelectorAll(".tabs [role=tab]").forEach(b => b.onclick = () => {
   document.querySelectorAll(".tabs [role=tab]").forEach(x => x.setAttribute("aria-selected", x === b));
-  ["preview","goal","workflows","conflicts","timeline","audit","lessons","report"].forEach(t => $("pane-"+t).hidden = t !== b.dataset.tab);
+  ["preview","goal","workflows","conflicts","timeline","audit","style","lessons","playbooks","report"].forEach(t => $("pane-"+t).hidden = t !== b.dataset.tab);
 });
 async function send(){
   const text = $("box").value.trim(); if (!text) return;
@@ -618,6 +664,10 @@ $("dclose").onclick = () => $("detail").close();
     .map(x => `<option value="${esc(x.id)}">${esc(x.id)} · ${esc(x.status)} · ${esc(x.brief.slice(0, 50))}</option>`).join("");
   $("runsel").value = viewRun; } catch (e) {} })();
 $("runsel").onchange = () => { location.search = $("runsel").value ? "?run=" + encodeURIComponent($("runsel").value) : ""; };
+$("pane-playbooks").addEventListener("click", async e => {
+  if (e.target.id !== "clear-playbooks" || !confirm("Delete every saved playbook (memory/playbooks.jsonl)? This can't be undone.")) return;
+  await fetch("/api/playbooks/clear", {method:"POST"});
+});
 $("pane-lessons").addEventListener("click", async e => {
   if (e.target.id !== "clear-lessons" || !confirm("Delete every saved lesson (memory/lessons.jsonl)? This can't be undone.")) return;
   await fetch("/api/lessons/clear", {method:"POST"});

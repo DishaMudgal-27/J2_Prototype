@@ -148,7 +148,7 @@ The page opens in the **Simple view**, made for someone who knows nothing about 
   plus one friendly line while the team works, e.g. "Building your menu section…".
 - **Questions:** a question with options is shown once, followed by its buttons, so you never type an option
   number; a text box is there for your own answer.
-- **Start screen:** the three example briefs as cards.
+- **Start screen:** example briefs as cards: a cafe, a bakery, a florist and a photographer.
 - **When done:** "Your website is ready" with Open full screen, Download the HTML file and Ask for a change.
 - **Errors:** a plain "Something went wrong. Try again."; the details stay in the Detailed view.
 
@@ -175,26 +175,46 @@ are never edited by this code.
 
 ### The loop
 
-1. **J2.a** Identity asks as many rounds as it needs; there is no round cap. A fact only you know is a question
-   to you. If you can't give it yet, Identity records it as **to be confirmed** against its done-when item. That
+1. **J2.a** Identity asks as many rounds as it needs; there is no round cap. It works out what kind of business
+   this is and what its visitors usually need: a florist's visitors browse, order and check delivery, and a
+   photographer's look at the portfolio, packages and booking. Unless the brief already says it, Identity lists
+   those needs and asks you to confirm or change them. The charter records `business_type` and the confirmed
+   `visitor_needs`. A fact only you know is a question to you. If you can't give it yet, Identity records it as **to be confirmed** against its done-when item. That
    item is not met: Audit's result for it is forced to `TO_BE_CONFIRMED` by code.
-2. **J2.b** Adaptation proposes workflows. With memory on it gets the 5 most relevant lessons and says which
-   one it used.
+2. **J2.b** Adaptation proposes workflows. With memory on it gets the 5 most relevant lessons and, on the first
+   proposal for a brief, the playbooks of similar businesses. It says which one it used and what it changed.
 3. **J2.c** Priority prices them. The bargain is bounded by **four hops, fifteen minutes and its spend**. Past
    any bound, both final positions go to Identity (J2.d).
 4. **J2.e** The validator registers each agreed workflow and creates its agent, e.g. "W-3 Builder", with the
    workflow's goal, outputs, completion check and envelope.
 5. **J2.f** Coordination schedules and holds the write lock. Priority checks the envelope. The workflow's agent
    writes its marked section (`<!-- J2:W-3 start (owner W-3) -->` ... `end`, plus an optional head block).
+   **Style guide:** the first workflow that runs also writes the style guide for this brief before its section
+   is accepted: palette, fonts, spacing, button and card styles suited to the business. Without it the reply
+   is retried within the envelope. Code turns it into CSS variables (`--j2-primary`, `--j2-font-body`, ...) and
+   the classes `j2-btn`, `j2-btn-secondary` and `j2-card`, first in the page head. Every later workflow agent
+   gets the guide and is told to follow it. Values that could break out of CSS or HTML are refused.
    An unusable reply is retried within the envelope's call and retry limits. Then the agent reports to
    Coordination. A workflow with `"revises": "W-2"` rewrites W-2's section and becomes its owner. Code
    assembles the file from the sections, in registration order.
 6. **J2.g** Audit checks the site and files every finding (all IDs and text) to Identity. A finding can name a
-   fact only you know; Identity then asks you for it.
+   fact only you know; Identity then asks you for it. Audit also judges the **design and usability rubric**:
+   - R-1 consistent styling (follows the style guide)
+   - R-2 readable contrast (WCAG AA)
+   - R-3 clear hierarchy (one h1, headings in order)
+   - R-4 one obvious main action
+   - R-5 easy navigation
+   - R-6 tap targets at least 44x44px on phones (`J2_TAP_MIN`)
+   - R-7 alt text on images
+
+   In live runs Audit sees a screenshot of the first screen at 360px and 1280px side by side. Code measures
+   contrast, headings, tap targets (links inside text are exempt) and images without alt, so Audit can't pass an
+   item code measured as failing. A failing rubric item is a normal finding that loops back.
 7. **J2.h** Identity: is the site **workable**? If not, back to J2.b. This repeats until it is workable.
 
 **Workable** is decided by code (`workable()` in `j2.py`), not by a model:
 - every done-when item passes Audit
+- every design rubric item passes
 - no JS errors
 - no horizontal overflow at 360px and 1280px
 - every form submits (`j2_check.py` fills each form with sample values and submits it)
@@ -226,6 +246,20 @@ the open problems listed.
 - `J2_MEMORY=0` turns memory off: nothing is read or written. Use it for clean test runs; the default is on.
   `J2_MEMORY_FILE` moves the file.
 - The **Lessons** tab lists every lesson. Clear memory deletes the file after a confirm prompt.
+- **Playbooks (plans, not only fixes):** when a run ends Done, Adaptation saves a playbook for that kind of
+  business in `memory/playbooks.jsonl` (`J2_PLAYBOOK_FILE` moves it). One playbook per run; a later Done after
+  a change request replaces it. It holds:
+  - recorded by code: workflows in build order, costs, what failed and what fixed it, and the measured outcome
+    (cycles, whether Audit passed the first time, AI calls, the changes you asked for)
+  - written by Adaptation: the sections, mistakes to avoid and advice
+
+  At its first J2.b for a brief, Adaptation reads up to 2 playbooks for the same business type, or briefs that
+  share words. It says which it used (`playbook_used`) and what it changed (`playbook_changes`). Only Done runs
+  save one. A `J2_FORCE_AUDIT_FAIL` run's playbook is marked test and follows the test-lesson rule.
+  `J2_MEMORY=0` turns off lessons and playbooks alike.
+- The **Playbooks** tab lists them, with a progress record per business type: runs, first-pass Audit rate,
+  cycles and AI calls per run, and each run in order, so you can see whether it's improving. Clear playbooks
+  is there too.
 
 ### Behind-the-scenes view
 
@@ -359,6 +393,12 @@ python j2_check.py site.html      # the render check on any page
   "after the team" or other internals. A question with buttons appears once. The phone toggle appears only once
   a site exists. The ready card has its three buttons. Also checked: the word list (run in node: Audit becomes
   "our checks"), and that every Identity prompt, and no other, carries the plain-language rule
+- H: J2.a proposes visitor needs for a florist and asks to confirm. The style guide comes first, is retried when
+  missing and is followed by every later agent. A planted small tap target fails R-6 by measurement, loops
+  back, is fixed and passes. Playbooks are saved at Done with the measured outcome, reused for the same business
+  type (not for a florist) with the change named, flagged as test after a forced failure, and untouched with
+  `J2_MEMORY=0`. Also: design measurements and the screenshot on a planted page, no cafe examples in our
+  instructions, the new example briefs
 - E: the page's tabs, lanes and their statuses, call links with reasons and no invented tokens, the full call
   record, saved runs opened read-only, path tricks refused, a fake key redacted, clear memory
 
@@ -373,7 +413,11 @@ python j2_check.py site.html      # the render check on any page
 - **Audit timing**: Audit runs once the build queue is empty, not after every workflow (fewer calls).
 - **"Core" done-when items**: every done-when item counts as core; the charter has no core / optional split.
 - **"Its spend" in J2.c**: our number (8 AI calls), see above.
-- **Lesson relevance**: word overlap, not meaning; fine for a small file.
+- **Lesson relevance**: word overlap, not meaning; fine for a small file. Playbooks match on business type
+  first, then shared words.
+- **Rubric R-1, R-4, R-5** (styling, main action, navigation) are Audit's judgment on the screenshot. Only R-2,
+  R-3, R-6 and R-7 are measured by code. Screenshots go to the model in live runs only. Image input through
+  `claude -p` (stream-json) is implemented but not yet tried on a live run.
 - **Executors**: the official files have no executor. The workflow agents use our placeholder `builder.md`.
 - **CEO**: where the official files say CEO, J2 reads it as you, reached only through Identity.
 - **No-progress limit**: a run with 2 cycles that registered nothing also triggers Identity's question, a guard

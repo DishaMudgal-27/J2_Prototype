@@ -56,6 +56,18 @@ MAX_CYCLES = int(os.getenv("J2_MAX_CYCLES", "6"))   # plan -> build -> audit loo
 LIMIT_ADD = int(os.getenv("J2_LIMIT_ADD", "30"))    # budget the "keep working" option adds when the budget ran out
 MEMORY_FILE = os.getenv("J2_MEMORY_FILE") or os.path.join(HERE, "memory", "lessons.jsonl")
 MAX_LESSONS = 5            # lessons Adaptation reads at J2.b
+PLAYBOOK_FILE = os.getenv("J2_PLAYBOOK_FILE") or os.path.join(HERE, "memory", "playbooks.jsonl")
+MAX_PLAYBOOKS = 2          # playbooks Adaptation reads at its first J2.b of a brief
+# Audit's design and usability rubric, checked on the screenshot (360px and 1280px) and code's design measurements.
+# A failing item is a normal finding: the site isn't workable until every item passes.
+RUBRIC = (("R-1", "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card "
+                  "styles)"),
+          ("R-2", "Readable contrast: text is easy to read against its background (WCAG AA)"),
+          ("R-3", "Clear hierarchy: one main heading, headings in order, the most important things stand out"),
+          ("R-4", "One obvious main action: a visitor can tell at once what to do next"),
+          ("R-5", "Easy navigation: a visitor can reach every section quickly, on a phone too"),
+          ("R-6", f"Tap targets are big enough on phones (at least {j2_check.TAP_MIN}x{j2_check.TAP_MIN}px)"),
+          ("R-7", "Images have alt text"))
 MAX_TURNS = int(os.getenv("J2_MAX_TURNS", "30"))       # agent turns per cycle
 CHAT_FULL_CHARS = int(os.getenv("J2_CHAT_FULL_CHARS", "60000"))   # above this, summary + recent messages
 CHAT_TAIL = 40             # messages always shown in full once the chat is summarised
@@ -252,6 +264,20 @@ def brief_list(pos):
 
 
 # ---- mock mode helpers (scripted functions, no model): a generic charter and page built from the text
+BUSINESS_TYPES = (("florist", r"florist|flower|bouquet"), ("photographer", r"photograph"), ("bakery", r"baker|cake"),
+                  ("cafe", r"cafe|coffee|espresso"), ("clinic", r"clinic|dental|doctor|hospital"))
+NEEDS = {"florist": ["Browse bouquets with prices", "Order for delivery or pickup", "Delivery areas and times"],
+         "photographer": ["Portfolio of past work", "Packages and prices", "Booking or enquiry form"],
+         "bakery": ["Menu with prices", "Order a cake", "Opening hours and address"],
+         "cafe": ["Menu with prices", "Opening hours", "Where to find us"],
+         "clinic": ["Services offered", "Doctors and timings", "Book an appointment"]}
+
+
+def guess_type(text):
+    """Mock only: a business type from the brief's words (live runs ask Identity)."""
+    return next((t for t, pat in BUSINESS_TYPES if re.search(pat, text, re.I)), "business")
+
+
 def mock_charter(text):
     t = text.lower()
     m = re.search(r"\b(?:for|called)\s+([A-Z][\w']*(?:\s+[A-Z][\w']*)*)", text)
@@ -261,12 +287,16 @@ def mock_charter(text):
                             ("order", "Visitors can pre-order a coffee for pickup with a form"),
                             ("bean", "A section about the beans and the farms they come from"),
                             ("loyalty", "A loyalty-card explainer (buy 9, get the 10th free)")) if k in t]
+    if len(items) < 2:                    # not a cafe brief: the business type's usual visitor needs
+        items += [f"{n} is on the page" for n in NEEDS.get(guess_type(text), ["What the business offers",
+                                                                             "How to get in touch"])]
     items.append("Layout works on a phone")
     return {"statement": f"A one-page website for {name} where visitors find what they need and come in",
             "site_name": name, "audience": "Local customers, mostly on phones",
             "standards": ["Warm, modern feel", "Fast first screen on a phone"],
             "rules": ["Plain HTML/CSS/JS in one file", "No real customer data"],
-            "done_when": items, "to_be_confirmed": [], "dropped_from_brief": []}
+            "done_when": items, "to_be_confirmed": [], "dropped_from_brief": [],
+            "business_type": guess_type(text), "visitor_needs": NEEDS.get(guess_type(text), [])}
 
 
 def mock_section(w, goal, sections):
@@ -285,6 +315,63 @@ def mock_section(w, goal, sections):
                     "launch).</p></section>" for i, d in enumerate(g.get("done_when") or [], 1)
                     if "phone" not in str(d).lower() and f'data-item="{i}"' not in others)
     return "", items or f"<section><h2>{html.escape(w['name'])}</h2><p>Sample content.</p></section>"
+
+
+# ---- the style guide: written by the first workflow that runs, followed by every workflow agent
+STYLE_FMT = ('{"palette": {"primary": hex, "secondary": hex, "accent": hex, "background": hex, "surface": hex, "text": hex, '
+             '"muted": hex}, "fonts": {"heading": css font-family, "body": css font-family, "google_fonts_url": '
+             'https://fonts.googleapis.com/... or null}, "spacing": {"unit": "8px", "section": "64px"}, "radius": "12px", '
+             '"buttons": {"primary": css declarations, "secondary": css declarations}, "card": css declarations, '
+             '"notes": str (one line: why this suits the business)}')
+HEX = re.compile(r"#(?:[0-9a-fA-F]{3}){1,2}")
+CSS_SAFE = re.compile(r'^[^<>{}"\\]*$')   # values only: nothing that can close a rule, a tag or an attribute
+
+
+def parse_style(raw):
+    """The style guide from a ```style block; ValueError with the reason when it can't be used."""
+    m = re.search(r"```style\s*(\{.*?\})\s*```", raw, re.S)
+    if not m:
+        raise ValueError("the reply has no ```style block with the style guide (you run first, so you write it)")
+    try:
+        g = json.loads(m.group(1))
+    except ValueError:
+        raise ValueError("the ```style block isn't valid JSON") from None
+    pal, fonts = g.get("palette") or {}, g.get("fonts") or {}
+    missing = [k for k in ("primary", "background", "text") if not HEX.fullmatch(str(pal.get(k) or ""))]
+    if missing:
+        raise ValueError(f"the style guide's palette needs hex colours for {', '.join(missing)}")
+    flat = [str(v) for v in list(pal.values()) + [fonts.get("heading"), fonts.get("body"), g.get("radius"),
+                                                  g.get("card")] + list((g.get("spacing") or {}).values())
+            + list((g.get("buttons") or {}).values()) if v]
+    if not fonts.get("heading") or not fonts.get("body") or not all(CSS_SAFE.match(v) for v in flat):
+        raise ValueError('the style guide needs heading and body fonts, and plain CSS values (no <, >, {, }, " or \\)')
+    url = str(fonts.get("google_fonts_url") or "")
+    fonts["google_fonts_url"] = url if url.startswith("https://fonts.googleapis.com/") and CSS_SAFE.match(url) else None
+    return g
+
+
+def style_css(g):
+    """Head tags for the style guide: CSS variables (--j2-primary, --j2-font-body, ...) and the .j2-btn,
+    .j2-btn-secondary and .j2-card classes every workflow agent uses."""
+    pal, fonts, sp = g["palette"], g["fonts"], g.get("spacing") or {}
+    var = "".join(f"--j2-{k}:{v};" for k, v in pal.items() if HEX.fullmatch(str(v)))
+    var += (f"--j2-font-heading:{fonts['heading']};--j2-font-body:{fonts['body']};--j2-space:{sp.get('unit', '8px')};"
+            f"--j2-section:{sp.get('section', '64px')};--j2-radius:{g.get('radius', '8px')};")
+    btn = g.get("buttons") or {}
+    link = f'<link rel="stylesheet" href="{html.escape(fonts["google_fonts_url"])}">' if fonts.get("google_fonts_url") else ""
+    return (link + "<style>:root{" + var + "}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);"
+            "background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}"
+            f".j2-btn{{display:inline-block;{btn.get('primary', '')}}}.j2-btn-secondary{{display:inline-block;"
+            f"{btn.get('secondary', '')}}}.j2-card{{{g.get('card', '')}}}</style>")
+
+
+MOCK_STYLE = {"palette": {"primary": "#1f5f8b", "secondary": "#e8eef3", "accent": "#b4531a", "background": "#ffffff",
+                          "surface": "#f5f7f9", "text": "#1f2933", "muted": "#52606d"},
+              "fonts": {"heading": "Georgia, serif", "body": "system-ui, sans-serif", "google_fonts_url": None},
+              "spacing": {"unit": "8px", "section": "56px"}, "radius": "10px",
+              "buttons": {"primary": "background:#1f5f8b;color:#fff;padding:12px 20px;border-radius:10px;min-height:44px",
+                          "secondary": "background:#e8eef3;color:#1f2933;padding:12px 20px;border-radius:10px"},
+              "card": "background:#f5f7f9;border-radius:10px;padding:16px", "notes": "Calm, readable defaults (mock)"}
 
 
 # ---- the site file: one marked section per workflow agent, assembled by code
@@ -339,6 +426,7 @@ def workable(audit):
         return ["no site has been audited yet"]
     out = [f"done-when item {r['item']} ({r['id']} {r['verdict']}): {r['criterion']}" for r in audit["results"]
            if not r["pass"]]
+    out += [f"design rubric {r['id']} ({r['verdict']}): {r['criterion']}" for r in audit.get("rubric", []) if not r["pass"]]
     mech = audit.get("mechanical") or {}
     if not mech.get("available"):
         return out + [f"render check didn't run, so JS errors, overflow and forms are unverified: {mech.get('note')}"]
@@ -346,7 +434,7 @@ def workable(audit):
 
 
 def failure_signature(audit):
-    return sorted(f"{r['criterion']}|{r['verdict']}" for r in audit["results"] if not r["pass"]) \
+    return sorted(f"{r['criterion']}|{r['verdict']}" for r in audit["results"] + audit.get("rubric", []) if not r["pass"]) \
         + sorted(j2_check.problems(audit.get("mechanical") or {}))
 
 
@@ -384,6 +472,47 @@ def clear_lessons():
         n = sum(1 for ln in f if ln.strip())
     os.remove(MEMORY_FILE)
     return n
+
+
+def load_playbooks():
+    if not memory_on() or not os.path.exists(PLAYBOOK_FILE):
+        return []
+    with open(PLAYBOOK_FILE, encoding="utf-8") as f:
+        return [json.loads(ln) for ln in f if ln.strip().startswith("{")]
+
+
+def save_playbook(pb):
+    """One playbook per run: a later Done in the same run (after a change request) replaces it."""
+    if not memory_on():
+        return
+    keep = [x for x in load_playbooks() if x.get("id") != pb["id"]]
+    os.makedirs(os.path.dirname(PLAYBOOK_FILE), exist_ok=True)
+    with open(PLAYBOOK_FILE, "w", encoding="utf-8") as f:
+        f.writelines(json.dumps(x, ensure_ascii=False) + "\n" for x in keep + [pb])
+
+
+def clear_playbooks():
+    if not os.path.exists(PLAYBOOK_FILE):
+        return 0
+    with open(PLAYBOOK_FILE, encoding="utf-8") as f:
+        n = sum(1 for ln in f if ln.strip())
+    os.remove(PLAYBOOK_FILE)
+    return n
+
+
+def relevant_playbooks(pbs, business_type, text, n=MAX_PLAYBOOKS, include_test=False):
+    """Playbooks for similar businesses: the same business type first, then shared words with the brief; newest
+    first on a tie. Test playbooks (from a J2_FORCE_AUDIT_FAIL run) only with include_test."""
+    bt, want = str(business_type or "").lower(), set(WORD.findall(str(text).lower()))
+    scored = []
+    for i, x in enumerate(pbs):
+        if x.get("test") and not include_test:
+            continue
+        same = str(x.get("business_type") or "").lower() == bt and bt not in ("", "business")
+        words = len(want & set(WORD.findall(" ".join([str(x.get("business_type")), str(x.get("brief"))]).lower())))
+        if same or words >= 2:
+            scored.append((same, words, i, x))
+    return [x for *_, x in sorted(scored, key=lambda t: (-t[0], -t[1], -t[2]))][:n]
 
 
 WORD = re.compile(r"[a-z]{4,}")
@@ -520,7 +649,9 @@ def saved_snapshot(name, since=0):
             "lanes": lanes(chat, wfs, None, None, "saved", None, 8, None), "call_log": calls,
             "workable": s.get("workable") if s else (workable(audits[-1]) if audits else None),
             "memory": False, "lessons": [], "lessons_used": (s.get("lessons") or {}).get("used", []),
-            "lessons_saved": (s.get("lessons") or {}).get("saved", [])}
+            "lessons_saved": (s.get("lessons") or {}).get("saved", []), "style": _read(d, "style.json"), "rubric": RUBRIC,
+            "playbooks": [], "playbooks_used": (s.get("playbooks") or {}).get("used", []),
+            "playbook_saved": (s.get("playbooks") or {}).get("saved")}
 
 
 def call_record(d, cid):
@@ -566,6 +697,8 @@ class J2Run:
         self.sections, self.write_lock, self.bargain = {}, None, None   # section id -> {owner, head, body, workflow}
         self.memory = memory_on()
         self.call_log, self.pending_calls = [], {}     # every AI call (calls.jsonl); calls not yet shown in a message
+        self.style = None                              # the style guide, written by the first workflow that runs
+        self.playbooks_used, self.playbook_saved = [], None
         self.lessons_used, self.lessons_saved = [], []
         self.fail_floor = 0          # audits before this index don't count for "same failure twice in a row"
         self._begin_cycle(advance=False)
@@ -588,6 +721,9 @@ class J2Run:
                            | {"label": PAUSES.get(self.paused["kind"], ""),
                               "choices": self.paused["handoff"].get("choices")}) if self.paused else None,
                 "outcome": self.outcome,          # read-only, for the Simple view
+                "style": self.style, "rubric": RUBRIC,
+                "playbooks": load_playbooks() if self.memory else [], "playbooks_used": self.playbooks_used,
+                "playbook_saved": self.playbook_saved,
                 "mock": llm.MOCK, "model": None if llm.MOCK else llm.MODEL, "fixes": int(self.fixes),
                 "force_audit_fail": self.force_fail or None, "test_lessons": self.test_lessons,
                 "placeholders": self._placeholders(), "report": self.report,
@@ -675,6 +811,7 @@ class J2Run:
                            "site_versions": len(self.sites),
                            "site_sections": [{"section": k, "owner": x["owner"], "workflow": x.get("workflow")}
                                              for k, x in self.sections.items()],
+                           "style_guide": self.style,
                            "rate_card": ({"prices": RATES, "rule": "a workflow costs the sum of its parts' prices; "
                                           "estimated_resources.money is ignored; list a part once per unit"}
                                          if RATES and not blind else None)}, ensure_ascii=False)
@@ -723,11 +860,11 @@ class J2Run:
         "checklist, standards, reserve, fix, effort, budget, units, workflow, cycle, finding, audit, ruling, envelope, "
         "content types such as \"warmth content\", or the names of the functions (Identity, Adaptation, Priority, "
         "Coordination, Audit). At most two short sentences of context. Each option says what they get and what it costs, "
-        "in plain words, e.g. \"Add a section about your coffee's story (takes a bit longer)\" / \"Keep it simple, no "
-        "story section\". No recommendation.")
+        "in plain words, e.g. \"Add a gallery of past work (takes a bit longer)\" / \"Keep it simple, no gallery\". "
+        "No recommendation.")
     MOCK_REASON = "Scripted mock reply: no model reasoning."
 
-    def call(self, fn, reply_format, task, mock, max_tokens=900, json_reply=True):
+    def call(self, fn, reply_format, task, mock, max_tokens=900, json_reply=True, images=None):
         """One agent's AI call. Every JSON reply format gets a "reason" field. Each call is logged to calls.jsonl
         (inputs, reply, reason, tokens, time) and linked to the agent's next chat message for the detail view."""
         if json_reply and reply_format.rstrip().endswith("}") and '"reason"' not in reply_format:
@@ -741,7 +878,7 @@ class J2Run:
         t0 = time.time()
         try:
             raw = llm.ask(system, user, mock, max_tokens=max_tokens, effort="low" if json_reply else "high",
-                          json_mode=json_reply)
+                          json_mode=json_reply, images=images)
         finally:
             self.thinking = None
         reply = raw
@@ -753,6 +890,8 @@ class J2Run:
             if llm.MOCK and not reply.get("reason"):
                 reply["reason"] = self.MOCK_REASON
         self._log_call(fn, task, system, user, raw, reply if json_reply else None, time.time() - t0)
+        if images:
+            self.call_log[-1]["images"] = [os.path.relpath(p, self.dir) for p in images]
         return reply
 
     def _inputs(self, fn, task):
@@ -990,7 +1129,9 @@ class J2Run:
                 }.get(h.get("kind"), self._identity_question)(h)
 
     CHARTER_FMT = ('{"statement": str, "site_name": str, "audience": str, "standards": [str], "rules": [str], '
-                   '"done_when": [str], "to_be_confirmed": [{"item": int (done-when item number), "fact": str}], '
+                   '"done_when": [str], "business_type": str (one or two words, e.g. "florist"), "visitor_needs": [str] '
+                   '(what this business\'s visitors need, as confirmed), '
+                   '"to_be_confirmed": [{"item": int (done-when item number), "fact": str}], '
                    '"dropped_from_brief": [str]}')
 
     def _identity_intake(self, h):
@@ -1020,10 +1161,13 @@ class J2Run:
                                                                   + [f"Change: {change}"]}})
             text = " ".join([self.request] + [x["answer"] for x in self.intake])
             if not self.intake and len(self.request.split()) < 25 and not last:
+                kind = guess_type(self.request)
+                needs = (f"For a {kind} site, visitors usually need: {', '.join(NEEDS[kind]).lower()}. Is that right, "
+                         "or what would you change?") if kind in NEEDS else "What must visitors be able to see or do on the site?"
                 return json.dumps({"say": "Before we start, a few quick questions so we build the right thing.",
                                    "enough": False, "next": "Requester", "questions": [
                     {"question": "What is the business called, and where is it?", "options": []},
-                    {"question": "What must visitors be able to see or do on the site?", "options": []},
+                    {"question": needs, "options": []},
                     {"question": "How should it feel, and must it work well on phones?", "options": []}]})
             return json.dumps({"say": "@Adaptation Charter recorded from the brief"
                                       + (" and the Requester's answers." if self.intake else "; it had enough to work."),
@@ -1035,6 +1179,11 @@ class J2Run:
                       f"REQUESTER'S BRIEF: {self.request}\nEARLIER QUESTIONS AND ANSWERS: {json.dumps(self.intake)}\n"
                       f"{feedback}\nJ2.a: is there enough information to work? You need enough to write the charter: "
                       "goal, audience, standards, rules and a checkable done-when list. Never invent a missing fact.\n"
+                      "- Work out what kind of business this is and what its visitors usually need (for example a "
+                      "florist: browse bouquets, order, delivery areas; a photographer: portfolio, packages, booking; a "
+                      "dental clinic: services, prices, appointments). Don't assume: unless the brief already says what "
+                      "visitors must see or do, list what you think they need in one question and ask the Requester to "
+                      "confirm or change it. Record business_type and the confirmed visitor_needs in the charter.\n"
                       "- Not enough: set enough=false and ask the Requester 1-4 specific questions about what the brief "
                       "leaves open (what the site is for, who it serves, what visitors must be able to see or do, hard "
                       "rules). Offer options only for a choice between known alternatives. Don't ask about cost.\n"
@@ -1283,8 +1432,8 @@ class J2Run:
         """Audit's full findings for Identity: every id, verdict, severity and text, done-when items and extra issues."""
         a = audit or (self.audits[-1] if self.audits else None)
         keys = ("id", "item", "criterion", "verdict", "severity", "confidence", "note", "needs_requester_fact")
-        return [{k: r.get(k) for k in keys if r.get(k) is not None} for r in (a["results"] + a.get("extra_issues", [])
-                                                                              if a else [])]
+        return [{k: r.get(k) for k in keys if r.get(k) is not None}
+                for r in (a["results"] + a.get("rubric", []) + a.get("extra_issues", []) if a else [])]
 
     def _identity_hears_requester(self, h):
         """The Requester answered Identity at J2.g/J2.h (a fact, a limit, or another question Identity asked).
@@ -1455,6 +1604,8 @@ class J2Run:
             self.outcome = "Done: the site is workable. Every done-when item passes with Audit's evidence and the " \
                            "render check is clean."
             self.turn = None
+            if self.memory:
+                self._save_playbook()
             return
         questions = clean_questions(r.get("requester_questions"))
         questions += [{"question": f"{x['needs_requester_fact']} (done-when item {x.get('item')}). If you can't give it "
@@ -1514,7 +1665,8 @@ class J2Run:
         about = str(about or "").strip()
         if other == "audit":
             last = self.audits[-1] if self.audits else None
-            fails = [r for r in (last["results"] + last.get("extra_issues", []) if last else []) if not r.get("pass")]
+            fails = [r for r in (last["results"] + last.get("rubric", []) + last.get("extra_issues", []) if last else [])
+                     if not r.get("pass")]
             f = next((r for r in fails if about.lower() in (str(r.get("id")).lower(), f"item {r.get('item')}",
                                                              str(r.get("item")))), None)
             if not f:
@@ -1608,10 +1760,10 @@ class J2Run:
                                  f"{r.get('instruction') or ''} Reshape the work so the missing condition is met, or park it.")
         # finding
         audit = self.audits[-1]
-        f = next((x for x in audit["results"] + audit.get("extra_issues", []) if x.get("id") == sid), None)
+        f = next((x for x in audit["results"] + audit.get("rubric", []) + audit.get("extra_issues", []) if x.get("id") == sid), None)
         if winner == "adaptation" and f:
             f.update({"pass": True, "verdict": "WITHDRAWN", "note": f"{f.get('note', '')} (withdrawn in {c['id']})"})
-            audit["all_pass"] = all(x.get("pass") for x in audit["results"])
+            audit["all_pass"] = all(x.get("pass") for x in audit["results"] + audit.get("rubric", []))
             self.save("audits.json", self.audits)
             self._settle(c, winner, f"Finding {sid} withdrawn.", by)
             if audit["all_pass"]:
@@ -1664,13 +1816,20 @@ class J2Run:
             return self._adaptation_responds(h)
         last = self.audits[-1] if self.audits else None
         fails = [{k: r.get(k) for k in ("id", "item", "criterion", "verdict", "note")}
-                 for r in (last["results"] + last.get("extra_issues", []) if last else []) if not r.get("pass")]
+                 for r in (last["results"] + last.get("rubric", []) + last.get("extra_issues", []) if last else [])
+                 if not r.get("pass")]
         held = [{"id": w["id"], "name": w["name"]} for w in self.workflows if w["status"] == "held"]
         lessons = relevant_lessons(load_lessons(), " ".join([str(h.get("why") or ""), json.dumps(fails),
                                                              json.dumps((self.goal or {}).get("done_when"))]),
                                    include_test=self.test_lessons) if self.memory else []
         offered = [{k: x.get(k) for k in ("id", "problem", "cause", "fix", "test") if x.get(k) is not None}
                    for x in lessons]
+        g = self.goal or {}
+        pbs = relevant_playbooks(load_playbooks(), g.get("business_type"), " ".join([self.request, str(self.feedback or "")]),
+                                 include_test=self.test_lessons) \
+            if self.memory and (not self.workflows or self.feedback) else []
+        pb_offer = [{k: x.get(k) for k in ("id", "business_type", "sections", "build_order", "watch_out", "advice",
+                                           "outcome", "test") if x.get(k) is not None} for x in pbs]
 
         def mock_plain():
             if self.feedback:
@@ -1721,10 +1880,16 @@ class J2Run:
             if offered and r.get("act") == "PROPOSE":
                 r["say"] += f" Using lesson {offered[0]['id']}: {offered[0]['fix']}"
                 r["lesson_used"] = offered[0]["id"]
+            if pb_offer and r.get("act") == "PROPOSE":
+                r["say"] += f" Using playbook {pb_offer[0]['id']} ({pb_offer[0]['business_type']}): same build order, " \
+                            "sections adjusted to this brief."
+                r.update(playbook_used=pb_offer[0]["id"], playbook_changes="Sections adjusted to this brief.")
             return json.dumps(r)
         r = self.call("adaptation", '{"say": str, "act": "PROPOSE"|"POLICY_QUESTION"|"DISPUTE", "workflows": '
                       + self.WF_FMT + ', "question": str|null, "dispute": {"with": "Audit"|"Coordination", "about": str '
-                      '(finding id or workflow id), "reason": str}|null, "lesson_used": str|null (id of the lesson '
+                      '(finding id or workflow id), "reason": str}|null, "playbook_used": str|null (id of the playbook '
+                      'you followed), "playbook_changes": str|null (what you changed from it, one sentence), '
+                      '"lesson_used": str|null (id of the lesson '
                       'you applied, if any), '
                       + next_field(("priority", "identity", "audit", "coordination"), "Priority to get your proposal "
                                    "funded; Identity only for a policy question, put in \"question\"; Audit or "
@@ -1741,7 +1906,12 @@ class J2Run:
                          "If one applies, use it, set lesson_used to its id and say in one clause which one you used."
                          + (" A lesson marked test is a demo lesson; if you use one, call it a test lesson."
                             if any(x.get("test") for x in offered) else "")   # only with J2_MEMORY_TEST_LESSONS=1
-                         if offered else "") + (" Price every workflow with rate-card parts (see STATE.rate_card); its cost is "
+                         if offered else "")
+                      + (f"\nPLAYBOOKS FROM EARLIER RUNS FOR SIMILAR BUSINESSES (closest first): "
+                         f"{json.dumps(pb_offer, ensure_ascii=False)}\nIf one fits, follow its sections and build order "
+                         "and adapt it to this brief: set playbook_used to its id, say in one clause which one you used, "
+                         "and put what you changed in playbook_changes. Its watch_out items are mistakes to avoid."
+                         if pb_offer else "") + (" Price every workflow with rate-card parts (see STATE.rate_card); its cost is "
                                       "fixed by them." if RATES else ""), mock)
         act = str(r.get("act", "")).upper()
         note = None
@@ -1774,9 +1944,16 @@ class J2Run:
         if used:
             self.lessons_used.append({"cycle": self.cycle, "lesson": used, "offered": [x["id"] for x in offered],
                                       **({"test": True} if used_test else {})})
+        pb = str(r.get("playbook_used") or "")
+        pb = pb if pb in {x["id"] for x in pb_offer} else None
+        if pb:
+            self.playbooks_used.append({"cycle": self.cycle, "playbook": pb, "changes": r.get("playbook_changes"),
+                                        "offered": [x["id"] for x in pb_offer]})
         self.a_msg = self._say("adaptation", r.get("say", ""), nxt, note or note2, proposal=wfs, cycle=self.cycle,
                                **({"lesson_used": used} if used else {}), **({"lesson_test": True} if used_test else {}),
-                               **({"lessons_offered": [x["id"] for x in offered]} if offered else {}))
+                               **({"lessons_offered": [x["id"] for x in offered]} if offered else {}),
+                               **({"playbook_used": pb, "playbook_changes": r.get("playbook_changes")} if pb else {}),
+                               **({"playbooks_offered": [x["id"] for x in pb_offer]} if pb_offer else {}))
         if used_test:
             self._event("adaptation", "test_lesson", f"used test lesson {used}")
             self.post("system", f"TEST LESSON: Adaptation used {used}, a lesson from a forced test failure "
@@ -2252,8 +2429,20 @@ class J2Run:
         def mock():
             head, body = mock_section(w, self.goal, self.sections)
             return (json.dumps({"say": f"@Coordination {fn} done: {w['name']}. Section {sid} written; completion "
-                                       f"check: {w['completion_check']}.", "next": "Coordination"})
+                                       f"check: {w['completion_check']}." + (" Style guide written." if first else ""),
+                                "next": "Coordination"})
+                    + (f"\n```style\n{json.dumps(MOCK_STYLE)}\n```" if first else "")
                     + (f"\n```head\n{head}\n```" if head else "") + (f"\n```section\n{body}\n```" if body else ""))
+        # Before any section is built, the first workflow that runs writes the style guide; every later agent follows it.
+        first = self.style is None
+        style_task = ("\nYOU RUN FIRST, SO YOU ALSO WRITE THE STYLE GUIDE for this brief, before your section: palette, "
+                      "fonts, spacing, button and card styles that suit this business and its visitors, with readable "
+                      "contrast (WCAG AA) and buttons at least 44px tall. Code turns it into CSS variables (--j2-primary, "
+                      "--j2-font-body, --j2-radius, ...) and the classes j2-btn, j2-btn-secondary and j2-card; use them "
+                      "in your section." if first else
+                      f"\nSTYLE GUIDE (follow it exactly): {json.dumps(self.style, ensure_ascii=False)}\nUse its CSS "
+                      "variables (var(--j2-primary), var(--j2-font-heading), ...) and the classes j2-btn, j2-btn-secondary "
+                      "and j2-card. Don't add other colours or fonts.")
         got, raw, stop, last_err = None, "", None, None
         while got is None:
             if w["calls_used"] >= max_calls:
@@ -2263,22 +2452,26 @@ class J2Run:
             w["calls_used"] += 1
             raw = self.call(fn, 'First line: a JSON object {"say": str (one short line reporting to @Coordination: '
                             'what you changed and whether your completion check holds), "next": "Coordination", '
-                            + self.REASON + '}. Then, '
+                            + self.REASON + '}. '
+                            + ('Then a ```style block with the style guide as JSON: ' + STYLE_FMT + '. ' if first else '')
+                            + 'Then, '
                             'only if your section needs page-head tags, a ```head block (meta, link, style or script '
                             'tags only). Then a ```section block: your section\'s HTML only, no <html>, <head> or <body> '
                             'tags (inline <style> and <script> are fine).',
                             f"YOU ARE {NAMES[fn]}, the agent for one registered workflow.\nYOUR WORKFLOW: "
                             f"{json.dumps(brief, ensure_ascii=False)}\nYOU OWN SECTION {sid} of the site file. Code puts "
                             "your head block in the page head and your section in the body, in section order, between "
-                            "markers. Write the whole section each time; don't repeat other sections."
+                            "markers. Write the whole section each time; don't repeat other sections." + style_task
                             + (f"\nYOUR SECTION NOW (last written by {mine['owner']}):\n```head\n{mine['head']}\n```\n"
                                f"```section\n{mine['body']}\n```" if mine else "")
                             + (f"\nYOUR LAST ATTEMPT WAS REJECTED: {last_err}. Fix that." if last_err else "")
                             + f"\nTHE WHOLE SITE FILE NOW (v{len(self.sites)}, read only):\n{prev[:SITE_LIMIT]}",
                             mock, max_tokens=16000, json_reply=False)
             try:
-                got = parse_section(raw)
-                w["last_check"] = "usable section" + (" and head tags" if got[0] else "")
+                parts = parse_section(raw)
+                guide = parse_style(raw) if first else None
+                got = parts      # only once both parse: a missing style guide must be retried, not accepted
+                w["last_check"] = ("style guide, " if first else "") + "usable section" + (" and head tags" if got[0] else "")
             except ValueError as e:
                 last_err = w["last_check"] = str(e)
                 if w["retries_used"] >= max_retries:
@@ -2306,6 +2499,12 @@ class J2Run:
             self._event(fn, "limit_fail", f"{fn}: {stop}")
             self.save("workflows.json", self.workflows)
             return self._handoff("coordination", kind="schedule")
+        if first:     # the style guide goes first in the head, so every section can use its variables and classes
+            self.style = guide
+            self.sections = {"style": {"owner": fn, "head": style_css(guide), "body": "", "workflow": "Style guide"},
+                             **self.sections}
+            self.save("style.json", guide)
+            w["style_guide"] = True
         self.sections[sid] = {"owner": fn, "head": got[0], "body": got[1], "workflow": w["name"]}
         html_out = assemble((self.goal or {}).get("site_name") or "Site", self.sections)
         self.sites.append(html_out)
@@ -2363,7 +2562,7 @@ class J2Run:
         """A code-written tally under Audit's message, so the chat and the report always agree."""
         by = {}
         for x in results:
-            by.setdefault(x["verdict"], []).append(f"{x['id']} item {x['item']}")
+            by.setdefault(x["verdict"], []).append(x["id"] if x.get("rubric") else f"{x['id']} item {x['item']}")
         parts = [f"{len(v)} {k}" + ("" if k == "PASS" else f" ({', '.join(v)})") for k, v in by.items()]
         return (f"Findings (code tally): {'; '.join(parts)}"
                 + (f"; extra issues: {', '.join(x['id'] + ' ' + x['verdict'] for x in extras)}" if extras else "") + ".")
@@ -2383,6 +2582,11 @@ class J2Run:
         if len(site) > SITE_LIMIT:
             self.post("system", f"Warning: site v{len(self.sites)} is {len(site):,} characters. Audit sees only the "
                                 f"first {SITE_LIMIT:,}, so findings about the end of the file may be wrong.", warning=True)
+        shot = None   # live runs: Audit looks at both widths; mock replies don't read images, so no Chrome run for them
+        if site and not llm.MOCK:
+            os.makedirs(os.path.join(self.dir, "site", "shots"), exist_ok=True)
+            shot = j2_check.screenshot(site, os.path.join(self.dir, "site", "shots", f"v{len(self.sites)}.png"))
+        measured = j2_check.design_problems(mech)
 
         def mock():
             fs = []
@@ -2395,24 +2599,36 @@ class J2Run:
                                         "phones render the page at desktop width") if phone else
                                        ("Section present in the page" if ok else "No section for this item")})
             n = sum(f["verdict"] == "NEEDS_REVISION" for f in fs)
+            rub = [{"id": rid, "verdict": "PASS", "evidence": "Mock: looks fine in the measurements"} for rid, _ in RUBRIC]
             return json.dumps({"say": "@Identity All criteria pass; done-when may hold." if not n else
-                               f"@Identity {n} finding needs revision.", "findings": fs, "next": "Identity"})
+                               f"@Identity {n} finding needs revision.", "findings": fs, "rubric": rub, "next": "Identity"})
         r = self.call("audit", '{"say": str, "findings": [{"id": "F-1", "item": int|null (done-when item number; null '
                       'for an extra issue), "criterion": str, "verdict": "PASS"|"PASS_WITH_WARNING"|'
                       '"NEEDS_REVISION"|"BLOCKED_BY_EVIDENCE"|"POLICY_CONCERN", "severity": "low"|"medium"|"high"|'
                       '"critical", "confidence": "low"|"medium"|"high", "evidence": str (one line: what you observed '
                       'in the code or the mechanical check), "needs_requester_fact": str|null (the fact only the '
-                      'Requester knows that this item needs, e.g. "the cafe\'s phone number"; null otherwise)}] '
+                      'Requester knows that this item needs, e.g. "the business phone number"; null otherwise)}] '
                       '(exactly one finding per done-when item, plus one per extra issue; a PASS needs evidence), '
+                      '"rubric": [{"id": "R-1".."R-7", "verdict": "PASS"|"PASS_WITH_WARNING"|"NEEDS_REVISION", '
+                      '"evidence": str (one line: what you saw on the screenshot or in the measurements)}] (exactly '
+                      'one per rubric item), '
                       + next_field(("identity",), "Identity: you file every finding to Identity, who decides J2.h") + "}",
                       f"CRITERIA: {json.dumps(crit)}\nMECHANICAL CHECK (run by code in headless Chrome; treat as evidence, and "
                       f"use BLOCKED_BY_EVIDENCE only for what neither it nor the code can show): {json.dumps(mech)}\n"
-                      f"SITE v{len(self.sites)}:\n{site[:SITE_LIMIT]}", mock,
-                      max_tokens=1200)
+                      f"DESIGN AND USABILITY RUBRIC (judge each item; a failing item is a normal finding): "
+                      f"{json.dumps(dict(RUBRIC), ensure_ascii=False)}\nSTYLE GUIDE: {json.dumps(self.style, ensure_ascii=False)}"
+                      f"\nDESIGN MEASUREMENTS (code, both widths): {json.dumps(mech.get('design'), ensure_ascii=False)}\n"
+                      f"MEASURED PROBLEMS (code; you can't PASS these items): {json.dumps(measured, ensure_ascii=False)}\n"
+                      + ("SCREENSHOT ATTACHED: the first screen at 360px (left) and 1280px (right). Judge R-1 to R-5 on "
+                         "what you see.\n" if shot else "No screenshot this time: judge from the code and the measurements.\n")
+                      + f"SITE v{len(self.sites)}:\n{site[:SITE_LIMIT]}", mock,
+                      max_tokens=1600, images=[shot] if shot else None)
         results, extras = self._audit_findings(r.get("findings") or r.get("results") or [], crit)
         forced = self._force_fail(results)
+        rubric = self._audit_rubric(r.get("rubric") or [], measured)
         audit = {"cycle": self.cycle, "version": len(self.sites), "results": results, "extra_issues": extras,
-                 "mechanical": mech, "all_pass": bool(results) and all(x.get("pass") for x in results)}
+                 "rubric": rubric, "mechanical": mech, "screenshot": os.path.relpath(shot, self.dir) if shot else None,
+                 "all_pass": bool(results) and all(x.get("pass") for x in results + rubric)}
         self.audits.append(audit)
         self.save("audits.json", self.audits)
         nxt, note = self._pick("audit", r.get("next"), ("identity",), "identity",
@@ -2420,8 +2636,8 @@ class J2Run:
         fails = workable(audit)
         if forced:   # Audit's own line may say "all pass": code writes it from the findings as filed
             r["say"] = f"@Identity Site v{len(self.sites)} checked. " + " ".join(
-                f"{x['id']} item {x['item']} {x['verdict']}: {x['note']}" for x in results if not x["pass"])
-        self._say("audit", r.get("say", "") + "\n" + self._audit_tally(results, extras)
+                f"{x['id']} item {x['item']} {x['verdict']}: {x['note']}" for x in results + rubric if not x["pass"])
+        self._say("audit", r.get("say", "") + "\n" + self._audit_tally(results + rubric, extras)
                   + (" Workable (code): yes." if not fails else f" Workable (code): no, {len(fails)} problem(s)."),
                   nxt, note, audit=audit["all_pass"], version=len(self.sites), workable=not fails,
                   **({"forced_test": forced} if forced else {}))
@@ -2430,6 +2646,26 @@ class J2Run:
         failed = [f"workflow {w['id']} {w['name']} failed (envelope limits)" for w in self.workflows
                   if w["status"] == "failed" and w["cycle"] == self.cycle]
         self._handoff("identity", kind="audit", why=f"Failed workflows this cycle: {failed}" if failed else "")
+
+    def _audit_rubric(self, rows, measured):
+        """One result per rubric item. Missing, or a PASS without evidence, is BLOCKED_BY_EVIDENCE; an item code
+        measured as failing (contrast, hierarchy, tap targets, alt text) is NEEDS_REVISION whatever Audit said."""
+        by = {str(x.get("id")).upper(): x for x in rows if isinstance(x, dict)}
+        out = []
+        for rid, crit in RUBRIC:
+            x = by.get(rid) or {}
+            verdict, note = str(x.get("verdict") or "").upper(), str(x.get("evidence") or "").strip()
+            if not x:
+                verdict, note = "BLOCKED_BY_EVIDENCE", "Audit filed no result for this rubric item."
+            elif verdict in ("PASS", "PASS_WITH_WARNING") and not note:
+                verdict, note = "BLOCKED_BY_EVIDENCE", "Marked PASS with no evidence."
+            if measured.get(rid):
+                if verdict in ("PASS", "PASS_WITH_WARNING"):
+                    self._event("audit", "invalid_move", f"{rid} passed although code measured: {measured[rid][0]}")
+                verdict, note = "NEEDS_REVISION", "Measured by code: " + "; ".join(measured[rid])
+            out.append({"id": rid, "item": rid, "criterion": crit, "verdict": verdict, "note": note, "rubric": True,
+                        "severity": "medium", "pass": verdict in ("PASS", "PASS_WITH_WARNING")})
+        return out
 
     def _force_fail(self, results):
         """J2_FORCE_AUDIT_FAIL=<item>: a test switch for live runs. In cycle 1 only (Audit's first check), the item's
@@ -2456,12 +2692,56 @@ class J2Run:
                   warning=True, test=True)
         return n
 
+    def _save_playbook(self):
+        """J2.h learns plans: a run that ended Done leaves a playbook for its kind of business. Code records what
+        happened (workflows in build order, costs, what failed and what fixed it, the measured outcome); Adaptation
+        writes the reusable part (sections, mistakes to avoid, advice). One per run; a later Done replaces it."""
+        g = self.goal or {}
+        built = sorted((w for w in self.workflows if w["status"] == "done"), key=lambda w: w.get("version", 0))
+        fixed = []
+        for prev, cur in zip(self.audits, self.audits[1:]):
+            now_ok = {r["criterion"] for r in cur["results"] + cur.get("rubric", []) if r["pass"]}
+            ran = [w["name"] for w in self.workflows if prev["version"] < w.get("version", 0) <= cur["version"]]
+            fixed += [{"problem": f"{r['criterion']}: {r.get('note')}", "fixed_by": ran} for r in
+                      prev["results"] + prev.get("rubric", []) if not r["pass"] and r["criterion"] in now_ok and ran]
+        first = self.audits[0] if self.audits else None
+        outcome = {"cycles": self.cycle, "audits": len(self.audits), "ai_calls": self.calls,
+                   "first_pass_audit": bool(first) and not workable(first), "budget_used": self.spent,
+                   "change_requests": [m["text"] for m in self.chat if m["who"] == "user" and m.get("change")]}
+
+        def mock():
+            return json.dumps({"say": f"Playbook saved for a {g.get('business_type') or 'business'} site.",
+                               "sections": [w["name"] for w in built], "watch_out": [x["problem"] for x in fixed][:5],
+                               "advice": "Build the scaffold and style guide first, then the main sections."})
+        r = self.call("adaptation", '{"say": str (one line for the chat), "sections": [str] (the sections a site for this '
+                      'kind of business needs, in build order, named generally), "watch_out": [str] (what failed and '
+                      'what fixed it, one line each, reusable on another site), "advice": str (one or two sentences for '
+                      'the next run of this kind)}',
+                      f"THE RUN ENDED DONE. Write the playbook for a {g.get('business_type') or 'business'} site.\n"
+                      f"WORKFLOWS IN BUILD ORDER: {json.dumps([{k: w.get(k) for k in ('name', 'purpose', 'cost', 'cycle')} for w in built], ensure_ascii=False)}"
+                      f"\nWHAT FAILED AND WHAT FIXED IT (from Audit): {json.dumps(fixed, ensure_ascii=False)}\n"
+                      f"OUTCOME (measured by code): {json.dumps(outcome, ensure_ascii=False)}", mock)
+        pb = {"id": f"P-{self.run_id}", "run": self.run_id, "t": time.strftime("%Y-%m-%d %H:%M:%S"),
+              "business_type": str(g.get("business_type") or "business").lower(), "brief": self.request[:300],
+              "visitor_needs": g.get("visitor_needs") or [], "sections": r.get("sections") or [w["name"] for w in built],
+              "build_order": [w["name"] for w in built],
+              "workflows": [{k: w.get(k) for k in ("name", "cost", "cycle", "status", "revises")} for w in self.workflows],
+              "costs": {"used": self.spent, "budget": self.budget}, "what_failed": fixed,
+              "watch_out": r.get("watch_out") or [], "advice": r.get("advice") or "", "outcome": outcome,
+              **({"test": True} if self.force_fail else {}),
+              **({"used_playbook": self.playbooks_used[0]["playbook"]} if self.playbooks_used else {})}
+        save_playbook(pb)
+        self.playbook_saved = pb["id"]
+        self.agent_turns["adaptation"] = self.agent_turns.get("adaptation", 0) + 1
+        self._say("adaptation", (r.get("say") or "Playbook saved.") + f" Saved {pb['id']} ({pb['business_type']}).", None,
+                  None, act="PLAYBOOK", playbook=pb["id"])
+
     def _learn(self, prev, cur):
         """J2.h learns: Audit confirmed a fix worked (a problem in the previous audit is gone, and a workflow ran in
         between), so Adaptation writes a lesson (problem, cause, fix) and code saves it to memory/lessons.jsonl."""
-        now_ok = {r["criterion"] for r in cur["results"] if r["verdict"] in ("PASS", "PASS_WITH_WARNING")}
+        now_ok = {r["criterion"] for r in cur["results"] + cur.get("rubric", []) if r["verdict"] in ("PASS", "PASS_WITH_WARNING")}
         fixed = [{"id": r["id"], "criterion": r["criterion"], "verdict": r["verdict"], "note": r.get("note")}
-                 for r in prev["results"] if not r["pass"] and r["criterion"] in now_ok]
+                 for r in prev["results"] + prev.get("rubric", []) if not r["pass"] and r["criterion"] in now_ok]
         test = any(r.get("forced_test") for r in prev["results"] if r["criterion"] in now_ok)   # kept out of the prompt
         gone = set(j2_check.problems(prev.get("mechanical") or {})) - set(j2_check.problems(cur.get("mechanical") or {}))
         fixed += [{"id": "mechanical", "criterion": p, "verdict": "render check", "note": p} for p in sorted(gone)
@@ -2515,6 +2795,7 @@ class J2Run:
                    "pass": sum(r["verdict"].upper() == "PASS" for r in a["results"]),
                    "warn": sum(r["verdict"].upper() == "PASS_WITH_WARNING" for r in a["results"]),
                    "fail": sum(not r["pass"] for r in a["results"]),
+                   "rubric_fail": sum(not r["pass"] for r in a.get("rubric", [])),
                    "mechanical": j2_check.problems(a.get("mechanical") or {}),
                    "mechanical_ran": bool((a.get("mechanical") or {}).get("available"))} for a in self.audits]
         cs = self.conflicts
@@ -2581,7 +2862,8 @@ class J2Run:
                       if e["type"] == "hold"],
             "audits": [{"cycle": a["cycle"], "version": a["version"], "all_pass": a["all_pass"],
                         "verdicts": [{"id": r.get("id"), "item": r.get("item"), "verdict": r.get("verdict")}
-                                     for r in a["results"] + a.get("extra_issues", [])]} for a in self.audits],
+                                     for r in a["results"] + a.get("rubric", []) + a.get("extra_issues", [])]}
+                       for a in self.audits],
             "site_versions": len(self.sites),
             "workable": workable(last) if last else None,
             "to_be_confirmed": (self.goal or {}).get("to_be_confirmed") or [],
@@ -2591,6 +2873,9 @@ class J2Run:
                                  "retries": w["retries_used"]} for w in self.workflows],
             "limits_hit": [e["detail"] for e in self.events if e["type"] == "limit"],
             "lessons": {"memory": self.memory, "saved": [x["id"] for x in self.lessons_saved], "used": self.lessons_used},
+            "playbooks": {"saved": self.playbook_saved, "used": self.playbooks_used},
+            "business_type": (self.goal or {}).get("business_type"), "style_guide": bool(self.style),
+            "rubric": [{"id": r["id"], "pass": r["pass"], "verdict": r["verdict"]} for r in (last or {}).get("rubric", [])],
             "done_when": [{"item": i, "criterion": c,
                            "pass": next((r["pass"] for r in (last or {}).get("results", []) if r.get("item") == i), None)}
                           for i, c in enumerate((self.goal or {}).get("done_when") or [], 1)],
