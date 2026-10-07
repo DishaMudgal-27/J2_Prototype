@@ -133,7 +133,7 @@ Default budget is 100 if you don't set it.
 **Budget:** 120
 
 **Brief:**
-> Brew Lab, Indiranagar, Bengaluru. One-page site with menu and prices, hours, location and pre-order for pickup. Done means: all of that works on a phone AND the page includes our exact address "100 Feet Road, Indiranagar, Bengaluru 560038" AND the phone number +91 80 4000 2468.
+> Brew Lab, Indiranagar, Bengaluru. One-page site with menu and prices, hours, location and pre-order for pickup. Done means: all of that works on a phone AND the page includes our exact address "100 Feet Road, Indiranagar, Bengaluru 560038" AND the phone number +91 00000 11111.
 
 **Expected path:** J2.g Passed (if Audit misses the exact address or phone) → J2.h No → J2.b → … → J2.h Yes
 

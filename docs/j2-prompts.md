@@ -133,7 +133,7 @@ J2_BUDGET=120 STUDIO_PROVIDER=claude-cli J2_DELAY=0 python3 j2_server.py
 ```
 Brief:
 ```text
-Brew Lab, Indiranagar, Bengaluru. One-page site with menu and prices, hours, location and pre-order for pickup. Done means: all of that works on a phone AND the page includes our exact address "100 Feet Road, Indiranagar, Bengaluru 560038" AND the phone number +91 80 4000 2468.
+Brew Lab, Indiranagar, Bengaluru. One-page site with menu and prices, hours, location and pre-order for pickup. Done means: all of that works on a phone AND the page includes our exact address "100 Feet Road, Indiranagar, Bengaluru 560038" AND the phone number +91 00000 11111.
 ```
 
 ---
