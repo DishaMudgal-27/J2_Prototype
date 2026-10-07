@@ -1,0 +1,10 @@
+.env
+.env.*
+.venv/
+runs/
+memory/
+_backup/
+projects/
+__pycache__/
+*.pyc
+.DS_Store
