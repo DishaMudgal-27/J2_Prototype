@@ -369,11 +369,12 @@ def clear_lessons():
 WORD = re.compile(r"[a-z]{4,}")
 
 
-def relevant_lessons(lessons, text, n=MAX_LESSONS):
-    """The n lessons sharing the most words with the current gap; newest first on a tie.
+def relevant_lessons(lessons, text, n=MAX_LESSONS, include_test=False):
+    """The n lessons sharing the most words with the current gap; newest first on a tie. Test lessons (from a
+    J2_FORCE_AUDIT_FAIL run) are left out unless include_test (J2_MEMORY_TEST_LESSONS=1, demo runs only).
     ponytail: word overlap, swap for embeddings if the lesson file grows past a few hundred lines."""
     want = set(WORD.findall(text.lower()))
-    lessons = [x for x in lessons if not x.get("test")]     # lessons from a J2_FORCE_AUDIT_FAIL run aren't reused
+    lessons = [x for x in lessons if include_test or not x.get("test")]
     scored = [(len(want & set(WORD.findall(" ".join(str(x.get(k, "")) for k in ("problem", "cause", "fix")).lower()))),
                i, x) for i, x in enumerate(lessons)]
     return [x for sc, i, x in sorted(scored, key=lambda t: (-t[0], -t[1])) if sc > 0][:n]
@@ -409,6 +410,9 @@ def lanes(chat, workflows, thinking, turn, status, paused, step, write_lock):
             lane.update(status="waiting", on="Requester", doing=PAUSES.get(paused["kind"], ""))
         elif live and nxt and nxt not in (fn, "user") and not answered:
             lane.update(status="waiting", on=NAMES.get(nxt, nxt))
+        tl = [x["lesson_used"] for x in chat if x["who"] == fn and x.get("lesson_test")]
+        if tl:
+            lane["test_lesson"] = tl[-1]
         if w:
             env = w.get("envelope") or {}
             lane["progress"] = {"workflow": w["name"], "section": w.get("section"), "workflow_status": w["status"],
@@ -488,7 +492,7 @@ def saved_snapshot(name, since=0):
             "audits": audits, "versions": versions, "cycle": s.get("cycles") or 0, "calls": s.get("ai_calls") or len(calls),
             "error": None, "done": True, "turn": None, "cycle_turns": 0, "max_turns": MAX_TURNS, "paused": None,
             "mock": head.get("mock"), "model": head.get("model"), "fixes": head.get("j2_fixes", 0), "placeholders": [],
-            "force_audit_fail": head.get("force_audit_fail"),
+            "force_audit_fail": head.get("force_audit_fail"), "test_lessons": bool(head.get("test_lessons")),
             "report": _read(d, "report.json"), "outcome": s.get("outcome"),
             "sections": [{"id": k, "owner": x["owner"], "workflow": x.get("workflow"),
                           "bytes": len((x["head"] + x["body"]).encode("utf-8"))} for k, x in sections.items()],
@@ -532,6 +536,7 @@ class J2Run:
         # Test switch, off unless set: in cycle 1, Audit's result for this done-when item is forced to NEEDS_REVISION
         self.force_fail = as_int(os.getenv("J2_FORCE_AUDIT_FAIL"), 0) if os.getenv("J2_FORCE_AUDIT_FAIL") else 0
         self.forced = False
+        self.test_lessons = os.getenv("J2_MEMORY_TEST_LESSONS") == "1"   # demo only: J2.b may read test lessons
         self.p_refused = {}         # workflow name -> why: what Priority refused in the current negotiation
         self.rejections = []        # every validator rejection, with its exact reason
         self.events, self.agent_turns, self.report, self.started = [], {}, None, None   # for the run report
@@ -562,7 +567,7 @@ class J2Run:
                 "paused": ({k: self.paused[k] for k in ("kind", "questions", "msg")}
                            | {"label": PAUSES.get(self.paused["kind"], "")}) if self.paused else None,
                 "mock": llm.MOCK, "model": None if llm.MOCK else llm.MODEL, "fixes": int(self.fixes),
-                "force_audit_fail": self.force_fail or None,
+                "force_audit_fail": self.force_fail or None, "test_lessons": self.test_lessons,
                 "placeholders": self._placeholders(), "report": self.report,
                 "sections": [{"id": k, "owner": x["owner"], "workflow": x.get("workflow"),
                               "bytes": len((x["head"] + x["body"]).encode("utf-8"))} for k, x in self.sections.items()],
@@ -615,6 +620,7 @@ class J2Run:
             if m["id"] == 1:   # first line of the file: which mode and model produced this run
                 f.write(json.dumps({"meta": True, "run": self.run_id, "j2_fixes": int(self.fixes),
                                     "force_audit_fail": self.force_fail or None,
+                                    "test_lessons": self.test_lessons or None,
                                     "provider": None if llm.MOCK else llm.PROVIDER, "model": None if llm.MOCK else llm.MODEL,
                                     "mock": llm.MOCK}) + "\n")
             f.write(json.dumps(m, ensure_ascii=False) + "\n")
@@ -1629,9 +1635,10 @@ class J2Run:
                  for r in (last["results"] + last.get("extra_issues", []) if last else []) if not r.get("pass")]
         held = [{"id": w["id"], "name": w["name"]} for w in self.workflows if w["status"] == "held"]
         lessons = relevant_lessons(load_lessons(), " ".join([str(h.get("why") or ""), json.dumps(fails),
-                                                             json.dumps((self.goal or {}).get("done_when"))])) \
-            if self.memory else []
-        offered = [{k: x.get(k) for k in ("id", "problem", "cause", "fix")} for x in lessons]
+                                                             json.dumps((self.goal or {}).get("done_when"))]),
+                                   include_test=self.test_lessons) if self.memory else []
+        offered = [{k: x.get(k) for k in ("id", "problem", "cause", "fix", "test") if x.get(k) is not None}
+                   for x in lessons]
 
         def mock_plain():
             if self.feedback:
@@ -1699,7 +1706,8 @@ class J2Run:
                       "(STATE.site_sections): to change what's inside an earlier workflow's section, set revises to that "
                       "workflow's id; otherwise the workflow adds a new section."
                       + (f"\nLESSONS FROM EARLIER WORK (most relevant first): {json.dumps(offered, ensure_ascii=False)}\n"
-                         "If one applies, use it, set lesson_used to its id and say in one clause which one you used."
+                         "If one applies, use it, set lesson_used to its id and say in one clause which one you used. "
+                         "A lesson marked test came from a forced test failure; if you use one, call it a test lesson."
                          if offered else "") + (" Price every workflow with rate-card parts (see STATE.rate_card); its cost is "
                                       "fixed by them." if RATES else ""), mock)
         act = str(r.get("act", "")).upper()
@@ -1729,11 +1737,18 @@ class J2Run:
                                 "priority")
         used = str(r.get("lesson_used") or "")
         used = used if used in {x["id"] for x in offered} else None
+        used_test = bool(used and next(x for x in offered if x["id"] == used).get("test"))
         if used:
-            self.lessons_used.append({"cycle": self.cycle, "lesson": used, "offered": [x["id"] for x in offered]})
+            self.lessons_used.append({"cycle": self.cycle, "lesson": used, "offered": [x["id"] for x in offered],
+                                      **({"test": True} if used_test else {})})
         self.a_msg = self._say("adaptation", r.get("say", ""), nxt, note or note2, proposal=wfs, cycle=self.cycle,
-                               **({"lesson_used": used} if used else {}),
+                               **({"lesson_used": used} if used else {}), **({"lesson_test": True} if used_test else {}),
                                **({"lessons_offered": [x["id"] for x in offered]} if offered else {}))
+        if used_test:
+            self._event("adaptation", "test_lesson", f"used test lesson {used}")
+            self.post("system", f"TEST LESSON: Adaptation used {used}, a lesson from a forced test failure "
+                                "(J2_MEMORY_TEST_LESSONS=1, demo runs only). It is not evidence from a real fix.",
+                      warning=True, test=True)
         if not wfs:
             # Audit re-checks first, so J2.h never judges a stale audit (e.g. after the Requester confirmed a fact).
             self.post("system", "Adaptation proposed no workflows, so there is nothing to fund or register. Audit "
@@ -2510,7 +2525,7 @@ class J2Run:
         last = self.audits[-1] if self.audits else None
         self.save("summary.json", {
             "run": self.run_id, "j2_fixes": int(self.fixes), "provider": None if llm.MOCK else llm.PROVIDER,
-            "force_audit_fail": self.force_fail or None,
+            "force_audit_fail": self.force_fail or None, "test_lessons": self.test_lessons,
             "model": None if llm.MOCK else llm.MODEL, "mock": llm.MOCK, "brief": self.request,
             "change_requests": [m["text"] for m in self.chat if m["who"] == "user" and m.get("change")],
             "status": status, "outcome": o,

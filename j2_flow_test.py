@@ -15,6 +15,7 @@ C. Workable loop: the same failure twice, the cycle limit and to-be-confirmed fa
 D. Memory: a confirmed fix saves a lesson, the next run's Adaptation uses it, J2_MEMORY=0 reads and writes nothing.
 E. The page: Agents and Lessons tabs, the state they read, and the clear-memory endpoint.
 F. J2_FORCE_AUDIT_FAIL=<item>: a forced cycle-1 failure, then a real fix, a real re-check and a saved lesson.
+   J2_MEMORY_TEST_LESSONS=1 lets J2.b read test lessons (off by default), flagged in the chat and the lanes.
 Runs are written to runs/ (or J2_RUNS_DIR); each ended run has summary.json. Memory is off (J2_MEMORY=0) except in
 the memory test, which uses its own lessons file.
 """
@@ -434,6 +435,42 @@ def forced_fail():
         os.environ.pop("J2_FORCE_AUDIT_FAIL", None)
 
 
+def test_lessons():
+    """J2_MEMORY_TEST_LESSONS=1 (demo only) lets Adaptation read test lessons at J2.b; by default they're filtered.
+    A used test lesson is flagged in the chat (tag + TEST LESSON note) and on Adaptation's lane."""
+    tmp = tempfile.mkdtemp()
+    old, j2.MEMORY_FILE = j2.MEMORY_FILE, os.path.join(tmp, "lessons.jsonl")
+
+    def only_test_lesson():
+        with open(j2.MEMORY_FILE, "w") as f:
+            f.write(json.dumps({"id": "L-test-1", "test": True, "problem": "Layout works on a phone: no viewport meta "
+                                "tag", "cause": "forced test failure", "fix": "Viewport fix", "run": "x"}) + "\n")
+    only_test_lesson()
+    os.environ["J2_MEMORY"] = "1"
+    try:
+        run = j2.J2Run()                                    # default: the test lesson is never offered
+        say(run, BREW_LAB)
+        add_budget_if_asked(run)
+        assert not run.test_lessons and not any(m.get("lessons_offered") for m in run.chat), "test lesson offered"
+        os.environ["J2_MEMORY_TEST_LESSONS"] = "1"
+        only_test_lesson()                                  # drop the real lesson the first run saved
+        run = j2.J2Run()
+        say(run, BREW_LAB)
+        add_budget_if_asked(run)
+        m = next(m for m in run.chat if m.get("lesson_used"))
+        assert m["lesson_used"] == "L-test-1" and m["lesson_test"] and m["who"] == "adaptation", m
+        assert any(x.get("test") and x["text"].startswith("TEST LESSON: Adaptation used L-test-1") for x in run.chat)
+        snap = run.snapshot()
+        lane = next(x for x in snap["lanes"] if x["id"] == "adaptation")
+        assert snap["test_lessons"] and lane["test_lesson"] == "L-test-1", lane
+        s = summary(run)
+        assert s["test_lessons"] and s["lessons"]["used"][0]["test"], s["lessons"]
+    finally:
+        j2.MEMORY_FILE = old
+        os.environ["J2_MEMORY"] = "0"
+        os.environ.pop("J2_MEMORY_TEST_LESSONS", None)
+
+
 def page():
     """E: the behind-the-scenes view. Lanes with live status, a detail view per agent message (inputs, decision,
     reason, cost), the timeline's J2 steps, workflow-agent progress, saved runs opened afterwards, no secrets."""
@@ -532,7 +569,8 @@ if __name__ == "__main__":
         bargain_time()
         memory()
         forced_fail()
-        print(f"J2_FIXES={mode}: B workflow agents, C workable loop and limits, D memory, F forced audit failure ok")
+        test_lessons()
+        print(f"J2_FIXES={mode}: B workflow agents, C workable loop and limits, D memory, F forced audit failure and test lessons ok")
     ruling_over_budget()
     redirect()
     workable_unit()

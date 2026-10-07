@@ -107,6 +107,7 @@ pre{white-space:pre-wrap;word-wrap:break-word;font:12px/1.45 var(--mono);backgro
   <span class="meta" id="mode"></span>
   <span class="warn" id="fixes"></span>
   <span class="warn" id="forced" hidden style="color:var(--bad)"></span>
+  <span class="warn" id="testles" hidden style="color:var(--bad)">J2_MEMORY_TEST_LESSONS=1: test lessons can be used (demo)</span>
   <span class="warn" id="ph" hidden></span>
   <span class="lock" id="lock"></span>
   <span class="meta" id="mem"></span>
@@ -178,7 +179,8 @@ function addMsg(m){
   if (m.envelope) t += `<span class="tag ${m.envelope==="allowed"?"ok":"bad"}">envelope: ${m.envelope}</span>`;
   if (m.attempt) t += `<span class="tag ${m.agree?"ok":"bad"}">${m.agree?"agrees":"holds position"} · attempt ${m.attempt}/4</span>`;
   if (m.next && !m.to_user) t += `<span class="tag">→ ${esc(who(m.next)[0])}</span>`;
-  if (m.lesson_used) t += `<span class="tag ok">used lesson ${esc(m.lesson_used)}</span>`;
+  if (m.lesson_used) t += m.lesson_test ? `<span class="tag bad">used TEST LESSON ${esc(m.lesson_used)} (from a forced failure, demo only)</span>`
+    : `<span class="tag ok">used lesson ${esc(m.lesson_used)}</span>`;
   if (m.lessons) t += `<span class="tag ok">saved ${esc(m.lessons.join(", "))}</span>`;
   if (m.section) t += `<span class="tag">section ${esc(m.section)}</span>`;
   if (m.workable !== undefined) t += `<span class="tag ${m.workable?"ok":"bad"}">${m.workable?"workable":"not workable"}</span>`;
@@ -267,6 +269,7 @@ function renderLanes(s){
   return `<h2>Agents · live status</h2>` + s.lanes.map(l => { const p = l.progress;
     return `<button type="button" class="lane" data-msg="${l.last_msg ?? ""}" style="--c:${col(l.id)}">
       <b>${esc(l.name)}</b> <span class="pill st-${l.status}">${l.status}${l.on ? " on " + esc(l.on) : ""}</span>
+      ${l.test_lesson ? `<span class="pill" style="color:var(--bad)">test lesson ${esc(l.test_lesson)}</span>` : ""}
       <span class="d">${esc(l.doing || ROLE[l.id] || "")}</span>
       ${p ? `<span class="pg">section ${esc(p.section)} · attempts ${p.attempts}/${p.attempt_limit} · retries ${p.retries}/${p.retry_limit}${p.write_lock ? " · write lock" : ""}<br>last check: ${esc(p.last_check || "not run yet")}</span>` : ""}
     </button>`; }).join("");
@@ -326,7 +329,7 @@ async function openDetail(id){
 function renderLessons(s){
   if (!s.memory) return `<p class="empty">Memory is off (J2_MEMORY=0): no lessons are read or saved in this run.</p>`;
   const used = new Set(s.lessons_used.map(x => x.lesson)), saved = new Set(s.lessons_saved);
-  const rows = s.lessons.slice().reverse().map(l => `<tr><td><b>${esc(l.id)}</b>${saved.has(l.id) ? ' <span class="pill done">new this run</span>' : ""}${used.has(l.id) ? ' <span class="pill running">used this run</span>' : ""}<br><span class="empty">${esc(l.t || "")}</span></td>
+  const rows = s.lessons.slice().reverse().map(l => `<tr><td><b>${esc(l.id)}</b>${saved.has(l.id) ? ' <span class="pill done">new this run</span>' : ""}${used.has(l.id) ? ' <span class="pill running">used this run</span>' : ""}${l.test ? ' <span class="pill" style="color:var(--bad)">test lesson</span>' : ""}<br><span class="empty">${esc(l.t || "")}</span></td>
     <td>${esc(l.problem)}</td><td>${esc(l.cause)}</td><td>${esc(l.fix)}</td><td>${esc(l.run)}</td></tr>`).join("");
   return `<h3>Lessons (${s.lessons.length}) <button type="button" class="ghost" id="clear-lessons">Clear memory</button></h3>
     <p class="empty">Adaptation saves a lesson when Audit confirms a fix worked, and reads the 5 most relevant at J2.b. Stored in memory/lessons.jsonl.</p>
@@ -391,6 +394,7 @@ async function poll(){
     $("mode").textContent = (s.mock ? "mock functions" : `model: ${s.model}`) + ` · ${s.calls} AI calls · cycle ${s.cycle}`;
     $("fixes").textContent = s.fixes ? "J2_FIXES=1 (fixes)" : "J2_FIXES=0 (baseline, as in the diagram)";
     $("forced").hidden = !s.force_audit_fail;
+    $("testles").hidden = !s.test_lessons;
     $("forced").textContent = `TEST: J2_FORCE_AUDIT_FAIL=${s.force_audit_fail} (cycle 1 Audit result forced)`;
     $("lock").textContent = s.write_lock ? `write lock: ${who(s.write_lock)[0]}` : "";
     $("mem").textContent = s.memory ? `memory on · ${s.lessons.length} lesson(s)` : "memory off";

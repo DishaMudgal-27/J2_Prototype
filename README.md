@@ -251,6 +251,7 @@ Settings:
 | `J2_MAX_TURNS` | 30 | Agent turns per cycle |
 | `J2_RATES` | 1 | 0 turns the rate card off |
 | `J2_FORCE_AUDIT_FAIL` | off | Test switch, see below |
+| `J2_MEMORY_TEST_LESSONS` | off | 1 lets J2.b read test lessons (demo runs only), see below |
 
 **Test switch for live runs: `J2_FORCE_AUDIT_FAIL=<done-when item number>`.** It is off unless the variable is
 set. In cycle 1 only (Audit's first check), Audit's result for that item is overridden to `NEEDS_REVISION` with
@@ -260,8 +261,15 @@ the note "forced test failure". The note keeps Audit's own verdict. The chat sho
 - a red badge in the header (also when the run is opened later as a saved run)
 
 Everything after runs normally: Identity sends it back, Adaptation proposes a fix, the workflow agent runs it,
-and Audit re-checks for real. If the fix passes, the lesson is saved. It is marked `"test": true` and is never
-read back at J2.b, so a forced failure can't steer real runs. An item number the charter doesn't have is
+and Audit re-checks for real. If the fix passes, the lesson is saved. It is marked `"test": true` and by
+default is never read back at J2.b, so a forced failure can't steer real runs.
+
+`J2_MEMORY_TEST_LESSONS=1` (opt-in, for demo runs only) lets Adaptation read test lessons at J2.b, so a demo can
+show a lesson being saved in one run and used in the next. When a test lesson is used, it's flagged in:
+- the chat: a red "used TEST LESSON" tag on Adaptation's message and a "TEST LESSON" system note
+- the Agents panel: a "test lesson" badge on Adaptation's lane
+- the header badge and the Lessons tab
+- `summary.json` (`test_lessons`, and `"test": true` on the lesson used) An item number the charter doesn't have is
 ignored, with a warning. The switch is recorded in `chat.jsonl` (first line) and in `summary.json`.
 
 ```bash
@@ -300,7 +308,8 @@ python j2_check.py site.html      # the render check on any page
   bound, out of budget (add budget), `workable()` cases
 - D: a lesson saved, then used by the next run; `J2_MEMORY=0` reads and writes nothing; clear
 - F: `J2_FORCE_AUDIT_FAIL`: forced once in cycle 1 and marked as a test, real fix and re-check, test lesson saved
-  and not reused, an unknown item ignored, off when unset
+  and not reused, an unknown item ignored, off when unset. `J2_MEMORY_TEST_LESSONS`: test lessons filtered by
+  default; with the opt-in one is used and flagged in the chat, the lane and `summary.json`
 - E: the page's tabs, lanes and their statuses, call links with reasons and no invented tokens, the full call
   record, saved runs opened read-only, path tricks refused, a fake key redacted, clear memory
 
