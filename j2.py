@@ -1570,8 +1570,13 @@ class J2Run:
                  and x.get("criterion") not in tbc]
         recent = self.audits[max(self.fail_floor, len(self.audits) - 2):]
         same = len(recent) == 2 and failure_signature(recent[0]) == failure_signature(recent[1]) and fails
-        only_tbc = fails and last and all(r["pass"] or r["verdict"] == "TO_BE_CONFIRMED" for r in last["results"]) \
-            and not j2_check.problems(last.get("mechanical") or {}) and (last.get("mechanical") or {}).get("available")
+        # Only the Requester can help when every remaining failure is a to-be-confirmed item: no other done-when item,
+        # no rubric item, no render problem. (Checking done-when alone sent a lone rubric failure to the Requester as
+        # a limit question: runs/j2-20261007-184146.) Anything else the department can fix loops back to J2.b.
+        open_items = [r for r in (last or {}).get("results", []) + (last or {}).get("rubric", []) if not r["pass"]]
+        only_tbc = bool(fails and open_items and all(r["verdict"] == "TO_BE_CONFIRMED" for r in open_items)
+                        and not j2_check.problems(last.get("mechanical") or {})
+                        and (last.get("mechanical") or {}).get("available"))
         if fails and not facts and (same or only_tbc):
             return self._identity_limit({"reason": "Only you can close what's left: these done-when items are to be "
                                                    "confirmed." if only_tbc else
@@ -1837,7 +1842,8 @@ class J2Run:
                                    "act": "PROPOSE", "next": "Priority",
                                    "workflows": [{"name": "Requester change", "goal_gap": self.feedback, "parts": ["fix"],
                                                   "outputs": ["index.html"], "completion_check": "Change visible"}]})
-            phone = next((f for f in fails if "phone" in str(f["criterion"]).lower()), None)
+            phone = next((f for f in fails if "phone" in str(f["criterion"]).lower()      # the done-when item, not R-6
+                          and not str(f["id"]).startswith("R-")), None)
             if phone and self._can_dispute("audit", phone["id"])[0]:
                 return json.dumps({"say": f"@Audit I disagree with {phone['id']}: the layout uses fluid widths and the "
                                           "mechanical check found no overflow at 360px.", "act": "DISPUTE",

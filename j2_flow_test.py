@@ -783,6 +783,38 @@ def rubric_loop():
     assert any("DESIGN AND USABILITY RUBRIC" in c["prompt"] for c in calls_of(run) if c["fn"] == "audit")
 
 
+def lone_rubric_failure():
+    """Bug from runs/j2-20261007-184146: the first audit's only failure was R-6 (tap targets), with budget left in
+    cycle 1, and the run paused with a limit question. A normal failure with budget left must loop back to J2.b
+    without asking the Requester: Adaptation proposes the fix, it runs, Audit re-checks, Done, no limit hit."""
+    if not j2.j2_check.find_chrome():
+        print("lone rubric failure test skipped: Chrome not found")
+        return
+    run = j2.J2Run()
+    run.budget = 150
+    orig, done = run.call, set()
+
+    def call(fn, fmt, task, mock, **k):
+        raw = orig(fn, fmt, task, mock, **k)
+        if fn == "W-1" and fn not in done:          # the scaffold already has the viewport tag: phones pass
+            done.add(fn)
+            raw = raw.replace("```head\n", '```head\n<meta name="viewport" content="width=device-width, initial-scale=1">\n', 1)
+        if fn == "W-2" and fn not in done:          # and one tap target is too small: R-6 is the only failure
+            done.add(fn)
+            raw = raw.replace("```section\n", '```section\n<a href="https://example.com" style="display:inline-block;'
+                                              'font-size:10px">Call us</a>\n', 1)
+        return raw
+    run.call = call
+    say(run, BREW_LAB)
+    first = run.audits[0]
+    fails = j2.workable(first)
+    assert len(fails) == 1 and fails[0].startswith("design rubric R-6"), fails   # the bug's exact situation
+    assert not any(e["type"] == "limit" for e in run.events), [e["detail"] for e in run.events if e["type"] == "limit"]
+    assert not any(m.get("pause") == "limit" for m in run.chat), "asked the Requester a limit question"
+    assert any(w["name"] == "Fix item R-6" and w["status"] == "done" for w in run.workflows), run.workflows
+    assert run.outcome.startswith("Done") and summary(run)["limits_hit"] == [], run.outcome
+
+
 def intake_needs():
     """H: at J2.a Identity proposes what this kind of business's visitors need and asks the Requester to confirm."""
     run = j2.J2Run()
@@ -975,6 +1007,7 @@ if __name__ == "__main__":
         test_lessons()
         style_guide()
         rubric_loop()
+        lone_rubric_failure()
         intake_needs()
         playbooks()
         summary_before_review()
