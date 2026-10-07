@@ -187,6 +187,21 @@ are never edited by this code.
    any bound, both final positions go to Identity (J2.d).
 4. **J2.e** The validator registers each agreed workflow and creates its agent, e.g. "W-3 Builder", with the
    workflow's goal, outputs, completion check and envelope.
+
+   **Cost follows the work, not the labels.** Each workflow lists `covers` (the done-when items it builds) and
+   `fixes` (the Audit findings it fixes). The validator rejects a workflow that breaks any of these rules:
+   - It is priced below the rate-card minimum for the items it newly covers. Each item's minimum comes from its
+     kind: a form or ordering item is `form` (15); a filter, search or slider item is `interactive_feature`
+     (10); a viewport or phone-layout item is `styling` (5); anything else is `page_section` (10).
+   - It is a fix (it lists findings, or rewrites an earlier section) without one `fix` part per finding. A fix
+     can't be relabelled as a cheaper part.
+   - It covers nothing but has `page_section` or `form` parts, or it covers nothing and fixes nothing after the
+     first Audit.
+
+   Items an earlier workflow already paid for aren't charged again. Priority sees each proposal's cost per
+   covered item against those minimums and is told to question plans far below them. Each workflow agent is told
+   to build only the items it covers. This came from `runs/j2-20261007-190411`, where 13 items cost 35 at
+   budget 40: everything was bundled into two workflows, and a fix (8) was relabelled as styling (5).
 5. **J2.f** Coordination schedules and holds the write lock. Priority checks the envelope. The workflow's agent
    writes its marked section (`<!-- J2:W-3 start (owner W-3) -->` ... `end`, plus an optional head block).
    **Style guide:** the first workflow that runs also writes the style guide for this brief before its section
@@ -393,6 +408,9 @@ python j2_check.py site.html      # the render check on any page
   "after the team" or other internals. A question with buttons appears once. The phone toggle appears only once
   a site exists. The ready card has its three buttons. Also checked: the word list (run in node: Audit becomes
   "our checks"), and that every Identity prompt, and no other, carries the plain-language rule
+- I: pricing. A bundled plan (6 items for 20) is rejected while the same work at 65 passes; a fix relabelled as
+  styling is rejected; a fix isn't charged again for items already paid for; Priority's prompt carries the cost
+  per item
 - H: J2.a proposes visitor needs for a florist and asks to confirm. The style guide comes first, is retried when
   missing and is followed by every later agent. A planted small tap target fails R-6 by measurement, loops
   back, is fixed and passes. Playbooks are saved at Done with the measured outcome, reused for the same business
@@ -413,6 +431,9 @@ python j2_check.py site.html      # the render check on any page
 - **Audit timing**: Audit runs once the build queue is empty, not after every workflow (fewer calls).
 - **"Core" done-when items**: every done-when item counts as core; the charter has no core / optional split.
 - **"Its spend" in J2.c**: our number (8 AI calls), see above.
+- **Item kinds for pricing**: a keyword match on the done-when text. The validator trusts each workflow's
+  `covers` list: an agent could still build items it didn't declare. The workflow agent is told not to, but
+  nothing checks the built page against `covers` yet.
 - **Lesson relevance**: word overlap, not meaning; fine for a small file. Playbooks match on business type
   first, then shared words.
 - **Rubric R-1, R-4, R-5** (styling, main action, navigation) are Audit's judgment on the screenshot. Only R-2,

@@ -171,6 +171,22 @@ def price(w):
     return sum(RATES.get(str(p), 0) for p in parts), unknown
 
 
+# Cost follows the work: each done-when item a workflow covers has a minimum price, the rate-card part that kind of
+# item needs. ponytail: keyword match on the item text; first match wins, else a page section.
+ITEM_KINDS = (("form", r"\bform\b|\border|\bbook(?:ing)?\b|enquir|inquir|appointment|reserv|sign[- ]?up|subscribe"),
+              ("interactive_feature", r"filter|search|sort|slider|carousel|calculator|toggle|\btabs?\b|interactive|animat"),
+              ("styling", r"viewport|mobile|phone|responsive|horizontal scroll|\b360\s*px|\b1280\s*px|\bcolou?rs?\b|\bfonts?\b"),
+              ("page_section", r""))
+
+
+def item_kind(criterion):
+    return next(k for k, pat in ITEM_KINDS if re.search(pat, str(criterion), re.I))
+
+
+def item_min(criterion):
+    return RATES.get(item_kind(criterion), 0)
+
+
 def granted(w):
     """Rate-card price when the rate card is on; otherwise the money Priority granted (envelope.money_limit),
     and Adaptation's estimate only if no limit was given."""
@@ -813,7 +829,10 @@ class J2Run:
                                              for k, x in self.sections.items()],
                            "style_guide": self.style,
                            "rate_card": ({"prices": RATES, "rule": "a workflow costs the sum of its parts' prices; "
-                                          "estimated_resources.money is ignored; list a part once per unit"}
+                                          "estimated_resources.money is ignored; list a part once per unit",
+                                          "item_minimums": [{"item": i, "kind": item_kind(c), "min": item_min(c)}
+                                                            for i, c in enumerate((self.goal or {}).get("done_when") or [], 1)],
+                                          "fix_rule": "one 'fix' part per Audit finding fixed"}
                                          if RATES and not blind else None)}, ensure_ascii=False)
 
     def chat_view(self):
@@ -1804,6 +1823,8 @@ class J2Run:
     # ------------------------------------------------------------------ J2.b / J2.c: Adaptation <-> Priority
     WF_FMT = ('[{"id": str, "name": str, "goal_gap": str, "expected_outcome": str, "outputs": [str], '
               '"completion_check": str, "dependencies": [str], "parts": [rate-card item, repeated for quantity], '
+              '"covers": [int] (the done-when item numbers this workflow builds), "fixes": [str] (the Audit finding ids '
+              'it fixes, e.g. "F-3", "R-6"), '
               '"revises": str|null (registered workflow id whose site section this one rewrites; null adds a new '
               'section), "estimated_resources": {"money": int, "calls": int, "time_minutes": int}}]')
 
@@ -1836,11 +1857,19 @@ class J2Run:
         pb_offer = [{k: x.get(k) for k in ("id", "business_type", "sections", "build_order", "watch_out", "advice",
                                            "outcome", "test") if x.get(k) is not None} for x in pbs]
 
+        crit = (self.goal or {}).get("done_when") or []
+
+        def items(pat, kinds=None, skip=r"$^"):
+            return [i for i, c in enumerate(crit, 1) if re.search(pat, c, re.I) and not re.search(skip, c, re.I)
+                    and (kinds is None or item_kind(c) in kinds)]
+
         def mock_plain():
+            # The mock declares honest covers/fixes: each workflow's parts pay for the items it covers (J2.e checks).
             if self.feedback:
                 return json.dumps({"say": f"@Priority The Requester asked: \"{self.feedback}\". One workflow covers it.",
                                    "act": "PROPOSE", "next": "Priority",
-                                   "workflows": [{"name": "Requester change", "goal_gap": self.feedback, "parts": ["fix"],
+                                   "workflows": [{"name": "Requester change", "goal_gap": self.feedback,
+                                                  "parts": ["page_section"], "covers": [len(crit)],
                                                   "outputs": ["index.html"], "completion_check": "Change visible"}]})
             phone = next((f for f in fails if "phone" in str(f["criterion"]).lower()      # the done-when item, not R-6
                           and not str(f["id"]).startswith("R-")), None)
@@ -1850,6 +1879,7 @@ class J2Run:
                                    "next": "Audit", "dispute": {"with": "Audit", "about": phone["id"],
                                                                 "reason": "Fluid layout, no overflow at 360px"}})
             others = [{"name": f"Fix item {f['item']}", "goal_gap": f["criterion"], "parts": ["fix"], "revises": "W-2",
+                       "fixes": [f["id"]],
                        "outputs": ["index.html"], "completion_check": f["criterion"]} for f in fails
                       if f is not phone and f.get("item") and f.get("verdict") != "TO_BE_CONFIRMED"]
             if phone:
@@ -1857,26 +1887,30 @@ class J2Run:
                                           "meta tag." + (" Plus a fix for each other failing item." if others else ""),
                                    "act": "PROPOSE", "next": "Priority",
                                    "workflows": [{"name": "Viewport fix", "goal_gap": phone["criterion"], "parts": ["fix"],
+                                                  "fixes": [phone["id"]],
                                                   "outputs": ["index.html"],
                                                   "completion_check": "viewport meta tag present"}] + others})
             if others and self.cycle > 1:
                 return json.dumps({"say": "@Priority One fix per failing item.", "act": "PROPOSE", "next": "Priority",
                                    "workflows": others})
             if self.cycle == 1 and not self.workflows:
+                extra = r"bean|farm|loyal|phone"
+                core = [i for i in items(r".", {"page_section"}, extra) if i != 1][:3] + items(r".", {"form"}, extra)[:1]
                 return json.dumps({"say": "@Priority Proposal for cycle 1: scaffold and styling, the charter's core "
                                           "sections, a stories section for warmth, and subtle animations.",
                                    "act": "PROPOSE", "next": "Priority", "workflows": [
                                        {"name": "Scaffold and styling", "goal_gap": "No site exists",
-                                        "parts": ["page_section", "styling"], "outputs": ["index.html"],
+                                        "parts": ["page_section", "styling"], "covers": [1], "outputs": ["index.html"],
                                         "completion_check": "index.html loads"},
                                        {"name": "Core sections", "goal_gap": "Every done-when section",
-                                        "parts": ["page_section", "page_section", "page_section", "form"],
+                                        "parts": ["page_section", "page_section", "page_section", "form"], "covers": core,
                                         "outputs": ["index.html"], "completion_check": "All done-when sections present"},
                                        {"name": "Stories section", "goal_gap": "Warm content: the beans, the farms and "
-                                        "the people behind the cafe", "parts": ["blog_post"] * 3,
+                                        "the people behind the cafe", "parts": ["blog_post"] * 3, "covers": items(r"bean|farm"),
                                         "outputs": ["stories section"], "completion_check": "3 stories visible"},
                                        {"name": "Animations", "goal_gap": "Scroll and hover effects",
                                         "parts": ["interactive_feature", "interactive_feature"], "outputs": ["CSS"],
+                                        "covers": items(r"loyal")[:1],
                                         "completion_check": "Effects run on scroll"}]})
             return json.dumps({"say": "@Priority Nothing left to propose.", "act": "PROPOSE", "next": "Priority",
                                "workflows": []})
@@ -1905,7 +1939,12 @@ class J2Run:
                       "question. If you disagree with an open Audit finding or a Coordination HOLD, DISPUTE it with your "
                       f"reason instead: you and they get {MAX_ATTEMPTS} attempts to settle it before Identity rules. "
                       "Workflows change the site; checking it is Audit's job, so don't propose check, review or report "
-                      "workflows. Each registered workflow gets its own agent that owns one section of the site file "
+                      "workflows. Cost follows the work: list in covers every done-when item a workflow builds; each "
+                      "newly covered item costs at least its rate-card minimum (see STATE.rate_card.item_minimums), so "
+                      "bundling many items into one cheap workflow is rejected. A workflow that fixes Audit findings "
+                      "lists them in fixes and is priced with one 'fix' part per finding, never as a cheaper part. "
+                      "After the first Audit, every workflow must cover an item or fix a finding. "
+                      "Each registered workflow gets its own agent that owns one section of the site file "
                       "(STATE.site_sections): to change what's inside an earlier workflow's section, set revises to that "
                       "workflow's id; otherwise the workflow adds a new section."
                       + (f"\nLESSONS FROM EARLIER WORK (most relevant first): {json.dumps(offered, ensure_ascii=False)}\n"
@@ -2075,6 +2114,9 @@ class J2Run:
                       + next_field(("adaptation", "identity"), f"Adaptation normally; Identity only once {MAX_ATTEMPTS} "
                                    "exchanges are used") + "}",
                       f"ON THE TABLE: {json.dumps(table)} (cost {cost_of(table)}, remaining budget {remaining}). "
+                      f"COST PER DONE-WHEN ITEM: {json.dumps(self._per_item(table), ensure_ascii=False)}. Question any "
+                      "plan whose cost per item is far below the rate-card minimums (many items bundled into one cheap "
+                      "workflow, or a fix priced as a cheaper part): COUNTER or REFUSE with that reason. "
                       f"Exchange {self.exchanges + 1} of {MAX_ATTEMPTS}; after that Identity rules on both final "
                       "positions." + (" Prices are fixed by the rate card: to spend less, remove parts or whole "
                                       "workflows, not the price." if RATES else ""), mock)
@@ -2115,6 +2157,19 @@ class J2Run:
         m = self._say("priority", p.get("say", ""), nxt, note or note2, **meta)
         self._attempt(c, "priority", p.get("say"), f"{dec.upper()}: {brief_list(wfs)}", m, False, self.exchanges)
         self._handoff("adaptation", kind="respond", offer=wfs, decision=dec)
+
+    def _per_item(self, table):
+        """For Priority: each proposed workflow's price against the rate-card minimum for the items it covers."""
+        crit = (self.goal or {}).get("done_when") or []
+        out = []
+        for w in table:
+            covers = self._covers(w)
+            rc = price(w)[0]
+            mins = sum(item_min(crit[i - 1]) for i in covers)
+            out.append({"workflow": w.get("name"), "covers": covers, "fixes": w.get("fixes") or [], "price": rc,
+                        "rate_card_minimum_for_items": mins,
+                        "per_item": round(rc / len(covers), 1) if covers and rc is not None else None})
+        return out
 
     def _track_refused(self, table, offered, dec, when):
         """What Priority refused in this negotiation: everything on a REFUSE, or what a COUNTER left out."""
@@ -2244,6 +2299,8 @@ class J2Run:
         """J2.e, plain code: every proposal is checked before it is registered, including one from an Identity ruling.
         Checks: required fields present, priced from the rate card, nothing Priority refused, cost fits what's left."""
         remaining, registered, refused, defaults = self.budget - self.spent, [], [], []
+        covered = {i for x in self.workflows if x["status"] in ("registered", "held", "running", "done")
+                   for i in x.get("covers") or []}
         for w in norm(agreed):
             c, name = granted(w), w.get("name") or "?"
             missing = [f for f in self.REQUIRED if not (w.get(f) or (f == "goal_gap" and w.get("purpose")))]
@@ -2254,7 +2311,8 @@ class J2Run:
                       else "no rate-card parts, so it has no price" if RATES and rc is None
                       else f"unknown rate-card parts {unknown}; allowed: {', '.join(RATES)}" if unknown
                       else "its cost is 0" if c <= 0
-                      else f"it costs {c}, over the {remaining} left in the budget" if c > remaining else None)
+                      else self._underpriced(w, rc, covered) if RATES
+                      else None) or (f"it costs {c}, over the {remaining} left in the budget" if c > remaining else None)
             if reason:
                 refused.append(self._reject(name, reason))
                 continue
@@ -2268,7 +2326,9 @@ class J2Run:
                     defaults.append(f"{name}: {k}={d}")
             if not RATES and as_int((w.get("envelope") or {}).get("money_limit")) <= 0:
                 defaults.append(f"{name}: no money_limit granted, charged the estimate ({c})")
+            covered |= set(self._covers(w))
             wf = {"id": f"W-{len(self.workflows) + 1}", "proposal_id": w.get("id"), "name": w.get("name", "workflow"),
+                  "covers": self._covers(w), "fixes": [str(f) for f in w.get("fixes") or []],
                   "purpose": w.get("purpose") or w.get("goal_gap", ""), "cost": c, "estimate": w.get("estimate", wf_cost(w)),
                   "envelope": env, "charged": True, "calls_used": 0, "retries_used": 0, "outputs": w.get("outputs"),
                   "completion_check": w.get("completion_check", ""), "dependencies": w.get("dependencies") or [],
@@ -2288,6 +2348,36 @@ class J2Run:
         self._recalc_spent()
         self.save("workflows.json", self.workflows)
         return registered, refused, defaults
+
+    def _covers(self, w):
+        n = len((self.goal or {}).get("done_when") or [])
+        return sorted({as_int(i) for i in w.get("covers") or [] if 1 <= as_int(i) <= n})
+
+    def _underpriced(self, w, rc, covered):
+        """Cost follows the work (J2.e). None when the price holds, else the exact reason:
+        - every newly covered done-when item costs at least its rate-card minimum (bundling can't make items cheaper);
+        - a fix (it lists findings, or rewrites an existing section) has one 'fix' part per finding: a fix can't be
+          relabelled as a cheaper part type;
+        - a workflow with page_section or form parts (the parts that build done-when sections) must list the items it
+          covers; after the first Audit every workflow must cover an item or fix a finding."""
+        crit = (self.goal or {}).get("done_when") or []
+        covers, fixes, parts = self._covers(w), [str(f) for f in w.get("fixes") or []], [str(p) for p in w.get("parts") or []]
+        is_fix = bool(fixes) or bool(w.get("revises"))
+        if not covers and not fixes and not is_fix and (self.audits or {"page_section", "form"} & set(parts)):
+            return ("it covers no done-when item and fixes no Audit finding: list the items it builds in covers, or "
+                    "the findings it fixes in fixes" + (" (page_section and form parts build done-when items, so "
+                                                       "they must say which)" if not self.audits else ""))
+        need_fix = max(1, len(fixes)) if is_fix else 0
+        if parts.count("fix") < need_fix:
+            return (f"a fix is priced as a fix: it needs {need_fix} 'fix' part(s) "
+                    f"({', '.join(fixes) or 'it rewrites ' + str(w.get('revises'))}), but its parts are {parts}")
+        new = [i for i in covers if i not in covered]
+        minimum = sum(item_min(crit[i - 1]) for i in new) + need_fix * RATES.get("fix", 0)
+        if rc < minimum:
+            each = "; ".join(f"item {i} {item_kind(crit[i - 1])} {item_min(crit[i - 1])}" for i in new)
+            return (f"it costs {rc}, below the rate-card minimum of {minimum} for the work it covers ({each}"
+                    + (f"; {need_fix} fix {need_fix * RATES.get('fix', 0)}" if need_fix else "") + ")")
+        return None
 
     def _recalc_spent(self):
         """Budget used = money of every workflow currently charged (held work is released, not charged)."""
@@ -2430,7 +2520,9 @@ class J2Run:
             self.post("system", f"Warning: site v{len(self.sites)} is {len(prev):,} characters. {fn} sees only the "
                                 f"first {SITE_LIMIT:,}, so the end of the file may be lost.", warning=True)
         mine = self.sections.get(sid)
-        brief = {k: w.get(k) for k in ("id", "name", "purpose", "outputs", "completion_check", "envelope", "revises")}
+        brief = {k: w.get(k) for k in ("id", "name", "purpose", "outputs", "completion_check", "envelope", "revises",
+                                        "covers", "fixes")}
+        brief["covers_items"] = [((self.goal or {}).get("done_when") or [""] * 99)[i - 1] for i in w.get("covers") or []]
 
         def mock():
             head, body = mock_section(w, self.goal, self.sections)
@@ -2467,7 +2559,9 @@ class J2Run:
                             f"YOU ARE {NAMES[fn]}, the agent for one registered workflow.\nYOUR WORKFLOW: "
                             f"{json.dumps(brief, ensure_ascii=False)}\nYOU OWN SECTION {sid} of the site file. Code puts "
                             "your head block in the page head and your section in the body, in section order, between "
-                            "markers. Write the whole section each time; don't repeat other sections." + style_task
+                            "markers. Write the whole section each time; don't repeat other sections. Build only the "
+                            "done-when items your workflow covers and fix only its findings; other items belong to other "
+                            "workflows." + style_task
                             + (f"\nYOUR SECTION NOW (last written by {mine['owner']}):\n```head\n{mine['head']}\n```\n"
                                f"```section\n{mine['body']}\n```" if mine else "")
                             + (f"\nYOUR LAST ATTEMPT WAS REJECTED: {last_err}. Fix that." if last_err else "")

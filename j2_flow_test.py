@@ -14,6 +14,8 @@ C. Workable loop: the same failure twice, the cycle limit and to-be-confirmed fa
    (keep working, drop, ship); the J2.c bargain's time bound escalates to Identity; workable() unit checks.
 D. Memory: a confirmed fix saves a lesson, the next run's Adaptation uses it, J2_MEMORY=0 reads and writes nothing.
 E. The page: Agents and Lessons tabs, the state they read, and the clear-memory endpoint.
+I. Cost follows the work (runs/j2-20261007-190411: 13 items for 35 by bundling, a fix relabelled as styling): each
+   covered item has a rate-card minimum, a fix is priced as a fix, Priority sees cost per item.
 H. Any business, better each run: J2.a proposes visitor needs for the business type; the first workflow writes the
    style guide everyone follows; Audit's design rubric loops a measured failure back; playbooks saved at Done and
    reused for a similar business; no cafe examples in live prompts.
@@ -267,7 +269,7 @@ def workflow_agents():
     assert run.sections["W-2"]["owner"] == reg[0]["id"] and f"(owner {reg[0]['id']})" in run.sites[-1]
     # past retry_limit: the agent reports the failure to Coordination and its section is unchanged
     reg, _, _ = run._register([{"name": "Broken one", "goal_gap": "x", "outputs": ["y"], "completion_check": "z",
-                                "parts": ["fix"]}])
+                                "parts": ["fix"], "fixes": ["F-9"]}])
     run.call = lambda fn, *a, **k: "no blocks at all"
     n = len(run.sites)
     run._turn_workflow_agent({"wid": reg[0]["id"]})
@@ -291,7 +293,7 @@ def same_failure():
                     f.update(verdict="NEEDS_REVISION", evidence="Prices missing")
             if fn == "adaptation" and "WHY YOU ARE UP" in task and run.audits and not run.audits[-1]["results"][0]["pass"]:
                 r = {"say": "@Priority Menu fix.", "act": "PROPOSE", "next": "Priority", "workflows": [
-                    {"name": "Menu fix", "goal_gap": "prices", "parts": ["fix"], "outputs": ["menu"],
+                    {"name": "Menu fix", "goal_gap": "prices", "parts": ["fix"], "fixes": ["F-1"], "outputs": ["menu"],
                      "completion_check": "prices"}]}
             return r
         run.call = call
@@ -815,6 +817,47 @@ def lone_rubric_failure():
     assert run.outcome.startswith("Done") and summary(run)["limits_hit"] == [], run.outcome
 
 
+def pricing():
+    """I: the validator ties price to the work, not to labels."""
+    run = j2.J2Run()
+    run.goal = j2.mock_charter(BREW_LAB)    # 1 menu, 2 hours, 3 address, 4 order (form), 5 beans, 6 loyalty, 7 phone
+    run.budget, run.cycle = 500, 1
+    base = {"goal_gap": "x", "outputs": ["index.html"], "completion_check": "y"}
+    kinds = [j2.item_kind(c) for c in run.goal["done_when"]]
+    assert kinds == ["page_section"] * 3 + ["form"] + ["page_section"] * 2 + ["styling"], kinds
+    # bundling: six items in one 20-unit workflow (as in the run) is rejected; the same work priced honestly passes
+    reg, refused, _ = run._register([{**base, "name": "Shop", "parts": ["page_section", "interactive_feature"],
+                                      "covers": [1, 2, 3, 4, 5, 6]}])
+    assert not reg and "costs 20, below the rate-card minimum of 65" in refused[0], refused
+    assert "item 4 form 15" in refused[0], refused[0]
+    reg, refused, _ = run._register([{**base, "name": "Shop", "covers": [1, 2, 3, 4, 5, 6],
+                                      "parts": ["page_section"] * 5 + ["form"]}])
+    assert reg and reg[0]["cost"] == 65 and reg[0]["covers"] == [1, 2, 3, 4, 5, 6], refused
+    # page_section/form parts must say which items they build
+    reg, refused, _ = run._register([{**base, "name": "Page frame and store info", "parts": ["page_section", "styling"]}])
+    assert not reg and "covers no done-when item" in refused[0], refused
+    # after the first Audit: a fix relabelled as a cheaper part is rejected, with or without listing the finding
+    run.audits = [{"cycle": 1, "version": 1, "results": [], "rubric": [], "mechanical": {}, "all_pass": False}]
+    for w in ({"fixes": ["R-6"], "revises": "W-1"}, {"revises": "W-1"}, {"fixes": ["R-6", "F-2"]}):
+        reg, refused, _ = run._register([{**base, "name": "Header tap area", "parts": ["styling"], **w}])
+        assert not reg and "a fix is priced as a fix" in refused[0], (w, refused)
+    reg, refused, _ = run._register([{**base, "name": "Header tap area", "parts": ["fix", "fix"], "fixes": ["R-6", "F-2"]}])
+    assert reg and reg[0]["cost"] == 16, refused
+    # a fix to an item already paid for isn't charged the item again; styling with no item or finding is rejected now
+    reg, refused, _ = run._register([{**base, "name": "Hours fix", "parts": ["fix"], "fixes": ["F-2"], "covers": [2]}])
+    assert reg and reg[0]["cost"] == 8, refused
+    reg, refused, _ = run._register([{**base, "name": "Polish", "parts": ["styling"]}])
+    assert not reg and "covers no done-when item" in refused[0], refused
+    # Priority is told the cost per done-when item and to question plans far below the rate card
+    run = j2.J2Run()
+    say(run, BREW_LAB)
+    finish(run)
+    p = next(c for c in calls_of(run) if c["fn"] == "priority" and "ON THE TABLE" in c["prompt"])
+    assert "COST PER DONE-WHEN ITEM" in p["prompt"] and "rate_card_minimum_for_items" in p["prompt"], p["prompt"][-800:]
+    assert "far below the rate-card minimums" in p["prompt"]
+    assert all(w.get("covers") or w.get("fixes") or w["name"] in ("Stories section", "Animations") for w in run.workflows)
+
+
 def intake_needs():
     """H: at J2.a Identity proposes what this kind of business's visitors need and asks the Requester to confirm."""
     run = j2.J2Run()
@@ -1008,10 +1051,11 @@ if __name__ == "__main__":
         style_guide()
         rubric_loop()
         lone_rubric_failure()
+        pricing()
         intake_needs()
         playbooks()
         summary_before_review()
-        print(f"J2_FIXES={mode}: B workflow agents, C workable loop and limits, D memory, F forced audit failure (hidden from agents) and test lessons, summary before review, H style guide, rubric loop, needs, playbooks ok")
+        print(f"J2_FIXES={mode}: B workflow agents, C workable loop and limits, D memory, F forced audit failure (hidden from agents) and test lessons, summary before review, H style guide, rubric loop, needs, playbooks, I pricing ok")
     ruling_over_budget()
     redirect()
     workable_unit()
