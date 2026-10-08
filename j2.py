@@ -283,7 +283,13 @@ ONLY_PICK = re.compile(r"\s*(option\s*)?[1-9]\s*[.:)]?\s*", re.I)
 REPLY_FMT = ('"to_requester": str (to the Requester only, in plain words: what you understood from their answer and '
              'what happens next; at most 3 short sentences; never starts with @), "to_agents": str (the instruction '
              'for the team; the Requester never sees it)')
-AT_AGENT = re.compile(r"^\s*(?:@[\w-]+(?: Builder)?[,:]?\s*)+")
+AT_REQUESTER = re.compile(r"^\s*@Requester\b[,:]?\s*", re.I)
+# Agent content the Requester must never get, and user-facing content agents must never get (checked in call()).
+AGENT_CONTENT = re.compile(r"@(?!Requester\b)[A-Za-z]|\b[WFRC]-\d+\b|\bre-?pric|\b\d+\s*units?\b|\b(?:Adaptation|"
+                           r"Priority|Coordination|Validator|Audit)\b|\b(?:workflows?|GRANT|COUNTER|REFUSE|envelope|"
+                           r"rate[- ]card)\b", re.I)
+USER_CONTENT = re.compile(r"@Requester\b|\bthank(?:s| you)\b|\bI(?:'ll| will) start\b|\bwould you like\b|"
+                          r"\bdo you want\b|\byour (?:site|website|shop|store|business|brief)\b", re.I)
 PLAIN_WORDS = ((r"\bbuilding time\b", "work"), (r"\bdone[-_ ]when items?\b", "checklist items"),
                (r"\bdone[-_ ]when\b", "checklist"), (r"\bcycles\b", "rounds"), (r"\bcycle\b", "round"),
                (r"\bcaps?\b", "limit"), (r"\s*\((?:my |a |rough )?estimated?\)", ""), (r"\bestimated\b", "about"),
@@ -296,9 +302,9 @@ def for_agents(m):
 
 
 def to_requester(text, question=True):
-    """What the Requester reads: no @agent in front, none of the internal words, at most 3 short sentences plus one
-    question (no question when the question is asked separately below it: question=False)."""
-    t = " ".join(AT_AGENT.sub("", str(text or "")).split())
+    """What the Requester reads (without its @Requester tag, which the caller adds): none of the internal words, at
+    most 3 short sentences plus one question (none when the question is asked separately below it: question=False)."""
+    t = " ".join(AT_REQUESTER.sub("", str(text or "")).split())
     for pat, w in PLAIN_WORDS:
         t = re.sub(pat, w, t, flags=re.I)
     parts = [x for x in re.split(r"(?<=[.!?])\s+", t) if x.strip()]
@@ -856,7 +862,7 @@ class J2Run:
 
     def post(self, who, text, **meta):
         if who == "identity" and meta.get("to_user") and meta.get("act") != "ASK_REQUESTER":
-            text = to_requester(text)               # _ask_user shapes its own text
+            text = "@Requester " + to_requester(text)    # one addressee per message; _ask_user shapes its own text
         m = {"id": len(self.chat) + 1, "t": time.strftime("%H:%M:%S"), "who": who, "text": text, "step": self.step, **meta}
         if self.pending_calls.get(who):          # the AI calls behind this message, for the detail view
             m["calls"] = self.pending_calls.pop(who)
@@ -957,7 +963,10 @@ class J2Run:
         "No recommendation.")
     MOCK_REASON = "Scripted mock reply: no model reasoning."
 
-    def call(self, fn, reply_format, task, mock, max_tokens=900, json_reply=True, images=None):
+    REPLY_DEFAULTS = ("Thanks, got it. We're working on it now.", "Go ahead with the Requester's latest answer.")
+
+    def call(self, fn, reply_format, task, mock, max_tokens=900, json_reply=True, images=None, defaults=None,
+             _retry=False):
         """One agent's AI call. Every JSON reply format gets a "reason" field. Each call is logged to calls.jsonl
         (inputs, reply, reason, tokens, time) and linked to the agent's next chat message for the detail view."""
         if json_reply and reply_format.rstrip().endswith("}") and '"reason"' not in reply_format:
@@ -985,7 +994,33 @@ class J2Run:
         self._log_call(fn, task, system, user, raw, reply if json_reply else None, time.time() - t0)
         if images:
             self.call_log[-1]["images"] = [os.path.relpath(p, self.dir) for p in images]
+        if fn == "identity" and json_reply and '"to_requester"' in reply_format and reply.get("enough") is not False:
+            reply = self._check_audiences(reply, reply_format, task, mock, max_tokens, defaults, _retry)
         return reply
+
+    def _check_audiences(self, r, fmt, task, mock, max_tokens, defaults, retried):
+        """One message, one addressee: to_requester may not carry agent content (instructions, unit counts, workflow
+        ids, an @agent), to_agents may not read as user-facing (thanks, I'll start, a question to the user). A mixed
+        reply is regenerated once with the reason; if it is still mixed, the bad part becomes a template."""
+        req, ag = str(r.get("to_requester") or ""), str(r.get("to_agents") or r.get("say") or "")
+        bad = ([f"to_requester has agent content ({m.group(0)!r})"] if (m := AGENT_CONTENT.search(req)) else []) \
+            + ([f"to_agents reads as user-facing ({m.group(0)!r})"] if (m := USER_CONTENT.search(ag)) else [])
+        if not bad:
+            return r
+        self._event("identity", "audience_mix", "; ".join(bad))
+        if not retried:
+            return self.call("identity", fmt, task + "\nYOUR LAST REPLY MIXED THE TWO AUDIENCES: " + "; ".join(bad)
+                             + ". Write it again: to_requester only for the Requester (plain words, nothing for the "
+                             "team), to_agents only the instruction for the team (no thanks, no questions to the "
+                             "Requester).", mock, max_tokens=max_tokens, defaults=defaults, _retry=True)
+        d_req, d_ag = defaults or self.REPLY_DEFAULTS
+        r = dict(r)
+        if AGENT_CONTENT.search(req) or (USER_CONTENT.search(ag) and not req):
+            r["to_requester"] = d_req
+        if USER_CONTENT.search(ag):
+            r["to_agents"] = d_ag
+        self._event("identity", "audience_template", "; ".join(bad))
+        return r
 
     def _inputs(self, fn, task):
         """What the agent read, summarised by code: [label, text] pairs. The full prompt is in calls.jsonl."""
@@ -1078,8 +1113,9 @@ class J2Run:
     def _reply(self, r, nxt, note=None, **meta):
         """Identity after a Requester answer: to_requester goes to the Requester only, to_agents to the team only."""
         if r.get("to_requester"):
-            self.post("identity", r["to_requester"], to_user=True, requester_only=True)
-        return self._say("identity", r.get("to_agents") or r.get("say") or "", nxt, note, **meta)
+            self.post("identity", r["to_requester"], to_user=True, requester_only=True, audience="user")
+        return self._say("identity", r.get("to_agents") or r.get("say") or "", nxt, note,
+                         **({"audience": nxt} if nxt else {}), **meta)
 
     def _handoff(self, to, **h):
         self.turn, self.handoff = to, h
@@ -1106,7 +1142,7 @@ class J2Run:
             # Adding budget is offered only by the decision question (_identity_limit), whose options code builds
             # and applies. Approval and ruling_budget apply their own amount after the answer.
             questions = [{k: v for k, v in q.items() if k != "budget"} for q in questions]
-        m = self.post("identity", say + ("\n" + numbered(questions) if questions else ""),
+        m = self.post("identity", "@Requester " + say + ("\n" + numbered(questions) if questions else ""),
                       act="ASK_REQUESTER", to_user=True, next="user", pause=kind, **meta)
         self.paused = {"kind": kind, "questions": questions, "to": to, "handoff": handoff or {}, "msg": m["id"]}
         self._event("identity", "pause", f"{kind}: {len(questions)} question(s) for the Requester", pause=kind)
@@ -1308,10 +1344,12 @@ class J2Run:
                     {"question": "What is the business called, and where is it?", "options": []},
                     {"question": needs, "options": []},
                     {"question": "How should it feel, and must it work well on phones?", "options": []}]})
-            return json.dumps({"say": "@Adaptation Charter recorded from the brief"
+            return json.dumps({"to_requester": "Thanks, I have everything I need. I'm starting the build now.",
+                               "to_agents": "@Adaptation Charter recorded from the brief"
                                       + (" and the Requester's answers." if self.intake else "; it had enough to work."),
                                "enough": True, "next": "Adaptation", "goal": mock_charter(text)})
-        r = self.call("identity", '{"say": str, "enough": bool, "questions": [{"question": str, "options": [str] '
+        r = self.call("identity", '{"say": str (when you ask: to the Requester), ' + REPLY_FMT + ' (when enough is '
+                      'true), "enough": bool, "questions": [{"question": str, "options": [str] '
                       '(0-4)}] (when enough is false), "goal": ' + self.CHARTER_FMT + '|null (when enough is true), '
                       + next_field(("user", "adaptation"), "Requester when you ask; Adaptation once the charter is "
                                    "recorded") + "}",
@@ -1334,7 +1372,9 @@ class J2Run:
                       "may not refer to the Requester, Audit, verification, approval or launch. Keep everything the brief "
                       "asks for; if the charter leaves any of it out, list it in dropped_from_brief with the reason. "
                       "Don't plan costs or resources."
-                      + ("\nRecord the charter now (enough=true) from what you have." if last else ""), mock)
+                      + ("\nRecord the charter now (enough=true) from what you have." if last else ""), mock,
+                      defaults=("Thanks, I have everything I need. I'm starting the build now.",
+                                "Charter is ready. Propose the first workflows."))
         qs = clean_questions(r.get("questions"))
         if not r.get("enough") and not last and qs:
             return self._ask_user(r.get("say", ""), qs, "info", handoff={"kind": "intake", "change": change, "mark": mark})
@@ -1362,7 +1402,7 @@ class J2Run:
                                   "charter_drop", handoff={"kind": "intake", "force": True, "drop": True})
         nxt, note = self._pick("identity", r.get("next"), ("adaptation",), "adaptation",
                                "after the charter, Adaptation proposes")
-        self._say("identity", r.get("say", ""), nxt, note, artifact="charter")
+        self._reply(r, nxt, note, artifact="charter")
         start = dict(kind="propose", new_cycle=True, why=f"The Requester asked for a change: {change}. Identity checked it at "
                      "J2.a and updated the charter." if change else "The charter is recorded. Propose the first workflows.")
         if ok:

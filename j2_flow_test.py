@@ -629,10 +629,17 @@ def simple_view():
         say(run, "Option 1")                                                                 # ruling: add effort
         assert run.paused and run.paused["kind"] == "limit", run.outcome
         check(run, opts=2, once=("What would you like to do?", "Finish as it is: you get the site as it is now"))
-        # safety net: a message meant for an agent never reaches the Simple view, even if one slips through
-        run.chat.append({"id": len(run.chat) + 1, "t": "", "who": "identity", "step": 8, "to_user": True,
-                         "text": "@Audit Got it, we'll finish the site as it is now."})
-        assert "finish the site as it is now" not in check(run, opts=2)
+        # (c) the Simple view shows only messages for you: no agent-tagged message, no agent content
+        text = check(run, opts=2)
+        for m in run.chat:
+            if m["who"] == "identity" and not m.get("to_user"):
+                body = re.sub(r"^@[\w-]+[,:]?\s*", "", m["text"])[:40]
+                assert body not in text, ("agent message in the Simple view", m["text"][:80])
+        # (d) the Detailed view shows both parts of a reply, each labelled with who it is for
+        import subprocess
+        dom = subprocess.run([j2.j2_check.find_chrome(), "--headless=new", "--disable-gpu", "--virtual-time-budget=6000",
+                              "--dump-dom", base + "/?view=detail"], capture_output=True, text=True, timeout=90).stdout
+        assert "for Requester (you)" in dom and "for Adaptation" in dom, "Detailed view must label both audiences"
     finally:
         j2_server.RUN = keep
         srv.shutdown()
@@ -1275,47 +1282,66 @@ def plain_for_requester(run):
         if m["who"] != "identity" or not m.get("to_user"):
             continue
         say = m["text"].split("\n")[0]
-        assert not say.lstrip().startswith("@"), m["text"]
+        assert say.startswith("@Requester ") and not re.search(r"@(?!Requester\b)\w", say), m["text"]
         assert not BANNED_FOR_REQUESTER.search(m["text"].replace("checklist item", "")), m["text"]
-        parts = [x for x in re.split(r"(?<=[.!?])\s+", say) if x.strip()]
+        parts = [x for x in re.split(r"(?<=[.!?])\s+", say[len("@Requester "):]) if x.strip()]
         assert len([x for x in parts if not x.endswith("?")]) <= 3 and len([x for x in parts if x.endswith("?")]) <= 1, say
         qs = re.findall(r"^\d+\. ", m["text"], re.M)
         assert len(qs) <= 1 and len(re.findall(r"^\s+Option \d+:", m["text"], re.M)) <= 3, m["text"]
 
 
 def two_audiences():
-    """Item 4: after a Requester answer Identity writes to_requester (only the Requester sees it, never starting with
-    @) and to_agents (only agents get it). Run 20261008-123848 msgs 51 and 54 had the user's reply addressed to
-    @Audit and @Adaptation."""
+    """Item 4, corrected: one message, one addressee, the tag matches the text. (a) Live run 8 Oct 14:06 sent "@Adaptation
+    Thanks, I have everything I need. I'll start building..." as one message: it becomes one @Requester and one
+    @Adaptation message. (b) A to_requester with agent content ("re-price", "W-3") is rejected and regenerated. Agents
+    never get the to_requester text."""
     old, os.environ["J2_FIXES"] = os.environ.get("J2_FIXES"), "0"
     run = j2.J2Run()
     os.environ["J2_FIXES"] = old
-    orig = run.call
+    orig, seen = run.call, []
 
     def call(fn, fmt, task, mock, **k):
-        r = orig(fn, fmt, task, mock, **k)
-        if fn == "identity" and "to_requester" in fmt:          # what Identity did live: the user's reply @Audit
-            r["to_requester"] = "@Audit Got it, we'll leave those parts out and check the site again."
-            r["to_agents"] = "@Audit Re-check the site against the new checklist."
-        return r
+        if fn == "identity" and task.startswith("REQUESTER'S BRIEF"):          # (a) what Identity said live
+            def mixed():
+                r = json.loads(mock())
+                r.pop("to_requester", None), r.pop("to_agents", None)
+                if r.get("enough"):
+                    r["say"] = "@Adaptation Thanks, I have everything I need. I'll start building the Brew Lab site now."
+                return json.dumps(r)
+            return orig(fn, fmt, task, mixed, **k)
+        if fn == "identity" and task.startswith("YOU ASKED THE REQUESTER"):   # (b) agent content, then a clean retry
+            seen.append(task)
+            def first():                       # bad only on the first attempt; the retry gets a clean reply
+                r = json.loads(mock())
+                if len(seen) == 1:
+                    r["to_requester"] = "Got it. I'll re-price W-3 for Priority and drop those items."
+                return json.dumps(r)
+            return orig(fn, fmt, task, first, **k)
+        return orig(fn, fmt, task, mock, **k)
     run.call = call
     run.budget = 12
     say(run, BREW_LAB)
+    ch = next(i for i, m in enumerate(run.chat) if m.get("artifact") == "charter")
+    pair = run.chat[ch - 1:ch + 1]
+    assert pair[0]["text"] == "@Requester Thanks, I have everything I need. I'm starting the build now." and \
+        pair[0]["to_user"] and pair[0]["audience"] == "user", pair
+    assert pair[1]["text"].startswith("@Adaptation Charter is ready") and not pair[1].get("to_user") \
+        and pair[1]["audience"] == "adaptation", pair
+    assert any(e["type"] == "audience_template" for e in run.events)
     n = len(run.chat)
     say(run, "2")
+    assert len(seen) == 2 and "MIXED THE TWO AUDIENCES" in seen[1] and "re-pric" in seen[1], seen[-1][-300:]
     mine = [m for m in run.chat[n:] if m.get("requester_only")]
-    assert len(mine) == 1 and mine[0]["to_user"] and mine[0]["text"].startswith("Got it"), mine
-    assert any(m["who"] == "identity" and m["text"].startswith("@Audit Re-check") and not m.get("to_user")
-               for m in run.chat[n:]), [m["text"][:60] for m in run.chat[n:]]
-    view = run.chat_view()
-    assert "leave those parts out" not in view and "Re-check the site" in view, "agents must get to_agents only"
+    assert len(mine) == 1 and mine[0]["text"] == "@Requester Thanks, got it.", mine        # the regenerated reply
+    assert not any("re-price" in m["text"] for m in run.chat if m.get("to_user"))
+    assert "@Requester Thanks, got it." not in run.chat_view(), "agents must not get to_requester"
     plain_for_requester(run)
 
 
 def simple_messages():
     """Item 5: what the Requester reads is short and plain; one question, at most 3 options; the decision question's
     options say what they get."""
-    t = j2.to_requester("@Adaptation The building time is used up. We hit the cap after 3 cycles. The done-when "
+    t = j2.to_requester("@Requester The building time is used up. We hit the cap after 3 cycles. The done-when "
                         "list has 4 items (estimate). One more sentence. And another. Which do you want? Really?")
     assert t == ("The work is used up. We hit the limit after 3 rounds. The checklist list has 4 items. Which do you "
                  "want?"), t

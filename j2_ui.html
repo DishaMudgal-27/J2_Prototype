@@ -253,7 +253,8 @@ function addMsg(m){
   if (m.auto) t += `<span class="tag">by code, no AI call</span>`;
   if (m.envelope) t += `<span class="tag ${m.envelope==="allowed"?"ok":"bad"}">envelope: ${m.envelope}</span>`;
   if (m.attempt) t += `<span class="tag ${m.agree?"ok":"bad"}">${m.agree?"agrees":"holds position"} · attempt ${m.attempt}/4</span>`;
-  if (m.next && !m.to_user) t += `<span class="tag">→ ${esc(who(m.next)[0])}</span>`;
+  if (m.audience) t += `<span class="tag aud">for ${esc(m.audience === "user" ? "Requester (you)" : who(m.audience)[0])}</span>`;
+  else if (m.next && !m.to_user) t += `<span class="tag">→ ${esc(who(m.next)[0])}</span>`;
   if (m.lesson_used) t += m.lesson_test ? `<span class="tag bad">used TEST LESSON ${esc(m.lesson_used)} (from a forced failure, demo only)</span>`
     : `<span class="tag ok">used lesson ${esc(m.lesson_used)}</span>`;
   if (m.lessons) t += `<span class="tag ok">saved ${esc(m.lessons.join(", "))}</span>`;
@@ -466,7 +467,6 @@ const PLAIN = [[/@[\w-]+[,:]?/g, ""], [/\(?\bJ2(?:\.[a-h]|_[A-Z_]+(?:=\S*)?)?\)?
   [new RegExp(`\\b${AGENT}'s\\b`, "g"), "the team's"], [new RegExp(`\\b${AGENT}\\b`, "g"), "the team"]];
 const plain = t => PLAIN.reduce((a, [r, w]) => a.replace(r, w), String(t || "")).replace(/[ \t]{2,}/g, " ")
   .replace(/\s+([.,;:!?])/g, "$1").replace(/\(\s*\)/g, "").trim().replace(/(^|[.!?]\s+|\n)([a-z])/g, (m, a, b) => a + b.toUpperCase());
-const TO_AGENT = new RegExp(`^\\s*@(?:${AGENT}|Audit)\\b`);
 const STAGES = ["Understanding your request", "Planning", "Building", "Checking", "Ready"];
 const isReady = s => /^Done/.test(s.outcome || "") && !s.paused && s.status !== "running";
 const failed = s => !!s.error || /^(Crashed|Stopped)/.test(s.outcome || "");
@@ -506,7 +506,7 @@ function renderSimple(s){
       out += `<div class="sb me">${esc(lab)}</div>`;
     } else if (m.who === "system" && m.override){
       out += `<div class="sb team"><small>Owner override</small>${esc(plain(m.text))}</div>`;
-    } else if (m.who === "identity" && m.to_user && !TO_AGENT.test(m.text)){   // never show a message meant for an agent
+    } else if (m.who === "identity" && m.to_user){   // only messages for you; never one for an agent
       if (m.act === "ASK_REQUESTER"){ lastAsk = m; out += askBubble(m, s.paused && s.paused.msg === m.id && s.status !== "running"); }
       else out += `<div class="sb team"><small>Your website team</small>${esc(plain(m.text))}</div>`;
     }

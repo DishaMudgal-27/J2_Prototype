@@ -266,11 +266,16 @@ directly. The amount in the option text is what code adds; when the cap limits i
 allowed)". A typed answer is applied like a click: "2. Add 25 more. Leave out the lookbook and reviews" adds 25 and
 drops those items; Audit then re-checks against the new done-when before anything else runs. "Finish as is" ends
 the run as `done_with_open_items`.
-Identity talks to two audiences. After a Requester answer it writes `to_requester` (plain words, never starting
-with @) and `to_agents` (the instruction for the team): the Requester sees only the first, agents only the second.
-Everything the Requester reads is at most 3 short sentences plus one question, with at most 3 options that each
-say what they get; internal words (building time, cap, cycles, done-when, estimate) are replaced by code. As a
-safety net the Simple view never shows a message that starts with @ and an agent name. A workflow agent's section
+Identity talks to two audiences, one message per addressee, and the @tag matches the text. After a Requester answer
+(and when it records the charter) it writes `to_requester` (tagged `@Requester`, plain words) and `to_agents`
+(tagged with the agent, the instruction for the team), posted as two messages: "@Requester Thanks, I have
+everything I need. I'm starting the build now." and "@Adaptation Charter is ready. Propose the first workflows."
+The Simple view shows only messages for the Requester; agents never get them. The Detailed view shows both, each
+labelled with who it is for. Code checks every such reply where Identity's prompt is assembled (`call()`): agent
+content in `to_requester` (instructions, unit counts, workflow ids like W-3, an @agent) or user-facing text in
+`to_agents` (thanks, "I'll start", a question to the user) gets one regeneration with the reason, then a template.
+Everything the Requester reads is at most 3 short sentences plus one question, with at most 3 options that each say
+what they get; internal words (building time, cap, cycles, done-when, estimate) are replaced by code. A workflow agent's section
 with a `<form>` but no submit button is rejected and retried; the browser check still marks such a site not
 workable.
 Once Adaptation has proposed nothing because less than the cheapest part is left, it isn't asked again until
