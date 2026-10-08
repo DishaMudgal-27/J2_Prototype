@@ -68,3 +68,16 @@ dupattas 899/1,099); size guide XS32..XXL42; 3 reviews; lookbook 3 outfits; deli
 4. Test a non-shop site (college fest) for question quality.
 5. Deployment: needs company Anthropic API key + hosting account (manager said ok if not too much effort; Tesla team can help).
 6. Update round 2 doc / write round 3 findings after these runs.
+
+## Risks and corrections (added 8 Oct, read before writing prompts)
+- Never create or overwrite .env in the project (it holds J2_OVERRIDE_KEY). Hook tests go in a throwaway temp repo.
+- The "sent back twice at most" rule is J4 on the department page, not J2. J2's bargain limit is four hops, fifteen minutes and its spend.
+- Keep decisions with the agents: add rules the validator enforces, do not hard-code agent choices in code.
+- J2 is judged against versions.html: v1 FOLLOW (20 runs, pass rate visible) and v2 REMEMBER (interrupts halved). Log questions asked to the user and pass/fail per run.
+
+## Status (8 Oct, later)
+- Step 1 part A passed live (run 20261008-131555, 40 -> 65, dropped items never returned). Part B ("finish as is") NOT yet tested; that run is paused in the old server's memory (port 8773).
+- Second pass (two audiences, simple messages, owner override, form submit button) committed as 6f978af. Full mock suite green.
+- .env.example not yet committed: pre-commit hook blocks any .env.* file. Prompt 1 (allow exactly .env.example) pending.
+- Third pass pending: nav fix rejected as 'styling' (should be 'fix'); fund blocking fixes before optional sections via a validator rule; check-only report on loop and bargain limits.
+- After that: live clothing test on new code, grep runs/ and logs for the key value, then steps 3 to 6 above.
