@@ -628,7 +628,8 @@ def simple_view():
         say(run, BREW_LAB)
         say(run, "Option 1")                                                                 # ruling: add effort
         assert run.paused and run.paused["kind"] == "limit", run.outcome
-        check(run, opts=2, once=("What would you like to do?", "Finish as it is: you get the site as it is now"))
+        check(run, opts=2, once=("Add more and keep going, leave out the missing parts, or finish as it is?",
+                                 "Finish as it is: you get the site as it is now"))
         # (c) the Simple view shows only messages for you: no agent-tagged message, no agent content
         text = check(run, opts=2)
         for m in run.chat:
@@ -1453,6 +1454,42 @@ def audiences_everywhere():
     assert m["text"] == "@Adaptation Re-price W-3." and run.events[n]["type"] == "misaddressed", (m, run.events[n:])
 
 
+def limit_wording():
+    """Run 20261008-154537: msg 5 printed "1.\n1." (Identity's own numbered list plus code's); msgs 45/46 paused at
+    the per-cycle turn cap with a money banner although no money option was offered, and "1 thing still not right"
+    didn't match the gaps the message listed. The list is numbered once; the question and the banner say why the team
+    paused and offer only what's on offer; the gap list and its count come from one list; every option says what you
+    get, with the amount when money is involved."""
+    run = j2.J2Run()
+    run._ask_user("Thanks, that covers most of it. A few things are still missing.\n1. Which products are new?\n"
+                  "2. Which sizes?", [{"question": "Which products are new arrivals?"},
+                                      {"question": "Which sizes does each product come in?"}], "info")
+    txt = run.chat[-1]["text"]
+    assert len(re.findall(r"(?m)(?:^|\s)\d+\.(?:\s|$)", txt)) == 1 and "1.\n1." not in txt, txt
+
+    old, os.environ["J2_FIXES"] = os.environ.get("J2_FIXES"), "0"
+    run = j2.J2Run()
+    os.environ["J2_FIXES"] = old
+    say(run, BREW_LAB)
+    run.audits[-1]["results"][0].update(verdict="NEEDS_REVISION", **{"pass": False})
+    run.audits[-1]["results"][2].update(verdict="NEEDS_REVISION", **{"pass": False})
+    run._identity_limit({"reason": f"Cycle {run.cycle} used {j2.MAX_TURNS} turns (the per-cycle cap) without finishing."})
+    q = run.paused["questions"][0]
+    assert q["question"] == "The team paused after a round of work. Keep going, leave out the missing parts, or " \
+                            "finish as it is?", q["question"]
+    assert "budget" not in q and "add budget" not in run.outcome and q["question"] in run.outcome, run.outcome
+    gaps = j2.workable(run.audits[-1])
+    listed = run.chat[-1]["text"].split("Still not right: ")[1].split("\n")[0].rstrip(".").split("; ")
+    assert len(listed) == len(gaps) and q["options"][-1].endswith(f"with {len(gaps)} things still not right"), (listed, q)
+    for o in q["options"]:
+        assert "you get" in o, o
+    run.spent = run.budget                                    # money: the option says the amount
+    run._identity_limit({"reason": "Out of budget", "out_of_budget": True})
+    q = run.paused["questions"][0]
+    assert q["question"].startswith("The work you approved is used up. Add more and keep going"), q["question"]
+    assert re.match(r"Add \d+ units", q["options"][0]) and all("you get" in o for o in q["options"]), q["options"]
+
+
 if __name__ == "__main__":
     for mode in ("0", "1"):
         os.environ["J2_FIXES"] = mode
@@ -1489,6 +1526,7 @@ if __name__ == "__main__":
     identity_decisions()
     two_audiences()
     audiences_everywhere()
+    limit_wording()
     simple_messages()
     owner_override()
     form_submit()

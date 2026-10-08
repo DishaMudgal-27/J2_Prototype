@@ -305,10 +305,11 @@ def for_agents(m):
 def to_requester(text, question=True):
     """What the Requester reads (without its @Requester tag, which the caller adds): none of the internal words, at
     most 3 short sentences plus one question (none when the question is asked separately below it: question=False)."""
-    t = " ".join(AT_REQUESTER.sub("", str(text or "")).split())
+    t = re.sub(r"(?m)^\s*\d+[.)]\s.*$", "", AT_REQUESTER.sub("", str(text or "")))   # numbered lines: code's job
+    t = " ".join(t.split())
     for pat, w in PLAIN_WORDS:
         t = re.sub(pat, w, t, flags=re.I)
-    parts = [x for x in re.split(r"(?<=[.!?])\s+", t) if x.strip()]
+    parts = [x for x in re.split(r"(?<=[.!?])\s+", t) if x.strip() and not re.fullmatch(r"\d+[.)]", x.strip())]
     said = [x for x in parts if not x.endswith("?")][:3]
     asked = [x for x in parts if x.endswith("?")][:1] if question else []
     return " ".join(said + asked)
@@ -1137,9 +1138,13 @@ class J2Run:
     def _save_conflicts(self):
         self.save("conflicts.json", self.conflicts)
 
-    def _ask_user(self, say, questions, kind, to="identity", handoff=None, **meta):
-        """Identity asks the Requester and the run pauses. The reply resumes the run at `to` with `handoff`."""
+    def _ask_user(self, say, questions, kind, to="identity", handoff=None, gaps=None, **meta):
+        """Identity asks the Requester and the run pauses. The reply resumes the run at `to` with `handoff`. `gaps`
+        (the decision question) is appended by code after Identity's words, so the list and its count are one list."""
         say = to_requester(say, question=not questions)
+        if gaps is not None:
+            say = " ".join(re.split(r"(?<=[.!?])\s+", say)[:2]) + (
+                " Still not right: " + "; ".join(str(g).rstrip(". ") for g in gaps) + "." if gaps else "")
         if len(questions) > 1:
             # One question per message: several become one list of what to send (options can't be kept).
             items = [re.sub(r"\?$", "", q["question"]).strip() for q in questions]
@@ -1154,7 +1159,8 @@ class J2Run:
                       act="ASK_REQUESTER", to_user=True, next="user", pause=kind, **meta)
         self.paused = {"kind": kind, "questions": questions, "to": to, "handoff": handoff or {}, "msg": m["id"]}
         self._event("identity", "pause", f"{kind}: {len(questions)} question(s) for the Requester", pause=kind)
-        self.outcome = f"Paused: Identity is waiting on the Requester ({PAUSES[kind]})."
+        self.outcome = (f"Paused: Identity is waiting on the Requester "
+                        f"({questions[0]['question'] if kind == 'limit' else PAUSES[kind]}).")
         self.turn = None
 
     # ------------------------------------------------------------------ entry
@@ -1770,6 +1776,12 @@ class J2Run:
         reason, last = h.get("reason") or "", self.audits[-1] if self.audits else None
         fails = workable(last)
         items = [r for r in (last or {}).get("results", []) if not r["pass"]]
+        # One list for the message and the count: the failing items and design checks by name, then what the
+        # browser check found.
+        mech = (last or {}).get("mechanical") or {}
+        gaps = ([r["criterion"] for r in items] + [r["criterion"] for r in (last or {}).get("rubric", []) if not r["pass"]]
+                + (j2_check.problems(mech) if mech.get("available") else ["the browser check didn't run"])
+                if last else ["nothing has been checked yet"])
         cheapest = min(RATES.values()) if RATES else 1
         room = BUDGET_CAP - self.budget
         short = self.budget - self.spent < cheapest       # whatever the limit was, nothing new can be funded
@@ -1792,22 +1804,33 @@ class J2Run:
                         "without them")
             budget.append(0)
             choices.append("drop")
-        opts.append("Finish as it is: you get the site as it is now" + (f", with {len(fails)} thing"
-                    f"{'s' if len(fails) > 1 else ''} still not right" if fails else ""))
+        opts.append("Finish as it is: you get the site as it is now" + (f", with {len(gaps)} thing"
+                    f"{'s' if len(gaps) > 1 else ''} still not right" if gaps else ""))
         budget.append(0)
         choices.append("ship")
-        q = {"question": "What would you like to do?", "options": opts, **({"budget": budget} if any(budget) else {})}
+        lead = ("The team paused after a round of work." if re.match(r"Cycle \d+ used|The department used", reason) else
+                "The work you approved is used up." if short else
+                "The same problem came back twice." if reason.startswith("The same failure") else
+                "Only you can give what's still missing." if reason.startswith("Only you") else
+                "The team needs your decision.")
+        say_choices = {"continue": "add more and keep going" if add else "keep going",
+                       "drop": "leave out the missing parts", "ship": "finish as it is"}
+        ask = [say_choices[c] for c in choices]
+        ask = ", ".join(ask[:-1]) + (", or " if len(ask) > 2 else " or ") + ask[-1] if len(ask) > 1 else ask[0]
+        q = {"question": f"{lead} {ask[0].upper() + ask[1:]}?", "options": opts,
+             **({"budget": budget} if any(budget) else {})}
         self._event("system", "limit", reason)
-        plain_missing = ("The site isn't finished yet. Still missing: " + "; ".join(x["criterion"] for x in items) + "."
-                         if items else "The site isn't finished yet: a few things still don't work right.")
-        r = self.call("identity", '{"say": str (to the Requester, in plain words: what is still missing, at most 3 '
-                      'short sentences; no question, it is asked below; no recommendation; never the words "building '
-                      'time", "cap", "cycles", "done-when" or "estimate")}',
-                      f"LIMIT: {reason}\nWHAT STILL STOPS THE SITE BEING WORKABLE: {json.dumps(fails, ensure_ascii=False)}"
-                      f"\nTHE OPTIONS CODE WILL OFFER: {json.dumps(opts, ensure_ascii=False)}\nTell the Requester.",
+        plain_missing = "The site isn't finished yet."
+        r = self.call("identity", '{"say": str (to the Requester, in plain words: what has been done so far, at most 2 '
+                      'short sentences; don\'t list what is missing, code adds that list; no question, it is asked '
+                      'below; no recommendation; never the words "building time", "cap", "cycles", "done-when" or '
+                      '"estimate")}',
+                      f"LIMIT: {reason}\nWHAT IS STILL NOT RIGHT (code lists it after your words): "
+                      f"{json.dumps(gaps, ensure_ascii=False)}\nTHE QUESTION AND OPTIONS CODE WILL OFFER: "
+                      f"{json.dumps(q, ensure_ascii=False)}\nTell the Requester.",
                       lambda: json.dumps({"say": plain_missing}))
         self.last_limit = {"state": state, "decision": None}
-        self._ask_user(r.get("say") or plain_missing, [q], "limit", handoff={"kind": "requester_answered", "limit": reason,
+        self._ask_user(r.get("say") or plain_missing, [q], "limit", gaps=gaps, handoff={"kind": "requester_answered", "limit": reason,
                                                                        "choices": choices, "resume": h.get("resume"),
                                                                        "failing_items": [x["item"] for x in items]})
 
