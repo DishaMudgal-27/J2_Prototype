@@ -194,7 +194,7 @@ def ruling_over_budget():
     assert run.paused and run.paused["kind"] == "limit" and run.paused["handoff"]["limit"].startswith("Out of budget"), \
         run.outcome
     q = run.paused["questions"][0]
-    assert q["options"][0].startswith("Keep working: add 30") and q["budget"][0] == 30 and q["options"][-1].startswith("Ship")
+    assert q["options"][0].startswith("Add 30 units and keep going") and q["budget"][0] == 30 and q["options"][-1].startswith("Finish as it is")
     say(run, "1")
     assert run.budget == 120 and run.outcome.startswith("Done"), (run.budget, run.outcome)
     s = summary(run)
@@ -222,7 +222,7 @@ def policy_budget(fixes):
     run.call = call
     say(run, BREW_LAB)
     assert run.paused and run.paused["kind"] == "limit" and run.budget == 60, run.outcome
-    assert run.paused["questions"][0]["options"][0].startswith("Keep working: add 40 units,"), run.paused
+    assert run.paused["questions"][0]["options"][0].startswith("Add 40 units and keep going"), run.paused
     say(run, "the bigger one I think")                       # unclear: no guess, Identity asks once more
     assert run.paused and run.paused["handoff"].get("reasked") and run.budget == 60, run.paused
     say(run, "option 1")
@@ -317,7 +317,7 @@ def same_failure():
     say(run, BREW_LAB)
     assert run.paused and run.paused["kind"] == "limit" and "same failure" in run.paused["handoff"]["limit"], run.outcome
     opts = run.paused["questions"][0]["options"]
-    assert [o.split(":")[0] for o in opts] == ["Keep working", "Drop the failing done-when items", "Ship as is"], opts
+    assert run.paused["handoff"]["choices"] == ["continue", "drop", "ship"] and len(opts) == 3, opts
     say(run, "2, drop it")
     assert run.outcome.startswith("Done") and run.goal["dropped_by_requester"][0].startswith("The menu"), run.outcome
     assert summary(run)["dropped_by_requester"]
@@ -628,8 +628,11 @@ def simple_view():
         say(run, BREW_LAB)
         say(run, "Option 1")                                                                 # ruling: add effort
         assert run.paused and run.paused["kind"] == "limit", run.outcome
-        check(run, "This needs a bit more work than planned", "What would you like to do?", opts=2,
-              once=("Continue (uses a little more effort)", "Finish as it is"))
+        check(run, opts=2, once=("What would you like to do?", "Finish as it is: you get the site as it is now"))
+        # safety net: a message meant for an agent never reaches the Simple view, even if one slips through
+        run.chat.append({"id": len(run.chat) + 1, "t": "", "who": "identity", "step": 8, "to_user": True,
+                         "text": "@Audit Got it, we'll finish the site as it is now."})
+        assert "finish the site as it is now" not in check(run, opts=2)
     finally:
         j2_server.RUN = keep
         srv.shutdown()
@@ -1155,21 +1158,20 @@ def budget_cap():
     run.budget = j2.BUDGET_CAP - 40                 # Identity says 78 is needed; the cap allows 40
     run._identity_limit({"reason": "Adaptation asked", "budget_needed": 78})
     o = run.paused["questions"][0]["options"][0]
-    assert o.startswith("Keep working: add 40 units (the most allowed)") and run.paused["questions"][0]["budget"][0] == 40, o
-    assert f"can't go above {j2.BUDGET_CAP}" in run.chat[-1]["text"], run.chat[-1]["text"]
+    assert o.startswith("Add 40 units (the most allowed)") and run.paused["questions"][0]["budget"][0] == 40, o
     run.budget = j2.BUDGET_CAP
     run._identity_limit({"reason": "Adaptation asked", "budget_needed": 78})
-    assert not any(o.startswith("Keep working") for o in run.paused["questions"][0]["options"]), run.paused
+    assert not any(o.startswith(("Add ", "Keep going")) for o in run.paused["questions"][0]["options"]), run.paused
     cheapest = min(j2.RATES.values())
     run.spent = run.budget - cheapest + 1                       # less than the cheapest part left, no room to add
     run._identity_limit({"reason": "Out of budget", "out_of_budget": True})
-    assert not any(o.startswith("Keep working") for o in run.paused["questions"][0]["options"]), run.paused
+    assert not any(o.startswith(("Add ", "Keep going")) for o in run.paused["questions"][0]["options"]), run.paused
     run.spent = 0                                               # money left: keep working is offered once
     run._identity_limit({"reason": "turn cap"})
-    assert run.paused["questions"][0]["options"][0].startswith("Keep working"), run.paused
+    assert run.paused["questions"][0]["options"][0].startswith(("Add ", "Keep going")), run.paused
     run.last_limit["decision"] = "continue"                     # ...and changed nothing: not offered again
     run._identity_limit({"reason": "turn cap"})
-    assert not any(o.startswith("Keep working") for o in run.paused["questions"][0]["options"]), run.paused
+    assert not any(o.startswith(("Add ", "Keep going")) for o in run.paused["questions"][0]["options"]), run.paused
 
 
 def repeats():
@@ -1263,6 +1265,134 @@ def identity_decisions():
     assert summary(run)["status"] == "done_with_open_items"
 
 
+BANNED_FOR_REQUESTER = re.compile(r"building time|\bcaps?\b|\bcycles?\b|done[-_ ]when|\bestimate", re.I)
+
+
+def plain_for_requester(run):
+    """Everything Identity sends the Requester: no @ in front, no internal words, at most 3 sentences plus one
+    question, at most one question with at most 3 options."""
+    for m in run.chat:
+        if m["who"] != "identity" or not m.get("to_user"):
+            continue
+        say = m["text"].split("\n")[0]
+        assert not say.lstrip().startswith("@"), m["text"]
+        assert not BANNED_FOR_REQUESTER.search(m["text"].replace("checklist item", "")), m["text"]
+        parts = [x for x in re.split(r"(?<=[.!?])\s+", say) if x.strip()]
+        assert len([x for x in parts if not x.endswith("?")]) <= 3 and len([x for x in parts if x.endswith("?")]) <= 1, say
+        qs = re.findall(r"^\d+\. ", m["text"], re.M)
+        assert len(qs) <= 1 and len(re.findall(r"^\s+Option \d+:", m["text"], re.M)) <= 3, m["text"]
+
+
+def two_audiences():
+    """Item 4: after a Requester answer Identity writes to_requester (only the Requester sees it, never starting with
+    @) and to_agents (only agents get it). Run 20261008-123848 msgs 51 and 54 had the user's reply addressed to
+    @Audit and @Adaptation."""
+    old, os.environ["J2_FIXES"] = os.environ.get("J2_FIXES"), "0"
+    run = j2.J2Run()
+    os.environ["J2_FIXES"] = old
+    orig = run.call
+
+    def call(fn, fmt, task, mock, **k):
+        r = orig(fn, fmt, task, mock, **k)
+        if fn == "identity" and "to_requester" in fmt:          # what Identity did live: the user's reply @Audit
+            r["to_requester"] = "@Audit Got it, we'll leave those parts out and check the site again."
+            r["to_agents"] = "@Audit Re-check the site against the new checklist."
+        return r
+    run.call = call
+    run.budget = 12
+    say(run, BREW_LAB)
+    n = len(run.chat)
+    say(run, "2")
+    mine = [m for m in run.chat[n:] if m.get("requester_only")]
+    assert len(mine) == 1 and mine[0]["to_user"] and mine[0]["text"].startswith("Got it"), mine
+    assert any(m["who"] == "identity" and m["text"].startswith("@Audit Re-check") and not m.get("to_user")
+               for m in run.chat[n:]), [m["text"][:60] for m in run.chat[n:]]
+    view = run.chat_view()
+    assert "leave those parts out" not in view and "Re-check the site" in view, "agents must get to_agents only"
+    plain_for_requester(run)
+
+
+def simple_messages():
+    """Item 5: what the Requester reads is short and plain; one question, at most 3 options; the decision question's
+    options say what they get."""
+    t = j2.to_requester("@Adaptation The building time is used up. We hit the cap after 3 cycles. The done-when "
+                        "list has 4 items (estimate). One more sentence. And another. Which do you want? Really?")
+    assert t == ("The work is used up. We hit the limit after 3 rounds. The checklist list has 4 items. Which do you "
+                 "want?"), t
+    assert j2.to_requester("Done. What now?", question=False) == "Done."
+    run = j2.J2Run()
+    run._ask_user("Two things. What is your phone number?", [{"question": "What is your phone number?"},
+                                                              {"question": "What are your hours?"}], "info")
+    q = run.paused["questions"]
+    assert len(q) == 1 and q[0]["question"] == "Please send these: What is your phone number; What are your hours.", q
+    assert "?" not in run.chat[-1]["text"].split("\n")[0], run.chat[-1]["text"]
+    run._ask_user("Pick one.", [{"question": "Which?", "options": ["a", "b", "c", "d"]}], "question")
+    assert run.paused["questions"][0]["options"] == ["a", "b", "c"], run.paused
+    run.budget, run.spent = 40, 38
+    run._identity_limit({"reason": "Out of budget", "out_of_budget": True})
+    opts = run.paused["questions"][0]["options"]
+    assert opts[0].startswith("Add ") and "you get" in opts[0] and opts[-1].startswith("Finish as it is: you get"), opts
+    plain_for_requester(run)
+
+
+def owner_override():
+    """Item 6: a message starting with J2_OVERRIDE_KEY and a command is applied by code; the key is never posted,
+    stored or sent to an agent, and the server redacts it."""
+    import j2_server
+    key = "test-override-key-123"
+    old_key, os.environ["J2_OVERRIDE_KEY"] = os.environ.get("J2_OVERRIDE_KEY"), key
+    old, os.environ["J2_FIXES"] = os.environ.get("J2_FIXES"), "0"
+    try:
+        run = j2.J2Run()
+        os.environ["J2_FIXES"] = old
+        run.budget = 12
+        say(run, BREW_LAB)
+        assert run.paused and run.paused["kind"] == "limit"
+        say(run, f"{key} budget +500")
+        assert run.budget == 512 and run.raises[-1]["override"] and run.budget > j2.BUDGET_CAP, run.raises
+        assert run.chat[-1]["text"].startswith("Owner override applied: budget +500") and run.paused, run.chat[-1]
+        crit = run.goal["done_when"][1]
+        say(run, f"{key} drop 2")
+        assert crit not in run.goal["done_when"] and run.goal["dropped_reasons"][-1]["reason"] == "Owner override"
+        say(run, f"{key} paint it blue")
+        assert run.chat[-1]["text"].startswith("Owner override not applied"), run.chat[-1]
+        say(run, f"{key} ship")
+        assert run.outcome.startswith("Done with open items") and not run.paused and run.done, run.outcome
+        assert summary(run)["status"] == "done_with_open_items"
+        for name in ("chat.jsonl", "calls.jsonl", "goal.json", "summary.json"):
+            path = os.path.join(run.dir, name)
+            assert not os.path.exists(path) or key not in open(path, encoding="utf-8").read(), name
+        assert key not in run.chat_view() and key not in json.dumps(run.chat)
+        assert key not in j2_server.redact(f"typed: {key} ship"), "the server must redact the key"
+    finally:
+        os.environ["J2_FIXES"] = old
+        if old_key is None:
+            os.environ.pop("J2_OVERRIDE_KEY", None)
+        else:
+            os.environ["J2_OVERRIDE_KEY"] = old_key
+
+
+def form_submit():
+    """Item 7 (run 20261008-123848 msg 46: a form with no submit button): a section whose form has no submit button
+    is rejected so the agent retries; the browser check still makes such a site not workable."""
+    for body, ok in (('<form><input name="n"><button type="button">Order</button></form>', False),
+                     ('<form><input name="n"></form>', False),
+                     ('<form><input name="n"><button>Order on WhatsApp</button></form>', True),
+                     ('<form><input type="submit" value="Send"></form>', True)):
+        try:
+            j2.parse_section("```section\n" + body + "\n```")
+            got = True
+        except ValueError as e:
+            got = False
+            assert "submit button" in str(e), e
+        assert got == ok, body
+    bad = {"results": [{"item": 1, "id": "F-1", "verdict": "PASS", "criterion": "a", "pass": True}],
+           "mechanical": {"available": True, "phone": {"overflow_px": 0}, "desktop": {"overflow_px": 0},
+                          "js_errors": [], "broken_in_page_links": [],
+                          "form_results": [{"index": 1, "ok": False, "has_submit": False, "errors_during": []}]}}
+    assert "form 1 has no submit button" in j2.workable(bad)
+
+
 if __name__ == "__main__":
     for mode in ("0", "1"):
         os.environ["J2_FIXES"] = mode
@@ -1297,6 +1427,11 @@ if __name__ == "__main__":
     repeats()
     adaptation_idle()
     identity_decisions()
+    two_audiences()
+    simple_messages()
+    owner_override()
+    form_submit()
+    print("second pass: two audiences, simple messages, owner override, form submit ok")
     print("limit answers (turn cap, own amount, drop with reason, done with open items), budget cap, repeats, idle Adaptation, decisions applied by code (msgs 24, 50) ok")
     page()
     print("E behind-the-scenes view (lanes, detail, timeline, saved runs, redaction, lessons) ok")

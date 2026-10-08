@@ -266,6 +266,13 @@ directly. The amount in the option text is what code adds; when the cap limits i
 allowed)". A typed answer is applied like a click: "2. Add 25 more. Leave out the lookbook and reviews" adds 25 and
 drops those items; Audit then re-checks against the new done-when before anything else runs. "Finish as is" ends
 the run as `done_with_open_items`.
+Identity talks to two audiences. After a Requester answer it writes `to_requester` (plain words, never starting
+with @) and `to_agents` (the instruction for the team): the Requester sees only the first, agents only the second.
+Everything the Requester reads is at most 3 short sentences plus one question, with at most 3 options that each
+say what they get; internal words (building time, cap, cycles, done-when, estimate) are replaced by code. As a
+safety net the Simple view never shows a message that starts with @ and an agent name. A workflow agent's section
+with a `<form>` but no submit button is rejected and retried; the browser check still marks such a site not
+workable.
 Once Adaptation has proposed nothing because less than the cheapest part is left, it isn't asked again until
 something changes (budget raised, an item dropped, a new answer from the Requester): Identity asks the Requester.
 
@@ -347,6 +354,13 @@ Settings:
 | `J2_RATES` | 1 | 0 turns the rate card off |
 | `J2_FORCE_AUDIT_FAIL` | off | Test switch, see below |
 | `J2_MEMORY_TEST_LESSONS` | off | 1 lets J2.b read test lessons (demo runs only), see below |
+| `J2_OVERRIDE_KEY` | unset | Owner override key, `.env` only, see below |
+
+**Owner override: `J2_OVERRIDE_KEY`.** Set it in `.env` (never committed; `.env.example` lists the name only). A
+message that starts with the key followed by a command is applied by code, not by an agent: `budget +N` adds N
+(the cap doesn't apply), `ship` ends the run as it is (`done_with_open_items`), `drop <item>` leaves out a done-when
+item by number or words. A visible "Owner override applied: ..." note is posted. The key itself is never posted,
+stored in the run files or sent to an agent, and the server redacts it from every response.
 
 **Test switch for live runs: `J2_FORCE_AUDIT_FAIL=<done-when item number>`.** It is off unless the variable is
 set. In cycle 1 only (Audit's first check), Audit's result for that item is overridden to `NEEDS_REVISION`.
