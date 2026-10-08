@@ -24,7 +24,7 @@ G. The Simple view (default page): rendered in headless Chrome for a start scree
 F. J2_FORCE_AUDIT_FAIL=<item>: a forced cycle-1 failure that agents can't tell from a real finding (no test label in
    any prompt), then a real fix, a real re-check and a saved lesson. summary.json exists before the reviewer call.
    J2_MEMORY_TEST_LESSONS=1 lets J2.b read test lessons (off by default), flagged in the chat and the lanes.
-Runs are written to runs/ (or J2_RUNS_DIR); each ended run has summary.json. Memory is off (J2_MEMORY=0) except in
+Runs are written to a temp folder (J2_RUNS_DIR), never the real runs/; each ended run has summary.json. Memory is off (J2_MEMORY=0) except in
 the memory test, which uses its own lessons file.
 """
 import json
@@ -43,6 +43,7 @@ os.environ["J2_MEMORY"] = "0"        # clean runs: the memory tests turn it on
 SESSION_MEMORY = tempfile.mkdtemp(prefix="j2-test-memory-")
 os.environ["J2_MEMORY_FILE"] = os.path.join(SESSION_MEMORY, "lessons.jsonl")
 os.environ["J2_PLAYBOOK_FILE"] = os.path.join(SESSION_MEMORY, "playbooks.jsonl")
+os.environ["J2_RUNS_DIR"] = os.path.join(SESSION_MEMORY, "runs")   # runs/ holds real runs only: report evidence
 REAL_MEMORY = [os.path.join(os.path.dirname(os.path.abspath(__file__)), "memory", f) for f in ("lessons.jsonl", "playbooks.jsonl")]
 
 
@@ -1181,6 +1182,38 @@ def repeats():
     assert run.chat[-1]["who"] == "adaptation" and not run.relay
 
 
+def adaptation_idle():
+    """runs/j2-20261008-110419 msgs 93-103: with less left than the cheapest part, Adaptation said it could propose
+    nothing, Identity answered, and Adaptation was asked again, four times. Once it has said so, it isn't asked again
+    until something changes (budget raised, item dropped, a new Requester answer); Identity asks the Requester."""
+    run = j2.J2Run()
+    run.goal = {"done_when": ["The menu with prices is shown", "Opening hours are listed"]}
+    run.budget, run.spent = 40, 38
+    asked = []
+
+    def call(fn, fmt, task, mock, **k):
+        asked.append(fn)
+        return {"say": "@Identity 2 left, the cheapest part costs more, so I propose nothing.",
+                "act": "POLICY_QUESTION", "workflows": [], "next": "Identity"}
+    run.call = call
+    h = {"kind": "propose", "why": "Identity answered."}
+    run.agent_turns["adaptation"] = 1
+    run._turn_adaptation(h)
+    assert asked == ["adaptation"] and run.turn == "identity" and run.handoff["kind"] == "question", run.handoff
+    run.agent_turns["adaptation"] = 2
+    run._turn_adaptation(h)
+    assert asked == ["adaptation"], "Adaptation was asked again with nothing changed"
+    assert run.turn == "identity" and run.handoff["kind"] == "limit" and run.handoff["out_of_budget"], run.handoff
+    assert run.chat[-1]["who"] == "system" and "isn't asked again" in run.chat[-1]["text"]
+    for change in (lambda: run.decisions.append({"answer": "1"}),               # a new Requester answer
+                   lambda: run.goal["done_when"].pop(),                        # an item dropped
+                   lambda: setattr(run, "budget", run.budget + 1)):            # budget raised (still short)
+        change()
+        n = len(asked)
+        run._turn_adaptation(h)
+        assert len(asked) == n + 1, "a change must let Adaptation re-plan"
+
+
 if __name__ == "__main__":
     for mode in ("0", "1"):
         os.environ["J2_FIXES"] = mode
@@ -1213,7 +1246,8 @@ if __name__ == "__main__":
     limit_answers()
     budget_cap()
     repeats()
-    print("limit answers (turn cap, own amount, drop with reason, done with open items), budget cap, repeats ok")
+    adaptation_idle()
+    print("limit answers (turn cap, own amount, drop with reason, done with open items), budget cap, repeats, idle Adaptation ok")
     page()
     print("E behind-the-scenes view (lanes, detail, timeline, saved runs, redaction, lessons) ok")
     generalist_units()

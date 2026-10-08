@@ -259,6 +259,8 @@ items (recorded in `goal.json` with the reason), and Audit re-checks. "Ship" end
 items` (status `done_with_open_items`) with the open problems listed. An answer always gets a fresh turn
 allowance, so the per-cycle turn cap can't re-ask before the answer is handled. An agent message that repeats the
 same agent's last message word for word isn't posted again (Audit excepted: a re-check with the same result is news); Identity takes the turn.
+Once Adaptation has proposed nothing because less than the cheapest part is left, it isn't asked again until
+something changes (budget raised, an item dropped, a new answer from the Requester): Identity asks the Requester.
 
 ### Adaptation's memory (J2.h learns)
 

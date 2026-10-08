@@ -732,6 +732,7 @@ class J2Run:
         self.lessons_used, self.lessons_saved = [], []
         self.fail_floor = 0          # audits before this index don't count for "same failure twice in a row"
         self.last_limit = None       # the last limit question: state then and the Requester's decision
+        self.adapt_idle = None       # _adapt_state() when Adaptation last proposed nothing for lack of budget
         self._begin_cycle(advance=False)
 
     def _begin_cycle(self, advance=True):
@@ -1894,6 +1895,17 @@ class J2Run:
             return self._turn_dispute("adaptation", h)
         if h.get("kind") == "respond":
             return self._adaptation_responds(h)
+        if self.adapt_idle and self.adapt_idle == self._adapt_state():
+            # Adaptation already said it can propose nothing at this budget, and nothing changed since (no raise, no
+            # drop, no new answer from the Requester). Asking again only repeats it (runs/j2-20261008-110419, msgs
+            # 93-103): Identity takes the turn and asks the Requester.
+            self.agent_turns["adaptation"] -= 1
+            self._event("system", "adaptation_idle", "nothing changed since Adaptation could propose nothing")
+            self.post("system", "Adaptation can't propose anything at this budget and nothing has changed since it said "
+                                "so, so it isn't asked again. Identity asks the Requester.")
+            return self._handoff("identity", kind="limit", out_of_budget=True,
+                                 reason=f"Out of budget: {self.budget - self.spent} of {self.budget} units left, less "
+                                        "than the cheapest rate-card part, so Adaptation can propose nothing.")
         last = self.audits[-1] if self.audits else None
         fails = [{k: r.get(k) for k in ("id", "item", "criterion", "verdict", "note")}
                  for r in (last["results"] + last.get("rubric", []) + last.get("extra_issues", []) if last else [])
@@ -2034,6 +2046,8 @@ class J2Run:
             note = f"Dispute isn't valid: {sid}. Treated as a proposal."
             self._event("adaptation", "invalid_move", note)
         wfs = norm(r.get("workflows"))
+        st = self._adapt_state()
+        self.adapt_idle = st if st[0] and (not wfs or act == "POLICY_QUESTION") else None
         if act == "POLICY_QUESTION":
             self._say("adaptation", r.get("say", ""), "identity", note, act="POLICY_QUESTION")
             return self._handoff("identity", kind="question", frm="adaptation", question=r.get("question") or r.get("say"),
@@ -2069,6 +2083,12 @@ class J2Run:
         self.a_pos = wfs
         self.bargain = {"start": time.time(), "calls": self.calls}      # J2.c starts: hops, minutes, spend
         self._handoff("priority", kind="proposal", table=wfs)
+
+    def _adapt_state(self):
+        """(can't fund a part, budget, done-when, Requester decisions): Adaptation is asked again once any changes."""
+        cheapest = min(RATES.values()) if RATES else 1
+        return (self.budget - self.spent < cheapest, self.budget, tuple((self.goal or {}).get("done_when") or []),
+                len(self.decisions))
 
     def _proposal_conflict(self):
         """The Adaptation <-> Priority negotiation becomes a logged conflict at Priority's first COUNTER or REFUSE."""
