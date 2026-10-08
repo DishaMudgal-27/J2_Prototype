@@ -1490,6 +1490,51 @@ def limit_wording():
     assert re.match(r"Add \d+ units", q["options"][0]) and all("you get" in o for o in q["options"]), q["options"]
 
 
+def open_list():
+    """Follow-up to 6e5aa59 (run 20261008-154537 msg 45: the audit had 1 problem, but reviews, styling and menu links
+    weren't built yet). The list combines the last audit's failures with every checklist item an unfinished workflow
+    covers, one entry per item; the count is its length; items built after the last audit are marked."""
+    def paused_run():
+        old, os.environ["J2_FIXES"] = os.environ.get("J2_FIXES"), "0"
+        run = j2.J2Run()
+        os.environ["J2_FIXES"] = old
+        say(run, BREW_LAB)                                      # done and workable: a clean last audit
+        run.audits[-1]["results"][0].update(verdict="NEEDS_REVISION", **{"pass": False})   # 1 audit failure: item 1
+        return run
+
+    def unfinished(run, covers, status="registered"):
+        run.workflows.append({"id": f"W-{len(run.workflows) + 1}", "name": "x", "status": status, "covers": covers})
+
+    def ask(run):
+        run._identity_limit({"reason": f"Cycle {run.cycle} used {j2.MAX_TURNS} turns (the per-cycle cap) without "
+                                       "finishing."})
+        text = run.chat[-1]["text"]
+        listed = text.split("Still not right: ")[1].split(".")[0].split("; ")
+        return text, listed, run.paused["questions"][0]["options"][-1]
+
+    # (a) 1 audit failure + 3 unfinished workflows (registered, running, unfunded) -> 4 items, "4 things"
+    run = paused_run()
+    unfinished(run, [2]), unfinished(run, [3], "running"), unfinished(run, [5], "unfunded")
+    text, listed, ship = ask(run)
+    crit = run.goal["done_when"]
+    assert len(listed) == 4 and ship.endswith("with 4 things still not right"), (listed, ship)
+    assert listed[0] == crit[0] and listed[1] == f"{crit[1]} (not built yet)", listed
+
+    # (b) an item both failing in the audit and covered by an unfinished workflow appears once
+    run = paused_run()
+    unfinished(run, [1, 2])
+    text, listed, ship = ask(run)
+    assert listed == [crit[0], f"{crit[1]} (not built yet)"] and ship.endswith("with 2 things still not right"), listed
+
+    # (c) the site is newer than the last audit: what was built since is marked, and the message says so
+    run = paused_run()
+    run.sites.append(run.sites[-1])
+    run.workflows.append({"id": "W-99", "name": "y", "status": "done", "covers": [1, 4], "version": len(run.sites)})
+    text, listed, ship = ask(run)
+    assert listed == [f"{crit[0]} (not checked yet)", f"{crit[3]} (not checked yet)"], listed
+    assert "built after the last check, so they're not checked yet" in text and ship.endswith("with 2 things still not right"), text
+
+
 if __name__ == "__main__":
     for mode in ("0", "1"):
         os.environ["J2_FIXES"] = mode
@@ -1527,6 +1572,7 @@ if __name__ == "__main__":
     two_audiences()
     audiences_everywhere()
     limit_wording()
+    open_list()
     simple_messages()
     owner_override()
     form_submit()

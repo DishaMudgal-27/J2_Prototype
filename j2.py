@@ -1144,7 +1144,9 @@ class J2Run:
         say = to_requester(say, question=not questions)
         if gaps is not None:
             say = " ".join(re.split(r"(?<=[.!?])\s+", say)[:2]) + (
-                " Still not right: " + "; ".join(str(g).rstrip(". ") for g in gaps) + "." if gaps else "")
+                " Still not right: " + "; ".join(re.sub(r"\.(?= \(not|$)", "", str(g)) for g in gaps) + "."
+                if gaps else "") + (" Some parts were built after the last check, so they're not checked yet."
+                                    if any(str(g).endswith("(not checked yet)") for g in gaps) else "")
         if len(questions) > 1:
             # One question per message: several become one list of what to send (options can't be kept).
             items = [re.sub(r"\?$", "", q["question"]).strip() for q in questions]
@@ -1776,12 +1778,7 @@ class J2Run:
         reason, last = h.get("reason") or "", self.audits[-1] if self.audits else None
         fails = workable(last)
         items = [r for r in (last or {}).get("results", []) if not r["pass"]]
-        # One list for the message and the count: the failing items and design checks by name, then what the
-        # browser check found.
-        mech = (last or {}).get("mechanical") or {}
-        gaps = ([r["criterion"] for r in items] + [r["criterion"] for r in (last or {}).get("rubric", []) if not r["pass"]]
-                + (j2_check.problems(mech) if mech.get("available") else ["the browser check didn't run"])
-                if last else ["nothing has been checked yet"])
+        gaps = self._open_list(last, items)
         cheapest = min(RATES.values()) if RATES else 1
         room = BUDGET_CAP - self.budget
         short = self.budget - self.spent < cheapest       # whatever the limit was, nothing new can be funded
@@ -1833,6 +1830,37 @@ class J2Run:
         self._ask_user(r.get("say") or plain_missing, [q], "limit", gaps=gaps, handoff={"kind": "requester_answered", "limit": reason,
                                                                        "choices": choices, "resume": h.get("resume"),
                                                                        "failing_items": [x["item"] for x in items]})
+
+    def _open_list(self, last, items):
+        """One list for the decision message and its count. (1) What the last audit found: failing checklist items,
+        design checks, browser-check problems. (2) Every checklist item an unfinished workflow covers (registered,
+        held, running, failed or unfunded): mid-cycle, the audit can't know about them. One entry per checklist item.
+        Items built after the last audit are marked "(not checked yet)"."""
+        crit = (self.goal or {}).get("done_when") or []
+        out = {}
+        for r in items:
+            out[("item", r["item"])] = r["criterion"]
+        # ponytail: covers are item numbers from registration; a drop since then renumbers them. Store criteria on
+        # the workflow if drops mid-cycle become common.
+        for w in self.workflows:
+            if w["status"] != "done":
+                for i in w.get("covers") or []:
+                    if 1 <= i <= len(crit):
+                        out.setdefault(("item", i), f"{crit[i - 1]} (not built yet)")
+        for r in (last or {}).get("rubric", []):
+            if not r["pass"]:
+                out.setdefault(("rubric", r["id"]), r["criterion"])
+        mech = (last or {}).get("mechanical") or {}
+        for p in (j2_check.problems(mech) if mech.get("available") else ["the browser check didn't run"]) if last else []:
+            out.setdefault(("check", p), p)
+        if last and last["version"] < len(self.sites):
+            for w in self.workflows:
+                if w["status"] == "done" and w.get("version", 0) > last["version"]:
+                    for i in w.get("covers") or []:
+                        if 1 <= i <= len(crit):
+                            text = re.sub(r" \((?:not built yet|not checked yet)\)$", "", out.get(("item", i), crit[i - 1]))
+                            out[("item", i)] = f"{text} (not checked yet)"
+        return list(out.values()) or ([] if last else ["nothing has been checked yet"])
 
     def _identity_audit(self, h):
         """J2.h: is the site workable? Code decides that (workable()); Identity declares done with Audit's evidence.
