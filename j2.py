@@ -255,7 +255,8 @@ def clean_questions(raw):
 def numbered(qs):
     def opt(q, j, o):
         add = q["budget"][j - 1] if q.get("budget") else 0
-        return f"\n   Option {j}: {o}" + (f" [adds {add} units to the budget]" if add else "")
+        return f"\n   Option {j}: {o}" + (f" [adds {add} units to the budget; the budget can't go above {BUDGET_CAP}]"
+                                            if add else "")
     return "\n".join(f"{i}. {q['question']}" + "".join(opt(q, j, o) for j, o in enumerate(q["options"], 1))
                      for i, q in enumerate(qs, 1))
 
@@ -270,6 +271,15 @@ def option_picked(q, answer):
     texts = {j for j, o in enumerate(q["options"], 1) if o and o.lower() in str(answer).lower()}
     hits = nums | texts
     return hits.pop() - 1 if len(hits) == 1 else None
+
+
+def custom_amount(q, answer):
+    """(index of the option that adds budget, amount) when the answer types its own number of units instead of an
+    option number, e.g. "25 units" or "add 25"; else None."""
+    j = next((j for j, b in enumerate(q.get("budget") or []) if b), None)
+    n = [int(x) for x in re.findall(r"\d+", str(answer))]
+    n = [x for x in n if x > len(q["options"])] or (n if re.search(r"\bunits?\b|\badd\b|\bmore\b", str(answer), re.I) else [])
+    return (j, n[0]) if j is not None and n and n[0] > 0 else None
 
 
 def brief_list(pos):
@@ -721,6 +731,7 @@ class J2Run:
         self.playbooks_used, self.playbook_saved = [], None
         self.lessons_used, self.lessons_saved = [], []
         self.fail_floor = 0          # audits before this index don't count for "same failure twice in a row"
+        self.last_limit = None       # the last limit question: state then and the Requester's decision
         self._begin_cycle(advance=False)
 
     def _begin_cycle(self, advance=True):
@@ -980,6 +991,17 @@ class J2Run:
 
     def _say(self, who, text, nxt=None, note=None, **meta):
         text = text or ""
+        if who in ("adaptation", "priority", "coordination"):
+            # The same message as this agent's last one adds nothing: don't post it again, Identity takes the turn.
+            # Not Audit: its message reports a fresh check, and "the same result again" is news.
+            norm = lambda t: " ".join(re.sub(r"^@[\w-]+[,:]?\s*", "", t or "").lower().split())
+            last = next((m for m in reversed(self.chat) if m["who"] == who), None)
+            if last and norm(last["text"]) == norm(text):
+                self._event(who, "repeat", "same message as its last one, not posted again")
+                self.post("system", f"{NAMES[who]} repeated its last message unchanged, so it isn't posted again. "
+                                    "Identity takes the turn.")
+                self.relay = {"from": who, "text": f"You repeated your last message unchanged: {text}"}
+                return last
         if who in ROUTES and who != "identity" and (self.relay or TO_USER.search(text)):
             if not self.relay:
                 self._event(who, "redirect", "addressed the Requester in the message, routed to Identity")
@@ -1011,6 +1033,17 @@ class J2Run:
         say = re.sub(r"^@\w+[,:]?\s*", "", str(say or "")).strip()
         if kind in ("approval", "ruling_budget"):   # these apply their own amount after the answer; don't apply twice
             questions = [{k: v for k, v in q.items() if k != "budget"} for q in questions]
+        room, out = BUDGET_CAP - self.budget, []
+        for q in questions:   # never offer budget the cap won't allow; numbered() shows the cap in the option text
+            q = dict(q)
+            if q.get("budget"):
+                keep = [j for j, b in enumerate(q["budget"]) if not b or room > 0]
+                q["options"] = [q["options"][j] for j in keep]
+                q["budget"] = [min(q["budget"][j], room) for j in keep]
+                if not any(q["budget"]):
+                    del q["budget"]
+            out.append(q)
+        questions = out
         m = self.post("identity", "@Requester " + say + ("\n" + numbered(questions) if questions else ""),
                       act="ASK_REQUESTER", to_user=True, next="user", pause=kind, **meta)
         self.paused = {"kind": kind, "questions": questions, "to": to, "handoff": handoff or {}, "msg": m["id"]}
@@ -1055,12 +1088,15 @@ class J2Run:
         if p:
             # The Requester answered Identity: resume where the run stopped. Answers don't renew the cycle allowance.
             self.paused = None
+            self.cycle_turns = 0       # the answer is new information: without this the turn cap re-asked at once
             d = {"kind": p["kind"], "asked": [q["question"] for q in p["questions"]], "answer": last_user}
             self.decisions.append(d)
             # ponytail: one budget question per pause is mapped; Identity asks one decision question at a time
             bq = next((q for q in p["questions"] if q.get("budget")), None)
             if bq:
-                i = option_picked(bq, last_user)
+                i, add = option_picked(bq, last_user), None
+                if i is None and custom_amount(bq, last_user):
+                    i, add = custom_amount(bq, last_user)     # "Other amount": the Requester typed a number of units
                 if i is None and not p.get("reasked"):
                     # Don't guess which option changes the budget: Identity asks once more.
                     d["unclear"] = True
@@ -1072,15 +1108,16 @@ class J2Run:
                 elif i is None:
                     self.post("system", "The answer still doesn't name one option, so no budget change was applied.")
                 else:
-                    d["option"], d["budget_added"] = i + 1, bq["budget"][i]
-                    self._raise_budget(bq["budget"][i], f"the Requester chose option {i + 1}: {bq['options'][i]}")
+                    d["option"], d["budget_added"] = i + 1, add or bq["budget"][i]
+                    self._raise_budget(d["budget_added"], f"the Requester chose option {i + 1}"
+                                       + (f" with their own amount ({add})" if add else f": {bq['options'][i]}"))
         if self.paused:
             pass                                        # re-asked above; the run waits again
         elif p:
             h = dict(p["handoff"])
             if h.get("why"):
                 h["why"] += f" The Requester answered: {last_user}"
-            self._handoff(p["to"], **h, answer=last_user, asked=p["questions"])
+            self._handoff(p["to"], **h, answer=last_user, asked=p["questions"], picked=d.get("option"))
         else:
             if not self.goal:
                 self.request = last_user
@@ -1466,7 +1503,7 @@ class J2Run:
         limit, choices, answer = h.get("limit"), h.get("choices") or [], h.get("answer") or ""
         picked = None
         if limit and h.get("asked"):
-            i = option_picked(h["asked"][0], answer)
+            i = h["picked"] - 1 if h.get("picked") else option_picked(h["asked"][0], answer)
             picked = choices[i] if i is not None and i < len(choices) else None
         g = self.goal or {}
         tbc = g.get("to_be_confirmed") or []
@@ -1498,7 +1535,8 @@ class J2Run:
                       "gave goes in confirmed; a fact they say they can't give yet goes in still_to_be_confirmed (that "
                       "done-when item is not met until they confirm it)."
                       + (f"\nThis answers a limit question ({limit}). decision: continue (keep working), drop (drop the "
-                         "failing done-when items) or ship (ship the site as it is)." if limit else ""), mock)
+                         "failing done-when items) or ship (ship the site as it is). The Requester's decision is final: "
+                         "you may say what won't fit in the budget, never refuse it." if limit else ""), mock)
         decision = picked or (str(r.get("decision") or "").lower() if limit else "continue")
         if decision not in ("continue", "drop", "ship") or (limit and decision not in choices):
             decision = "continue" if "continue" in choices or not limit else "ship"
@@ -1512,18 +1550,23 @@ class J2Run:
         self.fail_floor = len(self.audits)       # the Requester's answer is new information
         if self.decisions:
             self.decisions[-1]["decision"] = decision
+        if limit and self.last_limit:
+            self.last_limit["decision"] = decision
         if decision == "ship":
             self.post("identity", address(r.get("say") or "Shipping the site as it is.", "user"), to_user=True,
                       next="user", done=True)
             fails = workable(self.audits[-1]) if self.audits else ["nothing was built"]
-            self.outcome = (f"Shipped as is on the Requester's decision ({limit or 'their answer'}). Still not "
-                            f"workable: {'; '.join(fails)}.")
+            self.outcome = (f"Done with open items: shipped as is on the Requester's decision "
+                            f"({limit or 'their answer'}). Still not workable: {'; '.join(fails)}.")
             self.turn = None
             return
         if decision == "drop":
             gone = [crit[i - 1] for i in h.get("failing_items") or [] if 1 <= i <= len(crit)]
             g["done_when"] = [c for c in crit if c not in gone]
             g["dropped_by_requester"] = (g.get("dropped_by_requester") or []) + gone
+            g["dropped_reasons"] = (g.get("dropped_reasons") or []) + [
+                {"criterion": c, "reason": f"The Requester chose to leave it out ({limit or 'their answer'}): {answer}"}
+                for c in gone]
             g["to_be_confirmed"] = [t for t in g["to_be_confirmed"] if t["criterion"] not in gone]
             self.save("goal.json", g)
             self._say("identity", r.get("say") or "", "audit", None)
@@ -1554,12 +1597,18 @@ class J2Run:
         fails = workable(last)
         items = [r for r in (last or {}).get("results", []) if not r["pass"]]
         cheapest = min(RATES.values()) if RATES else 1
-        add = min(max(LIMIT_ADD, cheapest), BUDGET_CAP - self.budget) if h.get("out_of_budget") else 0
+        room = BUDGET_CAP - self.budget
+        short = self.budget - self.spent < cheapest       # whatever the limit was, nothing new can be funded
+        add = min(max(LIMIT_ADD, cheapest), room) if short else 0
+        # Keep working only when it can do something: with no money left it needs a raise the cap allows. And after
+        # "keep working" changed nothing (same site, audits, spend), the same option isn't offered again.
+        state = (len(self.sites), len(self.audits), self.spent)
+        stale = self.last_limit and self.last_limit["state"] == state and self.last_limit["decision"] == "continue"
         opts, budget, choices = [], [], []
-        if not h.get("out_of_budget") or add > 0:
-            opts.append("Keep working: " + (f"add {add} units to the budget and " if add else "")
-                        + f"allow {MAX_CYCLES} more cycles" + (" (give the missing facts in your answer)"
-                                                               if h.get("tbc") else ""))
+        if (not short or self.budget + add - self.spent >= cheapest) and not stale:
+            opts.append("Keep working: " + (f"add {add} units, or type your own number up to {room}, and "
+                                            if add else "") + f"allow {MAX_CYCLES} more cycles"
+                        + (" (give the missing facts in your answer)" if h.get("tbc") else ""))
             budget.append(add)
             choices.append("continue")
         if items:
@@ -1577,6 +1626,7 @@ class J2Run:
                       f"LIMIT: {reason}\nWHAT STILL STOPS THE SITE BEING WORKABLE: {json.dumps(fails, ensure_ascii=False)}"
                       f"\nTHE OPTIONS CODE WILL OFFER: {json.dumps(opts, ensure_ascii=False)}\nTell the Requester.",
                       lambda: json.dumps({"say": f"{reason} Still open: {'; '.join(fails) or 'nothing'}."}))
+        self.last_limit = {"state": state, "decision": None}
         self._ask_user(r.get("say") or reason, [q], "limit", handoff={"kind": "requester_answered", "limit": reason,
                                                                        "choices": choices,
                                                                        "failing_items": [x["item"] for x in items]})
@@ -2972,7 +3022,7 @@ class J2Run:
     def _write_summary(self):
         """runs/<run>/summary.json when a run ends (done, stopped, out of budget or crashed). Code only, no AI call."""
         o = self.outcome or ""
-        status = next((k for p, k in (("Done", "done"), ("Shipped", "shipped"), ("Crashed", "crashed"))
+        status = next((k for p, k in (("Done with open items", "done_with_open_items"), ("Done", "done"), ("Crashed", "crashed"))
                        if o.startswith(p)), "stopped")
         last = self.audits[-1] if self.audits else None
         self.save("summary.json", {

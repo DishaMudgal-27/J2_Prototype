@@ -251,9 +251,14 @@ when one of these is hit:
 - 30 turns in one cycle
 
 The same question comes up when only to-be-confirmed items are left. "Keep working" adds `J2_LIMIT_ADD`
-(default 30) budget units when the budget ran out (capped at `J2_BUDGET_CAP`) and allows a fresh set of cycles.
-"Drop" removes the failing done-when items, and Audit re-checks. "Ship" ends the run with status `shipped` and
-the open problems listed.
+(default 30) budget units when the budget ran out and allows a fresh set of cycles. The option text shows the
+cap (`J2_BUDGET_CAP`), and it is offered only when it can be applied: never when the cap leaves no room, and not
+again after "keep working" changed nothing. Instead of the option number, the Requester can type their own amount
+("25 units"); code adds it, up to the cap, and Adaptation re-plans within it. "Drop" removes the failing done-when
+items (recorded in `goal.json` with the reason), and Audit re-checks. "Ship" ends the run as `Done with open
+items` (status `done_with_open_items`) with the open problems listed. An answer always gets a fresh turn
+allowance, so the per-cycle turn cap can't re-ask before the answer is handled. An agent message that repeats the
+same agent's last message word for word isn't posted again (Audit excepted: a re-check with the same result is news); Identity takes the turn.
 
 ### Adaptation's memory (J2.h learns)
 
@@ -384,7 +389,7 @@ bound.
 When a run ends, `runs/j2-*/summary.json` is written at once, before the reviewer's AI call (which can take a
 minute or more), so it exists as soon as the chat says the run ended. It is also written when the reviewer
 fails or the run crashes. It records (written by code, no AI call):
-- run: mode, model, brief, status (`done`, `shipped`, `stopped`, `crashed`), AI calls
+- run: mode, model, brief, status (`done`, `done_with_open_items`, `stopped`, `crashed`), AI calls
 - budget: start, granted, used, raises
 - what happened: questions to you, conflicts, validator rejections, HOLDs, audits, limits hit
 - the result: workable problems still open, to-be-confirmed facts, items you dropped, each done-when item's

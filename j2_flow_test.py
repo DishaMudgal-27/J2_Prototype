@@ -324,9 +324,9 @@ def same_failure():
 
     run2 = failing_run()
     say(run2, BREW_LAB)
-    say(run2, "ship it as is")
+    say(run2, "3, ship it as is")
     s = summary(run2)
-    assert run2.outcome.startswith("Shipped") and s["status"] == "shipped" and s["workable"], run2.outcome
+    assert run2.outcome.startswith("Done with open items") and s["status"] == "done_with_open_items" and s["workable"], run2.outcome
 
 
 def cycle_limit():
@@ -1111,6 +1111,76 @@ def page():
         os.environ.pop("J2_TEST_API_KEY", None)
 
 
+def limit_answers():
+    """runs/j2-20261008-110419: the Requester answered a limit question while the cycle was at its turn cap, and the
+    cap fired again before the answer was handled, so Identity re-asked forever. Now every answer is handled:
+    "25 units" adds that amount, "2" drops the failing items with the reason, "3" ends Done with open items."""
+    def at_cap():
+        old, os.environ["J2_FIXES"] = os.environ.get("J2_FIXES"), "0"   # fix (a) asks about a ruling first
+        run = j2.J2Run()
+        os.environ["J2_FIXES"] = old
+        run.budget = 12                          # out of budget after the first cycle: a limit question
+        say(run, BREW_LAB)
+        assert run.paused and run.paused["kind"] == "limit", run.outcome
+        run.cycle_turns = j2.MAX_TURNS           # the live run's state when the Requester answered
+        return run
+    run = at_cap()
+    say(run, "i want a different option so go with 25 units")
+    assert run.raises and run.raises[0]["asked"] == 25 and run.raises[0]["to"] == 37, run.raises
+    assert "own amount" in run.raises[0]["why"] and run.decisions[0]["option"] == 1, run.decisions
+    assert not any(e["type"] == "limit" and "turns" in e["detail"] for e in run.events), "turn cap fired on the answer"
+
+    run = at_cap()
+    asked = run.paused["questions"]
+    say(run, "2")
+    g = run.goal
+    assert g["dropped_by_requester"] and len(g["dropped_reasons"]) == len(g["dropped_by_requester"]), g
+    assert all(c not in g["done_when"] for c in g["dropped_by_requester"]) and "leave it out" in g["dropped_reasons"][0]["reason"]
+    assert not (run.paused and run.paused["questions"] == asked), "asked the same question again"
+
+    run = at_cap()
+    say(run, "Option 3")
+    assert run.outcome.startswith("Done with open items") and not run.paused, run.outcome
+    assert summary(run)["status"] == "done_with_open_items"
+
+
+def budget_cap():
+    """The cap shows in the option text; an option that adds budget the cap won't allow is never offered, and
+    "keep working" isn't offered when it can't fund anything or when it already changed nothing."""
+    run = j2.J2Run()
+    q = {"question": "More?", "options": ["Add more building", "Ship"], "budget": [30, 0]}
+    run.budget = j2.BUDGET_CAP - 10
+    run._ask_user("x", [q], "question")
+    assert run.paused["questions"][0]["budget"] == [10, 0], run.paused
+    assert f"can't go above {j2.BUDGET_CAP}" in run.chat[-1]["text"], run.chat[-1]["text"]
+    run.budget = j2.BUDGET_CAP
+    run._ask_user("x", [q], "question")
+    assert run.paused["questions"][0]["options"] == ["Ship"] and "budget" not in run.paused["questions"][0], run.paused
+    cheapest = min(j2.RATES.values())
+    run.spent = run.budget - cheapest + 1                       # less than the cheapest part left, no room to add
+    run._identity_limit({"reason": "Out of budget", "out_of_budget": True})
+    assert not any(o.startswith("Keep working") for o in run.paused["questions"][0]["options"]), run.paused
+    run.spent = 0                                               # money left: keep working is offered once
+    run._identity_limit({"reason": "turn cap"})
+    assert run.paused["questions"][0]["options"][0].startswith("Keep working"), run.paused
+    run.last_limit["decision"] = "continue"                     # ...and changed nothing: not offered again
+    run._identity_limit({"reason": "turn cap"})
+    assert not any(o.startswith("Keep working") for o in run.paused["questions"][0]["options"]), run.paused
+
+
+def repeats():
+    """An agent message the same as that agent's last one isn't posted again; Identity takes the turn."""
+    run = j2.J2Run()
+    run._say("adaptation", "@Identity No budget left, so I propose nothing.", "identity")
+    n = len(run.chat)
+    m = run._say("adaptation", "No budget left,  so I propose NOTHING.", "identity")
+    assert m is run.chat[n - 1] and run.chat[n:] and all(x["who"] == "system" for x in run.chat[n:]), run.chat[n:]
+    assert run.relay and run.relay["from"] == "adaptation" and any(e["type"] == "repeat" for e in run.events)
+    run.relay = None
+    run._say("adaptation", "@Identity A different message.", "identity")
+    assert run.chat[-1]["who"] == "adaptation" and not run.relay
+
+
 if __name__ == "__main__":
     for mode in ("0", "1"):
         os.environ["J2_FIXES"] = mode
@@ -1140,6 +1210,10 @@ if __name__ == "__main__":
     redirect()
     workable_unit()
     playbook_matching()
+    limit_answers()
+    budget_cap()
+    repeats()
+    print("limit answers (turn cap, own amount, drop with reason, done with open items), budget cap, repeats ok")
     page()
     print("E behind-the-scenes view (lanes, detail, timeline, saved runs, redaction, lessons) ok")
     generalist_units()

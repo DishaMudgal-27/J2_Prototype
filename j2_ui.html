@@ -467,7 +467,7 @@ const PLAIN = [[/@[\w-]+[,:]?/g, ""], [/\(?\bJ2(?:\.[a-h]|_[A-Z_]+(?:=\S*)?)?\)?
 const plain = t => PLAIN.reduce((a, [r, w]) => a.replace(r, w), String(t || "")).replace(/[ \t]{2,}/g, " ")
   .replace(/\s+([.,;:!?])/g, "$1").replace(/\(\s*\)/g, "").trim().replace(/(^|[.!?]\s+|\n)([a-z])/g, (m, a, b) => a + b.toUpperCase());
 const STAGES = ["Understanding your request", "Planning", "Building", "Checking", "Ready"];
-const isReady = s => /^(Done|Shipped)/.test(s.outcome || "") && !s.paused && s.status !== "running";
+const isReady = s => /^Done/.test(s.outcome || "") && !s.paused && s.status !== "running";
 const failed = s => !!s.error || /^(Crashed|Stopped)/.test(s.outcome || "");
 function stage(s){ if (isReady(s)) return 4; const n = s.step || 0; return n <= 1 ? 0 : n <= 5 ? 1 : n === 6 ? 2 : 3; }
 function parseAsk(text){   // "@Requester say\n1. question\n   Option 1: text" -> {say, qs:[{q, opts}]}
@@ -521,7 +521,7 @@ function renderSimple(s){
       else out += `<div class="sb team"><small>Your website team</small>${esc(plain(m.text))}</div>`;
     }
   });
-  if (isReady(s)) out += `<div class="ready"><h2>Your website is ready${/^Shipped/.test(s.outcome) ? " (some things were left as they are)" : ""}</h2>
+  if (isReady(s)) out += `<div class="ready"><h2>Your website is ready${/^Done with open items/.test(s.outcome) ? " (some things were left as they are)" : ""}</h2>
     <div class="acts"><a href="/site/latest${runQ().replace("&", "?")}" target="_blank" rel="noopener">Open full screen</a>
     <a href="/site/latest${runQ().replace("&", "?")}" download="my-website.html">Download the HTML file</a>
     <button type="button" id="sask-change">Ask for a change</button></div></div>`;
