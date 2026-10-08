@@ -1838,15 +1838,13 @@ class J2Run:
         Items built after the last audit are marked "(not checked yet)"."""
         crit = (self.goal or {}).get("done_when") or []
         out = {}
-        for r in items:
-            out[("item", r["item"])] = r["criterion"]
-        # ponytail: covers are item numbers from registration; a drop since then renumbers them. Store criteria on
-        # the workflow if drops mid-cycle become common.
+        for r in items:                     # by text: an item dropped since this audit is gone, the rest renumbered
+            if r["criterion"] in crit:
+                out[("item", crit.index(r["criterion"]) + 1)] = r["criterion"]
         for w in self.workflows:
             if w["status"] != "done":
-                for i in w.get("covers") or []:
-                    if 1 <= i <= len(crit):
-                        out.setdefault(("item", i), f"{crit[i - 1]} (not built yet)")
+                for i in self._wf_items(w):
+                    out.setdefault(("item", i), f"{crit[i - 1]} (not built yet)")
         for r in (last or {}).get("rubric", []):
             if not r["pass"]:
                 out.setdefault(("rubric", r["id"]), r["criterion"])
@@ -1856,10 +1854,9 @@ class J2Run:
         if last and last["version"] < len(self.sites):
             for w in self.workflows:
                 if w["status"] == "done" and w.get("version", 0) > last["version"]:
-                    for i in w.get("covers") or []:
-                        if 1 <= i <= len(crit):
-                            text = re.sub(r" \((?:not built yet|not checked yet)\)$", "", out.get(("item", i), crit[i - 1]))
-                            out[("item", i)] = f"{text} (not checked yet)"
+                    for i in self._wf_items(w):
+                        text = re.sub(r" \((?:not built yet|not checked yet)\)$", "", out.get(("item", i), crit[i - 1]))
+                        out[("item", i)] = f"{text} (not checked yet)"
         return list(out.values()) or ([] if last else ["nothing has been checked yet"])
 
     def _identity_audit(self, h):
@@ -2625,7 +2622,7 @@ class J2Run:
         Checks: required fields present, priced from the rate card, nothing Priority refused, cost fits what's left."""
         remaining, registered, refused, defaults = self.budget - self.spent, [], [], []
         covered = {i for x in self.workflows if x["status"] in ("registered", "held", "running", "done")
-                   for i in x.get("covers") or []}
+                   for i in self._wf_items(x)}
         for w in norm(agreed):
             c, name = granted(w), w.get("name") or "?"
             missing = [f for f in self.REQUIRED if not (w.get(f) or (f == "goal_gap" and w.get("purpose")))]
@@ -2654,6 +2651,7 @@ class J2Run:
             covered |= set(self._covers(w))
             wf = {"id": f"W-{len(self.workflows) + 1}", "proposal_id": w.get("id"), "name": w.get("name", "workflow"),
                   "covers": self._covers(w), "fixes": [str(f) for f in w.get("fixes") or []],
+                  "covers_text": [((self.goal or {}).get("done_when") or [])[i - 1] for i in self._covers(w)],
                   "purpose": w.get("purpose") or w.get("goal_gap", ""), "cost": c, "estimate": w.get("estimate", wf_cost(w)),
                   "envelope": env, "charged": True, "calls_used": 0, "retries_used": 0, "outputs": w.get("outputs"),
                   "completion_check": w.get("completion_check", ""), "dependencies": w.get("dependencies") or [],
@@ -2673,6 +2671,15 @@ class J2Run:
         self._recalc_spent()
         self.save("workflows.json", self.workflows)
         return registered, refused, defaults
+
+    def _wf_items(self, w):
+        """The current done-when item numbers a registered workflow covers, matched by the item text stored at
+        registration (covers_text): a drop renumbers the list, so numbers alone could point at the wrong item, and a
+        dropped item is simply gone. Runs from before covers_text fall back to the numbers."""
+        crit = (self.goal or {}).get("done_when") or []
+        if "covers_text" in w:
+            return [crit.index(t) + 1 for t in w["covers_text"] if t in crit]
+        return [i for i in w.get("covers") or [] if isinstance(i, int) and 1 <= i <= len(crit)]
 
     def _covers(self, w):
         n = len((self.goal or {}).get("done_when") or [])
@@ -2847,7 +2854,7 @@ class J2Run:
         mine = self.sections.get(sid)
         brief = {k: w.get(k) for k in ("id", "name", "purpose", "outputs", "completion_check", "envelope", "revises",
                                         "covers", "fixes")}
-        brief["covers_items"] = [((self.goal or {}).get("done_when") or [""] * 99)[i - 1] for i in w.get("covers") or []]
+        brief["covers_items"] = [((self.goal or {}).get("done_when") or [])[i - 1] for i in self._wf_items(w)]
 
         def mock():
             head, body = mock_section(w, self.goal, self.sections)
@@ -3075,9 +3082,13 @@ class J2Run:
 
     def paid_items(self):
         """Done-when items some built workflow paid for: its covers, plus the items of the findings it fixed."""
-        by_finding = {r["id"]: r["item"] for a in self.audits for r in a["results"] if isinstance(r.get("item"), int)}
+        crit = (self.goal or {}).get("done_when") or []
+        # a finding's item by its text (an older audit row without one: its number)
+        by_finding = {r["id"]: (crit.index(r["criterion"]) + 1 if r.get("criterion") in crit else
+                                None if r.get("criterion") else r.get("item"))
+                      for a in self.audits for r in a["results"]}
         return {i for w in self.workflows if w["status"] == "done"
-                for i in list(w.get("covers") or []) + [by_finding.get(f) for f in w.get("fixes") or []] if i}
+                for i in self._wf_items(w) + [by_finding.get(f) for f in w.get("fixes") or []] if i}
 
     def _flag_unpaid(self, results):
         """Cost follows the work, checked on the page: a done-when item that passes although no workflow paid for it

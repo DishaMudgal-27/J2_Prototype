@@ -1535,6 +1535,39 @@ def open_list():
     assert "built after the last check, so they're not checked yet" in text and ship.endswith("with 2 things still not right"), text
 
 
+def covers_by_text():
+    """Follow-up to 0543422: a workflow stores the text of the done-when items it covers, so dropping an item (which
+    renumbers the list) can't point an unfinished workflow at the wrong item, and a dropped item never shows."""
+    old, os.environ["J2_FIXES"] = os.environ.get("J2_FIXES"), "0"
+    run = j2.J2Run()
+    os.environ["J2_FIXES"] = old
+    say(run, BREW_LAB)
+    crit = list(run.goal["done_when"])
+    run.budget, run.p_refused = 500, {}
+    reg, refused, _ = run._register([
+        {"name": f"Item {i}", "goal_gap": crit[i - 1], "outputs": ["x"], "completion_check": "y",
+         "parts": ["form" if "form" in crit[i - 1].lower() else "page_section"], "covers": [i]} for i in (4, 5, 6)])
+    assert len(reg) == 3 and not refused, refused
+    assert [w["covers_text"] for w in reg] == [[crit[3]], [crit[4]], [crit[5]]], [w.get("covers_text") for w in reg]
+    run.audits[-1]["results"][3].update(verdict="NEEDS_REVISION", **{"pass": False})     # item 4 also fails the audit
+    run._override("drop 4")                                                          # renumbers: 5 -> 4, 6 -> 5
+    assert run.goal["done_when"] == crit[:3] + crit[4:], run.goal["done_when"]
+    items = [r for r in run.audits[-1]["results"] if not r["pass"]]
+    listed = run._open_list(run.audits[-1], items)
+    # (a) the unfinished workflows still name their own items, at their new numbers
+    assert listed == [f"{crit[4]} (not built yet)", f"{crit[5]} (not built yet)"], listed
+    assert [run._wf_items(w) for w in reg] == [[], [4], [5]], [run._wf_items(w) for w in reg]
+    # (b) the dropped item never appears: not from its workflow, not from the audit that still lists it
+    assert not any(crit[3] in x for x in listed), listed
+    # (c) runs saved before covers_text still load and fall back to the numbers
+    for w in run.workflows:
+        w.pop("covers_text", None)
+    run.save("workflows.json", run.workflows)
+    snap = j2.saved_snapshot(os.path.basename(run.dir))
+    assert snap and len(snap["workflows"]) == len(run.workflows), "an old run must load"
+    assert run._wf_items(reg[1]) == [5] and run._open_list(run.audits[-1], []), "old workflows use their numbers"
+
+
 if __name__ == "__main__":
     for mode in ("0", "1"):
         os.environ["J2_FIXES"] = mode
@@ -1573,6 +1606,7 @@ if __name__ == "__main__":
     audiences_everywhere()
     limit_wording()
     open_list()
+    covers_by_text()
     simple_messages()
     owner_override()
     form_submit()
