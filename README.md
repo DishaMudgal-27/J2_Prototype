@@ -259,6 +259,13 @@ items (recorded in `goal.json` with the reason), and Audit re-checks. "Ship" end
 items` (status `done_with_open_items`) with the open problems listed. An answer always gets a fresh turn
 allowance, so the per-cycle turn cap can't re-ask before the answer is handled. An agent message that repeats the
 same agent's last message word for word isn't posted again (Audit excepted: a re-check with the same result is news); Identity takes the turn.
+This decision question is the only place the Requester is offered more budget, leaving items out or finishing as
+is, whoever needs the decision: Identity can't offer these in its own questions (it sets `needs_decision`, with an
+estimate in `budget_needed`), and when the site isn't workable and the money can't fund a part, code asks it
+directly. The amount in the option text is what code adds; when the cap limits it, the text says "(the most
+allowed)". A typed answer is applied like a click: "2. Add 25 more. Leave out the lookbook and reviews" adds 25 and
+drops those items; Audit then re-checks against the new done-when before anything else runs. "Finish as is" ends
+the run as `done_with_open_items`.
 Once Adaptation has proposed nothing because less than the cheapest part is left, it isn't asked again until
 something changes (budget raised, an item dropped, a new answer from the Requester): Identity asks the Requester.
 

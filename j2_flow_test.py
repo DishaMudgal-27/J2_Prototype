@@ -203,8 +203,9 @@ def ruling_over_budget():
 
 def policy_budget(fixes):
     """Bug from runs/j2-20261006-130411: the Requester picked a budget-raise option on a policy question and the
-    ledger didn't change. Adaptation asks a policy question; Identity offers an option that adds 40 units; the first
-    answer is unclear (Identity asks once more); "option 1" raises the budget by code; the work is granted and built."""
+    ledger didn't change. Adaptation asks a policy question; Identity says the Requester must decide and 40 is needed,
+    so code asks the decision question (Identity can't offer money itself); the first answer is unclear (asked once
+    more); "option 1" raises the budget by code; the work is granted and built."""
     run = j2.J2Run()
     run.budget = 60
     orig, asked = run.call, []
@@ -216,19 +217,18 @@ def policy_budget(fixes):
                     "act": "POLICY_QUESTION", "question": "60 can't cover the charter's sections. Add budget?"}
         if fn == "identity" and task.startswith("QUESTION FROM"):
             return {"say": "@Adaptation The charter doesn't set the budget; asking the Requester.", "clause": "authority",
-                    "user_question": {"question": "Add budget so the charter's sections can be built?", "options": [
-                        {"text": "Add 40 units (60 to 100)", "budget_increase": 40},
-                        {"text": "Keep 60 and build less", "budget_increase": 0}]}}
+                    "needs_decision": True, "budget_needed": 40}
         return orig(fn, fmt, task, mock, **k)
     run.call = call
     say(run, BREW_LAB)
-    assert run.paused and run.paused["kind"] == "question" and run.budget == 60, run.outcome
+    assert run.paused and run.paused["kind"] == "limit" and run.budget == 60, run.outcome
+    assert run.paused["questions"][0]["options"][0].startswith("Keep working: add 40 units,"), run.paused
     say(run, "the bigger one I think")                       # unclear: no guess, Identity asks once more
-    assert run.paused and run.paused.get("reasked") and run.budget == 60, run.paused
+    assert run.paused and run.paused["handoff"].get("reasked") and run.budget == 60, run.paused
     say(run, "option 1")
     assert run.budget == 100 and run.raises[0]["asked"] == 40, run.raises
-    d = [x for x in run.decisions if x["kind"] == "question"]
-    assert d[0].get("unclear") and d[1]["option"] == 1 and d[1]["budget_added"] == 40, d
+    d = [x for x in run.decisions if x["kind"] == "limit"]
+    assert d[0].get("unclear") and d[1]["decision"] == "continue" and d[1]["budget_added"] == 40, d
     built = [w for w in run.workflows if w["status"] == "done"]
     assert built and run.spent > 60, (run.spent, built)       # work beyond the old 60 was granted and built
     assert run.outcome.startswith("Done"), run.outcome
@@ -1128,7 +1128,7 @@ def limit_answers():
     run = at_cap()
     say(run, "i want a different option so go with 25 units")
     assert run.raises and run.raises[0]["asked"] == 25 and run.raises[0]["to"] == 37, run.raises
-    assert "own amount" in run.raises[0]["why"] and run.decisions[0]["option"] == 1, run.decisions
+    assert "25 units" in run.raises[0]["why"] and run.decisions[0]["budget_added"] == 25, run.decisions
     assert not any(e["type"] == "limit" and "turns" in e["detail"] for e in run.events), "turn cap fired on the answer"
 
     run = at_cap()
@@ -1150,13 +1150,16 @@ def budget_cap():
     "keep working" isn't offered when it can't fund anything or when it already changed nothing."""
     run = j2.J2Run()
     q = {"question": "More?", "options": ["Add more building", "Ship"], "budget": [30, 0]}
-    run.budget = j2.BUDGET_CAP - 10
-    run._ask_user("x", [q], "question")
-    assert run.paused["questions"][0]["budget"] == [10, 0], run.paused
+    run._ask_user("x", [q], "question")             # only the decision question may carry money
+    assert "budget" not in run.paused["questions"][0], run.paused
+    run.budget = j2.BUDGET_CAP - 40                 # Identity says 78 is needed; the cap allows 40
+    run._identity_limit({"reason": "Adaptation asked", "budget_needed": 78})
+    o = run.paused["questions"][0]["options"][0]
+    assert o.startswith("Keep working: add 40 units (the most allowed)") and run.paused["questions"][0]["budget"][0] == 40, o
     assert f"can't go above {j2.BUDGET_CAP}" in run.chat[-1]["text"], run.chat[-1]["text"]
     run.budget = j2.BUDGET_CAP
-    run._ask_user("x", [q], "question")
-    assert run.paused["questions"][0]["options"] == ["Ship"] and "budget" not in run.paused["questions"][0], run.paused
+    run._identity_limit({"reason": "Adaptation asked", "budget_needed": 78})
+    assert not any(o.startswith("Keep working") for o in run.paused["questions"][0]["options"]), run.paused
     cheapest = min(j2.RATES.values())
     run.spent = run.budget - cheapest + 1                       # less than the cheapest part left, no room to add
     run._identity_limit({"reason": "Out of budget", "out_of_budget": True})
@@ -1214,6 +1217,52 @@ def adaptation_idle():
         assert len(asked) == n + 1, "a change must let Adaptation re-plan"
 
 
+def identity_decisions():
+    """runs/j2-20261008-123848: when the money ran out, Identity asked its own free-form question (msgs 22, 48), so
+    code applied nothing: "2. Add 25 more. Leave out ..." added nothing and the items came back (msg 24 -> 56), and
+    "option 2: finish as is" led to a rejected done and the limit question again (msg 50 -> 56). Now money, leaving
+    items out and finishing are only ever asked by code's decision question, and a typed answer is applied."""
+    def out_of_money():
+        old, os.environ["J2_FIXES"] = os.environ.get("J2_FIXES"), "0"
+        run = j2.J2Run()
+        os.environ["J2_FIXES"] = old
+        orig = run.call
+
+        def call(fn, fmt, task, mock, **k):
+            if fn == "identity" and "AUDIT'S FINDINGS" in task:   # what Identity did live: money in its own question
+                return {"say": "@Requester The money is used up.", "done": False, "needs_requester": True,
+                        "requester_questions": ["Option 1: Add more money so everything is built. Option 2: Add a "
+                                                "smaller amount and drop some parts. Option 3: Finish as is."]}
+            return orig(fn, fmt, task, mock, **k)
+        run.call = call
+        run.budget = 12
+        say(run, BREW_LAB)
+        assert run.paused and run.paused["kind"] == "limit", run.paused and run.paused["kind"]
+        assert not any(m.get("pause") == "fact" for m in run.chat), "Identity asked about money in free form"
+        return run
+
+    # msg 24: add and leave out in one typed answer, both applied by code
+    run = out_of_money()
+    n = len(run.chat)
+    gone = [c for c in run.goal["done_when"] if re.search(r"opening hours|loyalty|beans", c, re.I)]
+    say(run, "2. Add 25 more. Leave out the opening hours, loyalty-card explainer and beans.")
+    assert run.raises and run.raises[0]["asked"] == 25 and run.raises[0]["from"] == 12, run.raises
+    g = run.goal
+    assert len(gone) == 3 and all(c not in g["done_when"] for c in gone), g["done_when"]
+    assert [x["criterion"] for x in g["dropped_reasons"]] == gone, g["dropped_reasons"]
+    later = " ".join(m["text"] for m in run.chat[n + 1:] if m["who"] == "identity")
+    assert not any(c in later for c in gone), "dropped items came back"
+
+    # msg 50: "finish as is" ends the run, no rejected done and no limit question straight after
+    run = out_of_money()
+    n = len(run.chat)
+    say(run, "option 2: finish as is")
+    assert run.outcome.startswith("Done with open items") and not run.paused, run.outcome
+    assert not any(m.get("pause") for m in run.chat[n:]), [m["text"][:80] for m in run.chat[n:] if m.get("pause")]
+    assert not any("Identity declared done" in m["text"] for m in run.chat[n:])
+    assert summary(run)["status"] == "done_with_open_items"
+
+
 if __name__ == "__main__":
     for mode in ("0", "1"):
         os.environ["J2_FIXES"] = mode
@@ -1247,7 +1296,8 @@ if __name__ == "__main__":
     budget_cap()
     repeats()
     adaptation_idle()
-    print("limit answers (turn cap, own amount, drop with reason, done with open items), budget cap, repeats, idle Adaptation ok")
+    identity_decisions()
+    print("limit answers (turn cap, own amount, drop with reason, done with open items), budget cap, repeats, idle Adaptation, decisions applied by code (msgs 24, 50) ok")
     page()
     print("E behind-the-scenes view (lanes, detail, timeline, saved runs, redaction, lessons) ok")
     generalist_units()

@@ -261,8 +261,6 @@ def numbered(qs):
                      for i, q in enumerate(qs, 1))
 
 
-OPTION_FMT = ('{"text": str, "budget_increase": int (units this option adds to the budget if the Requester picks it; '
-              '0 if none. Code applies it; you can\'t change the budget yourself)}')
 
 
 def option_picked(q, answer):
@@ -273,13 +271,41 @@ def option_picked(q, answer):
     return hits.pop() - 1 if len(hits) == 1 else None
 
 
-def custom_amount(q, answer):
-    """(index of the option that adds budget, amount) when the answer types its own number of units instead of an
-    option number, e.g. "25 units" or "add 25"; else None."""
-    j = next((j for j, b in enumerate(q.get("budget") or []) if b), None)
-    n = [int(x) for x in re.findall(r"\d+", str(answer))]
-    n = [x for x in n if x > len(q["options"])] or (n if re.search(r"\bunits?\b|\badd\b|\bmore\b", str(answer), re.I) else [])
-    return (j, n[0]) if j is not None and n and n[0] > 0 else None
+DECIDE_FMT = ('"needs_decision": bool (true when the Requester must choose to add budget, leave items out or finish '
+              'as is), "budget_needed": int|null (units needed to finish, your estimate)')
+DECIDE_RULE = ("Never offer adding budget, leaving items out or finishing as is in your own question: set needs_decision "
+               "instead and code asks the Requester with the exact amounts it can apply.")
+DECISION_FMT = ('"decision": "continue"|"drop"|"ship"|null (null if the answer doesn\'t say), "add": int|null (units the '
+                'Requester asked to add, as they typed it), "drop_items": [int] (done-when item numbers they asked to '
+                'leave out)')
+ONLY_PICK = re.compile(r"\s*(option\s*)?[1-9]\s*[.:)]?\s*", re.I)
+
+
+def parse_decision(answer, q, choices, crit):
+    """The Requester's answer to the decision question, as code reads it: {"decision", "add", "drop_items"}.
+    "2. Add 25 more. Leave out the lookbook and reviews" -> continue, add 25, drop the two items by name."""
+    answer = str(answer or "")
+    i = option_picked(q, answer) if q.get("options") else None
+    picked = choices[i] if i is not None and i < len(choices) else None
+    if ONLY_PICK.fullmatch(answer):
+        return {"decision": picked, "add": None, "drop_items": []}
+    amount = re.search(r"\badd\s+(\d+)|(\d+)\s*(?:more|units?|extra)\b", answer, re.I)   # "add 25", "25 more/units"
+    add = int(amount.group(1) or amount.group(2)) if amount else None
+    drops = {int(n) for n in re.findall(r"\bitems? (\d+)", answer, re.I)}
+    m = re.search(r"(?:leave out|drop|without|skip|remove)\s+(.*)", answer, re.I)
+    for part in re.split(r",|\band\b|\.", m.group(1)) if m else []:
+        part = re.sub(r"^\s*(the|a|an)\s+", "", part.strip(), flags=re.I).strip().lower()
+        drops |= {j for j, c in enumerate(crit, 1) if len(part) > 2 and part in c.lower()}
+    drops = sorted(n for n in drops if 1 <= n <= len(crit))
+    if re.search(r"\bship\b|as is|\bfinish|go live", answer, re.I) and not add:
+        decision = "ship"
+    elif add or picked == "continue":
+        decision = "continue"
+    elif drops or m or picked == "drop":
+        decision = "drop"
+    else:
+        decision = picked
+    return {"decision": decision, "add": add, "drop_items": drops}
 
 
 def brief_list(pos):
@@ -1032,19 +1058,10 @@ class J2Run:
     def _ask_user(self, say, questions, kind, to="identity", handoff=None, **meta):
         """Identity asks the Requester and the run pauses. The reply resumes the run at `to` with `handoff`."""
         say = re.sub(r"^@\w+[,:]?\s*", "", str(say or "")).strip()
-        if kind in ("approval", "ruling_budget"):   # these apply their own amount after the answer; don't apply twice
+        if kind != "limit":
+            # Adding budget is offered only by the decision question (_identity_limit), whose options code builds
+            # and applies. Approval and ruling_budget apply their own amount after the answer.
             questions = [{k: v for k, v in q.items() if k != "budget"} for q in questions]
-        room, out = BUDGET_CAP - self.budget, []
-        for q in questions:   # never offer budget the cap won't allow; numbered() shows the cap in the option text
-            q = dict(q)
-            if q.get("budget"):
-                keep = [j for j, b in enumerate(q["budget"]) if not b or room > 0]
-                q["options"] = [q["options"][j] for j in keep]
-                q["budget"] = [min(q["budget"][j], room) for j in keep]
-                if not any(q["budget"]):
-                    del q["budget"]
-            out.append(q)
-        questions = out
         m = self.post("identity", "@Requester " + say + ("\n" + numbered(questions) if questions else ""),
                       act="ASK_REQUESTER", to_user=True, next="user", pause=kind, **meta)
         self.paused = {"kind": kind, "questions": questions, "to": to, "handoff": handoff or {}, "msg": m["id"]}
@@ -1092,33 +1109,11 @@ class J2Run:
             self.cycle_turns = 0       # the answer is new information: without this the turn cap re-asked at once
             d = {"kind": p["kind"], "asked": [q["question"] for q in p["questions"]], "answer": last_user}
             self.decisions.append(d)
-            # ponytail: one budget question per pause is mapped; Identity asks one decision question at a time
-            bq = next((q for q in p["questions"] if q.get("budget")), None)
-            if bq:
-                i, add = option_picked(bq, last_user), None
-                if i is None and custom_amount(bq, last_user):
-                    i, add = custom_amount(bq, last_user)     # "Other amount": the Requester typed a number of units
-                if i is None and not p.get("reasked"):
-                    # Don't guess which option changes the budget: Identity asks once more.
-                    d["unclear"] = True
-                    self._event("identity", "unclear_answer", f"answer to '{bq['question']}' names no single option")
-                    self._ask_user("I couldn't tell which option you chose, and one of them changes the budget. "
-                                   "Please reply with the option number.", [bq], p["kind"], to=p["to"],
-                                   handoff=p["handoff"], auto=True)
-                    self.paused["reasked"] = True
-                elif i is None:
-                    self.post("system", "The answer still doesn't name one option, so no budget change was applied.")
-                else:
-                    d["option"], d["budget_added"] = i + 1, add or bq["budget"][i]
-                    self._raise_budget(d["budget_added"], f"the Requester chose option {i + 1}"
-                                       + (f" with their own amount ({add})" if add else f": {bq['options'][i]}"))
-        if self.paused:
-            pass                                        # re-asked above; the run waits again
-        elif p:
+        if p:
             h = dict(p["handoff"])
             if h.get("why"):
                 h["why"] += f" The Requester answered: {last_user}"
-            self._handoff(p["to"], **h, answer=last_user, asked=p["questions"], picked=d.get("option"))
+            self._handoff(p["to"], **h, answer=last_user, asked=p["questions"])
         else:
             if not self.goal:
                 self.request = last_user
@@ -1360,8 +1355,9 @@ class J2Run:
                + ('"workflows": [str] (for split: names of the workflows to register, taken as they are from either '
                   'final position), ' if proposal else '')
                + '"instruction": str (what happens next, one sentence)'
-               + ('' if answer else ', "user_question": {"question": str, "options": [' + OPTION_FMT + '] (2-4, each '
-                  'text with its consequence, cost and risk; no recommendation)}|null') + "}")
+               + ('' if answer else ', "user_question": {"question": str, "options": [str] (2-4, each text with its '
+                  'consequence and risk; no recommendation; never adding budget, leaving items out or finishing as '
+                  'is: only code offers those)}|null') + "}")
         attempts = "\n".join(f"  attempt {x['n']} {NAMES[x['who']]}: {x['text']}" for x in c["attempts"])
         task = (f"CONFLICT {c['id']} ({TOPICS[c['topic']]}) between {NAMES[a]} and {NAMES[b]}: {c['subject']}\n"
                 f"{c.get('detail') or ''}\nTHEIR ATTEMPTS:\n{attempts}\n"
@@ -1435,14 +1431,20 @@ class J2Run:
         frm = h.get("frm") or "adaptation"
         resume = h.get("resume") or {"to": "adaptation", "handoff": {"kind": "propose", "why": "Identity answered."}}
         r = self.call("identity", '{"say": str (address @' + NAMES[frm] + '), "clause": str, "answer": str|null, '
-                      '"user_question": {"question": str, "options": [' + OPTION_FMT + '] (0-4, no '
-                      'recommendation)}|null}',
+                      '"user_question": {"question": str, "options": [str] (0-4, no recommendation)}|null, '
+                      + DECIDE_FMT + '}',
                       f"QUESTION FROM {NAMES[frm]}: {h.get('question')}\nAnswer it from the charter, naming the clause. "
                       "Only if the charter can't decide it and only the Requester can (a fact, an approval or a value "
-                      "trade-off), put one decision-ready question in user_question instead.",
+                      "trade-off), put one decision-ready question in user_question instead. " + DECIDE_RULE,
                       lambda: json.dumps({"say": f"@{NAMES[frm]} The charter's rules cover this; proceed inside them.",
                                           "clause": "rules", "answer": "Proceed inside the charter's rules.",
                                           "user_question": None}))
+        cheapest = min(RATES.values()) if RATES else 1
+        if r.get("needs_decision") or (frm == "adaptation" and self.budget - self.spent < cheapest):
+            # Budget, leaving items out and finishing are the code's decision question, never a free-form one.
+            return self._identity_limit({"reason": f"{NAMES[frm]} asked: {h.get('question')}",
+                                         "out_of_budget": self.budget - self.spent < cheapest,
+                                         "budget_needed": as_int(r.get("budget_needed")) or None, "resume": resume})
         q = clean_questions([r.get("user_question")]) if isinstance(r.get("user_question"), dict) else []
         if q:
             return self._ask_user(r.get("say", ""), q, "question", to=resume["to"], handoff=resume["handoff"])
@@ -1499,13 +1501,11 @@ class J2Run:
     def _identity_hears_requester(self, h):
         """The Requester answered Identity at J2.g/J2.h (a fact, a limit, or another question Identity asked).
         Facts they supply are recorded; facts they can't supply yet become to be confirmed (that item isn't met).
-        After a limit question: keep working, drop the failing items, or ship as is."""
+        After the decision question (_identity_limit): code applies what the answer asks, typed or clicked: add
+        budget, leave items out (both at once is fine), keep working, or finish as is."""
         self.step = 8
         limit, choices, answer = h.get("limit"), h.get("choices") or [], h.get("answer") or ""
-        picked = None
-        if limit and h.get("asked"):
-            i = h["picked"] - 1 if h.get("picked") else option_picked(h["asked"][0], answer)
-            picked = choices[i] if i is not None and i < len(choices) else None
+        q = (h.get("asked") or [{}])[0] if limit else {}
         g = self.goal or {}
         tbc = g.get("to_be_confirmed") or []
         crit = g.get("done_when") or []
@@ -1517,13 +1517,16 @@ class J2Run:
             asked_items = [as_int(n) for n in re.findall(r"item (\d+)", json.dumps(h.get("asked")))]
             items = asked_items or [crit.index(t["criterion"]) + 1 for t in tbc if t["criterion"] in crit]
             facts = [{"item": n, "fact": answer} for n in items]
-            return json.dumps({"say": "Thanks, recorded." if not unknown else "Recorded as to be confirmed.",
-                               "clause": "done_when", "decision": "ship" if ship else "drop" if drop else "continue",
-                               "confirmed": [] if unknown or ship or drop else facts,
+            d = parse_decision(answer, q, choices, crit) if limit else {}
+            return json.dumps({**d, "say": "Thanks, recorded." if not unknown else "Recorded as to be confirmed.",
+                               "clause": "done_when", **({} if limit else {"decision": "ship" if ship else "drop" if
+                                                                             drop else "continue"}),
+                               "confirmed": [] if unknown or ship or drop or d.get("add") or d.get("drop_items")
+                               or d.get("decision") in ("ship", "drop") else facts,
                                "still_to_be_confirmed": facts if unknown else [],
                                "instruction_to_adaptation": f"Put the Requester's answer in: {answer}",
                                "next": "Adaptation"})
-        r = self.call("identity", '{"say": str, "clause": str, "decision": "continue"|"drop"|"ship", "confirmed": '
+        r = self.call("identity", '{"say": str, "clause": str, ' + DECISION_FMT + ', "confirmed": '
                       '[{"item": int, "fact": str}] (facts the Requester supplied, by done-when item), '
                       '"still_to_be_confirmed": [{"item": int, "fact": str}] (facts they said they can\'t supply yet), '
                       '"instruction_to_adaptation": str|null, '
@@ -1535,12 +1538,36 @@ class J2Run:
                       "\nRecord what the answer settles against the charter, without changing done-when. A fact they "
                       "gave goes in confirmed; a fact they say they can't give yet goes in still_to_be_confirmed (that "
                       "done-when item is not met until they confirm it)."
-                      + (f"\nThis answers a limit question ({limit}). decision: continue (keep working), drop (drop the "
-                         "failing done-when items) or ship (ship the site as it is). The Requester's decision is final: "
-                         "you may say what won't fit in the budget, never refuse it." if limit else ""), mock)
-        decision = picked or (str(r.get("decision") or "").lower() if limit else "continue")
-        if decision not in ("continue", "drop", "ship") or (limit and decision not in choices):
-            decision = "continue" if "continue" in choices or not limit else "ship"
+                      + (f"\nThis answers the decision question ({limit}). Read what they asked for: decision "
+                         "continue (keep working), drop (leave out the failing items) or ship (finish as it is); add: "
+                         "units they asked to add; drop_items: the done-when items they named to leave out. Adding and "
+                         "leaving out can come together. Code applies it. The Requester's decision is final: you may "
+                         "say what won't fit in the budget, never refuse it." if limit else ""), mock)
+        decision, add, drops = "continue", None, []
+        if limit:
+            if ONLY_PICK.fullmatch(answer):          # a click or a bare option number: exactly that option
+                r.update(parse_decision(answer, q, choices, crit))
+            decision = str(r.get("decision") or "").lower() or None
+            add = max(0, as_int(r.get("add"))) or None
+            drops = sorted({as_int(n) for n in r.get("drop_items") or [] if 1 <= as_int(n) <= len(crit)})
+            if decision == "continue" and not add and q.get("budget") and "continue" in choices:
+                add = q["budget"][choices.index("continue")] or None       # the option's own amount
+            if decision == "drop" and not drops:
+                drops = [i for i in h.get("failing_items") or [] if 1 <= i <= len(crit)]
+            if decision == "continue" and "continue" not in choices and drops:
+                decision = "drop"                     # keep working wasn't offered (nothing to fund it): leave out
+            if decision not in choices and not h.get("reasked"):
+                if self.decisions:
+                    self.decisions[-1]["unclear"] = True
+                self._event("identity", "unclear_answer", f"answer to '{q.get('question')}' names no option")
+                self._ask_user("I couldn't tell which option you chose. Please reply with the option number, or type "
+                               "what to add or leave out.", [q], "limit", auto=True,
+                               handoff={**{k: h[k] for k in ("kind", "limit", "choices", "failing_items", "resume")
+                                           if k in h},
+                                        "reasked": True})
+                return
+            if decision not in choices:
+                decision = "continue" if "continue" in choices else "ship"
         confirmed = self._tbc(r.get("confirmed"), crit)
         done_facts = {t["criterion"] for t in confirmed}
         g["confirmed_facts"] = (g.get("confirmed_facts") or []) + confirmed
@@ -1550,9 +1577,21 @@ class J2Run:
         self.save("goal.json", g)
         self.fail_floor = len(self.audits)       # the Requester's answer is new information
         if self.decisions:
-            self.decisions[-1]["decision"] = decision
+            self.decisions[-1].update(decision=decision, **({"budget_added": add} if add else {}),
+                                      **({"dropped_items": drops} if drops else {}))
         if limit and self.last_limit:
             self.last_limit["decision"] = decision
+        gone = [crit[i - 1] for i in drops]
+        if gone:
+            g["done_when"] = [c for c in crit if c not in gone]
+            g["dropped_by_requester"] = (g.get("dropped_by_requester") or []) + gone
+            g["dropped_reasons"] = (g.get("dropped_reasons") or []) + [
+                {"criterion": c, "reason": f"The Requester chose to leave it out ({limit}): {answer}"} for c in gone]
+            g["to_be_confirmed"] = [t for t in g["to_be_confirmed"] if t["criterion"] not in gone]
+            self.save("goal.json", g)
+            self.post("system", f"Dropped from done-when on the Requester's decision: {'; '.join(gone)}.")
+        if add and decision != "ship":
+            self._raise_budget(add, f"the Requester's answer: {answer}")
         if decision == "ship":
             self.post("identity", address(r.get("say") or "Shipping the site as it is.", "user"), to_user=True,
                       next="user", done=True)
@@ -1561,19 +1600,20 @@ class J2Run:
                             f"({limit or 'their answer'}). Still not workable: {'; '.join(fails)}.")
             self.turn = None
             return
-        if decision == "drop":
-            gone = [crit[i - 1] for i in h.get("failing_items") or [] if 1 <= i <= len(crit)]
-            g["done_when"] = [c for c in crit if c not in gone]
-            g["dropped_by_requester"] = (g.get("dropped_by_requester") or []) + gone
-            g["dropped_reasons"] = (g.get("dropped_reasons") or []) + [
-                {"criterion": c, "reason": f"The Requester chose to leave it out ({limit or 'their answer'}): {answer}"}
-                for c in gone]
-            g["to_be_confirmed"] = [t for t in g["to_be_confirmed"] if t["criterion"] not in gone]
-            self.save("goal.json", g)
+        if gone or decision == "drop":
+            # Audit re-checks against the new done-when first: every later step (Adaptation's plan, the next
+            # question) works from a fresh audit, never one that still lists the dropped items.
+            if decision == "continue":
+                self.cycle_limit = self.cycle + MAX_CYCLES
             self._say("identity", r.get("say") or "", "audit", None)
-            self.post("system", f"Dropped from done-when on the Requester's decision: {'; '.join(gone) or 'nothing'}. "
-                                "Audit re-checks the current site.")
+            self.post("system", "Audit re-checks the current site against the new done-when.")
             return self._handoff("audit", kind="audit")
+        if limit and h.get("resume"):
+            # The decision answered an agent's question mid-cycle (Adaptation's policy question): it goes on there.
+            self._say("identity", r.get("say", ""), h["resume"]["to"], None)
+            h2 = dict(h["resume"]["handoff"])
+            h2["why"] = f"{h2.get('why') or ''} The Requester decided: {answer}"
+            return self._handoff(h["resume"]["to"], **h2)
         if limit:
             self.cycle_limit = self.cycle + MAX_CYCLES      # keep working: a fresh cycle allowance
             nxt, note = "adaptation", None
@@ -1600,15 +1640,16 @@ class J2Run:
         cheapest = min(RATES.values()) if RATES else 1
         room = BUDGET_CAP - self.budget
         short = self.budget - self.spent < cheapest       # whatever the limit was, nothing new can be funded
-        add = min(max(LIMIT_ADD, cheapest), room) if short else 0
+        want = max(as_int(h.get("budget_needed")) or LIMIT_ADD, cheapest)
+        add = min(want, room) if short or h.get("budget_needed") else 0
         # Keep working only when it can do something: with no money left it needs a raise the cap allows. And after
         # "keep working" changed nothing (same site, audits, spend), the same option isn't offered again.
         state = (len(self.sites), len(self.audits), self.spent)
         stale = self.last_limit and self.last_limit["state"] == state and self.last_limit["decision"] == "continue"
         opts, budget, choices = [], [], []
-        if (not short or self.budget + add - self.spent >= cheapest) and not stale:
-            opts.append("Keep working: " + (f"add {add} units, or type your own number up to {room}, and "
-                                            if add else "") + f"allow {MAX_CYCLES} more cycles"
+        if (not short or self.budget + add - self.spent >= cheapest) and not stale and (add or not h.get("budget_needed")):
+            opts.append("Keep working: " + (f"add {add} units{' (the most allowed)' if add < want else ''}, or "
+                                            f"type your own number up to {room}, and " if add else "") + f"allow {MAX_CYCLES} more cycles"
                         + (" (give the missing facts in your answer)" if h.get("tbc") else ""))
             budget.append(add)
             choices.append("continue")
@@ -1629,7 +1670,7 @@ class J2Run:
                       lambda: json.dumps({"say": f"{reason} Still open: {'; '.join(fails) or 'nothing'}."}))
         self.last_limit = {"state": state, "decision": None}
         self._ask_user(r.get("say") or reason, [q], "limit", handoff={"kind": "requester_answered", "limit": reason,
-                                                                       "choices": choices,
+                                                                       "choices": choices, "resume": h.get("resume"),
                                                                        "failing_items": [x["item"] for x in items]})
 
     def _identity_audit(self, h):
@@ -1656,6 +1697,13 @@ class J2Run:
                                                    "confirmed." if only_tbc else
                                          "The same failure came back twice in a row, so another cycle would likely "
                                          "repeat it.", "tbc": bool(only_tbc)})
+        cheapest = min(RATES.values()) if RATES else 1
+        if fails and self.budget - self.spent < cheapest:
+            # Not workable and nothing can be funded: only the Requester's decision moves it (runs/j2-20261008-123848
+            # msgs 22 and 48: Identity offered money and "finish as is" in its own question; code applied neither).
+            return self._identity_limit({"reason": f"Out of budget: {self.budget - self.spent} of {self.budget} units "
+                                                   "left, less than the cheapest rate-card part, and the site isn't "
+                                                   "workable yet.", "out_of_budget": True})
 
         def mock():
             if not fails:
@@ -1666,7 +1714,7 @@ class J2Run:
                                "clause": "done_when", "done": False, "needs_requester": bool(facts),
                                "requester_questions": [], "next": "Requester" if facts else "Adaptation"})
         r = self.call("identity", '{"say": str, "clause": str, "done": bool, "needs_requester": bool, '
-                      '"requester_questions": [str], "instruction_to_adaptation": str|null, '
+                      '"requester_questions": [str], "instruction_to_adaptation": str|null, ' + DECIDE_FMT + ', '
                       + next_field(("user", "adaptation"), "Requester when done=true or needs_requester=true; "
                                    "Adaptation for rework") + "}",
                       f"AUDIT'S FINDINGS (all, in full): {json.dumps(findings, ensure_ascii=False)}\n"
@@ -1677,7 +1725,7 @@ class J2Run:
                       "link, nothing to be confirmed. Code checks this. Workable: declare done=true and tell the Requester "
                       "the goal is reached. Not workable: it goes back to Adaptation (J2.b); give the instruction. If a "
                       "fix needs a fact only the Requester knows (facts above, or any you see), set needs_requester=true "
-                      "and ask for it in requester_questions; the run pauses until they answer.", mock)
+                      "and ask for it in requester_questions; the run pauses until they answer. " + DECIDE_RULE, mock)
         if not fails and r.get("done"):
             self.post("identity", address(r.get("say", ""), "user"), done=True, to_user=True, next="user")
             self.outcome = "Done: the site is workable. Every done-when item passes with Audit's evidence and the " \
@@ -1686,6 +1734,9 @@ class J2Run:
             if self.memory:
                 self._save_playbook()
             return
+        if fails and r.get("needs_decision"):
+            return self._identity_limit({"reason": "Identity: the site can't be finished as asked without your "
+                                                   "decision.", "budget_needed": as_int(r.get("budget_needed")) or None})
         questions = clean_questions(r.get("requester_questions"))
         questions += [{"question": f"{x['needs_requester_fact']} (done-when item {x.get('item')}). If you can't give it "
                                    "yet, say so and it's marked to be confirmed.", "options": []} for x in facts]
