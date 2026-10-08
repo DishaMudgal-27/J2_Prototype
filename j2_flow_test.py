@@ -194,7 +194,7 @@ def ruling_over_budget():
     assert run.paused and run.paused["kind"] == "limit" and run.paused["handoff"]["limit"].startswith("Out of budget"), \
         run.outcome
     q = run.paused["questions"][0]
-    assert q["options"][0].startswith("Add 30 units and keep going") and q["budget"][0] == 30 and q["options"][-1].startswith("Finish as it is")
+    assert q["options"][0].startswith("Add 30 work credits and keep going") and q["budget"][0] == 30 and q["options"][-1].startswith("Finish as it is")
     say(run, "1")
     assert run.budget == 120 and run.outcome.startswith("Done"), (run.budget, run.outcome)
     s = summary(run)
@@ -222,7 +222,7 @@ def policy_budget(fixes):
     run.call = call
     say(run, BREW_LAB)
     assert run.paused and run.paused["kind"] == "limit" and run.budget == 60, run.outcome
-    assert run.paused["questions"][0]["options"][0].startswith("Add 40 units and keep going"), run.paused
+    assert run.paused["questions"][0]["options"][0].startswith("Add 40 work credits and keep going"), run.paused
     say(run, "the bigger one I think")                       # unclear: no guess, Identity asks once more
     assert run.paused and run.paused["handoff"].get("reasked") and run.budget == 60, run.paused
     say(run, "option 1")
@@ -719,7 +719,7 @@ def plain_words():
     with open(os.path.join(j2.HERE, "j2_ui.html"), encoding="utf-8") as f:
         ui = f.read()
     js = ui[ui.index("const AGENT ="):ui.index("const STAGES =")]
-    cases = {"only 10 units stay for fixes after Audit": "Only 10 effort points stay for fixes after our checks",
+    cases = {"only 10 units stay for fixes after Audit": "Only 10 work credits stay for fixes after our checks",
              "Every done-when item passes with Audit's evidence.": "Every checklist item passes with our checks' evidence.",
              "@Adaptation Priority's final answer was COUNTER.": "The team's final answer was a smaller offer.",
              "The Requester picked; the budget is over budget.": "You picked; the effort is more than planned."}
@@ -1166,7 +1166,7 @@ def budget_cap():
     run.budget = j2.BUDGET_CAP - 40                 # Identity says 78 is needed; the cap allows 40
     run._identity_limit({"reason": "Adaptation asked", "budget_needed": 78})
     o = run.paused["questions"][0]["options"][0]
-    assert o.startswith("Add 40 units (the most allowed)") and run.paused["questions"][0]["budget"][0] == 40, o
+    assert o.startswith("Add 40 work credits (the most allowed)") and run.paused["questions"][0]["budget"][0] == 40, o
     run.budget = j2.BUDGET_CAP
     run._identity_limit({"reason": "Adaptation asked", "budget_needed": 78})
     assert not any(o.startswith(("Add ", "Keep going")) for o in run.paused["questions"][0]["options"]), run.paused
@@ -1454,6 +1454,11 @@ def audiences_everywhere():
     assert m["text"] == "@Adaptation Re-price W-3." and run.events[n]["type"] == "misaddressed", (m, run.events[n:])
 
 
+def listed_gaps(text):
+    """The "Still not right" entries of a decision message: one per line, "- " in front."""
+    return [ln[2:] for ln in text.split("\n") if ln.startswith("- ")]
+
+
 def limit_wording():
     """Run 20261008-154537: msg 5 printed "1.\n1." (Identity's own numbered list plus code's); msgs 45/46 paused at
     the per-cycle turn cap with a money banner although no money option was offered, and "1 thing still not right"
@@ -1465,7 +1470,7 @@ def limit_wording():
                   "2. Which sizes?", [{"question": "Which products are new arrivals?"},
                                       {"question": "Which sizes does each product come in?"}], "info")
     txt = run.chat[-1]["text"]
-    assert len(re.findall(r"(?m)(?:^|\s)\d+\.(?:\s|$)", txt)) == 1 and "1.\n1." not in txt, txt
+    assert not re.findall(r"(?m)(?:^|\s)\d+\.(?:\s|$)", txt) and txt.endswith("Which sizes does each product come in."), txt
 
     old, os.environ["J2_FIXES"] = os.environ.get("J2_FIXES"), "0"
     run = j2.J2Run()
@@ -1479,7 +1484,7 @@ def limit_wording():
                             "finish as it is?", q["question"]
     assert "budget" not in q and "add budget" not in run.outcome and q["question"] in run.outcome, run.outcome
     gaps = j2.workable(run.audits[-1])
-    listed = run.chat[-1]["text"].split("Still not right: ")[1].split("\n")[0].rstrip(".").split("; ")
+    listed = listed_gaps(run.chat[-1]["text"])
     assert len(listed) == len(gaps) and q["options"][-1].endswith(f"with {len(gaps)} things still not right"), (listed, q)
     for o in q["options"]:
         assert "you get" in o, o
@@ -1487,7 +1492,7 @@ def limit_wording():
     run._identity_limit({"reason": "Out of budget", "out_of_budget": True})
     q = run.paused["questions"][0]
     assert q["question"].startswith("The work you approved is used up. Add more and keep going"), q["question"]
-    assert re.match(r"Add \d+ units", q["options"][0]) and all("you get" in o for o in q["options"]), q["options"]
+    assert re.match(r"Add \d+ work credits", q["options"][0]) and all("you get" in o for o in q["options"]), q["options"]
 
 
 def open_list():
@@ -1509,7 +1514,7 @@ def open_list():
         run._identity_limit({"reason": f"Cycle {run.cycle} used {j2.MAX_TURNS} turns (the per-cycle cap) without "
                                        "finishing."})
         text = run.chat[-1]["text"]
-        listed = text.split("Still not right: ")[1].split(".")[0].split("; ")
+        listed = listed_gaps(text)
         return text, listed, run.paused["questions"][0]["options"][-1]
 
     # (a) 1 audit failure + 3 unfinished workflows (registered, running, unfunded) -> 4 items, "4 things"
@@ -1568,6 +1573,55 @@ def covers_by_text():
     assert run._wf_items(reg[1]) == [5] and run._open_list(run.audits[-1], []), "old workflows use their numbers"
 
 
+def readable_decision():
+    """Follow-up to bab0ca7: the decision question is readable without shortening the gaps. (1) one gap per line,
+    full text, after at most 2 sentences, then the question and options; (2) no "1." before the question; (3) work
+    credits, not units; (4) an unclear answer gets one short line and the options only; (5) the counts add up, and a
+    difference is explained."""
+    old, os.environ["J2_FIXES"] = os.environ.get("J2_FIXES"), "0"
+    run = j2.J2Run()
+    os.environ["J2_FIXES"] = old
+    say(run, BREW_LAB)                                          # done and workable: a clean last audit
+    run.spent = run.budget                                      # then out of money: add / leave out / finish
+    crit = run.goal["done_when"]
+    last = run.audits[-1]
+    for i in (1,):
+        last["results"][i].update(verdict="NEEDS_REVISION", **{"pass": False})
+    last["rubric"][0].update(verdict="NEEDS_REVISION", **{"pass": False})
+    for i in (3, 4, 5):
+        run.workflows.append({**run.workflows[0], "id": f"W-{90 + i}", "status": "registered", "covers": [i + 1],
+                              "covers_text": [crit[i]]})
+    run._identity_limit({"reason": "Out of budget", "out_of_budget": True})
+    text = run.chat[-1]["text"]
+    lines = text.split("\n")
+    gaps = listed_gaps(text)
+    q = run.paused["questions"][0]
+    # (1) intro (at most 2 sentences), the header, one full gap per line, then the question, then the options
+    intro = lines[0][len("@Requester "):]
+    assert len([x for x in re.split(r"(?<=[.!?])\s+", intro) if x]) <= 2, intro
+    i = lines.index(next(ln for ln in lines if ln.startswith("Still not right (")))
+    assert lines[i + 1:i + 1 + len(gaps)] == [f"- {g}" for g in gaps], lines
+    whole = set(crit) | {f"{c} (not built yet)" for c in crit} | {r["criterion"] for r in last["rubric"]}
+    assert len(gaps) == 5 and all(g in whole for g in gaps), gaps                          # full text, not cut
+    assert lines[i + 1 + len(gaps)] == q["question"] and lines[i + 2 + len(gaps)].startswith("   Option 1: "), lines
+    # (2) no "1." before the question
+    assert not any(re.match(r"\d+\. ", ln) for ln in lines), lines
+    # (3) work credits, never units
+    assert "work credits" in q["options"][0] and not re.search(r"\bunits?\b", text), text
+    # (5) counts: the header explains the mix; finish counts the whole list; leave-out explains the difference
+    assert lines[i] == f"Still not right ({len(gaps)}: 2 built but failing, 3 not built yet):", lines[i]
+    assert q["options"][-1].endswith(f"with {len(gaps)} things still not right"), q["options"]
+    drop = next(o for o in q["options"] if o.startswith("Leave out"))
+    assert drop.startswith("Leave out the 4 unfinished checklist parts") and "(the other 1 on the list stays as it is)" \
+        in drop, drop
+    # (4) unclear answer: one short line, then the options only
+    say(run, "hmm, not sure")
+    re_ask = next(m for m in reversed(run.chat) if m["who"] == "identity")["text"].split("\n")
+    assert re_ask[0] == "@Requester I couldn't tell which option you chose. Reply 1, 2 or 3, or type what to add or " \
+                        "leave out.", re_ask[0]
+    assert len(re_ask) == 4 and all(ln.startswith("   Option ") for ln in re_ask[1:]), re_ask
+
+
 if __name__ == "__main__":
     for mode in ("0", "1"):
         os.environ["J2_FIXES"] = mode
@@ -1607,6 +1661,7 @@ if __name__ == "__main__":
     limit_wording()
     open_list()
     covers_by_text()
+    readable_decision()
     simple_messages()
     owner_override()
     form_submit()

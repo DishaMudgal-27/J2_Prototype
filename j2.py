@@ -252,12 +252,15 @@ def clean_questions(raw):
     return out
 
 
-def numbered(qs):
+def numbered(qs, options_only=False):
+    """The question(s) and options as text. One question isn't numbered; options_only (a re-ask) leaves it out."""
     def opt(q, j, o):
         add = q["budget"][j - 1] if q.get("budget") else 0
-        return f"\n   Option {j}: {o}" + (f" [adds {add} units]" if add else "")
-    return "\n".join(f"{i}. {q['question']}" + "".join(opt(q, j, o) for j, o in enumerate(q["options"], 1))
-                     for i, q in enumerate(qs, 1))
+        return f"\n   Option {j}: {o}" + (f" [adds {add} work credits]" if add else "")
+    if options_only:
+        return "".join(opt(qs[0], j, o) for j, o in enumerate(qs[0]["options"], 1)).lstrip("\n")
+    return "\n".join(("" if len(qs) == 1 else f"{i}. ") + q["question"]
+                     + "".join(opt(q, j, o) for j, o in enumerate(q["options"], 1)) for i, q in enumerate(qs, 1))
 
 
 
@@ -291,10 +294,17 @@ AGENT_CONTENT = re.compile(r"@(?!Requester\b)[A-Za-z]|\b[WFRC]-\d+\b|\bre-?pric|
                            r"rate[- ]card)\b", re.I)
 USER_CONTENT = re.compile(r"@Requester\b|\bthank(?:s| you)\b|\bI(?:'ll| will) start\b|\bwould you like\b|"
                           r"\bdo you want\b|\byour (?:site|website|shop|store|business|brief)\b", re.I)
-PLAIN_WORDS = ((r"\bbuilding time\b", "work"), (r"\bdone[-_ ]when items?\b", "checklist items"),
+PLAIN_WORDS = ((r"\bunits\b", "work credits"), (r"\bunit\b", "work credit"), (r"\bbuilding time\b", "work"), (r"\bdone[-_ ]when items?\b", "checklist items"),
                (r"\bdone[-_ ]when\b", "checklist"), (r"\bcycles\b", "rounds"), (r"\bcycle\b", "round"),
                (r"\bcaps?\b", "limit"), (r"\s*\((?:my |a |rough )?estimated?\)", ""), (r"\bestimated\b", "about"),
                (r"\bestimates?\b", "rough figure"))
+
+
+def gap_kind(g):
+    """How a "Still not right" entry stands, in plain words (the list's header counts these)."""
+    g = str(g)
+    return ("not built yet" if g.endswith("(not built yet)") else
+            "built but not checked yet" if g.endswith("(not checked yet)") else "built but failing")
 
 
 def for_agents(m):
@@ -323,7 +333,7 @@ def parse_decision(answer, q, choices, crit):
     picked = choices[i] if i is not None and i < len(choices) else None
     if ONLY_PICK.fullmatch(answer):
         return {"decision": picked, "add": None, "drop_items": []}
-    amount = re.search(r"\badd\s+(\d+)|(\d+)\s*(?:more|units?|extra)\b", answer, re.I)   # "add 25", "25 more/units"
+    amount = re.search(r"\badd\s+(\d+)|(\d+)\s*(?:more|units?|extra|(?:work )?credits?)\b", answer, re.I)  # "add 25"
     add = int(amount.group(1) or amount.group(2)) if amount else None
     drops = {int(n) for n in re.findall(r"\bitems? (\d+)", answer, re.I)}
     m = re.search(r"(?:leave out|drop|without|skip|remove)\s+(.*)", answer, re.I)
@@ -1138,15 +1148,23 @@ class J2Run:
     def _save_conflicts(self):
         self.save("conflicts.json", self.conflicts)
 
-    def _ask_user(self, say, questions, kind, to="identity", handoff=None, gaps=None, **meta):
+    def _ask_user(self, say, questions, kind, to="identity", handoff=None, gaps=None, options_only=False, **meta):
         """Identity asks the Requester and the run pauses. The reply resumes the run at `to` with `handoff`. `gaps`
         (the decision question) is appended by code after Identity's words, so the list and its count are one list."""
         say = to_requester(say, question=not questions)
         if gaps is not None:
-            say = " ".join(re.split(r"(?<=[.!?])\s+", say)[:2]) + (
-                " Still not right: " + "; ".join(re.sub(r"\.(?= \(not|$)", "", str(g)) for g in gaps) + "."
-                if gaps else "") + (" Some parts were built after the last check, so they're not checked yet."
-                                    if any(str(g).endswith("(not checked yet)") for g in gaps) else "")
+            # At most 2 sentences, then the full list, one gap per line; the header's counts add up to the list.
+            say = " ".join(re.split(r"(?<=[.!?])\s+", say)[:2])
+            if gaps:
+                kinds = {}
+                for g in gaps:
+                    k = gap_kind(g)
+                    kinds[k] = kinds.get(k, 0) + 1
+                say += (f"\nStill not right ({len(gaps)}" + (": " + ", ".join(f"{n} {k}" for k, n in kinds.items())
+                                                             if len(kinds) > 1 else "") + "):\n"
+                        + "\n".join(f"- {g}" for g in gaps))
+                if "built but not checked yet" in kinds:
+                    say += "\nSome parts were built after the last check, so they're not checked yet."
         if len(questions) > 1:
             # One question per message: several become one list of what to send (options can't be kept).
             items = [re.sub(r"\?$", "", q["question"]).strip() for q in questions]
@@ -1157,7 +1175,7 @@ class J2Run:
             # Adding budget is offered only by the decision question (_identity_limit), whose options code builds
             # and applies. Approval and ruling_budget apply their own amount after the answer.
             questions = [{k: v for k, v in q.items() if k != "budget"} for q in questions]
-        m = self.post("identity", "@Requester " + say + ("\n" + numbered(questions) if questions else ""),
+        m = self.post("identity", "@Requester " + say + ("\n" + numbered(questions, options_only) if questions else ""),
                       act="ASK_REQUESTER", to_user=True, next="user", pause=kind, **meta)
         self.paused = {"kind": kind, "questions": questions, "to": to, "handoff": handoff or {}, "msg": m["id"]}
         self._event("identity", "pause", f"{kind}: {len(questions)} question(s) for the Requester", pause=kind)
@@ -1623,7 +1641,7 @@ class J2Run:
                 q = clean_questions([r.get("user_question")]) if isinstance(r.get("user_question"), dict) else []
                 if not q or len(q[0]["options"]) < 2:
                     q = [{"question": f"Run {w['name']} over the budget?",
-                          "options": [f"Approve: add {need} units so it runs", "Don't run it; it stays parked"]}]
+                          "options": [f"Approve: add {need} work credits so it runs", "Don't run it; it stays parked"]}]
                 return self._ask_user(r.get("say", ""), q, "approval", handoff={"kind": "approval", "wid": w["id"]})
             self._say("identity", r.get("say", ""), "coordination")
         w["status"] = "unfunded"
@@ -1701,8 +1719,10 @@ class J2Run:
                 if self.decisions:
                     self.decisions[-1]["unclear"] = True
                 self._event("identity", "unclear_answer", f"answer to '{q.get('question')}' names no option")
-                self._ask_user("I couldn't tell which option you chose. Please reply with the option number, or type "
-                               "what to add or leave out.", [q], "limit", auto=True,
+                n = len(q.get("options") or [])
+                nums = ", ".join(str(i) for i in range(1, n)) + f" or {n}" if n > 1 else "1"
+                self._ask_user(f"I couldn't tell which option you chose. Reply {nums}, or type what to add or leave "
+                               "out.", [q], "limit", auto=True, options_only=True,
                                handoff={**{k: h[k] for k in ("kind", "limit", "choices", "failing_items", "resume")
                                            if k in h},
                                         "reasked": True})
@@ -1790,15 +1810,20 @@ class J2Run:
         stale = self.last_limit and self.last_limit["state"] == state and self.last_limit["decision"] == "continue"
         opts, budget, choices = [], [], []
         if (not short or self.budget + add - self.spent >= cheapest) and not stale and (add or not h.get("budget_needed")):
-            opts.append((f"Add {add} units{' (the most allowed)' if add < want else ''} and keep going: you get more "
+            opts.append((f"Add {add} work credits{' (the most allowed)' if add < want else ''} and keep going: you get more "
                          f"of the missing parts built. Or type your own number, up to {room}" if add else
                          "Keep going: you get more of the missing parts built")
                         + (" (send the missing details with your answer)" if h.get("tbc") else ""))
             budget.append(add)
             choices.append("continue")
-        if items:
-            opts.append(f"Leave out the {len(items)} missing part{'s' if len(items) > 1 else ''}: you get the site "
-                        "without them")
+        crit = (self.goal or {}).get("done_when") or []
+        drop = [crit.index(t) + 1 for g in gaps if gap_kind(g) != "built but not checked yet"
+                for t in [re.sub(r" \(not built yet\)$", "", g)] if t in crit]
+        if drop:
+            rest = len(gaps) - len(drop)
+            opts.append(f"Leave out the {len(drop)} unfinished checklist part{'s' if len(drop) > 1 else ''}: you get "
+                        "the site without them" + (f" (the other {rest} on the list "
+                        + ("stays as it is)" if rest == 1 else "stay as they are)") if rest else ""))
             budget.append(0)
             choices.append("drop")
         opts.append("Finish as it is: you get the site as it is now" + (f", with {len(gaps)} thing"
@@ -1829,7 +1854,7 @@ class J2Run:
         self.last_limit = {"state": state, "decision": None}
         self._ask_user(r.get("say") or plain_missing, [q], "limit", gaps=gaps, handoff={"kind": "requester_answered", "limit": reason,
                                                                        "choices": choices, "resume": h.get("resume"),
-                                                                       "failing_items": [x["item"] for x in items]})
+                                                                       "failing_items": drop})
 
     def _open_list(self, last, items):
         """One list for the decision message and its count. (1) What the last audit found: failing checklist items,
