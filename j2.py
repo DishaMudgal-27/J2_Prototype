@@ -280,9 +280,10 @@ DECISION_FMT = ('"decision": "continue"|"drop"|"ship"|null (null if the answer d
 ONLY_PICK = re.compile(r"\s*(option\s*)?[1-9]\s*[.:)]?\s*", re.I)
 
 
-REPLY_FMT = ('"to_requester": str (to the Requester only, in plain words: what you understood from their answer and '
-             'what happens next; at most 3 short sentences; never starts with @), "to_agents": str (the instruction '
-             'for the team; the Requester never sees it)')
+REPLY_FMT = ('"to_requester": str (to the Requester only, in plain words: what you understood or decided and what '
+             'happens next; at most 3 short sentences; tagged @Requester or no tag; nothing for the team; "" when the '
+             'Requester needn\'t hear anything now), "to_agents": str (the instruction for the team, tagged with the '
+             'agent; the Requester never sees it)')
 AT_REQUESTER = re.compile(r"^\s*@Requester\b[,:]?\s*", re.I)
 # Agent content the Requester must never get, and user-facing content agents must never get (checked in call()).
 AGENT_CONTENT = re.compile(r"@(?!Requester\b)[A-Za-z]|\b[WFRC]-\d+\b|\bre-?pric|\b\d+\s*units?\b|\b(?:Adaptation|"
@@ -862,7 +863,13 @@ class J2Run:
 
     def post(self, who, text, **meta):
         if who == "identity" and meta.get("to_user") and meta.get("act") != "ASK_REQUESTER":
-            text = "@Requester " + to_requester(text)    # one addressee per message; _ask_user shapes its own text
+            if re.match(r"\s*@(?!Requester\b)\w", str(text or "")):
+                # Addressed to an agent but sent to the Requester: never re-tag it, record it (call() should have
+                # caught it).
+                self.events.append({"agent": who, "type": "misaddressed", "detail": str(text)[:120],
+                                    "msg": len(self.chat) + 1, "cycle": self.cycle})
+            else:
+                text = "@Requester " + to_requester(text)    # one addressee per message; _ask_user shapes its own
         m = {"id": len(self.chat) + 1, "t": time.strftime("%H:%M:%S"), "who": who, "text": text, "step": self.step, **meta}
         if self.pending_calls.get(who):          # the AI calls behind this message, for the detail view
             m["calls"] = self.pending_calls.pop(who)
@@ -1002,7 +1009,8 @@ class J2Run:
         """One message, one addressee: to_requester may not carry agent content (instructions, unit counts, workflow
         ids, an @agent), to_agents may not read as user-facing (thanks, I'll start, a question to the user). A mixed
         reply is regenerated once with the reason; if it is still mixed, the bad part becomes a template."""
-        req, ag = str(r.get("to_requester") or ""), str(r.get("to_agents") or r.get("say") or "")
+        req = str(r.get("to_requester") or "")
+        ag = str(r["to_agents"] if "to_agents" in r else r.get("say") or "")
         bad = ([f"to_requester has agent content ({m.group(0)!r})"] if (m := AGENT_CONTENT.search(req)) else []) \
             + ([f"to_agents reads as user-facing ({m.group(0)!r})"] if (m := USER_CONTENT.search(ag)) else [])
         if not bad:
@@ -1473,11 +1481,11 @@ class J2Run:
         if answer:
             c["user_answer"] = answer
         rulings = [a, b] + (["split"] if proposal else [])
-        fmt = ('{"say": str, "clause": str, "facts": [str], "resolved": bool, "ruling": "' + '"|"'.join(rulings) + '" '
+        fmt = ('{' + REPLY_FMT + ', "clause": str, "facts": [str], "resolved": bool, "ruling": "' + '"|"'.join(rulings) + '" '
                '(whose final position stands), '
                + ('"workflows": [str] (for split: names of the workflows to register, taken as they are from either '
                   'final position), ' if proposal else '')
-               + '"instruction": str (what happens next, one sentence)' + (', ' + REPLY_FMT if answer else '')
+               + '"instruction": str (what happens next, one sentence)'
                + ('' if answer else ', "user_question": {"question": str, "options": [str] (2-4, each text with its '
                   'consequence and risk; no recommendation; never adding budget, leaving items out or finishing as '
                   'is: only code offers those)}|null') + "}")
@@ -1501,21 +1509,21 @@ class J2Run:
             split = {"ruling": "split", "workflows": names + extra}
             beans = next((d for d in (self.goal or {}).get("done_when", []) if re.search(r"bean|farm", d, re.I)), None)
             if not proposal:
-                return json.dumps({"say": f"Clause: done_when. {NAMES[b]}'s position stands.", "clause": "done_when",
+                return json.dumps({"to_agents": f"Clause: done_when. {NAMES[b]}'s position stands.", "clause": "done_when",
                                    "resolved": True, "ruling": b, "instruction": "Carry on."})
             if answer:
                 fund = re.search(r"\b1\b|fund|include|add a section", answer, re.I)
-                return json.dumps({"say": "The Requester chose. " + ("The stories section is funded as Adaptation "
+                return json.dumps({"to_agents": "The Requester chose. " + ("The stories section is funded as Adaptation "
                                    "proposed; Priority's other cuts stand." if fund else "Priority's position stands: "
                                    "no stories section, the reserve stays."), "clause": "Requester's decision",
                                    "resolved": True, "instruction": "Register and build.",
                                    **(split if fund else {"ruling": "priority"})})
             if beans:
-                return json.dumps({"say": f"Clause: done_when \"{beans}\". The stories cover that item, so they're in; "
+                return json.dumps({"to_agents": f"Clause: done_when \"{beans}\". The stories cover that item, so they're in; "
                                           "Priority's cut to the animations stands.", "clause": f"done_when: {beans}",
                                    "facts": ["The charter names the beans and farms content"], "resolved": True,
                                    "instruction": "Register the split.", **split})
-            return json.dumps({"say": "@Requester One choice is up to you. A story section makes the site feel more "
+            return json.dumps({"to_agents": "", "to_requester": "@Requester One choice is up to you. A story section makes the site feel more "
                                       "personal, but it takes longer to build.", "clause": "done_when; standards",
                                "resolved": False, "ruling": None, "instruction": "", "user_question": {
                                    "question": "Do you want a section about your coffee's story?",
@@ -1523,14 +1531,11 @@ class J2Run:
                                                "Keep it simple, no story section"]}})
         r = self.call("identity", fmt, task, mock)
         ruling = key(r.get("ruling"))
-        c["identity"].append({"say": r.get("say"), "clause": r.get("clause"), "resolved": bool(r.get("resolved")),
+        c["identity"].append({"say": r.get("to_agents") or r.get("say"), "clause": r.get("clause"), "resolved": bool(r.get("resolved")),
                               "ruling": ruling or None, "after_user": bool(answer)})
         if r.get("resolved") and ruling in rulings:
             c["resolved_by"] = "identity_after_user" if answer else "identity"
-            if answer:
-                self._reply(r, None, conflict=c["id"], decision=True)
-            else:
-                self._say("identity", r.get("say", ""), None, None, conflict=c["id"], decision=True)
+            self._reply(r, None, conflict=c["id"], decision=True)
             return self._apply(c, ruling, r)
         if not answer:
             q = clean_questions([r.get("user_question")]) if isinstance(r.get("user_question"), dict) else []
@@ -1542,7 +1547,7 @@ class J2Run:
                       "options": [f"{NAMES[a]}'s: {brief_list(pos[a])}", f"{NAMES[b]}'s: {brief_list(pos[b])}"]}]
             c["user_question"], c["escalated_to_user"] = q[0], True
             self._save_conflicts()
-            return self._ask_user(r.get("say", ""), q, "conflict", handoff={"kind": "resolve", "conflict": c["id"]},
+            return self._ask_user(r.get("to_requester") or r.get("say", ""), q, "conflict", handoff={"kind": "resolve", "conflict": c["id"]},
                                   conflict=c["id"])
         self._event("identity", "invalid_move", f"{c['id']}: no ruling after the Requester's answer")
         self.post("system", f"Identity didn't rule on {c['id']} after the Requester answered. The default for "
@@ -1840,13 +1845,14 @@ class J2Run:
 
         def mock():
             if not fails:
-                return json.dumps({"say": "@Requester Your website is ready. Everything you asked for is on the page, and "
-                                          "it works on phones and computers.", "clause": "done_when",
-                                   "done": True, "next": "Requester"})
-            return json.dumps({"say": "@Adaptation Not workable yet; the failing findings need rework.",
+                return json.dumps({"to_requester": "@Requester Your website is ready. Everything you asked for is on "
+                                                   "the page, and it works on phones and computers.",
+                                   "to_agents": "", "clause": "done_when", "done": True, "next": "Requester"})
+            return json.dumps({"to_requester": "", "to_agents": "@Adaptation Not workable yet; the failing findings "
+                                                                "need rework.",
                                "clause": "done_when", "done": False, "needs_requester": bool(facts),
                                "requester_questions": [], "next": "Requester" if facts else "Adaptation"})
-        r = self.call("identity", '{"say": str, "clause": str, "done": bool, "needs_requester": bool, '
+        r = self.call("identity", '{' + REPLY_FMT + ', "clause": str, "done": bool, "needs_requester": bool, '
                       '"requester_questions": [str], "instruction_to_adaptation": str|null, ' + DECIDE_FMT + ', '
                       + next_field(("user", "adaptation"), "Requester when done=true or needs_requester=true; "
                                    "Adaptation for rework") + "}",
@@ -1858,9 +1864,12 @@ class J2Run:
                       "link, nothing to be confirmed. Code checks this. Workable: declare done=true and tell the Requester "
                       "the goal is reached. Not workable: it goes back to Adaptation (J2.b); give the instruction. If a "
                       "fix needs a fact only the Requester knows (facts above, or any you see), set needs_requester=true "
-                      "and ask for it in requester_questions; the run pauses until they answer. " + DECIDE_RULE, mock)
+                      "and ask for it in requester_questions; the run pauses until they answer. " + DECIDE_RULE, mock,
+                      defaults=("Your website is ready.", "") if not fails else
+                      ("We're still working on your site.", "Not workable yet: rework the failing findings."))
         if not fails and r.get("done"):
-            self.post("identity", address(r.get("say", ""), "user"), done=True, to_user=True, next="user")
+            self.post("identity", r.get("to_requester") or r.get("say") or "Your website is ready.", done=True,
+                      to_user=True, next="user")
             self.outcome = "Done: the site is workable. Every done-when item passes with Audit's evidence and the " \
                            "render check is clean."
             self.turn = None
@@ -1874,15 +1883,17 @@ class J2Run:
         questions += [{"question": f"{x['needs_requester_fact']} (checklist item {x.get('item')}). If you can't give it "
                                    "yet, say so and it's marked to be confirmed.", "options": []} for x in facts]
         if questions and (facts or r.get("needs_requester")):
-            return self._ask_user(r.get("say", ""), questions, "fact", handoff={"kind": "requester_answered"}, done=False)
+            return self._ask_user(r.get("to_requester") or r.get("say", ""), questions, "fact",
+                                  handoff={"kind": "requester_answered"}, done=False)
         note0 = ("Identity declared done, but the site isn't workable, so done-when can't hold. Back to J2.b."
                  if r.get("done") and fails else
                  "The site is workable, but Identity didn't declare done. Back to J2.b with Identity's reason."
                  if not fails else None)
         nxt, note = self._pick("identity", r.get("next"), ("adaptation",), "adaptation")
-        self._say("identity", r.get("say", ""), nxt, note0 or note, done=False)
+        self._reply(r, nxt, note0 or note, done=False)
         self._handoff("adaptation", kind="propose", new_cycle=True,
-                      why=f"Identity at J2.h: {r.get('instruction_to_adaptation') or r.get('say')} Not workable yet: "
+                      why=f"Identity at J2.h: {r.get('instruction_to_adaptation') or r.get('to_agents') or r.get('say')} "
+                          "Not workable yet: "
                           f"{json.dumps(fails, ensure_ascii=False)}")
 
     # ------------------------------------------------------------------ conflicts between any two agents

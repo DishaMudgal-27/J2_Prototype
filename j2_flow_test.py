@@ -1419,6 +1419,40 @@ def form_submit():
     assert "form 1 has no submit button" in j2.workable(bad)
 
 
+def audiences_everywhere():
+    """Follow-up to 5ba8160. J2.h's reply has the same two parts and check: "@Adaptation Thanks, your site is almost
+    ready..." is regenerated into one @Requester and one @Adaptation message. REPLY_FMT allows the @Requester tag.
+    post() never re-tags an @agent message as @Requester; it records an event."""
+    assert "never starts with @" not in j2.REPLY_FMT and "tagged @Requester or no tag" in j2.REPLY_FMT, j2.REPLY_FMT
+    run = j2.J2Run()
+    orig, seen = run.call, []
+
+    def call(fn, fmt, task, mock, **k):
+        if fn == "identity" and task.startswith("AUDIT'S FINDINGS") and len(seen) < 2:
+            seen.append(task)
+            def h():
+                if len(seen) == 1:      # what Identity sends live: user talk addressed to an agent
+                    return json.dumps({"say": "@Adaptation Thanks, your site is almost ready. Fix the phone layout next.",
+                                       "clause": "done_when", "done": False, "next": "Adaptation"})
+                return json.dumps({"to_requester": "Your site is almost ready. We're fixing the phone layout now.",
+                                   "to_agents": "@Adaptation Fix the phone layout next.", "clause": "done_when",
+                                   "done": False, "next": "Adaptation"})
+            return orig(fn, fmt, task, h, **k)
+        return orig(fn, fmt, task, mock, **k)
+    run.call = call
+    say(run, BREW_LAB)
+    assert len(seen) == 2 and "MIXED THE TWO AUDIENCES" in seen[1], "J2.h's mixed reply must be regenerated"
+    i = next(j for j, m in enumerate(run.chat) if "Your site is almost ready" in m["text"])
+    req, ag = run.chat[i], run.chat[i + 1]
+    assert req["text"] == "@Requester Your site is almost ready. We're fixing the phone layout now." and req["to_user"], req
+    assert ag["text"] == "@Adaptation Fix the phone layout next." and not ag.get("to_user") \
+        and ag["audience"] == "adaptation", ag
+    assert not any("Thanks, your site" in m["text"] for m in run.chat)
+    n = len(run.events)
+    m = run.post("identity", "@Adaptation Re-price W-3.", to_user=True)
+    assert m["text"] == "@Adaptation Re-price W-3." and run.events[n]["type"] == "misaddressed", (m, run.events[n:])
+
+
 if __name__ == "__main__":
     for mode in ("0", "1"):
         os.environ["J2_FIXES"] = mode
@@ -1454,6 +1488,7 @@ if __name__ == "__main__":
     adaptation_idle()
     identity_decisions()
     two_audiences()
+    audiences_everywhere()
     simple_messages()
     owner_override()
     form_submit()
