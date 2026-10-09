@@ -68,6 +68,8 @@ RUBRIC = (("R-1", "Consistent styling: the whole page follows the style guide (s
           ("R-5", "Easy navigation: a visitor can reach every section quickly, on a phone too"),
           ("R-6", f"Tap targets are big enough on phones (at least {j2_check.TAP_MIN}x{j2_check.TAP_MIN}px)"),
           ("R-7", "Images have alt text"))
+WORKABLE_OUTCOME = ("Done: the site is workable. Every done-when item passes with Audit's evidence and the render "
+                    "check is clean.")
 MAX_TURNS = int(os.getenv("J2_MAX_TURNS", "30"))       # agent turns per cycle
 CHAT_FULL_CHARS = int(os.getenv("J2_CHAT_FULL_CHARS", "60000"))   # above this, summary + recent messages
 CHAT_TAIL = 40             # messages always shown in full once the chat is summarised
@@ -816,13 +818,24 @@ class J2Run:
         self.conflict = None                 # the Adaptation <-> Priority negotiation in progress, once they disagree
         self.a_pos, self.p_pos = [], []      # Adaptation's and Priority's latest positions this cycle
 
+    def _ship_outcome(self, why):
+        """Outcome of "finish as it is". "Done with open items" only with items to name: a workable site is done."""
+        fails = workable(self.audits[-1]) if self.audits else ["nothing was built"]
+        if not fails:
+            return WORKABLE_OUTCOME
+        return f"Done with open items: shipped as is {why}. Still not workable: {'; '.join(fails)}."
+
+    def _turn_cap(self):
+        """Turns allowed this cycle, scaled with the work: each workflow registered this cycle needs its own turns."""
+        return max(MAX_TURNS, 10 + 4 * sum(w.get("cycle") == self.cycle for w in self.workflows))
+
     def snapshot(self, since=0):
         return {"chat": self.chat[since:], "total": len(self.chat), "status": self.status,
                 "thinking": self.thinking, "step": self.step, "steps": STEPS, "goal": self.goal,
                 "stamped": self.stamped, "workflows": self.workflows, "budget": self.budget, "spent": self.spent,
                 "conflicts": self.conflicts, "audits": self.audits, "versions": len(self.sites),
                 "cycle": self.cycle, "calls": self.calls, "error": self.error, "done": self.done,
-                "turn": self.turn, "cycle_turns": self.cycle_turns, "max_turns": MAX_TURNS,
+                "turn": self.turn, "cycle_turns": self.cycle_turns, "max_turns": self._turn_cap(),
                 "paused": ({k: self.paused[k] for k in ("kind", "questions", "msg")}
                            | {"label": PAUSES.get(self.paused["kind"], ""),
                               "choices": self.paused["handoff"].get("choices")}) if self.paused else None,
@@ -1212,9 +1225,8 @@ class J2Run:
                                 "why": "owner override", "override": True})
             note = f"budget +{m[1]} ({old} -> {self.budget}; the cap doesn't apply)"
         elif re.fullmatch(r"ship", cmd, re.I):
-            fails = workable(self.audits[-1]) if self.audits else ["nothing was built"]
             self.paused, self.turn, self.done = None, None, True
-            self.outcome = f"Done with open items: shipped as is on an owner override. Still not workable: {'; '.join(fails)}."
+            self.outcome = self._ship_outcome("on an owner override")
             note = "ship: the run ends with the site as it is"
         elif m := re.fullmatch(r"drop\s+(.+)", cmd, re.I):
             want = m[1].strip()
@@ -1232,7 +1244,7 @@ class J2Run:
             return True
         self._event("owner", "override", note)
         self.post("system", f"Owner override applied: {note}.", override=True)
-        if self.outcome and self.outcome.startswith("Done with open items") and self.done and not self.paused:
+        if self.outcome and self.outcome.startswith("Done") and self.done and not self.paused:
             self._write_summary()
         return True
 
@@ -1300,8 +1312,11 @@ class J2Run:
                     self._handoff("identity", kind="limit", reason=limit, out_of_budget=limit.startswith("Out of budget"))
                     continue
                 self._begin_cycle()
-            if self.cycle_turns >= MAX_TURNS and self.handoff.get("kind") != "limit":
-                self._handoff("identity", kind="limit", reason=f"Cycle {self.cycle} used {MAX_TURNS} turns (the "
+            # J2.h after a passing Audit always runs: the cap never asks "keep going?" about a finished site.
+            j2h = self.turn == "identity" and self.handoff.get("kind") == "audit" and self.audits \
+                and not workable(self.audits[-1])
+            if self.cycle_turns >= self._turn_cap() and self.handoff.get("kind") != "limit" and not j2h:
+                self._handoff("identity", kind="limit", reason=f"Cycle {self.cycle} used {self._turn_cap()} turns (the "
                                                                "per-cycle cap) without finishing.")
                 continue
             self.cycle_turns += 1
@@ -1756,9 +1771,7 @@ class J2Run:
         if decision == "ship":
             self.post("identity", r.get("to_requester") or "We'll finish the site as it is now.", to_user=True,
                       next="user", done=True)
-            fails = workable(self.audits[-1]) if self.audits else ["nothing was built"]
-            self.outcome = (f"Done with open items: shipped as is on the Requester's decision "
-                            f"({limit or 'their answer'}). Still not workable: {'; '.join(fails)}.")
+            self.outcome = self._ship_outcome(f"on the Requester's decision ({limit or 'their answer'})")
             self.turn = None
             return
         if gone or decision == "drop":
@@ -1943,8 +1956,7 @@ class J2Run:
         if not fails and r.get("done"):
             self.post("identity", r.get("to_requester") or r.get("say") or "Your website is ready.", done=True,
                       to_user=True, next="user")
-            self.outcome = "Done: the site is workable. Every done-when item passes with Audit's evidence and the " \
-                           "render check is clean."
+            self.outcome = WORKABLE_OUTCOME
             self.turn = None
             if self.memory:
                 self._save_playbook()

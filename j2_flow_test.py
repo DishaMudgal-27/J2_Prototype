@@ -1156,6 +1156,50 @@ def limit_answers():
     assert summary(run)["status"] == "done_with_open_items"
 
 
+def nine_workflows():
+    """runs/j2-20261008-190919: Audit passed every item at msg 40, then the 30-turn cap fired before J2.h, so Identity
+    asked "keep going or finish?" about a finished site and the outcome listed no open items. The cap now scales
+    with the workflows registered this cycle, J2.h always runs after a passing Audit, and finishing a workable
+    site is "Done", never "Done with open items" with an empty list."""
+    def nine(cap=None):
+        old, os.environ["J2_FIXES"] = os.environ.get("J2_FIXES"), "0"
+        run = j2.J2Run()
+        os.environ["J2_FIXES"] = old
+        run.budget, orig = 400, run.call
+        if cap:
+            run._turn_cap = lambda: cap
+
+        def call(fn, fmt, task, mock, **k):          # cycle 1: nine workflows, one item each, all of them pass
+            if fn == "adaptation" and "WHY YOU ARE UP" in task and not run.workflows:
+                crit = run.goal["done_when"]
+
+                def wf(name, i, parts=("page_section",)):
+                    return {"name": name, "goal_gap": crit[i - 1], "parts": list(parts), "covers": [i],
+                            "outputs": ["index.html"], "completion_check": crit[i - 1]}
+                phone = next(i for i, c in enumerate(crit, 1) if "phone" in c.lower())
+                form = next(i for i, c in enumerate(crit, 1) if "form" in c.lower())
+                rest = [i for i in range(2, len(crit) + 1) if i not in (phone, form)]
+                wfs = [wf("Scaffold and styling", 1, ("page_section", "styling")), wf("Viewport fix", phone, ("fix",)),
+                       wf("Pre-order form", form, ("form",))] + [wf(f"Section {i}", i) for i in rest]
+                return {"say": "@Priority Nine workflows.", "act": "PROPOSE", "next": "Priority",
+                        "workflows": wfs + [wf(f"Extra {i}", i) for i in rest][:9 - len(wfs)]}
+            return orig(fn, fmt, task, mock, **k)
+        run.call = call
+        say(run, BREW_LAB)
+        return run
+    run = nine()
+    assert len(run.workflows) == 9 and all(w["cycle"] == 1 and w["status"] == "done" for w in run.workflows), run.workflows
+    assert run.cycle_turns > j2.MAX_TURNS and run._turn_cap() == 10 + 4 * 9, (run.cycle_turns, run._turn_cap())
+    assert run.outcome == j2.WORKABLE_OUTCOME and not run.paused, run.outcome
+    assert not any(e["type"] == "limit" for e in run.events) and summary(run)["status"] == "done"
+    # (1) the cap is reached exactly when Audit hands a passing site to Identity: J2.h still runs
+    turns = run.cycle_turns
+    run = nine(cap=turns - 1)
+    assert run.outcome == j2.WORKABLE_OUTCOME and not any(e["type"] == "limit" for e in run.events), run.outcome
+    # (3) "finish as it is" on a workable site is Done, not Done with open items and an empty list
+    assert run._ship_outcome("on the Requester's decision") == j2.WORKABLE_OUTCOME
+
+
 def budget_cap():
     """The cap shows in the option text; an option that adds budget the cap won't allow is never offered, and
     "keep working" isn't offered when it can't fund anything or when it already changed nothing."""
@@ -1652,6 +1696,7 @@ if __name__ == "__main__":
     workable_unit()
     playbook_matching()
     limit_answers()
+    nine_workflows()
     budget_cap()
     repeats()
     adaptation_idle()
@@ -1666,7 +1711,7 @@ if __name__ == "__main__":
     owner_override()
     form_submit()
     print("second pass: two audiences, simple messages, owner override, form submit ok")
-    print("limit answers (turn cap, own amount, drop with reason, done with open items), budget cap, repeats, idle Adaptation, decisions applied by code (msgs 24, 50) ok")
+    print("limit answers (turn cap, nine workflows, own amount, drop with reason, done with open items), budget cap, repeats, idle Adaptation, decisions applied by code (msgs 24, 50) ok")
     page()
     print("E behind-the-scenes view (lanes, detail, timeline, saved runs, redaction, lessons) ok")
     generalist_units()

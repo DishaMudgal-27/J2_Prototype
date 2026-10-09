@@ -355,7 +355,7 @@ Settings:
 | `J2_BARGAIN_MINUTES` | 15 | J2.c time bound |
 | `J2_BARGAIN_CALLS` | 8 | J2.c spend bound (AI calls) |
 | `J2_MEMORY` | 1 | 0 turns lessons off |
-| `J2_MAX_TURNS` | 30 | Agent turns per cycle |
+| `J2_MAX_TURNS` | 30 | Agent turns per cycle, at least; a cycle gets max(this, 10 + 4 × workflows registered in it). J2.h after a passing Audit always runs |
 | `J2_RATES` | 1 | 0 turns the rate card off |
 | `J2_FORCE_AUDIT_FAIL` | off | Test switch, see below |
 | `J2_MEMORY_TEST_LESSONS` | off | 1 lets J2.b read test lessons (demo runs only), see below |
