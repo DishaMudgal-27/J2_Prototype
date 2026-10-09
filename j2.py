@@ -191,7 +191,9 @@ def item_min(criterion):
 
 # Leaving items out for budget: the no-errors gate and the brief's core facts always stay in. Identity marks core
 # items at J2.a (goal["core_items"]); the keywords are only the fallback for a charter without that mark.
-NO_ERRORS_GATE = re.compile(r"no (?:javascript |js )?errors|horizontal (?:overflow|scroll)|broken (?:in-page )?links?", re.I)
+NO_ERRORS_GATE = re.compile(r"\b(?:javascript|js) errors\b", re.I)    # the gate item names JavaScript errors
+GATE_TEXT = ("The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link "
+             "points to an existing section.")     # fixed by code at J2.a: Identity never adds features to it
 CORE_FACT = re.compile(r"\bprices?\b|\bhours\b|timings?|address|location|\bmaps?\b|contact|whatsapp|e-?mail|"
                        r"phone number|\bcall\b|\border", re.I)
 BUDGET_TALK = re.compile(r"budget|\bcosts?\b|afford|expensive|cheap|\bcut|\bdrop|leave (?:\w+ )?out|fund|credits?\b|"
@@ -304,6 +306,8 @@ DECIDE_RULE = ("Never offer adding budget, leaving items out or finishing as is 
 DECISION_FMT = ('"decision": "continue"|"drop"|"ship"|null (null if the answer doesn\'t say), "add": int|null (units the '
                 'Requester asked to add, as they typed it), "drop_items": [int] (done-when item numbers they asked to '
                 'leave out)')
+BUILT_CLAIM = re.compile(r"\b(?:now has|already has|so far the (?:page|site) has|the (?:page|site) has|is built|"
+                         r"(?:we|I)(?:'ve| have)? (?:built|added)|has been (?:built|added))\b", re.I)
 DECISION_PAUSES = ("limit", "conflict", "ruling_budget")    # the Requester decides; info/fact/question only inform
 ONLY_PICK = re.compile(r"\s*(option\s*)?[1-9]\s*[.:)]?\s*", re.I)
 
@@ -859,6 +863,7 @@ class J2Run:
         self.a_pos, self.p_pos = [], []      # Adaptation's and Priority's latest positions this cycle
         self.a_named = []                    # done-when items Adaptation's last proposal covered or left out
         self.deferred = {}                   # done-when item text -> rounds (cycles) it was left out or refused
+        self.pending_left = None             # items a ruling left out: Identity asks after this cycle's Audit
 
     def _ship_outcome(self, why):
         """Outcome of "finish as it is". "Done with open items" only with items to name: a workable site is done."""
@@ -1476,7 +1481,11 @@ class J2Run:
             return
         goal["to_be_confirmed"] = self._tbc(goal.get("to_be_confirmed"), goal.get("done_when") or [])
         goal.pop("open_inputs", None)
-        crit, core = goal.get("done_when") or [], goal.pop("core", None)
+        # The no-errors gate has fixed wording: Identity can't extend it with features (runs/j2-20261009-133203
+        # item 16 added filters and category browsing, so it couldn't pass once those were dropped).
+        goal["done_when"] = [GATE_TEXT if NO_ERRORS_GATE.search(str(c)) else c for c in goal.get("done_when") or []]
+        crit, core = goal["done_when"], goal.pop("core", None)
+        goal["charter_items"] = list(crit)     # the numbering Audit may still use after items are dropped
         if isinstance(core, list) and len(core) == len(crit):          # stored by text: drops renumber the list
             goal["core_items"] = [c for c, k in zip(crit, core) if k is True]
         elif "core_items" in goal:                                       # a change request kept the old marks
@@ -1916,20 +1925,30 @@ class J2Run:
              **({"budget": budget} if any(budget) else {})}
         self._event("system", "limit", reason)
         plain_missing = "The site isn't finished yet."
+        passed, funded = self._built_and_funded(last)
         r = self.call("identity", '{"say": str (to the Requester, in plain words: what has been done so far, at most 2 '
                       'short sentences; don\'t list what is missing, code adds that list; no question, it is asked '
                       'below; no recommendation; never the words "building time", "cap", "cycles", "done-when" or '
                       '"estimate")}',
+                      f"PASSED BY AUDIT (the only things you may describe as built or on the site): "
+                      f"{json.dumps(passed, ensure_ascii=False)}\nFUNDED, NOT BUILT OR NOT CHECKED YET (say the team "
+                      f"will build these, never that the site has them): {json.dumps(funded, ensure_ascii=False)}\n"
                       f"LIMIT: {reason}\nWHAT IS STILL NOT RIGHT (code lists it after your words): "
                       f"{json.dumps(gaps, ensure_ascii=False)}\nTHE QUESTION AND OPTIONS CODE WILL OFFER: "
                       f"{json.dumps(q, ensure_ascii=False)}\nTell the Requester.",
                       lambda: json.dumps({"say": plain_missing}))
+        say = r.get("say") or plain_missing
+        if not passed and BUILT_CLAIM.search(say):
+            # Nothing has passed Audit, so nothing may be described as built (runs/j2-20261009-133203 msg 29).
+            self._event("identity", "invalid_move", "described unbuilt work as built")
+            say = (f"Nothing has passed the checks yet; the team will build {len(funded)} funded part"
+                   f"{'s' if len(funded) != 1 else ''} first." if funded else plain_missing)
         self.last_limit = {"state": state, "decision": None}
         resume = h.get("resume") or ({"to": "adaptation", "handoff": {"kind": "propose", "why": "The Requester added "
                                       f"credits for the items left out: {json.dumps(left, ensure_ascii=False)}"}}
                                      if left else None)
         handoff = {"kind": "requester_answered", "limit": reason, "choices": choices, "resume": resume,
-                   "failing_items": drop, **({"after_ruling": True} if left else {})}
+                   "failing_items": drop, **({"after_ruling": True} if left and not h.get("at_audit") else {})}
         if len(choices) < 2:
             # Never a one-option question. The only lone option is "finish as it is" (with no site, "stop here" is
             # always added, and money is never added without asking): code applies it and says so.
@@ -1937,7 +1956,16 @@ class J2Run:
             self.decisions.append({"kind": "limit", "asked": [q["question"]], "answer": "1", "only_option": True,
                                    "decision": "ship"})
             return self._finish_only_option(reason, gaps, room, stale)
-        self._ask_user(r.get("say") or plain_missing, [q], "limit", gaps=gaps, handoff=handoff)
+        self._ask_user(say, [q], "limit", gaps=gaps, handoff=handoff)
+
+    def _built_and_funded(self, last):
+        """(done-when items the last Audit passed on the current site, items funded but not built or not checked)."""
+        crit = (self.goal or {}).get("done_when") or []
+        fresh = last and last["version"] == len(self.sites) and self.sites
+        passed = [r["criterion"] for r in (last or {}).get("results", []) if fresh and r["pass"] and r["criterion"] in crit]
+        funded = [crit[i - 1] for w in self.workflows if w["status"] in ("registered", "held", "running", "done")
+                  for i in self._wf_items(w) if crit[i - 1] not in passed]
+        return passed, list(dict.fromkeys(funded))
 
     def _finish_only_option(self, reason, gaps, room, stale):
         """The decision question had one option, "finish as it is": code applies it and tells the Requester why
@@ -1991,6 +2019,16 @@ class J2Run:
         self.step = 8
         last = self.audits[-1] if self.audits else None
         fails, findings = workable(last), self._findings(last)
+        if self.pending_left and not self._waiting_work():
+            # The cycle's funded work is built and audited: now Identity asks about what the ruling left out.
+            p, self.pending_left = self.pending_left, None
+            crit = (self.goal or {}).get("done_when") or []
+            passed = {r["criterion"] for r in (last or {}).get("results", []) if r["pass"]}
+            left = [c for c in p["left_out"] if c in crit and c not in passed]
+            if left:
+                need = sum(item_min(c) for c in left) - (self.budget - self.spent)
+                return self._identity_limit({**p, "left_out": left, "at_audit": True,
+                                             "budget_needed": need if need > 0 else None})
         tbc = {t["criterion"] for t in (self.goal or {}).get("to_be_confirmed") or []}
         facts = [x for x in findings if x.get("needs_requester_fact") and x.get("verdict") not in ("PASS", "PASS_WITH_WARNING")
                  and x.get("criterion") not in tbc]
@@ -2238,8 +2276,10 @@ class J2Run:
         items out, Identity asks the Requester first."""
         self.bargain = None
         if left := self._left_by_ruling():
-            self.post("system", f"Nothing new registered ({why}).")
-            return self._handoff("identity", kind="limit", **left)
+            if not self._waiting_work():
+                self.post("system", f"Nothing new registered ({why}).")
+                return self._handoff("identity", kind="limit", **left)
+            self._ask_after_audit(left)
         if self._waiting_work():
             self.post("system", f"Nothing new registered ({why}). Building the work already registered.")
             return self._handoff("coordination", kind="schedule")
@@ -2472,6 +2512,9 @@ class J2Run:
         out = [as_int(x.get("item") if isinstance(x, dict) else x) for x in r.get("left_out") or []]
         self.a_named = [c for i, c in enumerate(crit, 1) if i in out or any(i in self._covers(w) for w in wfs)]
         if not wfs and (left := self._left_by_ruling()):
+            if self._waiting_work():
+                self._ask_after_audit(left)
+                return self._handoff("coordination", kind="schedule")
             self.post("system", "Nothing fits the budget left, so there is nothing for Priority to fund. Identity asks "
                                 "the Requester.")
             return self._handoff("identity", kind="limit", **left)
@@ -2532,6 +2575,13 @@ class J2Run:
             return None             # the budget left still pays for them: Adaptation proposes them next (J2.b)
         return {"reason": f"Priority's ruling leaves out {len(left)} checklist item(s) the budget left can't pay for.",
                 "left_out": left, "budget_needed": need}
+
+    def _ask_after_audit(self, left):
+        """Funded work is built first: Identity's question about the items left out waits for this cycle's Audit,
+        so it is asked about a real site and never while registered work is unbuilt."""
+        self.pending_left = left
+        self.post("system", f"{len(left['left_out'])} checklist item(s) aren't funded. The funded work is built and "
+                            "checked first; then Identity asks the Requester about them.")
 
     def _adapt_state(self):
         """(can't fund a part, budget, done-when, Requester decisions): Adaptation is asked again once any changes."""
@@ -2804,10 +2854,10 @@ class J2Run:
                                                                if w["section"] in self.sections else "")
                 for w in registered) + "."
             left = self._left_by_ruling()
-            self._say("validator", msg + f" Budget: {self.spent}/{self.budget} used.",
-                      "identity" if left else "coordination", register=True, charged=sum(w["cost"] for w in registered))
+            self._say("validator", msg + f" Budget: {self.spent}/{self.budget} used.", "coordination", register=True,
+                      charged=sum(w["cost"] for w in registered))
             if left:
-                return self._handoff("identity", kind="limit", **left)
+                self._ask_after_audit(left)
             return self._handoff("coordination", kind="schedule")
         self._say("validator", f"Rejected: {'; '.join(refused) or 'the agreed set was empty'}. Adaptation reshapes or "
                                "parks it.", "adaptation", register=False)
@@ -2904,7 +2954,8 @@ class J2Run:
           covers; after the first Audit every workflow must cover an item or fix a finding."""
         crit = (self.goal or {}).get("done_when") or []
         covers, fixes, parts = self._covers(w), [str(f) for f in w.get("fixes") or []], [str(p) for p in w.get("parts") or []]
-        is_fix = bool(fixes) or bool(w.get("revises"))
+        target = self._wf(str(w.get("revises") or "").upper())
+        is_fix = bool(fixes) or bool(target and target["status"] == "done")   # rewriting an unbuilt section is new work
         if not covers and not fixes and not is_fix and (self.audits or {"page_section", "form"} & set(parts)):
             return ("it covers no done-when item and fixes no Audit finding: list the items it builds in covers, or "
                     "the findings it fixes in fixes" + (" (page_section and form parts build done-when items, so "
@@ -3170,14 +3221,17 @@ class J2Run:
         """One result per done-when item, matched by item number. A missing item, or a PASS with no evidence, becomes
         BLOCKED_BY_EVIDENCE (audit.md: when evidence is absent, don't guess). Other findings are extra issues."""
         by_item, extras = {}, []
+        g = self.goal or {}
+        orig, dropped = g.get("charter_items") or crit, g.get("dropped_by_requester") or []
         for i, f in enumerate(x for x in findings if isinstance(x, dict)):
             row = {"id": f.get("id") or f"F-{i + 1}", "criterion": f.get("criterion", ""),
                    "verdict": str(f.get("verdict", "")).upper(), "note": str(f.get("evidence") or "").strip(),
                    "severity": f.get("severity"), "confidence": f.get("confidence"),
                    "needs_requester_fact": str(f.get("needs_requester_fact") or "").strip() or None}
-            n = as_int(f.get("item"), 0)
-            if not n:   # no item number: match the criterion text instead
-                n = next((k for k, c in enumerate(crit, 1) if c and c.lower()[:40] in row["criterion"].lower()), 0)
+            n = self._finding_item(as_int(f.get("item"), 0), row["criterion"], crit, orig, dropped)
+            if n == -1:     # a dropped item is out of scope: never a finding, never an extra issue
+                self._event("audit", "invalid_move", f"{row['id']} is about a dropped item: ignored")
+                continue
             if 1 <= n <= len(crit) and n not in by_item:
                 by_item[n] = row
             else:
@@ -3199,6 +3253,27 @@ class J2Run:
                                                                     f"(Audit's own note: {row.get('note') or 'none'})"}
             results.append({**row, "item": n, "criterion": c, "pass": row["verdict"] in ("PASS", "PASS_WITH_WARNING")})
         return results, extras
+
+    @staticmethod
+    def _finding_item(n, text, crit, orig, dropped):
+        """The current item number a finding is about, -1 for a dropped item, 0 for an extra issue. After a drop
+        Audit may still use the charter's first numbering (runs/j2-20261009-133203: items 9, 15, 16 for 5, 6, 7), so
+        the number is read against both lists and the finding's own text picks between them."""
+        def like(item, finding):        # share of the finding's words that the item's text contains
+            words = set(re.findall(r"[a-z0-9]{4,}", str(finding).lower()))
+            return len(words & set(re.findall(r"[a-z0-9]{4,}", str(item).lower()))) / len(words) if words else 0
+        cands = []
+        if 1 <= n <= len(crit):
+            cands.append(crit[n - 1])
+        if orig != crit and 1 <= n <= len(orig):
+            cands.append(orig[n - 1])
+        if not cands:                    # no usable number: the closest current or dropped item by text
+            best = max(crit + dropped, key=lambda c: like(c, text), default=None)
+            cands = [best] if best and like(best, text) >= 0.6 else []
+        if not cands:
+            return 0
+        pick = max(cands, key=lambda c: like(c, text)) if text else cands[0]
+        return crit.index(pick) + 1 if pick in crit else -1 if pick in dropped else 0
 
     def _audit_tally(self, results, extras):
         """A code-written tally under Audit's message, so the chat and the report always agree."""
@@ -3255,7 +3330,12 @@ class J2Run:
                       '"evidence": str (one line: what you saw on the screenshot or in the measurements)}] (exactly '
                       'one per rubric item), '
                       + next_field(("identity",), "Identity: you file every finding to Identity, who decides J2.h") + "}",
-                      f"CRITERIA: {json.dumps(crit)}\nMECHANICAL CHECK (run by code in headless Chrome; treat as evidence, and "
+                      f"CRITERIA (file each finding under this list's item number; earlier messages may use numbers "
+                      f"from before items were dropped): {json.dumps([{'item': i, 'criterion': c} for i, c in enumerate(crit, 1)], ensure_ascii=False)}\n"
+                      + (f"DROPPED BY THE REQUESTER (out of scope: file no finding for these): "
+                         f"{json.dumps((self.goal or {}).get('dropped_by_requester'), ensure_ascii=False)}\n"
+                         if (self.goal or {}).get("dropped_by_requester") else "")
+                      + f"MECHANICAL CHECK (run by code in headless Chrome; treat as evidence, and "
                       f"use BLOCKED_BY_EVIDENCE only for what neither it nor the code can show): {json.dumps(mech)}\n"
                       f"DESIGN AND USABILITY RUBRIC (judge each item; a failing item is a normal finding): "
                       f"{json.dumps(dict(RUBRIC), ensure_ascii=False)}\nSTYLE GUIDE: {json.dumps(self.style, ensure_ascii=False)}"

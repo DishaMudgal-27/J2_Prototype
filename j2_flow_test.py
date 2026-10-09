@@ -201,6 +201,17 @@ def ruling_over_budget():
     assert s["status"] == "done" and s["limits_hit"] and not s["workable"], s
 
 
+def built_first(run):
+    """runs/j2-20261009-133203: the decision question about unfunded items comes after the funded work is built and
+    audited, never while registered work is unbuilt."""
+    assert run.paused and run.paused["kind"] == "limit" and not run.paused["handoff"].get("after_ruling"), run.outcome
+    assert run.sites and run.audits and run.audits[-1]["version"] == len(run.sites), run.outcome
+    assert not any(w["status"] in ("registered", "held", "running") for w in run.workflows), run.workflows
+    reg = next(m["id"] for m in run.chat if m["who"] == "validator" and m.get("register"))
+    order = [m["who"] for m in run.chat if m["id"] > reg]
+    assert order.index("coordination") < order.index("audit") < len(order) - 1 - order[::-1].index("identity"), order
+
+
 def policy_budget(fixes):
     """runs/j2-20261008-153402 (budget 40, rate-card floor 110): Adaptation asked about affordability twice and never
     proposed, so Priority was never called and nothing was built. Now a budget POLICY_QUESTION is rejected by code and
@@ -226,9 +237,9 @@ def policy_budget(fixes):
                for m in run.chat)
     i = {m["who"]: m["id"] for m in reversed(run.chat) if m["who"] != "validator" or m.get("register")}
     assert i["adaptation"] < i["priority"] < i["validator"], i   # proposal, then Priority's ruling, then registration
-    assert run.paused and run.paused["kind"] == "limit" and run.paused["handoff"].get("after_ruling"), run.outcome
+    built_first(run)
     q = run.paused["questions"][0]
-    assert run.paused["handoff"]["choices"] == ["continue", "drop"] and not run.sites, run.paused["handoff"]
+    assert run.paused["handoff"]["choices"] == ["continue", "drop", "ship"], run.paused["handoff"]
     assert q["options"][0].startswith("Add 10 work credits and keep going") and q["options"][1].startswith("Leave out"), q
     say(run, "the bigger one I think")                       # unclear: no guess, Identity asks once more
     assert run.paused and run.paused["handoff"].get("reasked") and run.budget == 60, run.paused
@@ -267,6 +278,8 @@ def connections():
                     break
                 p = run.paused
                 asked.append(p)
+                assert p["kind"] != "limit" or not any(w["status"] in ("registered", "held") for w in run.workflows), \
+                    (name, "paused with registered, unbuilt work")
                 if p["kind"] == "limit":
                     ch = p["handoff"]["choices"]
                     say(run, str(ch.index("drop" if "drop" in ch else "continue") + 1))
@@ -297,13 +310,14 @@ def connections():
         for p in limits:                                 # "finish" only once a site exists; never one option
             opts = p["questions"][0]["options"]
             assert len(opts) >= 2, (name, opts)
+            built = any(re.match(r"W-\d+$", m["who"]) and m["id"] < p["msg"] for m in chat)
+            assert built or not any(o.startswith("Finish as it is") for o in opts), (name, opts)   # finish needs a site
         if name == "tight":
             assert any(m.get("decision") == "counter" for m in chat) or \
                 any("drop" in p["handoff"]["choices"] for p in limits), (name, links)
         if name == "impossible":
             first = limits[0] if limits else None
             assert first and "drop" in first["handoff"]["choices"] and "continue" not in first["handoff"]["choices"], first
-            assert not any(o.startswith("Finish as it is") for o in first["questions"][0]["options"]), first
             # the finish code applied (the only option left) tells the Requester why, and what's missing
             i = next(i for i, m in enumerate(chat) if m["text"].startswith("Only one option was possible"))
             told = chat[i + 1]
@@ -318,10 +332,71 @@ def connections():
             assert run.outcome == j2.WORKABLE_OUTCOME, run.outcome
 
 
+def build_before_asking():
+    """runs/j2-20261009-133203: 6 workflows were registered across two rulings, but the run went validator -> Identity's
+    decision question each time and the site stayed at v0; Identity told the Requester "the site now has..." about
+    unbuilt work; the gate item was extended with filters; Audit filed items 5-7 under their pre-drop numbers."""
+    # (1) budget 40: the funded workflows are built and audited before the question
+    run = j2.J2Run()
+    run.budget = 40
+    say(run, BREW_LAB)
+    built_first(run)
+    assert all(w["status"] == "done" for w in run.workflows) and len(run.workflows) >= 1, run.workflows
+    # (2) nothing has passed Audit: Identity may not describe anything as built ("will build" instead)
+    run = j2.J2Run()
+    run.goal = j2.mock_charter(BREW_LAB)
+    run.workflows = [{"id": "W-1", "name": "Menu", "status": "registered", "covers_text": [run.goal["done_when"][0]]}]
+    run.call = lambda fn, fmt, task, mock, **k: {"say": "So far the page has the earthy look and all your prices."} \
+        if fn == "identity" else json.loads(mock())
+    run._identity_limit({"reason": "Priority's ruling", "left_out": run.goal["done_when"][1:], "budget_needed": 20})
+    text = run.chat[-1]["text"]
+    assert "page has" not in text and "will build 1 funded part" in text, text
+    assert any(e["type"] == "invalid_move" and "as built" in e["detail"] for e in run.events)
+    # (3) the gate's wording is fixed by code: it can't name features
+    run = j2.J2Run()
+    orig = run.call
+
+    def call(fn, fmt, task, mock, **k):
+        if fn == "identity" and '"core": [bool]' in fmt:
+            r = json.loads(mock())
+            r["goal"]["done_when"] = r["goal"]["done_when"] + [
+                "The page runs with no JavaScript errors, filters and category browsing work, and every in-page link "
+                "points to an existing section."]
+            r["goal"]["core"] = [False] * (len(r["goal"]["done_when"]) - 1) + [True]
+            return r
+        return orig(fn, fmt, task, mock, **k)
+    run.call = call
+    run.budget = 200
+    say(run, BREW_LAB)
+    gate = run.goal["done_when"][-1]
+    assert gate == j2.GATE_TEXT and not re.search(r"filter|categor", gate, re.I), gate
+    assert gate in run.goal["core_items"] and j2.must_keep(gate, run.goal), run.goal["core_items"]
+    # (5) after a drop, Audit's pre-drop numbers are read by text; dropped items get no finding; nothing is "missing"
+    run = j2.J2Run()
+    orig_items = [c for c, _ in THREAD_AND_LOOM]
+    keep = [orig_items[i] for i in (0, 1, 6, 8, 11)]
+    run.goal = {"done_when": keep, "charter_items": orig_items,
+                "dropped_by_requester": [c for c in orig_items if c not in keep]}
+    findings = [{"id": f"F-{i}", "item": i, "criterion": c[:70], "verdict": "PASS", "evidence": "seen"}
+                for i, c in ((1, keep[0]), (2, keep[1]))]
+    findings += [{"id": "F-3", "item": 7, "criterion": "Every product has an order button to WhatsApp", "verdict": "PASS",
+                  "evidence": "seen"},                                   # old number 7 -> item 3
+                 {"id": "F-4", "item": 9, "criterion": "Store section with address, hours and map link",
+                  "verdict": "PASS", "evidence": "seen"},                # old number 9 -> item 4
+                 {"id": "F-5", "item": 12, "criterion": "No JavaScript errors", "verdict": "PASS", "evidence": "seen"},
+                 {"id": "F-6", "item": 8, "criterion": "Lookbook with 3 styled outfits", "verdict": "NEEDS_REVISION",
+                  "evidence": "absent"},                                 # dropped: no finding
+                 {"id": "F-7", "item": None, "criterion": "A reviews section shows three reviews", "verdict":
+                  "NEEDS_REVISION", "evidence": "absent"}]               # dropped, unnumbered: no finding
+    results, extras = run._audit_findings(findings, keep)
+    assert [r["id"] for r in results] == ["F-1", "F-2", "F-3", "F-4", "F-5"] and all(r["pass"] for r in results), results
+    assert not extras, extras
+
+
 def below_floor():
     """runs/j2-20261008-153402: budget below the rate-card floor. Adaptation proposes the best set that fits and lists
-    the rest in left_out (core facts first); Priority rules; Identity asks one decision question with a leave-out
-    option; leaving them out builds the site. A question never has one option; "finish" needs a site."""
+    the rest in left_out (core facts first); Priority rules; the funded work is built and audited; then Identity asks
+    one decision question with a leave-out option. A question never has one option; "finish" needs a site."""
     run = j2.J2Run()
     run.budget = 50                                          # Brew Lab's floor is 70; its core items cost 45
     say(run, BREW_LAB)
@@ -333,22 +408,23 @@ def below_floor():
     funded = {t for w in run.workflows for t in w["covers_text"]}
     assert all(c in funded for c in crit if j2.must_keep(c, run.goal)), funded    # core facts are never left out
     left = [c for c in crit if c not in funded]
-    assert run.paused and run.paused["handoff"]["choices"] == ["continue", "drop"], run.paused
+    built_first(run)
+    assert run.paused["handoff"]["choices"] == ["continue", "drop", "ship"], run.paused
+    assert [crit[i - 1] for i in run.paused["handoff"]["failing_items"]] == left, run.paused["handoff"]
     assert len([e for e in run.events if e.get("type") == "pause"]) == 1, "more than one question"
     say(run, "2")
     assert run.goal["dropped_by_requester"] == left and not run.paused, run.goal
     assert run.sites and run.outcome == j2.WORKABLE_OUTCOME, run.outcome
-    # at the cap with no site: leave out, or stop here (never a one-option question, never "finish" without a site)
+    # at the cap: the funded work is built first, so the question has a site to finish (and no "add credits")
     run = j2.J2Run()
     run.budget = j2.BUDGET_CAP = 40
     try:
         say(run, BREW_LAB)
+        built_first(run)
         q = run.paused["questions"][0]
-        assert run.paused["handoff"]["choices"] == ["drop", "ship"] and q["options"][1].startswith("Stop here"), q
-        say(run, "2")
+        assert run.paused["handoff"]["choices"] == ["drop", "ship"] and q["options"][1].startswith("Finish as it is"), q
     finally:
         j2.BUDGET_CAP = 2 * j2.BUDGET
-    assert run.outcome.startswith("Stopped") and "nothing was built" in run.outcome, run.outcome
     # only "add credits" would be possible (every left-out item is a core fact): stop here is the second option
     run = j2.J2Run()
     run.goal = {"done_when": ["The menu with prices is shown", "Opening hours are listed"]}
@@ -400,8 +476,9 @@ def thread_and_loom_core():
     run.call = call
     say(run, "A website for Thread & Loom, a handloom clothing boutique in Pune. " * 3)
     crit = run.goal["done_when"]
-    assert run.goal["core_items"] == [c for c, k in THREAD_AND_LOOM if k], run.goal["core_items"]
-    assert run.paused and run.paused["handoff"].get("after_ruling"), run.outcome
+    expect = [j2.GATE_TEXT if "JavaScript errors" in c else c for c, k in THREAD_AND_LOOM if k]
+    assert run.goal["core_items"] == expect, run.goal["core_items"]
+    built_first(run)
     offered = [crit[i - 1] for i in run.paused["handoff"]["failing_items"]]
     for words in ("lookbook", "reviews section", "New Arrivals"):
         assert any(words in c for c in offered), (words, offered)
@@ -1057,7 +1134,14 @@ def pricing():
     # page_section/form parts must say which items they build
     reg, refused, _ = run._register([{**base, "name": "Page frame and store info", "parts": ["page_section", "styling"]}])
     assert not reg and "covers no done-when item" in refused[0], refused
+    # revising a section whose workflow hasn't run yet is a new section, not a fix (runs/j2-20261009-133203 msg 27
+    # rejected "Browse by category" for revising W-2 before W-2 had built anything)
+    assert run._wf("W-1")["status"] == "registered"
+    reg, refused, _ = run._register([{**base, "name": "Browse by category", "parts": ["page_section"], "covers": [5],
+                                      "revises": "W-1"}])
+    assert reg and reg[0]["cost"] == 10 and not refused, refused
     # after the first Audit: a fix relabelled as a cheaper part is rejected, with or without listing the finding
+    run._wf("W-1")["status"] = "done"                        # W-1 ran: rewriting its section is a fix now
     run.audits = [{"cycle": 1, "version": 1, "results": [], "rubric": [], "mechanical": {}, "all_pass": False}]
     for w in ({"fixes": ["R-6"], "revises": "W-1"}, {"revises": "W-1"}, {"fixes": ["R-6", "F-2"]}):
         reg, refused, _ = run._register([{**base, "name": "Header tap area", "parts": ["styling"], **w}])
@@ -1317,7 +1401,7 @@ def page():
 def limit_answers():
     """runs/j2-20261008-110419: the Requester answered a limit question while the cycle was at its turn cap, and the
     cap fired again before the answer was handled, so Identity re-asked forever. Now every answer is handled:
-    "25 units" adds that amount, "2" drops the failing items with the reason; with no site there is no "finish"."""
+    "25 units" adds that amount, "2" drops the failing items with the reason, "3" ends Done with open items."""
     def at_cap():
         old, os.environ["J2_FIXES"] = os.environ.get("J2_FIXES"), "0"   # fix (a) asks about a ruling first
         run = j2.J2Run()
@@ -1341,8 +1425,12 @@ def limit_answers():
     assert all(c not in g["done_when"] for c in g["dropped_by_requester"]) and "leave it out" in g["dropped_reasons"][0]["reason"]
     assert not (run.paused and run.paused["questions"] == asked), "asked the same question again"
 
-    run = at_cap()                           # nothing is built yet: "finish as it is" isn't an option (same_failure has it)
-    assert run.paused["handoff"]["choices"] == ["continue", "drop"] and not run.sites, run.paused["handoff"]
+    run = at_cap()                           # the funded work was built first, so "finish as it is" is an option
+    built_first(run)
+    assert run.paused["handoff"]["choices"] == ["continue", "drop", "ship"], run.paused["handoff"]
+    say(run, "Option 3")
+    assert run.outcome.startswith("Done with open items") and not run.paused, run.outcome
+    assert summary(run)["status"] == "done_with_open_items"
 
 
 def nine_workflows():
@@ -1485,10 +1573,8 @@ def identity_decisions():
         run.call = call
         run.budget = 12
         say(run, BREW_LAB)
-        if built:       # below the floor: Priority's ruling leaves items out; leaving them out builds a site first
-            assert run.paused["handoff"].get("after_ruling") and not run.sites, run.paused["handoff"]
-            say(run, "2")
-            assert run.sites and run.spent > 0, run.outcome
+        if built:       # below the floor: the funded work is built and audited before the decision question
+            built_first(run)
         assert run.paused and run.paused["kind"] == "limit", run.paused and run.paused["kind"]
         assert not any(m.get("pause") == "fact" for m in run.chat), "Identity asked about money in free form"
         return run
@@ -1629,10 +1715,9 @@ def owner_override():
         assert crit not in run.goal["done_when"] and run.goal["dropped_reasons"][-1]["reason"] == "Owner override"
         say(run, f"{key} paint it blue")
         assert run.chat[-1]["text"].startswith("Owner override not applied"), run.chat[-1]
-        say(run, f"{key} ship")                    # nothing is built yet (budget 12 is below the floor)
-        assert run.outcome.startswith("Stopped on an owner override: nothing was built") and not run.paused \
-            and run.done, run.outcome
-        assert summary(run)["status"] == "stopped"
+        say(run, f"{key} ship")                    # the funded work was built before the question
+        assert run.outcome.startswith("Done with open items") and not run.paused and run.done, run.outcome
+        assert summary(run)["status"] == "done_with_open_items"
         for name in ("chat.jsonl", "calls.jsonl", "goal.json", "summary.json"):
             path = os.path.join(run.dir, name)
             assert not os.path.exists(path) or key not in open(path, encoding="utf-8").read(), name
@@ -1880,7 +1965,8 @@ if __name__ == "__main__":
         thread_and_loom_core()
         deferred_twice()
         connections()
-        print(f"J2_FIXES={mode}: vague brief (both answers), full brief, budget question rejected and re-asked, below-floor proposal with left_out, one decision question after the ruling, core marks from J2.a, deferred twice, connections at three budgets ok")
+        build_before_asking()
+        print(f"J2_FIXES={mode}: vague brief (both answers), full brief, budget question rejected and re-asked, below-floor proposal with left_out, one decision question after the ruling, core marks from J2.a, deferred twice, connections at three budgets, funded work built before the question ok")
         workflow_agents()
         same_failure()
         cycle_limit()
