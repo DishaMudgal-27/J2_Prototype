@@ -304,6 +304,7 @@ DECIDE_RULE = ("Never offer adding budget, leaving items out or finishing as is 
 DECISION_FMT = ('"decision": "continue"|"drop"|"ship"|null (null if the answer doesn\'t say), "add": int|null (units the '
                 'Requester asked to add, as they typed it), "drop_items": [int] (done-when item numbers they asked to '
                 'leave out)')
+DECISION_PAUSES = ("limit", "conflict", "ruling_budget")    # the Requester decides; info/fact/question only inform
 ONLY_PICK = re.compile(r"\s*(option\s*)?[1-9]\s*[.:)]?\s*", re.I)
 
 
@@ -3482,6 +3483,18 @@ class J2Run:
                 "lessons": {"memory": self.memory, "saved": [x["id"] for x in self.lessons_saved],
                             "used": self.lessons_used}}
 
+    def _links(self):
+        """Hand-offs in the chat, "who->next": workflow agents count as "W", the Requester as "requester"."""
+        def node(x):
+            x = str(x).lower()
+            return "W" if re.match(r"w-\d+", x) else "requester" if x in ("user", "requester") else x
+        out = {}
+        for m in self.chat:
+            if m.get("next") and m["who"] not in ("system", "user"):
+                k = f"{node(m['who'])}->{node(m['next'])}"
+                out[k] = out.get(k, 0) + 1
+        return out
+
     def _write_summary(self):
         """runs/<run>/summary.json when a run ends (done, stopped, out of budget or crashed). Code only, no AI call."""
         o = self.outcome or ""
@@ -3496,6 +3509,9 @@ class J2Run:
             "status": status, "outcome": o,
             "budget": {"start": BUDGET, "granted": self.budget, "used": self.spent, "raises": self.raises},
             "ai_calls": self.calls, "cycles": self.cycle,
+            "links": self._links(),
+            "identity_to_requester_decisions": sum(m["who"] == "identity" and m.get("pause") in DECISION_PAUSES
+                                                   for m in self.chat),
             "questions_to_user": self.decisions,
             "conflicts": [{"id": c["id"], "pair": c["between"], "topic": c["topic"], "subject": c["subject"],
                            "attempts": sum(1 for x in c["attempts"] if x["n"] > 0), "escalated": c["escalated"],

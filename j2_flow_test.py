@@ -243,6 +243,66 @@ def policy_budget(fixes):
     show(run)
 
 
+def connections():
+    """Every J2 link works at three budgets: generous (2x the rate-card floor), tight (floor - 15, cap above the
+    floor) and impossible (cap below the floor). Adaptation proposes, Priority rules on every proposal, the validator
+    registers or rejects with a reason, Coordination schedules, Audit checks what was built, and every run ends with
+    a site built (the Requester always picks leave-out or keep going here). summary.json counts the links."""
+    j2.load_rates()
+    floor = sum(j2.item_min(c) for c in j2.mock_charter(BREW_LAB)["done_when"])
+    assert floor == 70, floor
+    for name, budget, cap in (("generous", 2 * floor, None), ("tight", floor - 15, None),
+                              ("impossible", floor - 30, floor - 30)):
+        old_cap = j2.BUDGET_CAP
+        try:
+            if cap:
+                j2.BUDGET_CAP = cap
+            assert j2.BUDGET_CAP > floor if name != "impossible" else j2.BUDGET_CAP < floor, name
+            run = j2.J2Run()
+            run.budget = budget
+            say(run, BREW_LAB)
+            asked = []
+            for _ in range(6):
+                if not run.paused:
+                    break
+                p = run.paused
+                asked.append(p)
+                if p["kind"] == "limit":
+                    ch = p["handoff"]["choices"]
+                    say(run, str(ch.index("drop" if "drop" in ch else "continue") + 1))
+                else:
+                    say(run, "Option 2" if p["kind"] == "conflict" else "1")
+        finally:
+            j2.BUDGET_CAP = old_cap
+        s, chat = summary(run), run.chat
+        links = s["links"]
+        assert links.get("adaptation->priority", 0) >= 1, (name, links)                     # Adaptation proposed
+        for i, m in enumerate(chat):                     # Priority ruled on every proposal sent to it
+            if m["who"] == "adaptation" and m.get("next") == "priority":
+                ruling = next((x for x in chat[i + 1:] if x["who"] == "priority"), None)
+                assert ruling and ruling.get("decision") in ("grant", "counter", "refuse"), (name, m["text"], ruling)
+        reg = [m for m in chat if m["who"] == "validator" and "register" in m]
+        assert reg and all(m["register"] or "Rejected:" in m["text"] for m in reg), (name, reg)
+        assert all(r["reason"] for r in run.rejections), (name, run.rejections)
+        assert links.get("coordination->priority", 0) >= 1 and links.get("priority->W", 0) >= 1, (name, links)
+        assert run.sites and run.audits and links.get("audit->identity", 0) >= 1, (name, run.outcome)
+        decisions = [m for m in chat if m["who"] == "identity" and m.get("pause") in j2.DECISION_PAUSES]
+        assert s["identity_to_requester_decisions"] == len(decisions), (name, s["identity_to_requester_decisions"])
+        limits = [p for p in asked if p["kind"] == "limit"]
+        for p in limits:                                 # "finish" only once a site exists; never one option
+            opts = p["questions"][0]["options"]
+            assert len(opts) >= 2, (name, opts)
+        if name == "tight":
+            assert any(m.get("decision") == "counter" for m in chat) or \
+                any("drop" in p["handoff"]["choices"] for p in limits), (name, links)
+        if name == "impossible":
+            first = limits[0] if limits else None
+            assert first and "drop" in first["handoff"]["choices"] and "continue" not in first["handoff"]["choices"], first
+            assert not any(o.startswith("Finish as it is") for o in first["questions"][0]["options"]), first
+        if name == "generous":
+            assert run.outcome == j2.WORKABLE_OUTCOME, run.outcome
+
+
 def below_floor():
     """runs/j2-20261008-153402: budget below the rate-card floor. Adaptation proposes the best set that fits and lists
     the rest in left_out (core facts first); Priority rules; Identity asks one decision question with a leave-out
@@ -1804,7 +1864,8 @@ if __name__ == "__main__":
         below_floor()
         thread_and_loom_core()
         deferred_twice()
-        print(f"J2_FIXES={mode}: vague brief (both answers), full brief, budget question rejected and re-asked, below-floor proposal with left_out, one decision question after the ruling, core marks from J2.a, deferred twice ok")
+        connections()
+        print(f"J2_FIXES={mode}: vague brief (both answers), full brief, budget question rejected and re-asked, below-floor proposal with left_out, one decision question after the ruling, core marks from J2.a, deferred twice, connections at three budgets ok")
         workflow_agents()
         same_failure()
         cycle_limit()
