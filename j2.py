@@ -189,6 +189,22 @@ def item_min(criterion):
     return RATES.get(item_kind(criterion), 0)
 
 
+# Leaving items out for budget: the no-errors gate and the brief's core facts always stay in.
+NO_ERRORS_GATE = re.compile(r"no (?:javascript |js )?errors|horizontal (?:overflow|scroll)|broken (?:in-page )?links?", re.I)
+CORE_FACT = re.compile(r"\d|\bprices?\b|\bhours\b|timings?|address|location|\bmaps?\b|contact|whatsapp|e-?mail|"
+                       r"phone number|\bcall\b", re.I)
+BUDGET_TALK = re.compile(r"budget|\bcosts?\b|afford|expensive|cheap|\bcut|\bdrop|leave (?:\w+ )?out|fund|credits?\b|"
+                         r"\bunits?\b|rate[- ]card|minimums?", re.I)
+
+
+def must_keep(criterion, goal):
+    """True for a done-when item that can't be left out for budget: the no-errors gate, or a core fact from the brief.
+    ponytail: a core fact is an item naming the site or stating a number, price, hours, address or contact; keyword
+    match, a model call if it misjudges items."""
+    c, name = str(criterion), str((goal or {}).get("site_name") or "").lower()
+    return bool(NO_ERRORS_GATE.search(c) or CORE_FACT.search(c) or (name and name in c.lower()))
+
+
 def granted(w):
     """Rate-card price when the rate card is on; otherwise the money Priority granted (envelope.money_limit),
     and Adaptation's estimate only if no limit was given."""
@@ -398,7 +414,8 @@ def mock_charter(text):
 
 
 def mock_section(w, goal, sections):
-    """(head, body) a scripted workflow agent writes: the scaffold styles the page, a viewport fix adds the meta tag,
+    """(head, body) a scripted workflow agent writes: the scaffold styles the page, a viewport fix (or a workflow that
+    builds a phone item) adds the meta tag,
     anything else adds the done-when items no other section covers yet (or a plain section named after it)."""
     g, n = goal or {}, w["name"].lower()
     if "scaffold" in n:
@@ -406,7 +423,7 @@ def mock_section(w, goal, sections):
                 "color:#2b211b}section{padding:16px 0;border-top:1px solid #e6dccf}</style>",
                 f"<header><h1>{html.escape(g.get('site_name') or 'Our site')}</h1>"
                 f"<p>{html.escape(g.get('statement') or '')}</p></header>")
-    if "viewport" in n:
+    if "viewport" in n or any("phone" in str(t).lower() for t in w.get("covers_text") or []):
         return '<meta name="viewport" content="width=device-width, initial-scale=1">', ""
     others = "".join(x["body"] for sid, x in sections.items() if sid != w["section"])
     items = "".join(f'<section data-item="{i}"><h2>{html.escape(str(d))}</h2><p>Sample content (replace before '
@@ -817,10 +834,13 @@ class J2Run:
         self.cycle_turns = self.exchanges = self.hold_bounces = 0
         self.conflict = None                 # the Adaptation <-> Priority negotiation in progress, once they disagree
         self.a_pos, self.p_pos = [], []      # Adaptation's and Priority's latest positions this cycle
+        self.a_named = []                    # done-when items Adaptation's last proposal covered or left out
 
     def _ship_outcome(self, why):
         """Outcome of "finish as it is". "Done with open items" only with items to name: a workable site is done."""
-        fails = workable(self.audits[-1]) if self.audits else ["nothing was built"]
+        if not self.sites:
+            return f"Stopped {why}: nothing was built."
+        fails = workable(self.audits[-1]) if self.audits else ["nothing has been checked"]
         if not fails:
             return WORKABLE_OUTCOME
         return f"Done with open items: shipped as is {why}. Still not workable: {'; '.join(fails)}."
@@ -1244,7 +1264,7 @@ class J2Run:
             return True
         self._event("owner", "override", note)
         self.post("system", f"Owner override applied: {note}.", override=True)
-        if self.outcome and self.outcome.startswith("Done") and self.done and not self.paused:
+        if self.outcome and self.outcome.startswith(("Done", "Stopped")) and self.done and not self.paused:
             self._write_summary()
         return True
 
@@ -1771,9 +1791,21 @@ class J2Run:
         if decision == "ship":
             self.post("identity", r.get("to_requester") or "We'll finish the site as it is now.", to_user=True,
                       next="user", done=True)
-            self.outcome = self._ship_outcome(f"on the Requester's decision ({limit or 'their answer'})")
+            self.outcome = self._ship_outcome(f"as the only option left ({limit})" if h.get("only_option") else
+                                              f"on the Requester's decision ({limit or 'their answer'})")
             self.turn = None
             return
+        if h.get("after_ruling") and (gone or decision == "drop"):
+            # Left out after Priority's ruling: added credits fund a new proposal, else the funded work is built next.
+            if add:
+                self._reply(r, "adaptation")
+                return self._handoff("adaptation", kind="propose", why=f"The Requester decided: {answer}")
+            if self._waiting_work():
+                self._reply(r, "coordination")
+                return self._handoff("coordination", kind="schedule")
+            self._reply(r, "adaptation")
+            return self._handoff("adaptation", kind="propose", new_cycle=True,
+                                 why=f"The Requester left items out after Priority's ruling: {answer}")
         if gone or decision == "drop":
             # Audit re-checks against the new done-when first: every later step (Adaptation's plan, the next
             # question) works from a fresh audit, never one that still lists the dropped items.
@@ -1811,7 +1843,8 @@ class J2Run:
         reason, last = h.get("reason") or "", self.audits[-1] if self.audits else None
         fails = workable(last)
         items = [r for r in (last or {}).get("results", []) if not r["pass"]]
-        gaps = self._open_list(last, items)
+        left = h.get("left_out")          # after Priority's ruling: the done-when items nothing will build
+        gaps = [f"{c} (not built yet)" for c in left] if left else self._open_list(last, items)
         cheapest = min(RATES.values()) if RATES else 1
         room = BUDGET_CAP - self.budget
         short = self.budget - self.spent < cheapest       # whatever the limit was, nothing new can be funded
@@ -1831,7 +1864,7 @@ class J2Run:
             choices.append("continue")
         crit = (self.goal or {}).get("done_when") or []
         drop = [crit.index(t) + 1 for g in gaps if gap_kind(g) != "built but not checked yet"
-                for t in [re.sub(r" \(not built yet\)$", "", g)] if t in crit]
+                for t in [re.sub(r" \(not built yet\)$", "", g)] if t in crit and not (left and must_keep(t, self.goal))]
         if drop:
             rest = len(gaps) - len(drop)
             opts.append(f"Leave out the {len(drop)} unfinished checklist part{'s' if len(drop) > 1 else ''}: you get "
@@ -1839,17 +1872,22 @@ class J2Run:
                         + ("stays as it is)" if rest == 1 else "stay as they are)") if rest else ""))
             budget.append(0)
             choices.append("drop")
-        opts.append("Finish as it is: you get the site as it is now" + (f", with {len(gaps)} thing"
-                    f"{'s' if len(gaps) > 1 else ''} still not right" if gaps else ""))
-        budget.append(0)
-        choices.append("ship")
-        lead = ("The team paused after a round of work." if re.match(r"Cycle \d+ used|The department used", reason) else
+        if self.sites:                    # finishing needs a site to finish
+            opts.append("Finish as it is: you get the site as it is now" + (f", with {len(gaps)} thing"
+                        f"{'s' if len(gaps) > 1 else ''} still not right" if gaps else ""))
+            budget.append(0)
+            choices.append("ship")
+        if not self.sites and len(choices) < 2:
+            opts.append("Stop here: nothing is built yet, so you get no site")
+            budget.append(0)
+            choices.append("ship")
+        lead = ("Some parts don't fit in the work you approved." if left else"The team paused after a round of work." if re.match(r"Cycle \d+ used|The department used", reason) else
                 "The work you approved is used up." if short else
                 "The same problem came back twice." if reason.startswith("The same failure") else
                 "Only you can give what's still missing." if reason.startswith("Only you") else
                 "The team needs your decision.")
         say_choices = {"continue": "add more and keep going" if add else "keep going",
-                       "drop": "leave out the missing parts", "ship": "finish as it is"}
+                       "drop": "leave out the missing parts", "ship": "finish as it is" if self.sites else "stop here"}
         ask = [say_choices[c] for c in choices]
         ask = ", ".join(ask[:-1]) + (", or " if len(ask) > 2 else " or ") + ask[-1] if len(ask) > 1 else ask[0]
         q = {"question": f"{lead} {ask[0].upper() + ask[1:]}?", "options": opts,
@@ -1865,9 +1903,18 @@ class J2Run:
                       f"{json.dumps(q, ensure_ascii=False)}\nTell the Requester.",
                       lambda: json.dumps({"say": plain_missing}))
         self.last_limit = {"state": state, "decision": None}
-        self._ask_user(r.get("say") or plain_missing, [q], "limit", gaps=gaps, handoff={"kind": "requester_answered", "limit": reason,
-                                                                       "choices": choices, "resume": h.get("resume"),
-                                                                       "failing_items": drop})
+        resume = h.get("resume") or ({"to": "adaptation", "handoff": {"kind": "propose", "why": "The Requester added "
+                                      f"credits for the items left out: {json.dumps(left, ensure_ascii=False)}"}}
+                                     if left else None)
+        handoff = {"kind": "requester_answered", "limit": reason, "choices": choices, "resume": resume,
+                   "failing_items": drop, **({"after_ruling": True} if left else {})}
+        if len(choices) < 2:
+            # Never a one-option question. The only lone option is "finish as it is" (with no site, "stop here" is
+            # always added, and money is never added without asking): code applies it and says so.
+            self.post("system", f"Only one option was possible ({opts[0]}), so it is applied without asking.")
+            self.decisions.append({"kind": "limit", "asked": [q["question"]], "answer": "1", "only_option": True})
+            return self._identity_hears_requester({**handoff, "answer": "1", "asked": [q], "only_option": True})
+        self._ask_user(r.get("say") or plain_missing, [q], "limit", gaps=gaps, handoff=handoff)
 
     def _open_list(self, last, items):
         """One list for the decision message and its count. (1) What the last audit found: failing checklist items,
@@ -2147,8 +2194,12 @@ class J2Run:
         return None
 
     def _parked(self, why):
-        """Adaptation reshapes or parks it -> J2.b. Work already registered is built first."""
+        """Adaptation reshapes or parks it -> J2.b. Work already registered is built first. If the ruling left done-when
+        items out, Identity asks the Requester first."""
         self.bargain = None
+        if left := self._left_by_ruling():
+            self.post("system", f"Nothing new registered ({why}).")
+            return self._handoff("identity", kind="limit", **left)
         if self._waiting_work():
             self.post("system", f"Nothing new registered ({why}). Building the work already registered.")
             return self._handoff("coordination", kind="schedule")
@@ -2261,11 +2312,15 @@ class J2Run:
                                         "parts": ["interactive_feature", "interactive_feature"], "outputs": ["CSS"],
                                         "covers": items(r"loyal")[:1],
                                         "completion_check": "Effects run on scroll"}]})
+            if not self.audits and self._cheapest_fit()["workflows"]:
+                return json.dumps(self._cheapest_fit())         # items left out earlier, now that credits were added
             return json.dumps({"say": "@Priority Nothing left to propose.", "act": "PROPOSE", "next": "Priority",
                                "workflows": []})
 
         def mock():
             r = json.loads(mock_plain())
+            if r.get("act") == "PROPOSE" and not self.workflows and sum(item_min(c) for c in crit) > self.budget - self.spent:
+                r = self._cheapest_fit()                         # the charter costs more than the budget left
             if offered and r.get("act") == "PROPOSE":
                 r["say"] += f" Using lesson {offered[0]['id']}: {offered[0]['fix']}"
                 r["lesson_used"] = offered[0]["id"]
@@ -2274,16 +2329,19 @@ class J2Run:
                             "sections adjusted to this brief."
                 r.update(playbook_used=pb_offer[0]["id"], playbook_changes="Sections adjusted to this brief.")
             return json.dumps(r)
-        r = self.call("adaptation", '{"say": str, "act": "PROPOSE"|"POLICY_QUESTION"|"DISPUTE", "workflows": '
-                      + self.WF_FMT + ', "question": str|null, "dispute": {"with": "Audit"|"Coordination", "about": str '
+        g = self.goal or {}
+        keep = [i for i, c in enumerate(crit, 1) if must_keep(c, g)]
+        fmt = ('{"say": str, "act": "PROPOSE"|"POLICY_QUESTION"|"DISPUTE", "workflows": '
+                      + self.WF_FMT + ', "left_out": [{"item": int, "reason": str}] (done-when items this proposal '
+                      'leaves out because the budget left can\'t pay for them), "question": str|null, "dispute": {"with": "Audit"|"Coordination", "about": str '
                       '(finding id or workflow id), "reason": str}|null, "playbook_used": str|null (id of the playbook '
                       'you followed), "playbook_changes": str|null (what you changed from it, one sentence), '
                       '"lesson_used": str|null (id of the lesson '
                       'you applied, if any), '
                       + next_field(("priority", "identity", "audit", "coordination"), "Priority to get your proposal "
                                    "funded; Identity only for a policy question, put in \"question\"; Audit or "
-                                   "Coordination only when you DISPUTE their finding or HOLD") + "}",
-                      f"WHY YOU ARE UP: {h.get('why')}\nOPEN AUDIT FINDINGS: {json.dumps(fails)}\nHELD WORK: "
+                                   "Coordination only when you DISPUTE their finding or HOLD") + "}")
+        task = (f"WHY YOU ARE UP: {h.get('why')}\nOPEN AUDIT FINDINGS: {json.dumps(fails)}\nHELD WORK: "
                       f"{json.dumps(held)}\nPropose the smallest workflows that close the gap, or ask Identity a policy "
                       "question. If you disagree with an open Audit finding or a Coordination HOLD, DISPUTE it with your "
                       f"reason instead: you and they get {MAX_ATTEMPTS} attempts to settle it before Identity rules. "
@@ -2306,7 +2364,23 @@ class J2Run:
                          "and adapt it to this brief: set playbook_used to its id, say in one clause which one you used, "
                          "and put what you changed in playbook_changes. Its watch_out items are mistakes to avoid."
                          if pb_offer else "") + (" Price every workflow with rate-card parts (see STATE.rate_card); its cost is "
-                                      "fixed by them." if RATES else ""), mock)
+                                      "fixed by them." if RATES else "")
+                      + "\nPriority decides what gets funded, never you: don't judge affordability and never ask about "
+                      "budget, cost or cutting. When the done-when items cost more than the budget left, still PROPOSE "
+                      "the best set that fits and list each item you leave out in left_out with its reason. Never leave "
+                      f"out these items (the no-errors check and the brief's core facts): {keep}.")
+        r = self.call("adaptation", fmt, task, mock)
+        if self._budget_question(r):
+            # Affordability is Priority's call (J2.c): a budget question is rejected, asked once more, then replaced.
+            self._event("adaptation", "invalid_move", "budget POLICY_QUESTION rejected")
+            self.post("system", "Adaptation's question about budget was rejected: Priority decides what gets funded. "
+                                "Adaptation proposes the best set that fits instead.")
+            r = self.call("adaptation", fmt, task + "\nYOUR LAST REPLY WAS REJECTED: it asked about budget, cost or "
+                          "cutting. PROPOSE the best set that fits the budget left, with left_out.", mock)
+            if self._budget_question(r) or str(r.get("act", "")).upper() != "PROPOSE" or not norm(r.get("workflows")):
+                r = self._cheapest_fit()
+                self.post("system", "Adaptation asked about budget again, so code proposes the cheapest done-when "
+                                    "items that fit the budget left.")
         act = str(r.get("act", "")).upper()
         note = None
         if act == "DISPUTE":
@@ -2355,6 +2429,12 @@ class J2Run:
             self.post("system", f"TEST LESSON: Adaptation used {used}, a lesson from a forced test failure "
                                 "(J2_MEMORY_TEST_LESSONS=1, demo runs only). It is not evidence from a real fix.",
                       warning=True, test=True)
+        out = [as_int(x.get("item") if isinstance(x, dict) else x) for x in r.get("left_out") or []]
+        self.a_named = [c for i, c in enumerate(crit, 1) if i in out or any(i in self._covers(w) for w in wfs)]
+        if not wfs and (left := self._left_by_ruling()):
+            self.post("system", "Nothing fits the budget left, so there is nothing for Priority to fund. Identity asks "
+                                "the Requester.")
+            return self._handoff("identity", kind="limit", **left)
         if not wfs:
             # Audit re-checks first, so J2.h never judges a stale audit (e.g. after the Requester confirmed a fact).
             self.post("system", "Adaptation proposed no workflows, so there is nothing to fund or register. Audit "
@@ -2363,6 +2443,47 @@ class J2Run:
         self.a_pos = wfs
         self.bargain = {"start": time.time(), "calls": self.calls}      # J2.c starts: hops, minutes, spend
         self._handoff("priority", kind="proposal", table=wfs)
+
+    def _budget_question(self, r):
+        return str(r.get("act", "")).upper() == "POLICY_QUESTION" and \
+            bool(BUDGET_TALK.search(f"{r.get('question') or ''} {r.get('say') or ''}"))
+
+    def _cheapest_fit(self):
+        """Adaptation's proposal when it won't propose within the budget: one workflow per done-when item no workflow
+        builds yet, must-keep items first, then the cheapest, while the budget left pays. The rest go in left_out."""
+        g = self.goal or {}
+        crit = g.get("done_when") or []
+        built = {i for w in self.workflows if w["status"] in ("registered", "held", "running", "done")
+                 for i in self._wf_items(w)}
+        todo = sorted((i for i in range(1, len(crit) + 1) if i not in built),
+                      key=lambda i: (not must_keep(crit[i - 1], g), item_min(crit[i - 1]), i))
+        left, wfs, out = self.budget - self.spent, [], []
+        for i in todo:
+            c, cost = crit[i - 1], item_min(crit[i - 1])
+            if cost > left:
+                out.append({"item": i, "reason": f"costs {cost}, only {left} left after the items before it"})
+                continue
+            left -= cost
+            first = not self.sites and not self.workflows and not wfs     # the first workflow lays out the page
+            wfs.append({"name": f"{'Scaffold and item' if first else 'Build item'} {i}", "goal_gap": c,
+                        "parts": [item_kind(c)], "covers": [i], "outputs": ["index.html"], "completion_check": c})
+        say = f"@Priority The cheapest done-when items that fit the {self.budget - self.spent} left: " + \
+            (", ".join(w["name"] for w in wfs) or "none") + "." + \
+            (f" Left out: items {', '.join(str(x['item']) for x in out)}." if out else "")
+        return {"say": say, "act": "PROPOSE", "next": "Priority", "workflows": wfs, "left_out": out}
+
+    def _left_by_ruling(self):
+        """After Priority's ruling: done-when items Adaptation's proposal covered or left out that no workflow builds
+        and the budget left can't pay for. Identity asks the Requester about them (_identity_limit with left_out)."""
+        crit = (self.goal or {}).get("done_when") or []
+        built = {crit[i - 1] for w in self.workflows if w["status"] in ("registered", "held", "running", "done")
+                 for i in self._wf_items(w)}
+        left, self.a_named = [c for c in self.a_named if c in crit and c not in built], []
+        need = sum(item_min(c) for c in left) - (self.budget - self.spent)
+        if not left or need <= 0:
+            return None             # the budget left still pays for them: Adaptation proposes them next (J2.b)
+        return {"reason": f"Priority's ruling leaves out {len(left)} checklist item(s) the budget left can't pay for.",
+                "left_out": left, "budget_needed": need}
 
     def _adapt_state(self):
         """(can't fund a part, budget, done-when, Requester decisions): Adaptation is asked again once any changes."""
@@ -2455,7 +2576,7 @@ class J2Run:
                                       "retry_limit": 1, "stop_loss": "stop if the build fails twice"}}
 
         def mock():
-            if self.cycle == 1 and len(table) >= 4:
+            if self.cycle == 1 and len(table) >= 4 and any("stories" in w["name"].lower() for w in table):
                 offer = [env({**w, "parts": ["interactive_feature"], "cost": 10} if "anim" in w["name"].lower() else w)
                          for w in table if "stories" not in w["name"].lower()]
                 say = ("@Adaptation Scaffold and core sections: granted. The stories serve no done-when item, refused. "
@@ -2476,6 +2597,7 @@ class J2Run:
                       f"COST PER DONE-WHEN ITEM: {json.dumps(self._per_item(table), ensure_ascii=False)}. Question any "
                       "plan whose cost per item is far below the rate-card minimums (many items bundled into one cheap "
                       "workflow, or a fix priced as a cheaper part): COUNTER or REFUSE with that reason. "
+                      "A COUNTER names in say what you cut and why. "
                       f"Exchange {self.exchanges + 1} of {MAX_ATTEMPTS}; after that Identity rules on both final "
                       "positions." + (" Prices are fixed by the rate card: to spend less, remove parts or whole "
                                       "workflows, not the price." if RATES else ""), mock)
@@ -2633,8 +2755,11 @@ class J2Run:
                 f"{w['agent']} owns section {w['section']}" + (f" (rewrites it, was {self.sections[w['section']]['owner']})"
                                                                if w["section"] in self.sections else "")
                 for w in registered) + "."
-            self._say("validator", msg + f" Budget: {self.spent}/{self.budget} used.", "coordination", register=True,
-                      charged=sum(w["cost"] for w in registered))
+            left = self._left_by_ruling()
+            self._say("validator", msg + f" Budget: {self.spent}/{self.budget} used.",
+                      "identity" if left else "coordination", register=True, charged=sum(w["cost"] for w in registered))
+            if left:
+                return self._handoff("identity", kind="limit", **left)
             return self._handoff("coordination", kind="schedule")
         self._say("validator", f"Rejected: {'; '.join(refused) or 'the agreed set was empty'}. Adaptation reshapes or "
                                "parks it.", "adaptation", register=False)
