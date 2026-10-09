@@ -288,6 +288,11 @@ def connections():
         assert run.sites and run.audits and links.get("audit->identity", 0) >= 1, (name, run.outcome)
         decisions = [m for m in chat if m["who"] == "identity" and m.get("pause") in j2.DECISION_PAUSES]
         assert s["identity_to_requester_decisions"] == len(decisions), (name, s["identity_to_requester_decisions"])
+        facts = [m for m in chat if m["who"] == "identity" and m.get("pause") in ("fact", "info")]
+        assert s["identity_to_requester_facts"] == len(facts), (name, s["identity_to_requester_facts"])
+        rulings = [m["decision"] for m in chat if m["who"] == "priority" and m.get("decision")]
+        assert s["priority_rulings"] == {d: rulings.count(d) for d in ("grant", "counter", "refuse")} \
+            and sum(s["priority_rulings"].values()) == len(rulings) >= 1, (name, s["priority_rulings"], rulings)
         limits = [p for p in asked if p["kind"] == "limit"]
         for p in limits:                                 # "finish" only once a site exists; never one option
             opts = p["questions"][0]["options"]
@@ -299,6 +304,16 @@ def connections():
             first = limits[0] if limits else None
             assert first and "drop" in first["handoff"]["choices"] and "continue" not in first["handoff"]["choices"], first
             assert not any(o.startswith("Finish as it is") for o in first["questions"][0]["options"]), first
+            # the finish code applied (the only option left) tells the Requester why, and what's missing
+            i = next(i for i, m in enumerate(chat) if m["text"].startswith("Only one option was possible"))
+            told = chat[i + 1]
+            form = next(c for c in run.goal["done_when"] if "pre-order" in c)
+            assert told["who"] == "identity" and told.get("to_user") and told.get("done"), told
+            assert "We've reached a limit: you've approved the most work credits allowed" in told["text"], told["text"]
+            assert f"{form} can't be paid for and can't be left out" in told["text"], told["text"]
+            assert "Still not right (1):\n- " + form in told["text"], told["text"]
+            assert run.outcome.startswith("Done with open items: shipped as is as the only option"), run.outcome
+            plain_for_requester(run)
         if name == "generous":
             assert run.outcome == j2.WORKABLE_OUTCOME, run.outcome
 

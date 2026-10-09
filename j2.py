@@ -332,6 +332,21 @@ def gap_kind(g):
             "built but not checked yet" if g.endswith("(not checked yet)") else "built but failing")
 
 
+def gap_list(gaps):
+    """The "Still not right" list after Identity's words: one gap per line; the header's counts add up to the list."""
+    if not gaps:
+        return ""
+    kinds = {}
+    for g in gaps:
+        k = gap_kind(g)
+        kinds[k] = kinds.get(k, 0) + 1
+    out = (f"\nStill not right ({len(gaps)}" + (": " + ", ".join(f"{n} {k}" for k, n in kinds.items())
+                                                if len(kinds) > 1 else "") + "):\n" + "\n".join(f"- {g}" for g in gaps))
+    if "built but not checked yet" in kinds:
+        out += "\nSome parts were built after the last check, so they're not checked yet."
+    return out
+
+
 def for_agents(m):
     """Test notes are for humans; to_requester replies are for the Requester. Agents get neither."""
     return not m.get("test") and not m.get("requester_only")
@@ -915,7 +930,7 @@ class J2Run:
                   + f". Remaining: {self.budget - self.spent}.")
 
     def post(self, who, text, **meta):
-        if who == "identity" and meta.get("to_user") and meta.get("act") != "ASK_REQUESTER":
+        if who == "identity" and meta.get("to_user") and meta.get("act") != "ASK_REQUESTER" and not meta.get("shaped"):
             if re.match(r"\s*@(?!Requester\b)\w", str(text or "")):
                 # Addressed to an agent but sent to the Requester: never re-tag it, record it (call() should have
                 # caught it).
@@ -1197,16 +1212,7 @@ class J2Run:
         if gaps is not None:
             # At most 2 sentences, then the full list, one gap per line; the header's counts add up to the list.
             say = " ".join(re.split(r"(?<=[.!?])\s+", say)[:2])
-            if gaps:
-                kinds = {}
-                for g in gaps:
-                    k = gap_kind(g)
-                    kinds[k] = kinds.get(k, 0) + 1
-                say += (f"\nStill not right ({len(gaps)}" + (": " + ", ".join(f"{n} {k}" for k, n in kinds.items())
-                                                             if len(kinds) > 1 else "") + "):\n"
-                        + "\n".join(f"- {g}" for g in gaps))
-                if "built but not checked yet" in kinds:
-                    say += "\nSome parts were built after the last check, so they're not checked yet."
+            say += gap_list(gaps)
         if len(questions) > 1:
             # One question per message: several become one list of what to send (options can't be kept).
             items = [re.sub(r"\?$", "", q["question"]).strip() for q in questions]
@@ -1807,8 +1813,7 @@ class J2Run:
         if decision == "ship":
             self.post("identity", r.get("to_requester") or "We'll finish the site as it is now.", to_user=True,
                       next="user", done=True)
-            self.outcome = self._ship_outcome(f"as the only option left ({limit})" if h.get("only_option") else
-                                              f"on the Requester's decision ({limit or 'their answer'})")
+            self.outcome = self._ship_outcome(f"on the Requester's decision ({limit or 'their answer'})")
             self.turn = None
             return
         if h.get("after_ruling") and (gone or decision == "drop"):
@@ -1929,9 +1934,27 @@ class J2Run:
             # Never a one-option question. The only lone option is "finish as it is" (with no site, "stop here" is
             # always added, and money is never added without asking): code applies it and says so.
             self.post("system", f"Only one option was possible ({opts[0]}), so it is applied without asking.")
-            self.decisions.append({"kind": "limit", "asked": [q["question"]], "answer": "1", "only_option": True})
-            return self._identity_hears_requester({**handoff, "answer": "1", "asked": [q], "only_option": True})
+            self.decisions.append({"kind": "limit", "asked": [q["question"]], "answer": "1", "only_option": True,
+                                   "decision": "ship"})
+            return self._finish_only_option(reason, gaps, room, stale)
         self._ask_user(r.get("say") or plain_missing, [q], "limit", gaps=gaps, handoff=handoff)
+
+    def _finish_only_option(self, reason, gaps, room, stale):
+        """The decision question had one option, "finish as it is": code applies it and tells the Requester why
+        (which limit was reached, which core items can't be paid for or left out) and what is still missing."""
+        crit = (self.goal or {}).get("done_when") or []
+        core = [t for g in gaps for t in [re.sub(r" \((?:not built yet|not checked yet)\)$", "", g)]
+                if t in crit and must_keep(t, self.goal)]
+        limit = ("you've approved the most work credits allowed" if room <= 0 else
+                 "keeping going last time changed nothing" if stale else "the work you approved is used up")
+        why = f"We've reached a limit: {limit}"
+        why += (f", and {'; '.join(core)} can't be paid for and can't be left out, because "
+                f"{'it is' if len(core) == 1 else 'they are'} core to your site." if core else ".")
+        say = to_requester(why + (" So we're finishing the site as it is now." if self.sites else
+                                  " So we're stopping here; nothing is built yet."), question=False)
+        self.post("identity", "@Requester " + say + gap_list(gaps), to_user=True, next="user", done=True, shaped=True)
+        self.outcome = self._ship_outcome(f"as the only option left ({reason})")
+        self.turn = None
 
     def _open_list(self, last, items):
         """One list for the decision message and its count. (1) What the last audit found: failing checklist items,
@@ -3512,6 +3535,10 @@ class J2Run:
             "links": self._links(),
             "identity_to_requester_decisions": sum(m["who"] == "identity" and m.get("pause") in DECISION_PAUSES
                                                    for m in self.chat),
+            "identity_to_requester_facts": sum(m["who"] == "identity" and m.get("pause") in ("fact", "info")
+                                               for m in self.chat),
+            "priority_rulings": {d: sum(m["who"] == "priority" and m.get("decision") == d for m in self.chat)
+                                 for d in ("grant", "counter", "refuse")},
             "questions_to_user": self.decisions,
             "conflicts": [{"id": c["id"], "pair": c["between"], "topic": c["topic"], "subject": c["subject"],
                            "attempts": sum(1 for x in c["attempts"] if x["n"] > 0), "escalated": c["escalated"],
