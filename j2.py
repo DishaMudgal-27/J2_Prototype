@@ -189,20 +189,26 @@ def item_min(criterion):
     return RATES.get(item_kind(criterion), 0)
 
 
-# Leaving items out for budget: the no-errors gate and the brief's core facts always stay in.
+# Leaving items out for budget: the no-errors gate and the brief's core facts always stay in. Identity marks core
+# items at J2.a (goal["core_items"]); the keywords are only the fallback for a charter without that mark.
 NO_ERRORS_GATE = re.compile(r"no (?:javascript |js )?errors|horizontal (?:overflow|scroll)|broken (?:in-page )?links?", re.I)
-CORE_FACT = re.compile(r"\d|\bprices?\b|\bhours\b|timings?|address|location|\bmaps?\b|contact|whatsapp|e-?mail|"
-                       r"phone number|\bcall\b", re.I)
+CORE_FACT = re.compile(r"\bprices?\b|\bhours\b|timings?|address|location|\bmaps?\b|contact|whatsapp|e-?mail|"
+                       r"phone number|\bcall\b|\border", re.I)
 BUDGET_TALK = re.compile(r"budget|\bcosts?\b|afford|expensive|cheap|\bcut|\bdrop|leave (?:\w+ )?out|fund|credits?\b|"
                          r"\bunits?\b|rate[- ]card|minimums?", re.I)
 
 
 def must_keep(criterion, goal):
-    """True for a done-when item that can't be left out for budget: the no-errors gate, or a core fact from the brief.
-    ponytail: a core fact is an item naming the site or stating a number, price, hours, address or contact; keyword
-    match, a model call if it misjudges items."""
-    c, name = str(criterion), str((goal or {}).get("site_name") or "").lower()
-    return bool(NO_ERRORS_GATE.search(c) or CORE_FACT.search(c) or (name and name in c.lower()))
+    """True for a done-when item that can't be left out for budget: the no-errors gate, or a core fact from the brief
+    (business name and location, contact details, prices, hours, ordering). Identity's mark from J2.a decides; a
+    charter without it falls back to keywords."""
+    g, c = goal or {}, str(criterion)
+    if NO_ERRORS_GATE.search(c):
+        return True
+    if "core_items" in g:
+        return c in g["core_items"]
+    name = str(g.get("site_name") or "").lower()
+    return bool(CORE_FACT.search(c) or (name and name in c.lower()))
 
 
 def granted(w):
@@ -409,7 +415,8 @@ def mock_charter(text):
             "site_name": name, "audience": "Local customers, mostly on phones",
             "standards": ["Warm, modern feel", "Fast first screen on a phone"],
             "rules": ["Plain HTML/CSS/JS in one file", "No real customer data"],
-            "done_when": items, "to_be_confirmed": [], "dropped_from_brief": [],
+            "done_when": items, "core": [bool(CORE_FACT.search(d)) for d in items], "to_be_confirmed": [],
+            "dropped_from_brief": [],
             "business_type": guess_type(text), "visitor_needs": NEEDS.get(guess_type(text), [])}
 
 
@@ -835,6 +842,7 @@ class J2Run:
         self.conflict = None                 # the Adaptation <-> Priority negotiation in progress, once they disagree
         self.a_pos, self.p_pos = [], []      # Adaptation's and Priority's latest positions this cycle
         self.a_named = []                    # done-when items Adaptation's last proposal covered or left out
+        self.deferred = {}                   # done-when item text -> rounds (cycles) it was left out or refused
 
     def _ship_outcome(self, why):
         """Outcome of "finish as it is". "Done with open items" only with items to name: a workable site is done."""
@@ -1373,7 +1381,9 @@ class J2Run:
                 }.get(h.get("kind"), self._identity_question)(h)
 
     CHARTER_FMT = ('{"statement": str, "site_name": str, "audience": str, "standards": [str], "rules": [str], '
-                   '"done_when": [str], "business_type": str (one or two words, e.g. "florist"), "visitor_needs": [str] '
+                   '"done_when": [str], "core": [bool] (one per done-when item, same order: true for the business '
+                   'name and location, contact details, prices, hours, ordering and the no-errors check; these are '
+                   'never left out for budget), "business_type": str (one or two words, e.g. "florist"), "visitor_needs": [str] '
                    '(what this business\'s visitors need, as confirmed), '
                    '"to_be_confirmed": [{"item": int (done-when item number), "fact": str}], '
                    '"dropped_from_brief": [str]}')
@@ -1459,6 +1469,11 @@ class J2Run:
             return
         goal["to_be_confirmed"] = self._tbc(goal.get("to_be_confirmed"), goal.get("done_when") or [])
         goal.pop("open_inputs", None)
+        crit, core = goal.get("done_when") or [], goal.pop("core", None)
+        if isinstance(core, list) and len(core) == len(crit):          # stored by text: drops renumber the list
+            goal["core_items"] = [c for c, k in zip(crit, core) if k is True]
+        elif "core_items" in goal:                                       # a change request kept the old marks
+            goal["core_items"] = [c for c in goal["core_items"] if c in crit]
         self.goal = goal
         self.save("goal.json", self.goal)
         ok, why = self._stamp_check()
@@ -1881,7 +1896,8 @@ class J2Run:
             opts.append("Stop here: nothing is built yet, so you get no site")
             budget.append(0)
             choices.append("ship")
-        lead = ("Some parts don't fit in the work you approved." if left else"The team paused after a round of work." if re.match(r"Cycle \d+ used|The department used", reason) else
+        lead = ("Some parts were put off twice." if h.get("deferred") else
+                "Some parts don't fit in the work you approved." if left else"The team paused after a round of work." if re.match(r"Cycle \d+ used|The department used", reason) else
                 "The work you approved is used up." if short else
                 "The same problem came back twice." if reason.startswith("The same failure") else
                 "Only you can give what's still missing." if reason.startswith("Only you") else
@@ -2473,13 +2489,21 @@ class J2Run:
         return {"say": say, "act": "PROPOSE", "next": "Priority", "workflows": wfs, "left_out": out}
 
     def _left_by_ruling(self):
-        """After Priority's ruling: done-when items Adaptation's proposal covered or left out that no workflow builds
-        and the budget left can't pay for. Identity asks the Requester about them (_identity_limit with left_out)."""
+        """After Priority's ruling: done-when items Adaptation's proposal covered or left out that no workflow builds.
+        Identity asks the Requester about them (_identity_limit with left_out) when the budget left can't pay for them,
+        or when one of them was already left out or refused in an earlier round."""
         crit = (self.goal or {}).get("done_when") or []
         built = {crit[i - 1] for w in self.workflows if w["status"] in ("registered", "held", "running", "done")
                  for i in self._wf_items(w)}
         left, self.a_named = [c for c in self.a_named if c in crit and c not in built], []
+        for c in left:
+            self.deferred.setdefault(c, set()).add(self.cycle)
+        twice = [c for c in left if len(self.deferred[c]) >= 2]
         need = sum(item_min(c) for c in left) - (self.budget - self.spent)
+        if twice and need <= 0:
+            # Budget remains, but the same item was put off in 2 rounds: the Requester decides, not a third round.
+            return {"reason": f"The same checklist item(s) were left out or refused in 2 rounds: {'; '.join(twice)}.",
+                    "left_out": left, "deferred": True}
         if not left or need <= 0:
             return None             # the budget left still pays for them: Adaptation proposes them next (J2.b)
         return {"reason": f"Priority's ruling leaves out {len(left)} checklist item(s) the budget left can't pay for.",

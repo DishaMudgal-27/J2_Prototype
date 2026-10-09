@@ -248,8 +248,9 @@ def below_floor():
     the rest in left_out (core facts first); Priority rules; Identity asks one decision question with a leave-out
     option; leaving them out builds the site. A question never has one option; "finish" needs a site."""
     run = j2.J2Run()
-    run.budget = 40                                          # Brew Lab's floor is 70
+    run.budget = 50                                          # Brew Lab's floor is 70; its core items cost 45
     say(run, BREW_LAB)
+    assert run.goal["core_items"] == [c for c in run.goal["done_when"] if re.search(r"menu|hours|address|order", c)]
     a = next(m for m in run.chat if m["who"] == "adaptation")
     p = next(m for m in run.chat if m["who"] == "priority")
     assert a["id"] < p["id"] and a.get("proposal") and p.get("decision") == "grant", (a, p)
@@ -279,6 +280,78 @@ def below_floor():
     run._identity_limit({"reason": "Priority's ruling", "left_out": run.goal["done_when"], "budget_needed": 20})
     assert run.paused["handoff"]["choices"] == ["continue", "ship"], run.paused["handoff"]
 
+
+
+THREAD_AND_LOOM = [   # runs/j2-20261008-153402's charter (12 items, floor 110), with Identity's core marks
+    ("The page shows the name Thread & Loom and Pune, has a viewport meta tag, and uses an earthy colour palette "
+     "defined in the CSS.", True),
+    ("The site lists exactly these 10 products with their prices: Indigo block-print kurta 1,499; Mustard handloom "
+     "kurta 1,699; White chikankari kurta 2,199; Ikat handloom saree 3,499; Khadi silk saree 4,999; Cotton jamdani "
+     "saree 3,999; Khadi cotton shirt 1,299; Linen-blend shirt 1,599; Block-print dupatta 899; Chanderi dupatta 1,099.", True),
+    ("Visitors can filter products by category (All, Kurtas, Sarees, Shirts, Dupattas), by size, and by price, and the "
+     "filters work together.", False),
+    ("Size options match the supplied data: Indigo block-print kurta S to XXL; Mustard handloom kurta S to XL; White "
+     "chikankari kurta XS to XL; Khadi cotton shirt S to XXL; Linen-blend shirt M to XXL; all sarees and dupattas Free "
+     "size.", False),
+    ("A size guide table shows chest in inches: XS 32, S 34, M 36, L 38, XL 40, XXL 42.", False),
+    ("A New Arrivals section shows exactly the White chikankari kurta, Ikat handloom saree and Linen-blend shirt.", False),
+    ("Every product has an order button that opens a WhatsApp link to 910000011111 with the product name and chosen "
+     "size in the message text.", True),
+    ("A lookbook section shows 3 styled outfits, each built only from the listed products and naming them.", False),
+    ("A store section shows 18 FC Road, Shivajinagar, Pune 411005; hours 11am to 9pm, Tuesday to Sunday, closed "
+     "Monday; shop phone +91 00000 22222; and a map link for the address.", True),
+    ("A policy section states: exchange within 7 days if unworn with tags; no returns on sale items; and delivery in "
+     "Pune in 2 days for Rs 79, free above 2,999, pay on delivery.", False),
+    ("A reviews section shows these three reviews: \"Beautiful fabric, fits perfectly\" - Meera K.; \"Fast delivery and "
+     "lovely packing\" - Arjun S.; \"My go-to for festive kurtas\" - Priya D.", False),
+    ("The page has no JavaScript errors, no horizontal overflow at 360px or 1280px, and no broken in-page links.", True)]
+
+
+def thread_and_loom_core():
+    """Follow-up to 3a8960c: "any number" made prices, sizes, "3 styled outfits" and "360px" core, so almost nothing in
+    the Thread & Loom charter could be left out. Identity marks core items at J2.a; at budget 40 the decision question
+    offers the lookbook, reviews and new arrivals as leave-out options, never a core item."""
+    run = j2.J2Run()
+    run.budget = 40
+    orig = run.call
+
+    def call(fn, fmt, task, mock, **k):
+        if fn == "identity" and '"core": [bool]' in fmt:              # J2.a records the charter with core marks
+            r = json.loads(mock())
+            r["goal"].update(site_name="Thread & Loom", business_type="clothing boutique",
+                             done_when=[c for c, _ in THREAD_AND_LOOM], core=[k for _, k in THREAD_AND_LOOM])
+            return r
+        return orig(fn, fmt, task, mock, **k)
+    run.call = call
+    say(run, "A website for Thread & Loom, a handloom clothing boutique in Pune. " * 3)
+    crit = run.goal["done_when"]
+    assert run.goal["core_items"] == [c for c, k in THREAD_AND_LOOM if k], run.goal["core_items"]
+    assert run.paused and run.paused["handoff"].get("after_ruling"), run.outcome
+    offered = [crit[i - 1] for i in run.paused["handoff"]["failing_items"]]
+    for words in ("lookbook", "reviews section", "New Arrivals"):
+        assert any(words in c for c in offered), (words, offered)
+    assert not any(j2.must_keep(c, run.goal) for c in offered), offered
+    # the keyword fallback no longer treats a number as a core fact
+    assert not j2.must_keep(THREAD_AND_LOOM[7][0], {}) and j2.must_keep(THREAD_AND_LOOM[1][0], {})
+
+
+def deferred_twice():
+    """The same done-when item left out or refused in 2 rounds: Identity asks the Requester even though budget remains."""
+    run = j2.J2Run()
+    run.goal = {"done_when": ["The menu with prices is shown", "A lookbook section shows 3 styled outfits"],
+                "core_items": ["The menu with prices is shown"]}
+    run.budget, look = 100, "A lookbook section shows 3 styled outfits"
+    run.a_named = [look]
+    run._parked("Priority refused it")                       # round 1: budget remains, Adaptation proposes again
+    assert run.turn == "adaptation" and run.handoff.get("new_cycle"), run.handoff
+    run.cycle += 1
+    run.a_named = [look]
+    run._parked("Priority refused it")                       # round 2: the Requester decides
+    assert run.turn == "identity" and run.handoff["kind"] == "limit" and run.handoff["deferred"], run.handoff
+    run._identity_limit(run.handoff)
+    q, h = run.paused["questions"][0], run.paused["handoff"]
+    assert h["choices"] == ["continue", "drop"] and h["failing_items"] == [2], h
+    assert q["question"].startswith("Some parts were put off twice.") and "budget" not in q, q
 
 def redirect():
     """Audit addresses the Requester: the message goes to Identity first, with a Route check note."""
@@ -1729,7 +1802,9 @@ if __name__ == "__main__":
         full(mode == "1")
         policy_budget(mode == "1")
         below_floor()
-        print(f"J2_FIXES={mode}: vague brief (both answers), full brief, budget question rejected and re-asked, below-floor proposal with left_out, one decision question after the ruling ok")
+        thread_and_loom_core()
+        deferred_twice()
+        print(f"J2_FIXES={mode}: vague brief (both answers), full brief, budget question rejected and re-asked, below-floor proposal with left_out, one decision question after the ruling, core marks from J2.a, deferred twice ok")
         workflow_agents()
         same_failure()
         cycle_limit()
