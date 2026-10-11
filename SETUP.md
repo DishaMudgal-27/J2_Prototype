@@ -27,8 +27,8 @@ the API, even if the key is set.
 ## One-time setup
 
 ```bash
-git clone <this repo>
-cd agent-studio
+git clone https://github.com/DishaMudgal-27/J2_Prototype.git
+cd J2_Prototype
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
