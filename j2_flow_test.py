@@ -326,7 +326,7 @@ def connections():
             assert told["who"] == "identity" and told.get("to_user") and told.get("done"), told
             assert "We've reached a limit: you've approved the most work credits allowed" in told["text"], told["text"]
             assert f"{form} can't be paid for and can't be left out" in told["text"], told["text"]
-            assert "Still not right (1):\n- " + form in told["text"], told["text"]
+            assert f"Still not right (1):\n- F-{run._no(form)} {j2.short(form)} (unfunded)" in told["text"], told["text"]
             assert run.outcome.startswith("Done with open items: shipped as is as the only option"), run.outcome
             plain_for_requester(run)
         if name == "generous":
@@ -390,7 +390,8 @@ def build_before_asking():
                  {"id": "F-7", "item": None, "criterion": "A reviews section shows three reviews", "verdict":
                   "NEEDS_REVISION", "evidence": "absent"}]               # dropped, unnumbered: no finding
     results, extras = run._audit_findings(findings, keep)
-    assert [r["id"] for r in results] == ["F-1", "F-2", "F-3", "F-4", "F-5"] and all(r["pass"] for r in results), results
+    # findings are named by the items' run-long numbers: 1, 2, 7, 9, 12 (never renumbered after the drop)
+    assert [r["id"] for r in results] == ["F-1", "F-2", "F-7", "F-9", "F-12"] and all(r["pass"] for r in results), results
     assert not extras, extras
 
 
@@ -1123,6 +1124,90 @@ def atom_checks():
     assert v["escalated"] == 1, v
 
 
+def leave_out_named():
+    """runs/j2-20261012-170632 msgs 58-63: "Leave out the 2 unfinished checklist parts" named nothing; Identity then
+    told the team fees and sponsors, while code dropped sponsors and the colour scheme. Now the question lists every
+    unfinished item with its run-long number, short text and status, each option says what it drops and keeps, the
+    drop is exactly what the option named, and numbers never shift after a drop."""
+    six = BREW_LAB.replace(", and a simple loyalty-card explainer (buy 9, get the 10th free)", "")
+    run = j2.J2Run()
+    say(run, six)
+    finish(run)
+    crit = list(run.goal["done_when"])
+    assert len(crit) == 6, crit
+    hours, beans = (next(i for i, c in enumerate(crit, 1) if k in c.lower()) for k in ("hours", "beans"))
+    last = run.audits[-1]
+    for r in last["results"]:
+        if r["item"] in (hours, beans):
+            r.update(verdict="NEEDS_REVISION", note="missing", **{"pass": False})
+    last["rubric"] = [{"id": "R-6", "criterion": j2.RUBRIC[5][1], "verdict": "NEEDS_REVISION", "pass": False,
+                       "note": "button 30px", "rubric": True}]
+    run.outcome, run.done = None, False
+    run._identity_limit({"reason": "The same failure came back twice."})
+    q = run.paused["questions"][0]
+    text = run.chat[-1]["text"]
+    for i in (hours, beans):
+        assert re.search(rf"\n- F-{i} {re.escape(j2.short(crit[i - 1]))} \((built but failing|not built|unfunded)\)",
+                         text), text
+    assert "\n- R-6 Tap targets are big enough on phones (failing)" in text, text
+    drop = next(o for o in q["options"] if o.startswith("Leave out"))
+    named = [f"F-{hours} {j2.short(crit[hours - 1])}", f"F-{beans} {j2.short(crit[beans - 1])}"]
+    assert drop == (f"Leave out {named[0]} and {named[1]}: you get the site without them. R-6 Tap targets are big "
+                    "enough on phones stays as it is, still failing."), drop
+    ship = q["options"][-1]
+    assert ship.endswith(f"still not right: {named[0]}, {named[1]} and R-6 Tap targets are big enough on phones"), ship
+    assert run.paused["handoff"]["drop_named"] == named
+    say(run, str(q["options"].index(drop) + 1))
+    d = next(x for x in reversed(run.decisions) if x.get("decision") == "drop")
+    assert d["named"] == d["dropped"] == named, d                          # the dropped set is the named set
+    assert [c for c in crit if c not in run.goal["done_when"]] == [crit[hours - 1], crit[beans - 1]]
+    ack = next(m for m in run.chat if m.get("to_user") and "Got it. We'll leave out" in m["text"])
+    assert named[0] in ack["text"] and named[1] in ack["text"], ack["text"]
+    # numbers don't shift: the items after the dropped ones keep theirs, in the next audit and the next question
+    for i, c in enumerate(crit, 1):
+        if c in run.goal["done_when"]:
+            assert run._no(c) == i and next(r["id"] for r in run.audits[-1]["results"] if r["criterion"] == c) == f"F-{i}"
+    late = run.goal["done_when"][-1]
+    assert run._gap_rows([late], run.audits[-1], None)[0]["name"].startswith(f"F-{crit.index(late) + 1} ")
+    # a typed answer names items by those numbers too
+    assert j2.parse_decision("leave out F-6", {}, ["drop"], run.goal["done_when"],
+                             [run._no(c) for c in run.goal["done_when"]])["drop_items"] == [6]
+
+
+def rubric_and_credits():
+    """Every builder's brief carries the design rubric R-1 to R-6; the section holding buttons has a tap-targets
+    check code runs at 360px (it fails on a 30px button); no user-facing string says "units"."""
+    run = j2.J2Run()
+    say(run, BREW_LAB)
+    finish(run)
+    built = [c for c in calls_of(run) if j2.is_wf_agent(c["fn"])]
+    assert built and all(f"{rid} {txt}" in c["prompt"] for c in built for rid, txt in j2.RUBRIC[:6])
+    form = next(i for i, c in enumerate(run.goal["done_when"], 1) if j2.item_kind(c) == "form")
+    w = next(w for w in run.workflows if form in run._wf_items(w))
+    tap = [c for a in w["atoms"] for c in a["verification"] if c["type"] == "tap-targets"]
+    assert tap and tap[0]["target"] == ".order-form" and "order-form" in json.dumps(w["atoms"][0]["how"]), w["atoms"]
+    assert 'class="order-form"' in run.sites[-1] and "<button" in run.sites[-1].split('class="order-form"')[1]
+    got = [r for r in run.receipts if r["type"] == "tap-targets"]
+    assert got and got[-1]["pass"] and "at 360px" in got[-1]["evidence"], got
+    page = ('<!doctype html><html><body><section class="order-form"><form><button type="submit" '
+            'style="height:30px;width:120px">Send</button></form></section></body></html>')
+    r = j2.run_check(tap[0], run.dir, page)
+    assert r["pass"] is False and "1 of 1 tap target(s)" in r["evidence"] and "120x30" in r["evidence"], r
+    # "units": never in the outcome, the report, summary.json or any chat message; the page uses it only to parse
+    run = j2.J2Run()
+    run.budget = 12
+    say(run, BREW_LAB)
+    say(run, "finish as it is")
+    assert run.outcome.startswith("Done with open items"), run.outcome
+    texts = [run.outcome, open(os.path.join(run.dir, "report.md"), encoding="utf-8").read(),
+             open(os.path.join(run.dir, "summary.json"), encoding="utf-8").read()] + [m["text"] for m in run.chat]
+    assert "work credits" in " ".join(texts)
+    bad = [t[:200] for t in texts if re.search(r"\bunits?\b", t)]
+    assert not bad, bad
+    ui = [ln for ln in open(os.path.join(j2.HERE, "j2_ui.html"), encoding="utf-8") if re.search(r"\bunits\b", ln)]
+    assert all(re.search(r"/[^/]*\bunits\b[^/]*/|\(\?:units", ln) for ln in ui), ui     # regex patterns only
+
+
 def detail_stays_open():
     """The Detailed view re-renders on every poll. An opened screenshot (under Audit), the report's event log, and an
     opened message detail view (with its full text) must stay open while the run changes, until the user closes them.
@@ -1796,7 +1881,8 @@ def identity_decisions():
     g = run.goal
     assert len(gone) == 3 and all(c not in g["done_when"] for c in gone), g["done_when"]
     assert [x["criterion"] for x in g["dropped_reasons"]] == gone, g["dropped_reasons"]
-    later = " ".join(m["text"] for m in run.chat[n + 1:] if m["who"] == "identity")
+    later = " ".join(m["text"] for m in run.chat[n + 1:] if m["who"] == "identity"
+                     and not re.search(r"leave out|left out", m["text"]))     # not the drop's own acknowledgement
     assert not any(c in later for c in gone), "dropped items came back"
 
     # msg 50: "finish as is" ends the run, no rejected done and no limit question straight after
@@ -1869,7 +1955,8 @@ def two_audiences():
     say(run, "2")
     assert len(seen) == 2 and "MIXED THE TWO AUDIENCES" in seen[1] and "re-pric" in seen[1], seen[-1][-300:]
     mine = [m for m in run.chat[n:] if m.get("requester_only")]
-    assert len(mine) == 1 and mine[0]["text"] == "@Requester Thanks, got it.", mine        # the regenerated reply
+    # the answer left items out, so code writes the reply naming them (Identity's own words could name others)
+    assert len(mine) == 1 and mine[0]["text"].startswith("@Requester Got it. We'll leave out F-"), mine
     assert not any("re-price" in m["text"] for m in run.chat if m.get("to_user"))
     assert "@Requester Thanks, got it." not in run.chat_view(), "agents must not get to_requester"
     plain_for_requester(run)
@@ -2025,7 +2112,7 @@ def limit_wording():
     assert "budget" not in q and "add budget" not in run.outcome and q["question"] in run.outcome, run.outcome
     gaps = j2.workable(run.audits[-1])
     listed = listed_gaps(run.chat[-1]["text"])
-    assert len(listed) == len(gaps) and q["options"][-1].endswith(f"with {len(gaps)} things still not right"), (listed, q)
+    assert len(listed) == len(gaps) and f"with {len(gaps)} things still not right: F-" in q["options"][-1], (listed, q)
     for o in q["options"]:
         assert "you get" in o, o
     run.spent = run.budget                                    # money: the option says the amount
@@ -2062,22 +2149,24 @@ def open_list():
     unfinished(run, [2]), unfinished(run, [3], "running"), unfinished(run, [5], "unfunded")
     text, listed, ship = ask(run)
     crit = run.goal["done_when"]
-    assert len(listed) == 4 and ship.endswith("with 4 things still not right"), (listed, ship)
-    assert listed[0] == crit[0] and listed[1] == f"{crit[1]} (not built yet)", listed
+    assert len(listed) == 4 and "with 4 things still not right: " in ship, (listed, ship)
+    row = lambda i, st: f"F-{i} {j2.short(crit[i - 1])} ({st})"           # run-long number, short text, status
+    assert listed[:2] == [row(1, "built but failing"), row(2, "not built")] and listed[3] == row(5, "unfunded"), listed
 
     # (b) an item both failing in the audit and covered by an unfinished workflow appears once
     run = paused_run()
     unfinished(run, [1, 2])
     text, listed, ship = ask(run)
-    assert listed == [crit[0], f"{crit[1]} (not built yet)"] and ship.endswith("with 2 things still not right"), listed
+    assert listed == [row(1, "built but failing"), row(2, "not built")] and "with 2 things still not right: " in ship, \
+        listed
 
     # (c) the site is newer than the last audit: what was built since is marked, and the message says so
     run = paused_run()
     run.sites.append(run.sites[-1])
     run.workflows.append({"id": "W-99", "name": "y", "status": "done", "covers": [1, 4], "version": len(run.sites)})
     text, listed, ship = ask(run)
-    assert listed == [f"{crit[0]} (not checked yet)", f"{crit[3]} (not checked yet)"], listed
-    assert "built after the last check, so they're not checked yet" in text and ship.endswith("with 2 things still not right"), text
+    assert listed == [row(1, "built, not checked yet"), row(4, "built, not checked yet")], listed
+    assert "built after the last check, so they're not checked yet" in text and "with 2 things still not right: " in ship, text
 
 
 def covers_by_text():
@@ -2141,8 +2230,9 @@ def readable_decision():
     assert len([x for x in re.split(r"(?<=[.!?])\s+", intro) if x]) <= 2, intro
     i = lines.index(next(ln for ln in lines if ln.startswith("Still not right (")))
     assert lines[i + 1:i + 1 + len(gaps)] == [f"- {g}" for g in gaps], lines
-    whole = set(crit) | {f"{c} (not built yet)" for c in crit} | {r["criterion"] for r in last["rubric"]}
-    assert len(gaps) == 5 and all(g in whole for g in gaps), gaps                          # full text, not cut
+    # each line: the item's run-long number (or rubric id), its short text and Audit's status
+    assert len(gaps) == 5 and all(re.fullmatch(r"(F|R)-\d+ .+ \((built but failing|not built|unfunded|failing)\)", g)
+                                  for g in gaps), gaps
     assert lines[i + 1 + len(gaps)] == q["question"] and lines[i + 2 + len(gaps)].startswith("   Option 1: "), lines
     # (2) no "1." before the question
     assert not any(re.match(r"\d+\. ", ln) for ln in lines), lines
@@ -2150,10 +2240,10 @@ def readable_decision():
     assert "work credits" in q["options"][0] and not re.search(r"\bunits?\b", text), text
     # (5) counts: the header explains the mix; finish counts the whole list; leave-out explains the difference
     assert lines[i] == f"Still not right ({len(gaps)}: 2 built but failing, 3 not built yet):", lines[i]
-    assert q["options"][-1].endswith(f"with {len(gaps)} things still not right"), q["options"]
+    assert f"with {len(gaps)} things still not right: " in q["options"][-1], q["options"]
     drop = next(o for o in q["options"] if o.startswith("Leave out"))
-    assert drop.startswith("Leave out the 4 unfinished checklist parts") and "(the other 1 on the list stays as it is)" \
-        in drop, drop
+    assert drop.startswith("Leave out F-") and drop.count("F-") == 4 and drop.endswith(
+        "R-1 Consistent styling stays as it is, still failing."), drop
     # (4) unclear answer: one short line, then the options only
     say(run, "hmm, not sure")
     re_ask = next(m for m in reversed(run.chat) if m["who"] == "identity")["text"].split("\n")
@@ -2177,6 +2267,8 @@ if __name__ == "__main__":
         print(f"J2_FIXES={mode}: vague brief (both answers), full brief, budget question rejected and re-asked, below-floor proposal with left_out, one decision question after the ruling, core marks from J2.a, deferred twice, connections at three budgets, funded work built before the question ok")
         workflow_agents()
         atom_checks()
+        leave_out_named()
+        rubric_and_credits()
         same_failure()
         cycle_limit()
         to_be_confirmed()
@@ -2192,7 +2284,7 @@ if __name__ == "__main__":
         intake_needs()
         playbooks()
         summary_before_review()
-        print(f"J2_FIXES={mode}: B workflow agents, atom checks (rules, receipts, third failure to Adaptation), C workable loop and limits, D memory, F forced audit failure (hidden from agents) and test lessons, summary before review, H style guide, rubric loop, needs, playbooks, I pricing and unpaid items ok")
+        print(f"J2_FIXES={mode}: B workflow agents, atom checks (rules, receipts, third failure to Adaptation), leave-out question names its items, rubric in briefs, tap targets, no \"units\", C workable loop and limits, D memory, F forced audit failure (hidden from agents) and test lessons, summary before review, H style guide, rubric loop, needs, playbooks, I pricing and unpaid items ok")
     ruling_over_budget()
     redirect()
     workable_unit()

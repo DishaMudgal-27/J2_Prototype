@@ -170,6 +170,50 @@ def check(html):
     return out
 
 
+TAP_WRAPPER = """<!doctype html><html><body><iframe src="site.html" style="width:360px;height:900px;border:0"></iframe>
+<script>const f = document.querySelector('iframe');
+f.addEventListener('load', () => setTimeout(() => { let out;
+  try {
+    const w = f.contentWindow, d = w.document, cs = el => w.getComputedStyle(el), sel = %s, min = %d;
+    const TAP = 'a[href],button,input:not([type=hidden]),select,textarea,[role=button]';
+    const vis = el => { const r = el.getBoundingClientRect(), c = cs(el); return r.width > 0 && r.height > 0 && c.visibility !== 'hidden' && c.display !== 'none' && +c.opacity !== 0; };
+    const roots = [...d.querySelectorAll(sel)];
+    const els = [...new Set(roots.flatMap(r => [r, ...r.querySelectorAll(TAP)]))].filter(el => el.matches(TAP)).filter(vis)
+      .filter(el => !(el.tagName === 'A' && cs(el).display === 'inline' && el.closest('p,li,td,span')));   // links in text are exempt
+    const small = els.map(el => [el, el.getBoundingClientRect()]).filter(([, r]) => r.height < min || r.width < min);
+    out = {roots: roots.length, checked: els.length, small_count: small.length, small: small.slice(0, 6).map(([el, r]) =>
+      `${el.tagName.toLowerCase()} "${(el.textContent || el.value || el.name || '').trim().slice(0, 25)}" ${Math.round(r.width)}x${Math.round(r.height)}`)};
+  } catch (e) { out = {error: String(e)}; }
+  document.body.setAttribute('data-j2', JSON.stringify(out)); }, 300));
+</script></body></html>"""
+
+
+def tap_targets(html, selector, min_px=TAP_MIN):
+    """Tap targets inside the elements matching selector, measured in headless Chrome at 360px (phone width):
+    {available, roots, checked, small_count, small}. Links inside running text are exempt, as in the R-6 check."""
+    chrome = find_chrome()
+    if not chrome:
+        return {"available": False, "note": "Chrome not found (set J2_CHROME)"}
+    with tempfile.TemporaryDirectory() as tmp:
+        with open(os.path.join(tmp, "site.html"), "w", encoding="utf-8") as f:
+            f.write(html)
+        with open(os.path.join(tmp, "wrap.html"), "w", encoding="utf-8") as f:
+            f.write(TAP_WRAPPER % (json.dumps(selector), int(min_px)))
+        for _ in range(2):             # one retry, as in check(): a Chrome hang isn't a failed check
+            try:
+                p = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--allow-file-access-from-files",
+                                    "--window-size=400,1000", "--virtual-time-budget=3000", "--dump-dom",
+                                    "file://" + os.path.join(tmp, "wrap.html")], capture_output=True, text=True, timeout=60)
+            except subprocess.TimeoutExpired:
+                continue
+            m = re.search(r'data-j2="([^"]*)"', p.stdout)
+            if m:
+                r = json.loads(m.group(1).replace("&quot;", '"').replace("&amp;", "&").replace("&lt;", "<")
+                               .replace("&gt;", ">"))
+                return {"available": "error" not in r, **r}
+    return {"available": False, "note": "Chrome ran but the page never reported (twice)"}
+
+
 def form_ok(x):
     """Works = has a submit control, no JS error on submit, and the submit event fired (or a field's own rules
     rejected the sample value, which says nothing about the site)."""

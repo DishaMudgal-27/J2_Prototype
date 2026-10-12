@@ -254,7 +254,8 @@ def atom_missing(w):
 
 
 # ---- work-atom checks: the only check types Adaptation may write. Code runs them; no agent reports a result.
-CHECK_TYPES = ("file-exists", "grep-count", "element-count", "named-test", "facts-present")
+CHECK_TYPES = ("file-exists", "grep-count", "element-count", "named-test", "facts-present", "tap-targets")
+COUNTED = ("grep-count", "element-count", "tap-targets")     # target: a section id or class the atom says to create
 NAMED_TESTS = ("page-parses", "links-resolve", "form-has-submit")
 MAX_CHECK_ATTEMPTS = 3
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
@@ -279,6 +280,7 @@ def strings(x):
 def check_problems(a, source):
     """J2.e's rules for one atom's checks. source: the charter and the Requester's answers, squashed."""
     out, checks = [], a.get("verification") if isinstance(a.get("verification"), list) else []
+    # (tap-targets: expect is the minimum size in px, so a label like "at least 44x44px" must expect 44)
     told = squash(json.dumps([a.get("how"), a.get("constraints")], ensure_ascii=False))
     for n, c in enumerate(checks, 1):
         if not isinstance(c, dict):
@@ -294,7 +296,7 @@ def check_problems(a, source):
             bad = [f for f in facts if not str(f or "").strip() or squash(f) not in source]
             if bad:
                 out.append(f"check {n} facts-present lists {bad}, not found in the charter or the Requester's answers")
-        elif t in ("grep-count", "element-count"):
+        elif t in COUNTED:
             name = str(target or "").lstrip("#.")
             if not IDENT.match(str(target or "")) or EMAIL.search(str(target)) or \
                     (re.search(r"\d", name) and squash(name) in source):
@@ -387,6 +389,17 @@ def run_check(c, site_dir, page):
             n = len(scan.matching(target))
             return {"actual": n, "pass": n == as_int(expect, -1),
                     "evidence": f"{n} element(s) match {target!r}, expected {expect}"}
+        if t == "tap-targets":
+            r, want = j2_check.tap_targets(page, str(target), as_int(expect, j2_check.TAP_MIN)), as_int(expect, 44)
+            if not r.get("available"):
+                return {"actual": None, "pass": False, "evidence": f"the browser check couldn't run: {r.get('note')}"}
+            ok = r["roots"] > 0 and r["checked"] > 0 and not r["small_count"]
+            return {"actual": {k: r[k] for k in ("roots", "checked", "small_count", "small")}, "pass": ok,
+                    "evidence": (f"nothing on the page matches {target!r}" if not r["roots"] else
+                                 f"no buttons or links inside {target!r}" if not r["checked"] else
+                                 f"{r['small_count']} of {r['checked']} tap target(s) in {target!r} under {want}x{want}px "
+                                 f"at 360px: {', '.join(r['small'])}" if r["small_count"] else
+                                 f"all {r['checked']} tap target(s) in {target!r} at least {want}x{want}px at 360px")}
         if t == "facts-present":
             text = squash(" ".join(scan.text))
             facts = target if isinstance(target, list) else [target]
@@ -417,7 +430,15 @@ def run_check(c, site_dir, page):
 
 
 def mock_atom(w):
-    """The work atom the mock Adaptation (and code's cheapest-fit proposal) writes for a workflow."""
+    """The work atom the mock Adaptation (and code's cheapest-fit proposal) writes for a workflow. A workflow with a
+    form part builds the section that holds buttons, so it also gets R-6 as a tap-targets check."""
+    if "form" in (w.get("parts") or []):
+        a = mock_atom({k: v for k, v in w.items() if k != "parts"})
+        a["how"]["steps"] += "; the order form goes in a section with class order-form"
+        a["verification"].append({"text": f"R-6: every button and field in the order form is at least "
+                                          f"{j2_check.TAP_MIN}x{j2_check.TAP_MIN}px on a phone", "type": "tap-targets",
+                                  "target": ".order-form", "expect": j2_check.TAP_MIN})
+        return a
     return {"goal": w.get("completion_check") or w.get("goal_gap") or w.get("name") or "The workflow's change is live",
             "constraints": ["Other workflows' sections stay unchanged", "The page loads with no console errors"],
             "context": [f"charter item {i}" for i in w.get("covers") or []] + [f"finding {f}" for f in w.get("fixes") or []]
@@ -494,10 +515,10 @@ def option_picked(q, answer):
 
 
 DECIDE_FMT = ('"needs_decision": bool (true when the Requester must choose to add budget, leave items out or finish '
-              'as is), "budget_needed": int|null (units needed to finish, your estimate)')
+              'as is), "budget_needed": int|null (work credits needed to finish, your estimate)')
 DECIDE_RULE = ("Never offer adding budget, leaving items out or finishing as is in your own question: set needs_decision "
                "instead and code asks the Requester with the exact amounts it can apply.")
-DECISION_FMT = ('"decision": "continue"|"drop"|"ship"|null (null if the answer doesn\'t say), "add": int|null (units the '
+DECISION_FMT = ('"decision": "continue"|"drop"|"ship"|null (null if the answer doesn\'t say), "add": int|null (work credits the '
                 'Requester asked to add, as they typed it), "drop_items": [int] (done-when item numbers they asked to '
                 'leave out)')
 BUILT_CLAIM = re.compile(r"\b(?:now has|already has|so far the (?:page|site) has|the (?:page|site) has|is built|"
@@ -523,11 +544,30 @@ PLAIN_WORDS = ((r"\bunits\b", "work credits"), (r"\bunit\b", "work credit"), (r"
                (r"\bestimates?\b", "rough figure"))
 
 
+GAP_KINDS = (("(not built yet)", "not built yet"), ("(not built)", "not built yet"), ("(unfunded)", "unfunded"),
+             ("(not checked yet)", "built but not checked yet"), ("(built, not checked yet)", "built but not checked yet"))
+STILL = {"not built": "still not built", "unfunded": "still not funded", "built but failing": "still failing",
+         "built, not checked yet": "not checked yet", "failing": "still failing"}
+
+
 def gap_kind(g):
     """How a "Still not right" entry stands, in plain words (the list's header counts these)."""
     g = str(g)
-    return ("not built yet" if g.endswith("(not built yet)") else
-            "built but not checked yet" if g.endswith("(not checked yet)") else "built but failing")
+    return next((k for end, k in GAP_KINDS if g.endswith(end)), "built but failing")
+
+
+def short(text, n=7):
+    """A checklist item's short name: its first clause, at most n words."""
+    words = re.split(r"[,:;(]| - ", str(text))[0].split()[:n]
+    while len(words) > 1 and words[-1].lower() in ("a", "an", "the", "and", "or", "of", "for", "with", "to", "in", "on",
+                                                    "is", "are"):
+        words.pop()             # never end on a joining word ("about the beans and the")
+    return " ".join(words) or str(text)[:40]
+
+
+def and_list(xs):
+    xs = list(xs)
+    return ", ".join(xs[:-1]) + " and " + xs[-1] if len(xs) > 1 else "".join(xs)
 
 
 def gap_list(gaps):
@@ -563,22 +603,23 @@ def to_requester(text, question=True):
     return " ".join(said + asked)
 
 
-def parse_decision(answer, q, choices, crit):
+def parse_decision(answer, q, choices, crit, nums=None):
     """The Requester's answer to the decision question, as code reads it: {"decision", "add", "drop_items"}.
-    "2. Add 25 more. Leave out the lookbook and reviews" -> continue, add 25, drop the two items by name."""
-    answer = str(answer or "")
+    "2. Add 25 more. Leave out the lookbook and reviews" -> continue, add 25, drop the two items by name.
+    nums: each item's run-long number (what the Requester sees); drop_items are those numbers, never positions."""
+    answer, nums = str(answer or ""), nums or list(range(1, len(crit) + 1))
     i = option_picked(q, answer) if q.get("options") else None
     picked = choices[i] if i is not None and i < len(choices) else None
     if ONLY_PICK.fullmatch(answer):
         return {"decision": picked, "add": None, "drop_items": []}
     amount = re.search(r"\badd\s+(\d+)|(\d+)\s*(?:more|units?|extra|(?:work )?credits?)\b", answer, re.I)  # "add 25"
     add = int(amount.group(1) or amount.group(2)) if amount else None
-    drops = {int(n) for n in re.findall(r"\bitems? (\d+)", answer, re.I)}
+    drops = {int(n) for n in re.findall(r"\bitems? (\d+)|\bF-(\d+)", answer, re.I) for n in n if n}
     m = re.search(r"(?:leave out|drop|without|skip|remove)\s+(.*)", answer, re.I)
     for part in re.split(r",|\band\b|\.", m.group(1)) if m else []:
         part = re.sub(r"^\s*(the|a|an)\s+", "", part.strip(), flags=re.I).strip().lower()
-        drops |= {j for j, c in enumerate(crit, 1) if len(part) > 2 and part in c.lower()}
-    drops = sorted(n for n in drops if 1 <= n <= len(crit))
+        drops |= {nums[j] for j, c in enumerate(crit) if len(part) > 2 and part in c.lower()}
+    drops = sorted(n for n in drops if n in nums)
     if re.search(r"\bship\b|as is|\bfinish|go live", answer, re.I) and not add:
         decision = "ship"
     elif add or picked == "continue":
@@ -647,8 +688,15 @@ def mock_section(w, goal, sections):
     if "viewport" in n or any("phone" in str(t).lower() for t in w.get("covers_text") or []):
         return '<meta name="viewport" content="width=device-width, initial-scale=1">', ""
     others = "".join(x["body"] for sid, x in sections.items() if sid != w["section"])
-    items = "".join(f'<section data-item="{i}"><h2>{html.escape(str(d))}</h2><p>Sample content (replace before '
-                    "launch).</p></section>" for i, d in enumerate(g.get("done_when") or [], 1)
+    def item(i, d):
+        if item_kind(d) == "form":
+            return (f'<section class="order-form" data-item="{i}"><h2>{html.escape(str(d))}</h2><form>'
+                    '<label>Name <input name="name" style="display:block;min-height:44px;width:100%"></label>'
+                    '<button class="j2-btn" type="submit" style="min-height:44px;min-width:44px">Send</button>'
+                    "</form></section>")
+        return (f'<section data-item="{i}"><h2>{html.escape(str(d))}</h2><p>Sample content (replace before '
+                "launch).</p></section>")
+    items = "".join(item(i, d) for i, d in enumerate(g.get("done_when") or [], 1)
                     if "phone" not in str(d).lower() and f'data-item="{i}"' not in others)
     return "", items or f"<section><h2>{html.escape(w['name'])}</h2><p>Sample content.</p></section>"
 
@@ -1541,7 +1589,7 @@ class J2Run:
                     limit = f"The department used its {MAX_CYCLES} cycles (J2_MAX_CYCLES) and the site isn't workable yet."
                 elif self.goal and self.budget - self.spent < cheapest:
                     self._event("system", "out_of_budget", f"{self.budget - self.spent} left, cheapest part {cheapest}")
-                    limit = (f"Out of budget: {self.budget - self.spent} of {self.budget} units left, less than the "
+                    limit = (f"Out of budget: {self.budget - self.spent} of {self.budget} work credits left, less than the "
                              f"cheapest rate-card part ({cheapest}), so no new workflow can be funded.")
                 if limit:
                     self.idle_cycles, self.cycle_registered = 0, True
@@ -1681,7 +1729,10 @@ class J2Run:
         # item 16 added filters and category browsing, so it couldn't pass once those were dropped).
         goal["done_when"] = [GATE_TEXT if NO_ERRORS_GATE.search(str(c)) else c for c in goal.get("done_when") or []]
         crit, core = goal["done_when"], goal.pop("core", None)
-        goal["charter_items"] = list(crit)     # the numbering Audit may still use after items are dropped
+        # Every item keeps its number for the whole run: a new charter (a change request) keeps the earlier numbers
+        # and numbers its new items after them. Audit may still use these numbers after items are dropped.
+        old = (self.goal or {}).get("charter_items") or []
+        goal["charter_items"] = old + [c for c in crit if c not in old]
         if isinstance(core, list) and len(core) == len(crit):          # stored by text: drops renumber the list
             goal["core_items"] = [c for c, k in zip(crit, core) if k is True]
         elif "core_items" in goal:                                       # a change request kept the old marks
@@ -1881,7 +1932,7 @@ class J2Run:
         need = max(0, w["cost"] - (self.budget - self.spent))
         if answer:
             r = self.call("identity", '{' + REPLY_FMT + ', "approved": bool, "budget_increase": int|null}',
-                          f"YOU ASKED THE REQUESTER about running {w['id']} {w['name']} ({w['cost']} units, {need} more "
+                          f"YOU ASKED THE REQUESTER about running {w['id']} {w['name']} ({w['cost']} work credits, {need} more "
                           f"than is left). THE REQUESTER ANSWERED: {answer}\nRecord their decision. Add budget only if "
                           "they approved it.",
                           lambda: json.dumps({"say": "The Requester approved it.", "approved": True,
@@ -1928,15 +1979,16 @@ class J2Run:
         g = self.goal or {}
         tbc = g.get("to_be_confirmed") or []
         crit = g.get("done_when") or []
+        nums, at = [self._no(c) for c in crit], self._item_at()     # item numbers are run-long, never positions
 
         def mock():
             ship = re.search(r"\bship\b|as is", answer, re.I)
             drop = re.search(r"\bdrop\b", answer, re.I)
             unknown = re.search(r"don'?t know|not yet|later|no idea|can'?t", answer, re.I)
             asked_items = [as_int(n) for n in re.findall(r"item (\d+)", json.dumps(h.get("asked")))]
-            items = asked_items or [crit.index(t["criterion"]) + 1 for t in tbc if t["criterion"] in crit]
+            items = asked_items or [self._no(t["criterion"]) for t in tbc if t["criterion"] in crit]
             facts = [{"item": n, "fact": answer} for n in items]
-            d = parse_decision(answer, q, choices, crit) if limit else {}
+            d = parse_decision(answer, q, choices, crit, nums) if limit else {}
             return json.dumps({**d, "to_requester": "Thanks, got it." if not unknown else "Thanks. We'll mark that as "
                                "still to be confirmed.", "to_agents": "Recorded." if not unknown else "Recorded as to "
                                "be confirmed.",
@@ -1954,27 +2006,33 @@ class J2Run:
                       + next_field(("audit", "adaptation"), "Audit to re-check the current site when the site needs no "
                                    "change; Adaptation when the site must change (e.g. real details to put in)") + "}",
                       f"YOU ASKED THE REQUESTER: {json.dumps(h.get('asked'), ensure_ascii=False)}\nTHE REQUESTER "
-                      f"ANSWERED: {answer}\nDONE-WHEN: {json.dumps(crit, ensure_ascii=False)}\nTO BE CONFIRMED NOW: "
+                      f"ANSWERED: {answer}\nDONE-WHEN (by item number; numbers never change, F-n is item n): "
+                      f"{json.dumps(dict(zip(nums, crit)), ensure_ascii=False)}\nTO BE CONFIRMED NOW: "
                       f"{json.dumps(tbc, ensure_ascii=False)}\nAUDIT FINDINGS: {json.dumps(self._findings(), ensure_ascii=False)}"
                       "\nRecord what the answer settles against the charter, without changing done-when. A fact they "
                       "gave goes in confirmed; a fact they say they can't give yet goes in still_to_be_confirmed (that "
                       "done-when item is not met until they confirm it)."
                       + (f"\nThis answers the decision question ({limit}). Read what they asked for: decision "
                          "continue (keep working), drop (leave out the failing items) or ship (finish as it is); add: "
-                         "units they asked to add; drop_items: the done-when items they named to leave out. Adding and "
+                         "work credits they asked to add; drop_items: the item numbers they named to leave out. Adding and "
                          "leaving out can come together. Code applies it. The Requester's decision is final: you may "
                          "say what won't fit in the budget, never refuse it." if limit else ""), mock)
+        for k in ("confirmed", "still_to_be_confirmed"):          # item numbers -> current positions
+            r[k] = [{**x, "item": at.get(as_int(x.get("item")), 0)} for x in r.get(k) or [] if isinstance(x, dict)]
         decision, add, drops = "continue", None, []
+        named = [t for t in h.get("drop_texts") or [] if t in crit]   # what the "leave out" option named
         if limit:
             if ONLY_PICK.fullmatch(answer):          # a click or a bare option number: exactly that option
-                r.update(parse_decision(answer, q, choices, crit))
+                r.update(parse_decision(answer, q, choices, crit, nums))
             decision = str(r.get("decision") or "").lower() or None
             add = max(0, as_int(r.get("add"))) or None
-            drops = sorted({as_int(n) for n in r.get("drop_items") or [] if 1 <= as_int(n) <= len(crit)})
+            drops = sorted({at[as_int(n)] for n in r.get("drop_items") or [] if as_int(n) in at})
             if decision == "continue" and not add and q.get("budget") and "continue" in choices:
                 add = q["budget"][choices.index("continue")] or None       # the option's own amount
             if decision == "drop" and not drops:
-                drops = [i for i in h.get("failing_items") or [] if 1 <= i <= len(crit)]
+                # the option itself: exactly the items it named (older pauses carry positions only)
+                drops = [crit.index(t) + 1 for t in named] if "drop_texts" in h else \
+                    [i for i in h.get("failing_items") or [] if 1 <= i <= len(crit)]
             if decision == "continue" and "continue" not in choices and drops:
                 decision = "drop"                     # keep working wasn't offered (nothing to fund it): leave out
             if decision not in choices and not h.get("reasked"):
@@ -1985,8 +2043,8 @@ class J2Run:
                 nums = ", ".join(str(i) for i in range(1, n)) + f" or {n}" if n > 1 else "1"
                 self._ask_user(f"I couldn't tell which option you chose. Reply {nums}, or type what to add or leave "
                                "out.", [q], "limit", auto=True, options_only=True,
-                               handoff={**{k: h[k] for k in ("kind", "limit", "choices", "failing_items", "resume")
-                                           if k in h},
+                               handoff={**{k: h[k] for k in ("kind", "limit", "choices", "failing_items", "resume",
+                                                             "drop_texts", "drop_named") if k in h},
                                         "reasked": True})
                 return
             if decision not in choices:
@@ -2005,14 +2063,29 @@ class J2Run:
         if limit and self.last_limit:
             self.last_limit["decision"] = decision
         gone = [crit[i - 1] for i in drops]
+        names = and_list(f"F-{self._no(c)} {short(c)}" for c in gone)
+        if limit and decision == "drop" and ONLY_PICK.fullmatch(answer) and "drop_texts" in h:
+            # The check: the items the option named are exactly the items dropped.
+            if sorted(gone) != sorted(named):
+                self._event("system", "drop_mismatch", f"named {named}, dropping {gone}")
+                gone, names = list(named), and_list(f"F-{self._no(c)} {short(c)}" for c in named)
+        if self.decisions and limit:
+            self.decisions[-1].update(named=h.get("drop_named") if decision == "drop" and "drop_texts" in h else [],
+                                      dropped=[f"F-{self._no(c)} {short(c)}" for c in gone])
         if gone:
+            # Code writes what was left out: Identity's own words could name different items than code drops.
+            r["to_requester"] = (f"Got it. We'll leave out {names}" + (f" and add {add} work credits" if add and
+                                                                       decision != "ship" else "")
+                                 + ". Everything else stays as it is.")
+            r["to_agents"] = (f"The Requester left out {names}; {'it is' if len(gone) == 1 else 'they are'} off the "
+                              "checklist now. Work on what's left.")
             g["done_when"] = [c for c in crit if c not in gone]
             g["dropped_by_requester"] = (g.get("dropped_by_requester") or []) + gone
             g["dropped_reasons"] = (g.get("dropped_reasons") or []) + [
                 {"criterion": c, "reason": f"The Requester chose to leave it out ({limit}): {answer}"} for c in gone]
             g["to_be_confirmed"] = [t for t in g["to_be_confirmed"] if t["criterion"] not in gone]
             self.save("goal.json", g)
-            self.post("system", f"Dropped from done-when on the Requester's decision: {'; '.join(gone)}.")
+            self.post("system", f"Left out on the Requester's decision: {names}.")
         if add and decision != "ship":
             self._raise_budget(add, f"the Requester's answer: {answer}")
         if decision == "ship":
@@ -2061,6 +2134,53 @@ class J2Run:
                       why=f"The Requester answered Identity: {answer}. Instruction: {r.get('instruction_to_adaptation')}"
                           + (f" Facts to put in: {json.dumps(confirmed, ensure_ascii=False)}" if confirmed else ""))
 
+    def _no(self, text):
+        """A checklist item's number for the whole run (charter_items): never renumbered after a drop; an item added
+        later gets the next number."""
+        g = self.goal if self.goal is not None else {}
+        orig = g.setdefault("charter_items", list(g.get("done_when") or []))
+        if text not in orig:
+            orig.append(text)
+        return orig.index(text) + 1
+
+    def _no_at(self, i):
+        """The run-long number of the item at current position i (None when there is no such item)."""
+        crit = (self.goal or {}).get("done_when") or []
+        return self._no(crit[as_int(i) - 1]) if 1 <= as_int(i) <= len(crit) else None
+
+    def _item_at(self):
+        """Run-long number -> current position in done_when."""
+        return {self._no(c): i for i, c in enumerate((self.goal or {}).get("done_when") or [], 1)}
+
+    def _item_status(self, text, gap):
+        """Audit's current status of an unfinished checklist item, in plain words."""
+        if gap_kind(gap) == "built but not checked yet":
+            return "built, not checked yet"
+        crit = (self.goal or {}).get("done_when") or []
+        st = {w["status"] for w in self.workflows if text in [crit[i - 1] for i in self._wf_items(w)]}
+        waiting = bool(st & {"registered", "held", "running", "failed"})     # funded work not built (yet)
+        if gap_kind(gap) == "not built yet":                                 # an unfinished workflow covers it
+            return "not built" if waiting else "unfunded"
+        return "built but failing" if "done" in st else "not built" if waiting else "unfunded"
+
+    def _gap_rows(self, gaps, last, left):
+        """The unfinished list as rows: name (F-n with the item's run-long number and its short text, or the rubric
+        id), Audit's status, and whether "leave out" drops it. The question, its options and the drop that code
+        applies are all made from these rows, so the message and the outcome can't disagree."""
+        crit = (self.goal or {}).get("done_when") or []
+        rubric = {r["criterion"]: r["id"] for r in (last or {}).get("rubric", [])}
+        rows = []
+        for g in gaps:
+            t = re.sub(r" \((?:not built yet|not checked yet)\)$", "", g)
+            if t in crit:
+                st = self._item_status(t, g)
+                rows.append({"name": f"F-{self._no(t)} {short(t)}", "text": t, "status": st,
+                             "drop": st != "built, not checked yet" and not (left and must_keep(t, self.goal))})
+            else:
+                rows.append({"name": f"{rubric[t]} {short(t)}" if t in rubric else t, "text": t, "status": "failing",
+                             "drop": False})
+        return rows
+
     def _identity_limit(self, h):
         """A safety limit was hit (budget, cycles, turns, the same failure twice in a row) or only the Requester can
         close what's left. Identity asks: keep working (adding budget if it ran out), drop the failing items, or ship
@@ -2089,18 +2209,20 @@ class J2Run:
             budget.append(add)
             choices.append("continue")
         crit = (self.goal or {}).get("done_when") or []
-        drop = [crit.index(t) + 1 for g in gaps if gap_kind(g) != "built but not checked yet"
-                for t in [re.sub(r" \(not built yet\)$", "", g)] if t in crit and not (left and must_keep(t, self.goal))]
-        if drop:
-            rest = len(gaps) - len(drop)
-            opts.append(f"Leave out the {len(drop)} unfinished checklist part{'s' if len(drop) > 1 else ''}: you get "
-                        "the site without them" + (f" (the other {rest} on the list "
-                        + ("stays as it is)" if rest == 1 else "stay as they are)") if rest else ""))
+        rows = self._gap_rows(gaps, last, left)
+        named = [r for r in rows if r["drop"]]
+        drop = [crit.index(r["text"]) + 1 for r in named]
+        shown = [f"{r['name']} ({r['status']})" for r in rows]      # the list under Identity's words
+        if named:
+            opts.append(f"Leave out {and_list(r['name'] for r in named)}: you get the site without "
+                        f"{'it' if len(named) == 1 else 'them'}."
+                        + "".join(f" {r['name']} stays as it is, {STILL[r['status']]}." for r in rows if not r["drop"]))
             budget.append(0)
             choices.append("drop")
         if self.sites:                    # finishing needs a site to finish
             opts.append("Finish as it is: you get the site as it is now" + (f", with {len(gaps)} thing"
-                        f"{'s' if len(gaps) > 1 else ''} still not right" if gaps else ""))
+                        f"{'s' if len(gaps) > 1 else ''} still not right: {and_list(r['name'] for r in rows)}"
+                        if gaps else ""))
             budget.append(0)
             choices.append("ship")
         if not self.sites and len(choices) < 2:
@@ -2130,7 +2252,7 @@ class J2Run:
                       f"{json.dumps(passed, ensure_ascii=False)}\nFUNDED, NOT BUILT OR NOT CHECKED YET (say the team "
                       f"will build these, never that the site has them): {json.dumps(funded, ensure_ascii=False)}\n"
                       f"LIMIT: {reason}\nWHAT IS STILL NOT RIGHT (code lists it after your words): "
-                      f"{json.dumps(gaps, ensure_ascii=False)}\nTHE QUESTION AND OPTIONS CODE WILL OFFER: "
+                      f"{json.dumps(shown, ensure_ascii=False)}\nTHE QUESTION AND OPTIONS CODE WILL OFFER: "
                       f"{json.dumps(q, ensure_ascii=False)}\nTell the Requester.",
                       lambda: json.dumps({"say": plain_missing}))
         say = r.get("say") or plain_missing
@@ -2144,15 +2266,17 @@ class J2Run:
                                       f"credits for the items left out: {json.dumps(left, ensure_ascii=False)}"}}
                                      if left else None)
         handoff = {"kind": "requester_answered", "limit": reason, "choices": choices, "resume": resume,
-                   "failing_items": drop, **({"after_ruling": True} if left and not h.get("at_audit") else {})}
+                   "failing_items": drop, "drop_texts": [r["text"] for r in named],
+                   "drop_named": [r["name"] for r in named],
+                   **({"after_ruling": True} if left and not h.get("at_audit") else {})}
         if len(choices) < 2:
             # Never a one-option question. The only lone option is "finish as it is" (with no site, "stop here" is
             # always added, and money is never added without asking): code applies it and says so.
             self.post("system", f"Only one option was possible ({opts[0]}), so it is applied without asking.")
             self.decisions.append({"kind": "limit", "asked": [q["question"]], "answer": "1", "only_option": True,
                                    "decision": "ship"})
-            return self._finish_only_option(reason, gaps, room, stale)
-        self._ask_user(say, [q], "limit", gaps=gaps, handoff=handoff)
+            return self._finish_only_option(reason, gaps, room, stale, shown)
+        self._ask_user(say, [q], "limit", gaps=shown, handoff=handoff)
 
     def _built_and_funded(self, last):
         """(done-when items the last Audit passed on the current site, items funded but not built or not checked)."""
@@ -2163,7 +2287,7 @@ class J2Run:
                   for i in self._wf_items(w) if crit[i - 1] not in passed]
         return passed, list(dict.fromkeys(funded))
 
-    def _finish_only_option(self, reason, gaps, room, stale):
+    def _finish_only_option(self, reason, gaps, room, stale, shown=None):
         """The decision question had one option, "finish as it is": code applies it and tells the Requester why
         (which limit was reached, which core items can't be paid for or left out) and what is still missing."""
         crit = (self.goal or {}).get("done_when") or []
@@ -2176,7 +2300,8 @@ class J2Run:
                 f"{'it is' if len(core) == 1 else 'they are'} core to your site." if core else ".")
         say = to_requester(why + (" So we're finishing the site as it is now." if self.sites else
                                   " So we're stopping here; nothing is built yet."), question=False)
-        self.post("identity", "@Requester " + say + gap_list(gaps), to_user=True, next="user", done=True, shaped=True)
+        self.post("identity", "@Requester " + say + gap_list(shown or gaps), to_user=True, next="user", done=True,
+                  shaped=True)
         self.outcome = self._ship_outcome(f"as the only option left ({reason})")
         self.turn = None
 
@@ -2246,7 +2371,7 @@ class J2Run:
         if fails and self.budget - self.spent < cheapest:
             # Not workable and nothing can be funded: only the Requester's decision moves it (runs/j2-20261008-123848
             # msgs 22 and 48: Identity offered money and "finish as is" in its own question; code applied neither).
-            return self._identity_limit({"reason": f"Out of budget: {self.budget - self.spent} of {self.budget} units "
+            return self._identity_limit({"reason": f"Out of budget: {self.budget - self.spent} of {self.budget} work credits "
                                                    "left, less than the cheapest rate-card part, and the site isn't "
                                                    "workable yet.", "out_of_budget": True})
 
@@ -2286,7 +2411,8 @@ class J2Run:
             return self._identity_limit({"reason": "Identity: the site can't be finished as asked without your "
                                                    "decision.", "budget_needed": as_int(r.get("budget_needed")) or None})
         questions = clean_questions(r.get("requester_questions"))
-        questions += [{"question": f"{x['needs_requester_fact']} (checklist item {x.get('item')}). If you can't give it "
+        questions += [{"question": f"{x['needs_requester_fact']} (checklist item {self._no_at(x.get('item'))}). If you "
+                                   "can't give it "
                                    "yet, say so and it's marked to be confirmed.", "options": []} for x in facts]
         if questions and (facts or r.get("needs_requester")):
             return self._ask_user(r.get("to_requester") or r.get("say", ""), questions, "fact",
@@ -2507,7 +2633,13 @@ class J2Run:
                   "section id or class name; expect: how many times it appears in index.html); element-count (target: "
                   "\"#id\" or \".class\"; expect: how many elements on the page match); named-test (target: page-parses, "
                   "links-resolve or form-has-submit; expect true); facts-present (target: a list of strings that must all "
-                  "appear on the page; expect true). Rules the validator enforces: each facts-present string is copied "
+                  "appear on the page; expect true); tap-targets (target: a section id or class; code measures every "
+                  "button, link and field inside it in a headless browser at 360px; expect: the minimum size in px, "
+                  "44). DESIGN RUBRIC: also add, as checks of these types, the rubric rules (R-1 to R-6) that apply to "
+                  "the atom's section: tap-targets on every section that holds buttons, links or form fields (R-6); "
+                  "element-count of the classes the style guide gives buttons and cards (j2-btn, j2-card) when the "
+                  "section uses them (R-1); links-resolve for navigation (R-5). Never add a rubric check code can't run "
+                  "(contrast, hierarchy, one main action): Audit checks those. Rules the validator enforces: each facts-present string is copied "
                   "exactly from the charter or the Requester's answers (it can't be found otherwise, so no invented "
                   "facts); prefer facts-present over counts for names, times, prices, numbers and emails. grep-count and "
                   "element-count may only target a section id or class name that your how.steps or constraints tells "
@@ -2540,7 +2672,7 @@ class J2Run:
             self.post("system", "Adaptation can't propose anything at this budget and nothing has changed since it said "
                                 "so, so it isn't asked again. Identity asks the Requester.")
             return self._handoff("identity", kind="limit", out_of_budget=True,
-                                 reason=f"Out of budget: {self.budget - self.spent} of {self.budget} units left, less "
+                                 reason=f"Out of budget: {self.budget - self.spent} of {self.budget} work credits left, less "
                                         "than the cheapest rate-card part, so Adaptation can propose nothing.")
         last = self.audits[-1] if self.audits else None
         fails = [{k: r.get(k) for k in ("id", "item", "criterion", "verdict", "note")}
@@ -3052,7 +3184,7 @@ class J2Run:
         if cost > remaining:
             need = cost - remaining
             q = {"question": f"Identity's ruling on {c['id']} costs {cost}, but only {remaining} is left. What should happen?",
-                 "options": [f"Add {need} units so the ruling is funded in full: {brief_list(table)}",
+                 "options": [f"Add {need} work credits so the ruling is funded in full: {brief_list(table)}",
                              f"Go with Priority's final answer ({dec.upper()}): {brief_list(wfs)}"]}
             c.update(user_question=q, escalated_to_user=True)
             self._save_conflicts()
@@ -3432,6 +3564,8 @@ class J2Run:
                                 "only the done-when items your workflow covers and fix only its findings; other items "
                                 "belong to other workflows. After you write it, code runs every check in your work atoms' "
                                 f"verification on the whole page ({MAX_CHECK_ATTEMPTS} attempts)." + style_task
+                                + "\nDESIGN RUBRIC (Audit checks every section against it; follow it):\n"
+                                + "\n".join(f"{rid} {txt}" for rid, txt in RUBRIC[:6])
                                 + (f"\nYOUR SECTION NOW (last written by {mine['owner']}):\n```head\n{mine['head']}\n```\n"
                                    f"```section\n{mine['body']}\n```" if mine else "")
                                 + (f"\nATTEMPT {attempt} OF {MAX_CHECK_ATTEMPTS}. CODE RAN YOUR CHECKS ON YOUR LAST "
@@ -3642,7 +3776,17 @@ class J2Run:
             if tbc:   # J2.g: a fact the Requester hasn't confirmed yet: this item is not met, whatever the page shows
                 row = {**row, "verdict": "TO_BE_CONFIRMED", "note": f"Waiting on the Requester: {tbc['fact']}. "
                                                                     f"(Audit's own note: {row.get('note') or 'none'})"}
+            # A finding is named after its item's run-long number (F-n is item n, also after drops); Audit's own id is
+            # kept as audit_id.
+            fid = f"F-{self._no(c)}"
+            row = {**row, "id": fid, **({"audit_id": row["id"]} if row["id"] not in (fid, f"F-missing-{n}") else {})}
             results.append({**row, "item": n, "criterion": c, "pass": row["verdict"] in ("PASS", "PASS_WITH_WARNING")})
+        used = {r["id"] for r in results}
+        for x in extras:                 # an extra issue never shares an id with a checklist item
+            if x["id"] in used:
+                x["audit_id"], x["id"] = x["id"], next(f"F-{k}" for k in range(len(g.get("charter_items") or crit) + 1,
+                                                                             10 ** 4) if f"F-{k}" not in used)
+            used.add(x["id"])
         return results, extras
 
     @staticmethod
@@ -3670,10 +3814,11 @@ class J2Run:
         """A code-written tally under Audit's message, so the chat and the report always agree."""
         by = {}
         for x in results:
-            by.setdefault(x["verdict"], []).append(x["id"] if x.get("rubric") else f"{x['id']} item {x['item']}")
+            by.setdefault(x["verdict"], []).append(x["id"])       # F-n names item n (run-long numbers)
         parts = [f"{len(v)} {k}" + ("" if k == "PASS" else f" ({', '.join(v)})") for k, v in by.items()]
         return (f"Findings (code tally): {'; '.join(parts)}"
-                + (f"; extra issues: {', '.join(x['id'] + ' ' + x['verdict'] for x in extras)}" if extras else "") + ".")
+                + (f"; extra issues: {', '.join(x['id'] + ' ' + x['verdict'] + ' (' + short(x.get('criterion') or x.get('note') or 'no description', 10) + ')' for x in extras)}"
+                   if extras else "") + ".")
 
     def _turn_audit(self, h):
         if h.get("kind") == "dispute":

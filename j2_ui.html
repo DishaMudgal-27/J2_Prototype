@@ -270,7 +270,7 @@ function addMsg(m){
   if (m.workable !== undefined) t += `<span class="tag ${m.workable?"ok":"bad"}">${m.workable?"workable":"not workable"}</span>`;
   if (m.stamp === true) t += `<span class="tag ok">charter valid</span>`;
   if (m.stamp === false) t += `<span class="tag bad">charter rejected</span>`;
-  if (m.proposal) t += `<span class="tag">proposes ${m.proposal.length} workflow(s) · ${m.proposal.reduce((a,w)=>a+(+w.cost||0),0)} units</span>`;
+  if (m.proposal) t += `<span class="tag">proposes ${m.proposal.length} workflow(s) · ${m.proposal.reduce((a,w)=>a+(+w.cost||0),0)} work credits</span>`;
   if (m.decision && m.who === "priority") t += `<span class="tag ${m.decision==="grant"?"ok":"bad"}">${m.decision.toUpperCase()} · ${m.exchange==="ruling"?"after ruling":"exchange "+m.exchange+"/4"}</span>`;
   if (m.accept !== undefined) t += `<span class="tag ${m.accept?"ok":"bad"}">${m.accept?"accepts":"pushes back"} · exchange ${m.exchange}/4</span>`;
   if (m.conflict) t += `<span class="tag bad">${m.conflict}${m.decision === true ? " · ruling" : ""}</span>`;
@@ -353,7 +353,7 @@ function renderWorkflows(s){
     <td>${w.cost}${w.charged === false ? '<br><span class="empty">released</span>' : ""}</td>
     <td>${envCell(w)}</td><td>${w.cycle}</td><td><span class="pill ${w.status}">${w.status}</span></td></tr>
     <tr><td colspan="7"><details data-key="wf-${esc(w.id)}"><summary>Open ${esc(w.id)}: ${(w.atoms || []).length} work atom(s)</summary>${atomCards(s, w)}</details></td></tr>`).join("");
-  return `<h3>Budget: ${s.spent} of ${s.budget} units used</h3><div class="bar"><i style="width:${pct}%"></i></div>
+  return `<h3>Budget: ${s.spent} of ${s.budget} work credits used</h3><div class="bar"><i style="width:${pct}%"></i></div>
     ${rows ? `<table><tr><th>ID</th><th>Agent</th><th>Workflow</th><th>Charged</th><th>Limits</th><th>Cycle</th><th>Status</th></tr>${rows}</table>`
       : `<p class="empty">Nothing registered yet. Adaptation proposes, Priority answers, the validator registers what's agreed.</p>`}`;
 }
@@ -445,7 +445,7 @@ async function openDetail(id){
     + `<h3>Cost of this step</h3><dl><dt>AI calls</dt><dd>${calls.length}</dd>
       <dt>tokens</dt><dd>${tokIn === null ? `not reported${state.mock ? " (mock mode)" : " by this provider"}; ${calls.reduce((a, c) => a + c.chars.prompt + c.chars.reply, 0).toLocaleString()} characters in and out` : `${tokIn.toLocaleString()} in · ${tokOut.toLocaleString()} out`}</dd>
       <dt>time</dt><dd>${calls.length ? sum("seconds").toFixed(1) + " s" : "instant (code)"}</dd>
-      <dt>budget units charged</dt><dd>${charged}${m.workflow_cost ? ` · this workflow costs ${m.workflow_cost} (charged at registration)` : ""}</dd></dl>`;
+      <dt>work credits charged</dt><dd>${charged}${m.workflow_cost ? ` · this workflow costs ${m.workflow_cost} (charged at registration)` : ""}</dd></dl>`;
   if (!$("detail").open) $("detail").showModal();
   const f = $("full");
   if (f) f.addEventListener("toggle", async () => { if (!f.open || $("fulltext").dataset.ok) return;
@@ -500,7 +500,7 @@ function renderLessons(s){
 // Order matters: specific phrases first, then names and words. Internals become plain words; nothing is invented.
 const AGENT = "(?:Identity|Adaptation|Priority|Coordination|Validator|W-\\d+(?: Builder)?|Builder)";
 const PLAIN = [[/@[\w-]+[,:]?/g, ""], [/\(?\bJ2(?:\.[a-h]|_[A-Z_]+(?:=\S*)?)?\)?/g, ""], [/\bClause:\s*/g, ""],
-  [/\s+(?:on|in|for|of) [CFW]-\d+\b/g, ""], [/\b[CF]-\d+\b/g, ""],
+  [/\s+(?:on|in|for|of) [CFW]-\d+\b/g, ""], [/\bF-(\d+)\b/g, "item $1"], [/\bC-\d+\b/g, ""],
   [/\b[Tt]he Requester\b/g, "you"], [/\bRequester's\b/g, "your"], [/\bRequester\b/g, "you"],
   [/\bCOUNTER\b/g, "a smaller offer"], [/\bGRANT\b/g, "a yes"], [/\bREFUSE\b/g, "a no"],
   [/\bover (?:the )?budget\b/gi, "more than planned"], [/\bout of budget\b/gi, "out of planned effort"],
