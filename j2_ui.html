@@ -30,6 +30,9 @@ button{font:500 13px var(--body);cursor:pointer}
 .steps{display:flex;gap:4px;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--line);overflow-x:auto}
 .st{flex:1;min-width:120px;padding:6px 8px;border-radius:7px;background:var(--panel2);font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:baseline}
 .st b{font:700 13px var(--display);white-space:nowrap}
+.code{font:500 11px var(--mono);color:var(--muted);white-space:nowrap}.st.on .code{color:var(--on);opacity:.75}
+.atom{border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:6px 0;background:var(--panel)}
+.atom>summary{cursor:pointer}.atom h4{margin:8px 0 2px;font-size:12.5px}.atom p{margin:0 0 4px}
 .st.on{background:var(--accent);color:var(--on)}
 .st.past{color:var(--ink)}
 main{flex:1;display:grid;grid-template-columns:minmax(320px,1fr) 250px minmax(0,1.3fr);min-height:0}
@@ -88,7 +91,7 @@ dt{font:500 12px var(--mono);color:var(--muted);padding-top:2px}dd{margin:0}
 .tline{display:flex;gap:4px;overflow-x:auto;padding:6px 0 12px;align-items:stretch}
 .chip{flex:0 0 auto;border:1px solid var(--line);border-top:4px solid var(--c);background:var(--panel);color:var(--ink);border-radius:6px;padding:4px 7px;font-size:11.5px;text-align:left;max-width:180px}
 .chip b{color:var(--c);display:block;font-size:12px}.chip span{color:var(--muted)}
-.mark{flex:0 0 auto;align-self:center;font:700 12px var(--display);color:var(--on);background:var(--accent);border-radius:5px;padding:3px 6px}
+.mark{flex:0 0 auto;align-self:center;font:500 11px var(--mono);color:var(--muted);background:var(--panel2);border-radius:5px;padding:3px 6px}
 .msg:not(.user) .bubble{cursor:pointer}.msg:not(.user) .bubble:hover{border-color:var(--c)}
 dialog{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);width:min(760px,calc(100vw - 32px));max-height:86vh;padding:0}
 dialog::backdrop{background:rgb(0 0 0 / .35)}
@@ -239,19 +242,22 @@ const EXAMPLES = ["A website for my cafe", "A website for Sweet Crumbs Bakery in
   "A website for Petal & Stem, a florist in Jaipur: bouquets, same-day delivery, wedding flowers",
   "A website for Asha Rao Photography, a wedding and portrait photographer in Mumbai: portfolio, packages, booking"];
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const md = s => esc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/@(\w+)/g,"<b>@$1</b>");
+// Detailed view wording: plain names for J2 terms; the J2 step codes stay, in small grey text.
+const dv = t => String(t ?? "").replace(/\benvelope's\b/gi, "limits'").replace(/\benvelopes?\b/gi, "limits")
+  .replace(/\bdone[-_ ]when list\b/gi, "checklist").replace(/\bdone[-_ ]when\b/gi, "checklist");
+const md = s => esc(dv(s)).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/@(\w+)/g,"<b>@$1</b>");
 let seen = 0, state = null, versions = 0, allChat = [], viewRun = new URLSearchParams(location.search).get("run") || "";
 const runQ = () => viewRun ? "&run=" + encodeURIComponent(viewRun) : "";
 
 function addMsg(m){
   const el = document.createElement("div");
   if (m.who === "system"){ el.className = "sys"; if (m.test) el.style.cssText = "color:var(--bad);font-weight:700";
-    el.textContent = m.text; $("msgs").appendChild(el); return; }
+    el.textContent = dv(m.text); $("msgs").appendChild(el); return; }
   el.className = "msg " + m.who + (m.to_user ? " touser" : ""); el.style.setProperty("--c", col(m.who)); el.dataset.id = m.id;
   let t = "";
   if (m.act) t += `<span class="tag ${m.act==="PARK"||m.act==="DISPUTE"?"bad":m.act==="LESSON"?"ok":""}">${m.act}</span>`;
   if (m.auto) t += `<span class="tag">by code, no AI call</span>`;
-  if (m.envelope) t += `<span class="tag ${m.envelope==="allowed"?"ok":"bad"}">envelope: ${m.envelope}</span>`;
+  if (m.envelope) t += `<span class="tag ${m.envelope==="allowed"?"ok":"bad"}">limits: ${m.envelope}</span>`;
   if (m.attempt) t += `<span class="tag ${m.agree?"ok":"bad"}">${m.agree?"agrees":"holds position"} · attempt ${m.attempt}/4</span>`;
   if (m.audience) t += `<span class="tag aud">for ${esc(m.audience === "user" ? "Requester (you)" : who(m.audience)[0])}</span>`;
   else if (m.next && !m.to_user) t += `<span class="tag">→ ${esc(who(m.next)[0])}</span>`;
@@ -271,7 +277,7 @@ function addMsg(m){
   if (m.forced_test) t += `<span class="tag bad">TEST: item ${m.forced_test} forced to fail, not a real finding</span>`;
   if (m.check) t += `<span class="tag ${m.ok?"ok":"bad"}">charter check: ${m.ok?"ok":"issues"}</span>`;
   if (m.schedule) t += `<span class="tag">schedule: ${m.schedule.join(" → ")}</span>`;
-  if (m.done !== undefined) t += `<span class="tag ${m.done?"ok":"bad"}">${m.done?"done-when holds":"not done"}</span>`;
+  if (m.done !== undefined) t += `<span class="tag ${m.done?"ok":"bad"}">${m.done?"checklist holds":"not done"}</span>`;
   if (m.register === true) t += `<span class="tag ok">registered</span>`;
   if (m.register === false) t += `<span class="tag bad">rejected</span>`;
   if (m.version) t += `<span class="tag">site v${m.version}</span>`;
@@ -282,7 +288,7 @@ function addMsg(m){
 }
 function renderSteps(s){
   $("steps").innerHTML = Object.entries(s.steps).map(([n,l]) =>
-    `<div class="st ${+n===s.step?"on":(+n<s.step?"past":"")}"><b>${esc(l.split(" ")[0])}</b>${esc(l.split(" ").slice(1).join(" "))}</div>`).join("");
+    `<div class="st ${+n===s.step?"on":(+n<s.step?"past":"")}"><small class="code">${esc(l.split(" ")[0])}</small>${esc(dv(l.split(" ").slice(1).join(" ")))}</div>`).join("");
 }
 function renderGoal(s){
   const g = s.goal;
@@ -290,7 +296,7 @@ function renderGoal(s){
   return `<h3>${esc(g.site_name || "Goal")} ${s.stamped ? '<span class="pill done">validated</span>' : ""}</h3>
     <dl><dt>goal</dt><dd>${esc(g.statement)}</dd><dt>audience</dt><dd>${esc(g.audience)}</dd>
     <dt>standards</dt><dd>${(g.standards||[]).map(esc).join("<br>")}</dd><dt>rules</dt><dd>${(g.rules||[]).map(esc).join("<br>")}</dd>
-    <dt>done when</dt><dd>${(g.done_when||[]).map(esc).join("<br>")}</dd>
+    <dt>checklist</dt><dd>${(g.done_when||[]).map(esc).join("<br>")}</dd>
     ${(g.to_be_confirmed||[]).length ? `<dt>to be confirmed</dt><dd class="fail">${g.to_be_confirmed.map(t => esc(t.criterion + ": " + t.fact)).join("<br>")}<br><span class="empty">These items are not met until you confirm the fact.</span></dd>` : ""}
     ${(g.confirmed_facts||[]).length ? `<dt>confirmed by you</dt><dd>${g.confirmed_facts.map(t => esc(t.criterion + ": " + t.fact)).join("<br>")}</dd>` : ""}
     ${(g.dropped_by_requester||[]).length ? `<dt>dropped by you</dt><dd>${g.dropped_by_requester.map(esc).join("<br>")}</dd>` : ""}</dl>`;
@@ -299,15 +305,51 @@ function envCell(w){
   const e = w.envelope; if (!e) return '<span class="empty">none</span>';
   return `money ${e.money_limit} · calls ${w.calls_used||0}/${e.model_call_limit} · retries ${w.retries_used||0}/${e.retry_limit}`
     + (e.time_limit_minutes != null ? ` · ${e.time_limit_minutes} min` : "")
-    + (e.stop_loss ? `<br><span class="empty">stop-loss: ${esc(e.stop_loss)}</span>` : "");
+    + (e.stop_loss ? `<br><span class="empty">stop-loss: ${esc(dv(e.stop_loss))}</span>` : "");
+}
+// A work atom: five rows, each one plain sentence, then its own Run details (only the AI calls tagged with its id).
+const ATOM_ROWS = [["goal", "Goal", "What must be true when this is done"], ["constraints", "Constraints", "What must never break"],
+  ["context", "Context", "What it needs to know"], ["how", "How", "Who builds it"],
+  ["verification", "Verification", "The check that proves the goal is met"]];
+const sentence = t => { t = dv(t).trim(); return t && !/[.!?]$/.test(t) ? t + "." : t; };
+const words = v => (Array.isArray(v) ? v : [v]).filter(Boolean).map(x => typeof x === "string" ? x : Object.values(x).join(" ")).join("; ");
+function atomRow(a, k, w){
+  const v = a[k];
+  if (k === "goal") return esc(sentence(words(v)));
+  if (k === "constraints") return esc(sentence("Never break: " + words(v)));
+  if (k === "context") return esc(sentence("Uses " + words(v)));
+  if (k === "how") return esc(sentence((v && v.kind === "code" ? "Code builds it" : "AI builds it")
+    + (v && v.agent ? ": " + (v.kind !== "code" && /^builder$/i.test(v.agent) && w.agent ? w.agent : v.agent) : "")));
+  return (Array.isArray(v) ? v : []).map(c => `${esc(sentence(typeof c === "string" ? c : c.text))} <span class="empty">(written by Adaptation, not run by code yet)</span>`).join("<br>");
+}
+function runDetails(s, a, w){
+  const calls = s.call_log.filter(c => c.atom === a.id), none = '<p class="empty">No AI call yet.</p>';
+  const each = (f, raw) => calls.length ? calls.map(c => `<p><span class="code">call ${c.id}</span> ${esc(raw ? f(c) : dv(f(c)))}</p>`).join("") : none;
+  const tok = calls.some(c => c.tokens) ? calls.reduce((n, c) => n + ((c.tokens || {}).input || 0) + ((c.tokens || {}).output || 0), 0) + " tokens"
+    : calls.reduce((n, c) => n + c.chars.prompt + c.chars.reply, 0).toLocaleString() + " characters in and out";
+  return `<details data-key="run-${esc(a.id)}"><summary>Run details</summary>
+    <h4>Prompt sent</h4>${each(c => c.inputs.map(([k, v]) => k + ": " + v).join(" · "), true)}
+    <h4>Reply received</h4>${each(c => c.reply ? [c.reply.say, c.reply.check].filter(Boolean).join(" · ") : "No usable reply.")}
+    <h4>Reason given</h4>${each(c => c.reason || "No reason given in the reply.")}
+    <h4>Cost</h4>${calls.length ? `<p>${calls.length} AI call(s) · ${tok} · ${calls.reduce((n, c) => n + (c.seconds || 0), 0).toFixed(1)} s</p>` : none}
+    <h4>Attempts</h4><p>${calls.length} attempt(s), ${w.retries_used || 0} retry(ies) after an unusable reply.</p></details>`;
+}
+function atomCards(s, w){
+  const atoms = w.atoms || [];
+  if (!atoms.length) return '<p class="empty">No work atoms: registered before work atoms existed.</p>';
+  return atoms.map((a, i) => `<details class="atom" data-key="atom-${esc(a.id)}"${atoms.length === 1 ? " open" : ""}>
+    <summary><b>Work atom ${i + 1}</b> <span class="code">${esc(a.id)}</span> · ${esc(dv(words(a.goal)))} <span class="empty">· ${(a.verification || []).length} check(s), not run by code yet</span></summary>
+    <dl>${ATOM_ROWS.map(([k, label, gloss]) => `<dt>${label}<br><span class="empty">${gloss}</span></dt><dd>${atomRow(a, k, w)}</dd>`).join("")}</dl>
+    ${runDetails(s, a, w)}</details>`).join("");
 }
 function renderWorkflows(s){
   const pct = Math.min(100, s.spent / s.budget * 100);
-  const rows = s.workflows.map(w => `<tr><td>${w.id}</td><td style="color:${col(w.id)}"><b>${esc(w.agent || who(w.id)[0])}</b><br><span class="empty">section ${esc(w.section || "")}${w.revises ? " (rewrites " + esc(w.revises) + "'s)" : ""}</span></td><td>${esc(w.name)}<br><span class="empty">${esc(w.purpose)}</span></td>
+  const rows = s.workflows.map(w => `<tr><td>${w.id}</td><td style="color:${col(w.id)}"><b>${esc(w.agent || who(w.id)[0])}</b><br><span class="empty">section ${esc(w.section || "")}${w.revises ? " (rewrites " + esc(w.revises) + "'s)" : ""}</span></td><td>${esc(dv(w.name))}<br><span class="empty">${esc(dv(w.purpose))}</span></td>
     <td>${w.cost}${w.charged === false ? '<br><span class="empty">released</span>' : ""}</td>
-    <td>${envCell(w)}</td><td>${w.cycle}</td><td><span class="pill ${w.status}">${w.status}</span></td></tr>`).join("");
+    <td>${envCell(w)}</td><td>${w.cycle}</td><td><span class="pill ${w.status}">${w.status}</span></td></tr>
+    <tr><td colspan="7"><details data-key="wf-${esc(w.id)}"><summary>Open ${esc(w.id)}: ${(w.atoms || []).length} work atom(s)</summary>${atomCards(s, w)}</details></td></tr>`).join("");
   return `<h3>Budget: ${s.spent} of ${s.budget} units used</h3><div class="bar"><i style="width:${pct}%"></i></div>
-    ${rows ? `<table><tr><th>ID</th><th>Agent</th><th>Workflow</th><th>Charged</th><th>Envelope</th><th>Cycle</th><th>Status</th></tr>${rows}</table>`
+    ${rows ? `<table><tr><th>ID</th><th>Agent</th><th>Workflow</th><th>Charged</th><th>Limits</th><th>Cycle</th><th>Status</th></tr>${rows}</table>`
       : `<p class="empty">Nothing registered yet. Adaptation proposes, Priority answers, the validator registers what's agreed.</p>`}`;
 }
 function renderConflicts(s){
@@ -332,7 +374,7 @@ function renderConflicts(s){
     <table><tr><th>#</th><th>Who</th><th>Message</th><th>Position</th></tr>${tries}</table>`; }).join("");
 }
 function renderAudit(s){
-  if (!s.audits.length) return `<p class="empty">Audit checks the site against Identity's "done when" list after each cycle.</p>`;
+  if (!s.audits.length) return `<p class="empty">Audit checks the site against Identity's checklist after each cycle.</p>`;
   const wk = s.workable ? (s.workable.length ? `<h3 class="fail">Not workable yet (checked by code)</h3><ul>${s.workable.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`
     : `<h3 class="pass">Workable (checked by code)</h3>`) : "";
   return wk + s.audits.slice().reverse().map(a => `<h3>Cycle ${a.cycle} · site v${a.version} · ${a.all_pass ? '<span class="pass">all pass</span>' : '<span class="fail">failing</span>'}</h3>
@@ -343,7 +385,7 @@ function renderAudit(s){
     ${a.screenshot ? `<details data-key="shot-v${a.version}"><summary>Screenshot Audit looked at (360px left, 1280px right)</summary><img alt="Site v${a.version} at 360px and 1280px" style="max-width:100%;border:1px solid var(--line)" src="/shot/${a.version}${runQ().replace("&", "?")}"></details>` : ""}`).join("");
 }
 const ROLE = {identity:"J2.a charter, J2.d rulings, J2.h workable?", adaptation:"J2.b proposes, disputes, saves lessons",
-  priority:"J2.c prices, checks run envelopes", coordination:"J2.f schedules, holds the write lock", audit:"J2.g checks the site",
+  priority:"J2.c prices, checks run limits", coordination:"J2.f schedules, holds the write lock", audit:"J2.g checks the site",
   validator:"J2.e code: checks and registers workflows"};
 const stepTag = (s, n) => s.steps[n] ? s.steps[n].split(" ")[0] : "";
 function renderLanes(s){
@@ -358,7 +400,7 @@ function renderLanes(s){
 function decided(m){
   if (m.decision && m.who === "priority") return String(m.decision).toUpperCase();
   if (m.act) return m.act;
-  if (m.envelope) return "envelope " + m.envelope;
+  if (m.envelope) return "limits " + m.envelope;
   if (m.register !== undefined) return m.register ? "registered" : "rejected";
   if (m.stamp !== undefined) return m.stamp ? "charter valid" : "charter rejected";
   if (m.audit !== undefined) return m.workable ? "workable" : m.audit ? "all pass" : "findings";
@@ -390,7 +432,7 @@ async function openDetail(id){
   const reply = last && last.reply ? Object.fromEntries(Object.entries(last.reply).filter(([k]) => k !== "say")) : null;
   $("dtitle").innerHTML = `<span style="color:${col(m.who)}">${esc(who(m.who)[0])}</span> · message ${m.id} · ${esc(state.steps[m.step] || "")}`;
   $("dbody").innerHTML = `<p>${md(m.text)}</p>`
-    + (calls.length ? `<h3>What it read</h3><dl>${last.inputs.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
+    + (calls.length ? `<h3>What it read</h3><dl>${last.inputs.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(dv(v))}</dd>`).join("")}</dl>
       <details id="full"><summary>Full text of what it was given (${calls.length > 1 ? "last of " + calls.length + " calls, " : ""}${last.chars.prompt.toLocaleString()} characters)</summary><pre id="fulltext">Loading…</pre></details>
       <h3>What it decided</h3><p><b>${esc(decided(m) || "see reply")}</b></p>${reply ? `<pre>${esc(JSON.stringify(reply, null, 2))}</pre>` : ""}
       <h3>Why</h3><p>${esc(last.reason || "No reason given in the reply.")}</p>`

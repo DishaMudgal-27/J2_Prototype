@@ -239,6 +239,34 @@ def norm(wfs):
     return out
 
 
+ATOM_FIELDS = ("goal", "constraints", "context", "how", "verification")
+
+
+def atom_missing(w):
+    """J2.e's work-atom check: every field each atom lacks, by name ("atoms" when the workflow has none). An empty
+    verification list counts as missing."""
+    atoms = w.get("atoms")
+    if not isinstance(atoms, list) or not atoms:
+        return ["atoms"]
+    return [f"{f} in work atom {n}" for n, a in enumerate(atoms, 1) for f in ATOM_FIELDS
+            if not (isinstance(a, dict) and a.get(f))]
+
+
+def mock_atom(w):
+    """The work atom the mock Adaptation (and code's cheapest-fit proposal) writes for a workflow."""
+    return {"goal": w.get("completion_check") or w.get("goal_gap") or w.get("name") or "The workflow's change is live",
+            "constraints": ["Other workflows' sections stay unchanged", "The page loads with no console errors"],
+            "context": [f"charter item {i}" for i in w.get("covers") or []] + [f"finding {f}" for f in w.get("fixes") or []]
+            + ([f"section {w['revises']}"] if w.get("revises") else []) or ["charter goal"],
+            "how": {"kind": "AI", "agent": "Builder"},
+            "verification": [{"text": "The site file index.html exists after the build.", "type": "file-exists",
+                              "target": "index.html", "expect": True}]}
+
+
+def with_atoms(wfs):
+    return [{**w, "atoms": w.get("atoms") or [mock_atom(w)]} if isinstance(w, dict) else w for w in wfs or []]
+
+
 def key(name):
     s = str(name or "").strip().lstrip("@").strip().lower()
     s = s.split()[0] if s else ""
@@ -829,6 +857,7 @@ class J2Run:
         self.idle_cycles, self.cycle_registered = 0, True
         self.status, self.thinking, self.error, self.done = "idle", None, None, False
         self.feedback = None
+        self.atom, self.proposed_atoms = None, {}        # atom id of the build call in progress; atoms by workflow name
         self.turn, self.handoff, self.outcome = None, {}, None
         self.paused = None          # {"kind", "questions", "to", "handoff", "msg"} while the run waits on the Requester
         self.intake, self.decisions = [], []   # J2.a question rounds; every Requester answer to Identity
@@ -1138,7 +1167,8 @@ class J2Run:
                "chars": {"prompt": len(system) + len(user), "reply": len(raw)},
                "inputs": self._inputs(fn, task),
                "reply": {k: v for k, v in reply.items() if k != "reason"} if isinstance(reply, dict) else None,
-               "reason": reply.get("reason") if isinstance(reply, dict) else None}
+               "reason": reply.get("reason") if isinstance(reply, dict) else None,
+               **({"atom": self.atom} if self.atom else {})}
         self.call_log.append(rec)
         self.pending_calls.setdefault(fn, []).append(rec["id"])
         os.makedirs(self.dir, exist_ok=True)
@@ -2292,7 +2322,17 @@ class J2Run:
               '"covers": [int] (the done-when item numbers this workflow builds), "fixes": [str] (the Audit finding ids '
               'it fixes, e.g. "F-3", "R-6"), '
               '"revises": str|null (registered workflow id whose site section this one rewrites; null adds a new '
-              'section), "estimated_resources": {"money": int, "calls": int, "time_minutes": int}}]')
+              'section), "estimated_resources": {"money": int, "calls": int, "time_minutes": int}, '
+              '"atoms": [{"id": str, "goal": str, "constraints": [str], "context": [str], "how": {"kind": "AI"|"code", '
+              '"agent": str}, "verification": [{"text": str, "type": "file-exists"|"grep-count"|"named-test", '
+              '"target": str, "expect": int|bool|str}]}]}]')
+    ATOM_RULES = ("\nWORK ATOMS: every workflow, fixes included, carries atoms: exactly one work atom for now, id \"a1\" "
+                  "(code renames it W-n.a1 at registration). goal: what must be true when it is done, one sentence. "
+                  "constraints: short strings, what must never break. context: references only, charter item numbers "
+                  "and section ids (e.g. \"charter item 3\", \"section W-2\"), never copied text. how: {kind: \"AI\" or "
+                  "\"code\", agent: who builds it}. verification: at least one check, each {text: the check in plain "
+                  "words, type: file-exists | grep-count | named-test, target: the file, pattern or test name, expect: "
+                  "the expected result}. The validator rejects a workflow whose atom lacks any of these fields.")
 
     GRANT_FMT = WF_FMT[:-2] + (', "envelope": {"money_limit": int, "model_call_limit": int, "time_limit_minutes": int, '
                                '"retry_limit": int, "stop_loss": str}}]')
@@ -2399,6 +2439,7 @@ class J2Run:
 
         def mock():
             r = json.loads(mock_plain())
+            r["workflows"] = with_atoms(r.get("workflows"))
             if r.get("act") == "PROPOSE" and not self.workflows and sum(item_min(c) for c in crit) > self.budget - self.spent:
                 r = self._cheapest_fit()                         # the charter costs more than the budget left
             if offered and r.get("act") == "PROPOSE":
@@ -2448,7 +2489,7 @@ class J2Run:
                       + "\nPriority decides what gets funded, never you: don't judge affordability and never ask about "
                       "budget, cost or cutting. When the done-when items cost more than the budget left, still PROPOSE "
                       "the best set that fits and list each item you leave out in left_out with its reason. Never leave "
-                      f"out these items (the no-errors check and the brief's core facts): {keep}.")
+                      f"out these items (the no-errors check and the brief's core facts): {keep}." + self.ATOM_RULES)
         r = self.call("adaptation", fmt, task, mock)
         if self._budget_question(r):
             # Affordability is Priority's call (J2.c): a budget question is rejected, asked once more, then replaced.
@@ -2461,6 +2502,7 @@ class J2Run:
                 r = self._cheapest_fit()
                 self.post("system", "Adaptation asked about budget again, so code proposes the cheapest done-when "
                                     "items that fit the budget left.")
+        r = self._atoms_checked(r, fmt, task, mock)
         act = str(r.get("act", "")).upper()
         note = None
         if act == "DISPUTE":
@@ -2527,6 +2569,23 @@ class J2Run:
         self.bargain = {"start": time.time(), "calls": self.calls}      # J2.c starts: hops, minutes, spend
         self._handoff("priority", kind="proposal", table=wfs)
 
+    def _atoms_checked(self, r, fmt, task, mock):
+        """J2.e's work-atom check on Adaptation's workflows: one whose atom lacks a field is rejected with the field
+        named and Adaptation gets one retry; what is still incomplete after it is dropped from the proposal."""
+        for retry in (True, False):
+            bad = {w.get("name") or "?": m for w in norm(r.get("workflows")) if (m := atom_missing(w))}
+            if not bad:
+                break
+            why = [self._reject(n, "missing " + ", ".join(m)) for n, m in bad.items()]
+            if retry:
+                r = self.call("adaptation", fmt, task + "\nTHE VALIDATOR REJECTED: " + "; ".join(why) + ". Send your "
+                              "reply again with every field of every work atom filled in.", mock)
+            else:
+                r = {**r, "workflows": [w for w in norm(r.get("workflows")) if not atom_missing(w)]}
+        for w in norm(r.get("workflows")):
+            self.proposed_atoms[w.get("name")] = w["atoms"]
+        return r
+
     def _budget_question(self, r):
         return str(r.get("act", "")).upper() == "POLICY_QUESTION" and \
             bool(BUDGET_TALK.search(f"{r.get('question') or ''} {r.get('say') or ''}"))
@@ -2550,6 +2609,7 @@ class J2Run:
             first = not self.sites and not self.workflows and not wfs     # the first workflow lays out the page
             wfs.append({"name": f"{'Scaffold and item' if first else 'Build item'} {i}", "goal_gap": c,
                         "parts": [item_kind(c)], "covers": [i], "outputs": ["index.html"], "completion_check": c})
+        wfs = with_atoms(wfs)
         say = f"@Priority The cheapest done-when items that fit the {self.budget - self.spent} left: " + \
             (", ".join(w["name"] for w in wfs) or "none") + "." + \
             (f" Left out: items {', '.join(str(x['item']) for x in out)}." if out else "")
@@ -2611,15 +2671,18 @@ class J2Run:
                 say = ("@Priority The stories are what make a small cafe feel warm and personal. I can shrink them to "
                        "two (20)." if self.exchanges == 1 else
                        "@Priority Without any content beyond listings the page feels empty. I can't accept zero.")
-                return json.dumps({"say": say, "act": "REVISE", "workflows": offer + [stories], "next": "Priority"})
+                return json.dumps({"say": say, "act": "REVISE", "workflows": with_atoms(offer + [stories]),
+                                   "next": "Priority"})
             return json.dumps({"say": "@Priority Accepted.", "act": "ACCEPT", "workflows": [], "next": "Priority"})
-        r = self.call("adaptation", '{"say": str, "act": "ACCEPT"|"REVISE"|"PARK", "workflows": ' + self.WF_FMT
-                      + ' (your revision, for REVISE), ' + next_field(("priority", "identity"), "Priority to answer "
-                      "your revision; Identity only for a policy question") + "}",
-                      f"PRIORITY'S DECISION: {dec.upper()}\nPRIORITY OFFERS: {json.dumps(offer)}\nACCEPT only if the "
-                      "offer is non-empty and still closes the gap. After a REFUSE you must REVISE (reshape it: a smaller "
-                      "or different proposal) or PARK it (drop it for now). Exchange "
-                      f"{self.exchanges + 1} of {MAX_ATTEMPTS}; after that Identity rules on both final positions.", mock)
+        fmt = ('{"say": str, "act": "ACCEPT"|"REVISE"|"PARK", "workflows": ' + self.WF_FMT
+               + ' (your revision, for REVISE), ' + next_field(("priority", "identity"), "Priority to answer "
+               "your revision; Identity only for a policy question") + "}")
+        task = (f"PRIORITY'S DECISION: {dec.upper()}\nPRIORITY OFFERS: {json.dumps(offer)}\nACCEPT only if the "
+                "offer is non-empty and still closes the gap. After a REFUSE you must REVISE (reshape it: a smaller "
+                "or different proposal) or PARK it (drop it for now). Exchange "
+                f"{self.exchanges + 1} of {MAX_ATTEMPTS}; after that Identity rules on both final positions."
+                + self.ATOM_RULES)
+        r = self._atoms_checked(self.call("adaptation", fmt, task, mock), fmt, task, mock)
         act, wfs = str(r.get("act") or "").upper(), norm(r.get("workflows"))
         act = "PARK" if act == "WITHDRAW" else act
         if act not in ("ACCEPT", "REVISE", "PARK"):
@@ -2886,9 +2949,12 @@ class J2Run:
         for w in norm(agreed):
             c, name = granted(w), w.get("name") or "?"
             missing = [f for f in self.REQUIRED if not (w.get(f) or (f == "goal_gap" and w.get("purpose")))]
+            atoms = w.get("atoms") or self.proposed_atoms.get(name)     # Priority or a ruling may drop them
+            no_atom = atom_missing({"atoms": atoms})
             rc, unknown = price(w)
             reason = ("a check or report on the site is Audit's job, not a workflow" if self.CHECK_WORK.search(str(name))
                       else f"required field(s) missing: {', '.join(missing)}" if missing
+                      else f"missing {', '.join(no_atom)}" if no_atom
                       else f"{self.p_refused[name]}, so it can't be registered" if name in self.p_refused
                       else "no rate-card parts, so it has no price" if RATES and rc is None
                       else f"unknown rate-card parts {unknown}; allowed: {', '.join(RATES)}" if unknown
@@ -2916,6 +2982,7 @@ class J2Run:
                   "envelope": env, "charged": True, "calls_used": 0, "retries_used": 0, "outputs": w.get("outputs"),
                   "completion_check": w.get("completion_check", ""), "dependencies": w.get("dependencies") or [],
                   "status": "registered", "cycle": self.cycle}
+            wf["atoms"] = [{**a, "id": f"{wf['id']}.a{n}"} for n, a in enumerate(atoms, 1)]
             # J2.e: the workflow gets its own agent, which owns one marked section of the site file. "revises" hands
             # an earlier workflow's section to it (only a section that exists and isn't already being rewritten).
             rv = str(w.get("revises") or "").upper()
@@ -3114,7 +3181,7 @@ class J2Run:
                                 f"first {SITE_LIMIT:,}, so the end of the file may be lost.", warning=True)
         mine = self.sections.get(sid)
         brief = {k: w.get(k) for k in ("id", "name", "purpose", "outputs", "completion_check", "envelope", "revises",
-                                        "covers", "fixes")}
+                                        "covers", "fixes", "atoms")}
         brief["covers_items"] = [((self.goal or {}).get("done_when") or [])[i - 1] for i in self._wf_items(w)]
 
         def mock():
@@ -3135,6 +3202,7 @@ class J2Run:
                       "variables (var(--j2-primary), var(--j2-font-heading), ...) and the classes j2-btn, j2-btn-secondary "
                       "and j2-card. Don't add other colours or fonts.")
         got, raw, stop, last_err = None, "", None, None
+        self.atom = (w.get("atoms") or [{}])[0].get("id")     # its AI calls are tagged with the atom they build
         while got is None:
             if w["calls_used"] >= max_calls:
                 stop = f"it used its envelope's model_call_limit ({max_calls})" + (f"; last problem: {last_err}"
@@ -3173,7 +3241,7 @@ class J2Run:
                 w["retries_used"] += 1
                 self.post("system", f"{fn} attempt {w['calls_used']} can't be used: {last_err}. Retry "
                                     f"{w['retries_used']} of {max_retries} (within its envelope).")
-        self.write_lock = None
+        self.write_lock = self.atom = None
         head = raw.split("```")[0].strip()
         try:
             meta = llm.extract_json(head)

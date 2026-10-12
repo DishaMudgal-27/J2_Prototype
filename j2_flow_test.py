@@ -53,6 +53,7 @@ def fingerprint(paths):
 
 REAL_BEFORE = fingerprint(REAL_MEMORY)
 import j2  # noqa: E402
+ATOM = [j2.mock_atom({})]            # a complete work atom for workflows a test registers directly
 
 BREW_LAB = ("A one-page website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru. Visitors should "
             "see the menu with prices, the opening hours, and where to find us, and be able to pre-order a coffee for "
@@ -545,13 +546,13 @@ def workflow_agents():
     assert os.path.exists(os.path.join(run.dir, "sections.json")) and run.write_lock is None
     # revises: a new workflow rewrites W-2's section and becomes its owner
     run.budget, run.p_refused = 500, {}
-    reg, refused, _ = run._register([{"name": "Core sections rework", "goal_gap": "tighter copy", "outputs": ["W-2"],
+    reg, refused, _ = run._register([{"name": "Core sections rework", "goal_gap": "tighter copy", "outputs": ["W-2"], "atoms": ATOM,
                                       "completion_check": "same items", "parts": ["fix"], "revises": "W-2"}])
     assert reg and not refused and reg[0]["section"] == "W-2" and reg[0]["revises"] == "W-2", (reg, refused)
     run._turn_workflow_agent({"wid": reg[0]["id"]})
     assert run.sections["W-2"]["owner"] == reg[0]["id"] and f"(owner {reg[0]['id']})" in run.sites[-1]
     # past retry_limit: the agent reports the failure to Coordination and its section is unchanged
-    reg, _, _ = run._register([{"name": "Broken one", "goal_gap": "x", "outputs": ["y"], "completion_check": "z",
+    reg, _, _ = run._register([{"name": "Broken one", "goal_gap": "x", "outputs": ["y"], "completion_check": "z", "atoms": ATOM,
                                 "parts": ["fix"], "fixes": ["F-9"]}])
     run.call = lambda fn, *a, **k: "no blocks at all"
     n = len(run.sites)
@@ -575,9 +576,9 @@ def same_failure():
                 if "menu" in run.goal["done_when"][0].lower():
                     f.update(verdict="NEEDS_REVISION", evidence="Prices missing")
             if fn == "adaptation" and "WHY YOU ARE UP" in task and run.audits and not run.audits[-1]["results"][0]["pass"]:
-                r = {"say": "@Priority Menu fix.", "act": "PROPOSE", "next": "Priority", "workflows": [
+                r = {"say": "@Priority Menu fix.", "act": "PROPOSE", "next": "Priority", "workflows": j2.with_atoms([
                     {"name": "Menu fix", "goal_gap": "prices", "parts": ["fix"], "fixes": ["F-1"], "outputs": ["menu"],
-                     "completion_check": "prices"}]}
+                     "completion_check": "prices"}])}
             return r
         run.call = call
         return run
@@ -915,6 +916,113 @@ def simple_view():
         os.environ["J2_FIXES"] = "0"
 
 
+def work_atoms():
+    """Adaptation writes each workflow's work atom (goal, constraints, context, how, verification). The validator
+    rejects a workflow whose atom lacks a field, naming it, and Adaptation gets one retry; still incomplete after it,
+    the workflow is dropped. Registered workflows store their atoms (W-n.a1) and each build call is tagged with one."""
+    run = j2.J2Run()
+    say(run, BREW_LAB)
+    assert run.outcome.startswith("Done"), run.outcome
+    assert run.workflows and not [x for x in run.rejections if "atom" in x["reason"]], run.rejections
+    for w in run.workflows:
+        assert [a["id"] for a in w["atoms"]] == [f"{w['id']}.a1"] and not j2.atom_missing(w), w
+    saved = json.load(open(os.path.join(run.dir, "workflows.json"), encoding="utf-8"))
+    assert all(x["atoms"] == w["atoms"] for x, w in zip(saved, run.workflows)), "atoms not in workflows.json"
+    built = [c for c in run.call_log if j2.is_wf_agent(c["fn"])]
+    assert built and all(c["atom"] == f"{c['fn']}.a1" for c in built), [(c["fn"], c.get("atom")) for c in built]
+    assert not any("atom" in c for c in run.call_log if not j2.is_wf_agent(c["fn"]))
+    assert "WORK ATOMS" in next(c["prompt"] for c in calls_of(run) if c["fn"] == "adaptation")
+
+    def broken(field, times):
+        run, orig, asked = j2.J2Run(), None, []
+        orig = run.call
+
+        def call(fn, fmt, task, mock, **k):
+            r = orig(fn, fmt, task, mock, **k)
+            if fn == "adaptation" and isinstance(r, dict) and r.get("workflows") and len(asked) < times:
+                asked.append(task)
+                a = r["workflows"][0]["atoms"][0]
+                a[field] = [] if field == "verification" else a.pop(field) and None
+            return r
+        run.call = call
+        say(run, BREW_LAB)
+        return run, asked
+    for f in j2.ATOM_FIELDS:
+        run, asked = broken(f, 1)
+        assert len(asked) == 1 and run.rejections[0]["reason"] == f"missing {f} in work atom 1", (f, run.rejections)
+        retry = [c for c in calls_of(run) if c["fn"] == "adaptation" and "THE VALIDATOR REJECTED" in c["prompt"]]
+        assert len(retry) == 1 and f in retry[0]["prompt"], f
+        assert run.outcome.startswith("Done") and all(not j2.atom_missing(w) for w in run.workflows), f
+    run, asked = broken("goal", 2)                      # still missing after the one retry: dropped, not retried again
+    first = run.rejections[0]["workflow"]
+    assert [x["workflow"] for x in run.rejections[:2]] == [first, first], run.rejections
+    assert len([c for c in calls_of(run) if "THE VALIDATOR REJECTED" in c["prompt"]]) == 1
+    assert first not in [w["name"] for w in run.workflows if w["cycle"] == 1], first
+    # the validator itself: no atoms at all, or an empty verification list, is rejected with the field named
+    reg, refused, _ = run._register([{"name": "Bare", "goal_gap": "x", "outputs": ["y"], "completion_check": "z",
+                                      "parts": ["fix"], "fixes": ["F-9"]}])
+    assert not reg and refused == ["Bare (missing atoms)"], refused
+
+
+def work_atom_cards():
+    """Detailed view: opening a workflow lists its work atoms as cards (one atom opens expanded, two open collapsed),
+    each with five plain rows and its own Run details listing only the calls tagged with that atom."""
+    import html as htmllib
+    import subprocess
+    import threading
+    import j2_server
+    chrome = j2.j2_check.find_chrome()
+    if not chrome:
+        print("work atom cards test skipped: Chrome not found")
+        return
+    run = j2.J2Run()
+    say(run, BREW_LAB)
+    w1, w2 = run.workflows[0], run.workflows[1]
+    w1["atoms"].append({**w1["atoms"][0], "id": "W-1.a2", "goal": "The second atom's goal holds"})
+    other = next(c for c in run.call_log if c["fn"] == "priority")
+    other["atom"] = "W-1.a2"
+    mine = [c["id"] for c in run.call_log if c.get("atom") == "W-1.a1"]
+    assert mine
+    keep, j2_server.RUN = j2_server.RUN, run
+    srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=8000", "--dump-dom",
+                              f"http://127.0.0.1:{srv.server_address[1]}/?view=detail"],
+                             capture_output=True, text=True, timeout=120).stdout
+    finally:
+        j2_server.RUN = keep
+        srv.shutdown()
+
+    def block(key):              # the <details data-key=key> element's HTML (balanced on nested details)
+        i = dom.index(f'data-key="{key}"')
+        i, depth, j = dom.rindex("<details", 0, i), 0, i
+        for m in re.finditer(r"<details\b|</details>", dom[i:]):
+            depth += 1 if m.group(0) == "<details" else -1
+            if not depth:
+                return dom[i:i + m.end()]
+    one, two = block(f"wf-{w2['id']}"), block("wf-W-1")
+    assert two.count('class="atom"') == 2 and "Work atom 1" in two and "Work atom 2" in two, two[:300]
+    assert one.count('class="atom"') == 1 and re.search(r'class="atom"[^>]*\bopen\b', one), "one atom opens expanded"
+    assert not re.search(r'class="atom"[^>]*\bopen\b', two), "two atoms open collapsed"
+    a1 = block("atom-W-1.a1")
+    for label, gloss in (("Goal", "What must be true when this is done"), ("Constraints", "What must never break"),
+                         ("Context", "What it needs to know"), ("How", "Who builds it"),
+                         ("Verification", "The check that proves the goal is met")):
+        assert f"<dt>{label}<br>" in a1 and gloss in a1, label
+    assert "written by Adaptation, not run by code yet" in a1 and "{" not in re.sub(r"<[^>]+>", "", a1.split("Run details")[0])
+    run1, run2 = block("run-W-1.a1"), block("run-W-1.a2")
+    labels = re.findall(r"<(?:h4|summary)>([^<]*)<", run1)
+    assert labels == ["Run details", "Prompt sent", "Reply received", "Reason given", "Cost", "Attempts"], labels
+    assert not any(n.lower() in x.lower() for x in labels for n in j2.ATOM_FIELDS), labels
+    assert all(f"call {i}<" in run1 for i in mine) and f"call {other['id']}<" not in run1, run1[:400]
+    assert f"call {other['id']}<" in run2 and not any(f"call {i}<" in run2 for i in mine), run2[:400]
+    pane = dom.split('id="pane-workflows"')[1].split('id="pane-conflicts"')[0]
+    pane = re.sub(r"<h4>Prompt sent</h4>.*?<h4>", "", pane, flags=re.S)       # the prompt is shown as it was sent
+    pane = htmllib.unescape(re.sub(r"<[^>]+>", " ", pane))
+    assert "Limits" in pane and not re.search(r"envelope|done.when", pane, re.I), "plain words in the Detailed view"
+
+
 def detail_stays_open():
     """The Detailed view re-renders on every poll. An opened screenshot (under Audit), the report's event log, and an
     opened message detail view (with its full text) must stay open while the run changes, until the user closes them.
@@ -1120,7 +1228,7 @@ def pricing():
     run = j2.J2Run()
     run.goal = j2.mock_charter(BREW_LAB)    # 1 menu, 2 hours, 3 address, 4 order (form), 5 beans, 6 loyalty, 7 phone
     run.budget, run.cycle = 500, 1
-    base = {"goal_gap": "x", "outputs": ["index.html"], "completion_check": "y"}
+    base = {"goal_gap": "x", "outputs": ["index.html"], "completion_check": "y", "atoms": ATOM}
     kinds = [j2.item_kind(c) for c in run.goal["done_when"]]
     assert kinds == ["page_section"] * 3 + ["form"] + ["page_section"] * 2 + ["styling"], kinds
     # bundling: six items in one 20-unit workflow (as in the run) is rejected; the same work priced honestly passes
@@ -1459,7 +1567,7 @@ def nine_workflows():
                 wfs = [wf("Scaffold and styling", 1, ("page_section", "styling")), wf("Viewport fix", phone, ("fix",)),
                        wf("Pre-order form", form, ("form",))] + [wf(f"Section {i}", i) for i in rest]
                 return {"say": "@Priority Nine workflows.", "act": "PROPOSE", "next": "Priority",
-                        "workflows": wfs + [wf(f"Extra {i}", i) for i in rest][:9 - len(wfs)]}
+                        "workflows": j2.with_atoms(wfs + [wf(f"Extra {i}", i) for i in rest][:9 - len(wfs)])}
             return orig(fn, fmt, task, mock, **k)
         run.call = call
         say(run, BREW_LAB)
@@ -1882,7 +1990,7 @@ def covers_by_text():
     crit = list(run.goal["done_when"])
     run.budget, run.p_refused = 500, {}
     reg, refused, _ = run._register([
-        {"name": f"Item {i}", "goal_gap": crit[i - 1], "outputs": ["x"], "completion_check": "y",
+        {"name": f"Item {i}", "goal_gap": crit[i - 1], "outputs": ["x"], "completion_check": "y", "atoms": ATOM,
          "parts": ["form" if "form" in crit[i - 1].lower() else "page_section"], "covers": [i]} for i in (4, 5, 6)])
     assert len(reg) == 3 and not refused, refused
     assert [w["covers_text"] for w in reg] == [[crit[3]], [crit[4]], [crit[5]]], [w.get("covers_text") for w in reg]
@@ -2009,6 +2117,9 @@ if __name__ == "__main__":
     print("E behind-the-scenes view (lanes, detail, timeline, saved runs, redaction, lessons) ok")
     generalist_units()
     detail_stays_open()
+    work_atoms()
+    work_atom_cards()
+    print("work atoms: validator names a missing field and retries once, atoms stored and tagged, cards render ok")
     print("Detailed view: opened screenshot, event log and message detail stay open while the run updates ok")
     simple_view()
     plain_words()
