@@ -35,6 +35,7 @@ J2_FIXES (default 0) picks the mode, so findings can compare the two:
      (b) a change request after done goes to Identity at J2.a first, then J2.b.
 """
 import html
+import html.parser
 import json
 import os
 import re
@@ -252,15 +253,180 @@ def atom_missing(w):
             if not (isinstance(a, dict) and a.get(f))]
 
 
+# ---- work-atom checks: the only check types Adaptation may write. Code runs them; no agent reports a result.
+CHECK_TYPES = ("file-exists", "grep-count", "element-count", "named-test", "facts-present")
+NAMED_TESTS = ("page-parses", "links-resolve", "form-has-submit")
+MAX_CHECK_ATTEMPTS = 3
+EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
+SPECIFIC = re.compile(r"\d|" + EMAIL.pattern)       # a time, price, number or email in a goal
+IDENT = re.compile(r"^[#.]?[A-Za-z][\w-]*$")         # a section id or class name
+
+
+def squash(t):
+    """Case-insensitive, whitespace collapsed; no other rewriting."""
+    return re.sub(r"\s+", " ", str(t)).strip().lower()
+
+
+def strings(x):
+    """Every string inside a JSON-like value, for the facts-present source text."""
+    if isinstance(x, dict):
+        return [t for v in x.values() for t in strings(v)]
+    if isinstance(x, list):
+        return [t for v in x for t in strings(v)]
+    return [x] if isinstance(x, str) else []
+
+
+def check_problems(a, source):
+    """J2.e's rules for one atom's checks. source: the charter and the Requester's answers, squashed."""
+    out, checks = [], a.get("verification") if isinstance(a.get("verification"), list) else []
+    told = squash(json.dumps([a.get("how"), a.get("constraints")], ensure_ascii=False))
+    for n, c in enumerate(checks, 1):
+        if not isinstance(c, dict):
+            out.append(f"check {n} isn't an object with text, type, target and expect")
+            continue
+        t, target, label = c.get("type"), c.get("target"), str(c.get("text") or "")
+        if t not in CHECK_TYPES:
+            out.append(f"check {n} has type {t!r}; allowed: {', '.join(CHECK_TYPES)}")
+        elif t == "named-test" and target not in NAMED_TESTS:
+            out.append(f"check {n} names test {target!r}; allowed: {', '.join(NAMED_TESTS)}")
+        elif t == "facts-present":
+            facts = target if isinstance(target, list) else [target]
+            bad = [f for f in facts if not str(f or "").strip() or squash(f) not in source]
+            if bad:
+                out.append(f"check {n} facts-present lists {bad}, not found in the charter or the Requester's answers")
+        elif t in ("grep-count", "element-count"):
+            name = str(target or "").lstrip("#.")
+            if not IDENT.match(str(target or "")) or EMAIL.search(str(target)) or \
+                    (re.search(r"\d", name) and squash(name) in source):
+                out.append(f"check {n} {t} targets {target!r}: only a section id or class name, never a charter fact, "
+                           "an email or a generic string (use facts-present for those)")
+            elif name.lower() not in told:
+                out.append(f"check {n} {t} targets {target!r}, which the atom's how or constraints doesn't tell the "
+                           "builder to create")
+            nums = [int(x) for x in re.findall(r"\d+", label)]
+            if nums and as_int(c.get("expect"), None) not in nums:
+                out.append(f"check {n} says {label!r} but expects {c.get('expect')!r}")
+    if SPECIFIC.search(str(a.get("goal") or "")) and not any(
+            isinstance(c, dict) and c.get("type") in ("facts-present", "named-test") for c in checks):
+        out.append("its goal names a time, price, number or email but no check is facts-present or a named test")
+    return out
+
+
+VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
+OPTIONAL_END = {"p", "li", "dt", "dd", "tr", "td", "th", "option", "thead", "tbody", "tfoot", "colgroup", "html", "head",
+                "body"}
+
+
+class PageScan(html.parser.HTMLParser):
+    """One pass over the built page: every tag with its attributes, unclosed and stray tags, forms with a submit
+    control, and the visible text."""
+    def __init__(self, page):
+        super().__init__(convert_charrefs=True)
+        self.tags, self.stack, self.stray, self.text, self.forms, self.in_form = [], [], [], [], [], False
+        self.unclosed = []
+        self.feed(page)
+        self.close()
+        self.unclosed += [t for t in self.stack if t not in OPTIONAL_END]
+
+    def handle_starttag(self, tag, attrs, alone=False):
+        a = {k: v or "" for k, v in attrs}
+        self.tags.append((tag, a))
+        if tag == "form":
+            self.forms.append(0)
+            self.in_form = True
+        elif self.in_form and (tag == "button" and a.get("type", "submit").lower() == "submit"
+                               or tag == "input" and a.get("type", "").lower() in ("submit", "image")):
+            self.forms[-1] += 1
+        if tag not in VOID and not alone:
+            self.stack.append(tag)
+
+    def handle_startendtag(self, tag, attrs):
+        self.handle_starttag(tag, attrs, alone=True)
+
+    def handle_endtag(self, tag):
+        if tag == "form":
+            self.in_form = False
+        if tag not in self.stack:
+            if tag not in OPTIONAL_END and tag not in VOID:
+                self.stray.append(tag)
+            return
+        while self.stack:
+            t = self.stack.pop()
+            if t == tag:
+                break
+            if t not in OPTIONAL_END:
+                self.unclosed.append(t)
+
+    def handle_data(self, d):
+        self.text.append(d)
+
+    def matching(self, target):
+        name, kind = str(target).lstrip("#."), str(target)[:1]
+        return [t for t, a in self.tags if (kind != "." and a.get("id") == name)
+                or (kind != "#" and name in a.get("class", "").split())]
+
+
+def run_check(c, site_dir, page):
+    """{actual, pass, evidence} for one check against the built site. Code only."""
+    t, target, expect = c.get("type"), c.get("target"), c.get("expect")
+    try:
+        if t == "file-exists":
+            path = os.path.normpath(os.path.join(site_dir, str(target)))
+            ok = path.startswith(os.path.normpath(site_dir) + os.sep) and os.path.isfile(path)
+            want = True if expect is None else bool(expect)
+            return {"actual": ok, "pass": ok == want, "evidence": f"{target} {'exists' if ok else 'not found'} in the build"}
+        if t == "grep-count":
+            path = os.path.normpath(os.path.join(site_dir, str(c.get("file") or "index.html")))
+            text = open(path, encoding="utf-8").read() if path.startswith(os.path.normpath(site_dir)) \
+                and os.path.isfile(path) else ""
+            n = text.count(str(target).lstrip("#."))
+            return {"actual": n, "pass": n == as_int(expect, -1),
+                    "evidence": f"{target!r} found {n} time(s) in {c.get('file') or 'index.html'}, expected {expect}"}
+        scan = PageScan(page)
+        if t == "element-count":
+            n = len(scan.matching(target))
+            return {"actual": n, "pass": n == as_int(expect, -1),
+                    "evidence": f"{n} element(s) match {target!r}, expected {expect}"}
+        if t == "facts-present":
+            text = squash(" ".join(scan.text))
+            facts = target if isinstance(target, list) else [target]
+            missing = [f for f in facts if squash(f) not in text]
+            return {"actual": {"missing": missing}, "pass": not missing,
+                    "evidence": f"missing from the page: {missing}" if missing else f"all {len(facts)} fact(s) on the page"}
+        if target == "page-parses":
+            body = any(x == "body" for x, _ in scan.tags)
+            bad = scan.unclosed + [f"/{x}" for x in scan.stray]
+            return {"actual": {"body": body, "unbalanced": bad}, "pass": body and not bad,
+                    "evidence": ("page parses, tags balanced" if body and not bad else
+                                 f"{'no <body>; ' if not body else ''}unbalanced tags: {bad[:8]}")}
+        if target == "links-resolve":
+            ids = {a.get("id") for _, a in scan.tags}
+            broken = [a["href"] for _, a in scan.tags if a.get("href", "").startswith("#") and len(a["href"]) > 1
+                      and a["href"][1:] not in ids]
+            return {"actual": broken, "pass": not broken,
+                    "evidence": f"in-page links with no target: {broken[:8]}" if broken else "every in-page link resolves"}
+        if target == "form-has-submit":
+            ok = bool(scan.forms) and all(scan.forms)
+            return {"actual": scan.forms, "pass": ok,
+                    "evidence": (f"{len(scan.forms)} form(s), each with a submit control" if ok else
+                                 "no form on the page" if not scan.forms else
+                                 f"{scan.forms.count(0)} of {len(scan.forms)} form(s) have no submit control")}
+    except (OSError, ValueError) as e:
+        return {"actual": None, "pass": False, "evidence": f"the check couldn't run: {e}"}
+    return {"actual": None, "pass": False, "evidence": f"unknown check {t} {target}"}
+
+
 def mock_atom(w):
     """The work atom the mock Adaptation (and code's cheapest-fit proposal) writes for a workflow."""
     return {"goal": w.get("completion_check") or w.get("goal_gap") or w.get("name") or "The workflow's change is live",
             "constraints": ["Other workflows' sections stay unchanged", "The page loads with no console errors"],
             "context": [f"charter item {i}" for i in w.get("covers") or []] + [f"finding {f}" for f in w.get("fixes") or []]
             + ([f"section {w['revises']}"] if w.get("revises") else []) or ["charter goal"],
-            "how": {"kind": "AI", "agent": "Builder"},
+            "how": {"kind": "AI", "agent": "Builder", "steps": "Write the workflow's section of index.html"},
             "verification": [{"text": "The site file index.html exists after the build.", "type": "file-exists",
-                              "target": "index.html", "expect": True}]}
+                              "target": "index.html", "expect": True},
+                             {"text": "The page parses with balanced tags.", "type": "named-test",
+                              "target": "page-parses", "expect": True}]}
 
 
 def with_atoms(wfs):
@@ -857,7 +1023,7 @@ class J2Run:
         self.idle_cycles, self.cycle_registered = 0, True
         self.status, self.thinking, self.error, self.done = "idle", None, None, False
         self.feedback = None
-        self.atom, self.proposed_atoms = None, {}        # atom id of the build call in progress; atoms by workflow name
+        self.atom, self.proposed_atoms, self.receipts = None, {}, []        # atom id of the build call in progress; atoms by workflow name
         self.turn, self.handoff, self.outcome = None, {}, None
         self.paused = None          # {"kind", "questions", "to", "handoff", "msg"} while the run waits on the Requester
         self.intake, self.decisions = [], []   # J2.a question rounds; every Requester answer to Identity
@@ -2217,7 +2383,10 @@ class J2Run:
                       f"{c['subject']}\n{c.get('detail') or ''}\nATTEMPTS SO FAR:\n{tried}\nThis is attempt {n} of "
                       f"{MAX_ATTEMPTS}. Settle it with {NAMES[other]} if you can: agree when their reason is better (say "
                       "what you accept), or keep your position with a reason tied to the charter or the evidence. After "
-                      f"{MAX_ATTEMPTS} attempts it goes to Identity with both final positions.", mock)
+                      f"{MAX_ATTEMPTS} attempts it goes to Identity with both final positions."
+                      + (f"\nRECEIPTS (written by code when it ran the work atoms' checks; the latest per check): "
+                         f"{json.dumps(list({(x['atom'], x['check']): x for x in self.receipts}.values())[-30:], ensure_ascii=False)}"
+                         if self.receipts else ""), mock)
         agree = bool(r.get("agree"))
         last = n >= MAX_ATTEMPTS and not agree
         m = self._say(fn, r.get("say", ""), None if agree else ("identity" if last else other), None,
@@ -2324,15 +2493,29 @@ class J2Run:
               '"revises": str|null (registered workflow id whose site section this one rewrites; null adds a new '
               'section), "estimated_resources": {"money": int, "calls": int, "time_minutes": int}, '
               '"atoms": [{"id": str, "goal": str, "constraints": [str], "context": [str], "how": {"kind": "AI"|"code", '
-              '"agent": str}, "verification": [{"text": str, "type": "file-exists"|"grep-count"|"named-test", '
-              '"target": str, "expect": int|bool|str}]}]}]')
+              '"agent": str, "steps": str (what to build, naming every section id and class name it creates)}, '
+              '"verification": [{"text": str, "type": "file-exists"|"grep-count"|"element-count"|"named-test"|'
+              '"facts-present", "target": str|[str], "expect": int|bool}]}]}]')
     ATOM_RULES = ("\nWORK ATOMS: every workflow, fixes included, carries atoms: exactly one work atom for now, id \"a1\" "
                   "(code renames it W-n.a1 at registration). goal: what must be true when it is done, one sentence. "
                   "constraints: short strings, what must never break. context: references only, charter item numbers "
                   "and section ids (e.g. \"charter item 3\", \"section W-2\"), never copied text. how: {kind: \"AI\" or "
-                  "\"code\", agent: who builds it}. verification: at least one check, each {text: the check in plain "
-                  "words, type: file-exists | grep-count | named-test, target: the file, pattern or test name, expect: "
-                  "the expected result}. The validator rejects a workflow whose atom lacks any of these fields.")
+                  "\"code\", agent: who builds it, steps: what to build, naming every section id and class name it "
+                  "creates}. verification: the checks code runs on the built site after the builder writes it (the "
+                  "builder gets 3 attempts), each {text: the check in plain words, type, target, expect}. Only these "
+                  "types: file-exists (target: a path in the build, e.g. index.html; expect true); grep-count (target: a "
+                  "section id or class name; expect: how many times it appears in index.html); element-count (target: "
+                  "\"#id\" or \".class\"; expect: how many elements on the page match); named-test (target: page-parses, "
+                  "links-resolve or form-has-submit; expect true); facts-present (target: a list of strings that must all "
+                  "appear on the page; expect true). Rules the validator enforces: each facts-present string is copied "
+                  "exactly from the charter or the Requester's answers (it can't be found otherwise, so no invented "
+                  "facts); prefer facts-present over counts for names, times, prices, numbers and emails. grep-count and "
+                  "element-count may only target a section id or class name that your how.steps or constraints tells "
+                  "the builder to create, never a generic string, a charter fact or an email. A count whose text "
+                  "contains a number expects exactly that number. A goal that names a time, price, number or email needs "
+                  "at least one facts-present check or named test. Every claim in the goal needs at least one check that "
+                  "would fail if the claim were false: a check that only proves a section exists is not enough for a goal "
+                  "that names specific content. A workflow whose atom breaks a rule or lacks a field is rejected.")
 
     GRANT_FMT = WF_FMT[:-2] + (', "envelope": {"money_limit": int, "model_call_limit": int, "time_limit_minutes": int, '
                                '"retry_limit": int, "stop_loss": str}}]')
@@ -2346,6 +2529,8 @@ class J2Run:
             return self._turn_dispute("adaptation", h)
         if h.get("kind") == "respond":
             return self._adaptation_responds(h)
+        if h.get("kind") == "atom_failed":
+            return self._adaptation_atom_failed(h)
         if self.adapt_idle and self.adapt_idle == self._adapt_state():
             # Adaptation already said it can propose nothing at this budget, and nothing changed since (no raise, no
             # drop, no new answer from the Requester). Asking again only repeats it (runs/j2-20261008-110419, msgs
@@ -2573,18 +2758,31 @@ class J2Run:
         """J2.e's work-atom check on Adaptation's workflows: one whose atom lacks a field is rejected with the field
         named and Adaptation gets one retry; what is still incomplete after it is dropped from the proposal."""
         for retry in (True, False):
-            bad = {w.get("name") or "?": m for w in norm(r.get("workflows")) if (m := atom_missing(w))}
+            bad = {w.get("name") or "?": m for w in norm(r.get("workflows")) if (m := self._atom_problems(w))}
             if not bad:
                 break
-            why = [self._reject(n, "missing " + ", ".join(m)) for n, m in bad.items()]
+            why = [self._reject(n, "; ".join(m)) for n, m in bad.items()]
             if retry:
                 r = self.call("adaptation", fmt, task + "\nTHE VALIDATOR REJECTED: " + "; ".join(why) + ". Send your "
                               "reply again with every field of every work atom filled in.", mock)
             else:
-                r = {**r, "workflows": [w for w in norm(r.get("workflows")) if not atom_missing(w)]}
+                r = {**r, "workflows": [w for w in norm(r.get("workflows")) if not self._atom_problems(w)]}
         for w in norm(r.get("workflows")):
             self.proposed_atoms[w.get("name")] = w["atoms"]
         return r
+
+    def _fact_source(self):
+        """What a facts-present string must come from: the charter and the Requester's own words, squashed."""
+        return squash(" ".join(strings(self.goal or {}) + [self.request] + [m["text"] for m in self.chat
+                                                                             if m["who"] == "user"]))
+
+    def _atom_problems(self, w):
+        """J2.e's work-atom check: missing fields first; then the check rules (check_problems) for every atom."""
+        miss = atom_missing(w)
+        if miss:
+            return ["missing " + ", ".join(miss)]
+        src = self._fact_source()
+        return [f"work atom {n}: {x}" for n, a in enumerate(w["atoms"], 1) for x in check_problems(a, src)]
 
     def _budget_question(self, r):
         return str(r.get("act", "")).upper() == "POLICY_QUESTION" and \
@@ -2950,11 +3148,11 @@ class J2Run:
             c, name = granted(w), w.get("name") or "?"
             missing = [f for f in self.REQUIRED if not (w.get(f) or (f == "goal_gap" and w.get("purpose")))]
             atoms = w.get("atoms") or self.proposed_atoms.get(name)     # Priority or a ruling may drop them
-            no_atom = atom_missing({"atoms": atoms})
+            no_atom = self._atom_problems({"atoms": atoms})
             rc, unknown = price(w)
             reason = ("a check or report on the site is Audit's job, not a workflow" if self.CHECK_WORK.search(str(name))
                       else f"required field(s) missing: {', '.join(missing)}" if missing
-                      else f"missing {', '.join(no_atom)}" if no_atom
+                      else "; ".join(no_atom) if no_atom
                       else f"{self.p_refused[name]}, so it can't be registered" if name in self.p_refused
                       else "no rate-card parts, so it has no price" if RATES and rc is None
                       else f"unknown rate-card parts {unknown}; allowed: {', '.join(RATES)}" if unknown
@@ -3164,7 +3362,9 @@ class J2Run:
     def _turn_workflow_agent(self, h):
         """J2.f: the workflow's own agent (e.g. "W-1 Builder") writes only its marked section of the site file, while
         Coordination's write lock is on it. It retries within its envelope (model_call_limit, retry_limit) when a reply
-        can't be used, then reports to Coordination. Code assembles the file from every section."""
+        can't be used. Code assembles the file from every section and runs the work atom's checks (receipts.jsonl);
+        a failed check goes back to the builder with its evidence, up to MAX_CHECK_ATTEMPTS attempts. Then it reports
+        to Coordination, or, after the last failed attempt, code hands the receipts to Adaptation."""
         self.step = 6
         w = self._wf(h.get("wid") or self.turn)
         if not w:
@@ -3175,105 +3375,126 @@ class J2Run:
         self.write_lock = fn
         env = w.get("envelope") or {}
         max_calls, max_retries = as_int(env.get("model_call_limit"), 1), as_int(env.get("retry_limit"), 0)
-        prev = self.sites[-1] if self.sites else ""
-        if len(prev) > SITE_LIMIT:
-            self.post("system", f"Warning: site v{len(self.sites)} is {len(prev):,} characters. {fn} sees only the "
-                                f"first {SITE_LIMIT:,}, so the end of the file may be lost.", warning=True)
-        mine = self.sections.get(sid)
         brief = {k: w.get(k) for k in ("id", "name", "purpose", "outputs", "completion_check", "envelope", "revises",
-                                        "covers", "fixes", "atoms")}
+                                        "covers", "fixes")}
+        brief["atoms"] = [{k: v for k, v in a.items() if k not in ("results", "status", "attempts")}
+                          for a in w.get("atoms") or []]
         brief["covers_items"] = [((self.goal or {}).get("done_when") or [])[i - 1] for i in self._wf_items(w)]
-
-        def mock():
-            head, body = mock_section(w, self.goal, self.sections)
-            return (json.dumps({"say": f"@Coordination {fn} done: {w['name']}. Section {sid} written; completion "
-                                       f"check: {w['completion_check']}." + (" Style guide written." if first else ""),
-                                "next": "Coordination"})
-                    + (f"\n```style\n{json.dumps(MOCK_STYLE)}\n```" if first else "")
-                    + (f"\n```head\n{head}\n```" if head else "") + (f"\n```section\n{body}\n```" if body else ""))
-        # Before any section is built, the first workflow that runs writes the style guide; every later agent follows it.
-        first = self.style is None
-        style_task = ("\nYOU RUN FIRST, SO YOU ALSO WRITE THE STYLE GUIDE for this brief, before your section: palette, "
-                      "fonts, spacing, button and card styles that suit this business and its visitors, with readable "
-                      "contrast (WCAG AA) and buttons at least 44px tall. Code turns it into CSS variables (--j2-primary, "
-                      "--j2-font-body, --j2-radius, ...) and the classes j2-btn, j2-btn-secondary and j2-card; use them "
-                      "in your section." if first else
-                      f"\nSTYLE GUIDE (follow it exactly): {json.dumps(self.style, ensure_ascii=False)}\nUse its CSS "
-                      "variables (var(--j2-primary), var(--j2-font-heading), ...) and the classes j2-btn, j2-btn-secondary "
-                      "and j2-card. Don't add other colours or fonts.")
-        got, raw, stop, last_err = None, "", None, None
         self.atom = (w.get("atoms") or [{}])[0].get("id")     # its AI calls are tagged with the atom they build
-        while got is None:
-            if w["calls_used"] >= max_calls:
-                stop = f"it used its envelope's model_call_limit ({max_calls})" + (f"; last problem: {last_err}"
-                                                                                  if last_err else "")
-                break
-            w["calls_used"] += 1
-            raw = self.call(fn, 'First line: a JSON object {"say": str (one short line reporting to @Coordination: '
-                            'what you changed and whether your completion check holds), "next": "Coordination", '
-                            + self.REASON + '}. '
-                            + ('Then a ```style block with the style guide as JSON: ' + STYLE_FMT + '. ' if first else '')
-                            + 'Then, '
-                            'only if your section needs page-head tags, a ```head block (meta, link, style or script '
-                            'tags only). Then a ```section block: your section\'s HTML only, no <html>, <head> or <body> '
-                            'tags (inline <style> and <script> are fine).',
-                            f"YOU ARE {NAMES[fn]}, the agent for one registered workflow.\nYOUR WORKFLOW: "
-                            f"{json.dumps(brief, ensure_ascii=False)}\nYOU OWN SECTION {sid} of the site file. Code puts "
-                            "your head block in the page head and your section in the body, in section order, between "
-                            "markers. Write the whole section each time; don't repeat other sections. Build only the "
-                            "done-when items your workflow covers and fix only its findings; other items belong to other "
-                            "workflows." + style_task
-                            + (f"\nYOUR SECTION NOW (last written by {mine['owner']}):\n```head\n{mine['head']}\n```\n"
-                               f"```section\n{mine['body']}\n```" if mine else "")
-                            + (f"\nYOUR LAST ATTEMPT WAS REJECTED: {last_err}. Fix that." if last_err else "")
-                            + f"\nTHE WHOLE SITE FILE NOW (v{len(self.sites)}, read only):\n{prev[:SITE_LIMIT]}",
-                            mock, max_tokens=16000, json_reply=False)
-            try:
-                parts = parse_section(raw)
-                guide = parse_style(raw) if first else None
-                got = parts      # only once both parse: a missing style guide must be retried, not accepted
-                w["last_check"] = ("style guide, " if first else "") + "usable section" + (" and head tags" if got[0] else "")
-            except ValueError as e:
-                last_err = w["last_check"] = str(e)
-                if w["retries_used"] >= max_retries:
-                    stop = f"{last_err}, and it used its envelope's retry_limit ({max_retries})"
+        attempt, failed, evidence = 0, [], ""
+        while True:
+            attempt += 1
+            prev = self.sites[-1] if self.sites else ""
+            if len(prev) > SITE_LIMIT:
+                self.post("system", f"Warning: site v{len(self.sites)} is {len(prev):,} characters. {fn} sees only the "
+                                    f"first {SITE_LIMIT:,}, so the end of the file may be lost.", warning=True)
+            mine = self.sections.get(sid)
+            # Before any section is built, the first workflow that runs writes the style guide; every later agent
+            # follows it.
+            first = self.style is None
+
+            def mock():
+                head, body = mock_section(w, self.goal, self.sections)
+                return (json.dumps({"say": f"@Coordination {fn} done: {w['name']}. Section {sid} written.",
+                                    "next": "Coordination"})
+                        + (f"\n```style\n{json.dumps(MOCK_STYLE)}\n```" if first else "")
+                        + (f"\n```head\n{head}\n```" if head else "") + (f"\n```section\n{body}\n```" if body else ""))
+            style_task = ("\nYOU RUN FIRST, SO YOU ALSO WRITE THE STYLE GUIDE for this brief, before your section: "
+                          "palette, fonts, spacing, button and card styles that suit this business and its visitors, with "
+                          "readable contrast (WCAG AA) and buttons at least 44px tall. Code turns it into CSS variables "
+                          "(--j2-primary, --j2-font-body, --j2-radius, ...) and the classes j2-btn, j2-btn-secondary and "
+                          "j2-card; use them in your section." if first else
+                          f"\nSTYLE GUIDE (follow it exactly): {json.dumps(self.style, ensure_ascii=False)}\nUse its CSS "
+                          "variables (var(--j2-primary), var(--j2-font-heading), ...) and the classes j2-btn, "
+                          "j2-btn-secondary and j2-card. Don't add other colours or fonts.")
+            # A failed check buys one more call than the envelope's model_call_limit, so all attempts can run.
+            limit = max_calls + attempt - 1
+            got, raw, stop, last_err = None, "", None, None
+            while got is None:
+                if w["calls_used"] >= limit:
+                    stop = f"it used its envelope's model_call_limit ({limit})" + (f"; last problem: {last_err}"
+                                                                                   if last_err else "")
                     break
-                w["retries_used"] += 1
-                self.post("system", f"{fn} attempt {w['calls_used']} can't be used: {last_err}. Retry "
-                                    f"{w['retries_used']} of {max_retries} (within its envelope).")
+                w["calls_used"] += 1
+                raw = self.call(fn, 'First line: a JSON object {"say": str (one short line reporting to @Coordination: '
+                                'what you changed; code runs your checks and reports them, so don\'t claim they pass), '
+                                '"next": "Coordination", ' + self.REASON + '}. '
+                                + ('Then a ```style block with the style guide as JSON: ' + STYLE_FMT + '. ' if first
+                                   else '')
+                                + 'Then, '
+                                'only if your section needs page-head tags, a ```head block (meta, link, style or script '
+                                'tags only). Then a ```section block: your section\'s HTML only, no <html>, <head> or '
+                                '<body> tags (inline <style> and <script> are fine).',
+                                f"YOU ARE {NAMES[fn]}, the agent for one registered workflow.\nYOUR WORKFLOW: "
+                                f"{json.dumps(brief, ensure_ascii=False)}\nYOU OWN SECTION {sid} of the site file. Code "
+                                "puts your head block in the page head and your section in the body, in section order, "
+                                "between markers. Write the whole section each time; don't repeat other sections. Build "
+                                "only the done-when items your workflow covers and fix only its findings; other items "
+                                "belong to other workflows. After you write it, code runs every check in your work atoms' "
+                                f"verification on the whole page ({MAX_CHECK_ATTEMPTS} attempts)." + style_task
+                                + (f"\nYOUR SECTION NOW (last written by {mine['owner']}):\n```head\n{mine['head']}\n```\n"
+                                   f"```section\n{mine['body']}\n```" if mine else "")
+                                + (f"\nATTEMPT {attempt} OF {MAX_CHECK_ATTEMPTS}. CODE RAN YOUR CHECKS ON YOUR LAST "
+                                   f"ATTEMPT AND THESE FAILED:\n{evidence}\nFix the section so they pass." if evidence
+                                   else "")
+                                + (f"\nYOUR LAST ATTEMPT WAS REJECTED: {last_err}. Fix that." if last_err else "")
+                                + f"\nTHE WHOLE SITE FILE NOW (v{len(self.sites)}, read only):\n{prev[:SITE_LIMIT]}",
+                                mock, max_tokens=16000, json_reply=False)
+                try:
+                    parts = parse_section(raw)
+                    guide = parse_style(raw) if first else None
+                    got = parts      # only once both parse: a missing style guide must be retried, not accepted
+                    w["last_check"] = ("style guide, " if first else "") + "usable section" + (" and head tags"
+                                                                                               if got[0] else "")
+                except ValueError as e:
+                    last_err = w["last_check"] = str(e)
+                    if w["retries_used"] >= max_retries:
+                        stop = f"{last_err}, and it used its envelope's retry_limit ({max_retries})"
+                        break
+                    w["retries_used"] += 1
+                    self.post("system", f"{fn} attempt {w['calls_used']} can't be used: {last_err}. Retry "
+                                        f"{w['retries_used']} of {max_retries} (within its envelope).")
+            head = raw.split("```")[0].strip()
+            try:
+                meta = llm.extract_json(head)
+            except ValueError:
+                meta = {"say": head}
+            log = next((c for c in reversed(self.call_log) if c["fn"] == fn), None)
+            if log:   # the structured part of a workflow agent's reply, for the detail view
+                log["reply"] = {"say": meta.get("say"), "next": meta.get("next"), "check": w.get("last_check"),
+                                "head_chars": len(got[0]) if got else 0, "section_chars": len(got[1]) if got else 0}
+                log["reason"] = meta.get("reason") or (self.MOCK_REASON if llm.MOCK else None)
+            if got is None:      # code writes the failure report, so the unusable reply isn't route-checked
+                self.write_lock = self.atom = None
+                w["status"] = "failed"
+                self._say(fn, f"@Coordination {fn} failed: {stop}. My section is unchanged.", "coordination", None,
+                          workflow=fn)
+                self._event(fn, "limit_fail", f"{fn}: {stop}")
+                self.save("workflows.json", self.workflows)
+                return self._handoff("coordination", kind="schedule")
+            if first:     # the style guide goes first in the head, so every section can use its variables and classes
+                self.style = guide
+                self.sections = {"style": {"owner": fn, "head": style_css(guide), "body": "", "workflow": "Style guide"},
+                                 **self.sections}
+                self.save("style.json", guide)
+                w["style_guide"] = True
+            self.sections[sid] = {"owner": fn, "head": got[0], "body": got[1], "workflow": w["name"]}
+            html_out = assemble((self.goal or {}).get("site_name") or "Site", self.sections)
+            self.sites.append(html_out)
+            os.makedirs(os.path.join(self.dir, "site"), exist_ok=True)
+            for name in (f"v{len(self.sites)}.html", "index.html"):
+                with open(os.path.join(self.dir, "site", name), "w", encoding="utf-8") as f:
+                    f.write(html_out)
+            self.save("sections.json", self.sections)
+            failed = self._run_checks(w, attempt, html_out)
+            if not failed or attempt >= MAX_CHECK_ATTEMPTS:
+                break
+            evidence = "\n".join(f"- {r['check']} ({r['type']} {r['target']}, expect {r['expect']}): {r['evidence']}"
+                                 for r in failed)
+            self.post("system", f"Code ran {fn}'s checks on attempt {attempt} of {MAX_CHECK_ATTEMPTS}: {len(failed)} "
+                                f"failed. {fn} gets the evidence and tries again.")
         self.write_lock = self.atom = None
-        head = raw.split("```")[0].strip()
-        try:
-            meta = llm.extract_json(head)
-        except ValueError:
-            meta = {"say": head}
-        log = next((c for c in reversed(self.call_log) if c["fn"] == fn), None)
-        if log:   # the structured part of a workflow agent's reply, for the detail view
-            log["reply"] = {"say": meta.get("say"), "next": meta.get("next"), "check": w.get("last_check"),
-                            "head_chars": len(got[0]) if got else 0, "section_chars": len(got[1]) if got else 0}
-            log["reason"] = meta.get("reason") or (self.MOCK_REASON if llm.MOCK else None)
         nxt, note = self._pick(fn, meta.get("next"), ("coordination",), "coordination")
-        if got is None:      # code writes the failure report, so the unusable reply isn't route-checked
-            w["status"] = "failed"
-            self._say(fn, f"@Coordination {fn} failed: {stop}. My section is unchanged.", "coordination", None,
-                      workflow=fn)
-            self._event(fn, "limit_fail", f"{fn}: {stop}")
-            self.save("workflows.json", self.workflows)
-            return self._handoff("coordination", kind="schedule")
-        if first:     # the style guide goes first in the head, so every section can use its variables and classes
-            self.style = guide
-            self.sections = {"style": {"owner": fn, "head": style_css(guide), "body": "", "workflow": "Style guide"},
-                             **self.sections}
-            self.save("style.json", guide)
-            w["style_guide"] = True
-        self.sections[sid] = {"owner": fn, "head": got[0], "body": got[1], "workflow": w["name"]}
-        html_out = assemble((self.goal or {}).get("site_name") or "Site", self.sections)
-        self.sites.append(html_out)
-        os.makedirs(os.path.join(self.dir, "site"), exist_ok=True)
-        for name in (f"v{len(self.sites)}.html", "index.html"):
-            with open(os.path.join(self.dir, "site", name), "w", encoding="utf-8") as f:
-                f.write(html_out)
-        self.save("sections.json", self.sections)
         w["status"], w["version"] = "done", len(self.sites)
         self.save("workflows.json", self.workflows)
         self._say(fn, meta.get("say") or f"{fn} done.", nxt, note, workflow=fn, version=len(self.sites), section=sid,
@@ -3282,6 +3503,108 @@ class J2Run:
         if size > SITE_WARN_BYTES:
             self.post("system", f"Warning: site v{len(self.sites)} is {size / 1000:.0f} KB, over builder.md's ~60 KB "
                                 "single-page rule.", warning=True)
+        if failed:
+            bad = sorted({r["atom"] for r in failed})
+            self.post("system", f"{', '.join(bad)} failed its checks on all {MAX_CHECK_ATTEMPTS} attempts. Code sends "
+                                "the receipts to Adaptation, which decides whether the check or the build is wrong.")
+            return self._handoff("adaptation", kind="atom_failed", wid=fn, atoms=bad)
+        self._handoff("coordination", kind="schedule")
+
+    def _receipt(self, a, c, attempt, res, **extra):
+        """One line of receipts.jsonl: written by code only, never by an agent."""
+        rec = {"atom": a["id"], "check": c.get("text"), "type": c.get("type"), "target": c.get("target"),
+               "expect": c.get("expect"), "actual": res["actual"], "pass": res["pass"], "evidence": res["evidence"],
+               "attempt": attempt, "of": MAX_CHECK_ATTEMPTS, "t": time.strftime("%Y-%m-%dT%H:%M:%S"), "by": "code",
+               **extra}
+        self.receipts.append(rec)
+        os.makedirs(self.dir, exist_ok=True)
+        with open(os.path.join(self.dir, "receipts.jsonl"), "a", encoding="utf-8") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        return rec
+
+    def _run_checks(self, w, attempt, page, atoms=None, **extra):
+        """Code runs every check of the workflow's atoms on the built site; each result is a receipt and the atom keeps
+        its latest ones. Returns the failed receipts."""
+        site_dir, failed = os.path.join(self.dir, "site"), []
+        for a in atoms or w.get("atoms") or []:
+            recs = [self._receipt(a, c, attempt, run_check(c, site_dir, page), **extra)
+                    for c in a.get("verification") or [] if isinstance(c, dict)]
+            a["results"], a["attempts"] = recs, attempt
+            a["status"] = "passed" if all(r["pass"] for r in recs) else "failed"
+            failed += [r for r in recs if not r["pass"]]
+        if w.get("atoms"):
+            n = sum(len(a.get("results") or []) for a in atoms or w["atoms"])
+            self.post("system", f"Code ran {n} check(s) for {w['id']} (attempt {attempt} of {MAX_CHECK_ATTEMPTS}): "
+                                + (f"{len(failed)} failed: " + "; ".join(f"{r['check']} ({r['evidence']})"
+                                                                        for r in failed) if failed else "all passed")
+                                + ".", checks=w["id"])
+        self.save("workflows.json", self.workflows)
+        return failed
+
+    def _adaptation_atom_failed(self, h):
+        """E: a work atom failed its checks on every attempt. Adaptation reads the receipts (all attempts, the check
+        text, Audit's latest view) and decides: the check is wrong (it rewrites it and code re-runs it on the same
+        build), or the build is wrong. Only a wrong build the budget left can't fix goes to Identity. An atom with no
+        fix after its attempts is ESCALATED."""
+        self.step = 2
+        w = self._wf(h.get("wid"))
+        atoms = [a for a in (w or {}).get("atoms") or [] if a["id"] in (h.get("atoms") or [])]
+        if not atoms:
+            return self._handoff("coordination", kind="schedule")
+        recs = [r for r in self.receipts if r["atom"] in {a["id"] for a in atoms}]
+        last = self.audits[-1] if self.audits else None
+        view = ([{k: r.get(k) for k in ("id", "criterion", "verdict", "note")} for r in last["results"]
+                 if r.get("item") in self._wf_items(w) or not r.get("pass")] if last else "no Audit yet")
+        cheapest = RATES.get("fix", min(RATES.values()) if RATES else 1)
+        a0 = atoms[0]
+
+        def mock():
+            bad = [r for r in recs if r["attempt"] == MAX_CHECK_ATTEMPTS and not r["pass"]]
+            if bad and all(r["type"] in ("grep-count", "element-count") for r in bad):
+                fixed = {(r["type"], str(r["target"])): r["actual"] for r in bad}
+                ver = [{**c, "expect": fixed[k], "text": re.sub(r"\d+", str(fixed[k]), c.get("text") or "")}
+                       if (k := (c.get("type"), str(c.get("target")))) in fixed else c for c in a0["verification"]]
+                return json.dumps({"say": f"@Coordination The check is wrong, not the build: the page has "
+                                          f"{bad[0]['actual']} and that is what the goal needs. Check corrected.",
+                                   "verdict": "CHECK_WRONG", "atom": a0["id"], "verification": ver})
+            return json.dumps({"say": "@Coordination The build is wrong: the section misses what the check asks for.",
+                               "verdict": "BUILD_WRONG", "atom": a0["id"],
+                               "affordable": self.budget - self.spent >= cheapest})
+        r = self.call("adaptation", '{"say": str, "verdict": "CHECK_WRONG"|"BUILD_WRONG", "atom": str (the atom id), '
+                      '"verification": [check] (CHECK_WRONG only: the corrected checks, same rules), "affordable": bool '
+                      '(BUILD_WRONG only: can the budget left pay for a fix workflow?)}',
+                      f"WORK ATOM FAILED: {', '.join(a['id'] for a in atoms)} failed its checks on all "
+                      f"{MAX_CHECK_ATTEMPTS} attempts.\nTHE ATOMS: {json.dumps(atoms, ensure_ascii=False)}\nRECEIPTS "
+                      f"(written by code, every attempt): {json.dumps(recs, ensure_ascii=False)}\nAUDIT'S LATEST VIEW: "
+                      f"{json.dumps(view, ensure_ascii=False)}\nDecide whether the check or the build is wrong. "
+                      "CHECK_WRONG: the check doesn't test the goal correctly; send the corrected verification and code "
+                      "re-runs it on the same build. BUILD_WRONG: the section doesn't meet the goal; say whether the "
+                      f"budget left ({self.budget - self.spent}) can pay for a fix." + self.ATOM_RULES, mock)
+        verdict = str(r.get("verdict") or "").upper()
+        a = next((x for x in atoms if x["id"] == r.get("atom")), a0)
+        self._say("adaptation", r.get("say", ""), "coordination", None, act=verdict or "BUILD_WRONG", atom=a["id"])
+        if verdict == "CHECK_WRONG":
+            new = {**a, "verification": r.get("verification")}
+            probs = atom_missing({"atoms": [new]}) or check_problems(new, self._fact_source())
+            if probs:
+                self._reject(f"{a['id']} corrected check", "; ".join(probs))
+            else:
+                a["verification"] = new["verification"]
+                if not self._run_checks(w, MAX_CHECK_ATTEMPTS, self.sites[-1], atoms=[a],
+                                        recheck="check corrected by Adaptation"):
+                    return self._handoff("coordination", kind="schedule")
+        a["status"] = "escalated"
+        self._event("adaptation", "atom_escalated", f"{a['id']}: {verdict or 'no verdict'}")
+        self.save("workflows.json", self.workflows)
+        if verdict == "BUILD_WRONG" and r.get("affordable") is False:
+            self.post("system", f"{a['id']} is ESCALATED: the build is wrong and Adaptation says the budget left can't "
+                                "pay for a fix. Identity decides.")
+            return self._handoff("identity", kind="question", frm="adaptation",
+                                 question=f"{a['id']} ({w['name']}) fails its checks and a fix doesn't fit the budget "
+                                          f"left: {r.get('say')}",
+                                 resume={"to": "coordination", "handoff": {"kind": "schedule"}})
+        self.post("system", f"{a['id']} is ESCALATED after {MAX_CHECK_ATTEMPTS} failed attempts with no fix. Audit "
+                            "checks the site; Adaptation proposes the fix from its findings.")
         self._handoff("coordination", kind="schedule")
 
     # ------------------------------------------------------------------ J2.g: Audit
@@ -3681,6 +4004,8 @@ class J2Run:
             "budget": {"start": BUDGET, "granted": self.budget, "used": self.spent, "raises": self.raises},
             "ai_calls": self.calls, "cycles": self.cycle,
             "links": self._links(),
+            "verification": {**{k: sum(a.get("status") == k for w in self.workflows for a in w.get("atoms") or [])
+                                for k in ("passed", "failed", "escalated")}, "checks_run": len(self.receipts)},
             "identity_to_requester_decisions": sum(m["who"] == "identity" and m.get("pause") in DECISION_PAUSES
                                                    for m in self.chat),
             "identity_to_requester_facts": sum(m["who"] == "identity" and m.get("pause") in ("fact", "info")

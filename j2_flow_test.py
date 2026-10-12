@@ -1010,7 +1010,7 @@ def work_atom_cards():
                          ("Context", "What it needs to know"), ("How", "Who builds it"),
                          ("Verification", "The check that proves the goal is met")):
         assert f"<dt>{label}<br>" in a1 and gloss in a1, label
-    assert "written by Adaptation, not run by code yet" in a1 and "{" not in re.sub(r"<[^>]+>", "", a1.split("Run details")[0])
+    assert re.search(r"Passed</span>: [^<]+ <span class=\"empty\">Attempt 1 of 3", a1) and "not run" not in a1 and "{" not in re.sub(r"<[^>]+>", "", a1.split("Run details")[0])
     run1, run2 = block("run-W-1.a1"), block("run-W-1.a2")
     labels = re.findall(r"<(?:h4|summary)>([^<]*)<", run1)
     assert labels == ["Run details", "Prompt sent", "Reply received", "Reason given", "Cost", "Attempts"], labels
@@ -1021,6 +1021,106 @@ def work_atom_cards():
     pane = re.sub(r"<h4>Prompt sent</h4>.*?<h4>", "", pane, flags=re.S)       # the prompt is shown as it was sent
     pane = htmllib.unescape(re.sub(r"<[^>]+>", " ", pane))
     assert "Limits" in pane and not re.search(r"envelope|done.when", pane, re.I), "plain words in the Detailed view"
+
+
+def atom_checks():
+    """Verification is real: the validator's check rules, code running each atom's checks into receipts.jsonl, and a
+    third failed attempt going to Adaptation before Identity (Identity only for a wrong build that doesn't fit)."""
+    run = j2.J2Run()
+    say(run, BREW_LAB)
+    finish(run)
+    src, a = run._fact_source(), j2.mock_atom({"covers": [1]})
+    assert not j2.check_problems(a, src), j2.check_problems(a, src)
+    # facts-present: every string must come from the charter or the Requester's answers (no invented facts)
+    fact = {"text": "Name and area shown", "type": "facts-present", "target": ["brew  LAB", "Indiranagar"], "expect": True}
+    assert not j2.check_problems({**a, "verification": [fact]}, src)
+    bad = j2.check_problems({**a, "verification": [{**fact, "target": ["Brew Lab", "+91 98450 12345"]}]}, src)
+    assert len(bad) == 1 and "['+91 98450 12345'], not found in the charter" in bad[0], bad
+    # counts: label and expect must agree; targets only ids and classes the atom tells the builder to create
+    how = {"kind": "AI", "agent": "Builder", "steps": "Write section #events with one .event-option per event"}
+    opt = {"text": "8 event options", "type": "element-count", "target": ".event-option", "expect": 9}
+    bad = j2.check_problems({**a, "how": how, "verification": [opt]}, src)
+    assert bad == ["check 1 says '8 event options' but expects 9"], bad
+    assert not j2.check_problems({**a, "how": how, "verification": [{**opt, "expect": 8}]}, src)
+    for t in ("Day 1", "hello@brewlab.in", ".untold-class"):
+        bad = j2.check_problems({**a, "how": how, "verification": [{**opt, "text": "event options", "target": t}]}, src)
+        assert len(bad) == 1 and "targets" in bad[0], (t, bad)
+    assert j2.check_problems({**a, "verification": [{**opt, "type": "screenshot-diff"}]}, src)[0].startswith(
+        "check 1 has type 'screenshot-diff'")
+    # a goal naming times whose checks only count headings is flagged, and sent back to Adaptation once
+    timed = {**a, "goal": "Opening hours 8am to 9pm are listed", "how": {**how, "steps": "h2 headings, class hours-head"},
+             "verification": [{"text": "2 hours headings", "type": "element-count", "target": ".hours-head", "expect": 2}]}
+    assert j2.check_problems(timed, src) == ["its goal names a time, price, number or email but no check is "
+                                             "facts-present or a named test"], j2.check_problems(timed, src)
+
+    def patched(edit, reply=lambda r, fn: r, done=True):
+        """A run whose first Adaptation proposal has its first atom changed by edit (once)."""
+        run, hit = j2.J2Run(), []
+        orig = run.call
+
+        def call(fn, fmt, task, mock, **k):
+            r = orig(fn, fmt, task, mock, **k)
+            if fn == "adaptation" and isinstance(r, dict) and r.get("workflows") and not run.workflows and not hit:
+                hit.append(1)
+                edit(r["workflows"][0]["atoms"][0])
+            return reply(r, fn)
+        run.call = call
+        say(run, BREW_LAB)
+        if done:
+            finish(run)
+        return run
+    run = patched(lambda at: at.update({k: v for k, v in timed.items() if k != "context"}))
+    assert "names a time, price, number or email" in run.rejections[0]["reason"], run.rejections
+    assert len([c for c in calls_of(run) if "THE VALIDATOR REJECTED" in c["prompt"]]) == 1
+    assert run.outcome.startswith("Done"), run.outcome
+
+    # three failed attempts: the receipts go to Adaptation; it corrects the check and Identity is never called
+    def four_cards(at):
+        at["how"] = {**at["how"], "steps": "Give every card the class j2-card."}
+        at["verification"].append({"text": "4 cards", "type": "element-count", "target": ".j2-card", "expect": 4})
+    run = patched(four_cards)
+    calls = calls_of(run)
+    i = next(n for n, c in enumerate(calls) if "WORK ATOM FAILED" in c["prompt"])
+    assert calls[i]["fn"] == "adaptation" and [c["fn"] for c in calls[i - 3:i]] == ["W-1"] * 3, [c["fn"] for c in calls]
+    assert "ATTEMPT 3 OF 3" in calls[i - 1]["prompt"] and "0 element(s) match '.j2-card'" in calls[i - 1]["prompt"]
+    nxt = next(n for n, c in enumerate(calls) if n > i and c["fn"] != "adaptation")
+    assert calls[nxt]["fn"] != "identity" and not any(c["fn"] == "identity" for c in calls[i:nxt]), calls[nxt]["fn"]
+    at = run._wf("W-1")["atoms"][0]
+    card = [r for r in run.receipts if r["target"] == ".j2-card"]
+    assert [(r["attempt"], r["expect"], r["actual"], r["pass"]) for r in card] == \
+        [(1, 4, 0, False), (2, 4, 0, False), (3, 4, 0, False), (3, 0, 0, True)], card
+    assert card[-1]["recheck"] == "check corrected by Adaptation" and at["status"] == "passed", at
+    assert run.outcome.startswith("Done"), run.outcome
+    # receipts: written by code only, one per check run, matching each atom's checks
+    lines = [json.loads(x) for x in open(os.path.join(run.dir, "receipts.jsonl"), encoding="utf-8")]
+    assert lines == run.receipts and all(r["by"] == "code" and r["of"] == 3 and r["t"] for r in lines)
+    for w in run.workflows:
+        for x in w["atoms"]:
+            ran = [(r["check"], r["type"], r["target"], r["expect"]) for r in lines
+                   if r["atom"] == x["id"] and r["attempt"] == x["attempts"]][-len(x["verification"]):]
+            assert ran == [(c["text"], c["type"], c["target"], c["expect"]) for c in x["verification"]], (x["id"], ran)
+            assert x["results"] == [r for r in lines if r["atom"] == x["id"]][-len(x["verification"]):]
+    assert not any("receipts.jsonl" in str(c.get("raw")) for c in calls), "an agent wrote a receipt"
+    v = json.load(open(os.path.join(run.dir, "summary.json"), encoding="utf-8"))["verification"]
+    assert v == {"passed": len(run.workflows), "failed": 0, "escalated": 0, "checks_run": len(lines)}, v
+
+    # a wrong build the budget left can't fix: Adaptation first, then Identity; the atom is ESCALATED
+    def missing_fact(at):
+        at["verification"].append({**fact, "target": ["Indiranagar"]})
+
+    def unaffordable(r, fn):
+        if fn == "adaptation" and isinstance(r, dict) and r.get("verdict") == "BUILD_WRONG":
+            r["affordable"] = False
+        return r
+    run = patched(missing_fact, unaffordable, done=False)
+    calls = calls_of(run)
+    i = next(n for n, c in enumerate(calls) if "WORK ATOM FAILED" in c["prompt"])
+    assert calls[i]["fn"] == "adaptation" and not any(c["fn"] == "identity" for c in calls[i - 3:i])
+    assert calls[i + 1]["fn"] == "identity" and "fails its checks" in calls[i + 1]["prompt"], calls[i + 1]["fn"]
+    assert run._wf("W-1")["atoms"][0]["status"] == "escalated"
+    finish(run)
+    v = json.load(open(os.path.join(run.dir, "summary.json"), encoding="utf-8"))["verification"]
+    assert v["escalated"] == 1, v
 
 
 def detail_stays_open():
@@ -2076,6 +2176,7 @@ if __name__ == "__main__":
         build_before_asking()
         print(f"J2_FIXES={mode}: vague brief (both answers), full brief, budget question rejected and re-asked, below-floor proposal with left_out, one decision question after the ruling, core marks from J2.a, deferred twice, connections at three budgets, funded work built before the question ok")
         workflow_agents()
+        atom_checks()
         same_failure()
         cycle_limit()
         to_be_confirmed()
@@ -2091,7 +2192,7 @@ if __name__ == "__main__":
         intake_needs()
         playbooks()
         summary_before_review()
-        print(f"J2_FIXES={mode}: B workflow agents, C workable loop and limits, D memory, F forced audit failure (hidden from agents) and test lessons, summary before review, H style guide, rubric loop, needs, playbooks, I pricing and unpaid items ok")
+        print(f"J2_FIXES={mode}: B workflow agents, atom checks (rules, receipts, third failure to Adaptation), C workable loop and limits, D memory, F forced audit failure (hidden from agents) and test lessons, summary before review, H style guide, rubric loop, needs, playbooks, I pricing and unpaid items ok")
     ruling_over_budget()
     redirect()
     workable_unit()
