@@ -323,10 +323,11 @@ function atomRow(a, k, w){
   // each check with what code found when it ran it (the atom's latest receipts)
   return (Array.isArray(v) ? v : []).map((c, i) => { const r = (a.results || [])[i];
     const st = !r ? '<span class="empty">Not run yet.</span>'
+      : r.pass === null ? `<span class="empty">Could not run</span>: ${esc(sentence(r.evidence))} <span class="empty">Not counted as a failed attempt.</span>`
       : `<span class="${r.pass ? "pass" : "fail"}">${r.pass ? "Passed" : a.status === "escalated" ? "Failed, escalated" : "Failed"}</span>: ${esc(sentence(r.evidence))} <span class="empty">Attempt ${r.attempt} of ${r.of}${r.recheck ? ", " + esc(r.recheck) : ""}.</span>`;
     return `${esc(sentence(typeof c === "string" ? c : c.text))}<br>${st}`; }).join("<br>");
 }
-const ATOM_STATUS = {passed: "checks passed", failed: "checks failing", escalated: "ESCALATED"};
+const ATOM_STATUS = {passed: "checks passed", failed: "checks failing", escalated: "ESCALATED", "could not run": "a check could not run"};
 function runDetails(s, a, w){
   const calls = s.call_log.filter(c => c.atom === a.id), none = '<p class="empty">No AI call yet.</p>';
   const each = (f, raw) => calls.length ? calls.map(c => `<p><span class="code">call ${c.id}</span> ${esc(raw ? f(c) : dv(f(c)))}</p>`).join("") : none;
@@ -343,7 +344,7 @@ function atomCards(s, w){
   const atoms = w.atoms || [];
   if (!atoms.length) return '<p class="empty">No work atoms: registered before work atoms existed.</p>';
   return atoms.map((a, i) => `<details class="atom" data-key="atom-${esc(a.id)}"${atoms.length === 1 ? " open" : ""}>
-    <summary><b>Work atom ${i + 1}</b> <span class="code">${esc(a.id)}</span> · ${esc(dv(words(a.goal)))} <span class="${a.status === "passed" ? "pass" : a.status ? "fail" : "empty"}">· ${(a.verification || []).length} check(s), ${ATOM_STATUS[a.status] || "not run yet"}${a.attempts ? `, attempt ${a.attempts} of 3` : ""}</span></summary>
+    <summary><b>Work atom ${i + 1}</b> <span class="code">${esc(a.id)}</span> · ${esc(dv(words(a.goal)))} <span class="${a.status === "passed" ? "pass" : a.status && a.status !== "could not run" ? "fail" : "empty"}">· ${(a.verification || []).length} check(s), ${ATOM_STATUS[a.status] || "not run yet"}${a.attempts ? `, attempt ${a.attempts} of 3` : ""}</span></summary>
     <dl>${ATOM_ROWS.map(([k, label, gloss]) => `<dt>${label}<br><span class="empty">${gloss}</span></dt><dd>${atomRow(a, k, w)}</dd>`).join("")}</dl>
     ${runDetails(s, a, w)}</details>`).join("");
 }

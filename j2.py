@@ -391,8 +391,8 @@ def run_check(c, site_dir, page):
                     "evidence": f"{n} element(s) match {target!r}, expected {expect}"}
         if t == "tap-targets":
             r, want = j2_check.tap_targets(page, str(target), as_int(expect, j2_check.TAP_MIN)), as_int(expect, 44)
-            if not r.get("available"):
-                return {"actual": None, "pass": False, "evidence": f"the browser check couldn't run: {r.get('note')}"}
+            if not r.get("available"):      # no browser: the check didn't run, which says nothing about the build
+                return {"actual": None, "pass": None, "evidence": f"could not run: {r.get('note')}"}
             ok = r["roots"] > 0 and r["checked"] > 0 and not r["small_count"]
             return {"actual": {k: r[k] for k in ("roots", "checked", "small_count", "small")}, "pass": ok,
                     "evidence": (f"nothing on the page matches {target!r}" if not r["roots"] else
@@ -556,13 +556,29 @@ def gap_kind(g):
     return next((k for end, k in GAP_KINDS if g.endswith(end)), "built but failing")
 
 
-def short(text, n=7):
-    """A checklist item's short name: its first clause, at most n words."""
-    words = re.split(r"[,:;(]| - ", str(text))[0].split()[:n]
-    while len(words) > 1 and words[-1].lower() in ("a", "an", "the", "and", "or", "of", "for", "with", "to", "in", "on",
+def short(text, n=7, clause=True):
+    """A checklist item's short name: its first clause (the whole text with clause=False), at most n words."""
+    words = (re.split(r"[,:;(]| - ", str(text))[0] if clause else str(text)).split()[:n]
+    while clause and len(words) > 1 and words[-1].lower() in ("a", "an", "the", "and", "or", "of", "for", "with", "to", "in", "on",
                                                     "is", "are"):
-        words.pop()             # never end on a joining word ("about the beans and the")
+        words.pop()             # never end on a joining word ("about the beans and the"); a longer name, made to
+                                # tell two items apart, keeps its last word ("Hall A")
     return " ".join(words) or str(text)[:40]
+
+
+def shorts(texts, n=7):
+    """Short names that are unique within one list: items that share a short name get longer ones (past the first
+    clause if need be) until they differ. Identical texts are the same item and keep the same name."""
+    texts = list(texts)
+    out, k = [short(t, n) for t in texts], n
+    longest = max((len(str(t).split()) for t in texts), default=0)
+
+    def clashes():       # names shared by different texts
+        return {o for o in out if len({t for t, x in zip(texts, out) if x == o}) > 1}
+    while (c := clashes()) and k <= longest:
+        out = [short(t, k, clause=False) if o in c else o for t, o in zip(texts, out)]
+        k += 1
+    return out
 
 
 def and_list(xs):
@@ -696,8 +712,10 @@ def mock_section(w, goal, sections):
                     "</form></section>")
         return (f'<section data-item="{i}"><h2>{html.escape(str(d))}</h2><p>Sample content (replace before '
                 "launch).</p></section>")
-    items = "".join(item(i, d) for i, d in enumerate(g.get("done_when") or [], 1)
-                    if "phone" not in str(d).lower() and f'data-item="{i}"' not in others)
+    orig = g.get("charter_items") or g.get("done_when") or []      # charter numbers: stable after drops
+    items = "".join(item(orig.index(d) + 1 if d in orig else i, d) for i, d in enumerate(g.get("done_when") or [], 1)
+                    if "phone" not in str(d).lower()
+                    and f'data-item="{orig.index(d) + 1 if d in orig else i}"' not in others)
     return "", items or f"<section><h2>{html.escape(w['name'])}</h2><p>Sample content.</p></section>"
 
 
@@ -806,13 +824,17 @@ def forced_note(criterion):
                 "isn't fully met.")
 
 
+FINDING_ID = re.compile(r"F-\d+")
+
+
 def workable(audit):
     """Code's verdict on the latest audit, no model: what stops the site being workable ([] = workable).
     Every done-when item passes Audit (a "to be confirmed" item never does), and the render check found no JS
     errors, no horizontal overflow at 360px or 1280px, no broken form and no broken in-page link."""
     if not audit:
         return ["no site has been audited yet"]
-    out = [f"done-when item {r['item']} ({r['id']} {r['verdict']}): {r['criterion']}" for r in audit["results"]
+    num = lambda r: r["id"][2:] if FINDING_ID.fullmatch(str(r["id"])) else r["item"]    # F-n is charter item n
+    out = [f"done-when item {num(r)} ({r['id']} {r['verdict']}): {r['criterion']}" for r in audit["results"]
            if not r["pass"]]
     out += [f"design rubric {r['id']} ({r['verdict']}): {r['criterion']}" for r in audit.get("rubric", []) if not r["pass"]]
     mech = audit.get("mechanical") or {}
@@ -1064,6 +1086,7 @@ class J2Run:
         while os.path.exists(self.dir):          # two runs started in the same second get separate folders
             self.dir = os.path.join(RUNS_DIR, f"j2-{self.run_id}-{n}")
             n += 1
+        self.run_id = os.path.basename(self.dir)[3:]     # and separate ids (lesson and playbook ids use it)
         self.chat, self.workflows, self.conflicts, self.audits, self.sites = [], [], [], [], []
         self.goal, self.stamped, self.request = None, False, ""
         self.spent, self.cycle, self.calls, self.step = 0, 0, 0, 0
@@ -1219,7 +1242,11 @@ class J2Run:
         audits = [{"cycle": a["cycle"], "version": a["version"], "all_pass": a["all_pass"],
                    "results": [{k: r.get(k) for k in ("id", "criterion", "verdict", "severity", "note")} for r in a["results"]]}
                   for a in self.audits]
-        return json.dumps({"requester_brief": self.request, "requester_feedback": self.feedback, "charter": self.goal,
+        # Agents see every checklist item under its charter number (never its position, which shifts after a drop).
+        charter = self.goal and {**{k: v for k, v in self.goal.items() if k != "charter_items"},
+                                 "done_when": [{"item": self._no(c), "criterion": c}
+                                               for c in self.goal.get("done_when") or []]}
+        return json.dumps({"requester_brief": self.request, "requester_feedback": self.feedback, "charter": charter,
                            "requester_decisions": self.decisions,
                            "budget": None if blind else {"total": self.budget, "spent": self.spent,
                                                          "remaining": self.budget - self.spent},
@@ -1233,8 +1260,9 @@ class J2Run:
                            "style_guide": self.style,
                            "rate_card": ({"prices": RATES, "rule": "a workflow costs the sum of its parts' prices; "
                                           "estimated_resources.money is ignored; list a part once per unit",
-                                          "item_minimums": [{"item": i, "kind": item_kind(c), "min": item_min(c)}
-                                                            for i, c in enumerate((self.goal or {}).get("done_when") or [], 1)],
+                                          "item_minimums": [{"item": self._no(c), "kind": item_kind(c),
+                                                             "min": item_min(c)}
+                                                            for c in (self.goal or {}).get("done_when") or []],
                                           "fix_rule": "one 'fix' part per Audit finding fixed"}
                                          if RATES and not blind else None)}, ensure_ascii=False)
 
@@ -1499,7 +1527,7 @@ class J2Run:
 
     def _override(self, cmd):
         """Owner override (J2_OVERRIDE_KEY, in .env only): code applies the command directly and posts a visible note.
-        "budget +N" ignores the cap, "ship" ends the run as it is, "drop <item>" (number or words) leaves an item out."""
+        "budget +N" ignores the cap, "ship" ends the run as it is, "drop <item>" (charter number or words) leaves an item out."""
         g = self.goal or {}
         crit = g.get("done_when") or []
         note = None
@@ -1514,7 +1542,7 @@ class J2Run:
             note = "ship: the run ends with the site as it is"
         elif m := re.fullmatch(r"drop\s+(.+)", cmd, re.I):
             want = m[1].strip()
-            hit = [c for j, c in enumerate(crit, 1) if want == str(j) or (len(want) > 2 and want.lower() in c.lower())]
+            hit = [c for c in crit if want == str(self._no(c)) or (len(want) > 2 and want.lower() in c.lower())]
             if hit:
                 g["done_when"] = [c for c in crit if c not in hit]
                 g["dropped_by_requester"] = (g.get("dropped_by_requester") or []) + hit
@@ -1965,7 +1993,8 @@ class J2Run:
         """Audit's full findings for Identity: every id, verdict, severity and text, done-when items and extra issues."""
         a = audit or (self.audits[-1] if self.audits else None)
         keys = ("id", "item", "criterion", "verdict", "severity", "confidence", "note", "needs_requester_fact")
-        return [{k: r.get(k) for k in keys if r.get(k) is not None}
+        return [{**{k: r.get(k) for k in keys if r.get(k) is not None},
+                 **({"item": self._no(r["criterion"])} if r in a["results"] else {})}
                 for r in (a["results"] + a.get("rubric", []) + a.get("extra_issues", []) if a else [])]
 
     def _identity_hears_requester(self, h):
@@ -2063,15 +2092,16 @@ class J2Run:
         if limit and self.last_limit:
             self.last_limit["decision"] = decision
         gone = [crit[i - 1] for i in drops]
-        names = and_list(f"F-{self._no(c)} {short(c)}" for c in gone)
+        label = {**self._names(crit), **dict(zip(h.get("drop_texts") or [], h.get("drop_named") or []))}
+        names = and_list(label[c] for c in gone)    # the option's own names when it was the option
         if limit and decision == "drop" and ONLY_PICK.fullmatch(answer) and "drop_texts" in h:
             # The check: the items the option named are exactly the items dropped.
             if sorted(gone) != sorted(named):
                 self._event("system", "drop_mismatch", f"named {named}, dropping {gone}")
-                gone, names = list(named), and_list(f"F-{self._no(c)} {short(c)}" for c in named)
+                gone, names = list(named), and_list(label[c] for c in named)
         if self.decisions and limit:
             self.decisions[-1].update(named=h.get("drop_named") if decision == "drop" and "drop_texts" in h else [],
-                                      dropped=[f"F-{self._no(c)} {short(c)}" for c in gone])
+                                      dropped=[label[c] for c in gone])
         if gone:
             # Code writes what was left out: Identity's own words could name different items than code drops.
             r["to_requester"] = (f"Got it. We'll leave out {names}" + (f" and add {add} work credits" if add and
@@ -2163,18 +2193,25 @@ class J2Run:
             return "not built" if waiting else "unfunded"
         return "built but failing" if "done" in st else "not built" if waiting else "unfunded"
 
+    def _names(self, texts):
+        """{item text: "F-n short name"} with short names unique among these texts."""
+        texts = list(dict.fromkeys(texts))
+        return {t: f"F-{self._no(t)} {x}" for t, x in zip(texts, shorts(texts))}
+
     def _gap_rows(self, gaps, last, left):
         """The unfinished list as rows: name (F-n with the item's run-long number and its short text, or the rubric
         id), Audit's status, and whether "leave out" drops it. The question, its options and the drop that code
         applies are all made from these rows, so the message and the outcome can't disagree."""
         crit = (self.goal or {}).get("done_when") or []
         rubric = {r["criterion"]: r["id"] for r in (last or {}).get("rubric", [])}
+        names = self._names(t for g in gaps for t in [re.sub(r" \((?:not built yet|not checked yet)\)$", "", g)]
+                            if t in crit)
         rows = []
         for g in gaps:
             t = re.sub(r" \((?:not built yet|not checked yet)\)$", "", g)
             if t in crit:
                 st = self._item_status(t, g)
-                rows.append({"name": f"F-{self._no(t)} {short(t)}", "text": t, "status": st,
+                rows.append({"name": names[t], "text": t, "status": st,
                              "drop": st != "built, not checked yet" and not (left and must_keep(t, self.goal))})
             else:
                 rows.append({"name": f"{rubric[t]} {short(t)}" if t in rubric else t, "text": t, "status": "failing",
@@ -2473,8 +2510,9 @@ class J2Run:
             last = self.audits[-1] if self.audits else None
             fails = [r for r in (last["results"] + last.get("rubric", []) + last.get("extra_issues", []) if last else [])
                      if not r.get("pass")]
-            f = next((r for r in fails if about.lower() in (str(r.get("id")).lower(), f"item {r.get('item')}",
-                                                             str(r.get("item")))), None)
+            num = lambda r: self._no(r["criterion"]) if r in last["results"] else r.get("item")    # charter number
+            f = next((r for r in fails if about.lower() in (str(r.get("id")).lower(), f"item {num(r)}",
+                                                             str(num(r)))), None)
             if not f:
                 return False, f"no failing Audit finding '{about}'"
             sid = f["id"]
@@ -2675,7 +2713,8 @@ class J2Run:
                                  reason=f"Out of budget: {self.budget - self.spent} of {self.budget} work credits left, less "
                                         "than the cheapest rate-card part, so Adaptation can propose nothing.")
         last = self.audits[-1] if self.audits else None
-        fails = [{k: r.get(k) for k in ("id", "item", "criterion", "verdict", "note")}
+        fails = [{**{k: r.get(k) for k in ("id", "item", "criterion", "verdict", "note")},
+                  **({"item": self._no(r["criterion"])} if last and r in last["results"] else {})}   # charter numbers
                  for r in (last["results"] + last.get("rubric", []) + last.get("extra_issues", []) if last else [])
                  if not r.get("pass")]
         held = [{"id": w["id"], "name": w["name"]} for w in self.workflows if w["status"] == "held"]
@@ -2693,8 +2732,8 @@ class J2Run:
 
         crit = (self.goal or {}).get("done_when") or []
 
-        def items(pat, kinds=None, skip=r"$^"):
-            return [i for i, c in enumerate(crit, 1) if re.search(pat, c, re.I) and not re.search(skip, c, re.I)
+        def items(pat, kinds=None, skip=r"$^"):             # charter numbers, as an agent writes them
+            return [self._no(c) for c in crit if re.search(pat, c, re.I) and not re.search(skip, c, re.I)
                     and (kinds is None or item_kind(c) in kinds)]
 
         def mock_plain():
@@ -2703,7 +2742,7 @@ class J2Run:
                 return json.dumps({"say": f"@Priority The Requester asked: \"{self.feedback}\". One workflow covers it.",
                                    "act": "PROPOSE", "next": "Priority",
                                    "workflows": [{"name": "Requester change", "goal_gap": self.feedback,
-                                                  "parts": ["page_section"], "covers": [len(crit)],
+                                                  "parts": ["page_section"], "covers": [self._no(crit[-1])],
                                                   "outputs": ["index.html"], "completion_check": "Change visible"}]})
             phone = next((f for f in fails if "phone" in str(f["criterion"]).lower()      # the done-when item, not R-6
                           and not str(f["id"]).startswith("R-")), None)
@@ -2732,12 +2771,13 @@ class J2Run:
                                    "workflows": others})
             if self.cycle == 1 and not self.workflows:
                 extra = r"bean|farm|loyal|phone"
-                core = [i for i in items(r".", {"page_section"}, extra) if i != 1][:3] + items(r".", {"form"}, extra)[:1]
+                core = [i for i in items(r".", {"page_section"}, extra) if i != self._no(crit[0])][:3] \
+                    + items(r".", {"form"}, extra)[:1]
                 return json.dumps({"say": "@Priority Proposal for cycle 1: scaffold and styling, the charter's core "
                                           "sections, a stories section for warmth, and subtle animations.",
                                    "act": "PROPOSE", "next": "Priority", "workflows": [
                                        {"name": "Scaffold and styling", "goal_gap": "No site exists",
-                                        "parts": ["page_section", "styling"], "covers": [1], "outputs": ["index.html"],
+                                        "parts": ["page_section", "styling"], "covers": [self._no(crit[0])], "outputs": ["index.html"],
                                         "completion_check": "index.html loads"},
                                        {"name": "Core sections", "goal_gap": "Every done-when section",
                                         "parts": ["page_section", "page_section", "page_section", "form"], "covers": core,
@@ -2768,7 +2808,7 @@ class J2Run:
                 r.update(playbook_used=pb_offer[0]["id"], playbook_changes="Sections adjusted to this brief.")
             return json.dumps(r)
         g = self.goal or {}
-        keep = [i for i, c in enumerate(crit, 1) if must_keep(c, g)]
+        keep = [self._no(c) for c in crit if must_keep(c, g)]
         fmt = ('{"say": str, "act": "PROPOSE"|"POLICY_QUESTION"|"DISPUTE", "workflows": '
                       + self.WF_FMT + ', "left_out": [{"item": int, "reason": str}] (done-when items this proposal '
                       'leaves out because the budget left can\'t pay for them), "question": str|null, "dispute": {"with": "Audit"|"Coordination", "about": str '
@@ -2868,7 +2908,8 @@ class J2Run:
             self.post("system", f"TEST LESSON: Adaptation used {used}, a lesson from a forced test failure "
                                 "(J2_MEMORY_TEST_LESSONS=1, demo runs only). It is not evidence from a real fix.",
                       warning=True, test=True)
-        out = [as_int(x.get("item") if isinstance(x, dict) else x) for x in r.get("left_out") or []]
+        at = self._item_at()          # left_out names charter numbers
+        out = [at.get(as_int(x.get("item") if isinstance(x, dict) else x)) for x in r.get("left_out") or []]
         self.a_named = [c for i, c in enumerate(crit, 1) if i in out or any(i in self._covers(w) for w in wfs)]
         if not wfs and (left := self._left_by_ruling()):
             if self._waiting_work():
@@ -2933,12 +2974,13 @@ class J2Run:
         for i in todo:
             c, cost = crit[i - 1], item_min(crit[i - 1])
             if cost > left:
-                out.append({"item": i, "reason": f"costs {cost}, only {left} left after the items before it"})
+                out.append({"item": self._no(c), "reason": f"costs {cost}, only {left} left after the items before it"})
                 continue
             left -= cost
             first = not self.sites and not self.workflows and not wfs     # the first workflow lays out the page
             wfs.append({"name": f"{'Scaffold and item' if first else 'Build item'} {i}", "goal_gap": c,
-                        "parts": [item_kind(c)], "covers": [i], "outputs": ["index.html"], "completion_check": c})
+                        "parts": [item_kind(c)], "covers": [self._no(c)], "outputs": ["index.html"],
+                        "completion_check": c})
         wfs = with_atoms(wfs)
         say = f"@Priority The cheapest done-when items that fit the {self.budget - self.spent} left: " + \
             (", ".join(w["name"] for w in wfs) or "none") + "." + \
@@ -2994,7 +3036,7 @@ class J2Run:
 
         def mock():
             if dec == "refuse" or self.exchanges in (1, 3) and self.cycle == 1:
-                beans = [i for i, c in enumerate((self.goal or {}).get("done_when") or [], 1) if re.search(r"bean|farm", c, re.I)]
+                beans = [self._no(c) for c in (self.goal or {}).get("done_when") or [] if re.search(r"bean|farm", c, re.I)]
                 stories = {"name": "Stories section", "goal_gap": "Warm content: the beans, the farms and the people",
                            "covers": beans,
                            "parts": ["blog_post"] * 2, "outputs": ["stories section"], "completion_check": "2 stories"}
@@ -3138,7 +3180,8 @@ class J2Run:
             covers = self._covers(w)
             rc = price(w)[0]
             mins = sum(item_min(crit[i - 1]) for i in covers)
-            out.append({"workflow": w.get("name"), "covers": covers, "fixes": w.get("fixes") or [], "price": rc,
+            out.append({"workflow": w.get("name"), "covers": [self._no_at(i) for i in covers],
+                        "fixes": w.get("fixes") or [], "price": rc,
                         "rate_card_minimum_for_items": mins,
                         "per_item": round(rc / len(covers), 1) if covers and rc is not None else None})
         return out
@@ -3306,7 +3349,7 @@ class J2Run:
                 defaults.append(f"{name}: no money_limit granted, charged the estimate ({c})")
             covered |= set(self._covers(w))
             wf = {"id": f"W-{len(self.workflows) + 1}", "proposal_id": w.get("id"), "name": w.get("name", "workflow"),
-                  "covers": self._covers(w), "fixes": [str(f) for f in w.get("fixes") or []],
+                  "covers": [self._no_at(i) for i in self._covers(w)], "fixes": [str(f) for f in w.get("fixes") or []],
                   "covers_text": [((self.goal or {}).get("done_when") or [])[i - 1] for i in self._covers(w)],
                   "purpose": w.get("purpose") or w.get("goal_gap", ""), "cost": c, "estimate": w.get("estimate", wf_cost(w)),
                   "envelope": env, "charged": True, "calls_used": 0, "retries_used": 0, "outputs": w.get("outputs"),
@@ -3336,11 +3379,13 @@ class J2Run:
         crit = (self.goal or {}).get("done_when") or []
         if "covers_text" in w:
             return [crit.index(t) + 1 for t in w["covers_text"] if t in crit]
-        return [i for i in w.get("covers") or [] if isinstance(i, int) and 1 <= i <= len(crit)]
+        return self._covers(w)
 
     def _covers(self, w):
-        n = len((self.goal or {}).get("done_when") or [])
-        return sorted({as_int(i) for i in w.get("covers") or [] if 1 <= as_int(i) <= n})
+        """Current positions of the items a workflow covers. covers holds charter numbers (what agents see and write),
+        so after a drop covers [5] still means charter item 5; a dropped item is simply gone."""
+        at = self._item_at()
+        return sorted({at[as_int(i)] for i in w.get("covers") or [] if as_int(i) in at})
 
     def _underpriced(self, w, rc, covered):
         """Cost follows the work (J2.e). None when the price holds, else the exact reason:
@@ -3664,13 +3709,19 @@ class J2Run:
             recs = [self._receipt(a, c, attempt, run_check(c, site_dir, page), **extra)
                     for c in a.get("verification") or [] if isinstance(c, dict)]
             a["results"], a["attempts"] = recs, attempt
-            a["status"] = "passed" if all(r["pass"] for r in recs) else "failed"
-            failed += [r for r in recs if not r["pass"]]
+            # pass None = could not run (no browser): never a failed attempt, never escalated
+            a["status"] = "failed" if any(r["pass"] is False for r in recs) else \
+                "could not run" if any(r["pass"] is None for r in recs) else "passed"
+            failed += [r for r in recs if r["pass"] is False]
         if w.get("atoms"):
             n = sum(len(a.get("results") or []) for a in atoms or w["atoms"])
             self.post("system", f"Code ran {n} check(s) for {w['id']} (attempt {attempt} of {MAX_CHECK_ATTEMPTS}): "
                                 + (f"{len(failed)} failed: " + "; ".join(f"{r['check']} ({r['evidence']})"
-                                                                        for r in failed) if failed else "all passed")
+                                                                        for r in failed) if failed else
+                                   "all the others passed; could not run: " + "; ".join(
+                                       r["check"] for a in atoms or w["atoms"] for r in a["results"] if r["pass"] is None)
+                                   if any(a.get("status") == "could not run" for a in atoms or w["atoms"]) else
+                                   "all passed")
                                 + ".", checks=w["id"])
         self.save("workflows.json", self.workflows)
         return failed
@@ -3797,11 +3848,11 @@ class J2Run:
         def like(item, finding):        # share of the finding's words that the item's text contains
             words = set(re.findall(r"[a-z0-9]{4,}", str(finding).lower()))
             return len(words & set(re.findall(r"[a-z0-9]{4,}", str(item).lower()))) / len(words) if words else 0
-        cands = []
-        if 1 <= n <= len(crit):
-            cands.append(crit[n - 1])
-        if orig != crit and 1 <= n <= len(orig):
+        cands = []                       # the charter number first: that's the numbering Audit is given
+        if 1 <= n <= len(orig):
             cands.append(orig[n - 1])
+        if orig != crit and 1 <= n <= len(crit):
+            cands.append(crit[n - 1])
         if not cands:                    # no usable number: the closest current or dropped item by text
             best = max(crit + dropped, key=lambda c: like(c, text), default=None)
             cands = [best] if best and like(best, text) >= 0.6 else []
@@ -3843,8 +3894,8 @@ class J2Run:
 
         def mock():
             fs = []
-            for i, c in enumerate(crit, 1):
-                phone = "phone" in c.lower()
+            for c in crit:
+                phone, i = "phone" in c.lower(), self._no(c)
                 ok = 'name="viewport"' in site if phone else f'data-item="{i}"' in site
                 fs.append({"id": f"F-{i}", "item": i, "criterion": c, "verdict": "PASS" if ok else "NEEDS_REVISION",
                            "severity": "low" if ok else "high", "confidence": "high",
@@ -3866,8 +3917,8 @@ class J2Run:
                       '"evidence": str (one line: what you saw on the screenshot or in the measurements)}] (exactly '
                       'one per rubric item), '
                       + next_field(("identity",), "Identity: you file every finding to Identity, who decides J2.h") + "}",
-                      f"CRITERIA (file each finding under this list's item number; earlier messages may use numbers "
-                      f"from before items were dropped): {json.dumps([{'item': i, 'criterion': c} for i, c in enumerate(crit, 1)], ensure_ascii=False)}\n"
+                      f"CRITERIA (file each finding under its item number; numbers never change, also after items are "
+                      f"dropped): {json.dumps([{'item': self._no(c), 'criterion': c} for c in crit], ensure_ascii=False)}\n"
                       + (f"DROPPED BY THE REQUESTER (out of scope: file no finding for these): "
                          f"{json.dumps((self.goal or {}).get('dropped_by_requester'), ensure_ascii=False)}\n"
                          if (self.goal or {}).get("dropped_by_requester") else "")
@@ -4150,7 +4201,10 @@ class J2Run:
             "ai_calls": self.calls, "cycles": self.cycle,
             "links": self._links(),
             "verification": {**{k: sum(a.get("status") == k for w in self.workflows for a in w.get("atoms") or [])
-                                for k in ("passed", "failed", "escalated")}, "checks_run": len(self.receipts)},
+                                for k in ("passed", "failed", "escalated")},
+                             "could_not_run": sum(a.get("status") == "could not run" for w in self.workflows
+                                                  for a in w.get("atoms") or []),
+                             "checks_run": len(self.receipts)},
             "identity_to_requester_decisions": sum(m["who"] == "identity" and m.get("pause") in DECISION_PAUSES
                                                    for m in self.chat),
             "identity_to_requester_facts": sum(m["who"] == "identity" and m.get("pause") in ("fact", "info")
@@ -4182,9 +4236,10 @@ class J2Run:
             "playbooks": {"saved": self.playbook_saved, "used": self.playbooks_used},
             "business_type": (self.goal or {}).get("business_type"), "style_guide": bool(self.style),
             "rubric": [{"id": r["id"], "pass": r["pass"], "verdict": r["verdict"]} for r in (last or {}).get("rubric", [])],
-            "done_when": [{"item": i, "criterion": c,
-                           "pass": next((r["pass"] for r in (last or {}).get("results", []) if r.get("item") == i), None)}
-                          for i, c in enumerate((self.goal or {}).get("done_when") or [], 1)],
+            "done_when": [{"item": self._no(c), "criterion": c,
+                           "pass": next((r["pass"] for r in (last or {}).get("results", []) if r.get("criterion") == c),
+                                        None)}
+                          for c in (self.goal or {}).get("done_when") or []],
             "route_check_violations": [{"agent": e["agent"], "detail": e["detail"], "msg": e["msg"], "cycle": e["cycle"]}
                                        for e in self.events if e["type"] == "redirect"]})
 

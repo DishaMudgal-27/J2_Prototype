@@ -105,6 +105,8 @@ frames.forEach(f => f.addEventListener('load', () => setTimeout(() => {
 
 
 def find_chrome():
+    if os.getenv("J2_CHROME", "").lower() in ("none", "off", "0"):      # J2_CHROME=none: run as if Chrome is missing
+        return None
     for p in (os.getenv("J2_CHROME"), "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
               shutil.which("google-chrome"), shutil.which("chromium"), shutil.which("chromium-browser")):
         if p and os.path.exists(p):

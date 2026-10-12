@@ -1,4 +1,8 @@
-"""Offline check of the J2 flow in mock mode: python j2_flow_test.py [--chat]
+"""Offline check of the J2 flow in mock mode: python j2_flow_test.py [--fast [--browser]] [--chat]
+
+--fast stubs the headless-browser measurement (the render check and tap targets read the page without Chrome) and
+skips the tests that drive the page in Chrome; --fast --browser runs those and the real render check, with only tap
+targets stubbed. Without --fast everything uses Chrome.
 
 Each scenario runs with J2_FIXES=0 (baseline) and J2_FIXES=1 (fixes):
 1. A vague brief: J2.a asks the Requester, a conflict the charter can't decide goes to the Requester, Audit and
@@ -60,6 +64,51 @@ BREW_LAB = ("A one-page website for Brew Lab, a small specialty coffee shop in I
             "pickup. It should feel warm and modern and work well on a phone. Include a section about our beans and the "
             "farms they come from, and a simple loyalty-card explainer (buy 9, get the 10th free).")
 SHOW = "--chat" in sys.argv
+FAST = "--fast" in sys.argv
+BROWSER = not FAST or "--browser" in sys.argv        # the tests that drive the page in Chrome
+REAL_FIND, REAL_TAP, REAL_CHECK = j2.j2_check.find_chrome, j2.j2_check.tap_targets, j2.j2_check.check
+
+
+def fake_tap_targets(html, selector, min_px=j2.j2_check.TAP_MIN):
+    """--fast: no browser. The inline width/height (or min-width/min-height) in px of the buttons, links and fields
+    inside the elements matching selector; a control with no inline size counts as big enough."""
+    name, kind = selector.lstrip("#."), selector[:1]
+    attr = "id" if kind == "#" else "class"
+    roots, small, checked = 0, [], 0
+    for m in re.finditer(rf'<(\w+)\b[^>]*\b{attr}="(?:[^"]*\s)?{re.escape(name)}(?:\s[^"]*)?"[^>]*>', html):
+        roots += 1
+        tag, depth, end = m.group(1), 0, len(html)
+        for t in re.finditer(rf"<(/?){tag}\b[^>]*>", html[m.start():]):
+            depth += -1 if t.group(1) else 1
+            if not depth:
+                end = m.start() + t.end()
+                break
+        for c in re.finditer(r'<(button|a|input|select|textarea)\b([^>]*)>([^<]*)', html[m.start():end]):
+            if c.group(1) == "a" and "href" not in c.group(2) or 'type="hidden"' in c.group(2):
+                continue
+            checked += 1
+            style = dict(re.findall(r"(min-height|min-width|height|width)\s*:\s*(\d+)px", c.group(2)))
+            h = max(int(style.get("height", 0)), int(style.get("min-height", 0))) or min_px
+            w = max(int(style.get("width", 0)), int(style.get("min-width", 0))) or min_px
+            if h < min_px or w < min_px:
+                small.append(f'{c.group(1)} "{c.group(3).strip()[:25]}" {w}x{h}')
+    return {"available": True, "roots": roots, "checked": checked, "small_count": len(small), "small": small[:6]}
+
+
+def fake_check(html):
+    """--fast: the render check without a browser: static checks, no overflow, no JS errors, forms submit."""
+    st = j2.j2_check.static_checks(html)
+    return {"available": True, **st, "phone": {"width": 360, "overflow_px": 0},
+            "desktop": {"width": 1280, "overflow_px": 0}, "js_errors": [], "design": {},
+            "form_results": [{"index": i + 1, "has_submit": True, "submitted": True, "invalid": [], "errors_during": [],
+                              "ok": True} for i in range(st["forms"])]}
+
+
+if FAST:
+    j2.j2_check.tap_targets = fake_tap_targets
+    if not BROWSER:     # --fast --browser keeps the real render check: the rubric tests need its measurements
+        j2.j2_check.check = fake_check
+        j2.j2_check.find_chrome = lambda: None      # the page-driving tests skip; screenshots aren't taken
 
 
 def say(run, text):
@@ -573,8 +622,8 @@ def same_failure():
         def call(fn, fmt, task, mock, **k):
             r = orig(fn, fmt, task, mock, **k)
             if fn == "audit" and "findings" in r:          # not Audit's dispute turns
-                f = next(x for x in r["findings"] if x["item"] == 1)
-                if "menu" in run.goal["done_when"][0].lower():
+                f = next((x for x in r["findings"] if x["item"] == 1), None)    # charter item 1, the menu
+                if f and "menu" in f["criterion"].lower():
                     f.update(verdict="NEEDS_REVISION", evidence="Prices missing")
             if fn == "adaptation" and "WHY YOU ARE UP" in task and run.audits and not run.audits[-1]["results"][0]["pass"]:
                 r = {"say": "@Priority Menu fix.", "act": "PROPOSE", "next": "Priority", "workflows": j2.with_atoms([
@@ -1103,7 +1152,8 @@ def atom_checks():
             assert x["results"] == [r for r in lines if r["atom"] == x["id"]][-len(x["verification"]):]
     assert not any("receipts.jsonl" in str(c.get("raw")) for c in calls), "an agent wrote a receipt"
     v = json.load(open(os.path.join(run.dir, "summary.json"), encoding="utf-8"))["verification"]
-    assert v == {"passed": len(run.workflows), "failed": 0, "escalated": 0, "checks_run": len(lines)}, v
+    assert v == {"passed": len(run.workflows), "failed": 0, "escalated": 0, "could_not_run": 0,
+                 "checks_run": len(lines)}, v
 
     # a wrong build the budget left can't fix: Adaptation first, then Identity; the atom is ESCALATED
     def missing_fact(at):
@@ -1206,6 +1256,86 @@ def rubric_and_credits():
     assert not bad, bad
     ui = [ln for ln in open(os.path.join(j2.HERE, "j2_ui.html"), encoding="utf-8") if re.search(r"\bunits\b", ln)]
     assert all(re.search(r"/[^/]*\bunits\b[^/]*/|\(\?:units", ln) for ln in ui), ui     # regex patterns only
+
+
+def charter_numbers():
+    """Agents' prompts and covers use each item's charter number, never its position: after item 2 is dropped, an
+    agent's covers [5] still means charter item 5, and every number an agent reads is a charter number."""
+    run = j2.J2Run()
+    say(run, BREW_LAB)
+    finish(run)
+    crit = list(run.goal["done_when"])
+    run._override("drop 2")
+    assert crit[1] not in run.goal["done_when"] and run.goal["done_when"][1] == crit[2]   # position 2 is now item 3
+    run.budget, run.p_refused = 500, {}
+    reg, refused, _ = run._register([{"name": "Beans again", "goal_gap": "x", "outputs": ["x"], "completion_check": "y",
+                                      "atoms": ATOM, "parts": ["page_section"], "covers": [5]}])
+    assert reg and not refused, refused
+    assert reg[0]["covers"] == [5] and reg[0]["covers_text"] == [crit[4]] and run._wf_items(reg[0]) == [4], reg[0]
+    assert run._covers({"covers": [2]}) == [], "a dropped charter number covers nothing"
+    nums = [1, 3, 4, 5, 6, 7]
+    st = json.loads(run.state("adaptation"))
+    assert [x["item"] for x in st["charter"]["done_when"]] == nums and "charter_items" not in st["charter"], st["charter"]
+    assert [x["item"] for x in st["rate_card"]["item_minimums"]] == nums
+    assert run._per_item([{"name": "x", "parts": ["page_section"], "covers": [5]}])[0]["covers"] == [5]
+    run._turn_audit({"kind": "audit"})
+    prompt = calls_of(run)[-1]["prompt"]
+    assert '{"item": 5, "criterion": ' + json.dumps(crit[4]) in prompt and '"item": 2,' not in prompt
+    assert [r["id"] for r in run.audits[-1]["results"]] == [f"F-{n}" for n in nums], run.audits[-1]["results"]
+    fails = [{**r, "item": run._no(r["criterion"])} for r in run.audits[-1]["results"]]
+    assert all(f["item"] == int(f["id"][2:]) for f in fails)
+    # code's own proposal (cheapest fit) writes charter numbers too
+    run.workflows = []
+    fit = run._cheapest_fit()
+    assert {i for w in fit["workflows"] for i in w["covers"]} | {x["item"] for x in fit["left_out"]} <= set(nums), fit
+
+
+def chrome_unavailable():
+    """No Chrome: a browser check records "could not run"; it isn't a failed attempt and nothing escalates."""
+    old_env, old_tap, old_check = os.environ.get("J2_CHROME"), j2.j2_check.tap_targets, j2.j2_check.check
+    os.environ["J2_CHROME"], j2.j2_check.tap_targets = "none", REAL_TAP
+    j2.j2_check.check = fake_check      # Audit's render check isn't under test here (without Chrome it pauses the run)
+    try:
+        run = j2.J2Run()
+        say(run, BREW_LAB)
+        finish(run)
+    finally:
+        j2.j2_check.tap_targets, j2.j2_check.check = old_tap, old_check
+        if old_env is None:
+            os.environ.pop("J2_CHROME", None)
+        else:
+            os.environ["J2_CHROME"] = old_env
+    tap = [r for r in run.receipts if r["type"] == "tap-targets"]
+    assert tap and all(r["pass"] is None and r["evidence"].startswith("could not run") for r in tap), tap
+    assert all(r["attempt"] == 1 for r in tap), "a check that could not run isn't retried"
+    a = next(a for w in run.workflows for a in w["atoms"] if any(c["type"] == "tap-targets" for c in a["verification"]))
+    assert a["status"] == "could not run" and a["attempts"] == 1, a
+    assert not any("WORK ATOM FAILED" in c["prompt"] for c in calls_of(run)), "it went to Adaptation"
+    assert not any(e["type"] == "atom_escalated" for e in run.events)
+    v = json.load(open(os.path.join(run.dir, "summary.json"), encoding="utf-8"))["verification"]
+    assert v["could_not_run"] == 1 and v["failed"] == v["escalated"] == 0, v
+    assert run.outcome.startswith("Done"), run.outcome
+
+
+def unique_short_names():
+    """Short item names are unique within a list: items sharing their first 7 words get longer names until they
+    differ (past the first clause if need be), in the leave-out question too."""
+    a = "Each event card shows its fee and the room for events in Hall A"
+    b = "Each event card shows its fee and the room for events in Hall B"
+    names = j2.shorts([a, b, "Opening hours are listed"])
+    assert names == [a, b, "Opening hours are listed"], names
+    g = ["A gallery: photos of the shop, outside", "A gallery: photos of the team"]
+    assert len(set(j2.shorts(g))) == 2 and all(n.startswith("A gallery: photos of the") for n in j2.shorts(g))
+    assert j2.shorts(["The menu with prices is shown", "Opening hours are listed"]) == \
+        ["The menu with prices is shown", "Opening hours are listed"], "names that already differ stay short"
+    run = j2.J2Run()
+    say(run, BREW_LAB)
+    finish(run)
+    run.goal["done_when"] += [a, b]
+    gaps = [a, b, run.goal["done_when"][0]]
+    rows = run._gap_rows(gaps, run.audits[-1], None)
+    shown = [r["name"].split(" ", 1)[1] for r in rows]
+    assert len(set(shown)) == 3 and shown[0].endswith("Hall A") and shown[1].endswith("Hall B"), shown
 
 
 def detail_stays_open():
@@ -2199,7 +2329,8 @@ def covers_by_text():
     run.save("workflows.json", run.workflows)
     snap = j2.saved_snapshot(os.path.basename(run.dir))
     assert snap and len(snap["workflows"]) == len(run.workflows), "an old run must load"
-    assert run._wf_items(reg[1]) == [5] and run._open_list(run.audits[-1], []), "old workflows use their numbers"
+    # covers holds charter numbers: item 5 sits at position 4 after the drop
+    assert run._wf_items(reg[1]) == [4] and run._open_list(run.audits[-1], []), "old workflows use their numbers"
 
 
 def readable_decision():
@@ -2253,6 +2384,9 @@ def readable_decision():
 
 
 if __name__ == "__main__":
+    if FAST:
+        print("--fast: browser measurement stubbed" + ("" if BROWSER else "; tests that drive the page in Chrome are "
+                                                       "skipped below (add --browser to run them)"))
     for mode in ("0", "1"):
         os.environ["J2_FIXES"] = mode
         vague(mode == "1")
@@ -2269,6 +2403,9 @@ if __name__ == "__main__":
         atom_checks()
         leave_out_named()
         rubric_and_credits()
+        charter_numbers()
+        chrome_unavailable()
+        unique_short_names()
         same_failure()
         cycle_limit()
         to_be_confirmed()
@@ -2284,7 +2421,7 @@ if __name__ == "__main__":
         intake_needs()
         playbooks()
         summary_before_review()
-        print(f"J2_FIXES={mode}: B workflow agents, atom checks (rules, receipts, third failure to Adaptation), leave-out question names its items, rubric in briefs, tap targets, no \"units\", C workable loop and limits, D memory, F forced audit failure (hidden from agents) and test lessons, summary before review, H style guide, rubric loop, needs, playbooks, I pricing and unpaid items ok")
+        print(f"J2_FIXES={mode}: B workflow agents, atom checks (rules, receipts, third failure to Adaptation), leave-out question names its items, rubric in briefs, tap targets, no \"units\", charter numbers for agents, no Chrome = could not run, unique short names, C workable loop and limits, D memory, F forced audit failure (hidden from agents) and test lessons, summary before review, H style guide, rubric loop, needs, playbooks, I pricing and unpaid items ok")
     ruling_over_budget()
     redirect()
     workable_unit()
