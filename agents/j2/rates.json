@@ -9,5 +9,11 @@
     "extra_language": 12,
     "styling": 5,
     "fix": 8
+  },
+  "_note_prd": "Document rate card for PRD runs (J2_OUTPUT=prd): one section per workflow. Website rates above are unchanged.",
+  "rates_prd": {
+    "doc_section": 10,
+    "requirements_section": 15,
+    "fix": 8
   }
 }

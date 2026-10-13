@@ -8,6 +8,7 @@ import argparse
 import http.server
 import json
 import os
+import re
 import webbrowser
 from urllib.parse import parse_qs, urlparse
 
@@ -16,6 +17,7 @@ import llm
 from j2 import HERE, J2Run, clear_lessons
 
 RUN = J2Run()
+DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
 
 def secrets():
@@ -40,9 +42,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
         pass
 
     def _send(self, code, body, ctype="application/json"):
-        if ctype == "image/png":        # a screenshot: binary, no text to redact
+        if ctype in ("image/png", DOCX):     # a screenshot or a .docx: binary, no text to redact
             self.send_response(code)
             self.send_header("Content-Type", ctype)
+            if ctype == DOCX:
+                self.send_header("Content-Disposition", 'attachment; filename="prd.docx"')
             self.end_headers()
             return self.wfile.write(body)
         data = redact(body if isinstance(body, str) else body.decode("utf-8", "replace")).encode("utf-8")
@@ -76,26 +80,41 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 return self._send(404, "not found", "text/plain")
             with open(path, "rb") as f:
                 return self._send(200, f.read(), "image/png")
+        if u.path.startswith("/file/"):        # a document run's prd.md or prd.docx, to download
+            d, name = (j2.saved_dir(run) if run else RUN.dir), u.path.rsplit("/", 1)[-1]
+            o = j2.OUTPUTS[j2.saved_output(d) if run else RUN.output]
+            allowed = [o["file"], o["file"][:-3] + ".docx"] if o.get("file") else []
+            path = os.path.join(d or "", name)
+            if name not in allowed or not os.path.exists(path):
+                return self._send(404, "not found", "text/plain")
+            with open(path, "rb") as f:
+                data = f.read()
+            return self._send(200, data, DOCX) if name.endswith(".docx") else \
+                self._send(200, data, "text/markdown")
         if u.path.startswith("/site/") and run:
             d, key = j2.saved_dir(run), u.path.rsplit("/", 1)[-1]
             site = os.path.join(d or "", "site")
-            vs = sorted((f for f in os.listdir(site) if f[1:-5].isdigit()), key=lambda f: int(f[1:-5])) \
+            num = lambda f: int(f[1:].split(".")[0])
+            vs = sorted((f for f in os.listdir(site) if re.fullmatch(r"v\d+\.(?:html|md)", f)), key=num) \
                 if d and os.path.isdir(site) else []
-            name = vs[-1] if key == "latest" and vs else f"{key}.html"
-            if name not in vs:
+            name = vs[-1] if key == "latest" and vs else next((f for f in vs if f.split(".")[0] == key), None)
+            if not name:
                 return self._send(200, "<p style='font:14px system-ui;color:#667;padding:24px'>No site in this run.</p>",
                                   "text/html")
             with open(os.path.join(site, name), encoding="utf-8") as f:
-                return self._send(200, f.read(), "text/html")
+                text = f.read()
+            return self._send(200, j2.md_html(text) if name.endswith(".md") else text, "text/html")
         if u.path.startswith("/site/"):
             if not RUN.sites:
-                return self._send(200, "<p style='font:15px system-ui;color:#667;padding:24px'>Your website will appear "
-                                       "here once it's built.</p>", "text/html")
+                return self._send(200, "<p style='font:15px system-ui;color:#667;padding:24px'>Your "
+                                       f"{'document' if RUN.doc else 'website'} will appear here once it's built.</p>",
+                                  "text/html")
             key = u.path.rsplit("/", 1)[-1]
             i = len(RUN.sites) if key == "latest" else int(key.lstrip("v") or 0)
             if not 1 <= i <= len(RUN.sites):
                 return self._send(404, "not found", "text/plain")
-            return self._send(200, RUN.sites[i - 1], "text/html")
+            return self._send(200, j2.md_html(RUN.sites[i - 1], RUN.out["label"]) if RUN.doc else RUN.sites[i - 1],
+                              "text/html")
         self._send(404, "not found", "text/plain")
 
     def do_POST(self):
@@ -111,6 +130,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self._send(200, json.dumps({"ok": True, "cleared": j2.clear_playbooks()}))
         if self.path == "/api/lessons/clear":      # the Lessons tab's "Clear memory" (the page confirms first)
             return self._send(200, json.dumps({"ok": True, "cleared": clear_lessons()}))
+        if self.path == "/api/output":           # the start page's output type, before the first message
+            ok = RUN.set_output(body.get("type"))
+            return self._send(200 if ok else 409, json.dumps({"ok": ok, "output": RUN.output}))
         if self.path == "/api/reset":
             if RUN.status == "running":
                 return self._send(409, '{"ok": false}')

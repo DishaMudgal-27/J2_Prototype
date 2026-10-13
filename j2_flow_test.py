@@ -2383,6 +2383,187 @@ def readable_decision():
     assert len(re_ask) == 4 and all(ln.startswith("   Option ") for ln in re_ask[1:]), re_ask
 
 
+PRD_BRIEF = ("Write a PRD for QuickQueue, a mobile app that lets clinic patients join a waiting line remotely. Users: "
+             "patients at small clinics and the front-desk staff who manage the line. Problem: patients wait 45 minutes on "
+             "average in crowded waiting rooms. Must-have features: join the queue from a phone, live position updates, SMS "
+             "alert when 2 patients are ahead, staff dashboard to call the next patient. Constraints: works on low-end "
+             "Android phones; no patient health data stored. Success: average in-room wait under 10 minutes; 60% of "
+             "patients join remotely within 3 months.")
+BROWSER_FNS = ("check", "screenshot", "tap_targets", "find_chrome", "design_problems")
+
+
+def prd_run():
+    """J2_OUTPUT=prd: a mock PRD brief reaches Done workable with prd.md and prd.docx; no browser check is ever called;
+    only P-conditions and the D-rubric are listed, never a website's; the validator keeps the facts-present rule and
+    the document's own check types."""
+    called, saved = [], {k: getattr(j2.j2_check, k) for k in BROWSER_FNS}
+
+    def boom(name):
+        def f(*a, **k):
+            called.append(name)
+            raise AssertionError(f"a PRD run called the browser check {name}")
+        return f
+    for k in BROWSER_FNS:
+        setattr(j2.j2_check, k, boom(k))
+    os.environ["J2_OUTPUT"] = "prd"
+    try:
+        run = j2.J2Run()
+        assert run.output == "prd" and run.doc and j2.RATES == {"doc_section": 10, "requirements_section": 15, "fix": 8}
+        say(run, PRD_BRIEF)
+    finally:
+        os.environ.pop("J2_OUTPUT")
+        for k, v in saved.items():
+            setattr(j2.j2_check, k, v)
+    assert not called, called
+    assert run.outcome.startswith("Done: the PRD is workable"), run.outcome
+    s = summary(run)
+    with open(os.path.join(run.dir, "chat.jsonl"), encoding="utf-8") as f:
+        assert json.loads(f.readline())["output"] == "prd"
+    assert s["output_type"] == "prd" and s["status"] == "done" and s["workable"] == [], s
+    assert [x["heading"] for x in s["sections"]] == list(j2.PRD_SECTIONS) and all(x["words"] for x in s["sections"]), s
+    assert s["conditions"]["met"] == s["conditions"]["total"] == 6 and s["export"]["written"], s
+    assert s["verification"]["passed"] == 6 and not s["verification"]["failed"] and s["verification"]["checks_run"], s
+    # one workflow per section, one atom each, priced from the document rate card
+    assert [w["name"] for w in run.workflows] == [f"Write {x}" for x in j2.PRD_SECTIONS], run.workflows
+    assert all(len(w["atoms"]) == 1 for w in run.workflows) and run.spent == 65, run.spent
+    md = open(os.path.join(run.dir, "prd.md"), encoding="utf-8").read()
+    assert md.startswith("# QuickQueue") and [h for lv, h, _ in j2.md_sections(md) if lv == 2] == list(j2.PRD_SECTIONS)
+    assert "1. **R1**:" in md and "<" not in md, md
+    conds = json.load(open(os.path.join(run.dir, "conditions.json"), encoding="utf-8"))
+    assert [c["id"] for c in conds] == ["P1", "P2", "P3", "P4", "P5", "P6"] and all(c["met"] for c in conds), conds
+    # never a website condition: no render check, no R-rubric, no tap-targets rule in any prompt
+    a = run.audits[-1]
+    assert [r["id"] for r in a["rubric"]] == ["D-1", "D-2", "D-3", "D-4", "D-5"] and not a["mechanical"], a["rubric"]
+    assert a["output"] == "prd" and a["read"] and a["conditions"] == conds, a
+    assert not any(m["text"].startswith("Mechanical check") for m in run.chat)
+    calls = [json.loads(x) for x in open(os.path.join(run.dir, "calls.jsonl"), encoding="utf-8")]
+    for c in calls:
+        text = c["system"] + c["prompt"]
+        assert "tap-targets" not in text and "Tap targets are big enough" not in text and "R-6" not in text, c["fn"]
+    assert any("OUTPUT TYPE: PRD document" in c["prompt"] for c in calls)
+    assert any(c["fn"].startswith("W-") and "Workflow agent for a PRD section" in c["system"] for c in calls)
+    # the .docx: headings, numbered requirements and the metrics table come through
+    import docx
+    d = docx.Document(os.path.join(run.dir, "prd.docx"))
+    heads = [p.text for p in d.paragraphs if p.style.name.startswith("Heading")]
+    assert heads == list(j2.PRD_SECTIONS), heads
+    reqs = [p.text for p in d.paragraphs if p.style.name == "List Number"]
+    assert reqs[0].startswith("R1:") and len(reqs) == 4, reqs
+    assert d.tables and d.tables[0].cell(1, 0).text == "G1", [t.cell(0, 0).text for t in d.tables]
+    # the validator: facts-present keeps its rule (charter or the Requester's answers only); document check types only
+    atom = j2.mock_doc_atom({"name": "Write Problem"})
+    fact = {"text": "Product name", "type": "facts-present", "target": ["QuickQueue", "45 minutes"], "expect": True}
+    assert not run._atom_problems({"atoms": [{**atom, "verification": atom["verification"] + [fact]}]})
+    bad = run._atom_problems({"atoms": [{**atom, "verification": [{**fact, "target": ["QuickQueue", "99.9% uptime"]}]}]})
+    assert len(bad) == 1 and "['99.9% uptime'], not found in the charter" in bad[0], bad
+    for chk, why in (({"type": "tap-targets", "target": ".x", "expect": 44}, "allowed: facts-present, heading-present"),
+                     ({"type": "ids-unique", "target": "Requirement", "expect": True}, "only an id prefix"),
+                     ({"type": "section-not-empty", "target": "Users", "expect": 0}, "minimum word count")):
+        bad = run._atom_problems({"atoms": [{**atom, "verification": [{"text": "x", **chk}]}]})
+        assert len(bad) == 1 and why in bad[0], (chk, bad)
+    # a website run after it is a website again
+    assert j2.J2Run().output == "website" and "page_section" in j2.RATES
+    show(run)
+    return run
+
+
+def prd_checks():
+    """heading-present, section-not-empty and ids-unique pass and fail correctly (a duplicate R2 is rejected); each
+    necessary condition fails on the document that breaks it."""
+    doc = "# X\n\n## Users\n\nClinic patients and front-desk staff.\n\n## Requirements\n\n1. **R1**: Join the queue\n2. **R2**: See the position\n"
+    chk = lambda t, target, expect=True, d=doc: j2.doc_check({"type": t, "target": target, "expect": expect}, d)
+    assert chk("heading-present", "Requirements")["pass"] and chk("heading-present", "users")["pass"]
+    assert not chk("heading-present", "Goals")["pass"]
+    assert chk("section-not-empty", "Users", 5)["pass"] and not chk("section-not-empty", "Users", 50)["pass"]
+    assert not chk("section-not-empty", "Goals", 1)["pass"]
+    assert not chk("section-not-empty", "Users", 1, "## Users\n\n## Goals\n\n- G1: x\n")["pass"]     # empty section
+    assert chk("ids-unique", "R")["pass"] and chk("ids-unique", "R")["actual"] == [1, 2]
+    dup = chk("ids-unique", "R", d=doc + "3. **R2**: Get an SMS\n")
+    assert not dup["pass"] and "duplicate id(s): R2" in dup["evidence"], dup
+    assert not chk("ids-unique", "R", d="## Requirements\n\nJoin the queue.\n")["pass"]
+    assert chk("ids-unique", "R", d=doc + "\nThe SMS alert also serves R2.\n")["pass"]   # a mention, not an id
+    # the same checks through run_check, as code runs a work atom's verification
+    assert not j2.run_check({"type": "ids-unique", "target": "R"}, "", doc + "- **R2**: again\n", doc=True)["pass"]
+    # necessary conditions, each on a document that breaks it
+    conds = {c["id"]: c for c in j2.load_conditions("prd.json")}
+    goal = {"product_name": "QuickQueue", "facts": ["QuickQueue", "SMS alert"], "to_be_confirmed": []}
+    src = j2.squash("QuickQueue SMS alert 45 minutes 10 minutes 60% 3 months")
+    good = ("# QuickQueue\n\n## Problem\n\nPatients wait 45 minutes.\n\n## Users\n\nClinic patients.\n\n## Goals\n\n- **G1**: "
+            "Short waits\n\n## Requirements\n\n1. **R1**: SMS alert\n2. **R2**: Join from a phone\n\n## Success metrics\n\n"
+            "| Goal | Metric |\n|---|---|\n| G1 | Under 10 minutes |\n\n## Out of scope\n\n- Payments\n")
+    met = lambda cid, d, g=goal: j2.condition_met(conds[cid], d, g, src, j2.PRD_SECTIONS)
+    assert all(met(c, good)[0] for c in conds), [(c, met(c, good)) for c in conds]
+    assert not met("P1", good.replace("## Out of scope\n\n- Payments\n", "## Out of scope\n"))[0]
+    assert not met("P1", good.replace("## Users", "## People"))[0]
+    assert not met("P2", good.replace("phone\n", "phone\n3. **R2**: Duplicate\n"))[0] and not met("P2", good.replace("**R2**", "**R3**"))[0]
+    assert not met("P3", good.replace("SMS alert", "text message"))[0]
+    p4 = met("P4", good.replace("Under 10 minutes", "Under 7 minutes"))
+    assert not p4[0] and "7" in p4[1], p4
+    assert not met("P5", good.replace("Payments", "Payments (to be confirmed)"))[0]
+    assert not met("P5", good, {**goal, "to_be_confirmed": [{"criterion": "x", "fact": "y"}]})[0]
+    assert not met("P6", good.replace("| G1 | Under", "| Wait | Under"))[0]
+    assert not met("P6", good.replace("- **G1**: Short waits", "- Short waits"))[0]
+    # workable() for a document: conditions and the D-rubric count, the render check doesn't
+    audit = {"output": "prd", "results": [], "rubric": [], "mechanical": {},
+             "conditions": [{"id": "P2", "text": "ids", "met": False, "evidence": "R2 twice"}]}
+    assert j2.workable(audit) == ["necessary condition P2 not met: ids (R2 twice)"], j2.workable(audit)
+    assert j2.workable({**audit, "conditions": []}) == []
+
+
+def prd_page():
+    """The page: the output type is picked before the first message and shown; the preview renders prd.md; the .md
+    and .docx download, for the live run and once it is saved."""
+    import threading
+    import urllib.error
+    import urllib.request
+    import j2_server
+    srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{srv.server_address[1]}"
+    get = lambda path: urllib.request.urlopen(base + path).read()
+    post = lambda path, body: urllib.request.urlopen(urllib.request.Request(
+        base + path, json.dumps(body).encode(), {"Content-Type": "application/json"}))
+    try:
+        j2_server.RUN.reset()
+        assert json.loads(post("/api/output", {"type": "prd"}).read())["output"] == "prd"
+        st = json.loads(get("/api/state"))
+        assert st["output"] == "prd" and st["output_label"] == "PRD document" and st["doc"], st["output"]
+        html = get("/").decode()
+        assert 'id="outsel"' in html and 'id="otype"' in html and 'id="doclinks"' in html and "/api/output" in html
+        say(j2_server.RUN, PRD_BRIEF)
+        try:
+            post("/api/output", {"type": "website"})
+            raise AssertionError("the output type changed after the run started")
+        except urllib.error.HTTPError as e:
+            assert e.code == 409
+        st = json.loads(get("/api/state"))
+        assert st["files"] == ["prd.md", "prd.docx"] and st["conditions"] and st["rubric"][0][0] == "D-1", st["files"]
+        prev = get("/site/latest").decode()
+        assert "<h2>Problem</h2>" in prev and "<table>" in prev and "<ol>" in prev, prev[:300]
+        assert get("/file/prd.md").decode().startswith("# QuickQueue") and get("/file/prd.docx")[:2] == b"PK"
+        if j2.j2_check.find_chrome():            # the Simple view in Chrome: plain words, document links
+            text, _, _ = simple_text(base)
+            bad = SIMPLE_FORBIDDEN.findall(text) + SIMPLE_FORBIDDEN_CASE.findall(text)
+            assert not bad and "Your document team" in text and "Your document is ready" in text, (bad, text[-600:])
+            assert "Download the Word file (.docx)" in text and "Download the markdown (.md)" in text, text[-400:]
+            assert "Download the HTML file" not in text, text[-400:]
+        name = os.path.basename(j2_server.RUN.dir)
+        j2_server.RUN.set_output("website")
+        j2_server.RUN.reset()                    # the PRD run is now a saved run
+        sv = json.loads(get(f"/api/state?run={name}"))
+        assert sv["output"] == "prd" and sv["versions"] == 6 and sv["files"] == ["prd.md", "prd.docx"], sv["output"]
+        assert "<h2>Requirements</h2>" in get(f"/site/latest?run={name}").decode()
+        assert get(f"/file/prd.docx?run={name}")[:2] == b"PK"
+        try:
+            get(f"/file/goal.json?run={name}")
+            raise AssertionError("/file/ served a file that isn't the document")
+        except urllib.error.HTTPError as e:
+            assert e.code == 404
+    finally:
+        srv.shutdown()
+        j2_server.RUN.reset()
+
+
 if __name__ == "__main__":
     if FAST:
         print("--fast: browser measurement stubbed" + ("" if BROWSER else "; tests that drive the page in Chrome are "
@@ -2421,6 +2602,11 @@ if __name__ == "__main__":
         intake_needs()
         playbooks()
         summary_before_review()
+        prd_run()
+        prd_checks()
+        print(f"J2_FIXES={mode}: PRD output: mock PRD brief Done workable with prd.md and prd.docx, document checks pass "
+              "and fail (duplicate R2 rejected), invented facts-present rejected, no browser check, no website "
+              "conditions ok")
         print(f"J2_FIXES={mode}: B workflow agents, atom checks (rules, receipts, third failure to Adaptation), leave-out question names its items, rubric in briefs, tap targets, no \"units\", charter numbers for agents, no Chrome = could not run, unique short names, C workable loop and limits, D memory, F forced audit failure (hidden from agents) and test lessons, summary before review, H style guide, rubric loop, needs, playbooks, I pricing and unpaid items ok")
     ruling_over_budget()
     redirect()
@@ -2444,6 +2630,8 @@ if __name__ == "__main__":
     print("second pass: two audiences, simple messages, owner override, form submit ok")
     print("limit answers (turn cap, nine workflows, own amount, drop with reason, done with open items), budget cap, repeats, idle Adaptation, decisions applied by code (msgs 24, 50) ok")
     page()
+    prd_page()
+    print("PRD page: output picked before the first message and shown, preview from prd.md, .md and .docx downloads ok")
     print("E behind-the-scenes view (lanes, detail, timeline, saved runs, redaction, lessons) ok")
     generalist_units()
     detail_stays_open()

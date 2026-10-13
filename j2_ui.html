@@ -68,6 +68,9 @@ textarea{flex:1;resize:none;height:56px;border:1px solid var(--line);border-radi
 .tabs select{margin:0 0 6px auto;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:4px 6px;font:inherit}
 .pane{flex:1;min-height:0;overflow:auto;padding:16px}
 .pane.preview{padding:0;background:#fff}
+.doclinks{display:flex;gap:8px;align-items:center;height:38px;padding:0 10px;border-bottom:1px solid var(--line);background:var(--panel);font-size:13.5px}
+.doclinks a{color:var(--ink)}.pane.preview.has-links iframe{height:calc(100% - 39px)}
+.outsel{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:4px 6px;font:inherit}
 iframe{width:100%;height:100%;border:0;display:block}
 .empty{color:var(--muted)}
 h3{font:600 15px var(--display);margin:0 0 8px}
@@ -149,7 +152,7 @@ body.simple #dview{display:none}body:not(.simple) #sview{display:none}
 </head>
 <body class="simple">
 <div id="sview">
-  <header class="shead"><b>Your website team</b><span class="spacer"></span><a href="?view=detail" class="slink" id="to-detail">See how it works</a></header>
+  <header class="shead"><b id="stitle">Your website team</b><span class="meta" id="sotype"></span><span class="spacer"></span><a href="?view=detail" class="slink" id="to-detail">See how it works</a></header>
   <main class="smain">
     <div class="stoggle" role="tablist" aria-label="Show"><button type="button" role="tab" data-pane="chat" aria-selected="true">Chat</button><button type="button" role="tab" data-pane="preview" aria-selected="false">Preview</button></div>
     <section class="schat">
@@ -165,6 +168,7 @@ body.simple #dview{display:none}body:not(.simple) #sview{display:none}
 <header>
   <h1>J2 Department</h1>
   <span class="meta" id="mode"></span>
+  <span class="meta" id="otype"></span>
   <span class="warn" id="fixes"></span>
   <span class="warn" id="forced" hidden style="color:var(--bad)"></span>
   <span class="warn" id="testles" hidden style="color:var(--bad)">J2_MEMORY_TEST_LESSONS=1: test lessons can be used (demo)</span>
@@ -172,6 +176,7 @@ body.simple #dview{display:none}body:not(.simple) #sview{display:none}
   <span class="lock" id="lock"></span>
   <span class="meta" id="mem"></span>
   <span class="spacer"></span>
+  <select id="outsel" class="outsel" aria-label="What to build"></select>
   <select id="runsel" class="ghost" aria-label="Open a saved run"><option value="">Live run</option></select>
   <button class="ghost" id="reset">New run</button>
   <a href="?view=simple" class="slink" id="to-simple">Back to simple view</a>
@@ -206,7 +211,7 @@ body.simple #dview{display:none}body:not(.simple) #sview{display:none}
       <button role="tab" data-tab="report" aria-selected="false">Report</button>
       <select id="ver" aria-label="Version"></select>
     </div>
-    <div class="pane preview" id="pane-preview"><iframe id="frame" title="Website preview" src="/site/latest"></iframe></div>
+    <div class="pane preview" id="pane-preview"><div class="doclinks" id="doclinks" hidden></div><iframe id="frame" title="Website preview" src="/site/latest"></iframe></div>
     <div class="pane" id="pane-goal" hidden></div>
     <div class="pane" id="pane-workflows" hidden></div>
     <div class="pane" id="pane-conflicts" hidden></div>
@@ -241,6 +246,16 @@ function paint(el, html){
 const EXAMPLES = ["A website for my cafe", "A website for Sweet Crumbs Bakery in Pune: menu, cake orders, contact",
   "A website for Petal & Stem, a florist in Jaipur: bouquets, same-day delivery, wedding flowers",
   "A website for Asha Rao Photography, a wedding and portrait photographer in Mumbai: portfolio, packages, booking"];
+// Output types the start page offers (J2_OUTPUT sets the default); the run keeps its type once it starts.
+const OUTS = [["website", "Website"], ["prd", "PRD document"]];
+const PRD_EXAMPLES = ["Write a PRD for QuickQueue, a mobile app that lets clinic patients join a waiting line remotely. "
+  + "Users: patients at small clinics and the front-desk staff who manage the line. Problem: patients wait 45 minutes on "
+  + "average in crowded waiting rooms. Must-have features: join the queue from a phone, live position updates, SMS alert "
+  + "when 2 patients are ahead, staff dashboard to call the next patient. Constraints: works on low-end Android phones; no "
+  + "patient health data stored. Success: average in-room wait under 10 minutes; 60% of patients join remotely within 3 months."];
+const examples = s => s.doc ? PRD_EXAMPLES : EXAMPLES;
+const outOptions = s => OUTS.map(([v, l]) => `<option value="${v}"${s.output === v ? " selected" : ""}>${l}</option>`).join("");
+const fileLinks = s => (s.files || []).map(f => `<a href="/file/${f}${runQ().replace("&", "?")}" download>Download ${f.split(".").pop() === "docx" ? "the Word file (.docx)" : "the markdown (.md)"}</a>`).join(" ");
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 // Detailed view wording: plain names for J2 terms; the J2 step codes stay, in small grey text.
 const dv = t => String(t ?? "").replace(/\benvelope's\b/gi, "limits'").replace(/\benvelopes?\b/gi, "limits")
@@ -383,10 +398,13 @@ function renderAudit(s){
   if (!s.audits.length) return `<p class="empty">Audit checks the site against Identity's checklist after each cycle.</p>`;
   const wk = s.workable ? (s.workable.length ? `<h3 class="fail">Not workable yet (checked by code)</h3><ul>${s.workable.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`
     : `<h3 class="pass">Workable (checked by code)</h3>`) : "";
-  return wk + s.audits.slice().reverse().map(a => `<h3>Cycle ${a.cycle} · site v${a.version} · ${a.all_pass ? '<span class="pass">all pass</span>' : '<span class="fail">failing</span>'}</h3>
+  return wk + s.audits.slice().reverse().map(a => `<h3>Cycle ${a.cycle} · ${s.doc ? "document" : "site"} v${a.version} · ${a.all_pass ? '<span class="pass">all pass</span>' : '<span class="fail">failing</span>'}</h3>
+    ${a.conditions ? `<h3>Necessary conditions (checked by code)</h3><table><tr><th>Condition</th><th>Result</th><th>Evidence</th></tr>${a.conditions.map(c =>
+      `<tr><td><b>${esc(c.id)}</b> ${esc(c.text)}</td><td class="${c.met?"pass":"fail"}">${c.met ? "MET" : "NOT MET"}</td><td>${esc(c.evidence)}</td></tr>`).join("")}</table>` : ""}
+    ${a.read ? `<p class="empty">Audit read: ${esc(a.read)}</p>` : ""}
     <table><tr><th>Criterion</th><th>Result</th><th>Evidence</th></tr>${a.results.concat(a.extra_issues||[]).map(r => `<tr><td>${r.id ? `<b>${esc(r.id)}</b> ` : ""}${r.item ? r.item + ". " : "extra: "}${esc(r.criterion)}</td>
     <td class="${r.pass?"pass":"fail"}">${esc(r.verdict || (r.pass?"PASS":"FAIL"))}</td><td>${esc(r.note)}</td></tr>`).join("")}</table>
-    ${(a.rubric || []).length ? `<h3>Design and usability rubric</h3><table><tr><th>Item</th><th>Result</th><th>Evidence</th></tr>${a.rubric.map(r =>
+    ${(a.rubric || []).length ? `<h3>${s.doc ? "Document rubric" : "Design and usability rubric"}</h3><table><tr><th>Item</th><th>Result</th><th>Evidence</th></tr>${a.rubric.map(r =>
       `<tr><td><b>${esc(r.id)}</b> ${esc(r.criterion)}</td><td class="${r.pass?"pass":"fail"}">${esc(r.verdict)}</td><td>${esc(r.note)}</td></tr>`).join("")}</table>` : ""}
     ${a.screenshot ? `<details data-key="shot-v${a.version}"><summary>Screenshot Audit looked at (360px left, 1280px right)</summary><img alt="Site v${a.version} at 360px and 1280px" style="max-width:100%;border:1px solid var(--line)" src="/shot/${a.version}${runQ().replace("&", "?")}"></details>` : ""}`).join("");
 }
@@ -548,8 +566,10 @@ function renderSimple(s){
   const st = stage(s);
   $("sprog").innerHTML = STAGES.map((x, i) => `<div class="${i < st ? "done" : i === st ? "on" : ""}"><i></i>${x}</div>`).join("");
   let out = "", lastAsk = null;
-  if (!s.allChat.length) out = `<div class="sb team"><small>Your website team</small>Describe the website you want. We'll ask a few questions, then build it.
-    <div class="cards">${EXAMPLES.map(t => `<button type="button" data-brief="${esc(t)}">${esc(t)}</button>`).join("")}</div></div>`;
+  if (!s.allChat.length) out = `<div class="sb team"><small>${s.doc ? "Your document team" : "Your website team"}</small>
+    <div><label>What should we make? <select class="outsel" aria-label="What to build">${outOptions(s)}</select></label></div>
+    ${s.doc ? "Describe the product. We'll ask for any facts we need, then write the PRD." : "Describe the website you want. We'll ask a few questions, then build it."}
+    <div class="cards">${examples(s).map(t => `<button type="button" data-brief="${esc(t)}">${esc(t)}</button>`).join("")}</div></div>`;
   s.allChat.forEach(m => {
     if (m.who === "user"){
       const k = String(m.text).match(/^Option (\d+)$/), a = lastAsk && parseAsk(lastAsk.text);
@@ -562,21 +582,25 @@ function renderSimple(s){
       else out += `<div class="sb team"><small>Your website team</small>${esc(plain(m.text))}</div>`;
     }
   });
-  if (isReady(s)) out += `<div class="ready"><h2>Your website is ready${/^Done with open items/.test(s.outcome) ? " (some things were left as they are)" : ""}</h2>
+  if (isReady(s)) out += `<div class="ready"><h2>Your ${s.doc ? "document" : "website"} is ready${/^Done with open items/.test(s.outcome) ? " (some things were left as they are)" : ""}</h2>
     <div class="acts"><a href="/site/latest${runQ().replace("&", "?")}" target="_blank" rel="noopener">Open full screen</a>
-    <a href="/site/latest${runQ().replace("&", "?")}" download="my-website.html">Download the HTML file</a>
+    ${s.doc ? fileLinks(s) : `<a href="/site/latest${runQ().replace("&", "?")}" download="my-website.html">Download the HTML file</a>`}
     <button type="button" id="sask-change">Ask for a change</button></div></div>`;
   if (failed(s)) out += `<div class="oops">Something went wrong. Try again.<div class="acts" style="margin-top:8px"><button type="button" class="ghost" id="sretry">Start over</button></div></div>`;
   if (out !== simpleHTML){ simpleHTML = out; $("smsgs").innerHTML = out;
     const end = () => { $("smsgs").scrollTop = $("smsgs").scrollHeight; };   // again after layout and fonts settle
     end(); requestAnimationFrame(end); setTimeout(end, 300); }
   const w = s.workflows.find(x => x.id === s.thinking || x.status === "running");
+  $("stitle").textContent = s.doc ? "Your document team" : "Your website team";
+  $("sotype").textContent = s.doc ? `· ${s.output_label}` : "";
   $("sstatus").textContent = s.status !== "running" ? "" : w ? `Building your ${plain(w.name).toLowerCase()}…`
     : ["Reading your request…", "Reading your request…", "Planning your website…", "Planning your website…", "Planning your website…",
        "Planning your website…", "Building your website…", "Checking everything works on phones and computers…", "Almost there…"][s.step || 0];
+  if (s.doc) $("sstatus").textContent = $("sstatus").textContent.replace("your website", "your document")
+    .replace("everything works on phones and computers", "the document");
   const busy = s.status === "running" || !!s.saved;
   $("sbox").disabled = $("ssend").disabled = busy;
-  $("sbox").placeholder = s.paused ? "Or type your own answer…" : isReady(s) ? "Describe a change…" : s.allChat.length ? "Write a message…" : "Describe the website you want…";
+  $("sbox").placeholder = s.paused ? "Or type your own answer…" : isReady(s) ? "Describe a change…" : s.allChat.length ? "Write a message…" : s.doc ? "Describe the product…" : "Describe the website you want…";
   if (s.versions !== sversions){ sversions = s.versions; $("sframe").src = `/site/latest?t=${Date.now()}${runQ()}`; }
   document.body.classList.toggle("has-site", s.versions > 0);
   if (!s.versions) document.body.classList.remove("sp-preview");
@@ -642,7 +666,7 @@ function renderReport(s){
 }
 function quick(s){
   let items = [];
-  if (!s.total) items = EXAMPLES;
+  if (!s.total) items = examples(s);
   else if (s.status === "waiting" && s.done && !s.paused) items = ["Add a section for visiting hours", "Looks good"];
   $("quick").innerHTML = items.map(t => `<button type="button">${esc(t)}</button>`).join("");
   [...$("quick").children].forEach(b => b.onclick = () => { $("box").value = b.textContent; send(); });
@@ -667,6 +691,12 @@ async function poll(){
     $("box").disabled = busy; $("send").disabled = busy;
     $("mode").textContent = (s.mock ? "mock functions" : `model: ${s.model}`) + ` · ${s.calls} AI calls · cycle ${s.cycle}`;
     $("fixes").textContent = s.fixes ? "J2_FIXES=1 (fixes)" : "J2_FIXES=0 (baseline, as in the diagram)";
+    $("otype").textContent = `output: ${s.output_label}`;
+    if ($("outsel").__v !== s.output + s.total){ $("outsel").__v = s.output + s.total; $("outsel").innerHTML = outOptions(s); }
+    $("outsel").disabled = !!s.total || !!s.saved;
+    $("doclinks").hidden = !s.doc || !(s.files || []).length;
+    $("pane-preview").classList.toggle("has-links", !$("doclinks").hidden);
+    if (!$("doclinks").hidden) paint($("doclinks"), `<b>${esc(s.output_label)}</b> ${fileLinks(s)}`);
     $("forced").hidden = !s.force_audit_fail;
     $("testles").hidden = !s.test_lessons;
     $("forced").textContent = `TEST: J2_FORCE_AUDIT_FAIL=${s.force_audit_fail} (cycle 1 Audit result forced)`;
@@ -701,6 +731,9 @@ async function send(){
   await fetch("/api/say", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({text})});
 }
 $("send").onclick = send;
+// The start page's output type (both views): only before the first message; the server refuses it after.
+document.addEventListener("change", async e => { if (!e.target.matches(".outsel")) return;
+  await fetch("/api/output", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({type: e.target.value})}); });
 // Delegated clicks: panes are re-rendered on every poll.
 // Detail view: click an agent message, a timeline step, or a lane (its latest message).
 $("msgs").addEventListener("click", e => { const b = e.target.closest(".msg"); if (b && b.dataset.id) openDetail(b.dataset.id); });
