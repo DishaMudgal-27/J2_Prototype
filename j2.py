@@ -638,6 +638,52 @@ def doc_numbers(text):
     return set(re.findall(r"\d+(?:[.,]\d+)*", text)) | set(EMAIL.findall(text)) | phones
 
 
+ASSUMPTION = re.compile(r"\bAssumption:\s*(.+)", re.I)
+ASSUMPTIONS_HEADING = "Assumptions to confirm"
+NO_ACTIONS = "have no actions in this version"
+WINDOW = re.compile(r"\b(?:per|a|an|each|every|over|within|during|in|by|after|for)\s+(?:the\s+)?(?:first\s+|next\s+)?"
+                    r"(?:\d+\s+)?(?:days?|weeks?|months?|terms?|semesters?|quarters?|years?|hours?|sessions?|launch)\b|"
+                    r"\b(?:daily|weekly|monthly|quarterly|yearly|annually)\b|measurement window not set", re.I)
+
+
+def doc_assumptions(doc):
+    """The text of every "Assumption:" line a builder wrote (not the closing section code makes from them)."""
+    body = re.split(rf"(?m)^##\s+{ASSUMPTIONS_HEADING}\s*$", str(doc))[0]
+    return [m.group(1).strip() for ln in strip_md(body).splitlines() if (m := ASSUMPTION.search(ln))]
+
+
+def without_assumptions(doc):
+    """The document without its Assumption: lines and the closing assumptions section: what must come from the brief."""
+    body = re.split(rf"(?m)^##\s+{ASSUMPTIONS_HEADING}\s*$", str(doc))[0]
+    return "\n".join(ln for ln in body.splitlines() if not ASSUMPTION.search(strip_md(ln)))
+
+
+def doc_names(text):
+    """Proper names a document states: capitalised words that don't start a sentence, line, list item or table cell.
+    Ids (R1, G2), section headings and possessives are left out. ponytail: a capitalised common word mid-sentence
+    ("the Requirements section") counts unless it is a section word; a real NER pass is the upgrade."""
+    skip = {w.lower() for s in PRD_SECTIONS + (ASSUMPTIONS_HEADING,) for w in s.split()} | {"i", "assumption"}
+    out = set()
+    for ln in strip_md(text).splitlines():
+        if MD_HEADING.match(ln) or re.fullmatch(r"\s*\|?[\s|:-]*", ln):
+            continue
+        for seg in re.split(r"(?<=[.!?:;])\s+|\|", ln):
+            words = re.findall(r"[A-Za-z][\w'-]*", re.sub(r"^\s*(?:[-*+]|\d+[.)])\s*", "", seg))
+            cap = [w[0].isupper() and w.lower() not in skip and not re.fullmatch(r"[A-Z]{1,3}-?\d+", w) for w in words]
+            # a sentence's first word is a name only when the next is capitalised too ("Northfield College")
+            out |= {re.sub(r"'s$", "", w) for i, w in enumerate(words) if cap[i] and (i or len(cap) > 1 and cap[1])}
+    return out
+
+
+def user_groups(goal):
+    """The user groups the charter names: user_groups ([str] or [{"name"}]), else split from "users"."""
+    g = goal or {}
+    raw = [x.get("name") if isinstance(x, dict) else x for x in g.get("user_groups") or []]
+    if not raw and g.get("users"):
+        raw = re.split(r",|;|\band\b", re.sub(r"\([^)]*\)", "", str(g["users"])))
+    return [re.sub(r"^(?:the|its|our)\s+", "", str(x).strip().rstrip("."), flags=re.I) for x in raw if str(x or "").strip(" .")]
+
+
 def condition_met(cond, doc, goal, source, sections, page=None, mech=None):
     """(met, evidence) for one necessary condition, checked by code. doc: the document, or a website's visible text;
     page: a website's HTML; mech: its render check (j2_check.check). source: the charter and the Requester's own
@@ -666,8 +712,33 @@ def condition_met(cond, doc, goal, source, sections, page=None, mech=None):
         missing = [f for f in facts if squash(strip_md(f)) not in text]
         return bool(facts) and not missing, (f"missing: {missing}" if missing else f"all {len(facts)} brief fact(s) appear"
                                              if facts else "the charter lists no facts")
+    if k == "groups-covered":
+        groups, req = user_groups(g), squash(strip_md(md_section(doc, cond.get("section", "Requirements")) or ""))
+        said = squash(strip_md(doc))
+        stem = lambda x: squash(x)[:-1] if squash(x).endswith("s") else squash(x)     # "students" -> "student"
+        miss = [x for x in groups if stem(x) not in req and not re.search(
+            rf"{re.escape(squash(x))} ha(?:ve|s) no actions in this version", said)]
+        return not miss, (f"no requirement and no \"{NO_ACTIONS}\" statement for: {', '.join(miss)}" if miss else
+                          f"each of the {len(groups)} user group(s) has a requirement or a \"no actions\" statement"
+                          if groups else "the charter names no user groups")
+    if k == "metric-window":
+        body = md_section(doc, cond.get("section", "Success metrics")) or ""
+        rows = [ln for ln in strip_md(body).splitlines() if re.match(r"\s*(?:[-*+]|\d+[.)]|\|)", ln)
+                and not re.fullmatch(r"\s*\|?[\s|:-]*", ln)]
+        num = [r for r in rows if re.search(r"\d", re.sub(r"\b[A-Z]{1,3}-?\d+\b", "", r))]
+        bad = [" ".join(r.strip(" |-").split())[:60] for r in num if not WINDOW.search(r)]
+        return not bad, (f"no measurement window: {'; '.join(bad)}" if bad else
+                         f"each of the {len(num)} numeric metric(s) states a window" if num else "no numeric metrics")
     if k == "no-invented-facts":
         src = doc_numbers(source)
+        if cond.get("names"):           # a document: Assumption: lines may go beyond the brief; proper names count too
+            doc = without_assumptions(doc)
+            names = sorted(x for x in doc_names(doc) if not re.search(rf"\b{re.escape(x.lower())}\b", source))
+            extra = sorted(x for x in doc_numbers(doc) if x.lower() not in src)
+            bad = extra + names
+            return not bad, (f"not in the charter or the Requester's answers, and not marked Assumption: "
+                             f"{', '.join(bad[:8])}" if bad else "every number, email and proper name comes from the "
+                             "charter or the Requester's answers, or sits in an Assumption: line")
         if page is not None:      # a website: also the numbers and emails in its tel:, mailto:, wa.me links and form actions
             doc = " ".join([doc] + [v for t, a in PageScan(page).tags for n, v in a.items()
                                     if n in ("href", "action") and re.match(r"tel:|mailto:|https?://wa\.me/", v, re.I)])
@@ -690,8 +761,17 @@ def condition_met(cond, doc, goal, source, sections, page=None, mech=None):
 
 
 def check_conditions(conds, doc, goal, source, sections, page=None, mech=None):
+    """Each condition's result. "severity": "warn" in the conditions file: shown, never blocks workable(). P4 with
+    "names" also lists the document's Assumption: lines."""
     return [{"id": c["id"], "text": c["text"], "check": c["check"],
-             **dict(zip(("met", "evidence"), condition_met(c, doc, goal, source, sections, page, mech)))} for c in conds]
+             **dict(zip(("met", "evidence"), condition_met(c, doc, goal, source, sections, page, mech))),
+             **({"severity": "warn"} if c.get("severity") == "warn" else {}),
+             **({"assumptions": doc_assumptions(doc)} if c.get("names") else {})} for c in conds]
+
+
+def blocks(c):
+    """An unmet condition that stops workable() (a warning never does)."""
+    return not c["met"] and c.get("severity") != "warn"
 
 
 def _page_parses(cond, page, mech):
@@ -902,17 +982,23 @@ def gap_kind(g):
     return next((k for end, k in GAP_KINDS if g.endswith(end)), "built but failing")
 
 
-def short(text, n=7, clause=True):
-    """A checklist item's short name: its first clause (the whole text with clause=False), at most n words."""
-    words = (re.split(r"[,:;(]| - ", str(text))[0] if clause else str(text)).split()[:n]
-    while clause and len(words) > 1 and words[-1].lower() in ("a", "an", "the", "and", "or", "of", "for", "with", "to", "in", "on",
-                                                    "is", "are"):
-        words.pop()             # never end on a joining word ("about the beans and the"); a longer name, made to
-                                # tell two items apart, keeps its last word ("Hall A")
-    return " ".join(words) or str(text)[:40]
+JOINING = ("a", "an", "the", "and", "or", "of", "for", "with", "to", "in", "on", "at", "by", "from", "is", "are")
 
 
-def shorts(texts, n=7):
+def short(text, n=12, clause=True):
+    """A checklist item's short name, cut at a natural break: its first clause (the whole text with clause=False) when
+    that is at most n words, else its first n whole words, never ending on a joining word, plus "...". A longer name,
+    made to tell two items apart, keeps its last word ("Hall A")."""
+    part = (re.split(r"[,:;(]| - ", str(text))[0] if clause else str(text)).split()
+    words = part[:n]
+    cut = len(part) > n
+    while cut and len(words) > 1 and words[-1].lower().strip(".") in JOINING:
+        words.pop()             # never end on a joining word ("about the beans and the")
+    name = " ".join(words).rstrip(" .,;:-") if words else str(text)[:40]
+    return name + "..." if cut else name
+
+
+def shorts(texts, n=12):
     """Short names that are unique within one list: items that share a short name get longer ones (past the first
     clause if need be) until they differ. Identical texts are the same item and keep the same name."""
     texts = list(texts)
@@ -921,7 +1007,7 @@ def shorts(texts, n=7):
 
     def clashes():       # names shared by different texts
         return {o for o in out if len({t for t, x in zip(texts, out) if x == o}) > 1}
-    while (c := clashes()) and k <= longest:
+    while (c := clashes()) and k <= max(longest, n):
         out = [short(t, k, clause=False) if o in c else o for t, o in zip(texts, out)]
         k += 1
     return out
@@ -952,6 +1038,7 @@ def for_agents(m):
     return not m.get("test") and not m.get("requester_only")
 
 
+NUMBER_ASK = re.compile(r"\b(?:number|target|metric|how many|how much|percent(?:age)?|rate)\b|%", re.I)
 INTERNAL_ID = re.compile(r"\b(?:[FRDCPN]-\d+|[GRPN]\d{1,2})\b")     # findings, rubric, conflicts, conditions, PRD ids
 
 
@@ -1105,6 +1192,7 @@ def mock_prd_charter(text):
         return " ".join(x.group(1).split()) if x else default
     features = [f.strip() for f in re.split(r",|;|\band\b", field(r"must-have features|features")) if f.strip()]
     success = [f.strip() for f in field(r"success").split(";") if f.strip()]
+    groups = user_groups({"users": field("users")})     # mock: the first group does the features, the rest say nothing
     items = [f"The Problem section states the problem {name} solves", "The Users section says who the users are",
              "The Goals section lists the goals as G1, G2, ...",
              "The Requirements section lists every must-have feature as R1, R2, ...",
@@ -1112,6 +1200,7 @@ def mock_prd_charter(text):
              "The Out of scope section says what the product won't do"]
     return {"statement": f"A PRD for {name}", "product_name": name, "site_name": name,
             "users": field("users", "Its users"), "audience": field("users", "Its users"),
+            "user_groups": [{"name": x, "actions": features if i == 0 else []} for i, x in enumerate(groups)],
             "problem": field("problem", "The problem the brief describes"), "features": features,
             "constraints": [c.strip() for c in field("constraints").split(";") if c.strip()], "success_measures": success,
             "facts": [name] + features, "standards": ["Every requirement testable"], "rules": ["No invented facts"],
@@ -1124,10 +1213,13 @@ def mock_doc_section(w, goal):
     g = goal or {}
     sec = next((s for s in PRD_SECTIONS if s.lower() in str(w.get("name")).lower()), PRD_SECTIONS[0])
     name, feats, succ = g.get("product_name") or "The product", g.get("features") or [], g.get("success_measures") or []
+    groups = [x for x in g.get("user_groups") or [] if isinstance(x, dict)]
+    who = groups[0]["name"] if groups and groups[0].get("actions") else "Users"
+    idle = " ".join(f"{x['name'][:1].upper() + x['name'][1:]} {NO_ACTIONS}." for x in groups if not x.get("actions"))
     body = {"Problem": f"{g.get('problem') or ''}. {name} exists to solve this.",
-            "Users": f"The users of {name} are {g.get('users') or 'its users'}.",
+            "Users": f"The users of {name} are {g.get('users') or 'its users'}." + (f"\n\n{idle}" if idle else ""),
             "Goals": "\n".join(f"- **G{i}**: {s}" for i, s in enumerate(succ, 1)) or f"- **G1**: {name} solves the problem",
-            "Requirements": "\n".join(f"{i}. **R{i}**: Users can {f}" for i, f in enumerate(feats, 1)),
+            "Requirements": "\n".join(f"{i}. **R{i}**: {who[:1].upper() + who[1:]} can {f}" for i, f in enumerate(feats, 1)),
             "Success metrics": "| Goal | Metric |\n|---|---|\n" + "\n".join(f"| G{i} | {s} |" for i, s in enumerate(succ, 1)),
             "Out of scope": "\n".join(f"- Anything outside this constraint: {c}" for c in g.get("constraints") or [])
                             or f"- Features beyond the listed requirements of {name}"}[sec]
@@ -1158,7 +1250,8 @@ DOC_RUBRIC = (("D-1", "Every requirement is specific and testable"),
               ("D-2", "Goals and success metrics are measurable"),
               ("D-3", "Users and problem are consistent with the requirements"),
               ("D-4", "Out of scope is explicit"),
-              ("D-5", "No invented facts: every fact comes from the brief or the Requester's answers"))
+              ("D-5", "No invented facts: every fact comes from the brief or the Requester's answers, or is labelled "
+                      "\"Assumption:\"; the evidence quotes each unlabelled claim not in the brief"))
 PRD_BUILDER = """# Workflow agent for a PRD section (one per registered workflow, e.g. "W-1 Builder")
 
 - You exist for one registered workflow: one section of the PRD. Write that section only, in markdown, starting
@@ -1169,20 +1262,30 @@ PRD_BUILDER = """# Workflow agent for a PRD section (one per registered workflow
   metric names the goal it measures (a table row "| G1 | metric |" or a line "- **G1**: ..."). Mention an id
   inside a sentence anywhere else, never at the start of a line.
 - Each requirement is specific and testable; goals and metrics are measurable; out of scope is explicit.
+- Every user group the charter names either has requirements that name it, or, when the charter records no actions
+  for it, this line in the Users section: "<Group> have no actions in this version." Never invent what a group does.
+- A numeric success metric states its measurement window ("per week", "within 3 months"); if the charter gives
+  none, write "measurement window not set".
+- Any statement that goes beyond the charter and the Requester's answers starts with "Assumption:" on its own line
+  or list item. Nothing else may add a claim. Code collects these lines into "Assumptions to confirm" at the end.
 - If your reply can't be used, code tells you why and you retry, within your envelope. Then report to
   @Coordination what you changed."""
 PRD_INTAKE = ("J2.a for a PRD: is there enough information to write it? You need these product facts: the product "
               "name, who the users are, the problem, the must-have features, constraints, and how success is measured. "
               "Ask the Requester only for the ones the brief lacks (set enough=false, 1-4 specific questions); ask about "
               "nothing else, and never invent a fact. Enough: set enough=true and record the charter from the brief and "
-              "the answers only. done_when is the checklist for the PRD: checkable items for its sections (Problem, "
+              "the answers only. Name every user group in user_groups. For each group whose actions the brief doesn't give, ask "
+              "the Requester what that group does in the product; if they don't say, record its actions as []. When a "
+              "success measure is a number, ask for its measurement window (\"over what time?\") in the same question "
+              "as the number, unless the brief gives one. done_when is the checklist for the PRD: checkable items for its sections (Problem, "
               "Users, Goals, Requirements, Success metrics, Out of scope), each checkable by reading the document; mark "
               "core=true for the problem, the requirements and the success metrics. facts: the exact strings from the "
               "brief or the answers that the PRD must contain (product name, numbers, feature names). Done-when may not "
               "refer to the Requester, Audit, verification, approval or launch. Keep everything the brief asks for; if "
               "the charter leaves any of it out, list it in dropped_from_brief with the reason. Don't plan costs.")
 PRD_CHARTER_FMT = ('{"statement": str, "product_name": str, "users": str, "problem": str, "features": [str] (the '
-                   'must-have features), "constraints": [str], "success_measures": [str], "facts": [str] (exact strings '
+                   'must-have features), "user_groups": [{"name": str, "actions": [str] (what the group does, from the '
+                   'brief or the answers; [] if the Requester didn\'t say)}], "constraints": [str], "success_measures": [str], "facts": [str] (exact strings '
                    'from the brief or the answers the PRD must contain), "standards": [str], "rules": [str], '
                    '"done_when": [str], "core": [bool] (one per done-when item, same order), '
                    '"to_be_confirmed": [{"item": int (done-when item number), "fact": str}], "dropped_from_brief": [str]}')
@@ -1339,7 +1442,9 @@ def assemble_doc(title, sections, order):
         h = next((m[2] for ln in x["body"].splitlines() if (m := MD_HEADING.match(ln))), "")
         return next((i for i, s in enumerate(order) if squash(strip_md(h)).startswith(s.lower())), len(order))
     bodies = sorted((x for x in sections.values() if x.get("body")), key=rank)    # stable: ties keep build order
-    return f"# {title}\n\n" + "\n\n".join(x["body"].strip() for x in bodies) + "\n"
+    doc = f"# {title}\n\n" + "\n\n".join(x["body"].strip() for x in bodies) + "\n"
+    asm = doc_assumptions(doc)          # code's closing section, made from the builders' Assumption: lines
+    return doc + (f"\n## {ASSUMPTIONS_HEADING}\n\n" + "\n".join(f"- {a}" for a in asm) + "\n" if asm else "")
 
 
 FORCED_NOTES = ((r"price|menu", "Two items on the menu have no price next to them, so the menu with prices isn't complete."),
@@ -1380,10 +1485,10 @@ def workable(audit):
         return (out + [f"document rubric {r['id']} ({r['verdict']}): {r['criterion']}" for r in audit.get("rubric", [])
                        if not r["pass"]]
                 + [f"necessary condition {c['id']} not met: {c['text']} ({c['evidence']})"
-                   for c in audit.get("conditions") or [] if not c["met"]])
+                   for c in audit.get("conditions") or [] if blocks(c)])
     out += [f"design rubric {r['id']} ({r['verdict']}): {r['criterion']}" for r in audit.get("rubric", []) if not r["pass"]]
     out += [f"necessary condition {c['id']} not met: {c['text']} ({c['evidence']})"
-            for c in audit.get("conditions") or [] if not c["met"]]
+            for c in audit.get("conditions") or [] if blocks(c)]
     mech = audit.get("mechanical") or {}
     if not mech.get("available"):
         return out + [f"render check didn't run, so JS errors, overflow and forms are unverified: {mech.get('note')}"]
@@ -1393,7 +1498,7 @@ def workable(audit):
 def failure_signature(audit):
     return sorted(f"{r['criterion']}|{r['verdict']}" for r in audit["results"] + audit.get("rubric", []) if not r["pass"]) \
         + sorted(j2_check.problems(audit.get("mechanical") or {})) \
-        + sorted(f"{c['id']}|{c['evidence']}" for c in audit.get("conditions") or [] if not c["met"])
+        + sorted(f"{c['id']}|{c['evidence']}" for c in audit.get("conditions") or [] if blocks(c))
 
 
 # ---- Adaptation's memory: lessons from fixes Audit confirmed, kept across runs in memory/lessons.jsonl
@@ -2292,9 +2397,11 @@ class J2Run:
             if self.doc and not self.intake and len(self.request.split()) < 25 and not last:
                 return json.dumps({"say": "Before we start, a few quick questions so the document has the facts.",
                                    "enough": False, "next": "Requester", "questions": [
-                    {"question": "What is the product called, and who are its users?", "options": []},
+                    {"question": "What is the product called, who are its users, and what does each group do in "
+                                 "it?", "options": []},
                     {"question": "What problem does it solve, and what are the must-have features?", "options": []},
-                    {"question": "Any constraints, and how will you measure success?", "options": []}]})
+                    {"question": "Any constraints, and how will you measure success? If it's a number, over what "
+                                 "time?", "options": []}]})
             if self.doc:
                 return json.dumps({"to_requester": "Thanks, I have everything I need. I'm starting the document now.",
                                    "to_agents": "@Adaptation Charter recorded for the PRD.", "enough": True,
@@ -2787,6 +2894,8 @@ class J2Run:
         text = crit[as_int(x.get("item")) - 1] if n else None
         ask = requester_words(x["needs_requester_fact"], src).rstrip(" .") or \
             (f"The detail needed for {short(text)}" if text else "The detail this needs")
+        if self.doc and NUMBER_ASK.search(ask) and not re.search(r"over what time|window", ask, re.I):
+            ask += ", and over what time it is measured (for example per week or per term)"   # one question, P8
         return {"question": ask + (f" (checklist item {n}: {short(text)})" if n else "")
                 + ". If you can't give it yet, say so and it's marked to be confirmed.", "options": []}
 
@@ -2983,7 +3092,7 @@ class J2Run:
                 if last and not self.doc else []:
             out.setdefault(("check", p), p)
         for c in (last or {}).get("conditions") or []:      # necessary conditions, by their text (the Requester reads it)
-            if not c["met"] and not (not self.doc and c.get("check") in RENDER_CONDITIONS):
+            if blocks(c) and not (not self.doc and c.get("check") in RENDER_CONDITIONS):
                 out.setdefault(("condition", c["id"]), c["text"])
         if last and last["version"] < len(self.sites):
             for w in self.workflows:
@@ -3344,7 +3453,7 @@ class J2Run:
                  for r in (last["results"] + last.get("rubric", []) + last.get("extra_issues", []) if last else [])
                  if not r.get("pass")]
         fails += [{"id": c["id"], "criterion": c["text"], "verdict": "NOT_MET", "note": c["evidence"]}
-                  for c in (last or {}).get("conditions") or [] if not c["met"]]        # a document's conditions
+                  for c in (last or {}).get("conditions") or [] if blocks(c)]        # necessary conditions
         held = [{"id": w["id"], "name": w["name"]} for w in self.workflows if w["status"] == "held"]
         lessons = relevant_lessons(load_lessons(), " ".join([str(h.get("why") or ""), json.dumps(fails),
                                                              json.dumps((self.goal or {}).get("done_when"))]),
@@ -4609,7 +4718,7 @@ class J2Run:
         audit = {"cycle": self.cycle, "version": len(self.sites), "results": results, "extra_issues": extras,
                  "rubric": rubric, "mechanical": mech, "screenshot": os.path.relpath(shot, self.dir) if shot else None,
                  "all_pass": bool(results) and all(x.get("pass") for x in results + rubric)
-                 and all(c["met"] for c in extra.get("conditions") or []), **extra}
+                 and not any(blocks(c) for c in extra.get("conditions") or []), **extra}
         self.audits.append(audit)
         self.save("audits.json", self.audits)
         nxt, note = self._pick("audit", r.get("next"), ("identity",), "identity",
@@ -4700,7 +4809,8 @@ class J2Run:
         self.save("conditions.json", conds)
         if built:
             self.post("system", "Necessary conditions (checked by code): " + "; ".join(
-                f"{c['id']} " + ("met" if c["met"] else f"NOT MET ({c['evidence']})") for c in conds)
+                f"{c['id']} " + ("met" if c["met"] else f"{'WARNING' if c.get('severity') == 'warn' else 'NOT MET'} "
+                                                       f"({c['evidence']})") for c in conds)
                 + f" ({self.out['noun']} v{len(self.sites)})", mechanical=True)
         return conds
 
@@ -4733,8 +4843,8 @@ class J2Run:
                       '"evidence": str (one line: what the text says), "needs_requester_fact": str|null}] (exactly one '
                       'finding per done-when item, plus one per extra issue; a PASS needs evidence), "rubric": [{"id": '
                       f'"{self.out["rubric"][0][0]}".."{self.out["rubric"][-1][0]}", "verdict": "PASS"|"PASS_WITH_WARNING"|'
-                      '"NEEDS_REVISION", "evidence": str (one line: what in the text shows it)}] (exactly one per rubric '
-                      'item), ' + next_field(("identity",), "Identity: you file every finding to Identity") + "}",
+                      '"NEEDS_REVISION", "evidence": str (one line: what in the text shows it; for D-5, quote each '
+                      'claim not in the brief that isn\'t labelled "Assumption:")}] (exactly one per rubric item), ' + next_field(("identity",), "Identity: you file every finding to Identity") + "}",
                       f"CRITERIA (file each finding under its item number; numbers never change): "
                       f"{json.dumps([{'item': self._no(c), 'criterion': c} for c in crit], ensure_ascii=False)}\n"
                       + (f"DROPPED BY THE REQUESTER (out of scope: file no finding for these): "
@@ -5002,9 +5112,12 @@ class J2Run:
             "sections": [{"heading": h, "words": md_words(b)} for lv, h, b in md_sections(self.sites[-1]) if lv == 2]
             if self.doc and self.sites else list(self.sections),
             "conditions": {"met": sum(c["met"] for c in conds), "total": len(conds),
+                           "warnings": sum(c.get("severity") == "warn" and not c["met"] for c in conds),
                            "list": [{k: c[k] for k in ("id", "met", "evidence")} for c in conds]} if conds else None,
             "necessary_conditions": {"met": sum(c["met"] for c in conds), "total": len(conds),
-                                     "list": [{k: c[k] for k in ("id", "text", "met", "evidence")} for c in conds]}
+                                     "warnings": sum(c.get("severity") == "warn" and not c["met"] for c in conds),
+                                     "list": [{k: c[k] for k in ("id", "text", "met", "evidence", "severity",
+                                                                 "assumptions") if k in c} for c in conds]}
             if conds else None,
             **({"export": {"file": self.out["file"][:-3] + ".docx", "written": not self.export_note,
                            "note": self.export_note}} if self.doc else {}),

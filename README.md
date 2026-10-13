@@ -357,7 +357,7 @@ Settings:
 | `J2_MEMORY` | 1 | 0 turns lessons off |
 | `J2_MAX_TURNS` | 30 | Agent turns per cycle, at least; a cycle gets max(this, 10 + 4 × workflows registered in it). J2.h after a passing Audit always runs |
 | `J2_RATES` | 1 | 0 turns the rate card off |
-| `J2_OUTPUT` | website | A website must also meet the necessary conditions in `conditions/website.json` (N1 to N8, checked by code after each build, written to `conditions.json`). `prd` writes a PRD instead (also picked on the start page): six markdown sections checked by code (no browser), necessary conditions in `conditions/prd.json`, the document rubric D-1 to D-5, `rates_prd` in `rates.json`; the run ends with `prd.md` and `prd.docx` (needs `python-docx`) |
+| `J2_OUTPUT` | website | A website must also meet the necessary conditions in `conditions/website.json` (N1 to N8, checked by code after each build, written to `conditions.json`). `prd` writes a PRD instead (also picked on the start page): six markdown sections checked by code (no browser), necessary conditions in `conditions/prd.json` (P8 is a warning: `"severity": "warn"` shows but never blocks; statements beyond the brief start with `Assumption:` and are collected into a closing "Assumptions to confirm" section), the document rubric D-1 to D-5, `rates_prd` in `rates.json`; the run ends with `prd.md` and `prd.docx` (needs `python-docx`) |
 | `J2_FORCE_AUDIT_FAIL` | off | Test switch, see below |
 | `J2_MEMORY_TEST_LESSONS` | off | 1 lets J2.b read test lessons (demo runs only), see below |
 | `J2_OVERRIDE_KEY` | unset | Owner override key, `.env` only, see below |

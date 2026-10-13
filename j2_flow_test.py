@@ -2425,7 +2425,9 @@ def prd_run():
         assert json.loads(f.readline())["output"] == "prd"
     assert s["output_type"] == "prd" and s["status"] == "done" and s["workable"] == [], s
     assert [x["heading"] for x in s["sections"]] == list(j2.PRD_SECTIONS) and all(x["words"] for x in s["sections"]), s
-    assert s["conditions"]["met"] == s["conditions"]["total"] == 6 and s["export"]["written"], s
+    # P8 is a warning ("under 10 minutes" states no window): shown, and the PRD is still workable
+    assert (s["conditions"]["met"], s["conditions"]["total"], s["conditions"]["warnings"]) == (7, 8, 1), s["conditions"]
+    assert s["export"]["written"], s
     assert s["verification"]["passed"] == 6 and not s["verification"]["failed"] and s["verification"]["checks_run"], s
     # one workflow per section, one atom each, priced from the document rate card
     assert [w["name"] for w in run.workflows] == [f"Write {x}" for x in j2.PRD_SECTIONS], run.workflows
@@ -2434,7 +2436,8 @@ def prd_run():
     assert md.startswith("# QuickQueue") and [h for lv, h, _ in j2.md_sections(md) if lv == 2] == list(j2.PRD_SECTIONS)
     assert "1. **R1**:" in md and "<" not in md, md
     conds = json.load(open(os.path.join(run.dir, "conditions.json"), encoding="utf-8"))
-    assert [c["id"] for c in conds] == ["P1", "P2", "P3", "P4", "P5", "P6"] and all(c["met"] for c in conds), conds
+    assert [c["id"] for c in conds] == [f"P{i}" for i in range(1, 9)], conds
+    assert all(c["met"] for c in conds[:7]) and not conds[7]["met"] and conds[7]["severity"] == "warn", conds
     # never a website condition: no render check, no R-rubric, no tap-targets rule in any prompt
     a = run.audits[-1]
     assert [r["id"] for r in a["rubric"]] == ["D-1", "D-2", "D-3", "D-4", "D-5"] and not a["mechanical"], a["rubric"]
@@ -2494,7 +2497,7 @@ def prd_checks():
     src = j2.squash("QuickQueue SMS alert 45 minutes 10 minutes 60% 3 months")
     good = ("# QuickQueue\n\n## Problem\n\nPatients wait 45 minutes.\n\n## Users\n\nClinic patients.\n\n## Goals\n\n- **G1**: "
             "Short waits\n\n## Requirements\n\n1. **R1**: SMS alert\n2. **R2**: Join from a phone\n\n## Success metrics\n\n"
-            "| Goal | Metric |\n|---|---|\n| G1 | Under 10 minutes |\n\n## Out of scope\n\n- Payments\n")
+            "| Goal | Metric |\n|---|---|\n| G1 | Under 10 minutes, measured monthly |\n\n## Out of scope\n\n- Payments\n")
     met = lambda cid, d, g=goal: j2.condition_met(conds[cid], d, g, src, j2.PRD_SECTIONS)
     assert all(met(c, good)[0] for c in conds), [(c, met(c, good)) for c in conds]
     assert not met("P1", good.replace("## Out of scope\n\n- Payments\n", "## Out of scope\n"))[0]
@@ -2512,6 +2515,95 @@ def prd_checks():
              "conditions": [{"id": "P2", "text": "ids", "met": False, "evidence": "R2 twice"}]}
     assert j2.workable(audit) == ["necessary condition P2 not met: ids (R2 twice)"], j2.workable(audit)
     assert j2.workable({**audit, "conditions": []}) == []
+
+
+def prd_groups_metrics_assumptions():
+    """P7 user groups, P8 metric windows (a warning), P4 with Assumption: lines and proper names, the closing
+    assumptions section, the window in Identity's number question, and short item names cut at a natural break."""
+    conds = {c["id"]: c for c in j2.load_conditions("prd.json")}
+    goal = {"product_name": "LabSlot", "users": "Students (book slots) and lab staff", "facts": ["LabSlot"],
+            "to_be_confirmed": []}
+    src = j2.squash("LabSlot students lab staff book a slot 80% of bookings are made without staff help")
+    doc = ("# LabSlot\n\n## Users\n\nStudents and lab staff.\n\n## Requirements\n\n1. **R1**: A student can book a slot\n\n"
+           "## Success metrics\n\n- **G1**: 80% of bookings are made without staff help\n")
+    met = lambda cid, d, g=goal: j2.condition_met(conds[cid], d, g, src, j2.PRD_SECTIONS)
+    assert j2.user_groups(goal) == ["Students", "lab staff"], j2.user_groups(goal)
+    p7 = met("P7", doc)
+    assert not p7[0] and "lab staff" in p7[1] and "Students" not in p7[1], p7       # "a student" covers Students
+    assert met("P7", doc.replace("lab staff.\n", "lab staff.\n\nLab staff have no actions in this version.\n"))[0]
+    assert met("P7", doc, {**goal, "user_groups": [{"name": "students", "actions": ["book"]}]})[0]
+    # P8: a warning, never a blocker
+    p8 = met("P8", doc)
+    assert not p8[0] and "80% of bookings" in p8[1], p8
+    for window in (" per term", ", measured weekly", " (measurement window not set)", " within 3 months"):
+        assert met("P8", doc.replace("staff help\n", f"staff help{window}\n"))[0], window
+    rows = j2.check_conditions(j2.load_conditions("prd.json"), doc, goal, src, j2.PRD_SECTIONS)
+    w = next(c for c in rows if c["id"] == "P8")
+    assert w["severity"] == "warn" and not w["met"] and not j2.blocks(w), w
+    assert all("severity" not in c for c in rows if c["id"] != "P8")             # the others stay blocking
+    audit = {"output": "prd", "results": [], "rubric": [], "mechanical": {}, "conditions": [w]}
+    assert j2.workable(audit) == [], j2.workable(audit)
+    # P4: a number or proper name not in the charter fails outside an Assumption: line and passes inside one
+    for claim in ("Bookings open 7 days ahead.", "Northfield College runs the labs."):
+        bad = met("P4", doc + f"\nOut of scope: {claim}\n")
+        assert not bad[0] and ("7" in bad[1] or "Northfield" in bad[1]), (claim, bad)
+        assert met("P4", doc + f"\n- Assumption: {claim}\n")[0], claim
+    secs = {"W-1": {"body": "## Users\n\nStudents and lab staff.\n\n- Assumption: Bookings open 7 days ahead."},
+            "W-2": {"body": "## Requirements\n\n1. **R1**: A student can book a slot"}}
+    md = j2.assemble_doc("LabSlot", secs, j2.PRD_SECTIONS)
+    assert md.endswith("## Assumptions to confirm\n\n- Bookings open 7 days ahead.\n"), md
+    assert j2.doc_assumptions(md) == ["Bookings open 7 days ahead."] and met("P4", md)[0]
+    assert "Assumptions to confirm" not in j2.assemble_doc("LabSlot", {"W-2": secs["W-2"]}, j2.PRD_SECTIONS)
+    p4 = next(c for c in j2.check_conditions(j2.load_conditions("prd.json"), md, goal, src, j2.PRD_SECTIONS)
+              if c["id"] == "P4")
+    assert p4["met"] and p4["assumptions"] == ["Bookings open 7 days ahead."], p4
+    assert "quote each" in dict(j2.DOC_RUBRIC)["D-5"] or "quotes each" in dict(j2.DOC_RUBRIC)["D-5"]
+
+    # a mock PRD run whose Out of scope builder adds an assumption: in conditions.json and the closing section
+    os.environ["J2_OUTPUT"] = "prd"
+    try:
+        run = j2.J2Run()
+        orig = run.call
+
+        def call(fn, *a, **k):
+            raw = orig(fn, *a, **k)
+            if isinstance(raw, str) and "## Out of scope" in raw:
+                head, _, tail = raw.rpartition("```")
+                raw = head + "- Assumption: Clinics may want a printed ticket within 2 weeks.\n```" + tail
+            return raw
+        run.call = call
+        say(run, PRD_BRIEF)
+        q = run._fact_question({"needs_requester_fact": "A target for in-room wait", "item": None})["question"]
+        assert "over what time" in q, q                                       # the window in the same question
+    finally:
+        os.environ.pop("J2_OUTPUT")
+    assert run.outcome.startswith("Done: the PRD is workable"), run.outcome
+    md = open(os.path.join(run.dir, "prd.md"), encoding="utf-8").read()
+    assert md.endswith("## Assumptions to confirm\n\n- Clinics may want a printed ticket within 2 weeks.\n"), md[-300:]
+    saved = json.load(open(os.path.join(run.dir, "conditions.json"), encoding="utf-8"))
+    p4 = next(c for c in saved if c["id"] == "P4")
+    assert p4["met"] and p4["assumptions"] == ["Clinics may want a printed ticket within 2 weeks."], p4
+    assert next(c for c in saved if c["id"] == "P7")["met"], saved
+    site = j2.J2Run()
+    site.goal = {"done_when": ["x"]}
+    q = site._fact_question({"needs_requester_fact": "A target for in-room wait", "item": None})["question"]
+    assert "over what time" not in q, q                                       # websites: as before
+
+    # short names: cut at a natural break, at most 12 words, "..." when cut mid-clause, never on a joining word
+    texts = ["The Requirements section lists every must-have feature as R1, R2, ...",
+             "Visitors can see every event of the three-day fest grouped by day with its start time and the room it is in",
+             "A section about the beans and the farms they come from",
+             "Opening hours are listed"]
+    for t in texts:
+        n = j2.short(t)
+        words = n.rstrip(".").split()
+        assert len(words) <= 12 and not (n.endswith("...") and words[-1].lower() in j2.JOINING), n
+        first = re.split(r"[,:;(]| - ", t)[0].strip()
+        assert n == first or (n.endswith("...") and first.startswith(n[:-3])), (t, n)
+    assert j2.short(texts[1]).endswith("...") and j2.short(texts[3]) == texts[3]
+    assert j2.short(texts[2]) == texts[2]                                     # 11 words: whole, no "..."
+    names = j2.shorts([texts[1], texts[1].replace("room", "hall")])
+    assert len(set(names)) == 2, names                                        # still unique within a list
 
 
 def prd_page():
@@ -2703,12 +2795,13 @@ if __name__ == "__main__":
         summary_before_review()
         prd_run()
         prd_checks()
+        prd_groups_metrics_assumptions()
         website_conditions()
         print(f"J2_FIXES={mode}: website necessary conditions: N1 to N8 each reported not met with evidence, nav plan "
               "flagged before building, workable needs every condition, no None or internal ids for the Requester ok")
         print(f"J2_FIXES={mode}: PRD output: mock PRD brief Done workable with prd.md and prd.docx, document checks pass "
               "and fail (duplicate R2 rejected), invented facts-present rejected, no browser check, no website "
-              "conditions ok")
+              "conditions, P7 user groups, P8 window warning, assumptions labelled and listed, short names ok")
         print(f"J2_FIXES={mode}: B workflow agents, atom checks (rules, receipts, third failure to Adaptation), leave-out question names its items, rubric in briefs, tap targets, no \"units\", charter numbers for agents, no Chrome = could not run, unique short names, C workable loop and limits, D memory, F forced audit failure (hidden from agents) and test lessons, summary before review, H style guide, rubric loop, needs, playbooks, I pricing and unpaid items ok")
     ruling_over_budget()
     redirect()
