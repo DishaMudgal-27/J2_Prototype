@@ -2606,6 +2606,120 @@ def prd_groups_metrics_assumptions():
     assert len(set(names)) == 2, names                                        # still unique within a list
 
 
+def prd_recovery():
+    """runs/j2-20261013-185235: heading targets are normalised ("## Problem" is "Problem"); a wrong target after three
+    failures ends in CHECK_WRONG by code without asking Identity, and the corrected check re-runs on the same document;
+    an unusable Adaptation reply twice gets a code-built revision and the run goes on; the PRD question lists
+    sections only, says "document", never drops everything and never repeats with nothing changed."""
+    assert j2.heading_target("## Problem") == j2.heading_target(" #Problem") == "Problem"
+    doc = "# X\n\n## Problem\n\nBooking is done on paper and slots get double-booked.\n"
+    for t in ("## Problem", "Problem"):
+        assert j2.doc_check({"type": "heading-present", "target": t}, doc)["pass"], t
+        assert j2.doc_check({"type": "section-not-empty", "target": t, "expect": 5}, doc)["pass"], t
+    atom = j2.mock_doc_atom({"name": "Write Problem"})
+    assert not j2.check_problems({**atom, "verification": [{"text": "x", "type": "heading-present", "target": "## Problem",
+                                                            "expect": True}]}, "", j2.DOC_CHECK_TYPES)
+    assert "no # characters" in j2.PRD_ATOM_RULES
+
+    def prd(patch):
+        """A mock PRD run whose AI calls pass through patch(fn, reply, n) (n: that function's call count)."""
+        os.environ["J2_OUTPUT"] = "prd"
+        try:
+            run, seen = j2.J2Run(), {}
+            orig = run.call
+
+            def call(fn, *a, **k):
+                seen[fn] = seen.get(fn, 0) + 1
+                return patch(fn, orig(fn, *a, **k), seen[fn])
+            run.call = call
+            say(run, PRD_BRIEF)
+            finish(run)
+        finally:
+            os.environ.pop("J2_OUTPUT")
+        return run, seen
+
+    def target(t):              # Adaptation's first plan writes the Problem heading checks with target t
+        def patch(fn, r, n):
+            if fn == "adaptation" and n == 1 and isinstance(r, dict):
+                for w in r.get("workflows") or []:
+                    for c in w["atoms"][0]["verification"] if "Problem" in w["name"] else []:
+                        if c["type"] in j2.HEADING_CHECKS:
+                            c["target"] = t
+            return r
+        return patch
+    # (1) "## Problem" behaves exactly like "Problem", and the normalised form is stored
+    run, seen = prd(target("## Problem"))
+    assert run.outcome.startswith("Done: the PRD is workable"), run.outcome
+    w1 = run.workflows[0]
+    assert [c["target"] for c in w1["atoms"][0]["verification"] if c["type"] in j2.HEADING_CHECKS] == ["Problem"] * 2
+    saved = json.load(open(os.path.join(run.dir, "workflows.json"), encoding="utf-8"))[0]
+    assert all(c["target"] == "Problem" for c in saved["atoms"][0]["verification"] if c["type"] in j2.HEADING_CHECKS)
+    recs = [r for r in run.receipts if r["atom"] == "W-1.a1" and r["type"] in j2.HEADING_CHECKS]
+    assert recs and all(r["target"] == "Problem" and r["pass"] for r in recs) and seen["W-1"] == 1, recs
+
+    # (2) a wrong target fails three times: code checks the obvious case, CHECK_WRONG, re-run on the same document
+    run, seen = prd(target("Problem section"))
+    assert run.outcome.startswith("Done: the PRD is workable"), run.outcome
+    assert seen["W-1"] == j2.MAX_CHECK_ATTEMPTS, seen                      # no new build after the correction
+    assert any(e["type"] == "check_wrong_default" for e in run.events), run.events
+    note = next(m for m in run.chat if m["text"].startswith("Code checked the obvious case first"))
+    assert "'Problem section' passes as the heading text 'Problem'" in note["text"], note["text"]
+    re_run = [r for r in run.receipts if r["atom"] == "W-1.a1" and r.get("recheck")]
+    assert re_run and all(r["pass"] for r in re_run) and {r["target"] for r in re_run if r["type"] in
+                                                           j2.HEADING_CHECKS} == {"Problem"}, re_run
+    assert run.workflows[0]["atoms"][0]["status"] == "passed"
+    assert not any(m["who"] == "identity" and "fails its checks" in m["text"] for m in run.chat)
+    call = next(c for c in calls_of(run) if "WORK ATOM FAILED" in c["prompt"])
+    assert "the check's target looks wrong" in call["prompt"], call["prompt"][-600:]
+
+    # (3) the build is really wrong (W-1 writes "## Background"), then Adaptation's reply is a bare "say" twice:
+    # code builds the revision of W-1 itself and the run gets to Done
+    blob = {"say": '{"say":"One proposal: a W-1 revision covering items 1 and 8, priced at 28. The builder writes'}
+
+    def patch(fn, r, n):
+        if fn == "W-1":
+            return r.replace("## Problem", "## Background")
+        if fn == "adaptation" and n in (3, 4):          # 1: the plan, 2: the failed atom, 3-4: the next proposals
+            return dict(blob)
+        return r
+    run, seen = prd(patch)
+    assert run.outcome.startswith("Done: the PRD is workable"), run.outcome
+    assert run.workflows[0]["atoms"][0]["status"] == "escalated", run.workflows[0]["atoms"]
+    retry = [c for c in calls_of(run) if "YOUR LAST REPLY COULD NOT BE USED" in c["prompt"]]
+    assert len(retry) == 1 and '"revises": "W-1"' in retry[0]["prompt"], retry
+    fix = next(w for w in run.workflows if w.get("revises") == "W-1")
+    assert fix["name"] == "Revise W-1 Write Problem" and fix["cost"] == j2.RATES["fix"] and fix["status"] == "done", fix
+    assert any(m["text"].startswith("Adaptation's reply couldn't be used twice") for m in run.chat)
+    md = open(os.path.join(run.dir, "prd.md"), encoding="utf-8").read()
+    assert "## Problem" in md and "## Background" not in md, md[:300]
+
+    # (4) the PRD question: sections only, "document", never an option that drops everything, never a repeat
+    run, _ = prd(lambda fn, r, n: r)
+    crit, last = list(run.goal["done_when"]), run.audits[-1]
+    for r in last["results"][1:]:                       # every section but Problem fails
+        r.update(verdict="NEEDS_REVISION", note="missing", **{"pass": False})
+    last["rubric"][0].update(verdict="NEEDS_REVISION", **{"pass": False})
+    last["conditions"][0].update(met=False, evidence="missing")
+    run.outcome, run.done = None, False
+    run._identity_limit({"reason": "The same failure came back twice."})
+    text, q = run.chat[-1]["text"], run.paused["questions"][0]
+    rows = [ln[2:] for ln in text.split("\n") if ln.startswith("- ")]
+    assert rows and all(re.fullmatch(r"the (Users|Goals|Requirements|Success metrics|Out of scope) section \(.+\)", x)
+                        for x in rows), rows
+    assert not re.search(r"\b(?:web)?site\b", text + json.dumps(q), re.I), text
+    assert not re.search(r"\bP[1-8]\b|\bD-\d\b", text), text
+    assert not any(o.startswith("Leave out") for o in q["options"]), q   # it would leave only Problem
+    run.paused = None
+    for r in last["results"][1:4]:
+        r.update(verdict="PASS", **{"pass": True})
+    run.last_limit = {"state": (len(run.sites), len(run.workflows), run.spent), "decision": "continue"}
+    run._identity_limit({"reason": "The same failure came back twice."})
+    q = run.paused["questions"][0]
+    assert q["question"].startswith("The last round produced no new work"), q
+    assert not any(o.startswith("Keep going") for o in q["options"]), q          # only options that change something
+    assert any(o.startswith("Leave out the Success metrics section and the Out of scope section") for o in q["options"]), q
+
+
 def prd_page():
     """The page: the output type is picked before the first message and shown; the preview renders prd.md; the .md
     and .docx download, for the live run and once it is saved."""
@@ -2796,12 +2910,14 @@ if __name__ == "__main__":
         prd_run()
         prd_checks()
         prd_groups_metrics_assumptions()
+        prd_recovery()
         website_conditions()
         print(f"J2_FIXES={mode}: website necessary conditions: N1 to N8 each reported not met with evidence, nav plan "
               "flagged before building, workable needs every condition, no None or internal ids for the Requester ok")
         print(f"J2_FIXES={mode}: PRD output: mock PRD brief Done workable with prd.md and prd.docx, document checks pass "
               "and fail (duplicate R2 rejected), invented facts-present rejected, no browser check, no website "
-              "conditions, P7 user groups, P8 window warning, assumptions labelled and listed, short names ok")
+              "conditions, P7 user groups, P8 window warning, assumptions labelled and listed, short names, heading targets "
+              "normalised, wrong target is CHECK_WRONG, unusable reply twice gets a code fix, sections-only question ok")
         print(f"J2_FIXES={mode}: B workflow agents, atom checks (rules, receipts, third failure to Adaptation), leave-out question names its items, rubric in briefs, tap targets, no \"units\", charter numbers for agents, no Chrome = could not run, unique short names, C workable loop and limits, D memory, F forced audit failure (hidden from agents) and test lessons, summary before review, H style guide, rubric loop, needs, playbooks, I pricing and unpaid items ok")
     ruling_over_budget()
     redirect()

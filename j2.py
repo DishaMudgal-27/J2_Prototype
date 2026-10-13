@@ -298,9 +298,11 @@ def check_problems(a, source, types=CHECK_TYPES):
             out.append(f"check {n} isn't an object with text, type, target and expect")
             continue
         t, target, label = c.get("type"), c.get("target"), str(c.get("text") or "")
+        if t in HEADING_CHECKS:
+            target = heading_target(target)
         if t not in types:
             out.append(f"check {n} has type {t!r}; allowed: {', '.join(types)}")
-        elif t in ("heading-present", "section-not-empty") and not str(target or "").strip():
+        elif t in HEADING_CHECKS and not str(target or "").strip():
             out.append(f"check {n} {t} needs the heading text as its target")
         elif t == "section-not-empty" and as_int(c.get("expect")) < 1:
             out.append(f"check {n} section-not-empty expects {c.get('expect')!r}; expect is the minimum word count (1 or more)")
@@ -490,9 +492,55 @@ def md_ids(text, prefix):
                                        str(text))]
 
 
+HEADING_CHECKS = ("heading-present", "section-not-empty")
+
+
+def heading_target(t):
+    """A heading check's target as heading text: leading "#" characters and spaces stripped ("## Problem" -> "Problem")."""
+    return re.sub(r"^[#\s]+", "", str(t or "")).strip()
+
+
+def normalise_checks(atoms):
+    """Every heading check's target in these atoms as heading text, in place, so workflows.json and the receipts
+    store the form the check runs on."""
+    for a in atoms or []:
+        for c in (a.get("verification") if isinstance(a, dict) and isinstance(a.get("verification"), list) else []):
+            if isinstance(c, dict) and c.get("type") in HEADING_CHECKS:
+                c["target"] = heading_target(c.get("target"))
+    return atoms
+
+
+def corrected_check(c, doc):
+    """(corrected check, reason) when a failed heading or text check fails only because of how its target is written:
+    read as heading text (no #, emphasis, trailing colon or the word "section") it passes, or its text is in the
+    document written slightly differently (spacing, punctuation, case). None when the check fails on its merits."""
+    t, target = c.get("type"), c.get("target")
+    if t in HEADING_CHECKS:
+        loose = re.sub(r"\s*\b(?:section|heading)\s*$", "", re.sub(r"[*_`]+|[:.]+$", "", heading_target(target)),
+                       flags=re.I).strip()
+        new = {**c, "target": loose}
+        if loose and loose != target and doc_check(new, doc)["pass"]:
+            return new, f"{t} target {target!r} passes as the heading text {loose!r}"
+    if t == "facts-present":
+        facts, text, fixed = target if isinstance(target, list) else [target], strip_md(doc), []
+        for f in facts:
+            core = re.sub(r"[^a-z0-9]", "", str(f).lower())
+            m = None if squash(strip_md(f)) in squash(text) or not core else \
+                re.search(r"[^a-z0-9]*".join(map(re.escape, core)), text, re.I)
+            if not m and squash(strip_md(f)) not in squash(text):
+                return None
+            fixed.append(" ".join(m.group(0).split()) if m else f)
+        new = {**c, "target": fixed}
+        if fixed != facts and doc_check(new, doc)["pass"]:
+            return new, f"facts-present target {facts!r} is in the document as {fixed!r}"
+    return None
+
+
 def doc_check(c, doc):
     """{actual, pass, evidence} for one check against a markdown document. Code only."""
     t, target, expect = c.get("type"), c.get("target"), c.get("expect")
+    if t in HEADING_CHECKS:
+        target = heading_target(target)
     if t == "facts-present":
         text = squash(strip_md(doc))
         facts = target if isinstance(target, list) else [target]
@@ -1300,8 +1348,9 @@ PRD_ATOM_RULES = ("\nWORK ATOMS: every workflow, fixes included, carries atoms: 
                   "and section ids, never copied text. how: {kind: \"AI\" or \"code\", agent: who builds it, steps: which "
                   "\"## <Section>\" it writes}. verification: the checks code runs on the PRD after the builder writes it "
                   "(the builder gets 3 attempts), each {text: the check in plain words, type, target, expect}. Only these "
-                  "types: heading-present (target: the section heading text; expect true); section-not-empty (target: the "
-                  "heading text; expect: the minimum number of words); ids-unique (target: an id prefix, \"R\" for R1, R2, "
+                  "types: heading-present (target: the section heading text only, with no # characters, e.g. \"Problem\"; "
+                  "expect true); section-not-empty (target: the heading text only, no # characters; expect: the minimum "
+                  "number of words); ids-unique (target: an id prefix, \"R\" for R1, R2, "
                   "...; expect true); facts-present (target: a list of strings that must all appear in the document; "
                   "expect true). No browser checks. Each facts-present string is copied exactly from the charter or the "
                   "Requester's answers (no invented facts). A goal that names a number needs a facts-present check. A "
@@ -1898,6 +1947,8 @@ class J2Run:
                                     "msg": len(self.chat) + 1, "cycle": self.cycle})
             else:
                 text = "@Requester " + to_requester(text, keep=self._fact_source())   # _ask_user shapes its own
+        if who == "identity" and meta.get("to_user"):
+            text = self._requester_noun(text)
         m = {"id": len(self.chat) + 1, "t": time.strftime("%H:%M:%S"), "who": who, "text": text, "step": self.step, **meta}
         if self.pending_calls.get(who):          # the AI calls behind this message, for the detail view
             m["calls"] = self.pending_calls.pop(who)
@@ -2177,8 +2228,9 @@ class J2Run:
         (the decision question) is appended by code after Identity's words, so the list and its count are one list."""
         src = self._fact_source()
         say = to_requester(say, question=not questions, keep=src)
-        questions = [{**q, "question": requester_words(q["question"], src) or q["question"],
-                      "options": [requester_words(o, src) or o for o in q.get("options") or []]} for q in questions]
+        questions = [{**q, "question": self._requester_noun(requester_words(q["question"], src) or q["question"]),
+                      "options": [self._requester_noun(requester_words(o, src) or o) for o in q.get("options") or []]}
+                     for q in questions]
         if gaps is not None:
             # At most 2 sentences, then the full list, one gap per line; the header's counts add up to the list.
             say = " ".join(re.split(r"(?<=[.!?])\s+", say)[:2])
@@ -2806,12 +2858,12 @@ class J2Run:
             self.last_limit["decision"] = decision
         gone = [crit[i - 1] for i in drops]
         label = {**self._names(crit), **dict(zip(h.get("drop_texts") or [], h.get("drop_named") or []))}
-        names = and_list(label[c] for c in gone)    # the option's own names when it was the option
+        names = and_list(dict.fromkeys(label[c] for c in gone))   # the option's own names (a section once)
         if limit and decision == "drop" and ONLY_PICK.fullmatch(answer) and "drop_texts" in h:
             # The check: the items the option named are exactly the items dropped.
             if sorted(gone) != sorted(named):
                 self._event("system", "drop_mismatch", f"named {named}, dropping {gone}")
-                gone, names = list(named), and_list(label[c] for c in named)
+                gone, names = list(named), and_list(dict.fromkeys(label[c] for c in named))
         if self.decisions and limit:
             self.decisions[-1].update(named=h.get("drop_named") if decision == "drop" and "drop_texts" in h else [],
                                       dropped=[label[c] for c in gone])
@@ -2886,6 +2938,13 @@ class J2Run:
             orig.append(text)
         return orig.index(text) + 1
 
+    def _requester_noun(self, text):
+        """A document run's Requester reads "document", never "site" or "website"."""
+        if not self.doc:
+            return text
+        return re.sub(r"\b(?:web)?site(s?)\b", lambda m: ("Document" if m.group(0)[0].isupper() else "document")
+                      + m.group(1), str(text), flags=re.I)
+
     def _fact_question(self, x):
         """Identity's question for a fact only the Requester knows (an Audit finding's needs_requester_fact), in the
         Requester's words: the item's charter number and short text, never an internal id or agent-facing wording."""
@@ -2943,6 +3002,17 @@ class J2Run:
             else:
                 rows.append({"name": short(t) if t in rubric else t, "text": t, "status": "failing",
                              "drop": False})
+        if self.doc:      # a document: one row per section, named by the section; its items leave out together
+            by = {}
+            for r in rows:
+                sec = next((x for x in self.out["sections"] if x.lower() in r["text"].lower()), None)
+                k = sec or r["text"]
+                if k in by:
+                    by[k]["texts"].append(r["text"])
+                    by[k]["drop"] = by[k]["drop"] and r["drop"]
+                else:
+                    by[k] = {**r, "name": f"the {sec} section" if sec else r["name"], "texts": [r["text"]]}
+            rows = list(by.values())
         return rows
 
     def _identity_limit(self, h):
@@ -2962,7 +3032,7 @@ class J2Run:
         add = min(want, room) if short or h.get("budget_needed") else 0
         # Keep working only when it can do something: with no money left it needs a raise the cap allows. And after
         # "keep working" changed nothing (same site, audits, spend), the same option isn't offered again.
-        state = (len(self.sites), len(self.audits), self.spent)
+        state = (len(self.sites), len(self.workflows), self.spent)   # an audit alone changes nothing
         stale = self.last_limit and self.last_limit["state"] == state and self.last_limit["decision"] == "continue"
         opts, budget, choices = [], [], []
         if (not short or self.budget + add - self.spent >= cheapest) and not stale and (add or not h.get("budget_needed")):
@@ -2975,7 +3045,11 @@ class J2Run:
         crit = (self.goal or {}).get("done_when") or []
         rows = self._gap_rows(gaps, last, left)
         named = [r for r in rows if r["drop"]]
-        drop = [crit.index(r["text"]) + 1 for r in named]
+        if self.doc:      # never an option that leaves the document with one section or none
+            gone = {t for r in named for t in r.get("texts", [r["text"]])}
+            kept = {x for x in self.out["sections"] for c in crit if c not in gone and x.lower() in c.lower()}
+            named = named if len(kept) > 1 else []
+        drop = [crit.index(t) + 1 for r in named for t in r.get("texts", [r["text"]])]
         shown = [f"{r['name']} ({r['status']})" for r in rows]      # the list under Identity's words
         if named:
             opts.append(f"Leave out {and_list(r['name'] for r in named)}: you get the site without "
@@ -2993,7 +3067,8 @@ class J2Run:
             opts.append("Stop here: nothing is built yet, so you get no site")
             budget.append(0)
             choices.append("ship")
-        lead = ("Some parts were put off twice." if h.get("deferred") else
+        lead = ("The last round produced no new work, so keeping going as before would change nothing." if stale else
+                "Some parts were put off twice." if h.get("deferred") else
                 "Some parts don't fit in the work you approved." if left else"The team paused after a round of work." if re.match(r"Cycle \d+ used|The department used", reason) else
                 "The work you approved is used up." if short else
                 "The same problem came back twice." if reason.startswith("The same failure") else
@@ -3030,8 +3105,8 @@ class J2Run:
                                       f"credits for the items left out: {json.dumps(left, ensure_ascii=False)}"}}
                                      if left else None)
         handoff = {"kind": "requester_answered", "limit": reason, "choices": choices, "resume": resume,
-                   "failing_items": drop, "drop_texts": [r["text"] for r in named],
-                   "drop_named": [r["name"] for r in named],
+                   "failing_items": drop, "drop_texts": [t for r in named for t in r.get("texts", [r["text"]])],
+                   "drop_named": [r["name"] for r in named for _ in r.get("texts", [r["text"]])],
                    **({"after_ruling": True} if left and not h.get("at_audit") else {})}
         if len(choices) < 2:
             # Never a one-option question. The only lone option is "finish as it is" (with no site, "stop here" is
@@ -3084,14 +3159,14 @@ class J2Run:
             if w["status"] != "done":
                 for i in self._wf_items(w):
                     out.setdefault(("item", i), f"{crit[i - 1]} (not built yet)")
-        for r in (last or {}).get("rubric", []):
+        for r in (last or {}).get("rubric", []) if not self.doc else []:     # a document lists its sections only
             if not r["pass"]:
                 out.setdefault(("rubric", r["id"]), r["criterion"])
         mech = (last or {}).get("mechanical") or {}
         for p in (j2_check.problems(mech) if mech.get("available") else ["the browser check didn't run"]) \
                 if last and not self.doc else []:
             out.setdefault(("check", p), p)
-        for c in (last or {}).get("conditions") or []:      # necessary conditions, by their text (the Requester reads it)
+        for c in (last or {}).get("conditions") or [] if not self.doc else []:   # by their text (the Requester reads it)
             if blocks(c) and not (not self.doc and c.get("check") in RENDER_CONDITIONS):
                 out.setdefault(("condition", c["id"]), c["text"])
         if last and last["version"] < len(self.sites):
@@ -3571,7 +3646,8 @@ class J2Run:
                       "After the first Audit, every workflow must cover an item or fix a finding. "
                       "Each registered workflow gets its own agent that owns one section of the site file "
                       "(STATE.site_sections): to change what's inside an earlier workflow's section, set revises to that "
-                      "workflow's id; otherwise the workflow adds a new section."
+                      "workflow's id; otherwise the workflow adds a new section. A revision (revises: \"W-n\", one 'fix' "
+                      "part, corrected checks in its atom) re-runs W-n's builder; it needs no Audit finding id."
                       + (f"\nLESSONS FROM EARLIER WORK (most relevant first): {json.dumps(offered, ensure_ascii=False)}\n"
                          "If one applies, use it, set lesson_used to its id and say in one clause which one you used."
                          + (" A lesson marked test is a demo lesson; if you use one, call it a test lesson."
@@ -3603,6 +3679,7 @@ class J2Run:
                 r = self._cheapest_fit()
                 self.post("system", "Adaptation asked about budget again, so code proposes the cheapest done-when "
                                     "items that fit the budget left.")
+        r = self._usable(r, fmt, task, mock)
         r = self._atoms_checked(r, fmt, task, mock)
         r = self._plan_checked(r, fmt, task, mock)
         act = str(r.get("act", "")).upper()
@@ -3707,8 +3784,68 @@ class J2Run:
             else:
                 r = {**r, "workflows": [w for w in norm(r.get("workflows")) if not self._atom_problems(w)]}
         for w in norm(r.get("workflows")):
-            self.proposed_atoms[w.get("name")] = w["atoms"]
+            self.proposed_atoms[w.get("name")] = normalise_checks(w["atoms"])
         return r
+
+    REVISION_EXAMPLE = {"say": "@Priority One revision of W-1: its builder rewrites the section with the corrected check.",
+                        "act": "PROPOSE", "next": "Priority", "left_out": [], "workflows": [
+                            {"name": "Revise W-1", "goal_gap": "W-1's check failed", "revises": "W-1", "covers": [],
+                             "parts": ["fix"], "outputs": ["the section W-1 owns"], "completion_check": "its checks pass",
+                             "atoms": ["<one work atom, as in ATOM RULES>"]}]}
+
+    def _unusable(self, r):
+        """Why Adaptation's reply can't be acted on (None when it can): no next speaker, or a proposal whose workflows
+        aren't a list (a reply cut short becomes a bare "say", runs/j2-20261013-185235 msgs 24-46)."""
+        act = str(r.get("act") or "").upper()
+        if not r.get("next"):
+            return "it names no next speaker (\"next\")"
+        if act in ("", "PROPOSE") and not isinstance(r.get("workflows"), list):
+            return "it has no \"workflows\" list"
+        return None
+
+    def _usable(self, r, fmt, task, mock):
+        """An unusable reply is re-asked once with the exact format and an example. Unusable again: code builds the fix
+        itself (_code_fix), so recovery always makes progress."""
+        why = self._unusable(r)
+        if not why:
+            return r
+        self._event("adaptation", "invalid_move", f"unusable reply: {why}")
+        self.post("system", f"Adaptation's reply can't be used: {why}. Adaptation is asked once more, with the exact "
+                            "format.")
+        r = self.call("adaptation", fmt, task + f"\nYOUR LAST REPLY COULD NOT BE USED: {why}. Reply with ONE complete "
+                      f"JSON object in exactly this format: {fmt}\nEXAMPLE (a revision of W-1):\n"
+                      f"{json.dumps(self.REVISION_EXAMPLE, ensure_ascii=False)}", mock)
+        why = self._unusable(r)
+        if not why:
+            return r
+        self._event("adaptation", "invalid_move", f"unusable reply again: {why}")
+        r = self._code_fix()
+        self.post("system", f"Adaptation's reply couldn't be used twice ({why}), so code proposes the fix itself: "
+                            + (", ".join(w["name"] for w in r["workflows"]) or "nothing fits") + ".")
+        return r
+
+    def _code_fix(self):
+        """Code's proposal when Adaptation can't give one: a revision of each workflow whose atom failed its checks
+        (escalated) and isn't being redone yet, re-running its builder with the checks corrected (heading targets as
+        heading text, targets read as the document writes them), one 'fix' part each (the rate-card minimum). No such
+        workflow: the cheapest done-when items that fit (_cheapest_fit)."""
+        redone = {x.get("revises") for x in self.workflows if x["status"] in ("registered", "held", "running", "done")}
+        doc = self.sites[-1] if self.sites else ""
+        wfs = []
+        for w in self.workflows:
+            esc = [a for a in w.get("atoms") or [] if a.get("status") == "escalated"]
+            if not esc or w["id"] in redone or w["section"] not in self.sections:
+                continue
+            atoms = [{**{k: v for k, v in a.items() if k not in ("id", "results", "status", "attempts")},
+                      "verification": [(corrected_check(c, doc) or (c,))[0] if self.doc else c
+                                       for c in normalise_checks([a])[0]["verification"]]} for a in esc]
+            wfs.append({"name": f"Revise {w['id']} {w['name']}", "goal_gap": f"{', '.join(a['id'] for a in esc)} failed "
+                        "its checks", "revises": w["id"], "covers": [], "parts": ["fix"], "outputs": w.get("outputs"),
+                        "completion_check": w.get("completion_check") or "its checks pass", "atoms": atoms})
+        if not wfs:
+            return self._cheapest_fit()
+        return {"say": f"@Priority Code's proposal: {and_list(x['name'] for x in wfs)}, one 'fix' part each.",
+                "act": "PROPOSE", "next": "Priority", "workflows": wfs, "left_out": [], "code_fix": True}
 
     def _plan_gaps(self, wfs):
         """Necessary conditions that need their own work ("plan" in conditions/<type>.json: words a workflow must
@@ -4120,7 +4257,7 @@ class J2Run:
         for w in norm(agreed):
             c, name = granted(w), w.get("name") or "?"
             missing = [f for f in self.REQUIRED if not (w.get(f) or (f == "goal_gap" and w.get("purpose")))]
-            atoms = w.get("atoms") or self.proposed_atoms.get(name)     # Priority or a ruling may drop them
+            atoms = normalise_checks(w.get("atoms") or self.proposed_atoms.get(name))   # Priority or a ruling may drop them
             no_atom = self._atom_problems({"atoms": atoms})
             rc, unknown = price(w)
             reason = ("a check or report on the site is Audit's job, not a workflow" if self.CHECK_WORK.search(str(name))
@@ -4195,7 +4332,8 @@ class J2Run:
         crit = (self.goal or {}).get("done_when") or []
         covers, fixes, parts = self._covers(w), [str(f) for f in w.get("fixes") or []], [str(p) for p in w.get("parts") or []]
         target = self._wf(str(w.get("revises") or "").upper())
-        is_fix = bool(fixes) or bool(target and target["status"] == "done")   # rewriting an unbuilt section is new work
+        # rewriting a built section (done, or failed its checks) is a fix and needs no finding id; an unbuilt one is new
+        is_fix = bool(fixes) or bool(target and (target["status"] == "done" or target["section"] in self.sections))
         if not covers and not fixes and not is_fix and (self.audits or {"page_section", "form"} & set(parts)):
             return ("it covers no done-when item and fixes no Audit finding: list the items it builds in covers, or "
                     "the findings it fixes in fixes" + (" (page_section and form parts build done-when items, so "
@@ -4569,6 +4707,15 @@ class J2Run:
                  if r.get("item") in self._wf_items(w) or not r.get("pass")] if last else "no Audit yet")
         cheapest = RATES.get("fix", min(RATES.values()) if RATES else 1)
         a0 = atoms[0]
+        # A document: code checks the obvious case first. A failed heading or text check that passes once its target
+        # is read as written in the document means the check's target is wrong, not the build.
+        corr, why = {}, []
+        for a in atoms if self.doc and self.sites else []:
+            fixed = [(c, corrected_check(c, self.sites[-1]) if not doc_check(c, self.sites[-1])["pass"] else None)
+                     for c in a.get("verification") or [] if isinstance(c, dict)]
+            if any(x for _, x in fixed):
+                corr[a["id"]] = [x[0] if x else c for c, x in fixed]
+                why += [f"{a['id']}: {x[1]}" for _, x in fixed if x]
 
         def mock():
             bad = [r for r in recs if r["attempt"] == MAX_CHECK_ATTEMPTS and not r["pass"]]
@@ -4584,20 +4731,35 @@ class J2Run:
                                "affordable": self.budget - self.spent >= cheapest})
         r = self.call("adaptation", '{"say": str, "verdict": "CHECK_WRONG"|"BUILD_WRONG", "atom": str (the atom id), '
                       '"verification": [check] (CHECK_WRONG only: the corrected checks, same rules), "affordable": bool '
-                      '(BUILD_WRONG only: can the budget left pay for a fix workflow?)}',
+                      '(BUILD_WRONG only: can the budget left pay for a fix workflow?), "build_wrong_reason": str|null '
+                      '(BUILD_WRONG only: exactly what the build lacks)}',
                       f"WORK ATOM FAILED: {', '.join(a['id'] for a in atoms)} failed its checks on all "
                       f"{MAX_CHECK_ATTEMPTS} attempts.\nTHE ATOMS: {json.dumps(atoms, ensure_ascii=False)}\nRECEIPTS "
                       f"(written by code, every attempt): {json.dumps(recs, ensure_ascii=False)}\nAUDIT'S LATEST VIEW: "
                       f"{json.dumps(view, ensure_ascii=False)}\nDecide whether the check or the build is wrong. "
                       "CHECK_WRONG: the check doesn't test the goal correctly; send the corrected verification and code "
                       "re-runs it on the same build. BUILD_WRONG: the section doesn't meet the goal; say whether the "
-                      f"budget left ({self.budget - self.spent}) can pay for a fix." + self.ATOM_RULES, mock)
+                      f"budget left ({self.budget - self.spent}) can pay for a fix."
+                      + (f"\nCODE CHECKED THE OBVIOUS CASE FIRST: the check's target looks wrong: {'; '.join(why)}. "
+                         "The decision is CHECK_WRONG with the corrected checks unless you give a specific reason the "
+                         "build is wrong in build_wrong_reason." if why else "") + self.ATOM_RULES, mock)
         verdict = str(r.get("verdict") or "").upper()
         a = next((x for x in atoms if x["id"] == r.get("atom")), a0)
         self._say("adaptation", r.get("say", ""), "coordination", None, act=verdict or "BUILD_WRONG", atom=a["id"])
+        if corr and not (verdict == "BUILD_WRONG" and str(r.get("build_wrong_reason") or "").strip()):
+            a = a if a["id"] in corr else next(x for x in atoms if x["id"] in corr)
+            if verdict != "CHECK_WRONG":
+                r = {**r, "verification": corr[a["id"]]}
+            verdict = "CHECK_WRONG"
+            self._event("validator", "check_wrong_default", "; ".join(why))
+            self.post("system", f"Code checked the obvious case first: the check's target looks wrong ({'; '.join(why)}). "
+                                "Adaptation named no specific way the build is wrong, so the decision is CHECK_WRONG and "
+                                f"code re-runs the corrected check on the same {self.out['noun']}.")
         if verdict == "CHECK_WRONG":
-            new = {**a, "verification": r.get("verification")}
+            new = {**a, "verification": normalise_checks([{"verification": r.get("verification")}])[0]["verification"]}
             probs = atom_missing({"atoms": [new]}) or check_problems(new, self._fact_source(), self.out["check_types"])
+            if probs and a["id"] in corr:        # Adaptation's own correction breaks a rule: code's correction
+                new, probs = {**a, "verification": corr[a["id"]]}, []
             if probs:
                 self._reject(f"{a['id']} corrected check", "; ".join(probs))
             else:
@@ -4616,7 +4778,7 @@ class J2Run:
                                           f"left: {r.get('say')}",
                                  resume={"to": "coordination", "handoff": {"kind": "schedule"}})
         self.post("system", f"{a['id']} is ESCALATED after {MAX_CHECK_ATTEMPTS} failed attempts with no fix. Audit "
-                            "checks the site; Adaptation proposes the fix from its findings.")
+                            f"checks the {self.out['noun']}; Adaptation proposes the fix from its findings.")
         self._handoff("coordination", kind="schedule")
 
     # ------------------------------------------------------------------ J2.g: Audit

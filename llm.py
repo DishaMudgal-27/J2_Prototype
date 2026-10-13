@@ -214,9 +214,29 @@ def extract_json(text):
     if m:
         return json.loads(m.group(1))
     start, end = text.find("{"), text.rfind("}")
-    if start == -1 or end == -1:
+    if start == -1:
         raise ValueError("no JSON object in reply")
-    return json.loads(text[start:end + 1])
+    try:
+        return json.loads(text[start:end + 1])
+    except ValueError:
+        # A reply cut short or missing its last brace (runs/j2-20261013-185235: the whole proposal became a 400-char
+        # "say"): close the open string and brackets and try once more; still bad -> the caller's fallback.
+        return json.loads(close_json(text[start:]))
+
+
+def close_json(s):
+    """s with its unclosed string and brackets closed, in order."""
+    stack, in_str, esc = [], False, False
+    for ch in s:
+        if in_str:
+            esc, in_str = (not esc and ch == "\\"), in_str and not (ch == '"' and not esc)
+        elif ch == '"':
+            in_str = True
+        elif ch in "{[":
+            stack.append("}" if ch == "{" else "]")
+        elif ch in "}]" and stack:
+            stack.pop()
+    return s.rstrip().rstrip(",") + ('"' if in_str else "") + "".join(reversed(stack))
 
 
 def extract_html(text):
