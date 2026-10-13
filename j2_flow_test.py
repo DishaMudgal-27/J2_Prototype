@@ -375,7 +375,7 @@ def connections():
             assert told["who"] == "identity" and told.get("to_user") and told.get("done"), told
             assert "We've reached a limit: you've approved the most work credits allowed" in told["text"], told["text"]
             assert f"{form} can't be paid for and can't be left out" in told["text"], told["text"]
-            assert f"Still not right (1):\n- F-{run._no(form)} {j2.short(form)} (unfunded)" in told["text"], told["text"]
+            assert f"Still not right (1):\n- item {run._no(form)} {j2.short(form)} (unfunded)" in told["text"], told["text"]
             assert run.outcome.startswith("Done with open items: shipped as is as the only option"), run.outcome
             plain_for_requester(run)
         if name == "generous":
@@ -1007,7 +1007,10 @@ def work_atoms():
     first = run.rejections[0]["workflow"]
     assert [x["workflow"] for x in run.rejections[:2]] == [first, first], run.rejections
     assert len([c for c in calls_of(run) if "THE VALIDATOR REJECTED" in c["prompt"]]) == 1
-    assert first not in [w["name"] for w in run.workflows if w["cycle"] == 1], first
+    # dropping the scaffold left N8 (the nav) with no workflow: the plan is flagged and re-asked, and the clean reply
+    # brings it back
+    assert any(x["workflow"] == "plan" and "N8" in x["reason"] for x in run.rejections), run.rejections
+    assert first in [w["name"] for w in run.workflows if w["cycle"] == 1], first
     # the validator itself: no atoms at all, or an empty verification list, is rejected with the field named
     reg, refused, _ = run._register([{"name": "Bare", "goal_gap": "x", "outputs": ["y"], "completion_check": "z",
                                       "parts": ["fix"], "fixes": ["F-9"]}])
@@ -1197,15 +1200,15 @@ def leave_out_named():
     q = run.paused["questions"][0]
     text = run.chat[-1]["text"]
     for i in (hours, beans):
-        assert re.search(rf"\n- F-{i} {re.escape(j2.short(crit[i - 1]))} \((built but failing|not built|unfunded)\)",
+        assert re.search(rf"\n- item {i} {re.escape(j2.short(crit[i - 1]))} \((built but failing|not built|unfunded)\)",
                          text), text
-    assert "\n- R-6 Tap targets are big enough on phones (failing)" in text, text
+    assert "\n- Tap targets are big enough on phones (failing)" in text, text
     drop = next(o for o in q["options"] if o.startswith("Leave out"))
-    named = [f"F-{hours} {j2.short(crit[hours - 1])}", f"F-{beans} {j2.short(crit[beans - 1])}"]
-    assert drop == (f"Leave out {named[0]} and {named[1]}: you get the site without them. R-6 Tap targets are big "
+    named = [f"item {hours} {j2.short(crit[hours - 1])}", f"item {beans} {j2.short(crit[beans - 1])}"]
+    assert drop == (f"Leave out {named[0]} and {named[1]}: you get the site without them. Tap targets are big "
                     "enough on phones stays as it is, still failing."), drop
     ship = q["options"][-1]
-    assert ship.endswith(f"still not right: {named[0]}, {named[1]} and R-6 Tap targets are big enough on phones"), ship
+    assert ship.endswith(f"still not right: {named[0]}, {named[1]} and Tap targets are big enough on phones"), ship
     assert run.paused["handoff"]["drop_named"] == named
     say(run, str(q["options"].index(drop) + 1))
     d = next(x for x in reversed(run.decisions) if x.get("decision") == "drop")
@@ -1218,7 +1221,7 @@ def leave_out_named():
         if c in run.goal["done_when"]:
             assert run._no(c) == i and next(r["id"] for r in run.audits[-1]["results"] if r["criterion"] == c) == f"F-{i}"
     late = run.goal["done_when"][-1]
-    assert run._gap_rows([late], run.audits[-1], None)[0]["name"].startswith(f"F-{crit.index(late) + 1} ")
+    assert run._gap_rows([late], run.audits[-1], None)[0]["name"].startswith(f"item {crit.index(late) + 1} ")
     # a typed answer names items by those numbers too
     assert j2.parse_decision("leave out F-6", {}, ["drop"], run.goal["done_when"],
                              [run._no(c) for c in run.goal["done_when"]])["drop_items"] == [6]
@@ -2086,7 +2089,7 @@ def two_audiences():
     assert len(seen) == 2 and "MIXED THE TWO AUDIENCES" in seen[1] and "re-pric" in seen[1], seen[-1][-300:]
     mine = [m for m in run.chat[n:] if m.get("requester_only")]
     # the answer left items out, so code writes the reply naming them (Identity's own words could name others)
-    assert len(mine) == 1 and mine[0]["text"].startswith("@Requester Got it. We'll leave out F-"), mine
+    assert len(mine) == 1 and mine[0]["text"].startswith("@Requester Got it. We'll leave out item "), mine
     assert not any("re-price" in m["text"] for m in run.chat if m.get("to_user"))
     assert "@Requester Thanks, got it." not in run.chat_view(), "agents must not get to_requester"
     plain_for_requester(run)
@@ -2242,7 +2245,7 @@ def limit_wording():
     assert "budget" not in q and "add budget" not in run.outcome and q["question"] in run.outcome, run.outcome
     gaps = j2.workable(run.audits[-1])
     listed = listed_gaps(run.chat[-1]["text"])
-    assert len(listed) == len(gaps) and f"with {len(gaps)} things still not right: F-" in q["options"][-1], (listed, q)
+    assert len(listed) == len(gaps) and f"with {len(gaps)} things still not right: item " in q["options"][-1], (listed, q)
     for o in q["options"]:
         assert "you get" in o, o
     run.spent = run.budget                                    # money: the option says the amount
@@ -2280,7 +2283,7 @@ def open_list():
     text, listed, ship = ask(run)
     crit = run.goal["done_when"]
     assert len(listed) == 4 and "with 4 things still not right: " in ship, (listed, ship)
-    row = lambda i, st: f"F-{i} {j2.short(crit[i - 1])} ({st})"           # run-long number, short text, status
+    row = lambda i, st: f"item {i} {j2.short(crit[i - 1])} ({st})"           # run-long number, short text, status
     assert listed[:2] == [row(1, "built but failing"), row(2, "not built")] and listed[3] == row(5, "unfunded"), listed
 
     # (b) an item both failing in the audit and covered by an unfinished workflow appears once
@@ -2361,8 +2364,9 @@ def readable_decision():
     assert len([x for x in re.split(r"(?<=[.!?])\s+", intro) if x]) <= 2, intro
     i = lines.index(next(ln for ln in lines if ln.startswith("Still not right (")))
     assert lines[i + 1:i + 1 + len(gaps)] == [f"- {g}" for g in gaps], lines
-    # each line: the item's run-long number (or rubric id), its short text and Audit's status
-    assert len(gaps) == 5 and all(re.fullmatch(r"(F|R)-\d+ .+ \((built but failing|not built|unfunded|failing)\)", g)
+    # each line: the item's run-long number (a rubric item: no id), its short text and Audit's status
+    assert len(gaps) == 5 and all(re.fullmatch(r"(item \d+ )?.+ \((built but failing|not built|unfunded|failing)\)", g)
+                                  and not j2.INTERNAL_ID.search(g)
                                   for g in gaps), gaps
     assert lines[i + 1 + len(gaps)] == q["question"] and lines[i + 2 + len(gaps)].startswith("   Option 1: "), lines
     # (2) no "1." before the question
@@ -2373,8 +2377,8 @@ def readable_decision():
     assert lines[i] == f"Still not right ({len(gaps)}: 2 built but failing, 3 not built yet):", lines[i]
     assert f"with {len(gaps)} things still not right: " in q["options"][-1], q["options"]
     drop = next(o for o in q["options"] if o.startswith("Leave out"))
-    assert drop.startswith("Leave out F-") and drop.count("F-") == 4 and drop.endswith(
-        "R-1 Consistent styling stays as it is, still failing."), drop
+    assert drop.startswith("Leave out item ") and drop.count("item ") == 4 and drop.endswith(
+        "Consistent styling stays as it is, still failing."), drop
     # (4) unclear answer: one short line, then the options only
     say(run, "hmm, not sure")
     re_ask = next(m for m in reversed(run.chat) if m["who"] == "identity")["text"].split("\n")
@@ -2564,6 +2568,101 @@ def prd_page():
         j2_server.RUN.reset()
 
 
+def website_conditions():
+    """conditions/website.json: a page that breaks each of N1 to N8 is reported not met, with evidence; a plan with no
+    workflow for the nav is flagged before building; workable() needs every condition; Identity's question for a
+    fact shows no "None" and no internal id."""
+    conds = j2.load_conditions("website.json")
+    assert [c["id"] for c in conds] == [f"N{i}" for i in range(1, 9)], conds
+    goal = {"site_name": "Little Fig", "facts": ["Little Fig", "+91 98765 43210"], "to_be_confirmed": []}
+    src = j2.squash("Little Fig is open 8 to 10. Call +91 98765 43210 or write to hello@littlefig.in")
+    good = ('<!doctype html><html><head><title>Little Fig</title></head><body><header id="hero"><nav>'
+            '<a href="#menu">Menu</a> <a href="#visit">Visit</a></nav><h1>Little Fig</h1>'
+            '<a class="j2-btn" href="#visit">Visit us</a></header><section id="menu"><h2>Menu</h2><p>Open 8 to 10.</p>'
+            '</section><section id="visit"><h2>Visit</h2><a href="tel:+919876543210">+91 98765 43210</a> '
+            '<a href="https://wa.me/919876543210">WhatsApp</a><form action="mailto:hello@littlefig.in">'
+            '<input name="n"><button type="submit">Send</button></form></section></body></html>')
+    clean = {"available": True, "js_errors": [], "phone": {"width": 360, "overflow_px": 0},
+             "desktop": {"width": 1280, "overflow_px": 0}}
+
+    def check(page, mech=clean, g=goal):
+        return {c["id"]: c for c in j2.check_conditions(conds, " ".join(j2.PageScan(page).visible), g, src, (),
+                                                         page, mech)}
+    ok = check(good)
+    assert all(c["met"] for c in ok.values()), ok
+    breaks = {"N1": (good.replace("</h2><p>Open", "<p>Open"), clean, goal),
+              "N2": (good, {**clean, "js_errors": ["ReferenceError: menu is not defined"]}, goal),
+              "N3": (good, {**clean, "phone": {"width": 360, "overflow_px": 40}}, goal),
+              "N4": (good.replace("https://wa.me/919876543210", "https://wa.me/+91 98765"), clean, goal),
+              "N5": (good, clean, {**goal, "to_be_confirmed": ["the opening hours"]}),
+              "N6": (good.replace("<p>Open 8 to 10.</p>", "<p>Open 8 to 10. Free delivery over 500.</p>"), clean, goal),
+              "N7": (good.replace(' action="mailto:hello@littlefig.in"', ""), clean, goal),
+              "N8": (good.replace('<a href="#menu">Menu</a> ', ""), clean, goal)}
+    for cid, (page, mech, g) in breaks.items():
+        r = check(page, mech, g)[cid]
+        assert not r["met"] and r["evidence"] and r["evidence"] != ok[cid]["evidence"], (cid, r)
+    assert "500" in check(*breaks["N6"])["N6"]["evidence"] and "#menu" in check(*breaks["N8"])["N8"]["evidence"]
+    assert "wa.me/+91" in check(*breaks["N4"])["N4"]["evidence"]
+    r = check(good.replace('<a class="j2-btn" href="#visit">Visit us</a>', ""))["N8"]      # no main action in the hero
+    assert not r["met"] and "hero" in r["evidence"], r
+    r = check(good, {"available": False, "note": "Chrome not found"})
+    assert not r["N2"]["met"] and r["N2"]["evidence"].startswith("could not run"), r["N2"]
+    assert not check(good, clean, {**goal, "facts": ["Koramangala"]})["N5"]["met"]
+
+    # workable(): Audit accepts and the render check is clean; every condition met, or not workable
+    row = {"id": "F-1", "item": 1, "criterion": "Menu", "verdict": "PASS", "pass": True}
+    audit = {"results": [row], "rubric": [], "mechanical": fake_check(good), "conditions": list(ok.values())}
+    assert j2.workable(audit) == [], j2.workable(audit)
+    bad = {**audit, "conditions": list(check(*breaks["N8"]).values())}
+    assert j2.workable(bad) and all("necessary condition N8 not met" in x for x in j2.workable(bad)), j2.workable(bad)
+
+    # the plan check: no workflow for the nav is flagged before anything is built
+    run = j2.J2Run()
+    assert [c["id"] for c in run._plan_gaps([{"name": "Menu section", "goal_gap": "the menu"}])] == ["N8"]
+    assert run._plan_gaps([{"name": "Header", "goal_gap": "a nav bar to every section and a main action"}]) == []
+    orig = run.call
+
+    def call(fn, fmt, task, mock, **k):
+        r = orig(fn, fmt, task, mock, **k)
+        if fn == "adaptation" and isinstance(r, dict) and "FLAGGED" not in task and r.get("workflows"):
+            r["workflows"] = json.loads(json.dumps(r["workflows"]).replace(        # the first plan names no nav
+                " with a nav to every section and a main action in the hero", ""))
+        return r
+    run.call = call
+    say(run, BREW_LAB)
+    finish(run)
+    i = next(n for n, m in enumerate(run.chat) if m["text"].startswith("Validator flagged the plan before building"))
+    assert "N8" in run.chat[i]["text"] and not any(m["who"].startswith("W-") for m in run.chat[:i]), run.chat[i]
+    retry = [c for c in calls_of(run) if c["fn"] == "adaptation" and "THE VALIDATOR FLAGGED YOUR PLAN" in c["prompt"]]
+    assert len(retry) == 1 and "N8" in retry[0]["prompt"], retry
+    assert "NECESSARY CONDITIONS" in retry[0]["prompt"] and "N8: A nav reaches every section" in retry[0]["prompt"]
+    assert run.outcome.startswith("Done"), run.outcome
+    s = summary(run)
+    assert s["necessary_conditions"]["met"] == s["necessary_conditions"]["total"] == 8, s["necessary_conditions"]
+    saved = json.load(open(os.path.join(run.dir, "conditions.json"), encoding="utf-8"))
+    assert [c["id"] for c in saved] == [f"N{i}" for i in range(1, 9)] and all(c["met"] for c in saved), saved
+    assert run.snapshot()["conditions"] == run.audits[-1]["conditions"]
+
+    # Identity's question for a fact only the Requester knows: no "None", no internal ids, no agent-facing wording
+    run = j2.J2Run()
+    run.goal = {"done_when": ["Opening hours are listed", "Bookings never clash"]}
+    fact = ("A measurable target for double-booked slots. The brief gives none, so any number would be invented. "
+            "Alternatives: Requester supplies a target, or G2 is stated as covered by the requirement R5 instead of a "
+            "metric.")
+    for item, ref in ((None, None), (2, "(checklist item 2: Bookings never clash)")):
+        q = run._fact_question({"needs_requester_fact": fact, "item": item})["question"]
+        assert "None" not in q and not j2.INTERNAL_ID.search(q) and "Alternatives" not in q, q
+        assert q.startswith("A measurable target for double-booked slots. The brief gives none"), q
+        assert (ref in q) if ref else "checklist item" not in q, q
+    q = run._fact_question({"needs_requester_fact": "Confirm option B (G2 covered by R5, no metric)", "item": None})
+    assert q["question"].startswith("Confirm option B. If you can't"), q
+    run._ask_user("Nearly done. F-3 needs one number.", [q, run._fact_question({"needs_requester_fact": fact,
+                                                                                  "item": 1})], "fact")
+    text = run.chat[-1]["text"]
+    assert "None" not in text and not j2.INTERNAL_ID.search(text) and "Alternatives" not in text and ".." not in text, text
+    assert j2.requester_words("Meet in Room G2.", j2.squash("the venue is Room G2")) == "Meet in Room G2."
+
+
 if __name__ == "__main__":
     if FAST:
         print("--fast: browser measurement stubbed" + ("" if BROWSER else "; tests that drive the page in Chrome are "
@@ -2604,6 +2703,9 @@ if __name__ == "__main__":
         summary_before_review()
         prd_run()
         prd_checks()
+        website_conditions()
+        print(f"J2_FIXES={mode}: website necessary conditions: N1 to N8 each reported not met with evidence, nav plan "
+              "flagged before building, workable needs every condition, no None or internal ids for the Requester ok")
         print(f"J2_FIXES={mode}: PRD output: mock PRD brief Done workable with prd.md and prd.docx, document checks pass "
               "and fail (duplicate R2 rejected), invented facts-present rejected, no browser check, no website "
               "conditions ok")

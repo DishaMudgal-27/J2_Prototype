@@ -342,22 +342,25 @@ class PageScan(html.parser.HTMLParser):
     def __init__(self, page):
         super().__init__(convert_charrefs=True)
         self.tags, self.stack, self.stray, self.text, self.forms, self.in_form = [], [], [], [], [], False
-        self.unclosed = []
+        self.unclosed, self.form_attrs, self.visible, self.anc, self.open_idx = [], [], [], [], []
         self.feed(page)
         self.close()
         self.unclosed += [t for t in self.stack if t not in OPTIONAL_END]
 
     def handle_starttag(self, tag, attrs, alone=False):
         a = {k: v or "" for k, v in attrs}
+        self.anc.append(tuple(self.open_idx))      # indices in tags of the elements this one is inside
         self.tags.append((tag, a))
         if tag == "form":
             self.forms.append(0)
+            self.form_attrs.append(a)
             self.in_form = True
         elif self.in_form and (tag == "button" and a.get("type", "submit").lower() == "submit"
                                or tag == "input" and a.get("type", "").lower() in ("submit", "image")):
             self.forms[-1] += 1
         if tag not in VOID and not alone:
             self.stack.append(tag)
+            self.open_idx.append(len(self.tags) - 1)
 
     def handle_startendtag(self, tag, attrs):
         self.handle_starttag(tag, attrs, alone=True)
@@ -371,6 +374,7 @@ class PageScan(html.parser.HTMLParser):
             return
         while self.stack:
             t = self.stack.pop()
+            self.open_idx.pop()
             if t == tag:
                 break
             if t not in OPTIONAL_END:
@@ -378,6 +382,8 @@ class PageScan(html.parser.HTMLParser):
 
     def handle_data(self, d):
         self.text.append(d)
+        if not (self.stack and self.stack[-1] in ("script", "style")):
+            self.visible.append(d)
 
     def matching(self, target):
         name, kind = str(target).lstrip("#."), str(target)[:1]
@@ -608,7 +614,7 @@ def export_docx(doc, path):
     return None
 
 
-# Necessary conditions for a document (conditions/<type>.json): each names a code check below and its parameters.
+# Necessary conditions (conditions/<type>.json): each names a code check below (or a list of them) and its parameters.
 CONDITIONS_DIR = os.path.join(HERE, "conditions")
 TBC_WORDS = re.compile(r"to be confirmed|\bTB[CD]\b", re.I)
 
@@ -618,17 +624,30 @@ def load_conditions(name):
         return json.load(f)["conditions"]
 
 
+PHONE = re.compile(r"\+?\d[\d\s().-]{6,}\d")
+
+
 def doc_numbers(text):
-    """Numbers and emails a document states, leaving out ids (R1, G2, D-1) and list numbering."""
+    """Numbers and emails a document states, leaving out ids (R1, G2, D-1) and list numbering. A phone number (10 or
+    more digits, or 8 or more after a +) counts as its digits, however it is spaced."""
+    phones = {re.sub(r"\D", "", m) for m in PHONE.findall(str(text))
+              if len(re.sub(r"\D", "", m)) >= (8 if m.startswith("+") else 10)}
+    text = PHONE.sub(lambda m: " " if re.sub(r"\D", "", m.group(0)) in phones else m.group(0), str(text))
     text = re.sub(r"\b[A-Z]{1,3}-?\d+\b", " ", strip_md(text))
     text = re.sub(r"(?m)^\s*\d+[.)]\s", " ", text)
-    return set(re.findall(r"\d+(?:[.,]\d+)*", text)) | set(EMAIL.findall(text))
+    return set(re.findall(r"\d+(?:[.,]\d+)*", text)) | set(EMAIL.findall(text)) | phones
 
 
-def condition_met(cond, doc, goal, source, sections):
-    """(met, evidence) for one necessary condition, checked by code on the document. source: the charter and the
-    Requester's own words, squashed; sections: the output's required section headings."""
+def condition_met(cond, doc, goal, source, sections, page=None, mech=None):
+    """(met, evidence) for one necessary condition, checked by code. doc: the document, or a website's visible text;
+    page: a website's HTML; mech: its render check (j2_check.check). source: the charter and the Requester's own
+    words, squashed; sections: the output's required section headings."""
     k, g = cond.get("check"), goal or {}
+    if isinstance(k, list):             # several checks, all must hold
+        rs = [condition_met({**cond, "check": x}, doc, goal, source, sections, page, mech) for x in k]
+        return all(m for m, _ in rs), "; ".join(e for _, e in rs)
+    if k in WEB_CONDITIONS:
+        return WEB_CONDITIONS[k](cond, page or "", mech or {})
     if k == "sections-present":
         need = max(1, as_int(cond.get("min_words"), 1))
         bad = [f"{s} ({'missing' if md_section(doc, s) is None else f'{md_words(md_section(doc, s))} words'})"
@@ -649,9 +668,13 @@ def condition_met(cond, doc, goal, source, sections):
                                              if facts else "the charter lists no facts")
     if k == "no-invented-facts":
         src = doc_numbers(source)
+        if page is not None:      # a website: also the numbers and emails in its tel:, mailto:, wa.me links and form actions
+            doc = " ".join([doc] + [v for t, a in PageScan(page).tags for n, v in a.items()
+                                    if n in ("href", "action") and re.match(r"tel:|mailto:|https?://wa\.me/", v, re.I)])
         extra = sorted(x for x in doc_numbers(doc) if x.lower() not in src)
         return not extra, (f"not in the charter or the Requester's answers: {', '.join(extra[:8])}" if extra else
-                           "every number and email comes from the charter or the Requester's answers")
+                           f"every number{', phone' if page is not None else ''} and email comes from the charter or "
+                           "the Requester's answers")
     if k == "nothing-to-be-confirmed":
         m, open_ = TBC_WORDS.search(str(doc)), g.get("to_be_confirmed") or []
         return not m and not open_, (f"the document says {m.group(0)!r}" if m else
@@ -666,9 +689,89 @@ def condition_met(cond, doc, goal, source, sections):
     return False, f"no code check named {k!r}"
 
 
-def check_conditions(conds, doc, goal, source, sections):
-    return [{"id": c["id"], "text": c["text"], **dict(zip(("met", "evidence"), condition_met(c, doc, goal, source, sections)))}
-            for c in conds]
+def check_conditions(conds, doc, goal, source, sections, page=None, mech=None):
+    return [{"id": c["id"], "text": c["text"], "check": c["check"],
+             **dict(zip(("met", "evidence"), condition_met(c, doc, goal, source, sections, page, mech)))} for c in conds]
+
+
+def _page_parses(cond, page, mech):
+    r = run_check({"type": "named-test", "target": "page-parses"}, "", page)
+    return bool(r["pass"]), r["evidence"]
+
+
+def _rendered(mech):
+    return None if mech.get("available") else f"could not run: {mech.get('note') or 'no render check'}"
+
+
+def _no_js_errors(cond, page, mech):
+    if _rendered(mech):
+        return False, _rendered(mech)
+    e = mech.get("js_errors") or []
+    return not e, f"{len(e)} JS error(s) on load: {'; '.join(e[:3])}" if e else "no JS errors on load"
+
+
+def _no_overflow(cond, page, mech):
+    if _rendered(mech):
+        return False, _rendered(mech)
+    widths = cond.get("widths") or list(j2_check.WIDTHS.values())
+    seen = {(mech.get(n) or {}).get("width", w): (mech.get(n) or {}).get("overflow_px") for n, w in j2_check.WIDTHS.items()}
+    bad = [f"{w}px {'not measured' if seen.get(w) is None else f'overflows by {seen[w]}px'}" for w in widths if seen.get(w) != 0]
+    return not bad, "; ".join(bad) if bad else f"no horizontal overflow at {' and '.join(f'{w}px' for w in widths)}"
+
+
+TEL = re.compile(r"tel:\+?[\d\-.() ]+", re.I)
+WA_ME = re.compile(r"https?://wa\.me/\d{8,15}(?:\?.*)?", re.I)
+
+
+def _links_well_formed(cond, page, mech):
+    scan = PageScan(page)
+    ids, hrefs = {a.get("id") for _, a in scan.tags}, [a["href"].strip() for t, a in scan.tags if t == "a" and a.get("href")]
+    bad = [f"{h} (no such id)" for h in hrefs if h.startswith("#") and len(h) > 1 and h[1:] not in ids]
+    bad += [h for h in hrefs if h.lower().startswith("tel:") and not (TEL.fullmatch(h) and len(re.sub(r"\D", "", h)) >= 7)]
+    bad += [h for h in hrefs if re.match(r"https?://(?:www\.)?wa\.me", h, re.I) and not WA_ME.fullmatch(h)]
+    n = sum(h.startswith("#") or re.match(r"tel:|https?://(?:www\.)?wa\.me", h, re.I) is not None for h in hrefs)
+    return not bad, f"broken or malformed: {', '.join(bad[:8])}" if bad else \
+        f"all {n} in-page, tel: and wa.me link(s) resolve and are well formed"
+
+
+def _forms_have_destination(cond, page, mech):
+    scan, bad = PageScan(page), []
+    for i, (subs, a) in enumerate(zip(scan.forms, scan.form_attrs), 1):
+        act = a.get("action", "").strip()
+        if not subs:
+            bad.append(f"form {i} has no submit control")
+        if not act or act.startswith("#") or act.lower().startswith("javascript:"):
+            bad.append(f"form {i} has no destination (action or mailto)")
+    return not bad, "; ".join(bad) if bad else (f"{len(scan.forms)} form(s), each with a submit control and a "
+                                                "destination" if scan.forms else "no forms on the page")
+
+
+def _nav_and_main_action(cond, page, mech):
+    """A <nav> whose in-page links reach every <section> outside the hero, and a link or button in the hero (not a nav
+    link). The hero: the element whose id or class says hero, else the first header or section."""
+    scan = PageScan(page)
+    tags, anc = scan.tags, scan.anc
+    hero = next((i for i, (t, a) in enumerate(tags) if "hero" in f"{a.get('id', '')} {a.get('class', '')}".lower()), None)
+    if hero is None:
+        hero = next((i for i, (t, _) in enumerate(tags) if t in ("header", "section")), None)
+    navs = {i for i, (t, _) in enumerate(tags) if t == "nav"}
+    in_nav = lambda i: bool(navs & set(anc[i]))
+    linked = {a["href"][1:] for i, (t, a) in enumerate(tags) if t == "a" and a.get("href", "").startswith("#") and in_nav(i)}
+    secs = [(i, a.get("id")) for i, (t, a) in enumerate(tags) if t == "section" and i != hero and hero not in anc[i]]
+    unreached = [f"#{sid}" if sid else f"section {n} (no id)" for n, (i, sid) in enumerate(secs, 1) if sid not in linked]
+    acts = [i for i, (t, a) in enumerate(tags) if hero is not None and hero in anc[i] and not in_nav(i)
+            and (t == "a" and a.get("href") or t == "button")]
+    bad = (["no <nav> on the page"] if not navs else
+           [f"the nav doesn't reach {', '.join(unreached[:8])}"] if unreached else []) \
+        + (["no hero"] if hero is None else ["no link or button in the hero"] if not acts else [])
+    return not bad, "; ".join(bad) if bad else (f"the nav reaches all {len(secs)} section(s); the hero has "
+                                                f"{len(acts)} main action(s)")
+
+
+WEB_CONDITIONS = {"page-parses": _page_parses, "no-js-errors": _no_js_errors, "no-overflow": _no_overflow,
+                  "links-well-formed": _links_well_formed, "forms-have-destination": _forms_have_destination,
+                  "nav-and-main-action": _nav_and_main_action}
+RENDER_CONDITIONS = ("no-js-errors", "no-overflow")     # the render check's own problems already list these
 
 
 def mock_atom(w):
@@ -849,11 +952,25 @@ def for_agents(m):
     return not m.get("test") and not m.get("requester_only")
 
 
-def to_requester(text, question=True):
-    """What the Requester reads (without its @Requester tag, which the caller adds): none of the internal words, at
-    most 3 short sentences plus one question (none when the question is asked separately below it: question=False)."""
+INTERNAL_ID = re.compile(r"\b(?:[FRDCPN]-\d+|[GRPN]\d{1,2})\b")     # findings, rubric, conflicts, conditions, PRD ids
+
+
+def requester_words(text, keep=""):
+    """Text for the Requester without agent-facing wording: no "Alternatives: ..." sentence, no parenthesis that names
+    an internal id (G2, R5, F-3, R-6, N8), and no sentence that still names one. keep: the charter and the Requester's
+    words (squashed); an id that appears there is their own word (a room "G2") and stays."""
+    ids = lambda t: [m for m in INTERNAL_ID.findall(t) if not re.search(rf"\b{m.lower()}\b", keep)]
+    t = re.sub(r"\s*\bAlternatives?\s*:[^.?!]*[.?!]?", "", str(text or ""))
+    t = re.sub(r"\s*\([^()]*\)", lambda m: "" if ids(m.group(0)) else m.group(0), t)
+    return " ".join(x for x in re.split(r"(?<=[.!?;])\s+", t) if not ids(x)).strip()
+
+
+def to_requester(text, question=True, keep=""):
+    """What the Requester reads (without its @Requester tag, which the caller adds): none of the internal words or ids,
+    at most 3 short sentences plus one question (none when the question is asked separately below it: question=False).
+    keep: see requester_words."""
     t = re.sub(r"(?m)^\s*\d+[.)]\s.*$", "", AT_REQUESTER.sub("", str(text or "")))   # numbered lines: code's job
-    t = " ".join(t.split())
+    t = requester_words(" ".join(t.split()), keep)
     for pat, w in PLAIN_WORDS:
         t = re.sub(pat, w, t, flags=re.I)
     parts = [x for x in re.split(r"(?<=[.!?])\s+", t) if x.strip() and not re.fullmatch(r"\d+[.)]", x.strip())]
@@ -937,29 +1054,42 @@ def mock_charter(text):
 def mock_section(w, goal, sections):
     """(head, body) a scripted workflow agent writes: the scaffold styles the page, a viewport fix (or a workflow that
     builds a phone item) adds the meta tag,
-    anything else adds the done-when items no other section covers yet (or a plain section named after it)."""
+    anything else adds the done-when items no other section covers yet (or a plain block, not a section). The first
+    section built (the scaffold, or any section while no other has a nav) also holds the hero: the nav to every
+    item's section and one main action. A later section the hero's nav doesn't reach (an item added by a change
+    request) links its own items from a small nav of its own."""
     g, n = goal or {}, w["name"].lower()
+    others = "".join(x["body"] for sid, x in sections.items() if sid != w["section"])
+    orig = g.get("charter_items") or g.get("done_when") or []      # charter numbers: stable after drops
+    num = lambda i, d: orig.index(d) + 1 if d in orig else i
+    shown = [(num(i, d), d) for i, d in enumerate(g.get("done_when") or [], 1) if "phone" not in str(d).lower()]
+    main = next(((i, d) for i, d in shown if item_kind(d) == "form"), shown[0] if shown else None)
+    link = lambda i, d, c="": (f'<a{c} href="#item-{i}" style="display:inline-block;min-height:44px;min-width:44px;'
+                               f'line-height:44px;padding:0 8px">{html.escape(short(d))}</a>')     # 44px tap targets
+    hero = "" if "<nav" in others else (
+        '<header id="hero"><nav>' + " ".join(link(i, d) for i, d in shown)
+        + f"</nav><h1>{html.escape(g.get('site_name') or 'Our site')}</h1><p>{html.escape(g.get('statement') or '')}</p>"
+        + (link(*main, ' class="j2-btn"') if main else "") + "</header>")
     if "scaffold" in n:
         return ("<style>body{font:16px system-ui;margin:0 auto;max-width:900px;padding:24px;background:#fbf7f2;"
-                "color:#2b211b}section{padding:16px 0;border-top:1px solid #e6dccf}</style>",
-                f"<header><h1>{html.escape(g.get('site_name') or 'Our site')}</h1>"
-                f"<p>{html.escape(g.get('statement') or '')}</p></header>")
+                "color:#2b211b}section{padding:16px 0;border-top:1px solid #e6dccf}</style>", hero)
     if "viewport" in n or any("phone" in str(t).lower() for t in w.get("covers_text") or []):
         return '<meta name="viewport" content="width=device-width, initial-scale=1">', ""
-    others = "".join(x["body"] for sid, x in sections.items() if sid != w["section"])
+
     def item(i, d):
         if item_kind(d) == "form":
-            return (f'<section class="order-form" data-item="{i}"><h2>{html.escape(str(d))}</h2><form>'
+            return (f'<section class="order-form" id="item-{i}" data-item="{i}"><h2>{html.escape(str(d))}</h2>'
+                    '<form action="/orders">'
                     '<label>Name <input name="name" style="display:block;min-height:44px;width:100%"></label>'
                     '<button class="j2-btn" type="submit" style="min-height:44px;min-width:44px">Send</button>'
                     "</form></section>")
-        return (f'<section data-item="{i}"><h2>{html.escape(str(d))}</h2><p>Sample content (replace before '
-                "launch).</p></section>")
-    orig = g.get("charter_items") or g.get("done_when") or []      # charter numbers: stable after drops
-    items = "".join(item(orig.index(d) + 1 if d in orig else i, d) for i, d in enumerate(g.get("done_when") or [], 1)
-                    if "phone" not in str(d).lower()
-                    and f'data-item="{orig.index(d) + 1 if d in orig else i}"' not in others)
-    return "", items or f"<section><h2>{html.escape(w['name'])}</h2><p>Sample content.</p></section>"
+        return (f'<section id="item-{i}" data-item="{i}"><h2>{html.escape(str(d))}</h2><p>Sample content (replace '
+                "before launch).</p></section>")
+    new = [(i, d) for i, d in shown if f'data-item="{i}"' not in others]
+    more = [(i, d) for i, d in new if not hero and f'href="#item-{i}"' not in others]
+    items = "".join(item(i, d) for i, d in new)
+    return "", hero + ("<nav>" + " ".join(link(i, d) for i, d in more)
+                       + "</nav>" if more else "") + (items or '<div class="j2-extra"><p>Sample content.</p></div>')
 
 
 PRD_SECTIONS = ("Problem", "Users", "Goals", "Requirements", "Success metrics", "Out of scope")
@@ -1085,7 +1215,7 @@ def export_prd(doc, run_dir):
 
 
 OUTPUTS = {
-    "website": {"label": "Website", "noun": "site", "sections": (), "conditions": None, "rubric": RUBRIC,
+    "website": {"label": "Website", "noun": "site", "sections": (), "conditions": "website.json", "rubric": RUBRIC,
                 "rates": "rates", "check_types": CHECK_TYPES, "builder": "builder.md", "export": None,
                 "done": WORKABLE_OUTCOME},
     "prd": {"label": "PRD document", "noun": "PRD", "sections": PRD_SECTIONS, "conditions": "prd.json",
@@ -1237,8 +1367,9 @@ FINDING_ID = re.compile(r"F-\d+")
 
 def workable(audit):
     """Code's verdict on the latest audit, no model: what stops the site being workable ([] = workable).
-    Every done-when item passes Audit (a "to be confirmed" item never does), and the render check found no JS
-    errors, no horizontal overflow at 360px or 1280px, no broken form and no broken in-page link."""
+    Every done-when item passes Audit (a "to be confirmed" item never does), every necessary condition is met
+    (conditions/<type>.json; for a website that includes nothing to be confirmed), and for a website the render check
+    found no JS errors, no horizontal overflow at 360px or 1280px, no broken form and no broken in-page link."""
     if not audit:
         return ["no site has been audited yet"]
     num = lambda r: r["id"][2:] if FINDING_ID.fullmatch(str(r["id"])) else r["item"]    # F-n is charter item n
@@ -1251,6 +1382,8 @@ def workable(audit):
                 + [f"necessary condition {c['id']} not met: {c['text']} ({c['evidence']})"
                    for c in audit.get("conditions") or [] if not c["met"]])
     out += [f"design rubric {r['id']} ({r['verdict']}): {r['criterion']}" for r in audit.get("rubric", []) if not r["pass"]]
+    out += [f"necessary condition {c['id']} not met: {c['text']} ({c['evidence']})"
+            for c in audit.get("conditions") or [] if not c["met"]]
     mech = audit.get("mechanical") or {}
     if not mech.get("available"):
         return out + [f"render check didn't run, so JS errors, overflow and forms are unverified: {mech.get('note')}"]
@@ -1659,7 +1792,7 @@ class J2Run:
                 self.events.append({"agent": who, "type": "misaddressed", "detail": str(text)[:120],
                                     "msg": len(self.chat) + 1, "cycle": self.cycle})
             else:
-                text = "@Requester " + to_requester(text)    # one addressee per message; _ask_user shapes its own
+                text = "@Requester " + to_requester(text, keep=self._fact_source())   # _ask_user shapes its own
         m = {"id": len(self.chat) + 1, "t": time.strftime("%H:%M:%S"), "who": who, "text": text, "step": self.step, **meta}
         if self.pending_calls.get(who):          # the AI calls behind this message, for the detail view
             m["calls"] = self.pending_calls.pop(who)
@@ -1937,14 +2070,17 @@ class J2Run:
     def _ask_user(self, say, questions, kind, to="identity", handoff=None, gaps=None, options_only=False, **meta):
         """Identity asks the Requester and the run pauses. The reply resumes the run at `to` with `handoff`. `gaps`
         (the decision question) is appended by code after Identity's words, so the list and its count are one list."""
-        say = to_requester(say, question=not questions)
+        src = self._fact_source()
+        say = to_requester(say, question=not questions, keep=src)
+        questions = [{**q, "question": requester_words(q["question"], src) or q["question"],
+                      "options": [requester_words(o, src) or o for o in q.get("options") or []]} for q in questions]
         if gaps is not None:
             # At most 2 sentences, then the full list, one gap per line; the header's counts add up to the list.
             say = " ".join(re.split(r"(?<=[.!?])\s+", say)[:2])
             say += gap_list(gaps)
         if len(questions) > 1:
             # One question per message: several become one list of what to send (options can't be kept).
-            items = [re.sub(r"\?$", "", q["question"]).strip() for q in questions]
+            items = [re.sub(r"[?.]$", "", q["question"].strip()) for q in questions]
             questions = [{"question": "Please send these: " + "; ".join(items) + "."}]
         questions = [{**q, "options": q.get("options", [])[:3],
                       **({"budget": q["budget"][:3]} if q.get("budget") else {})} for q in questions]
@@ -2643,6 +2779,17 @@ class J2Run:
             orig.append(text)
         return orig.index(text) + 1
 
+    def _fact_question(self, x):
+        """Identity's question for a fact only the Requester knows (an Audit finding's needs_requester_fact), in the
+        Requester's words: the item's charter number and short text, never an internal id or agent-facing wording."""
+        crit, src = (self.goal or {}).get("done_when") or [], self._fact_source()
+        n = self._no_at(x.get("item"))
+        text = crit[as_int(x.get("item")) - 1] if n else None
+        ask = requester_words(x["needs_requester_fact"], src).rstrip(" .") or \
+            (f"The detail needed for {short(text)}" if text else "The detail this needs")
+        return {"question": ask + (f" (checklist item {n}: {short(text)})" if n else "")
+                + ". If you can't give it yet, say so and it's marked to be confirmed.", "options": []}
+
     def _no_at(self, i):
         """The run-long number of the item at current position i (None when there is no such item)."""
         crit = (self.goal or {}).get("done_when") or []
@@ -2664,13 +2811,14 @@ class J2Run:
         return "built but failing" if "done" in st else "not built" if waiting else "unfunded"
 
     def _names(self, texts):
-        """{item text: "F-n short name"} with short names unique among these texts."""
+        """{item text: "item n short name"} (n: its charter number) with short names unique among these texts. The
+        Requester reads these, so never an internal id (F-n)."""
         texts = list(dict.fromkeys(texts))
-        return {t: f"F-{self._no(t)} {x}" for t, x in zip(texts, shorts(texts))}
+        return {t: f"item {self._no(t)} {x}" for t, x in zip(texts, shorts(texts))}
 
     def _gap_rows(self, gaps, last, left):
-        """The unfinished list as rows: name (F-n with the item's run-long number and its short text, or the rubric
-        id), Audit's status, and whether "leave out" drops it. The question, its options and the drop that code
+        """The unfinished list as rows: name ("item n" with the item's run-long number and its short text, or a rubric
+        item's or condition's short text, no id), Audit's status, and whether "leave out" drops it. The question, its options and the drop that code
         applies are all made from these rows, so the message and the outcome can't disagree."""
         crit = (self.goal or {}).get("done_when") or []
         rubric = {r["criterion"]: r["id"] for r in (last or {}).get("rubric", [])}
@@ -2684,7 +2832,7 @@ class J2Run:
                 rows.append({"name": names[t], "text": t, "status": st,
                              "drop": st != "built, not checked yet" and not (left and must_keep(t, self.goal))})
             else:
-                rows.append({"name": f"{rubric[t]} {short(t)}" if t in rubric else t, "text": t, "status": "failing",
+                rows.append({"name": short(t) if t in rubric else t, "text": t, "status": "failing",
                              "drop": False})
         return rows
 
@@ -2806,7 +2954,8 @@ class J2Run:
         why += (f", and {'; '.join(core)} can't be paid for and can't be left out, because "
                 f"{'it is' if len(core) == 1 else 'they are'} core to your site." if core else ".")
         say = to_requester(why + (" So we're finishing the site as it is now." if self.sites else
-                                  " So we're stopping here; nothing is built yet."), question=False)
+                                  " So we're stopping here; nothing is built yet."), question=False,
+                           keep=self._fact_source())
         self.post("identity", "@Requester " + say + gap_list(shown or gaps), to_user=True, next="user", done=True,
                   shaped=True)
         self.outcome = self._ship_outcome(f"as the only option left ({reason})")
@@ -2833,9 +2982,9 @@ class J2Run:
         for p in (j2_check.problems(mech) if mech.get("available") else ["the browser check didn't run"]) \
                 if last and not self.doc else []:
             out.setdefault(("check", p), p)
-        for c in (last or {}).get("conditions") or []:      # a document's necessary conditions
-            if not c["met"]:
-                out.setdefault(("condition", c["id"]), f"{c['id']} {c['text']}")
+        for c in (last or {}).get("conditions") or []:      # necessary conditions, by their text (the Requester reads it)
+            if not c["met"] and not (not self.doc and c.get("check") in RENDER_CONDITIONS):
+                out.setdefault(("condition", c["id"]), c["text"])
         if last and last["version"] < len(self.sites):
             for w in self.workflows:
                 if w["status"] == "done" and w.get("version", 0) > last["version"]:
@@ -2908,7 +3057,7 @@ class J2Run:
                       f"FACTS ONLY THE REQUESTER KNOWS (from Audit): {json.dumps([x.get('needs_requester_fact') for x in facts], ensure_ascii=False)}\n"
                       f"{h.get('why', '')}\nJ2.h: the site is done only when it is workable: every done-when item passes "
                       "Audit, no JS errors, no horizontal overflow at 360px and 1280px, forms work, no broken in-page "
-                      "link, nothing to be confirmed. Code checks this. Workable: declare done=true and tell the Requester "
+                      "link, every necessary condition met, nothing to be confirmed. Code checks this. Workable: declare done=true and tell the Requester "
                       "the goal is reached. Not workable: it goes back to Adaptation (J2.b); give the instruction. If a "
                       "fix needs a fact only the Requester knows (facts above, or any you see), set needs_requester=true "
                       "and ask for it in requester_questions; the run pauses until they answer. " + DECIDE_RULE, mock,
@@ -2927,9 +3076,7 @@ class J2Run:
             return self._identity_limit({"reason": "Identity: the site can't be finished as asked without your "
                                                    "decision.", "budget_needed": as_int(r.get("budget_needed")) or None})
         questions = clean_questions(r.get("requester_questions"))
-        questions += [{"question": f"{x['needs_requester_fact']} (checklist item {self._no_at(x.get('item'))}). If you "
-                                   "can't give it "
-                                   "yet, say so and it's marked to be confirmed.", "options": []} for x in facts]
+        questions += [self._fact_question(x) for x in facts]
         if questions and (facts or r.get("needs_requester")):
             return self._ask_user(r.get("to_requester") or r.get("say", ""), questions, "fact",
                                   handoff={"kind": "requester_answered"}, done=False)
@@ -3261,7 +3408,8 @@ class J2Run:
                                    "act": "PROPOSE", "next": "Priority", "workflows": [
                                        {"name": "Scaffold and styling", "goal_gap": "No site exists",
                                         "parts": ["page_section", "styling"], "covers": [self._no(crit[0])], "outputs": ["index.html"],
-                                        "completion_check": "index.html loads"},
+                                        "completion_check": "index.html loads with a nav to every section and a main "
+                                                            "action in the hero"},
                                        {"name": "Core sections", "goal_gap": "Every done-when section",
                                         "parts": ["page_section", "page_section", "page_section", "form"], "covers": core,
                                         "outputs": ["index.html"], "completion_check": "All done-when sections present"},
@@ -3330,7 +3478,10 @@ class J2Run:
                       "budget, cost or cutting. When the done-when items cost more than the budget left, still PROPOSE "
                       "the best set that fits and list each item you leave out in left_out with its reason. Never leave "
                       f"out these items (the no-errors check and the brief's core facts): {keep}."
-                      + (self.out["plan"] if self.doc else "") + self.ATOM_RULES)
+                      + (self.out["plan"] if self.doc else "") + self.ATOM_RULES
+                      + f"\nNECESSARY CONDITIONS (code checks every one on the built {self.out['noun']}; it is workable "
+                      "only when all are met, so your plan must build what each needs):\n"
+                      + "\n".join(f"{c['id']}: {c['text']}" for c in load_conditions(self.out["conditions"])))
         r = self.call("adaptation", fmt, task, mock)
         if self._budget_question(r):
             # Affordability is Priority's call (J2.c): a budget question is rejected, asked once more, then replaced.
@@ -3344,6 +3495,7 @@ class J2Run:
                 self.post("system", "Adaptation asked about budget again, so code proposes the cheapest done-when "
                                     "items that fit the budget left.")
         r = self._atoms_checked(r, fmt, task, mock)
+        r = self._plan_checked(r, fmt, task, mock)
         act = str(r.get("act", "")).upper()
         note = None
         if act == "DISPUTE":
@@ -3447,6 +3599,37 @@ class J2Run:
                 r = {**r, "workflows": [w for w in norm(r.get("workflows")) if not self._atom_problems(w)]}
         for w in norm(r.get("workflows")):
             self.proposed_atoms[w.get("name")] = w["atoms"]
+        return r
+
+    def _plan_gaps(self, wfs):
+        """Necessary conditions that need their own work ("plan" in conditions/<type>.json: words a workflow must
+        mention), not met at the last audit, that no proposed or registered workflow mentions."""
+        last = self.audits[-1] if self.audits else {}
+        met = {c["id"] for c in last.get("conditions") or [] if c["met"]}
+        text = json.dumps(list(wfs) + [w for w in self.workflows if w["status"] in ("registered", "held", "running", "done")],
+                          ensure_ascii=False)
+        return [c for c in load_conditions(self.out["conditions"])
+                if c.get("plan") and c["id"] not in met and not re.search(c["plan"], text, re.I)]
+
+    def _plan_checked(self, r, fmt, task, mock):
+        """J2.e before building: a plan that leaves a necessary condition with no workflow is flagged and Adaptation
+        gets one retry. If the gap is still there, the plan goes ahead with a warning (Audit's check will show it)."""
+        for retry in (True, False):
+            gaps = self._plan_gaps(norm(r.get("workflows"))) if norm(r.get("workflows")) else []
+            if not gaps:
+                return r
+            why = "; ".join(f"no workflow builds {c['id']} ({c['text']})" for c in gaps)
+            self.rejections.append({"cycle": self.cycle, "workflow": "plan", "reason": why})
+            self._event("validator", "plan_gap", why)
+            if retry:
+                self.post("system", f"Validator flagged the plan before building: {why}. Adaptation sends it again.",
+                          rejected="plan")
+                r = self._atoms_checked(self.call("adaptation", fmt, task + "\nTHE VALIDATOR FLAGGED YOUR PLAN: " + why
+                                                  + ". Put that work in a workflow and send your whole reply again.", mock),
+                                        fmt, task, mock)
+            else:
+                self.post("system", f"The plan still leaves {', '.join(c['id'] for c in gaps)} with no workflow. It goes "
+                                    "ahead; the necessary-conditions check after the build will show the gap.", warning=True)
         return r
 
     def _fact_source(self):
@@ -4417,7 +4600,8 @@ class J2Run:
             r, extra = self._audit_doc(site, crit)
             mech, shot, measured = {}, None, {}
         else:
-            r, mech, shot, measured = self._audit_site(site, crit)
+            r, mech, shot, measured, conds = self._audit_site(site, crit)
+            extra = {"conditions": conds}
         results, extras = self._audit_findings(r.get("findings") or r.get("results") or [], crit)
         forced = self._force_fail(results)
         self._flag_unpaid(results)
@@ -4446,7 +4630,7 @@ class J2Run:
 
     def _audit_site(self, site, crit):
         """J2.g for a website: the render check and screenshot in headless Chrome, then Audit's call.
-        Returns (reply, render check, screenshot path, measured design problems)."""
+        Returns (reply, render check, screenshot path, measured design problems, necessary conditions)."""
         mech = j2_check.check(site) if site else {"available": False, "note": "no site built yet"}
         if site:
             self.post("system", j2_check.summary(mech) + f" (site v{len(self.sites)})", mechanical=True)
@@ -4461,6 +4645,7 @@ class J2Run:
             os.makedirs(os.path.join(self.dir, "site", "shots"), exist_ok=True)
             shot = j2_check.screenshot(site, os.path.join(self.dir, "site", "shots", f"v{len(self.sites)}.png"))
         measured = j2_check.design_problems(mech)
+        conds = self._conditions(site, mech)
 
         def mock():
             fs = []
@@ -4494,6 +4679,7 @@ class J2Run:
                          if (self.goal or {}).get("dropped_by_requester") else "")
                       + f"MECHANICAL CHECK (run by code in headless Chrome; treat as evidence, and "
                       f"use BLOCKED_BY_EVIDENCE only for what neither it nor the code can show): {json.dumps(mech)}\n"
+                      f"NECESSARY CONDITIONS (checked by code on the page; evidence): {json.dumps(conds, ensure_ascii=False)}\n"
                       f"DESIGN AND USABILITY RUBRIC (judge each item; a failing item is a normal finding): "
                       f"{json.dumps(dict(RUBRIC), ensure_ascii=False)}\nSTYLE GUIDE: {json.dumps(self.style, ensure_ascii=False)}"
                       f"\nDESIGN MEASUREMENTS (code, both widths): {json.dumps(mech.get('design'), ensure_ascii=False)}\n"
@@ -4502,19 +4688,27 @@ class J2Run:
                          "what you see.\n" if shot else "No screenshot this time: judge from the code and the measurements.\n")
                       + f"SITE v{len(self.sites)}:\n{site[:SITE_LIMIT]}", mock,
                       max_tokens=1600, images=[shot] if shot else None)
-        return r, mech, shot, measured
+        return r, mech, shot, measured, conds
+
+    def _conditions(self, built, mech=None):
+        """Code checks the output's necessary conditions on the latest build, saves conditions.json and posts the list.
+        A website is checked on its HTML (visible text for the facts) and its render check."""
+        page = None if self.doc else built
+        text = built if self.doc else " ".join(PageScan(built).visible)
+        conds = check_conditions(load_conditions(self.out["conditions"]), text, self.goal, self._fact_source(),
+                                 self.out["sections"], page, mech)
+        self.save("conditions.json", conds)
+        if built:
+            self.post("system", "Necessary conditions (checked by code): " + "; ".join(
+                f"{c['id']} " + ("met" if c["met"] else f"NOT MET ({c['evidence']})") for c in conds)
+                + f" ({self.out['noun']} v{len(self.sites)})", mechanical=True)
+        return conds
 
     def _audit_doc(self, doc, crit):
         """J2.g for a document: code checks the necessary conditions on the text (conditions.json), then Audit judges
         the done-when items and the document rubric from the text and says what it read. Returns (reply, the audit's
         extra fields)."""
-        conds = check_conditions(load_conditions(self.out["conditions"]), doc, self.goal, self._fact_source(),
-                                 self.out["sections"])
-        self.save("conditions.json", conds)
-        if doc:
-            self.post("system", "Necessary conditions (checked by code): " + "; ".join(
-                f"{c['id']} " + ("met" if c["met"] else f"NOT MET ({c['evidence']})") for c in conds)
-                + f" ({self.out['noun']} v{len(self.sites)})", mechanical=True)
+        conds = self._conditions(doc)
         read = "; ".join(f"{h} ({md_words(b)} words)" for lv, h, b in md_sections(doc) if lv == 2) or "no sections"
 
         def mock():
@@ -4809,6 +5003,9 @@ class J2Run:
             if self.doc and self.sites else list(self.sections),
             "conditions": {"met": sum(c["met"] for c in conds), "total": len(conds),
                            "list": [{k: c[k] for k in ("id", "met", "evidence")} for c in conds]} if conds else None,
+            "necessary_conditions": {"met": sum(c["met"] for c in conds), "total": len(conds),
+                                     "list": [{k: c[k] for k in ("id", "text", "met", "evidence")} for c in conds]}
+            if conds else None,
             **({"export": {"file": self.out["file"][:-3] + ".docx", "written": not self.export_note,
                            "note": self.export_note}} if self.doc else {}),
             "force_audit_fail": self.force_fail or None, "test_lessons": self.test_lessons,

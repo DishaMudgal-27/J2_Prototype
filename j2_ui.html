@@ -398,9 +398,10 @@ function renderAudit(s){
   if (!s.audits.length) return `<p class="empty">Audit checks the site against Identity's checklist after each cycle.</p>`;
   const wk = s.workable ? (s.workable.length ? `<h3 class="fail">Not workable yet (checked by code)</h3><ul>${s.workable.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`
     : `<h3 class="pass">Workable (checked by code)</h3>`) : "";
-  return wk + s.audits.slice().reverse().map(a => `<h3>Cycle ${a.cycle} · ${s.doc ? "document" : "site"} v${a.version} · ${a.all_pass ? '<span class="pass">all pass</span>' : '<span class="fail">failing</span>'}</h3>
-    ${a.conditions ? `<h3>Necessary conditions (checked by code)</h3><table><tr><th>Condition</th><th>Result</th><th>Evidence</th></tr>${a.conditions.map(c =>
-      `<tr><td><b>${esc(c.id)}</b> ${esc(c.text)}</td><td class="${c.met?"pass":"fail"}">${c.met ? "MET" : "NOT MET"}</td><td>${esc(c.evidence)}</td></tr>`).join("")}</table>` : ""}
+  const last = s.audits[s.audits.length - 1];
+  const conds = s.conditions ? `<h3>Necessary conditions (checked by code, ${s.doc ? "document" : "site"} v${last.version}): ${s.conditions.filter(c => c.met).length} of ${s.conditions.length} met</h3><table><tr><th>Condition</th><th>Result</th><th>Evidence</th></tr>${s.conditions.map(c =>
+      `<tr><td><b>${esc(c.id)}</b> ${esc(c.text)}</td><td class="${c.met?"pass":"fail"}">${c.met ? "MET" : "NOT MET"}</td><td>${esc(c.evidence)}</td></tr>`).join("")}</table>` : "";
+  return conds + wk + s.audits.slice().reverse().map(a => `<h3>Cycle ${a.cycle} · ${s.doc ? "document" : "site"} v${a.version} · ${a.all_pass ? '<span class="pass">all pass</span>' : '<span class="fail">failing</span>'}</h3>
     ${a.read ? `<p class="empty">Audit read: ${esc(a.read)}</p>` : ""}
     <table><tr><th>Criterion</th><th>Result</th><th>Evidence</th></tr>${a.results.concat(a.extra_issues||[]).map(r => `<tr><td>${r.id ? `<b>${esc(r.id)}</b> ` : ""}${r.item ? r.item + ". " : "extra: "}${esc(r.criterion)}</td>
     <td class="${r.pass?"pass":"fail"}">${esc(r.verdict || (r.pass?"PASS":"FAIL"))}</td><td>${esc(r.note)}</td></tr>`).join("")}</table>
