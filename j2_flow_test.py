@@ -104,8 +104,51 @@ def fake_check(html):
                               "ok": True} for i in range(st["forms"])]}
 
 
+class FakeDriver:
+    """A behaviour-step driver with no browser: elements by selector ({visible, text, classes, style}) and handlers
+    keyed ("set"|"click"|"scroll", selector) or "wait" that change them, as a page's script would."""
+    def __init__(self, els, on=None):
+        self.els, self.on = els, on or {}
+
+    def __call__(self, ops):
+        out = []
+        for o in ops:
+            el = self.els.get(o.get("sel"))
+            if o.get("do") == "wait":
+                self.on.get("wait", lambda e, o: None)(self.els, o)
+                out.append({"v": True})
+            elif el is None:
+                out.append({"missing": True})
+            elif o.get("do"):
+                if el.get("error"):
+                    out.append({"error": el["error"]})
+                    continue
+                self.on.get((o["do"], o["sel"]), lambda e, o: None)(self.els, o)
+                out.append({"v": True})
+            else:
+                r = o["read"]
+                out.append({"v": el.get("visible", True) if r == "visible" else o["cls"] in el.get("classes", ())
+                            if r == "class" else el.get("style", {}).get(o["prop"], "") if r == "style"
+                            else el.get("text", "")})
+        return {"available": True, "results": out}
+
+
+def fake_behavior(html, ops):
+    """--fast: behaviour steps on the static page (no script runs): ids and classes, hidden or not, their text."""
+    els = {}
+    for m in re.finditer(r"<(\w+)\b([^>]*)>([^<]*)", html):
+        attrs, cls = m.group(2), re.search(r'\bclass="([^"]+)"', m.group(2))
+        el = {"visible": not re.search(r"\shidden\b|display:\s*none", attrs), "text": m.group(3).strip(),
+              "classes": set(cls.group(1).split()) if cls else set()}
+        for sel in ([f"#{x}" for x in re.findall(r'\bid="([^"]+)"', attrs)] + [f".{c}" for c in el["classes"]]):
+            els.setdefault(sel, el)
+    return FakeDriver(els)(ops)
+
+
 if FAST:
     j2.j2_check.tap_targets = fake_tap_targets
+    if not BROWSER:
+        j2.j2_check.behavior = fake_behavior
     if not BROWSER:     # --fast --browser keeps the real render check: the rubric tests need its measurements
         j2.j2_check.check = fake_check
         j2.j2_check.find_chrome = lambda: None      # the page-driving tests skip; screenshots aren't taken
@@ -2883,6 +2926,185 @@ def website_conditions():
     assert j2.requester_words("Meet in Room G2.", j2.squash("the venue is Room G2")) == "Meet in Room G2."
 
 
+def behavior_steps():
+    """Behaviour items: the step interpreter with a fake driver (no Chrome), the validator's rules for behaviour
+    steps, one re-ask on a rejected item, and the mock writing one behaviour item per atom with an action goal."""
+    ck, run_steps = j2.j2_check, j2.j2_check.run_steps
+    # the interpreter: passes, and each failure named in plain words after the last action
+    page = lambda: FakeDriver({"#tshirt": {}, "#size": {"visible": False}, "#calc-go": {}, "#total": {"text": "Rs 0"},
+                               "#countdown": {"text": "10 days"}, "#contrast-toggle": {}, "body": {"style": {
+                                   "background-color": "rgb(255, 255, 255)"}}, "#schedule": {},
+                               "#link-schedule": {"classes": set()}, "#broken": {"error": "no option XXL"}},
+                              {("set", "#tshirt"): lambda e, o: e["#size"].update(visible=o["val"] == "yes"),
+                               ("click", "#calc-go"): lambda e, o: e["#total"].update(text="Total: Rs 950"),
+                               "wait": lambda e, o: e["#countdown"].update(text="9 days"),
+                               ("click", "#contrast-toggle"): lambda e, o: e["body"]["style"].update(
+                                   {"background-color": "rgb(0, 0, 0)"}),
+                               ("scroll", "#schedule"): lambda e, o: e["#link-schedule"]["classes"].add("active")})
+    ok = ["expect-hidden #size", "set #tshirt yes", "expect-visible #size", "click #calc-go",
+          "expect-number #total 500*0.9+2*250", "wait 2", "expect-changed #countdown", "click #contrast-toggle"]
+    r = run_steps(ok, page())
+    assert r["pass"] is True and r["evidence"] == "all 8 step(s) behaved as expected", r
+    r = run_steps(["expect-style-changed body background-color"][:0] + ["click #contrast-toggle",
+                  "expect-style-changed body background-color", "scroll-to #schedule",
+                  "expect-class #link-schedule active", "expect-text #countdown 10 DAYS"], page())
+    assert r["pass"] is True, r
+    for steps, why in ((["set #tshirt no", "expect-visible #size"], "after choosing tshirt no, size was still hidden"),
+                       (["set #tshirt yes", "expect-hidden #size"], "after choosing tshirt yes, size was still visible"),
+                       (["click #calc-go", "expect-number #total 500+2*250"],
+                        "after clicking calc go, total showed 'Total: Rs 950', expected 1000 (500+2*250)"),
+                       (["expect-text #total Rs 950"], "on load, total showed 'Rs 0', not 'Rs 950'"),
+                       (["click #calc-go", "wait 1", "expect-changed #total"],
+                        "after waiting 1s, total still showed 'Total: Rs 950'"),
+                       (["click #calc-go", "expect-style-changed body background-color"],
+                        "after clicking calc go, the background-color of body stayed rgb(255, 255, 255)"),
+                       (["expect-class #link-schedule active"], "on load, link schedule did not have the class active"),
+                       (["click #buy-now"], "on load, nothing on the page matches buy now (step 1: click)"),
+                       (["set #broken XXL"], "on load, step 1 (set broken) could not be done: no option XXL")):
+        r = run_steps(steps, page())
+        assert r["pass"] is False and r["evidence"] == why and r["actual"]["step"] == steps[-1], (steps, r)
+    r = run_steps(["click #calc-go"], lambda ops: {"available": False, "note": "Chrome not found"})
+    assert r["pass"] is None and r["evidence"].startswith("could not run"), r
+    assert ck.safe_number("(500*0.9)+2*250") == (950.0, [500, 0.9, 2, 250])
+    for bad in ("__import__('os')", "price*2", "2**8", "1;2"):
+        try:
+            ck.safe_number(bad)
+            raise AssertionError(bad)
+        except ValueError:
+            pass
+
+    # the validator: selectors the atom creates, numbers from the charter, no today's date, at most 8 steps
+    src = j2.squash("Race fee Rs 500. 10% off race fees for registrations up to 31 December 2026. T-shirt Rs 250 each.")
+    how = {"kind": "AI", "agent": "Builder", "steps": "Build the calculator #calc with #shirts, #reg-date, #calc-go and "
+           "#total; #tshirt and #size; #countdown"}
+    goal = "A fee calculator shows the total, with 10% off up to 31 December 2026"
+
+    def probs(steps, g=goal, h=how, kind="behavior"):
+        a = {"goal": g, "how": h, "constraints": [], "context": ["charter item 1"], "verification": [],
+             "expected_output": [{"text": "The total for one 10K runner and 2 T-shirts", "kind": kind, "steps": steps}]}
+        return j2.expected_problems(a, j2.CHECK_TYPES) or j2.check_problems(j2.cover_expected(a), src)
+    good = ["set #reg-date 2026-12-01", "set #shirts 2", "click #calc-go", "expect-number #total 500*0.9+2*250"]
+    assert probs(good) == [], probs(good)
+    for steps, part in (([*good[:3], "expect-number #total 950"], "uses 950, not in the charter"),
+                        ([*good[:3], "expect-number #total 500*0.85"], "uses 0.85"),
+                        ([*good[:3], "expect-number #total price*2"], "isn't arithmetic over numbers"),
+                        ([*good[:3], "expect-visible #buy-now"], "'#buy-now', which the atom's how or constraints"),
+                        ([*good[:3], "expect-text #total hello@x.com"], None),
+                        (good[1:], "depends on a date"),
+                        (good + ["wait 1"] * 5, "has 9 steps; at most 8"),
+                        (["wait 5", "expect-changed #countdown"], "wait is at most 3 seconds"),
+                        (["hover #total"], "starts with 'hover'"),
+                        (["expect-changed #countdown"], "expect-changed needs a wait step before it"),
+                        ([], "isn't an object with text, kind and target (steps for a behavior)")):
+        got = probs(steps)
+        assert (got == [] if part is None else len(got) == 1 and part in got[0]), (steps, got)
+    assert probs(good)[:0] == [] and "expected output item 1 behavior step 4" in probs(
+        [*good[:3], "expect-number #total 950"])[0]
+    # an action goal needs a behaviour item; a document has no behaviour check
+    act = probs(["click #calc-go"], kind="facts")
+    assert any("describes an action ('calculator')" in x for x in probs(["x"], kind=None) + [
+        *j2.check_problems({"goal": "A calculator shows the total", "how": how, "expected_output": [],
+                            "verification": [{"text": "x", "type": "file-exists", "target": "index.html"}]}, src)]), act
+    assert not j2.check_problems({"goal": "Shows the menu", "how": how, "expected_output": [], "verification": []}, src)
+    assert "which no check can verify" in j2.expected_problems(
+        {"expected_output": [{"text": "x", "kind": "behavior", "steps": ["click #a"]}]}, j2.DOC_CHECK_TYPES)[0]
+
+    # one re-ask: an invented total is rejected and Adaptation sends the reply again; the run still finishes
+    run, hit = j2.J2Run(), []
+    orig = run.call
+
+    def call(fn, fmt, task, mock, **k):
+        r = orig(fn, fmt, task, mock, **k)
+        if fn == "adaptation" and isinstance(r, dict) and r.get("workflows") and not run.workflows and not hit:
+            hit.append(1)
+            a = r["workflows"][0]["atoms"][0]
+            a["how"] = {**a["how"], "steps": a["how"]["steps"] + "; button #calc-go shows #total"}
+            a["expected_output"].append({"text": "The total", "kind": "behavior",
+                                         "steps": ["click #calc-go", "expect-number #total 4321"]})
+        return r
+    run.call = call
+    say(run, BREW_LAB)
+    finish(run)
+    assert "uses 4321, not in the charter" in run.rejections[0]["reason"], run.rejections
+    assert len([c for c in calls_of(run) if "THE VALIDATOR REJECTED" in c["prompt"]]) == 1
+    assert run.outcome.startswith("Done"), run.outcome
+
+    # mock mode: one behaviour item per atom whose goal describes an action, built and met
+    run = j2.J2Run()
+    say(run, BREW_LAB.replace("and where to find us", "where to find us, and a price calculator for an order"))
+    finish(run)
+    atoms = [a for w in run.workflows for a in w.get("atoms") or []]
+    acts = [a for a in atoms if j2.ACTION_GOAL.search(a["goal"])]
+    assert acts and all(len([x for x in a["expected_output"] if x["kind"] == "behavior"]) == 1 for a in acts), [(w["name"], w.get("completion_check"), [a["goal"] for a in w["atoms"]]) for w in run.workflows]
+    assert not any(x["kind"] == "behavior" for a in atoms if a not in acts for x in a["expected_output"])
+    if not BROWSER or j2.j2_check.find_chrome():
+        assert all(x["met"] is True for a in acts for x in a["expected_output"]), [a["expected_output"] for a in acts]
+    assert run.outcome.startswith("Done"), run.outcome
+    assert "behavior (proves the page works" in next(c["prompt"] for c in calls_of(run) if c["fn"] == "adaptation")
+
+
+BEHAVIOR_PAGES = {
+    "calculator": ("""<select id="race"><option value="300">5K</option><option value="500">10K</option></select>
+<input id="shirts" type="number" value="0"><input id="reg-date" type="date" value="2027-01-20">
+<button id="calc-go">Total</button><p id="total">Total: Rs 0</p>
+<script>document.getElementById('calc-go').onclick = () => { const early = document.getElementById('reg-date').value <= '2026-12-31';
+  const fee = +document.getElementById('race').value * (early && %s ? 0.9 : 1);
+  document.getElementById('total').textContent = 'Total: Rs ' + (fee + 250 * document.getElementById('shirts').value); };</script>""",
+                   ["set #race 10K", "set #shirts 2", "set #reg-date 2026-12-01", "click #calc-go",
+                    "expect-number #total 500*0.9+2*250"], "after clicking calc go, total showed 'Total: Rs 1000'"),
+    "conditional field": ("""<select id="tshirt"><option>no</option><option>yes</option></select>
+<label id="size" hidden>Size <select><option>S</option><option>M</option></select></label>
+<script>document.getElementById('tshirt').onchange = e => { if (%s) document.getElementById('size').hidden = e.target.value !== 'yes'; };</script>""",
+                          ["expect-hidden #size", "set #tshirt yes", "expect-visible #size", "set #tshirt no",
+                           "expect-hidden #size"], "after choosing tshirt yes, size was still hidden"),
+    "required only when": ("""<input id="dob" type="date"><input id="guardian"><button id="reg-go">Register</button>
+<p id="guardian-error" hidden>Guardian name is required for runners under 18</p>
+<script>document.getElementById('reg-go').onclick = () => { const minor = document.getElementById('dob').value > '2009-02-14';
+  document.getElementById('guardian-error').hidden = !(%s && minor && !document.getElementById('guardian').value); };</script>""",
+                           ["set #dob 2012-05-01", "click #reg-go", "expect-visible #guardian-error",
+                            "set #dob 1990-01-01", "click #reg-go", "expect-hidden #guardian-error"],
+                           "after clicking reg go, guardian error was still hidden"),
+    "countdown": ("""<p id="countdown">Race starts in 100 seconds</p>
+<script>let n = 100; setInterval(() => { if (%s) document.getElementById('countdown').textContent = 'Race starts in ' + (--n) + ' seconds'; }, 1000);</script>""",
+                  ["wait 2", "expect-changed #countdown"], "after waiting 2s, countdown still showed"),
+    "active menu link": ("""<nav style="position:fixed;top:0"><a class="menu-link" id="link-races" href="#races">Races</a>
+<a class="menu-link" id="link-schedule" href="#schedule">Schedule</a></nav>
+<section id="races" style="height:1500px">Races</section><section id="schedule" style="height:1500px">Schedule</section>
+<script>addEventListener('scroll', () => { if (!%s) return; for (const s of document.querySelectorAll('section')) {
+  const r = s.getBoundingClientRect(); document.getElementById('link-' + s.id).classList.toggle('active', r.top <= 100 && r.bottom > 100); } });</script>""",
+                         ["expect-class #link-races active"][:0] + ["scroll-to #schedule",
+                                                                     "expect-class #link-schedule active"],
+                         "after scrolling to schedule, link schedule did not have the class active"),
+    "contrast toggle": ("""<style>body{background:#fff} #menu{background:#f4efe6} body.hc{background:#000} body.hc #menu{background:#111}</style>
+<button id="contrast-toggle">High contrast</button><section id="menu">Menu</section>
+<script>document.getElementById('contrast-toggle').onclick = () => { if (%s) document.body.classList.toggle('hc'); };</script>""",
+                        ["click #contrast-toggle", "expect-style-changed body background-color",
+                         "expect-style-changed #menu background-color"],
+                        "after clicking contrast toggle, the background-color of body stayed"),
+}
+
+
+def behavior_browser():
+    """The point-5 cases in headless Chrome: each page works (true) and is broken (false); the broken one fails at
+    the step that shows it, in plain words. Each item also passes the validator."""
+    if not BROWSER or not REAL_FIND():
+        print("behaviour browser tests skipped: Chrome not found or --fast without --browser")
+        return
+    src = j2.squash("Race fee Rs 500. 10% off race fees up to 31 December 2026. T-shirt Rs 250.")
+    for name, (body, steps, why) in BEHAVIOR_PAGES.items():
+        how = {"kind": "AI", "agent": "Builder", "steps": "Creates " + " ".join(
+            s.split()[1] for s in steps) + " and the body class hc"}
+        a = {"goal": f"The {name} works", "how": how, "constraints": [], "context": ["charter item 1"],
+             "verification": [], "expected_output": [{"text": name, "kind": "behavior", "steps": steps}]}
+        assert not j2.check_problems(j2.cover_expected(a), src), (name, j2.check_problems(a, src))
+        for works in (True, False):
+            html = f"<!doctype html><html><body>{body % ('true' if works else 'false')}</body></html>"
+            r = j2.run_check(a["verification"][0], "", html)
+            assert r["pass"] is works and (works or r["evidence"].startswith(why)), (name, works, r)
+    print("behaviour steps in Chrome: calculator total (early-bird date set by a control), conditional field, "
+          "required only when, countdown, active menu link after scroll, contrast toggle on body and a section ok")
+
+
 if __name__ == "__main__":
     if FAST:
         print("--fast: browser measurement stubbed" + ("" if BROWSER else "; tests that drive the page in Chrome are "
@@ -2901,6 +3123,9 @@ if __name__ == "__main__":
         print(f"J2_FIXES={mode}: vague brief (both answers), full brief, budget question rejected and re-asked, below-floor proposal with left_out, one decision question after the ruling, core marks from J2.a, deferred twice, connections at three budgets, funded work built before the question ok")
         workflow_agents()
         atom_checks()
+        behavior_steps()
+        print(f"J2_FIXES={mode}: behaviour steps: interpreter with a fake driver, validator rules (selectors, charter "
+              "numbers, date control, 8 steps, action goals), one re-ask, mock behaviour items ok")
         leave_out_named()
         rubric_and_credits()
         charter_numbers()
@@ -2954,6 +3179,7 @@ if __name__ == "__main__":
     form_submit()
     print("second pass: two audiences, simple messages, owner override, form submit ok")
     print("limit answers (turn cap, nine workflows, own amount, drop with reason, done with open items), budget cap, repeats, idle Adaptation, decisions applied by code (msgs 24, 50) ok")
+    behavior_browser()
     page()
     prd_page()
     print("PRD page: output picked before the first message and shown, preview from prd.md, .md and .docx downloads ok")

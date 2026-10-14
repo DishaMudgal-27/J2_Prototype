@@ -304,6 +304,216 @@ def problems(c):
             + [form_problem(x) for x in c.get("form_results") or [] if not x["ok"]])
 
 
+# ---- behaviour steps: prove the page works, not only that things exist. The interpreter (Python) turns the steps
+# into ops, a driver runs the ops (headless Chrome here, a fake one in the tests) and reports what it saw, and the
+# interpreter judges the steps from those results, naming the failing step in plain words.
+STEP_ARGS = {"set": 2, "click": 1, "scroll-to": 1, "wait": 1, "expect-visible": 1, "expect-hidden": 1,
+             "expect-text": 2, "expect-number": 2, "expect-changed": 1, "expect-style-changed": 2, "expect-class": 2}
+MAX_STEPS, MAX_WAIT = 8, 3
+SETTLE_MS = 150      # after every action, so listeners and observers run before the next step reads the page
+
+
+def parse_step(step):
+    """{"verb", "sel", "arg"} for one step string; ValueError naming what's wrong."""
+    parts = str(step or "").split(None, 1)
+    verb = parts[0].lower() if parts else ""
+    if verb not in STEP_ARGS:
+        raise ValueError(f"step {step!r} starts with {verb!r}; allowed: {', '.join(STEP_ARGS)}")
+    if verb == "wait":
+        rest = parts[1].strip().rstrip("s") if len(parts) > 1 else ""
+        try:
+            sec = float(rest)
+        except ValueError:
+            raise ValueError(f"step {step!r}: wait needs a number of seconds") from None
+        if not 0 < sec <= MAX_WAIT:
+            raise ValueError(f"step {step!r}: wait is at most {MAX_WAIT} seconds")
+        return {"verb": verb, "sel": None, "arg": sec}
+    rest = parts[1].split(None, 1) if len(parts) > 1 else []
+    if not rest or (STEP_ARGS[verb] == 2) != (len(rest) == 2):
+        raise ValueError(f"step {step!r}: {verb} takes a selector" + (" and a value" if STEP_ARGS[verb] == 2 else " only"))
+    return {"verb": verb, "sel": rest[0], "arg": rest[1].strip() if len(rest) == 2 else None}
+
+
+def safe_number(expr):
+    """(value, [number literals]) of an arithmetic expression: numbers, + - * / and brackets only."""
+    import ast
+
+    def ev(n):
+        if isinstance(n, ast.Expression):
+            return ev(n.body)
+        if isinstance(n, ast.Constant) and type(n.value) in (int, float):
+            lits.append(n.value)
+            return n.value
+        if isinstance(n, ast.UnaryOp) and isinstance(n.op, (ast.UAdd, ast.USub)):
+            return ev(n.operand) * (-1 if isinstance(n.op, ast.USub) else 1)
+        if isinstance(n, ast.BinOp) and isinstance(n.op, (ast.Add, ast.Sub, ast.Mult, ast.Div)):
+            a, b = ev(n.left), ev(n.right)
+            return a + b if isinstance(n.op, ast.Add) else a - b if isinstance(n.op, ast.Sub) else \
+                a * b if isinstance(n.op, ast.Mult) else a / b
+        raise ValueError("only numbers, + - * / and brackets")
+    lits = []
+    try:
+        return ev(ast.parse(str(expr).replace(",", ""), mode="eval")), lits
+    except (SyntaxError, ZeroDivisionError) as e:
+        raise ValueError(str(e)) from None
+
+
+def compile_steps(steps):
+    """(ops, plan): ops for the driver; plan[i] = (index of step i's own op, {snapshot key: op index}). Before every
+    wait code reads the text of each expect-changed selector; before every click, each expect-style-changed value."""
+    parsed = [parse_step(s) for s in steps]
+    changed = sorted({p["sel"] for p in parsed if p["verb"] == "expect-changed"})
+    styled = sorted({(p["sel"], p["arg"]) for p in parsed if p["verb"] == "expect-style-changed"})
+    ops, plan = [], []
+    for p in parsed:
+        v, sel, arg, snaps = p["verb"], p["sel"], p["arg"], {}
+        if v == "wait":
+            for s in changed:
+                snaps[("text", s)] = len(ops)
+                ops.append({"read": "text", "sel": s})
+            ops.append({"do": "wait", "ms": int(arg * 1000)})
+        elif v == "click":
+            for s, prop in styled:
+                snaps[("style", s, prop)] = len(ops)
+                ops.append({"read": "style", "sel": s, "prop": prop})
+            ops.append({"do": "click", "sel": sel})
+        elif v in ("set", "scroll-to"):
+            ops.append({"do": "scroll" if v == "scroll-to" else "set", "sel": sel, "val": arg})
+        elif v in ("expect-visible", "expect-hidden"):
+            ops.append({"read": "visible", "sel": sel})
+        elif v == "expect-class":
+            ops.append({"read": "class", "sel": sel, "cls": arg})
+        elif v == "expect-style-changed":
+            ops.append({"read": "style", "sel": sel, "prop": arg})
+        else:
+            ops.append({"read": "text", "sel": sel})
+        plan.append((len(ops) - 1, snaps))
+    return ops, parsed, plan
+
+
+def name_of(sel):
+    """A selector in plain words: "#tshirt-size" -> "tshirt size"."""
+    return re.sub(r"[-_]+", " ", str(sel).lstrip("#.")).strip()
+
+
+def numbers_in(text):
+    return [float(x) for x in re.findall(r"-?\d+(?:\.\d+)?", re.sub(r"(?<=\d),(?=\d)", "", str(text)))]
+
+
+def judge_steps(steps, results):
+    """{actual, pass, evidence} from the driver's results; the first failing step is named in plain words."""
+    ops, parsed, plan = compile_steps(steps)
+    seen, after = {}, "on load"
+    for i, (p, (at, snaps)) in enumerate(zip(parsed, plan), 1):
+        if at >= len(results):
+            return {"actual": {"failed_step": i}, "pass": None, "evidence": f"could not run: no result for step {i}"}
+        for k, j in snaps.items():
+            seen[k] = (results[j] or {}).get("v")
+        r, v, sel, arg, nm = results[at] or {}, p["verb"], p["sel"], p["arg"], name_of(p["sel"])
+        lead = f"{after}, " if after == "on load" else f"after {after}, "
+        if r.get("missing"):
+            why = f"{lead}nothing on the page matches {nm} (step {i}: {v})"
+        elif r.get("error"):
+            why = f"{lead}step {i} ({v} {nm}) could not be done: {r['error']}"
+        else:
+            got, why = r.get("v"), None
+            if v in ("set", "click", "scroll-to", "wait"):
+                after = f"waiting {arg:g}s" if v == "wait" else {"set": f"choosing {nm} {arg}", "click": f"clicking {nm}",
+                                                                 "scroll-to": f"scrolling to {nm}"}[v]
+                continue
+            if v == "expect-visible" and not got:
+                why = f"{lead}{nm} was still hidden"
+            elif v == "expect-hidden" and got:
+                why = f"{lead}{nm} was still visible"
+            elif v == "expect-text" and " ".join(str(arg).split()).lower() not in " ".join(str(got).split()).lower():
+                why = f"{lead}{nm} showed {str(got)[:80]!r}, not {arg!r}"
+            elif v == "expect-number":
+                want = safe_number(arg)[0]
+                # ponytail: any number in the element's text may match, the first one if totals come with counts
+                if not any(abs(x - want) < 0.005 for x in numbers_in(got)):
+                    why = f"{lead}{nm} showed {str(got)[:80]!r}, expected {want:g} ({arg})"
+            elif v == "expect-changed" and got == seen.get(("text", sel)):
+                why = f"{lead}{nm} still showed {str(got)[:80]!r}"
+            elif v == "expect-style-changed" and got == seen.get(("style", sel, arg)):
+                why = f"{lead}the {arg} of {nm} stayed {got}"
+            elif v == "expect-class" and not got:
+                why = f"{lead}{nm} did not have the class {arg}"
+        if why:
+            return {"actual": {"failed_step": i, "step": steps[i - 1]}, "pass": False, "evidence": why}
+    return {"actual": {"steps": len(steps)}, "pass": True, "evidence": f"all {len(steps)} step(s) behaved as expected"}
+
+
+def run_steps(steps, execute):
+    """Run behaviour steps with a driver: execute(ops) -> {"available", "results" | "note"}."""
+    ops = compile_steps(steps)[0]
+    r = execute(ops)
+    if not r.get("available"):
+        return {"actual": None, "pass": None, "evidence": f"could not run: {r.get('note')}"}
+    return judge_steps(steps, r["results"])
+
+
+BEHAVIOR_WRAPPER = """<!doctype html><html><body><iframe src="site.html" style="width:1280px;height:900px;border:0"></iframe>
+<script>const f = document.querySelector('iframe'), ops = %s, SETTLE = %d;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const YES = /^(yes|true|on|1|checked|tick|ticked)$/i;
+f.addEventListener('load', () => setTimeout(async () => { const out = [];
+  const w = f.contentWindow, d = w.document;
+  const fire = el => ['input', 'change'].forEach(t => el.dispatchEvent(new w.Event(t, {bubbles: true})));
+  const vis = el => { for (let e = el; e && e.nodeType === 1; e = e.parentElement){ const c = w.getComputedStyle(e);
+      if (c.display === 'none' || c.visibility === 'hidden' || e.hidden) return false; }
+    const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+  const label = el => ((el.labels && el.labels[0] && el.labels[0].textContent) || el.value || '').trim().toLowerCase();
+  for (const o of ops){ let r;
+    try { const all = [...d.querySelectorAll(o.sel || 'body')], el = all[0];
+      if (o.do === 'wait') { await sleep(o.ms); r = {v: true}; }
+      else if (!el) r = {missing: true};
+      else if (o.do === 'set') { const val = String(o.val), lc = val.toLowerCase();
+        if (el.tagName === 'SELECT') { const opt = [...el.options].find(x => x.value.toLowerCase() === lc || x.textContent.trim().toLowerCase() === lc);
+          if (!opt) throw new Error('no option ' + val); el.value = opt.value; fire(el); }
+        else if (el.type === 'radio') { const rb = all.find(x => x.value.toLowerCase() === lc || label(x) === lc);
+          if (!rb) throw new Error('no choice ' + val); rb.click(); }
+        else if (el.type === 'checkbox') { if (el.checked !== YES.test(val)) el.click(); }
+        else { el.focus(); el.value = val; fire(el); }
+        r = {v: true}; await sleep(SETTLE); }
+      else if (o.do === 'click') { el.click(); r = {v: true}; await sleep(SETTLE); }
+      else if (o.do === 'scroll') { el.scrollIntoView(); w.dispatchEvent(new w.Event('scroll')); r = {v: true}; await sleep(SETTLE); }
+      else if (o.read === 'visible') r = {v: vis(el)};
+      else if (o.read === 'class') r = {v: el.classList.contains(o.cls)};
+      else if (o.read === 'style') r = {v: w.getComputedStyle(el).getPropertyValue(o.prop)};
+      else r = {v: /^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName) ? el.value : (el.innerText || el.textContent || '').trim()};
+    } catch (e) { r = {error: String(e.message || e)}; }
+    out.push(r); }
+  document.body.setAttribute('data-j2', JSON.stringify({results: out})); }, 300));
+</script></body></html>"""
+
+
+def behavior(html, ops):
+    """Driver for behaviour steps: runs the ops in headless Chrome (1280px frame, virtual time, so waits are fast and
+    timers still fire) and returns {available, results}."""
+    chrome = find_chrome()
+    if not chrome:
+        return {"available": False, "note": "Chrome not found (set J2_CHROME)"}
+    budget = 3000 + sum(o.get("ms", 0) + SETTLE_MS for o in ops)
+    with tempfile.TemporaryDirectory() as tmp:
+        with open(os.path.join(tmp, "site.html"), "w", encoding="utf-8") as f:
+            f.write(html)
+        with open(os.path.join(tmp, "wrap.html"), "w", encoding="utf-8") as f:
+            f.write(BEHAVIOR_WRAPPER % (json.dumps(ops), SETTLE_MS))
+        for _ in range(2):             # one retry, as in check(): a Chrome hang isn't a failed check
+            try:
+                p = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--allow-file-access-from-files",
+                                    "--window-size=1300,1000", f"--virtual-time-budget={budget}", "--dump-dom",
+                                    "file://" + os.path.join(tmp, "wrap.html")], capture_output=True, text=True, timeout=90)
+            except subprocess.TimeoutExpired:
+                continue
+            m = re.search(r'data-j2="([^"]*)"', p.stdout)
+            if m:
+                r = json.loads(m.group(1).replace("&quot;", '"').replace("&amp;", "&").replace("&lt;", "<")
+                               .replace("&gt;", ">"))
+                return {"available": True, **r}
+    return {"available": False, "note": "Chrome ran but the page never reported (twice)"}
+
+
 if __name__ == "__main__":   # python j2_check.py site.html [...]: print the mechanical check for each file
     import sys
     for path in sys.argv[1:] or sys.exit("usage: python j2_check.py site.html [...]"):

@@ -264,7 +264,8 @@ def atom_missing(w):
 
 
 # ---- work-atom checks: the only check types Adaptation may write. Code runs them; no agent reports a result.
-CHECK_TYPES = ("file-exists", "grep-count", "element-count", "named-test", "facts-present", "tap-targets")
+CHECK_TYPES = ("file-exists", "grep-count", "element-count", "named-test", "facts-present", "tap-targets",
+               "behavior-steps")
 DOC_CHECK_TYPES = ("facts-present", "heading-present", "section-not-empty", "ids-unique")   # a document: no browser
 COUNTED = ("grep-count", "element-count", "tap-targets")     # target: a section id or class the atom says to create
 NAMED_TESTS = ("page-parses", "links-resolve", "form-has-submit")
@@ -272,6 +273,13 @@ MAX_CHECK_ATTEMPTS = 3
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 SPECIFIC = re.compile(r"\d|" + EMAIL.pattern)       # a time, price, number or email in a goal
 IDENT = re.compile(r"^[#.]?[A-Za-z][\w-]*$")         # a section id or class name
+# A goal that describes an action needs a behaviour item proving it works; a rule that depends on a date needs a
+# control on the page that sets the date, used by the steps (never today's date).
+ACTION_GOAL = re.compile(r"\b(?:calculat\w*|hid(?:e|es|den|ing)|show(?:s|n)? only|only (?:shown|visible)|show/hide|"
+                         r"validat\w*|updat\w*|highlight\w*|toggl\w*|required only)\b", re.I)
+DATE_RULE = re.compile(r"early[- ]?bird|deadline|\b(?:up to|until|till|before|by|after)\s+(?:the\s+)?\d{1,2}(?:st|nd|rd|th)?"
+                       r"\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)", re.I)
+DATE_CONTROL = re.compile(r"date|day|today|early", re.I)
 
 
 def squash(t):
@@ -286,6 +294,71 @@ def strings(x):
     if isinstance(x, list):
         return [t for v in x for t in strings(v)]
     return [x] if isinstance(x, str) else []
+
+
+def target_problem(target, told, source):
+    """Why a counted check or a behaviour step can't use this selector (None when it can): only an id or class
+    the atom's how or constraints tells the builder to create."""
+    name = str(target or "").lstrip("#.")
+    if not IDENT.match(str(target or "")) or EMAIL.search(str(target)) or \
+            (re.search(r"\d", name) and squash(name) in source):
+        return (f"targets {target!r}: only a section id or class name, never a charter fact, an email or a generic "
+                "string (use facts-present for those)")
+    if name.lower() not in told:
+        return f"targets {target!r}, which the atom's how or constraints doesn't tell the builder to create"
+    return None
+
+
+def allowed_numbers(source, steps):
+    """Numbers an expect-number expression may use: those in the charter and the Requester's answers (a percentage
+    also as its fraction and its remainder: 10% -> 0.1 and 0.9), and the inputs the steps themselves set."""
+    nums = set(j2_check.numbers_in(source))
+    for p in re.findall(r"(\d+(?:\.\d+)?)\s*(?:%|per ?cent)", source):
+        nums |= {float(p) / 100, 1 - float(p) / 100}
+    for st in steps:
+        if str(st).split(None, 1)[:1] == ["set"]:
+            nums |= set(j2_check.numbers_in(str(st).split(None, 2)[2:]))
+    return nums
+
+
+def behavior_problems(steps, told, source, about):
+    """J2.e's rules for one behaviour check's steps. about: the atom's goal, how and the item text, squashed."""
+    if not isinstance(steps, list) or not steps:
+        return ["has no steps"]
+    if len(steps) > j2_check.MAX_STEPS:
+        return [f"has {len(steps)} steps; at most {j2_check.MAX_STEPS}"]
+    out, parsed = [], []
+    for i, st in enumerate(steps, 1):
+        try:
+            parsed.append(j2_check.parse_step(st))
+        except ValueError as e:
+            out.append(str(e))
+    if out:
+        return out
+    allowed = allowed_numbers(source, steps)
+    for i, p in enumerate(parsed, 1):
+        if p["sel"] and (bad := target_problem(p["sel"], told, source)):
+            out.append(f"step {i} {bad}")
+        if p["verb"] == "expect-number":
+            try:
+                lits = j2_check.safe_number(p["arg"])[1]
+            except ValueError:
+                out.append(f"step {i} expect-number {p['arg']!r} isn't arithmetic over numbers (+ - * / and brackets "
+                           "only)")
+                continue
+            new = [x for x in lits if not any(abs(x - y) < 1e-9 for y in allowed)]
+            if new:
+                out.append(f"step {i} expect-number uses {', '.join(f'{x:g}' for x in new)}, not in the charter, the "
+                           "Requester's answers or the inputs the steps set (no invented totals)")
+        elif p["verb"] in ("expect-changed", "expect-style-changed"):
+            need = "wait" if p["verb"] == "expect-changed" else "click"
+            if not any(q["verb"] == need for q in parsed[:i - 1]):
+                out.append(f"step {i} {p['verb']} needs a {need} step before it")
+    if DATE_RULE.search(about) and any(p["verb"] in ("expect-number", "expect-text") for p in parsed) and \
+            not any(p["verb"] == "set" and DATE_CONTROL.search(p["sel"]) for p in parsed):
+        out.append("its rule depends on a date: the atom must create a control that sets the date (e.g. #reg-date) "
+                   "and the steps must set it, never rely on today's date")
+    return out
 
 
 def check_problems(a, source, types=CHECK_TYPES):
@@ -317,21 +390,22 @@ def check_problems(a, source, types=CHECK_TYPES):
             bad = [f for f in facts if not str(f or "").strip() or squash(f) not in source]
             if bad:
                 out.append(f"{lab} facts-present lists {bad}, not found in the charter or the Requester's answers")
+        elif t == "behavior-steps":
+            about = squash(json.dumps([a.get("goal"), a.get("how"), label], ensure_ascii=False))
+            out += [f"{lab} behavior {x}" for x in behavior_problems(target, told, source, about)]
         elif t in COUNTED:
-            name = str(target or "").lstrip("#.")
-            if not IDENT.match(str(target or "")) or EMAIL.search(str(target)) or \
-                    (re.search(r"\d", name) and squash(name) in source):
-                out.append(f"{lab} {t} targets {target!r}: only a section id or class name, never a charter fact, "
-                           "an email or a generic string (use facts-present for those)")
-            elif name.lower() not in told:
-                out.append(f"{lab} {t} targets {target!r}, which the atom's how or constraints doesn't tell the "
-                           "builder to create")
+            if bad := target_problem(target, told, source):
+                out.append(f"{lab} {t} {bad}")
             nums = [int(x) for x in re.findall(r"\d+", label)]
             if nums and as_int(c.get("expect"), None) not in nums:
                 out.append(f"{lab} says {label!r} but expects {c.get('expect')!r}")
     if SPECIFIC.search(str(a.get("goal") or "")) and not any(
-            isinstance(c, dict) and c.get("type") in ("facts-present", "named-test") for c in checks):
+            isinstance(c, dict) and c.get("type") in ("facts-present", "named-test", "behavior-steps") for c in checks):
         out.append("its goal names a time, price, number or email but no check is facts-present or a named test")
+    if "behavior-steps" in types and (m := ACTION_GOAL.search(str(a.get("goal") or ""))) and not any(
+            isinstance(x, dict) and x.get("kind") == "behavior" for x in a.get("expected_output") or []):
+        out.append(f"its goal describes an action ({m.group(0)!r}) but no expected output item is a behavior that "
+                   "proves it works")
     return out
 
 
@@ -414,6 +488,8 @@ def run_check(c, site_dir, page, doc=False):
             n = text.count(str(target).lstrip("#."))
             return {"actual": n, "pass": n == as_int(expect, -1),
                     "evidence": f"{target!r} found {n} time(s) in {c.get('file') or 'index.html'}, expected {expect}"}
+        if t == "behavior-steps":
+            return j2_check.run_steps(target if isinstance(target, list) else [], lambda ops: j2_check.behavior(page, ops))
         scan = PageScan(page)
         if t == "element-count":
             n = len(scan.matching(target))
@@ -506,7 +582,7 @@ def heading_target(t):
 # type verifies it. An output allows the kinds whose check type it runs (a website's or a document's).
 EXPECT_KINDS = {"section": "element-count", "element": "element-count", "facts": "facts-present",
                 "file": "file-exists", "test": "named-test", "tap": "tap-targets",
-                "heading": "heading-present", "ids": "ids-unique"}
+                "heading": "heading-present", "ids": "ids-unique", "behavior": "behavior-steps"}
 
 
 def expect_kinds(types):
@@ -519,6 +595,8 @@ def expected_check(item, n):
     t = EXPECT_KINDS.get(kind)
     if not t:
         return None
+    if t == "behavior-steps":
+        target = list(item.get("steps") or [])
     expect = (as_int(item.get("count"), 1) if t == "element-count" else
               as_int(item.get("count"), j2_check.TAP_MIN) if t == "tap-targets" else True)
     return {"text": str(item.get("text") or ""), "type": t, "expect": expect, "item": n,
@@ -530,8 +608,9 @@ def expected_problems(a, types):
     whose check type this output doesn't run."""
     out, kinds = [], expect_kinds(types)
     for n, x in enumerate(a.get("expected_output") if isinstance(a.get("expected_output"), list) else [], 1):
-        if not isinstance(x, dict) or not str(x.get("text") or "").strip() or not x.get("target"):
-            out.append(f"expected output item {n} isn't an object with text, kind and target")
+        if not isinstance(x, dict) or not str(x.get("text") or "").strip() or \
+                not x.get("steps" if x.get("kind") == "behavior" else "target"):
+            out.append(f"expected output item {n} isn't an object with text, kind and target (steps for a behavior)")
         elif x.get("kind") not in kinds:
             out.append(f"expected output item {n} has kind {x.get('kind')!r}, which no check can verify; allowed: "
                        + ", ".join(kinds))
@@ -963,27 +1042,33 @@ RENDER_CONDITIONS = ("no-js-errors", "no-overflow")     # the render check's own
 
 def mock_atom(w):
     """The work atom the mock Adaptation (and code's cheapest-fit proposal) writes for a workflow. A workflow with a
-    form part builds the section that holds buttons, so it also gets R-6 as a tap-targets check."""
+    form part builds the section that holds buttons, so it also gets R-6 as a tap-targets check. A goal that describes
+    an action gets one behaviour item: a button that shows a result (mock_section builds both)."""
+    goal = w.get("completion_check") or w.get("goal_gap") or w.get("name") or "The workflow's change is live"
+    a = {"goal": goal,
+         "constraints": ["Other workflows' sections stay unchanged", "The page loads with no console errors"],
+         "context": [f"charter item {i}" for i in w.get("covers") or []] + [f"finding {f}" for f in w.get("fixes") or []]
+         + ([f"section {w['revises']}"] if w.get("revises") else []) or ["charter goal"],
+         "how": {"kind": "AI", "agent": "Builder", "steps": "Write the workflow's section of index.html"},
+         "expected_output": [{"text": "The site file index.html", "kind": "file", "target": "index.html"},
+                             {"text": "A page whose tags are balanced", "kind": "test", "target": "page-parses"}],
+         "verification": [{"text": "The site file index.html exists after the build.", "type": "file-exists",
+                           "target": "index.html", "expect": True},
+                          {"text": "The page parses with balanced tags.", "type": "named-test",
+                           "target": "page-parses", "expect": True}]}
     if "form" in (w.get("parts") or []):
-        a = mock_atom({k: v for k, v in w.items() if k != "parts"})
         a["how"]["steps"] += "; the order form goes in a section with class order-form"
         a["verification"].append({"text": f"R-6: every button and field in the order form is at least "
                                           f"{j2_check.TAP_MIN}x{j2_check.TAP_MIN}px on a phone", "type": "tap-targets",
                                   "target": ".order-form", "expect": j2_check.TAP_MIN})
         a["expected_output"].append({"text": "The order form's buttons and fields are big enough to tap on a phone",
                                      "kind": "tap", "target": ".order-form"})
-        return a
-    return {"goal": w.get("completion_check") or w.get("goal_gap") or w.get("name") or "The workflow's change is live",
-            "constraints": ["Other workflows' sections stay unchanged", "The page loads with no console errors"],
-            "context": [f"charter item {i}" for i in w.get("covers") or []] + [f"finding {f}" for f in w.get("fixes") or []]
-            + ([f"section {w['revises']}"] if w.get("revises") else []) or ["charter goal"],
-            "how": {"kind": "AI", "agent": "Builder", "steps": "Write the workflow's section of index.html"},
-            "expected_output": [{"text": "The site file index.html", "kind": "file", "target": "index.html"},
-                                {"text": "A page whose tags are balanced", "kind": "test", "target": "page-parses"}],
-            "verification": [{"text": "The site file index.html exists after the build.", "type": "file-exists",
-                              "target": "index.html", "expect": True},
-                             {"text": "The page parses with balanced tags.", "type": "named-test",
-                              "target": "page-parses", "expect": True}]}
+    if ACTION_GOAL.search(str(goal)):
+        slug = (re.sub(r"[^a-z0-9]+", "-", str(w.get("name") or "act").lower()).strip("-") or "act")[:24]
+        a["how"]["steps"] += f"; the interactive part has a button with id {slug}-try and a result with id {slug}-result"
+        a["expected_output"].append({"text": "Using the interactive part shows its result", "kind": "behavior",
+                                     "steps": [f"click #{slug}-try", f"expect-visible #{slug}-result"]})
+    return a
 
 
 def with_atoms(wfs, atom=None):
@@ -1235,7 +1320,8 @@ def mock_charter(text):
                             ("where", "The address and a map link are shown"),
                             ("order", "Visitors can pre-order a coffee for pickup with a form"),
                             ("bean", "A section about the beans and the farms they come from"),
-                            ("loyalty", "A loyalty-card explainer (buy 9, get the 10th free)")) if k in t]
+                            ("loyalty", "A loyalty-card explainer (buy 9, get the 10th free)"),
+                            ("calculat", "A price calculator shows the total for the chosen items")) if k in t]
     if len(items) < 2:                    # not a cafe brief: the business type's usual visitor needs
         items += [f"{n} is on the page" for n in NEEDS.get(guess_type(text), ["What the business offers",
                                                                              "How to get in touch"])]
@@ -1250,6 +1336,22 @@ def mock_charter(text):
 
 
 def mock_section(w, goal, sections):
+    """mock_page's (head, body) plus the elements the workflow's behaviour steps use (a button for a click, a
+    paragraph for anything read)."""
+    head, body = mock_page(w, goal, sections)
+    made, extra = set(), ""
+    for a in w.get("atoms") or []:
+        for x in a.get("expected_output") or []:
+            for st in x.get("steps") or [] if isinstance(x, dict) and x.get("kind") == "behavior" else []:
+                p = j2_check.parse_step(st)
+                if p["sel"] and p["sel"].startswith("#") and p["sel"] not in made:
+                    made.add(p["sel"])
+                    extra += (f'<button id="{p["sel"][1:]}" type="button" style="min-height:44px;min-width:44px">Try '
+                              "it</button>" if p["verb"] == "click" else f'<p id="{p["sel"][1:]}">Result shown here.</p>')
+    return head, body + (f'<div class="j2-try">{extra}</div>' if extra else "")
+
+
+def mock_page(w, goal, sections):
     """(head, body) a scripted workflow agent writes: the scaffold styles the page, a viewport fix (or a workflow that
     builds a phone item) adds the meta tag,
     anything else adds the done-when items no other section covers yet (or a plain block, not a section). The first
@@ -1431,7 +1533,7 @@ DOC_NOTE = ("\nOUTPUT TYPE: {label}. The department writes a markdown document, 
             "site, website, page or HTML, read the document. There is no browser check, style guide or design rubric; "
             "Audit uses the document rubric and code checks the necessary conditions.")
 WF_TYPES = '"file-exists"|"grep-count"|"element-count"|"named-test"|"facts-present"'
-WF_KINDS = '"section"|"element"|"facts"|"file"|"test"|"tap"'
+WF_KINDS = '"section"|"element"|"facts"|"file"|"test"|"tap"|"behavior"'
 
 
 def export_prd(doc, run_dir):
@@ -1927,7 +2029,7 @@ class J2Run:
         # A document's agents get its own check types, finding ids and atom rules; a website's prompts stay as they were.
         kinds = "|".join(f'"{k}"' for k in expect_kinds(self.out["check_types"]))
         doc_fmt = lambda f: f.replace(WF_TYPES, types).replace(WF_KINDS, kinds).replace(
-            ' (section/element only, default 1)', ' (leave out)').replace('"R-6"', f'"{self.out["rubric"][0][0]}", "P2"')
+            ' (section/element only, default 1)', ' (leave out)').replace(', "steps": [str] (behavior only)', '').replace('"R-6"', f'"{self.out["rubric"][0][0]}", "P2"')
         self.WF_FMT = doc_fmt(J2Run.WF_FMT) if self.doc else J2Run.WF_FMT
         self.GRANT_FMT = doc_fmt(J2Run.GRANT_FMT) if self.doc else J2Run.GRANT_FMT
         self.ATOM_RULES = self.out.get("atom_rules") or J2Run.ATOM_RULES
@@ -3543,8 +3645,8 @@ class J2Run:
               'section), "estimated_resources": {"money": int, "calls": int, "time_minutes": int}, '
               '"atoms": [{"id": str, "goal": str, "constraints": [str], "context": [str], "how": {"kind": "AI"|"code", '
               '"agent": str, "steps": str (what to build, naming every section id and class name it creates)}, '
-              '"expected_output": [{"text": str, "kind": "section"|"element"|"facts"|"file"|"test"|"tap", '
-              '"target": str|[str], "count": int (section/element only, default 1)}], '
+              '"expected_output": [{"text": str, "kind": "section"|"element"|"facts"|"file"|"test"|"tap"|"behavior", '
+              '"target": str|[str], "count": int (section/element only, default 1), "steps": [str] (behavior only)}], '
               '"verification": [{"text": str, "type": "file-exists"|"grep-count"|"element-count"|"named-test"|'
               '"facts-present", "target": str|[str], "expect": int|bool}]}]}]')
     ATOM_RULES = ("\nWORK ATOMS: every workflow, fixes included, carries atoms: exactly one work atom for now, id \"a1\" "
@@ -3558,7 +3660,24 @@ class J2Run:
                   "\"#id\" or \".class\" the steps create; count: how many), facts (target: a list of strings shown "
                   "on the page, copied exactly from the charter or the Requester's answers), file (target: a path in "
                   "the build), test (target: page-parses, links-resolve or form-has-submit), tap (target: a section id "
-                  "or class whose buttons and fields must be big enough to tap). Code turns each item into a check and "
+                  "or class whose buttons and fields must be big enough to tap), behavior (proves the page works, not "
+                  "only that things exist: text says what happens in plain words, e.g. \"choosing T-shirt yes shows "
+                  "the size field\"; steps: at most 8, each one of: \"set <selector> <value>\" (type into a field, "
+                  "pick an option, tick a box), \"click <selector>\", \"scroll-to <selector>\", \"wait <seconds>\" "
+                  "(at most 3), \"expect-visible <selector>\", \"expect-hidden <selector>\", \"expect-text <selector> "
+                  "<string>\", \"expect-number <selector> <expression>\" (arithmetic over numbers from the charter, "
+                  "the Requester's answers or the values the steps set, e.g. 500*0.9+2*250; never a total you worked "
+                  "out yourself), \"expect-changed <selector>\" (its text differs from before the last wait), "
+                  "\"expect-style-changed <selector> <css property>\" (computed value differs from before the last "
+                  "click), \"expect-class <selector> <class>\". Selectors: only \"#id\" or \".class\" names the "
+                  "atom's how.steps tells the builder to create. A rule that depends on a date (an early-bird price) "
+                  "needs a control the atom creates to set the date (e.g. #reg-date), and the steps set it; never "
+                  "rely on today's date). Every goal that describes an action (calculate, show/hide, validate, update, "
+                  "highlight, toggle) needs at least one behavior item. When the charter has them, write behavior "
+                  "items for: a calculator's total for a stated input; a field shown only when its trigger is set; a "
+                  "field required only when a rule holds; countdown text that changes after a wait; a menu link that "
+                  "gets the active class after scroll-to its section; a contrast toggle that changes the computed "
+                  "background-color of the body and of one section. Code turns each item into a check and "
                   "reports it met or not met; an item no check can verify, or an empty list, is rejected. "
                   "verification: the checks code runs on the built site after the builder writes it (the "
                   "builder gets 3 attempts), each {text: the check in plain words, type, target, expect}. Only these "
@@ -3688,7 +3807,10 @@ class J2Run:
                                        {"name": "Animations", "goal_gap": "Scroll and hover effects",
                                         "parts": ["interactive_feature", "interactive_feature"], "outputs": ["CSS"],
                                         "covers": items(r"loyal")[:1],
-                                        "completion_check": "Effects run on scroll"}]})
+                                        "completion_check": "Effects run on scroll"}]
+                                   + [{"name": f"Interactive item {self._no(c)}", "goal_gap": c, "covers": [self._no(c)],
+                                       "parts": ["interactive_feature"], "outputs": ["index.html"],
+                                       "completion_check": c} for c in crit if ACTION_GOAL.search(str(c))][:1]})
             if not self.audits and self._cheapest_fit()["workflows"]:
                 return json.dumps(self._cheapest_fit())         # items left out earlier, now that credits were added
             return json.dumps({"say": "@Priority Nothing left to propose.", "act": "PROPOSE", "next": "Priority",
