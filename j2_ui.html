@@ -322,9 +322,10 @@ function envCell(w){
     + (e.time_limit_minutes != null ? ` · ${e.time_limit_minutes} min` : "")
     + (e.stop_loss ? `<br><span class="empty">stop-loss: ${esc(dv(e.stop_loss))}</span>` : "");
 }
-// A work atom: five rows, each one plain sentence, then its own Run details (only the AI calls tagged with its id).
+// A work atom: six rows, each one plain sentence, then its own Run details (only the AI calls tagged with its id).
 const ATOM_ROWS = [["goal", "Goal", "What must be true when this is done"], ["constraints", "Constraints", "What must never break"],
   ["context", "Context", "What it needs to know"], ["how", "How", "Who builds it"],
+  ["expected_output", "Expected output", "What must exist when it is done"],
   ["verification", "Verification", "The check that proves the goal is met"]];
 const sentence = t => { t = dv(t).trim(); return t && !/[.!?]$/.test(t) ? t + "." : t; };
 const words = v => (Array.isArray(v) ? v : [v]).filter(Boolean).map(x => typeof x === "string" ? x : Object.values(x).join(" ")).join("; ");
@@ -335,6 +336,10 @@ function atomRow(a, k, w){
   if (k === "context") return esc(sentence("Uses " + words(v)));
   if (k === "how") return esc(sentence((v && v.kind === "code" ? "Code builds it" : "AI builds it")
     + (v && v.agent ? ": " + (v.kind !== "code" && /^builder$/i.test(v.agent) && w.agent ? w.agent : v.agent) : "")));
+  // one line per item, marked once code has run the atom's checks
+  if (k === "expected_output") return (Array.isArray(v) ? v : []).map(x => esc(sentence(typeof x === "string" ? x : x.text))
+    + (!a.attempts ? "" : x.met === true ? ' <span class="pass">Met</span>' : x.met === false ? ' <span class="fail">Not met</span>'
+      : ' <span class="empty">Not run</span>')).join("<br>") || '<span class="empty">None written.</span>';
   // each check with what code found when it ran it (the atom's latest receipts)
   return (Array.isArray(v) ? v : []).map((c, i) => { const r = (a.results || [])[i];
     const st = !r ? '<span class="empty">Not run yet.</span>'

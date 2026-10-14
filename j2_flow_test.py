@@ -1019,7 +1019,7 @@ def work_atoms():
 
 def work_atom_cards():
     """Detailed view: opening a workflow lists its work atoms as cards (one atom opens expanded, two open collapsed),
-    each with five plain rows and its own Run details listing only the calls tagged with that atom."""
+    each with six plain rows and its own Run details listing only the calls tagged with that atom."""
     import html as htmllib
     import subprocess
     import threading
@@ -1061,7 +1061,7 @@ def work_atom_cards():
     a1 = block("atom-W-1.a1")
     for label, gloss in (("Goal", "What must be true when this is done"), ("Constraints", "What must never break"),
                          ("Context", "What it needs to know"), ("How", "Who builds it"),
-                         ("Verification", "The check that proves the goal is met")):
+                         ("Expected output", "What must exist when it is done"), ("Verification", "The check that proves the goal is met")):
         assert f"<dt>{label}<br>" in a1 and gloss in a1, label
     assert re.search(r"Passed</span>: [^<]+ <span class=\"empty\">Attempt 1 of 3", a1) and "not run" not in a1 and "{" not in re.sub(r"<[^>]+>", "", a1.split("Run details")[0])
     run1, run2 = block("run-W-1.a1"), block("run-W-1.a2")
@@ -1100,8 +1100,19 @@ def atom_checks():
         assert len(bad) == 1 and "targets" in bad[0], (t, bad)
     assert j2.check_problems({**a, "verification": [{**opt, "type": "screenshot-diff"}]}, src)[0].startswith(
         "check 1 has type 'screenshot-diff'")
+    # expected output: every item is covered by at least one check; an item no check can verify is rejected, and a
+    # derived check follows the same rules (facts from the charter, counts only on ids the atom creates)
+    cov = j2.normalise_checks([json.loads(json.dumps(j2.mock_atom({"parts": ["form"]})))])[0]
+    assert all(any(c.get("item") == n for c in cov["verification"]) for n in range(1, len(cov["expected_output"]) + 1))
+    assert len(cov["verification"]) == 3, cov["verification"]          # matched by type and target, not duplicated
+    item = lambda **x: run._atom_problems({"atoms": [{**a, "expected_output": [{"text": "x", **x}]}]})
+    assert "has kind 'heading', which no check can verify" in item(kind="heading", target="Menu")[0]
+    assert "expected output item 1 facts-present lists ['+91 98450 12345']" in item(kind="facts", target=["+91 98450 12345"])[0]
+    assert "expected output item 1 element-count targets '#events'" in item(kind="section", target="#events")[0]
+    assert not item(kind="facts", target=["Indiranagar"]) and run._atom_problems({"atoms": [{**a, "expected_output": []}]})
     # a goal naming times whose checks only count headings is flagged, and sent back to Adaptation once
     timed = {**a, "goal": "Opening hours 8am to 9pm are listed", "how": {**how, "steps": "h2 headings, class hours-head"},
+             "expected_output": [{"text": "2 hours headings", "kind": "element", "target": ".hours-head", "count": 2}],
              "verification": [{"text": "2 hours headings", "type": "element-count", "target": ".hours-head", "expect": 2}]}
     assert j2.check_problems(timed, src) == ["its goal names a time, price, number or email but no check is "
                                              "facts-present or a named test"], j2.check_problems(timed, src)
@@ -1146,6 +1157,9 @@ def atom_checks():
     assert run.outcome.startswith("Done"), run.outcome
     # receipts: written by code only, one per check run, matching each atom's checks
     lines = [json.loads(x) for x in open(os.path.join(run.dir, "receipts.jsonl"), encoding="utf-8")]
+    met = [r for r in lines if "expected" in r]          # per expected-output item: met or not met
+    lines = [r for r in lines if "expected" not in r]
+    assert met and all(r["by"] == "code" and r["met"] in (True, False, None) and r["checks"] for r in met), met[:3]
     assert lines == run.receipts and all(r["by"] == "code" and r["of"] == 3 and r["t"] for r in lines)
     for w in run.workflows:
         for x in w["atoms"]:

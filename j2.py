@@ -34,6 +34,7 @@ J2_FIXES (default 0) picks the mode, so findings can compare the two:
      pricing; Priority's answer is final, and if the ruling is still over budget Identity asks the Requester.
      (b) a change request after done goes to Identity at J2.a first, then J2.b.
 """
+import copy
 import html
 import html.parser
 import json
@@ -249,12 +250,12 @@ def norm(wfs):
     return out
 
 
-ATOM_FIELDS = ("goal", "constraints", "context", "how", "verification")
+ATOM_FIELDS = ("goal", "constraints", "context", "how", "expected_output", "verification")
 
 
 def atom_missing(w):
     """J2.e's work-atom check: every field each atom lacks, by name ("atoms" when the workflow has none). An empty
-    verification list counts as missing."""
+    expected_output or verification list counts as missing."""
     atoms = w.get("atoms")
     if not isinstance(atoms, list) or not atoms:
         return ["atoms"]
@@ -294,39 +295,40 @@ def check_problems(a, source, types=CHECK_TYPES):
     # (tap-targets: expect is the minimum size in px, so a label like "at least 44x44px" must expect 44)
     told = squash(json.dumps([a.get("how"), a.get("constraints")], ensure_ascii=False))
     for n, c in enumerate(checks, 1):
+        lab = f"expected output item {c['item']}" if isinstance(c, dict) and c.get("item") else f"check {n}"
         if not isinstance(c, dict):
-            out.append(f"check {n} isn't an object with text, type, target and expect")
+            out.append(f"{lab} isn't an object with text, type, target and expect")
             continue
         t, target, label = c.get("type"), c.get("target"), str(c.get("text") or "")
         if t in HEADING_CHECKS:
             target = heading_target(target)
         if t not in types:
-            out.append(f"check {n} has type {t!r}; allowed: {', '.join(types)}")
+            out.append(f"{lab} has type {t!r}; allowed: {', '.join(types)}")
         elif t in HEADING_CHECKS and not str(target or "").strip():
-            out.append(f"check {n} {t} needs the heading text as its target")
+            out.append(f"{lab} {t} needs the heading text as its target")
         elif t == "section-not-empty" and as_int(c.get("expect")) < 1:
-            out.append(f"check {n} section-not-empty expects {c.get('expect')!r}; expect is the minimum word count (1 or more)")
+            out.append(f"{lab} section-not-empty expects {c.get('expect')!r}; expect is the minimum word count (1 or more)")
         elif t == "ids-unique" and not re.fullmatch(r"[A-Z]{1,3}", str(target or "")):
-            out.append(f"check {n} ids-unique targets {target!r}: only an id prefix such as \"R\" (for R1, R2, ...)")
+            out.append(f"{lab} ids-unique targets {target!r}: only an id prefix such as \"R\" (for R1, R2, ...)")
         elif t == "named-test" and target not in NAMED_TESTS:
-            out.append(f"check {n} names test {target!r}; allowed: {', '.join(NAMED_TESTS)}")
+            out.append(f"{lab} names test {target!r}; allowed: {', '.join(NAMED_TESTS)}")
         elif t == "facts-present":
             facts = target if isinstance(target, list) else [target]
             bad = [f for f in facts if not str(f or "").strip() or squash(f) not in source]
             if bad:
-                out.append(f"check {n} facts-present lists {bad}, not found in the charter or the Requester's answers")
+                out.append(f"{lab} facts-present lists {bad}, not found in the charter or the Requester's answers")
         elif t in COUNTED:
             name = str(target or "").lstrip("#.")
             if not IDENT.match(str(target or "")) or EMAIL.search(str(target)) or \
                     (re.search(r"\d", name) and squash(name) in source):
-                out.append(f"check {n} {t} targets {target!r}: only a section id or class name, never a charter fact, "
+                out.append(f"{lab} {t} targets {target!r}: only a section id or class name, never a charter fact, "
                            "an email or a generic string (use facts-present for those)")
             elif name.lower() not in told:
-                out.append(f"check {n} {t} targets {target!r}, which the atom's how or constraints doesn't tell the "
+                out.append(f"{lab} {t} targets {target!r}, which the atom's how or constraints doesn't tell the "
                            "builder to create")
             nums = [int(x) for x in re.findall(r"\d+", label)]
             if nums and as_int(c.get("expect"), None) not in nums:
-                out.append(f"check {n} says {label!r} but expects {c.get('expect')!r}")
+                out.append(f"{lab} says {label!r} but expects {c.get('expect')!r}")
     if SPECIFIC.search(str(a.get("goal") or "")) and not any(
             isinstance(c, dict) and c.get("type") in ("facts-present", "named-test") for c in checks):
         out.append("its goal names a time, price, number or email but no check is facts-present or a named test")
@@ -500,13 +502,70 @@ def heading_target(t):
     return re.sub(r"^[#\s]+", "", str(t or "")).strip()
 
 
+# An expected-output item names one concrete thing that must exist when the atom is done; its kind says which check
+# type verifies it. An output allows the kinds whose check type it runs (a website's or a document's).
+EXPECT_KINDS = {"section": "element-count", "element": "element-count", "facts": "facts-present",
+                "file": "file-exists", "test": "named-test", "tap": "tap-targets",
+                "heading": "heading-present", "ids": "ids-unique"}
+
+
+def expect_kinds(types):
+    return [k for k, t in EXPECT_KINDS.items() if t in types]
+
+
+def expected_check(item, n):
+    """The check code derives from expected-output item n (1-based), or None when its kind has no check."""
+    kind, target = item.get("kind"), item.get("target")
+    t = EXPECT_KINDS.get(kind)
+    if not t:
+        return None
+    expect = (as_int(item.get("count"), 1) if t == "element-count" else
+              as_int(item.get("count"), j2_check.TAP_MIN) if t == "tap-targets" else True)
+    return {"text": str(item.get("text") or ""), "type": t, "expect": expect, "item": n,
+            "target": heading_target(target) if t in HEADING_CHECKS else target}
+
+
+def expected_problems(a, types):
+    """Expected-output items no allowed check can verify: not an object with text, kind and target, or a kind
+    whose check type this output doesn't run."""
+    out, kinds = [], expect_kinds(types)
+    for n, x in enumerate(a.get("expected_output") if isinstance(a.get("expected_output"), list) else [], 1):
+        if not isinstance(x, dict) or not str(x.get("text") or "").strip() or not x.get("target"):
+            out.append(f"expected output item {n} isn't an object with text, kind and target")
+        elif x.get("kind") not in kinds:
+            out.append(f"expected output item {n} has kind {x.get('kind')!r}, which no check can verify; allowed: "
+                       + ", ".join(kinds))
+    return out
+
+
+def cover_expected(a):
+    """Every expected-output item covered by at least one check, in place: a check already tagged with the item's
+    number, or one with the same type and target (tagged now), covers it; otherwise code adds the derived check.
+    ponytail: a corrected check that drops its item number and changes the target gets the derived one back."""
+    items = a.get("expected_output") if isinstance(a.get("expected_output"), list) else []
+    ver = a["verification"] = a.get("verification") if isinstance(a.get("verification"), list) else []
+    for n, x in enumerate(items, 1):
+        d = expected_check(x, n) if isinstance(x, dict) else None
+        if not d or any(isinstance(c, dict) and c.get("item") == n for c in ver):
+            continue
+        same = next((c for c in ver if isinstance(c, dict) and "item" not in c and c.get("type") == d["type"]
+                     and json.dumps(c.get("target")) == json.dumps(d["target"])), None)
+        if same:
+            same["item"] = n
+        else:
+            ver.append(d)
+    return a
+
+
 def normalise_checks(atoms):
-    """Every heading check's target in these atoms as heading text, in place, so workflows.json and the receipts
-    store the form the check runs on."""
+    """Every heading check's target in these atoms as heading text, and every expected-output item covered by a
+    check, in place, so workflows.json and the receipts store the form the check runs on."""
     for a in atoms or []:
         for c in (a.get("verification") if isinstance(a, dict) and isinstance(a.get("verification"), list) else []):
             if isinstance(c, dict) and c.get("type") in HEADING_CHECKS:
                 c["target"] = heading_target(c.get("target"))
+        if isinstance(a, dict) and a.get("expected_output"):
+            cover_expected(a)
     return atoms
 
 
@@ -911,12 +970,16 @@ def mock_atom(w):
         a["verification"].append({"text": f"R-6: every button and field in the order form is at least "
                                           f"{j2_check.TAP_MIN}x{j2_check.TAP_MIN}px on a phone", "type": "tap-targets",
                                   "target": ".order-form", "expect": j2_check.TAP_MIN})
+        a["expected_output"].append({"text": "The order form's buttons and fields are big enough to tap on a phone",
+                                     "kind": "tap", "target": ".order-form"})
         return a
     return {"goal": w.get("completion_check") or w.get("goal_gap") or w.get("name") or "The workflow's change is live",
             "constraints": ["Other workflows' sections stay unchanged", "The page loads with no console errors"],
             "context": [f"charter item {i}" for i in w.get("covers") or []] + [f"finding {f}" for f in w.get("fixes") or []]
             + ([f"section {w['revises']}"] if w.get("revises") else []) or ["charter goal"],
             "how": {"kind": "AI", "agent": "Builder", "steps": "Write the workflow's section of index.html"},
+            "expected_output": [{"text": "The site file index.html", "kind": "file", "target": "index.html"},
+                                {"text": "A page whose tags are balanced", "kind": "test", "target": "page-parses"}],
             "verification": [{"text": "The site file index.html exists after the build.", "type": "file-exists",
                               "target": "index.html", "expect": True},
                              {"text": "The page parses with balanced tags.", "type": "named-test",
@@ -1288,6 +1351,9 @@ def mock_doc_atom(w):
             "context": [f"charter item {i}" for i in w.get("covers") or []] + [f"finding {f}" for f in w.get("fixes") or []]
             or ["charter goal"],
             "how": {"kind": "AI", "agent": "Builder", "steps": f"Write the \"## {sec}\" section of the PRD in markdown"},
+            "expected_output": [{"text": f"The {sec} heading", "kind": "heading", "target": sec}]
+            + ([{"text": "Requirement ids R1, R2, ... with no repeats", "kind": "ids", "target": "R"}]
+               if sec == "Requirements" else []),
             "verification": checks}
 
 
@@ -1346,7 +1412,13 @@ PRD_ATOM_RULES = ("\nWORK ATOMS: every workflow, fixes included, carries atoms: 
                   "(code renames it W-n.a1 at registration). goal: what must be true when it is done, one sentence. "
                   "constraints: short strings, what must never break. context: references only, charter item numbers "
                   "and section ids, never copied text. how: {kind: \"AI\" or \"code\", agent: who builds it, steps: which "
-                  "\"## <Section>\" it writes}. verification: the checks code runs on the PRD after the builder writes it "
+                  "\"## <Section>\" it writes}. expected_output: written now, before any build: a short list of the "
+                  "concrete things that must exist in the PRD when the atom is done, each {text: the thing in plain "
+                  "words, kind, target}: heading (target: the section heading text, no # characters), ids (target: the "
+                  "id prefix, \"R\" for requirement ids R1, R2, ...), facts (target: a list of strings copied exactly "
+                  "from the charter or the Requester's answers). Code turns each item into a check and reports it met "
+                  "or not met; an item no check can verify, or an empty list, is rejected. "
+                  "verification: the checks code runs on the PRD after the builder writes it "
                   "(the builder gets 3 attempts), each {text: the check in plain words, type, target, expect}. Only these "
                   "types: heading-present (target: the section heading text only, with no # characters, e.g. \"Problem\"; "
                   "expect true); section-not-empty (target: the heading text only, no # characters; expect: the minimum "
@@ -1359,6 +1431,7 @@ DOC_NOTE = ("\nOUTPUT TYPE: {label}. The department writes a markdown document, 
             "site, website, page or HTML, read the document. There is no browser check, style guide or design rubric; "
             "Audit uses the document rubric and code checks the necessary conditions.")
 WF_TYPES = '"file-exists"|"grep-count"|"element-count"|"named-test"|"facts-present"'
+WF_KINDS = '"section"|"element"|"facts"|"file"|"test"|"tap"'
 
 
 def export_prd(doc, run_dir):
@@ -1852,7 +1925,9 @@ class J2Run:
         load_rates(self.output)
         types = "|".join(f'"{t}"' for t in self.out["check_types"])
         # A document's agents get its own check types, finding ids and atom rules; a website's prompts stay as they were.
-        doc_fmt = lambda f: f.replace(WF_TYPES, types).replace('"R-6"', f'"{self.out["rubric"][0][0]}", "P2"')
+        kinds = "|".join(f'"{k}"' for k in expect_kinds(self.out["check_types"]))
+        doc_fmt = lambda f: f.replace(WF_TYPES, types).replace(WF_KINDS, kinds).replace(
+            ' (section/element only, default 1)', ' (leave out)').replace('"R-6"', f'"{self.out["rubric"][0][0]}", "P2"')
         self.WF_FMT = doc_fmt(J2Run.WF_FMT) if self.doc else J2Run.WF_FMT
         self.GRANT_FMT = doc_fmt(J2Run.GRANT_FMT) if self.doc else J2Run.GRANT_FMT
         self.ATOM_RULES = self.out.get("atom_rules") or J2Run.ATOM_RULES
@@ -3468,6 +3543,8 @@ class J2Run:
               'section), "estimated_resources": {"money": int, "calls": int, "time_minutes": int}, '
               '"atoms": [{"id": str, "goal": str, "constraints": [str], "context": [str], "how": {"kind": "AI"|"code", '
               '"agent": str, "steps": str (what to build, naming every section id and class name it creates)}, '
+              '"expected_output": [{"text": str, "kind": "section"|"element"|"facts"|"file"|"test"|"tap", '
+              '"target": str|[str], "count": int (section/element only, default 1)}], '
               '"verification": [{"text": str, "type": "file-exists"|"grep-count"|"element-count"|"named-test"|'
               '"facts-present", "target": str|[str], "expect": int|bool}]}]}]')
     ATOM_RULES = ("\nWORK ATOMS: every workflow, fixes included, carries atoms: exactly one work atom for now, id \"a1\" "
@@ -3475,7 +3552,15 @@ class J2Run:
                   "constraints: short strings, what must never break. context: references only, charter item numbers "
                   "and section ids (e.g. \"charter item 3\", \"section W-2\"), never copied text. how: {kind: \"AI\" or "
                   "\"code\", agent: who builds it, steps: what to build, naming every section id and class name it "
-                  "creates}. verification: the checks code runs on the built site after the builder writes it (the "
+                  "creates}. expected_output: written now, before any build: a short list of the concrete things that "
+                  "must exist on the page when the atom is done, each {text: the thing in plain words, kind, target}: "
+                  "section (target: the \"#id\" of the section the steps create; one must exist), element (target: "
+                  "\"#id\" or \".class\" the steps create; count: how many), facts (target: a list of strings shown "
+                  "on the page, copied exactly from the charter or the Requester's answers), file (target: a path in "
+                  "the build), test (target: page-parses, links-resolve or form-has-submit), tap (target: a section id "
+                  "or class whose buttons and fields must be big enough to tap). Code turns each item into a check and "
+                  "reports it met or not met; an item no check can verify, or an empty list, is rejected. "
+                  "verification: the checks code runs on the built site after the builder writes it (the "
                   "builder gets 3 attempts), each {text: the check in plain words, type, target, expect}. Only these "
                   "types: file-exists (target: a path in the build, e.g. index.html; expect true); grep-count (target: a "
                   "section id or class name; expect: how many times it appears in index.html); element-count (target: "
@@ -3837,6 +3922,8 @@ class J2Run:
             if not esc or w["id"] in redone or w["section"] not in self.sections:
                 continue
             atoms = [{**{k: v for k, v in a.items() if k not in ("id", "results", "status", "attempts")},
+                      "expected_output": [{k: v for k, v in x.items() if k != "met"}
+                                          for x in a.get("expected_output") or [] if isinstance(x, dict)],
                       "verification": [(corrected_check(c, doc) or (c,))[0] if self.doc else c
                                        for c in normalise_checks([a])[0]["verification"]]} for a in esc]
             wfs.append({"name": f"Revise {w['id']} {w['name']}", "goal_gap": f"{', '.join(a['id'] for a in esc)} failed "
@@ -3888,9 +3975,9 @@ class J2Run:
         miss = atom_missing(w)
         if miss:
             return ["missing " + ", ".join(miss)]
-        src = self._fact_source()
+        src, types = self._fact_source(), self.out["check_types"]
         return [f"work atom {n}: {x}" for n, a in enumerate(w["atoms"], 1)
-                for x in check_problems(a, src, self.out["check_types"])]
+                for x in expected_problems(a, types) or check_problems(cover_expected(copy.deepcopy(a)), src, types)]
 
     def _budget_question(self, r):
         return str(r.get("act", "")).upper() == "POLICY_QUESTION" and \
@@ -4666,14 +4753,27 @@ class J2Run:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
         return rec
 
+    def _expected_receipts(self, a, ver, recs, attempt, **extra):
+        """Per expected-output item: met (all its checks passed), not met (one failed) or None (could not run), stored
+        on the item and written to receipts.jsonl by code. These lines carry "expected", not "check"."""
+        for n, x in enumerate([x for x in a.get("expected_output") or [] if isinstance(x, dict)], 1):
+            res = [r["pass"] for c, r in zip(ver, recs) if c.get("item") == n]
+            x["met"] = None if not res or (None in res and False not in res) else False not in res
+            rec = {"atom": a["id"], "expected": x.get("text"), "kind": x.get("kind"), "target": x.get("target"),
+                   "met": x["met"], "checks": [c.get("text") for c in ver if c.get("item") == n], "attempt": attempt,
+                   "of": MAX_CHECK_ATTEMPTS, "t": time.strftime("%Y-%m-%dT%H:%M:%S"), "by": "code", **extra}
+            with open(os.path.join(self.dir, "receipts.jsonl"), "a", encoding="utf-8") as f:
+                f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+
     def _run_checks(self, w, attempt, page, atoms=None, **extra):
         """Code runs every check of the workflow's atoms on the built site; each result is a receipt and the atom keeps
         its latest ones. Returns the failed receipts."""
         site_dir, failed = os.path.join(self.dir, "site"), []
         for a in atoms or w.get("atoms") or []:
-            recs = [self._receipt(a, c, attempt, run_check(c, site_dir, page, self.doc), **extra)
-                    for c in a.get("verification") or [] if isinstance(c, dict)]
+            ver = [c for c in a.get("verification") or [] if isinstance(c, dict)]
+            recs = [self._receipt(a, c, attempt, run_check(c, site_dir, page, self.doc), **extra) for c in ver]
             a["results"], a["attempts"] = recs, attempt
+            self._expected_receipts(a, ver, recs, attempt, **extra)
             # pass None = could not run (no browser): never a failed attempt, never escalated
             a["status"] = "failed" if any(r["pass"] is False for r in recs) else \
                 "could not run" if any(r["pass"] is None for r in recs) else "passed"
@@ -4730,7 +4830,8 @@ class J2Run:
                                "verdict": "BUILD_WRONG", "atom": a0["id"],
                                "affordable": self.budget - self.spent >= cheapest})
         r = self.call("adaptation", '{"say": str, "verdict": "CHECK_WRONG"|"BUILD_WRONG", "atom": str (the atom id), '
-                      '"verification": [check] (CHECK_WRONG only: the corrected checks, same rules), "affordable": bool '
+                      '"verification": [check] (CHECK_WRONG only: the corrected checks, same rules; keep each check\'s '
+                      '"item" number), "affordable": bool '
                       '(BUILD_WRONG only: can the budget left pay for a fix workflow?), "build_wrong_reason": str|null '
                       '(BUILD_WRONG only: exactly what the build lacks)}',
                       f"WORK ATOM FAILED: {', '.join(a['id'] for a in atoms)} failed its checks on all "
@@ -4756,7 +4857,7 @@ class J2Run:
                                 "Adaptation named no specific way the build is wrong, so the decision is CHECK_WRONG and "
                                 f"code re-runs the corrected check on the same {self.out['noun']}.")
         if verdict == "CHECK_WRONG":
-            new = {**a, "verification": normalise_checks([{"verification": r.get("verification")}])[0]["verification"]}
+            new = normalise_checks([{**copy.deepcopy(a), "verification": r.get("verification")}])[0]
             probs = atom_missing({"atoms": [new]}) or check_problems(new, self._fact_source(), self.out["check_types"])
             if probs and a["id"] in corr:        # Adaptation's own correction breaks a rule: code's correction
                 new, probs = {**a, "verification": corr[a["id"]]}, []
