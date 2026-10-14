@@ -275,8 +275,8 @@ SPECIFIC = re.compile(r"\d|" + EMAIL.pattern)       # a time, price, number or e
 IDENT = re.compile(r"^[#.]?[A-Za-z][\w-]*$")         # a section id or class name
 # A goal that describes an action needs a behaviour item proving it works; a rule that depends on a date needs a
 # control on the page that sets the date, used by the steps (never today's date).
-ACTION_GOAL = re.compile(r"\b(?:calculat\w*|hid(?:e|es|den|ing)|show(?:s|n)? only|only (?:shown|visible)|show/hide|"
-                         r"validat\w*|updat\w*|highlight\w*|toggl\w*|required only)\b", re.I)
+ACTION_GOAL = re.compile(r"\b(?:(?:re)?calculat\w*|self-updating|on change|shows?\s*(?:/|and|or)\s*hides?|"
+                         r"toggl\w*|highlight\w*|validat\w*|reveal\w*)\b", re.I)
 DATE_RULE = re.compile(r"early[- ]?bird|deadline|\b(?:up to|until|till|before|by|after)\s+(?:the\s+)?\d{1,2}(?:st|nd|rd|th)?"
                        r"\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)", re.I)
 DATE_CONTROL = re.compile(r"date|day|today|early", re.I)
@@ -893,11 +893,15 @@ def condition_met(cond, doc, goal, source, sections, page=None, mech=None):
                     f"{p}1 to {p}{len(ids)}, unique and in order" if ok else
                     f"ids {', '.join(f'{p}{i}' for i in ids)}: not unique and sequential from {p}1")
     if k == "facts-present-all":
-        facts = [str(f) for f in g.get("facts") or [g.get("product_name") or g.get("site_name")] if str(f or "").strip()]
+        listed = [str(f) for f in g.get("facts") or [] if str(f or "").strip()]
+        facts = listed or [str(f) for f in [g.get("product_name") or g.get("site_name")] if str(f or "").strip()]
         text = squash(strip_md(doc))
         missing = [f for f in facts if squash(strip_md(f)) not in text]
-        return bool(facts) and not missing, (f"missing: {missing}" if missing else f"all {len(facts)} brief fact(s) appear"
-                                             if facts else "the charter lists no facts")
+        if not listed:      # the site-name fallback: say so, never "all 1 brief fact(s)"
+            return bool(facts) and not missing, ("no facts list and no site name" if not facts else
+                                                 f"no facts list; the site name {facts[0]!r} "
+                                                 + ("is missing" if missing else "appears"))
+        return not missing, f"missing: {missing}" if missing else f"all {len(facts)} brief fact(s) appear"
     if k == "groups-covered":
         groups, req = user_groups(g), squash(strip_md(md_section(doc, cond.get("section", "Requirements")) or ""))
         said = squash(strip_md(doc))
@@ -1331,7 +1335,7 @@ def mock_charter(text):
             "standards": ["Warm, modern feel", "Fast first screen on a phone"],
             "rules": ["Plain HTML/CSS/JS in one file", "No real customer data"],
             "done_when": items, "core": [bool(CORE_FACT.search(d)) for d in items], "to_be_confirmed": [],
-            "dropped_from_brief": [],
+            "dropped_from_brief": [], "facts": [name] if name in text else [],
             "business_type": guess_type(text), "visitor_needs": NEEDS.get(guess_type(text), [])}
 
 
@@ -2595,7 +2599,19 @@ class J2Run:
                    'never left out for budget), "business_type": str (one or two words, e.g. "florist"), "visitor_needs": [str] '
                    '(what this business\'s visitors need, as confirmed), '
                    '"to_be_confirmed": [{"item": int (done-when item number), "fact": str}], '
-                   '"dropped_from_brief": [str]}')
+                   '"dropped_from_brief": [str], "facts": [str] (every concrete fact the site must show: dates, '
+                   'times, prices, ages, addresses, names, emails, phone numbers, counts; each copied exactly, '
+                   'character for character, from the brief or the Requester\'s answers, never paraphrased or '
+                   'invented)}')
+
+    def _fact_problems(self, goal, change=None):
+        """Charter facts that aren't a substring of the brief or the Requester's answers (case and spacing ignored):
+        paraphrased or invented. A website charter only; a PRD keeps its own rules."""
+        if self.doc:
+            return []
+        src = squash(" ".join([self.request, str(change or "")] + [x["answer"] for x in self.intake]
+                              + [m["text"] for m in self.chat if m["who"] == "user"]))
+        return [f for f in goal.get("facts") or [] if not str(f or "").strip() or squash(f) not in src]
 
     def _identity_intake(self, h):
         """J2.a: is there enough information to work? If not, Identity asks the Requester and the run waits; the
@@ -2667,6 +2683,9 @@ class J2Run:
                       "leaves open (what the site is for, who it serves, what visitors must be able to see or do, hard "
                       "rules). Offer options only for a choice between known alternatives. Don't ask about cost.\n"
                       "- Enough: set enough=true and record the charter from the brief and the Requester's answers only. "
+                      "List in facts every concrete fact from the brief and the answers: dates, times, prices, ages, "
+                      "addresses, names, emails, phone numbers, counts, each copied exactly (code checks each one is in "
+                      "the brief or the answers, and that the site shows it exactly). "
                       "Every done-when item must be checkable by reading the site file itself. Content facts only the "
                       "Requester knows (phone numbers, prices, addresses) are questions for the Requester: ask for them. "
                       "Only if the Requester has said they can't supply a fact yet, record it in to_be_confirmed with the "
@@ -2690,6 +2709,20 @@ class J2Run:
             self.outcome = "Stopped: Identity couldn't record a charter from the brief and the answers."
             self.turn = None
             return
+        bad = self._fact_problems(goal, change)
+        if bad:
+            why = (f"charter facts not found in the brief or the Requester's answers: {bad}; each fact must be copied "
+                   "exactly from them, never paraphrased or invented")
+            self.rejections.append({"cycle": self.cycle, "workflow": "charter", "reason": why})
+            self._event("validator", "charter_facts", why)
+            if not h.get("facts_reasked"):
+                self.post("system", f"Validator rejected the charter: {why}. Identity sends it again.", rejected="charter")
+                return self._handoff("identity", kind="intake", facts_reasked=True, change=change, mark=mark,
+                                     force=last, feedback=feedback + "\nTHE VALIDATOR REJECTED YOUR CHARTER: " + why
+                                     + ". Send the whole charter again with only exact facts.")
+            goal["facts"] = [f for f in goal.get("facts") or [] if f not in bad]
+            self.post("system", f"The charter still lists facts not in the brief or the answers; code drops them: "
+                                f"{bad}.", warning=True)
         goal["to_be_confirmed"] = self._tbc(goal.get("to_be_confirmed"), goal.get("done_when") or [])
         goal.pop("open_inputs", None)
         if self.doc:      # code reads site_name (titles, core facts) and business_type (playbooks) for every output

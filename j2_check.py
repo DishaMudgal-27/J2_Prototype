@@ -428,9 +428,10 @@ def judge_steps(steps, results):
             elif v == "expect-text" and " ".join(str(arg).split()).lower() not in " ".join(str(got).split()).lower():
                 why = f"{lead}{nm} showed {str(got)[:80]!r}, not {arg!r}"
             elif v == "expect-number":
-                want = safe_number(arg)[0]
-                # ponytail: any number in the element's text may match, the first one if totals come with counts
-                if not any(abs(x - want) < 0.005 for x in numbers_in(got)):
+                want, nums = safe_number(arg)[0], numbers_in(got)
+                if len(nums) != 1:
+                    why = f"{lead}{nm} showed {str(got)[:80]!r}: could not tell which number is the total"
+                elif abs(nums[0] - want) >= 0.005:
                     why = f"{lead}{nm} showed {str(got)[:80]!r}, expected {want:g} ({arg})"
             elif v == "expect-changed" and got == seen.get(("text", sel)):
                 why = f"{lead}{nm} still showed {str(got)[:80]!r}"

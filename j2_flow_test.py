@@ -2871,6 +2871,9 @@ def website_conditions():
     r = check(good, {"available": False, "note": "Chrome not found"})
     assert not r["N2"]["met"] and r["N2"]["evidence"].startswith("could not run"), r["N2"]
     assert not check(good, clean, {**goal, "facts": ["Koramangala"]})["N5"]["met"]
+    assert ok["N5"]["evidence"].startswith("all 2 brief fact(s) appear"), ok["N5"]
+    r = check(good, clean, {**goal, "facts": []})["N5"]          # no facts list: the site name only, and it says so
+    assert r["met"] and r["evidence"].startswith("no facts list; the site name 'Little Fig' appears"), r
 
     # workable(): Audit accepts and the render check is clean; every condition met, or not workable
     row = {"id": "F-1", "item": 1, "criterion": "Menu", "verdict": "PASS", "pass": True}
@@ -2963,6 +2966,9 @@ def behavior_steps():
                        (["set #broken XXL"], "on load, step 1 (set broken) could not be done: no option XXL")):
         r = run_steps(steps, page())
         assert r["pass"] is False and r["evidence"] == why and r["actual"]["step"] == steps[-1], (steps, r)
+    two = FakeDriver({"#calc-go": {}, "#total": {"text": "2 runners: Rs 950"}})
+    r = run_steps(["click #calc-go", "expect-number #total 500*0.9+2*250"], two)
+    assert r["pass"] is False and r["evidence"].endswith("could not tell which number is the total"), r
     r = run_steps(["click #calc-go"], lambda ops: {"available": False, "note": "Chrome not found"})
     assert r["pass"] is None and r["evidence"].startswith("could not run"), r
     assert ck.safe_number("(500*0.9)+2*250") == (950.0, [500, 0.9, 2, 250])
@@ -3005,7 +3011,12 @@ def behavior_steps():
     assert any("describes an action ('calculator')" in x for x in probs(["x"], kind=None) + [
         *j2.check_problems({"goal": "A calculator shows the total", "how": how, "expected_output": [],
                             "verification": [{"text": "x", "type": "file-exists", "target": "index.html"}]}, src)]), act
-    assert not j2.check_problems({"goal": "Shows the menu", "how": how, "expected_output": [], "verification": []}, src)
+    for g in ("Shows the menu", "Update the menu section", "The menu section is updated with prices"):
+        assert not j2.check_problems({"goal": g, "how": how, "expected_output": [], "verification": []}, src), g
+    for g in ("Recalculates the total on change", "A self-updating countdown", "Reveals the size field",
+              "Shows or hides the guardian field"):
+        assert any("describes an action" in x for x in j2.check_problems(
+            {"goal": g, "how": how, "expected_output": [], "verification": []}, src)), g
     assert "which no check can verify" in j2.expected_problems(
         {"expected_output": [{"text": "x", "kind": "behavior", "steps": ["click #a"]}]}, j2.DOC_CHECK_TYPES)[0]
 
@@ -3041,6 +3052,35 @@ def behavior_steps():
         assert all(x["met"] is True for a in acts for x in a["expected_output"]), [a["expected_output"] for a in acts]
     assert run.outcome.startswith("Done"), run.outcome
     assert "behavior (proves the page works" in next(c["prompt"] for c in calls_of(run) if c["fn"] == "adaptation")
+
+
+def charter_facts():
+    """J2.a facts: a fact not in the brief or the answers (paraphrased or invented) is rejected and Identity is asked
+    once more; still there after that, code drops it. The mock charter's facts are exact."""
+    def run_with(times):
+        run, hit = j2.J2Run(), []
+        orig = run.call
+
+        def call(fn, fmt, task, mock, **k):
+            r = orig(fn, fmt, task, mock, **k)
+            if fn == "identity" and isinstance(r, dict) and isinstance(r.get("goal"), dict):
+                hit.append(task)
+            if len(hit) <= times and hit and hit[-1] is task and fn == "identity":
+                r["goal"]["facts"] = list(r["goal"].get("facts") or []) + ["Bengaluru's best coffee", "Indiranagar"]
+            return r
+        run.call = call
+        say(run, BREW_LAB)
+        finish(run)
+        return run, hit
+    run, hit = run_with(1)
+    assert len(hit) == 2 and "THE VALIDATOR REJECTED YOUR CHARTER" in hit[1], hit
+    rej = [x for x in run.rejections if x["workflow"] == "charter"]
+    assert len(rej) == 1 and "[\"Bengaluru's best coffee\"]" in rej[0]["reason"], rej
+    assert run.goal["facts"] == ["Brew Lab"] and run.outcome.startswith("Done"), (run.goal["facts"], run.outcome)
+    run, hit = run_with(2)                                   # still invented after the re-ask: dropped, not asked again
+    assert len(hit) == 2 and len([x for x in run.rejections if x["workflow"] == "charter"]) == 2
+    assert run.goal["facts"] == ["Brew Lab", "Indiranagar"] and run.outcome.startswith("Done"), run.goal["facts"]
+    assert "List in facts every concrete fact" in next(c["prompt"] for c in calls_of(run) if c["fn"] == "identity")
 
 
 BEHAVIOR_PAGES = {
@@ -3124,6 +3164,7 @@ if __name__ == "__main__":
         workflow_agents()
         atom_checks()
         behavior_steps()
+        charter_facts()
         print(f"J2_FIXES={mode}: behaviour steps: interpreter with a fake driver, validator rules (selectors, charter "
               "numbers, date control, 8 steps, action goals), one re-ask, mock behaviour items ok")
         leave_out_named()
