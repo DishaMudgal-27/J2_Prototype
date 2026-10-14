@@ -3014,7 +3014,9 @@ def behavior_steps():
     for g in ("Shows the menu", "Update the menu section", "The menu section is updated with prices"):
         assert not j2.check_problems({"goal": g, "how": how, "expected_output": [], "verification": []}, src), g
     for g in ("Recalculates the total on change", "A self-updating countdown", "Reveals the size field",
-              "Shows or hides the guardian field"):
+              "Shows or hides the guardian field", "T-shirt size shown only when T-shirt is yes",
+              "guardian name required only when the runner is under 18", "Guardian name required only if under 18",
+              "The size field is hidden unless T-shirt is yes", "Hide the size field"):
         assert any("describes an action" in x for x in j2.check_problems(
             {"goal": g, "how": how, "expected_output": [], "verification": []}, src)), g
     assert "which no check can verify" in j2.expected_problems(

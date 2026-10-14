@@ -276,7 +276,8 @@ IDENT = re.compile(r"^[#.]?[A-Za-z][\w-]*$")         # a section id or class nam
 # A goal that describes an action needs a behaviour item proving it works; a rule that depends on a date needs a
 # control on the page that sets the date, used by the steps (never today's date).
 ACTION_GOAL = re.compile(r"\b(?:(?:re)?calculat\w*|self-updating|on change|shows?\s*(?:/|and|or)\s*hides?|"
-                         r"toggl\w*|highlight\w*|validat\w*|reveal\w*)\b", re.I)
+                         r"toggl\w*|highlight\w*|validat\w*|reveal\w*|hides?|shown only when|hidden unless|"
+                         r"required only (?:when|if))\b", re.I)
 DATE_RULE = re.compile(r"early[- ]?bird|deadline|\b(?:up to|until|till|before|by|after)\s+(?:the\s+)?\d{1,2}(?:st|nd|rd|th)?"
                        r"\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)", re.I)
 DATE_CONTROL = re.compile(r"date|day|today|early", re.I)
