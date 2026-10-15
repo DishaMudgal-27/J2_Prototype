@@ -3065,7 +3065,7 @@ class J2Run:
         self.stages = docs + (["website"] if wants_site(*said) else [])
         self.stage_i = 0
         self._apply_output(self.stages[0])
-        self.site_tag = self.stages[0] + "-"
+        self.site_tag = self.stages[0] + "-" if len(self.stages) > 1 else ""      # one document keeps its plain file names
         if "website" in self.stages:     # the site's essentials are funded first: the documents get the rest
             web = RATES_WEB()
             self.budget_total, reserve = self.budget, sum(web.get(k, 0) for k in self.SITE_ESSENTIALS)
