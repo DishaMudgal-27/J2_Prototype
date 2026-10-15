@@ -172,13 +172,21 @@ def load_rates(output="website"):
             RATES = {k: int(v) for k, v in (json.load(f).get(OUTPUTS[output]["rates"]) or {}).items()}
 
 
-def RATES_WEB():
-    """The website rate card (for the site's essentials reserve), whatever output is current."""
+def _rate_card(key):
     path = os.path.join(J2_DIR, "rates.json")
     if RATES_ON and os.path.exists(path):
         with open(path, encoding="utf-8") as f:
-            return {k: int(v) for k, v in (json.load(f).get("rates") or {}).items()}
+            return {k: int(v) for k, v in (json.load(f).get(key) or {}).items()}
     return {}
+
+
+def RATES_WEB():
+    """The website rate card, whatever output is current (the cost of a stage still to come)."""
+    return _rate_card("rates")
+
+
+def RATES_DOC():
+    return _rate_card("rates_prd")
 
 
 def price(w):
@@ -1365,10 +1373,13 @@ def and_list(xs):
     return ", ".join(xs[:-1]) + " and " + xs[-1] if len(xs) > 1 else "".join(xs)
 
 
-def gap_list(gaps):
-    """The "Still not right" list after Identity's words: one gap per line; the header's counts add up to the list."""
+def gap_list(gaps, title=None):
+    """The "Still not right" list after Identity's words: one gap per line; the header's counts add up to the list.
+    title: another header for a list that isn't about failures (what the Requester asked for)."""
     if not gaps:
         return ""
+    if title:
+        return f"\n{title} ({len(gaps)}):\n" + "\n".join(f"- {g}" for g in gaps)
     kinds = {}
     for g in gaps:
         k = gap_kind(g)
@@ -2510,7 +2521,7 @@ class J2Run:
         # design documents (opt-in, code-detected): the stages of a run (PRD, HLD, LLD, then the site), each document's
         # agent_output, and what earlier stages left behind. Empty for every other run.
         self.docset, self.stages, self.stage_i, self.chain, self.docs = [], [], 0, {}, {}
-        self.past_workflows, self.stage_archive, self.site_tag, self.budget_total = [], [], "", None
+        self.past_workflows, self.stage_archive, self.site_tag, self.stage_checked = [], [], "", True
         self.blueprint, self.proposed_lld, self.lld_revisions, self.lld_conflicts = None, {}, [], {}   # the LLD as the spec
         self.stage_calls0 = 0         # AI calls before the current stage (a document's call range, for the cost estimate)
         self.goal, self.stamped, self.request = None, False, ""
@@ -2944,7 +2955,8 @@ class J2Run:
     def _save_conflicts(self):
         self.save("conflicts.json", self.conflicts)
 
-    def _ask_user(self, say, questions, kind, to="identity", handoff=None, gaps=None, options_only=False, **meta):
+    def _ask_user(self, say, questions, kind, to="identity", handoff=None, gaps=None, options_only=False, gaps_title=None,
+                  **meta):
         """Identity asks the Requester and the run pauses. The reply resumes the run at `to` with `handoff`. `gaps`
         (the decision question) is appended by code after Identity's words, so the list and its count are one list."""
         src = self._fact_source()
@@ -2955,7 +2967,7 @@ class J2Run:
         if gaps is not None:
             # At most 2 sentences, then the full list, one gap per line; the header's counts add up to the list.
             say = " ".join(re.split(r"(?<=[.!?])\s+", say)[:2])
-            say += gap_list(gaps)
+            say += gap_list(gaps, gaps_title)
         if len(questions) > 1:
             # One question per message: several become one list of what to send (options can't be kept).
             items = [re.sub(r"[?.]$", "", q["question"].strip()) for q in questions]
@@ -3130,7 +3142,7 @@ class J2Run:
 
     # ------------------------------------------------------------------ Identity
     def _turn_identity(self, h):
-        return {"intake": self._identity_intake, "resolve": self._identity_resolve, "approval": self._identity_approval,
+        return {"intake": self._identity_intake, "stage_decision": self._stage_decision, "resolve": self._identity_resolve, "approval": self._identity_approval,
                 "audit": self._identity_audit, "requester_answered": self._identity_hears_requester,
                 "ruling_budget": self._identity_ruling_budget, "limit": self._identity_limit,
                 }.get(h.get("kind"), self._identity_question)(h)
@@ -3173,10 +3185,7 @@ class J2Run:
         self.stage_i = 0
         self._apply_output(self.stages[0])
         self.site_tag = self.stages[0] + "-" if len(self.stages) > 1 else ""      # one document keeps its plain file names
-        if "website" in self.stages:     # the site's essentials are funded first: the documents get the rest
-            web = RATES_WEB()
-            self.budget_total, reserve = self.budget, sum(web.get(k, 0) for k in self.SITE_ESSENTIALS)
-            self.budget = max(self.budget - reserve, 0)
+        self.stage_checked = False       # the funding of the whole chain is checked once, when the first stage's plan starts
         names = " and ".join(f"the {k.upper()}" for k in docs) if len(docs) < 3 else "the PRD, the HLD and the LLD"
         self.post("system", f"Documents asked for: {names}" + (", then the website" if "website" in self.stages else "")
                   + ". They are written in that order, each from the one before.")
@@ -3206,18 +3215,132 @@ class J2Run:
         base = self.goal or {}
         self.stage_archive.append({"stage": self.stage_kind, "goal": base, "audits": self.audits, "sections": self.sections})
         self.save(f"stage-{self.stage_kind}.json", self.stage_archive[-1])
-        while self.stage_i + 1 < len(self.stages):
-            self.stage_i += 1
-            kind = self.stages[self.stage_i]
-            if kind == "website":
-                self.budget = self.budget_total or self.budget
-            elif self.budget - self.spent < min(RATES.values() or [1]) * 1:
-                self.post("system", f"The {kind.upper()} is left out so the website stays funded.", warning=True)
-                self.docset = [k for k in self.docset if k != kind]
-                continue
-            self._begin_stage(kind, base)
+        return self._advance(self.stage_i + 1)
+
+    # ---- funding the chain. Documents the Requester asked for are not optional, and the LLD is the site's blueprint:
+    # nothing is skipped by code. When the work credits left can't cover the stages still to do, the Requester gets the
+    # decision question (add credits, leave out, finish as it is), with each document and the site as an item.
+    def _stage_cost(self, kind):
+        """The least a stage can cost on the rate card: every section a doc_section and one requirements_section, or the
+        site's essentials (a scaffold, three sections, a form). 0 when the rate card is off."""
+        if kind == "website":
+            r, parts = RATES_WEB(), self.SITE_ESSENTIALS
+            return sum(r.get(k, 0) for k in parts)
+        r, n = RATES_DOC(), len(OUTPUTS[kind]["sections"])
+        return r.get("doc_section", 0) * (n - 1) + r.get("requirements_section", 0)
+
+    STAGE_WORDS = {"prd": "the product requirements", "hld": "the high-level design", "lld": "the low-level design",
+                   "website": "the website"}
+
+    def _advance(self, i):
+        """Start stage i, unless the credits left can't cover it and the rest (then the Requester is asked). False when
+        no stage is left."""
+        if i >= len(self.stages):
+            return False
+        self.stage_i = i - 1 if i else 0
+        if self._stage_gate(i):
             return True
-        return False
+        self.stage_i = i
+        self._begin_stage(self.stages[i], self.stage_archive[0]["goal"])
+        return True
+
+    def _stage_gate(self, i, started=False):
+        """Ask the decision question when stages i.. cost more than the credits left. started: stage i is already
+        running (its own funding is the usual flow's), so only the stages after it can be left out. True when asked."""
+        left, todo = self.budget - self.spent, self.stages[i:]
+        short, run, rows = [], left, []
+        for n, k in enumerate(todo):
+            c = self._stage_cost(k)
+            ok = not short and (c <= run or (started and n == 0))     # in chain order: the first that doesn't fit blocks the rest
+            run -= c if ok else 0
+            rows.append((k, c, ok))
+            if not ok:
+                short.append(k)
+        if not short:
+            return False
+        need = sum(c for _, c, _ in rows) - left
+        room = BUDGET_CAP - self.budget
+        add = min(max(need, 1), room) if room > 0 else 0
+        opts, budget, choices = [], [], []
+        if add:
+            opts.append(f"Add {add} work credits{' (the most allowed)' if add < need else ''} and keep going: you get more "
+                        f"of what you asked for built. Or type your own number, up to {room}")
+            budget.append(add)
+            choices.append("continue")
+        names = and_list(self.STAGE_WORDS[k] for k in short)
+        opts.append(f"Leave out {names}: you get the rest without {'it' if len(short) == 1 else 'them'}.")
+        budget.append(0)
+        choices.append("drop")
+        if self.docs:
+            opts.append("Finish as it is: you get what is already written, and the rest is not made")
+            budget.append(0)
+            choices.append("ship")
+        ask = {"continue": "add more and keep going", "drop": "leave out what doesn't fit", "ship": "finish as it is"}
+        ask = [ask[c] for c in choices]
+        ask = ", ".join(ask[:-1]) + (", or " if len(ask) > 2 else " or ") + ask[-1] if len(ask) > 1 else ask[0]
+        q = {"question": f"The work you approved doesn't cover everything you asked for. {ask[0].upper() + ask[1:]}?",
+             "options": opts, **({"budget": budget} if any(budget) else {})}
+        shown = [f"{self.STAGE_WORDS[k]} (needs at least {c} work credits{'' if ok else '; not covered'})" for k, c, ok in rows]
+        self._event("system", "limit", f"stages {', '.join(short)} can't be funded: {left} left, {need} short")
+        self.post("system", f"The work credits left ({left}) can't cover {names}. The Requester decides; nothing is skipped.",
+                  warning=True)
+        self._ask_user(f"You asked for {and_list(self.STAGE_WORDS[k] for k in todo)}, which needs at least "
+                       f"{sum(c for _, c, _ in rows)} work credits; {left} are left.", [q], "limit", gaps=shown,
+                       gaps_title="What you asked for",
+                       handoff={"kind": "stage_decision", "stage_i": i, "started": started, "choices": choices,
+                                "unfunded": short, "limit": "stages"})
+        return True
+
+    def _stage_decision(self, h):
+        """The Requester's answer to the stage question: add credits (then the chain goes on), leave out the named
+        stages, or finish as it is. Code applies it, typed or clicked, and says so."""
+        self.step = 8
+        answer, choices, i, short = h.get("answer") or "", h.get("choices") or [], h.get("stage_i", 0), h.get("unfunded") or []
+        q = (h.get("asked") or [{}])[0]
+        labels = [f"{self.STAGE_WORDS[k]} {k}" for k in self.stages[i:]]
+        d = parse_decision(answer, q, choices, labels, list(range(1, len(labels) + 1)))
+        decision = d.get("decision")
+        if decision not in choices:
+            decision = "continue" if "continue" in choices else "drop"
+        add = d.get("add") or (q.get("budget")[choices.index("continue")] if decision == "continue" and q.get("budget") else None)
+        named = [self.stages[i + n - 1] for n in d.get("drop_items") or [] if 1 <= n <= len(self.stages[i:])] or \
+            (short if decision == "drop" else [])
+        self.decisions[-1].update(decision=decision, **({"budget_added": add} if add else {}),
+                                  **({"left_out": named} if decision == "drop" else {}))
+        if decision == "ship":
+            left = and_list(self.STAGE_WORDS[k] for k in self.stages[i:])
+            self.post("identity", f"Got it. We'll finish with what is already written. Not made: {left}.", to_user=True,
+                      next="user", done=True)
+            self.outcome = f"Done with open items: finished as it is on the Requester's decision. Not made: {left}."
+            self.turn = None
+            return
+        if decision == "drop":
+            gone = [k for k in dict.fromkeys(named) if k in self.stages[i + (1 if h.get("started") else 0):]]
+            self.stages = [k for k in self.stages if k not in gone]
+            self.docset = [k for k in self.docset if k not in gone]
+            self.post("identity", f"Got it. We'll leave out {and_list(self.STAGE_WORDS[k] for k in gone)}"
+                      + (f" and add {add} work credits" if add else "") + ". Everything else stays as it is.", to_user=True,
+                      next="user")
+            self.post("system", f"Left out on the Requester's decision: {and_list(self.STAGE_WORDS[k] for k in gone)}.")
+            self.decisions[-1]["left_out"] = gone
+        if add:
+            self._raise_budget(add, f"the Requester's answer: {answer}")
+        if decision == "continue":
+            self.post("identity", "Got it. We'll keep going." + (f" {add} work credits added." if add else ""), to_user=True,
+                      next="user")
+        if h.get("started"):                         # stage i is already running: its plan goes on
+            self.stage_checked = True
+            return self._handoff("adaptation", kind="propose", new_cycle=True, why=f"The Requester decided: {answer}")
+        if not self._advance(i) and self.turn is None and not self.paused:
+            self._stages_finished()
+
+    def _stages_finished(self):
+        """The last stage left in the chain is done (the rest were left out): the same closing as a normal Done."""
+        self.post("identity", "Your design documents are ready." if len(self.docset) > 1 else
+                  "Your document is ready." if self.docset else "Your website is ready.", done=True, to_user=True, next="user")
+        self.outcome = ("Done: the design documents are workable. Every done-when item, rubric item and necessary condition "
+                        "passes in each." if len(self.docset) > 1 else self.out["done"])
+        self.turn = None
 
     def _begin_stage(self, kind, base):
         """Fresh working state for the next stage; the earlier stage's workflows and documents are kept for the record."""
@@ -3787,7 +3910,7 @@ class J2Run:
 
     def _requester_noun(self, text):
         """A document run's Requester reads "document", never "site" or "website"."""
-        if not self.doc:
+        if not self.doc or "website" in self.stages:      # a website was asked for as well: it is named as one
             return text
         return re.sub(r"\b(?:web)?site(s?)\b", lambda m: ("Document" if m.group(0)[0].isupper() else "document")
                       + m.group(1), str(text), flags=re.I)
@@ -4399,6 +4522,10 @@ class J2Run:
             return self._adaptation_responds(h)
         if h.get("kind") == "atom_failed":
             return self._adaptation_atom_failed(h)
+        if self.stages and not self.stage_checked and not self.workflows:
+            self.stage_checked = True            # once, before the first plan: can the work credits cover the whole chain?
+            if self._stage_gate(self.stage_i, started=True):
+                return
         if self.adapt_idle and self.adapt_idle == self._adapt_state():
             # Adaptation already said it can propose nothing at this budget, and nothing changed since (no raise, no
             # drop, no new answer from the Requester). Asking again only repeats it (runs/j2-20261008-110419, msgs

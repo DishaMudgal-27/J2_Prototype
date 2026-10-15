@@ -3547,15 +3547,9 @@ def docs_chain():
     assert flagged and "no workflow builds" in flagged[0], flagged
     assert any(m["text"].startswith("The plan still leaves H4") for m in run.chat if m["who"] == "system")
     assert run.outcome.startswith("Done"), run.outcome       # the build still meets H4, so it is workable
-    # budget short: the website's essentials are funded first, the documents get what is left
-    run = docs_run(DESIGN_BRIEF, 120)
-    notes = [m["text"] for m in run.chat if m["who"] == "system"]
-    assert any("left out so the website stays funded" in t for t in notes), notes[:6]
-    assert run.stage_kind == "website" and "prd" in run.docs and "lld" not in run.docs, (run.stage_kind, list(run.docs))
-    assert run.spent <= 120 and run.budget == 120, (run.spent, run.budget)
     print("chain: PRD, HLD, LLD in order; H1-H6 and L1-L6 by code; HLD reads the PRD's agent_output, LLD the HLD's; "
           "chain gaps caught (R2 missing, repeated heading, repeated id, element without trigger, field without required "
-          "flag, component not in an LLD section); plan flagged before building; short budget drops documents first ok")
+          "flag, component not in an LLD section); plan flagged before building ok")
 
 
 def docs_blueprint():
@@ -3820,6 +3814,60 @@ def docs_views():
 
 
 
+def stage_question(run):
+    return next(m for m in reversed(run.chat) if m.get("act") == "ASK_REQUESTER")["text"]
+
+
+def docs_funding():
+    """The work credits can't cover every document and the site: nothing is skipped by code. The existing decision
+    question (add credits, leave out, finish as it is) lists each as an item; the Requester's answer is what is applied."""
+    # at the start: asked before anything is planned or built
+    run = docs_run(DESIGN_BRIEF, 120)
+    assert run.paused and run.paused["kind"] == "limit" and not run.workflows and not run.docs, run.outcome
+    assert run.stages == ["prd", "hld", "lld", "website"] and run.docset == ["prd", "hld", "lld"], run.stages
+    text = stage_question(run)
+    for item in ("the product requirements", "the high-level design", "the low-level design", "the website"):
+        assert item in text, (item, text)
+    assert text.count("\n- ") == 4 and text.count("needs at least") == 5 and "not covered" in text and "Still not right" not in text, text
+    opts = run.paused["questions"][0]["options"]
+    assert opts[0].startswith("Add ") and opts[1].startswith("Leave out the high-level design, the low-level design and the website") \
+        and len(opts) == 2, opts            # nothing is written yet, so "finish as it is" isn't offered
+    assert not any("stays funded" in m["text"] or "is left out so" in m["text"] for m in run.chat), "silent skip"
+    body = text.replace("@Requester ", "", 1)
+    assert not SIMPLE_FORBIDDEN.search(body) and not re.search(r"\b(?:HLD|LLD|PRD|W-\d+)\b", body), body
+    # leave out what doesn't fit: the PRD alone is made, the decision is recorded
+    run.budget = 120
+    say(run, "Option 2")
+    assert run.outcome.startswith("Done") and run.stages == ["prd"] and list(run.docs) == ["prd"], (run.outcome, run.stages)
+    assert run.decisions[-1]["decision"] == "drop" and run.decisions[-1]["left_out"] == ["hld", "lld", "website"]
+    assert any(m["text"].startswith("Left out on the Requester's decision") for m in run.chat if m["who"] == "system")
+    # add the credits, keep going: asked again between documents when the rest still doesn't fit
+    run = docs_run(DESIGN_BRIEF, 100)
+    assert run.paused and "Add 100 work credits (the most allowed)" in stage_question(run)
+    say(run, "Option 1")
+    assert run.budget == 200 and run.paused and run.stage_kind == "prd" and list(run.docs) == ["prd"], (run.budget, run.outcome)
+    text = stage_question(run)
+    assert "the website (needs at least 50 work credits; not covered)" in text and "the high-level design (needs at least 65 work credits)" in text, text
+    opts = run.paused["questions"][0]["options"]
+    assert [o.split(":")[0] for o in opts] == ["Leave out the website", "Finish as it is"] and "hld.md" not in os.listdir(run.dir)
+    assert not any("is left out so" in m["text"] for m in run.chat)
+    # finish as it is: what is written stays, the rest is named as not made
+    fin = docs_run(DESIGN_BRIEF, 100)
+    say(fin, "Option 1")
+    say(fin, "Option 2")
+    assert fin.outcome.startswith("Done with open items") and "Not made: the high-level design, the low-level design and the website" in fin.outcome, fin.outcome
+    assert "prd.md" in os.listdir(fin.dir) and "hld.md" not in os.listdir(fin.dir)
+    # leave out the website only: the documents go on, and the chain finishes without a site
+    say(run, "Option 1")
+    assert run.stages == ["prd", "hld", "lld"] and not run.paused and run.outcome.startswith("Done") and list(run.docs) == ["prd", "hld", "lld"], \
+        (run.stages, run.outcome)
+    # enough credits: no question at all
+    run = docs_run(DESIGN_BRIEF, 900)
+    assert not any(m.get("act") == "ASK_REQUESTER" for m in run.chat) and run.outcome.startswith("Done")
+    print("funding: short credits ask the decision question with each document and the site as items, nothing is "
+          "skipped by code; leave out, add and keep going, finish as it is, and no question when the credits cover it ok")
+
+
 if __name__ == "__main__":
     if FAST:
         print("--fast: browser measurement stubbed" + ("" if BROWSER else "; tests that drive the page in Chrome are "
@@ -3844,6 +3892,7 @@ if __name__ == "__main__":
         replay_size()
         docs_detection()
         docs_chain()
+        docs_funding()
         docs_blueprint()
         docs_views()
         atom_checks()
