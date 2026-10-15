@@ -250,6 +250,21 @@ def norm(wfs):
     return out
 
 
+EXAMPLE_WORKFLOW = {   # shown to Adaptation in the code-side prompt wrapper (J2Run.ATOM_RULES); a test registers it as is
+    "name": "Contact section", "goal_gap": "Visitors have no way to message the business", "outputs": ["#contact"],
+    "completion_check": "A contact form with a send button is on the page", "parts": ["form"], "covers": [1],
+    "atoms": [{"id": "a1", "goal": "Visitors can send the business a message from a contact form.",
+               "constraints": ["Other sections stay unchanged", "Create only #contact and #contact-send"],
+               "context": ["charter item 1"],
+               "how": {"kind": "AI", "agent": "Builder", "steps": "Create section #contact holding a name field, an "
+                       "email field and a send button #contact-send"},
+               "expected_output": [{"text": "The contact section", "kind": "section", "target": "#contact"},
+                                   {"text": "The send button", "kind": "element", "target": "#contact-send"}],
+               "verification": [{"text": "One #contact section is on the page", "type": "element-count",
+                                 "target": "#contact", "expect": 1},
+                                {"text": "The form has a submit button", "type": "named-test",
+                                 "target": "form-has-submit", "expect": True}]}]}
+
 ATOM_FIELDS = ("goal", "constraints", "context", "how", "expected_output", "verification")
 
 
@@ -281,6 +296,14 @@ ACTION_GOAL = re.compile(r"\b(?:(?:re)?calculat\w*|self-updating|on change|shows
 DATE_RULE = re.compile(r"early[- ]?bird|deadline|\b(?:up to|until|till|before|by|after)\s+(?:the\s+)?\d{1,2}(?:st|nd|rd|th)?"
                        r"\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)", re.I)
 DATE_CONTROL = re.compile(r"date|day|today|early", re.I)
+
+
+def human_problem(t):
+    """Why a builder's human_output is unusable (None when it is fine): 1 to 3 sentences, at least 5 words."""
+    t = str(t or "").strip()
+    n = len([x for x in re.split(r"(?<=[.!?])\s+", t) if x])
+    return "it is empty or too short (\"done.\" alone is rejected)" if len(t.split()) < 5 else \
+        "it is longer than 3 sentences" if n > 3 else None
 
 
 def squash(t):
@@ -3735,6 +3758,12 @@ class J2Run:
                   "would fail if the claim were false: a check that only proves a section exists is not enough for a goal "
                   "that names specific content. A workflow whose atom breaks a rule or lacks a field is rejected.")
 
+    ATOM_RULES += ("\nTHE VALIDATOR REQUIRES (a reply that lacks any of this is rejected and costs a retry): every "
+                   "workflow has a non-empty name, goal_gap, outputs and completion_check; every atom has a non-empty "
+                   "goal, constraints, context, how, expected_output and verification. Every \"#id\" or \".class\" in a "
+                   "count check or a behaviour step must appear in that atom's how.steps or constraints, written out. "
+                   "EXAMPLE (one workflow, one atom, passes):\n" + json.dumps(EXAMPLE_WORKFLOW, ensure_ascii=False))
+
     GRANT_FMT = WF_FMT[:-2] + (', "envelope": {"money_limit": int, "model_call_limit": int, "time_limit_minutes": int, '
                                '"retry_limit": int, "stop_loss": str}}]')
 
@@ -4737,7 +4766,7 @@ class J2Run:
                           for a in w.get("atoms") or []]
         brief["covers_items"] = [((self.goal or {}).get("done_when") or [])[i - 1] for i in self._wf_items(w)]
         self.atom = (w.get("atoms") or [{}])[0].get("id")     # its AI calls are tagged with the atom they build
-        attempt, failed, evidence = 0, [], ""
+        attempt, failed, evidence, prev_sig, early = 0, [], "", set(), None
         while True:
             attempt += 1
             prev = self.sites[-1] if self.sites else ""
@@ -4752,10 +4781,12 @@ class J2Run:
             def mock():
                 if self.doc:
                     return (json.dumps({"say": f"@Coordination {fn} done: {w['name']}. Section {sid} written.",
+                                        "human_output": f"I wrote the {w['name']} section ({sid}) of the document.",
                                         "next": "Coordination"})
                             + f"\n```markdown\n{self.out['mock_section'](w, self.goal)}```")
                 head, body = mock_section(w, self.goal, self.sections)
                 return (json.dumps({"say": f"@Coordination {fn} done: {w['name']}. Section {sid} written.",
+                                    "human_output": f"I built the {w['name']} section ({sid}) of the page.",
                                     "next": "Coordination"})
                         + (f"\n```style\n{json.dumps(MOCK_STYLE)}\n```" if first else "")
                         + (f"\n```head\n{head}\n```" if head else "") + (f"\n```section\n{body}\n```" if body else ""))
@@ -4780,7 +4811,7 @@ class J2Run:
                                       if self.doc else (
                                 'First line: a JSON object {"say": str (one short line reporting to @Coordination: '
                                 'what you changed; code runs your checks and reports them, so don\'t claim they pass), '
-                                '"next": "Coordination", ' + self.REASON + '}. '
+                                '"human_output": str (1 to 3 plain sentences telling a person what you built; \"done.\" alone is rejected), "next": "Coordination", ' + self.REASON + '}. '
                                 + ('Then a ```style block with the style guide as JSON: ' + STYLE_FMT + '. ' if first
                                    else '')
                                 + 'Then, '
@@ -4855,15 +4886,25 @@ class J2Run:
             failed = self._run_checks(w, attempt, html_out)
             if not failed or attempt >= MAX_CHECK_ATTEMPTS:
                 break
+            # Another attempt can't help when the same check fails on the same evidence again, or when the builder
+            # says the cause is in another atom's section: Adaptation gets it now (runs/j2-20261015-114723, W-6).
+            sig = {(r["check"], r["evidence"]) for r in failed}
+            early = ("the same check failed with the same evidence twice" if sig & prev_sig else
+                     "the builder says the cause is in another atom's section" if self._blames_other(meta.get("say"), fn)
+                     else None)
+            prev_sig = sig
+            if early:
+                break
             evidence = "\n".join(f"- {r['check']} ({r['type']} {r['target']}, expect {r['expect']}): {r['evidence']}"
                                  for r in failed)
             self.post("system", f"Code ran {fn}'s checks on attempt {attempt} of {MAX_CHECK_ATTEMPTS}: {len(failed)} "
                                 f"failed. {fn} gets the evidence and tries again.")
         self.write_lock = self.atom = None
-        nxt, note = self._pick(fn, meta.get("next"), ("coordination",), "coordination")
+        nxt, note = "coordination", None      # a builder only reports to Coordination: code sets it, whatever "next" says
+        human = self._human_output(w, meta, sid)
         w["status"], w["version"] = "done", len(self.sites)
         self.save("workflows.json", self.workflows)
-        self._say(fn, meta.get("say") or f"{fn} done.", nxt, note, workflow=fn, version=len(self.sites), section=sid,
+        self._say(fn, f"@Coordination {human}", nxt, note, workflow=fn, human_output=human, version=len(self.sites), section=sid,
                   workflow_cost=w["cost"])
         size = len(html_out.encode("utf-8"))
         if size > SITE_WARN_BYTES:
@@ -4871,16 +4912,56 @@ class J2Run:
                                 "single-page rule.", warning=True)
         if failed:
             bad = sorted({r["atom"] for r in failed})
-            self.post("system", f"{', '.join(bad)} failed its checks on all {MAX_CHECK_ATTEMPTS} attempts. Code sends "
+            owner = self._owner_note(failed, sid) if early else ""
+            self.post("system", f"{', '.join(bad)} failed its checks on " + (f"attempt {attempt}: {early}, so no more "
+                                f"attempts. {owner}" if early else f"all {MAX_CHECK_ATTEMPTS} attempts.") + " Code sends "
                                 "the receipts to Adaptation, which decides whether the check or the build is wrong.")
-            return self._handoff("adaptation", kind="atom_failed", wid=fn, atoms=bad)
+            return self._handoff("adaptation", kind="atom_failed", wid=fn, atoms=bad, attempt=attempt, owner_note=owner)
         self._handoff("coordination", kind="schedule")
+
+    def _human_output(self, w, meta, sid):
+        """1 to 3 plain sentences saying what the builder built. "done." alone is rejected and asked for once more
+        (a short call about the section just written); if that fails too, code writes the sentence."""
+        fn, last = w["id"], str(meta.get("human_output") or "")
+        if human_problem(last):
+            self._event(fn, "invalid_move", f"human_output: {human_problem(last)}")
+            sec = (self.sections.get(sid) or {}).get("body") or ""
+            r = self.call(fn, '{"human_output": str (1 to 3 plain sentences)}',
+                          f"YOUR REPORT '{last}' CAN'T BE USED: {human_problem(last)}. Tell a person in 1 to 3 plain "
+                          f"sentences what you built in section {sid} ({w['name']}). Never just \"done.\"\nYOUR "
+                          f"SECTION:\n{sec[:3000]}",
+                          lambda: json.dumps({"human_output": f"I built the {w['name']} section ({sid}) of the "
+                                                              f"{self.out['noun']}."}))
+            last = str(r.get("human_output") or "")
+        if human_problem(last):
+            self._event(fn, "invalid_move", f"human_output again: {human_problem(last)}")
+            last = f"{fn} built {w['name']} in section {sid}. Code ran its checks; see the receipts."
+        return last
+
+    def _blames_other(self, say, fn):
+        """The builder's own report puts the cause in another workflow's section (names one besides its own)."""
+        say = str(say or "")
+        return bool(set(re.findall(r"\bW-\d+\b", say)) - {fn}) and bool(re.search(r"can(?:no|')t|unable|not (?:in|mine)|"
+                                                                                    r"outside|belongs?|their|its own", say, re.I))
+
+    def _owner_note(self, failed, sid):
+        """Evidence for Adaptation: which other workflow's atom holds the selector a failed check targets."""
+        for r in failed:
+            name = str(r.get("target") or "").lstrip("#.")
+            for k, x in self.sections.items():
+                if k not in (sid, "style") and name and re.search(rf"""(?:id=["']{re.escape(name)}["']|class=["'][^"']*\b"""
+                                                                  rf"""{re.escape(name)}\b)""", x.get("body") or ""):
+                    o = self._wf(str(x["owner"]).split()[0])
+                    a = ((o or {}).get("atoms") or [{}])[0].get("id")
+                    return (f"Owner atom: {a or x['owner']} (section {k}, {x['owner']}) also contains {r.get('target')}; "
+                            f"the cause is in its section, not the failing atom's.")
+        return ""
 
     def _doc_prompt(self, w, brief, sid, mine, attempt, evidence, last_err, prev):
         """(reply format, task) for a document section's workflow agent: markdown for its own section only."""
         fn = w["id"]
         return ('First line: a JSON object {"say": str (one short line reporting to @Coordination: what you changed; '
-                'code runs your checks and reports them, so don\'t claim they pass), "next": "Coordination", '
+                'code runs your checks and reports them, so don\'t claim they pass), "human_output": str (1 to 3 plain sentences telling a person what you built; \"done.\" alone is rejected), "next": "Coordination", '
                 + self.REASON + '}. Then a ```markdown block: your section only, starting with its "## <Section>" '
                 'heading. Markdown only, never HTML.',
                 f"YOU ARE {NAMES[fn]}, the agent for one registered workflow.\nYOUR WORKFLOW: "
@@ -4974,7 +5055,7 @@ class J2Run:
                 why += [f"{a['id']}: {x[1]}" for _, x in fixed if x]
 
         def mock():
-            bad = [r for r in recs if r["attempt"] == MAX_CHECK_ATTEMPTS and not r["pass"]]
+            bad = [r for r in recs if r["attempt"] == h.get("attempt", MAX_CHECK_ATTEMPTS) and not r["pass"]]
             if bad and all(r["type"] in ("grep-count", "element-count") for r in bad):
                 fixed = {(r["type"], str(r["target"])): r["actual"] for r in bad}
                 ver = [{**c, "expect": fixed[k], "text": re.sub(r"\d+", str(fixed[k]), c.get("text") or "")}
@@ -4990,8 +5071,11 @@ class J2Run:
                       '"item" number), "affordable": bool '
                       '(BUILD_WRONG only: can the budget left pay for a fix workflow?), "build_wrong_reason": str|null '
                       '(BUILD_WRONG only: exactly what the build lacks)}',
-                      f"WORK ATOM FAILED: {', '.join(a['id'] for a in atoms)} failed its checks on all "
-                      f"{MAX_CHECK_ATTEMPTS} attempts.\nTHE ATOMS: {json.dumps(atoms, ensure_ascii=False)}\nRECEIPTS "
+                      f"WORK ATOM FAILED: {', '.join(a['id'] for a in atoms)} failed its checks on "
+                      + (f"attempt {h['attempt']}; code stopped further attempts. {h.get('owner_note') or ''}"
+                         if h.get("attempt", MAX_CHECK_ATTEMPTS) < MAX_CHECK_ATTEMPTS else
+                         f"all {MAX_CHECK_ATTEMPTS} attempts.") +
+                      f"\nTHE ATOMS: {json.dumps(atoms, ensure_ascii=False)}\nRECEIPTS "
                       f"(written by code, every attempt): {json.dumps(recs, ensure_ascii=False)}\nAUDIT'S LATEST VIEW: "
                       f"{json.dumps(view, ensure_ascii=False)}\nDecide whether the check or the build is wrong. "
                       "CHECK_WRONG: the check doesn't test the goal correctly; send the corrected verification and code "

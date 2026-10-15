@@ -1181,21 +1181,21 @@ def atom_checks():
     assert len([c for c in calls_of(run) if "THE VALIDATOR REJECTED" in c["prompt"]]) == 1
     assert run.outcome.startswith("Done"), run.outcome
 
-    # three failed attempts: the receipts go to Adaptation; it corrects the check and Identity is never called
+    # the same failure on two attempts (identical evidence): no third attempt, the receipts go to Adaptation; it corrects the check and Identity is never called
     def four_cards(at):
         at["how"] = {**at["how"], "steps": "Give every card the class j2-card."}
         at["verification"].append({"text": "4 cards", "type": "element-count", "target": ".j2-card", "expect": 4})
     run = patched(four_cards)
     calls = calls_of(run)
     i = next(n for n, c in enumerate(calls) if "WORK ATOM FAILED" in c["prompt"])
-    assert calls[i]["fn"] == "adaptation" and [c["fn"] for c in calls[i - 3:i]] == ["W-1"] * 3, [c["fn"] for c in calls]
-    assert "ATTEMPT 3 OF 3" in calls[i - 1]["prompt"] and "0 element(s) match '.j2-card'" in calls[i - 1]["prompt"]
+    assert calls[i]["fn"] == "adaptation" and [c["fn"] for c in calls[i - 2:i]] == ["W-1"] * 2, [c["fn"] for c in calls]
+    assert "ATTEMPT 2 OF 3" in calls[i - 1]["prompt"] and "0 element(s) match '.j2-card'" in calls[i - 1]["prompt"]
     nxt = next(n for n, c in enumerate(calls) if n > i and c["fn"] != "adaptation")
     assert calls[nxt]["fn"] != "identity" and not any(c["fn"] == "identity" for c in calls[i:nxt]), calls[nxt]["fn"]
     at = run._wf("W-1")["atoms"][0]
     card = [r for r in run.receipts if r["target"] == ".j2-card"]
     assert [(r["attempt"], r["expect"], r["actual"], r["pass"]) for r in card] == \
-        [(1, 4, 0, False), (2, 4, 0, False), (3, 4, 0, False), (3, 0, 0, True)], card
+        [(1, 4, 0, False), (2, 4, 0, False), (3, 0, 0, True)], card
     assert card[-1]["recheck"] == "check corrected by Adaptation" and at["status"] == "passed", at
     assert run.outcome.startswith("Done"), run.outcome
     # receipts: written by code only, one per check run, matching each atom's checks
@@ -2714,10 +2714,10 @@ def prd_recovery():
     recs = [r for r in run.receipts if r["atom"] == "W-1.a1" and r["type"] in j2.HEADING_CHECKS]
     assert recs and all(r["target"] == "Problem" and r["pass"] for r in recs) and seen["W-1"] == 1, recs
 
-    # (2) a wrong target fails three times: code checks the obvious case, CHECK_WRONG, re-run on the same document
+    # (2) a wrong target fails twice with the same evidence (no third attempt): code checks the obvious case, CHECK_WRONG, re-run on the same document
     run, seen = prd(target("Problem section"))
     assert run.outcome.startswith("Done: the PRD is workable"), run.outcome
-    assert seen["W-1"] == j2.MAX_CHECK_ATTEMPTS, seen                      # no new build after the correction
+    assert seen["W-1"] == 2, seen                      # no new build after the correction
     assert any(e["type"] == "check_wrong_default" for e in run.events), run.events
     note = next(m for m in run.chat if m["text"].startswith("Code checked the obvious case first"))
     assert "'Problem section' passes as the heading text 'Problem'" in note["text"], note["text"]
@@ -3147,6 +3147,74 @@ def behavior_browser():
           "required only when, countdown, active menu link after scroll, contrast toggle on body and a section ok")
 
 
+def run_20261015_fixes():
+    """runs/j2-20261015-114723: (1) the prompt wrapper shows the validator's rules and one atom that passes, (2) the
+    same failure twice goes to Adaptation after attempt 2, naming the owner atom, (3) a builder's human_output."""
+    # 1: a mock Adaptation that copies the wrapper's example registers on the first submission, no rejection
+    text = j2.J2Run.ATOM_RULES
+    assert "THE VALIDATOR REQUIRES" in text and "goal_gap" in text and "completion_check" in text
+    ex = json.loads(text.split("passes):\n", 1)[1])
+    run = j2.J2Run()
+    run.budget, run.goal = 500, {"done_when": ["A contact form is on the page"]}
+    assert not run._atom_problems(ex), run._atom_problems(ex)
+    reg, refused, _ = run._register([{**ex, "envelope": {"money_limit": 20}}])
+    assert reg and not refused and not run.rejections, (refused, run.rejections)
+
+    # 2: W-1 owns #register; W-2's check on #register fails with the same evidence twice: no attempt 3
+    run = j2.J2Run()
+    run.budget, run.goal = 500, {"done_when": ["a", "b"]}
+    run.sections = {"W-1": {"owner": "W-1 Builder", "head": "", "body": '<section id="register">x</section>',
+                            "workflow": "Placeholder"}}
+    w1 = {"id": "W-1", "section": "W-1", "atoms": [{"id": "W-1.a1"}], "status": "done"}
+    run.workflows, run.style = [w1], dict(j2.MOCK_STYLE)
+    atom = {**ATOM[0], "verification": [{"text": "One register section on the page", "type": "grep-count", "target": "register",
+                                          "expect": 1}]}
+    atom["how"] = {**atom["how"], "steps": atom["how"]["steps"] + "; create section #register"}
+    reg, refused, _ = run._register([{"name": "Registration", "goal_gap": "x", "outputs": ["#register"],
+                                      "completion_check": "z", "atoms": [atom], "parts": ["fix"]}])
+    assert reg, (refused, run.rejections)
+    wid, orig, calls = reg[0]["id"], run.call, []
+    run.sections[wid] = {"owner": f"{wid} Builder", "head": "", "body": "", "workflow": "Registration"}
+
+    def call(fn, fmt, task, mock, **k):
+        if fn == f"{wid}":
+            calls.append(fn)
+            body = '<section id="register">mine</section>'
+            return ('{"say": "@Coordination written", "human_output": "I wrote the registration section.", '
+                    '"next": "Coordination"}\n```section\n' + body + "\n```")
+        return orig(fn, fmt, task, mock, **k)
+    run.call = call
+    run._turn_workflow_agent({"wid": wid})
+    assert len(calls) == 2 and run.turn == "adaptation" and run.handoff["kind"] == "atom_failed", (calls, run.turn, [m["text"][:200] for m in run.chat][-6:])
+    assert run.handoff["attempt"] == 2 and "W-1" in run.handoff["owner_note"] and "register" in run.handoff["owner_note"], \
+        run.handoff
+    assert any("same evidence twice" in m["text"] for m in run.chat if m["who"] == "system")
+
+    # 3: "done." alone is rejected and asked for once more; the next speaker is set by code even when missing
+    run = j2.J2Run()
+    run.budget, run.goal = 500, {"done_when": ["a"]}
+    reg, _, _ = run._register([{"name": "Hero", "goal_gap": "x", "outputs": ["y"], "completion_check": "z",
+                                "atoms": ATOM, "parts": ["fix"]}])
+    wid, orig, asked = reg[0]["id"], run.call, []
+    run.style = dict(j2.MOCK_STYLE)
+
+    def call3(fn, fmt, task, mock, **k):
+        if fn == wid and "human_output" not in fmt.split("}")[0][:40]:
+            return '{"say": "@Coordination done.", "human_output": "done."}\n```section\n<section id="x">x</section>\n```'
+        if fn == wid:
+            asked.append(task)
+            return {"human_output": "I built the hero section with a headline and a button."}
+        return orig(fn, fmt, task, mock, **k)
+    run.call = call3
+    run._turn_workflow_agent({"wid": wid})
+    last = next(m for m in reversed(run.chat) if m["who"] == wid)
+    assert len(asked) == 1 and "headline and a button" in last["text"] and run.turn == "coordination", (asked, last)
+    assert not any("Route check" in m["text"] for m in run.chat), "route check fired"
+    assert j2.human_problem("done.") and j2.human_problem("a b c d e. f. g. h.") and not j2.human_problem("I built it all today.")
+    print("runs/j2-20261015-114723 fixes: wrapper example registers first try, same failure twice escalates after "
+          "attempt 2 naming the owner atom, human_output regenerated once and next speaker set by code ok")
+
+
 if __name__ == "__main__":
     if FAST:
         print("--fast: browser measurement stubbed" + ("" if BROWSER else "; tests that drive the page in Chrome are "
@@ -3164,6 +3232,7 @@ if __name__ == "__main__":
         build_before_asking()
         print(f"J2_FIXES={mode}: vague brief (both answers), full brief, budget question rejected and re-asked, below-floor proposal with left_out, one decision question after the ruling, core marks from J2.a, deferred twice, connections at three budgets, funded work built before the question ok")
         workflow_agents()
+        run_20261015_fixes()
         atom_checks()
         behavior_steps()
         charter_facts()
