@@ -31,6 +31,7 @@ F. J2_FORCE_AUDIT_FAIL=<item>: a forced cycle-1 failure that agents can't tell f
 Runs are written to a temp folder (J2_RUNS_DIR), never the real runs/; each ended run has summary.json. Memory is off (J2_MEMORY=0) except in
 the memory test, which uses its own lessons file.
 """
+import inspect
 import json
 import os
 import re
@@ -3416,6 +3417,409 @@ def replay_size():
     print(f"replay of runs/j2-20261015-114723: slim prompts {m.group(1)}% vs old, no model call ok")
 
 
+CAMPUS = (" Users: students and teachers. Problem: students lose track of their notes. Must-have features: upload notes, "
+          "search notes. Constraints: free to use. Success: 50 uploads per week.")
+BREW_FACTS = (" Users: coffee lovers and office staff. Problem: people can't see the menu or order ahead. Must-have "
+              "features: see the menu with prices, pre-order a coffee, find the shop, read the opening hours. "
+              "Constraints: one page only. Success: 30 pre-orders per week.")
+DESIGN_BRIEF = BREW_LAB + " Write the design docs first." + BREW_FACTS
+CHECKPOINT = "0657d93"         # the commit before the design-document work: a plain brief must behave exactly as there
+
+
+def docs_run(text, budget=900, patch=None):
+    """A mock run of a brief; patch(run, orig_call) returns a replacement for run.call."""
+    run = j2.J2Run()
+    run.budget = budget
+    if patch:
+        run.call = patch(run, run.call)
+    say(run, text)
+    return run
+
+
+def docs_files(run):
+    return sorted(f for f in os.listdir(run.dir) if re.fullmatch(r"(?:prd|hld|lld)\.(?:md|docx)", f))
+
+
+def docs_detection():
+    """1: documents only when asked, by explicit terms. Set requests mean all three; naming some makes exactly those."""
+    d = j2.detect_documents
+    assert d(BREW_LAB) == [] and d("") == [] and d(None) == []
+    for t in ("design docs", "Please write the design documents", "design documentation for my app", "I need full documentation",
+              "DESIGN DOCS, please"):
+        assert d(t) == ["prd", "hld", "lld"], t
+    assert d("write a PRD") == ["prd"] and d("product requirements document") == ["prd"]
+    assert d("HLD and LLD") == ["hld", "lld"] and d("an LLD and a PRD") == ["prd", "lld"]
+    assert d("the high-level design") == ["hld"] and d("architecture overview") == ["hld"]
+    assert d("a low-level design") == ["lld"] and d("detailed design of the forms") == ["lld"]
+    for t in ("a modern design", "design a logo", "I like the design of your site", "design principles", "designing a menu",
+              "clean design, warm colours", "a designer will review it"):
+        assert d(t) == [], t
+    assert j2.wants_site("docs for my website") and not j2.wants_site("design docs for the app")
+    # a plain website brief creates none
+    run = docs_run(BREW_LAB, 200)
+    assert run.outcome.startswith("Done") and not run.docset and not run.stages and not docs_files(run), (run.outcome, docs_files(run))
+    assert not os.path.exists(os.path.join(run.dir, "documents.json")) and not run.past_workflows
+    # "design docs" creates all three, in order; "write a PRD" only the PRD; "HLD and LLD" those two
+    run = docs_run("Design docs for Campus Notes." + CAMPUS, 400)
+    assert run.outcome.startswith("Done") and list(run.docs) == ["prd", "hld", "lld"], (run.outcome, list(run.docs))
+    assert docs_files(run) == ["hld.docx", "hld.md", "lld.docx", "lld.md", "prd.docx", "prd.md"], docs_files(run)
+    run = docs_run("Write a PRD for Campus Notes." + CAMPUS, 200)
+    assert run.outcome.startswith("Done") and list(run.docs) == ["prd"] and docs_files(run) == ["prd.docx", "prd.md"], docs_files(run)
+    run = docs_run("Write the HLD and LLD for Campus Notes." + CAMPUS, 400)
+    assert run.outcome.startswith("Done") and list(run.docs) == ["hld", "lld"] and docs_files(run) == \
+        ["hld.docx", "hld.md", "lld.docx", "lld.md"], (run.outcome, docs_files(run))
+    # answers count too, before the charter exists
+    run = j2.J2Run()
+    run.request = "A site for a cafe"
+    run.intake = [{"asked": ["anything else?"], "answer": "Yes, an HLD as well"}]
+    run._plan_stages()
+    assert run.docset == ["hld"] and run.output == "hld"
+    print("documents on request only: set requests, single requests, other senses of 'design', a plain brief (none), "
+          "'design docs' (3), 'write a PRD' (1), 'HLD and LLD' (2) ok")
+
+
+def docs_chain():
+    """2: PRD, HLD, LLD in a chain: each reads the one before by its agent_output; H1-H6 and L1-L6 by code; chain
+    gaps flagged before building; budget short drops documents, the website's essentials stay funded."""
+    run = docs_run("Design docs for Campus Notes." + CAMPUS, 400)
+    assert run.outcome.startswith("Done"), run.outcome
+    arch = {k: json.load(open(os.path.join(run.dir, f"stage-{k}.json"), encoding="utf-8")) for k in ("prd", "hld", "lld")}
+    for k, ids in (("hld", ["H1", "H2", "H3", "H4", "H5", "H6"]), ("lld", ["L1", "L2", "L3", "L4", "L5", "L6"])):
+        conds = arch[k]["audits"][-1]["conditions"]
+        assert [c["id"] for c in conds] == ids and all(c["met"] for c in conds), (k, conds)
+    assert [c["id"] for c in arch["prd"]["audits"][-1]["conditions"]] == [f"P{i}" for i in range(1, 9)]
+    docs = run.docs
+    assert [docs[k]["workflows"][0] for k in docs] == ["W-1", "W-7", "W-13"], [docs[k]["workflows"] for k in docs]
+    # the chain: every requirement is in a component, every component in an LLD section
+    reqs = [r["id"] for r in docs["prd"]["agent_output"]["requirements"]]
+    comps = docs["hld"]["agent_output"]["components"]
+    secs = docs["lld"]["agent_output"]["sections"]
+    assert reqs == ["R1", "R2"] and {r for c in comps for r in c["covers"]} == set(reqs)
+    assert {c for s in secs for c in s["implements"]} == {c["id"] for c in comps}
+    # each document is built by workflows whose atoms carry both outputs
+    atoms = [a for w in run._all_wfs() for a in w["atoms"]]
+    assert atoms and all(a.get("status") == "passed" and not j2.atom_done_problem(a) for a in atoms), \
+        [(a["id"], a.get("status")) for a in atoms if not j2.atom_done_problem(a) == []]
+    # the HLD builders get the PRD's agent_output (requirements), never its text
+    rows = calls_file(run)
+    hld_prompts = [r["prompt"] for r in rows if r["fn"] in docs["hld"]["workflows"]]
+    assert hld_prompts and all('"requirements"' in p and "## Success metrics" not in p and "## Out of scope" not in p
+                               for p in hld_prompts), "HLD builders must read the PRD's agent_output, not its text"
+    lld_prompts = [r["prompt"] for r in rows if r["fn"] in docs["lld"]["workflows"]]
+    assert lld_prompts and all('"components"' in p and "## Components" not in p for p in lld_prompts)
+    # documents.json and the exported files
+    saved = json.load(open(os.path.join(run.dir, "documents.json"), encoding="utf-8"))
+    assert list(saved) == ["prd", "hld", "lld"] and saved["hld"]["file"] == "hld.md"
+    for f in ("hld.docx", "lld.docx", "prd.docx"):
+        assert open(os.path.join(run.dir, f), "rb").read(2) == b"PK", f
+    # the L and H checks catch what they name
+    hg = j2.stage_goal("hld", run.stage_archive[0]["goal"], {"prd": docs["prd"]["agent_output"]})
+    src = j2.squash(" ".join(j2.strings(hg) + ["Design docs for Campus Notes." + CAMPUS]))
+    hld = open(os.path.join(run.dir, "hld.md"), encoding="utf-8").read()
+    miss = hld.replace("Covers R2.", "").replace(" R2", "")
+    j2.OUTPUT = "hld"
+    by = lambda conds: {c["id"]: c for c in conds}
+    bad = by(j2.check_conditions(j2.load_conditions("hld.json"), miss, hg, src, j2.HLD_SECTIONS))
+    assert not bad["H4"]["met"] and "R2" in bad["H4"]["evidence"], bad["H4"]
+    dup = hld.replace("## Risks", "## Pages")
+    assert not by(j2.check_conditions(j2.load_conditions("hld.json"), dup, hg, src, j2.HLD_SECTIONS))["H2"]["met"]
+    lld = open(os.path.join(run.dir, "lld.md"), encoding="utf-8").read()
+    lg = j2.stage_goal("lld", run.stage_archive[0]["goal"], {**{k: v["agent_output"] for k, v in docs.items()}})
+    j2.OUTPUT = "lld"
+    src = j2.squash(" ".join(j2.strings(lg) + ["Design docs for Campus Notes." + CAMPUS]))
+    chk = lambda text: by(j2.check_conditions(j2.load_conditions("lld.json"), text, lg, src, j2.LLD_SECTIONS))
+    assert all(c["met"] for c in chk(lld).values()), [(c["id"], c["evidence"]) for c in chk(lld).values() if not c["met"]]
+    assert not chk(lld.replace("`#sec-2`", "`#sec-1`"))["L2"]["met"]
+    assert "E2" in chk(lld.replace("trigger click; behaviour", "behaviour", 1).replace("**E2** in S2: `#act-2` trigger click; behaviour", "**E2** in S2: `#act-2`"))["L3"]["evidence"]
+    assert not chk(lld.replace(", required yes", ""))["L4"]["met"]
+    assert not chk(lld.replace("Implements C2.", "").replace("shows C2.", ""))["L5"]["met"]
+    # a plan that leaves a chain link unnamed is flagged before building (then retried once, as the nav plan is)
+    def strip_ids(run, orig):
+        def call(fn, fmt, task, mock, **k):
+            r = orig(fn, fmt, task, mock, **k)
+            if fn == "adaptation" and isinstance(r, dict):
+                for w in r.get("workflows") or []:
+                    w["completion_check"] = re.sub(r", and covers .*", "", w.get("completion_check") or "")
+            return r
+        return call
+    run = docs_run("Write the PRD and the HLD for Campus Notes." + CAMPUS, 400, strip_ids)
+    flagged = [m["text"] for m in run.chat if m["who"] == "system" and "flagged the plan before building" in m["text"]]
+    assert flagged and "no workflow builds" in flagged[0], flagged
+    assert any(m["text"].startswith("The plan still leaves H4") for m in run.chat if m["who"] == "system")
+    assert run.outcome.startswith("Done"), run.outcome       # the build still meets H4, so it is workable
+    # budget short: the website's essentials are funded first, the documents get what is left
+    run = docs_run(DESIGN_BRIEF, 120)
+    notes = [m["text"] for m in run.chat if m["who"] == "system"]
+    assert any("left out so the website stays funded" in t for t in notes), notes[:6]
+    assert run.stage_kind == "website" and "prd" in run.docs and "lld" not in run.docs, (run.stage_kind, list(run.docs))
+    assert run.spent <= 120 and run.budget == 120, (run.spent, run.budget)
+    print("chain: PRD, HLD, LLD in order; H1-H6 and L1-L6 by code; HLD reads the PRD's agent_output, LLD the HLD's; "
+          "chain gaps caught (R2 missing, repeated heading, repeated id, element without trigger, field without required "
+          "flag, component not in an LLD section); plan flagged before building; short budget drops documents first ok")
+
+
+def docs_blueprint():
+    """3: with an LLD the site is built from it: coverage checked before building, each builder gets its slice, the
+    page is checked against it, one revision, then escalation, Audit compares, the chain is recorded."""
+    run = docs_run(DESIGN_BRIEF, 900)
+    assert run.outcome.startswith("Done") and run.stage_kind == "website", run.outcome
+    spec = run.blueprint
+    assert [s["id"] for s in spec["sections"]] == ["S1", "S2", "S3", "S4"]
+    build = [w for w in run.workflows if w.get("lld_sections")]
+    assert [w["lld_sections"] for w in build] == [["S1"], ["S2"], ["S3"], ["S4"]]
+    for w in build:                                     # the check that the page matches the slice is on the atom
+        chk = [c for c in w["atoms"][0]["verification"] if c["type"] == "lld-slice"]
+        assert len(chk) == 1 and [s["id"] for s in chk[0]["spec"]["sections"]] == w["lld_sections"], w["id"]
+        rec = [r for r in run.receipts if r["atom"] == w["atoms"][0]["id"] and r["type"] == "lld-slice"]
+        assert rec and rec[-1]["pass"] is True and "as written" in rec[-1]["evidence"], rec
+    # each builder's prompt: its own slice and a short HLD summary, not the whole page
+    rows = calls_file(run)
+    mine = {r["fn"]: r["prompt"] for r in rows if r["fn"] in {w["id"] for w in build}}
+    for w in build:
+        p = mine[w["id"]]
+        sid = w["lld_sections"][0]
+        assert "YOUR SPEC" in p and f'"id": "{sid}"' in p and "HLD SUMMARY" in p and "THE WHOLE SITE FILE" not in p, w["id"]
+        other = [s for s in ("S1", "S2", "S3", "S4") if s != sid]
+        assert not any(f'"id": "{o}", "anchor"' in p.split("YOUR SPEC", 1)[1].split("HLD SUMMARY")[0] for o in other)
+    # the Audit compared the finished page to the LLD; the final record has the chain
+    cmp = run.audits[-1]["lld"]
+    assert cmp == {"matches": ["S1", "S2", "S3", "S4"], "mismatches": [], "dropped": []}, cmp
+    chain = json.load(open(os.path.join(run.dir, "chain.json"), encoding="utf-8"))
+    assert chain[0]["requirement"] == "R1" and chain[0]["component"] == "C1" and chain[0]["lld_section"] == "S1" \
+        and chain[0]["atoms"] and chain == run._chain_record(), chain[:1]
+    summ = json.load(open(os.path.join(run.dir, "summary.json"), encoding="utf-8"))["design_documents"]
+    assert summ["requested"] == ["prd", "hld", "lld"] and summ["chain"] == chain and summ["lld_compare"] == cmp
+    assert "LLD COMPARISON" in next(r["prompt"] for r in reversed(rows) if r["fn"] == "audit")
+    # J2_SLIM=1 keeps the manifest of other atoms' agent_output beside the slice
+    os.environ["J2_SLIM"] = "1"
+    try:
+        slim_run = docs_run(DESIGN_BRIEF, 900)
+    finally:
+        os.environ.pop("J2_SLIM", None)
+    sp = [r["prompt"] for r in calls_file(slim_run) if r["fn"] in {w["id"] for w in slim_run.workflows if w.get("lld_sections")}]
+    assert slim_run.outcome.startswith("Done") and sp and all("YOUR SPEC" in p and "OTHER SECTIONS" in p
+                                                              and "THE WHOLE SITE FILE" not in p for p in sp[1:])
+    # coverage gap: a plan that leaves S2 without a workflow is flagged before building (then the plan goes ahead)
+    def drop_s2(run, orig):
+        def call(fn, fmt, task, mock, **k):
+            r = orig(fn, fmt, task, mock, **k)
+            if fn == "adaptation" and isinstance(r, dict) and run.blueprint:
+                gone = [w for w in r.get("workflows") or [] if w.get("lld_sections") == ["S2"]]
+                r["workflows"] = [w for w in r.get("workflows") or [] if w.get("lld_sections") != ["S2"]]
+                for w in r["workflows"]:           # the items S2's workflow covered move to S3's, so only the section is dropped
+                    if gone and w.get("lld_sections") == ["S3"]:
+                        w["covers"], w["parts"] = w["covers"] + gone[0]["covers"], w["parts"] + gone[0]["parts"]
+            return r
+        return call
+    run = docs_run(DESIGN_BRIEF, 900, drop_s2)
+    flag = [m["text"] for m in run.chat if m["who"] == "system" and "flagged the plan before building" in m["text"]]
+    assert flag and "no workflow implements LLD section S2" in flag[0], flag
+    dropped = run.audits[-1]["lld"]["dropped"]
+    assert [d["section"] for d in dropped] == ["S2"] and "isn't on the page" in dropped[0]["evidence"], run.audits[-1]["lld"]
+    assert run.outcome.startswith("Done"), run.outcome       # a dropped section is a warning, not a failure
+    # a workflow that cites no LLD section is flagged too
+    def uncite(run, orig):
+        def call(fn, fmt, task, mock, **k):
+            r = orig(fn, fmt, task, mock, **k)
+            if fn == "adaptation" and isinstance(r, dict) and run.blueprint:
+                for w in r.get("workflows") or []:
+                    if w.get("lld_sections") == ["S3"]:
+                        w["lld_sections"] = []
+            return r
+        return call
+    run = docs_run(DESIGN_BRIEF, 900, uncite)
+    assert any("cites no LLD section" in m["text"] for m in run.chat if m["who"] == "system" and "flagged" in m["text"])
+
+    # a build that doesn't match its slice fails its atom: the same failure twice escalates to Adaptation
+    def lose_button(run, orig):
+        def call(fn, fmt, task, mock, **k):
+            r = orig(fn, fmt, task, mock, **k)
+            w = run._wf(fn) if fn.startswith("W-") else None
+            if w and w.get("lld_sections") == ["S1"] and isinstance(r, str):
+                return r.replace('id="act-1"', 'id="wrong-1"')
+            return r
+        return call
+    run = docs_run(DESIGN_BRIEF, 900, lose_button)
+    w1 = next(w for w in run.workflows if w.get("lld_sections") == ["S1"])
+    bad = [r for r in run.receipts if r["atom"] == w1["atoms"][0]["id"] and r["type"] == "lld-slice"]
+    assert bad and not bad[0]["pass"] and "E1 #act-1 isn't on the page" in bad[0]["evidence"], bad[:1]
+    assert [r["attempt"] for r in bad][:2] == [1, 2] and any(m["text"].startswith(f"{w1['atoms'][0]['id']} failed its checks on attempt 2")
+                                                              for m in run.chat if m["who"] == "system"), "no third attempt"
+    # one revision: the builder reports the conflict, the LLD section is revised once with a version note and the reason
+    def conflict(times):
+        def patch(run, orig):
+            seen = []
+
+            def call(fn, fmt, task, mock, **k):
+                r = orig(fn, fmt, task, mock, **k)
+                w = run._wf(fn) if fn.startswith("W-") else None
+                if w and w.get("lld_sections") == ["S1"] and isinstance(r, str) and len(seen) < times:
+                    seen.append(1)
+                    head, _, rest = r.partition("\n")
+                    meta = json.loads(head)
+                    meta["spec_conflict"] = {"section": "S1", "reason": "the button id clashes with the hero",
+                                             "use": {"#act-1": "#go-1"}}
+                    built = "go-1" if times == 1 else "oops-1"      # twice: the first build doesn't match the revised spec
+                    return json.dumps(meta) + "\n" + rest.replace('id="act-1"', f'id="{built}"')
+                return r
+            return call
+        return patch
+    run = docs_run(DESIGN_BRIEF, 900, conflict(1))
+    assert run.outcome.startswith("Done") and len(run.lld_revisions) == 1, (run.outcome, run.lld_revisions)
+    rev = run.lld_revisions[0]
+    assert rev["section"] == "S1" and rev["version"] == 2 and rev["reason"] == "the button id clashes with the hero"
+    lld = open(os.path.join(run.dir, "lld.md"), encoding="utf-8").read()
+    assert "#go-1" in lld and "`#act-1`" not in lld and "Version 2: the button id clashes with the hero" in lld
+    assert run.docs["lld"]["agent_output"]["revisions"] == run.lld_revisions
+    assert any(a["agent_output"].get("revisions") for w in run.past_workflows if "Pages and sections" in w["name"]
+               for a in w["atoms"]), "the LLD atom carries the reason"
+    w1 = next(w for w in run.workflows if w.get("lld_sections") == ["S1"])
+    assert w1["atoms"][0]["status"] == "passed"
+    # a second conflict on the same section escalates to Adaptation, naming the LLD's owner atom
+    run = docs_run(DESIGN_BRIEF, 900, conflict(2))
+    notes = [m["text"] for m in run.chat if m["who"] == "system"]
+    esc = next((t for t in notes if "second conflict with LLD section S1" in t), None)
+    assert esc and "Owner atom: W-13.a1" in esc and "already revised once" in esc, esc
+    assert len(run.lld_revisions) == 1
+    print("blueprint: slices as specs, coverage gap and uncited workflow flagged before building, mismatch fails the atom "
+          "(no third attempt), one revision with version note and reason, second conflict escalates naming the owner "
+          "atom, Audit compares the page to the LLD, chain recorded, J2_SLIM keeps the manifest ok")
+
+
+def plain_unchanged():
+    """3: with no document asked for, the website flow is unchanged: same prompts, same page, same result as the
+    checkpoint commit (run in a copy of it)."""
+    import subprocess
+    import shutil
+    here = os.path.dirname(os.path.abspath(__file__))
+    probe = ("import json, os, sys, time, tempfile, hashlib\n"
+             "os.environ.update(STUDIO_MOCK='1', J2_MEMORY='0', J2_RUNS_DIR=tempfile.mkdtemp())\n"
+             "sys.argv = ['x']\n"
+             "import re\n"
+             "import j2\n"
+             + inspect.getsource(fake_tap_targets) + inspect.getsource(fake_check) +
+             "j2.j2_check.tap_targets, j2.j2_check.check, j2.j2_check.find_chrome = fake_tap_targets, fake_check, lambda: None\n"
+             "r = j2.J2Run()\n"
+             "r.user_says(sys.stdin.read())\n"
+             "while r.status != 'waiting': time.sleep(0.02)\n"
+             "rows = [json.loads(l) for l in open(os.path.join(r.dir, 'calls.jsonl'), encoding='utf-8')]\n"
+             "h = lambda t: hashlib.sha256(re.sub(r'\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d', 'T', t).encode()).hexdigest()[:12]\n"
+             "print(json.dumps({'outcome': r.outcome, 'spent': r.spent, 'site': h(r.sites[-1]), 'sections': h(json.dumps(r.sections, sort_keys=True)),\n"
+             "  'calls': [[c['fn'], h(c['system']), h(c['prompt'])] for c in rows],\n"
+             "  'workflows': h(json.dumps([{k: v for k, v in w.items() if k not in ('t',)} for w in r.workflows], sort_keys=True))}))\n")
+    old = tempfile.mkdtemp(prefix="j2-checkpoint-")
+    tar = subprocess.run(["git", "archive", CHECKPOINT, "--", "j2.py", "j2_check.py", "llm.py", "conditions", "agents"], cwd=here,
+                         capture_output=True)
+    if tar.returncode:
+        print(f"plain brief unchanged: skipped (checkpoint {CHECKPOINT} not in this clone)")
+        return
+    subprocess.run(["tar", "-x", "-C", old], input=tar.stdout, check=True)
+    for name in ("j2_check.py",):
+        pass
+    results = []
+    for cwd in (old, here):
+        env = {**os.environ, "STUDIO_MOCK": "1", "J2_MEMORY": "0", "J2_FIXES": os.environ.get("J2_FIXES", "0")}
+        r = subprocess.run([sys.executable, "-c", probe], input=BREW_LAB, cwd=cwd, capture_output=True, text=True, env=env, timeout=300)
+        assert r.returncode == 0, r.stderr[-800:]
+        results.append(json.loads(r.stdout.strip().splitlines()[-1]))
+    a, b = results
+    assert a["outcome"] == b["outcome"] and a["spent"] == b["spent"] and a["site"] == b["site"] and a["sections"] == b["sections"], (a, b)
+    assert [c[:2] for c in a["calls"]] == [c[:2] for c in b["calls"]], "different agents or system prompts"
+    diff = [i for i, (x, y) in enumerate(zip(a["calls"], b["calls"])) if x != y]
+    assert not diff, f"prompts differ at calls {diff[:5]}"
+    assert a["workflows"] == b["workflows"]
+    print(f"plain brief unchanged: {len(b['calls'])} calls, every system prompt and prompt, the page, the sections, the workflows "
+          f"and the outcome are identical to checkpoint {CHECKPOINT}")
+
+
+def docs_views():
+    """4: Detailed view: document atoms get the eight-block card with a preview and .md/.docx links. Simple view: plain
+    words for the finished set; a plain brief's Simple view is identical to the checkpoint's."""
+    import subprocess
+    import shutil
+    import threading
+    import urllib.request
+    import html as htmllib
+    run = docs_run(DESIGN_BRIEF, 900)
+    assert run.outcome.startswith("Done")
+    snap = j2.saved_snapshot(os.path.basename(run.dir), 0)
+    assert snap["docset"] == ["prd", "hld", "lld"] and [d["kind"] for d in snap["docset_files"]] == ["prd", "hld", "lld"]
+    assert snap["files"] == ["prd.md", "prd.docx", "hld.md", "hld.docx", "lld.md", "lld.docx"], snap["files"]
+    here = os.path.dirname(os.path.abspath(__file__))
+    srv = None
+    import j2_server
+    keep, j2_server.RUN = j2_server.RUN, run
+    srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{srv.server_address[1]}"
+    try:
+        for k in ("prd", "hld", "lld"):
+            for ext in ("md", "docx"):
+                for q in ("", f"?run={os.path.basename(run.dir)}"):
+                    r = urllib.request.urlopen(f"{base}/file/{k}.{ext}{q}")
+                    body = r.read()
+                    assert (body[:2] == b"PK") == (ext == "docx") and (ext == "docx" or body.startswith(b"# ")), (k, ext, q)
+        doc_atom = next(a for w in run._all_wfs() for a in w["atoms"] if "Components" in w["name"])
+        got = json.load(urllib.request.urlopen(f"{base}/api/preview?atom={doc_atom['id']}"))
+        assert got["html"] and "<h2>Components</h2>" in got["html"] and "C1" in got["html"], got
+        saved = json.load(urllib.request.urlopen(f"{base}/api/preview?atom={doc_atom['id']}&run={os.path.basename(run.dir)}"))
+        assert saved["html"] == got["html"]
+    finally:
+        j2_server.RUN = keep
+        srv.shutdown()
+    import shutil as _sh
+    if not _sh.which("node"):
+        print("document views (render) skipped: node not found")
+        return
+    previews = {}
+    for w in run._all_wfs():
+        for a in w["atoms"]:
+            body = j2.atom_section_body(run.dir, run._all_wfs(), a["id"])
+            previews[a["id"]] = j2.md_html(body, "Section") if body else ""
+    out = render_node(snap, previews)
+    cards = 0
+    for w in snap["workflows"]:
+        if w["id"] not in ("W-1", "W-7", "W-13"):
+            continue
+        card = out["cards"][w["id"]]
+        a = w["atoms"][0]
+        card = card[card.index(f'data-key="atom-{a["id"]}"'):].split("Run details")[0]
+        assert re.findall(r'data-block="([a-z_]+)"', card) == ["goal", "how", "constraints", "context", "expected_output",
+                                                              "verification", "human_output", "agent_output"], w["id"]
+        pre = card.split('<h4 class="agroup">')[0]
+        assert 'data-preview="frame"' in pre and "sandbox" in pre and "srcdoc=" in pre, pre[:200]
+        src = htmllib.unescape(re.search(r'srcdoc="([^"]*)"', pre).group(1))
+        assert src == previews[a["id"]] and "<h2>" in src
+        base_name = a["agent_output"]["file"][:-3]
+        assert f'data-link="md" href="/file/{base_name}.md"' in card and f'data-link="docx" href="/file/{base_name}.docx"' in card
+        assert 'data-link="site"' not in card and 'data-link="agent"' in card and 'data-link="evidence"' in card
+        cards += 1
+    assert cards == 3
+    # Simple view: the finished set in plain words, no ids or check codes
+    text = re.sub(r"<[^>]+>", " ", htmllib.unescape(out["simple"]))
+    assert "Your design documents are ready" in text and "Download the product requirements (markdown)" in text \
+        and "Download the low-level design (Word file)" in text, text[-500:]
+    bad = SIMPLE_FORBIDDEN.findall(text) + SIMPLE_FORBIDDEN_CASE.findall(text) + re.findall(r"\b(?:[PHLN]\d|R\d|W-\d+)\b", text)
+    assert not bad, bad
+    # a plain brief's Simple view is identical to the checkpoint's page, on the same state
+    plain = docs_run(BREW_LAB, 200)
+    ps = j2.saved_snapshot(os.path.basename(plain.dir), 0)
+    old = subprocess.run(["git", "show", f"{CHECKPOINT}:j2_ui.html"], capture_output=True, text=True, cwd=here)
+    if old.returncode == 0:
+        p = os.path.join(tempfile.mkdtemp(prefix="j2-old-ui-"), "j2_ui_old.html")
+        open(p, "w", encoding="utf-8").write(old.stdout)
+        before, after = render_node(ps, html=p), render_node(ps)
+        assert before["simple"] == after["simple"] and before["sprog"] == after["sprog"] and after["simple"] and "ready" in after["simple"]
+        # and a PRD-only run keeps its own ready card
+        prd = docs_run("Write a PRD for Campus Notes." + CAMPUS, 200)
+        ss = j2.saved_snapshot(os.path.basename(prd.dir), 0)
+        assert render_node(ss, html=p)["simple"] == render_node(ss)["simple"]
+    print("document views: .md and .docx downloads (live and saved), preview of a document atom's section, eight-block "
+          "cards with download links, Simple view says 'Your design documents are ready' in plain words, a plain "
+          "brief's Simple view identical to the checkpoint's ok")
+
+
+
 if __name__ == "__main__":
     if FAST:
         print("--fast: browser measurement stubbed" + ("" if BROWSER else "; tests that drive the page in Chrome are "
@@ -3438,6 +3842,10 @@ if __name__ == "__main__":
         slim_prompts()
         atom_cards_render()
         replay_size()
+        docs_detection()
+        docs_chain()
+        docs_blueprint()
+        docs_views()
         atom_checks()
         behavior_steps()
         charter_facts()

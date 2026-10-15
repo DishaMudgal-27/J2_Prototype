@@ -14,10 +14,14 @@ import re
 import sys
 
 os.environ.setdefault("STUDIO_MOCK", "1")
+if "--documents" in sys.argv:       # the estimate runs one mock run of the document chain, in a throw-away folder
+    import tempfile
+    os.environ.setdefault("J2_MEMORY", "0")
+    os.environ["J2_RUNS_DIR"] = tempfile.mkdtemp(prefix="j2-replay-docs-")
 import j2  # noqa: E402
 
-RUN = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "runs",
-                                                         "j2-20261015-114723")
+RUN = ([a for a in sys.argv[1:] if not a.startswith("--")] or [os.path.join(os.path.dirname(os.path.abspath(__file__)), "runs",
+                                                         "j2-20261015-114723")])[0]
 # What the new builder reply format adds to every builder call (the atom_human_output instruction), from the live text.
 FORMAT_ADD = len(', "atom_human_output": str (1 or 2 plain sentences telling the Requester what this part created, in '
                  'everyday words: no ids, no selectors, no "units")')
@@ -93,10 +97,67 @@ def main():
         print(f"{a:<10} {h:>13,} {ag:>13,}")
     H, A = sum(v[0] for v in per_atom.values()), sum(v[1] for v in per_atom.values())
     print(f"{'TOTAL':<10} {H:>13,} {A:>13,}   (~{t(H + A):,} tokens, estimated)")
+    by = {}
+    by_old = {}
+    for i, fn, o, f, n, tok in rows:
+        k = "builder" if fn.startswith("W-") else fn
+        by.setdefault(k, []).append(n)
+        by_old.setdefault(k, []).append(o)
+    avg = {k: sum(v) / len(v) for k, v in by.items()}
+    avg_old = {k: sum(v) / len(v) for k, v in by_old.items()}
     print(f"Net: slim saves {O - N:,} characters (~{t(O - N):,} tokens est.) across the run's prompts; the new fields are "
           f"{H + A:,} characters once, plus {FORMAT_ADD} characters per builder call; the fields cost less than they save: "
           f"{'yes' if O - N > H + A else 'NO'}.")
+    return avg, avg_old
+
+
+def documents_estimate(avg, avg_old):
+    """Extra calls and characters per design document, estimated from one mock run of the chain (its calls are the
+    real prompt builders' output, with mock-sized content) and, as stand-ins for real content, the replayed run's
+    average prompt per agent (page-heavy, so an upper bound for documents)."""
+    import time
+    brief = ("Design docs for Brew Lab, a one-page website for a small coffee shop in Indiranagar. Visitors see the menu with "
+             "prices, the opening hours and where to find us, and pre-order a coffee for pickup. Users: coffee lovers and "
+             "office staff. Problem: people can't see the menu or order ahead. Must-have features: see the menu with "
+             "prices, pre-order a coffee, find the shop, read the opening hours. Constraints: one page only. Success: 30 "
+             "pre-orders per week.")
+    r = j2.J2Run()
+    r.budget = 900
+    r.user_says(brief)
+    while r.status != "waiting":
+        time.sleep(0.02)
+    rows = jl_dir(r.dir, "calls.jsonl")
+    kind = lambda fn: "builder" if fn.startswith("W-") else fn
+    ranges = [(k, v["calls"]["from"], v["calls"]["to"]) for k, v in r.docs.items()]
+    ranges.append(("website (blueprint)", r.docs["lld"]["calls"]["to"] + 1, 10 ** 9))
+    print(f"\nDesign documents, estimated from a mock run of the chain ({r.outcome[:40]}...): extra AI calls and input characters")
+    print(f"{'stage':<22} {'calls':>5} {'builder':>7} {'coord':>6} {'other':>6} {'mock chars':>11} {'stand-in chars':>15} {'~tokens (stand-in)':>19}")
+    tot = [0, 0, 0]
+    for k, a, b in ranges:
+        rs = [c for c in rows if a <= c["id"] <= b]
+        n = {x: sum(kind(c["fn"]) == x for c in rs) for x in ("builder", "coordination")}
+        mock = sum(len(c["system"]) + len(c["prompt"]) for c in rs)
+        stand = sum(avg.get(kind(c["fn"]), avg["builder"]) for c in rs)
+        print(f"{k:<22} {len(rs):>5} {n['builder']:>7} {n['coordination']:>6} {len(rs) - n['builder'] - n['coordination']:>6} "
+              f"{mock:>11,} {stand:>15,.0f} {stand / 4:>19,.0f}")
+        if not k.startswith("website"):
+            tot = [tot[0] + len(rs), tot[1] + mock, tot[2] + stand]
+    print(f"{'documents total':<22} {tot[0]:>5} {'':>7} {'':>6} {'':>6} {tot[1]:>11,} {tot[2]:>15,.0f} {tot[2] / 4:>19,.0f}")
+    web = [c for c in rows if c["id"] > r.docs["lld"]["calls"]["to"] and c["fn"].startswith("W-")]
+    spec = [len(c["prompt"].split("YOUR SPEC", 1)[1]) for c in web if "YOUR SPEC" in c["prompt"]]
+    if spec:
+        print(f"Site builders with an LLD slice: the slice plus HLD summary is about {sum(spec) // len(spec):,} characters per builder "
+              f"in this mock run; the whole page the old path sends them was {avg_old['builder']:,.0f} characters on average in "
+              "the replayed run (J2_SLIM off).")
+    print("Stand-in = the replayed run's average prompt per agent with J2_SLIM=1, so it overstates a document (no page, "
+          "smaller state); mock chars understate real content. Treat the pair as a range.")
+
+
+def jl_dir(d, name):
+    return [json.loads(x) for x in open(os.path.join(d, name), encoding="utf-8")]
 
 
 if __name__ == "__main__":
-    main()
+    avg, avg_old = main()
+    if "--documents" in sys.argv:
+        documents_estimate(avg, avg_old)

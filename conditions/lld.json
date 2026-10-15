@@ -30,7 +30,7 @@
       "key": "hld_ids",
       "in": "Pages and sections",
       "label": "HLD components",
-      "plan": "component|\\bC\\d+\\b"
+      "plan": "\\bC\\d+\\b"
     },
     {
       "id": "L6",

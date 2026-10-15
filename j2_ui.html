@@ -258,6 +258,8 @@ const PRD_EXAMPLES = ["Write a PRD for QuickQueue, a mobile app that lets clinic
   + "patient health data stored. Success: average in-room wait under 10 minutes; 60% of patients join remotely within 3 months."];
 const examples = s => s.doc ? PRD_EXAMPLES : EXAMPLES;
 const outOptions = s => OUTS.map(([v, l]) => `<option value="${v}"${s.output === v ? " selected" : ""}>${l}</option>`).join("");
+const docLinks = s => (s.docset_files || []).map(d => `<a href="/file/${d.md}${runQ().replace("&", "?")}" download>${esc(d.kind.toUpperCase())} .md</a> <a href="/file/${d.docx}${runQ().replace("&", "?")}" download>${esc(d.kind.toUpperCase())} .docx</a>`).join(" ");
+const plainDocLinks = s => (s.docset_files || []).map(d => `<a href="/file/${d.md}${runQ().replace("&", "?")}" download>Download the ${esc(d.label)} (markdown)</a> <a href="/file/${d.docx}${runQ().replace("&", "?")}" download>Download the ${esc(d.label)} (Word file)</a>`).join(" ");
 const fileLinks = s => (s.files || []).map(f => `<a href="/file/${f}${runQ().replace("&", "?")}" download>Download ${f.split(".").pop() === "docx" ? "the Word file (.docx)" : "the markdown (.md)"}</a>`).join(" ");
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 // Detailed view wording: plain names for J2 terms; the J2 step codes stay, in small grey text.
@@ -357,7 +359,7 @@ const blockHTML = (a, key, label, gloss, body, long) => `<div class="ablock" dat
   ${long ? `<details class="long" data-key="blk-${esc(a.id)}-${key}"><summary>show</summary>${body}</details>` : `<div>${body}</div>`}</div>`;
 function atomPreview(a){
   const ag = a.agent_output || {}, h = a.human_output && a.human_output.text;
-  if (!ag.anchor) return `<div class="apreview" data-preview="text">${esc(h || "Nothing built yet.")}</div>`;
+  if (!ag.anchor && ag.kind !== "doc") return `<div class="apreview" data-preview="text">${esc(h || "Nothing built yet.")}</div>`;
   if (PREVIEWS[a.id] === undefined){ if (typeof wantPreview === "function") wantPreview(a.id);
     return `<div class="apreview" data-preview="wait"><span class="empty">Loading the preview…</span></div>`; }
   return PREVIEWS[a.id] ? `<iframe class="apreview" data-preview="frame" sandbox="" title="What this atom built" srcdoc="${esc(PREVIEWS[a.id])}"></iframe>`
@@ -366,7 +368,9 @@ function atomPreview(a){
 function atomBlocks(a, w){
   const ag = a.agent_output, res = a.results || [], ok = res.filter(r => r.pass === true).length, bad = res.filter(r => r.pass === false).length;
   const g = t => `<h4 class="agroup">${t}</h4>`;
-  const site = ag && ag.anchor ? `<a data-link="site" href="/site/latest${runQ().replace("&", "?")}#${esc(ag.anchor)}" target="_blank" rel="noopener">View in site</a>` : "";
+  const q = runQ().replace("&", "?"), base = ag && ag.file ? String(ag.file).replace(/\.md$/, "") : "";
+  const site = ag && ag.kind === "doc" ? `<a data-link="md" href="/file/${esc(base)}.md${q}" download>Download the markdown (.md)</a> <a data-link="docx" href="/file/${esc(base)}.docx${q}" download>Download the Word file (.docx)</a>`
+    : ag && ag.anchor ? `<a data-link="site" href="/site/latest${q}#${esc(ag.anchor)}" target="_blank" rel="noopener">View in site</a>` : "";
   return g("1. Particles")
     + blockHTML(a, "goal", "Goal", "What must be true when this is done", atomRow(a, "goal", w), false)
     + blockHTML(a, "how", "How", "Who builds it", atomRow(a, "how", w), false)
@@ -381,7 +385,7 @@ function atomBlocks(a, w){
     + blockHTML(a, "human_output", "Human output", "What it created, in plain words",
         a.human_output ? esc(sentence(a.human_output.text)) + ` <span class="empty">Attempt ${a.human_output.attempt}.</span>` : '<span class="empty">Not written yet.</span>', false)
     + blockHTML(a, "agent_output", "Agent output", "What other agents read",
-        ag ? `${esc(String(ag.section || ""))}: ${(ag.selectors || []).length} selector(s), ${(ag.checks || []).length} check(s), receipt ${esc(ag.receipt)}. `
+        ag ? `${esc(String(ag.section || ""))}: ${ag.kind === "doc" ? esc(String(ag.file || "")) : (ag.selectors || []).length + " selector(s)"}, ${(ag.checks || []).length} check(s), receipt ${esc(ag.receipt)}. `
           + `<button type="button" class="linkbtn" data-link="agent" data-atom="${esc(a.id)}">Agent output</button> ${site}` : '<span class="empty">Built by code when the checks pass.</span>', false);
 }
 function atomCards(s, w){
@@ -626,9 +630,9 @@ function renderSimple(s){
       else out += `<div class="sb team"><small>Your website team</small>${esc(plain(m.text))}</div>`;
     }
   });
-  if (isReady(s)) out += `<div class="ready"><h2>Your ${s.doc ? "document" : "website"} is ready${/^Done with open items/.test(s.outcome) ? " (some things were left as they are)" : ""}</h2>
+  if (isReady(s)) out += `<div class="ready"><h2>${(s.docset || []).length > 1 ? "Your design documents are ready" : `Your ${s.doc ? "document" : "website"} is ready`}${/^Done with open items/.test(s.outcome) ? " (some things were left as they are)" : ""}</h2>
     <div class="acts"><a href="/site/latest${runQ().replace("&", "?")}" target="_blank" rel="noopener">Open full screen</a>
-    ${s.doc ? fileLinks(s) : `<a href="/site/latest${runQ().replace("&", "?")}" download="my-website.html">Download the HTML file</a>`}
+    ${(s.docset || []).length > 1 ? plainDocLinks(s) : ""}${s.doc && (s.docset || []).length < 2 ? fileLinks(s) : s.doc ? "" : `<a href="/site/latest${runQ().replace("&", "?")}" download="my-website.html">Download the HTML file</a>`}
     <button type="button" id="sask-change">Ask for a change</button></div></div>`;
   if (failed(s)) out += `<div class="oops">Something went wrong. Try again.<div class="acts" style="margin-top:8px"><button type="button" class="ghost" id="sretry">Start over</button></div></div>`;
   if (out !== simpleHTML){ simpleHTML = out; $("smsgs").innerHTML = out;
@@ -738,9 +742,9 @@ async function poll(){
     $("otype").textContent = `output: ${s.output_label}`;
     if ($("outsel").__v !== s.output + s.total){ $("outsel").__v = s.output + s.total; $("outsel").innerHTML = outOptions(s); }
     $("outsel").disabled = !!s.total || !!s.saved;
-    $("doclinks").hidden = !s.doc || !(s.files || []).length;
+    $("doclinks").hidden = !(s.doc || (s.docset || []).length) || !(s.files || []).length;
     $("pane-preview").classList.toggle("has-links", !$("doclinks").hidden);
-    if (!$("doclinks").hidden) paint($("doclinks"), `<b>${esc(s.output_label)}</b> ${fileLinks(s)}`);
+    if (!$("doclinks").hidden) paint($("doclinks"), (s.docset || []).length > 1 ? `<b>Design documents</b> ${docLinks(s)}` : `<b>${esc(s.output_label)}</b> ${fileLinks(s)}`);
     $("forced").hidden = !s.force_audit_fail;
     $("testles").hidden = !s.test_lessons;
     $("forced").textContent = `TEST: J2_FORCE_AUDIT_FAIL=${s.force_audit_fail} (cycle 1 Audit result forced)`;

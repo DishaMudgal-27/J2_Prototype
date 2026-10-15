@@ -390,6 +390,7 @@ def build_agent_output(w, a, attempt, body, receipts, last_audit, n_sites, doc, 
             "files": [f"site/v{n_sites}.{'md' if doc else 'html'}", out_file or "site/index.html"],
             "section": w["section"], "section_names": [w["name"]] + [h for h in heads if h][:6], "anchor": anchor,
             "ids": ids[:40], "selectors": [f"#{i}" for i in ids[:40]] + [f".{c}" for c in cls[:40]],
+            **({"kind": "doc", "file": out_file} if doc else {}),
             "checks": [{"check": r["check"], "type": r["type"], "target": r["target"], "pass": r["pass"]} for r in recs],
             "conditions": [{"id": c["id"], "met": c["met"]} for c in (last_audit or {}).get("conditions") or []]}
 
@@ -1862,11 +1863,13 @@ def mock_hld_section(w, goal):
     g = goal or {}
     sec = next((s for s in HLD_SECTIONS if s.lower() in str(w.get("name")).lower()), HLD_SECTIONS[0])
     name, reqs = g.get("product_name") or "The product", ((g.get("chain") or {}).get("prd") or {}).get("requirements") or []
+    reqs = reqs or [{"text": f} for f in g.get("features") or []]      # no PRD asked for: the charter's features
+    feat = lambda r: (r["text"].split(" can ")[-1] if " can " in r["text"] else r["text"]).strip(" .").lower()
     body = {"Purpose and scope": f"{name} solves this: {g.get('problem') or 'the problem in the brief'}. This design covers "
                                  "every requirement in the PRD and nothing else.",
             "Pages": "- The product is one page, index.html, with one section for each component below.",
-            "Components": "\n".join(f"- **C{i}** part {i}: builds and shows what requirement {r['id']} asks for. Covers {r['id']}."
-                                    for i, r in enumerate(reqs, 1)) or "- **C1** part 1: shows the product. Covers R1.",
+            "Components": "\n".join(f"- **C{i}** {feat(r)}: builds and shows {feat(r)}." + (f" Covers {r['id']}." if r.get("id") else "")
+                                    for i, r in enumerate(reqs, 1)) or "- **C1** the page: shows the product.",
             "Data flow": "- Forms send what visitors type to the site owner by email; nothing is stored in the page.\n"
                          "- No outside service is called when the page loads.",
             "Hosting and deployment": "The page is a single static file. It is uploaded to any static host and replaced "
@@ -2427,7 +2430,8 @@ def saved_snapshot(name, since=0):
     audits = _read(d, "audits.json", [])
     site = os.path.join(d, "site")
     versions = len([f for f in os.listdir(site) if re.fullmatch(r"v\d+\.(?:html|md)", f)]) if os.path.isdir(site) else 0
-    out = saved_output(d)
+    docs = _read(d, "documents.json", {})
+    out = output_type(s.get("output_type") or saved_output(d)) if docs else saved_output(d)
     calls = [{k: v for k, v in c.items() if k not in ("system", "prompt", "raw")} for c in _jsonl(d, "calls.jsonl")]
     b = s.get("budget") or {}
     return {"saved": name, "chat": chat[since:], "total": len(chat), "status": "saved", "thinking": None, "step": 8,
@@ -2446,7 +2450,7 @@ def saved_snapshot(name, since=0):
             "memory": False, "lessons": [], "lessons_used": (s.get("lessons") or {}).get("used", []),
             "lessons_saved": (s.get("lessons") or {}).get("saved", []), "style": _read(d, "style.json"), "rubric": RUBRIC,
             "playbooks": [], "playbooks_used": (s.get("playbooks") or {}).get("used", []),
-            "playbook_saved": (s.get("playbooks") or {}).get("saved"), **output_info(out, d, audits)}
+            "playbook_saved": (s.get("playbooks") or {}).get("saved"), **output_info(out, d, audits, list(docs))}
 
 
 def saved_output(d):
@@ -2455,14 +2459,32 @@ def saved_output(d):
     return output_type(head.get("output") or "website")
 
 
-def output_info(out, run_dir, audits):
+DOC_NAMES = {"prd": "product requirements", "hld": "high-level design", "lld": "low-level design"}   # plain words
+
+
+def output_info(out, run_dir, audits, docset=None):
     """What the page needs about the output type: its label, whether it is a document, the latest necessary
-    conditions and which exported files exist."""
+    conditions and which exported files exist. A design-document run lists every document it has written."""
     o = OUTPUTS[out]
+    docset = docset or []
+    files = [f for f in ([o["file"], o["file"][:-3] + ".docx"] if o.get("file") else []) if os.path.exists(os.path.join(run_dir, f))]
+    if docset:
+        files = [f for k in docset for f in (f"{k}.md", f"{k}.docx") if os.path.exists(os.path.join(run_dir, f))]
     return {"output": out, "output_label": o["label"], "doc": bool(o["sections"]),
-            "rubric": o["rubric"], "conditions": (audits[-1].get("conditions") if audits else None),
-            "files": [f for f in ([o["file"], o["file"][:-3] + ".docx"] if o.get("file") else [])
-                      if os.path.exists(os.path.join(run_dir, f))]}
+            "rubric": o["rubric"], "conditions": (audits[-1].get("conditions") if audits else None), "files": files,
+            "docset": docset, "docset_files": [{"kind": k, "label": DOC_NAMES[k], "md": f"{k}.md", "docx": f"{k}.docx"}
+                                               for k in docset if os.path.exists(os.path.join(run_dir, f"{k}.md"))]}
+
+
+def atom_section_body(d, wfs, atom_id):
+    """The markdown (or HTML) section an atom's workflow wrote, from the run folder: sections.json for the current
+    stage, stage-<document>.json for the earlier ones."""
+    w = next((x for x in wfs if any(a["id"] == atom_id for a in x.get("atoms") or [])), None)
+    if not w or not d:
+        return None
+    sources = [_read(d, "sections.json", {})] + [(_read(d, f, {}) or {}).get("sections") or {}
+                                                  for f in sorted(os.listdir(d)) if re.fullmatch(r"stage-\w+\.json", f)]
+    return next((x["body"] for src in sources for k, x in src.items() if k == w.get("section") and x.get("body")), None)
 
 
 def call_record(d, cid):
@@ -2490,6 +2512,7 @@ class J2Run:
         self.docset, self.stages, self.stage_i, self.chain, self.docs = [], [], 0, {}, {}
         self.past_workflows, self.stage_archive, self.site_tag, self.budget_total = [], [], "", None
         self.blueprint, self.proposed_lld, self.lld_revisions, self.lld_conflicts = None, {}, [], {}   # the LLD as the spec
+        self.stage_calls0 = 0         # AI calls before the current stage (a document's call range, for the cost estimate)
         self.goal, self.stamped, self.request = None, False, ""
         self.spent, self.cycle, self.calls, self.step = 0, 0, 0, 0
         self.budget, self.raises = BUDGET, []
@@ -2595,7 +2618,7 @@ class J2Run:
                 "workable": workable(self.audits[-1]) if self.audits else None,
                 "memory": self.memory, "lessons": load_lessons() if self.memory else [],
                 "lessons_used": self.lessons_used, "lessons_saved": [x["id"] for x in self.lessons_saved],
-                **output_info(self.output, self.dir, self.audits)}
+                **output_info(self.output, self.dir, self.audits, [k for k in self.docset if k in self.docs])}
 
     def _placeholders(self):
         out = []
@@ -3169,6 +3192,7 @@ class J2Run:
         ao = doc_agent_output(kind, self.sites[-1])
         self.chain[kind] = ao
         self.docs[kind] = {"file": self.out["file"], "docx": self.out["file"][:-3] + ".docx", "agent_output": ao,
+                           "calls": {"from": self.stage_calls0 + 1, "to": self.calls},
                            "workflows": [w["id"] for w in self.workflows], "atoms": [a["id"] for w in self.workflows
                                                                                       for a in w.get("atoms") or []]}
         self.save("documents.json", self.docs)
@@ -3203,6 +3227,7 @@ class J2Run:
         self.fail_floor, self.feedback, self.drop_answer, self.adapt_idle, self.last_limit = 0, None, None, None, None
         self.write_lock = self.atom = None
         self.site_tag = kind + "-"
+        self.stage_calls0 = self.calls
         self._apply_output(kind)
         if kind == "website":
             self.post("system", "The documents are done. Now the website, built from them.")
@@ -4623,9 +4648,12 @@ class J2Run:
         crit, secs = (self.goal or {}).get("done_when") or [], self.out["sections"]
         sec_of = lambda text: next((x for x in secs if x.lower() in str(text).lower()), None)
         if not self.workflows:
-            wfs = [{"name": f"Write {x}", "goal_gap": f"The PRD has no {x} section yet", "parts": [item_kind(x)],
+            link = {"Components": "prd_ids", "Pages and sections": "hld_ids"}      # the ids the plan must name (a chain link)
+            ids = lambda x: ((self.goal or {}).get("chain") or {}).get(link.get(x)) or []
+            wfs = [{"name": f"Write {x}", "goal_gap": f"The {self.out['noun']} has no {x} section yet", "parts": [item_kind(x)],
                     "covers": [self._no(c) for c in crit if sec_of(c) == x], "outputs": [self.out["file"]],
-                    "completion_check": f"## {x} is present and not empty"} for x in secs]
+                    "completion_check": f"## {x} is present and not empty" + (f", and covers {', '.join(ids(x))}"
+                                                                                if ids(x) else "")} for x in secs]
             return {"say": f"@Priority One workflow per PRD section: {', '.join(secs)}.", "act": "PROPOSE",
                     "next": "Priority", "workflows": wfs}
         fix = []
@@ -5438,7 +5466,9 @@ class J2Run:
                                         "next": "Coordination"})
                             + f"\n```markdown\n{self.out['mock_section'](w, self.goal)}```")
                 head, body = mock_section(w, self.goal, self.sections, self._lld_slice_for(w),
-                                          [x["anchor"] for x in self.blueprint["sections"]] if self.blueprint else ())
+                                          [x["anchor"] for x in self.blueprint["sections"]
+                                           if x["id"] in {i for o in self.workflows for i in o.get("lld_sections") or []}]
+                                          if self.blueprint else ())
                 return (json.dumps({"say": f"@Coordination {fn} done: {w['name']}. Section {sid} written.",
                                     "human_output": f"I built the {w['name']} section ({sid}) of the page.",
                                     "atom_human_output": "This adds a part of the page that visitors can read and use.",

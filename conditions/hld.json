@@ -30,7 +30,7 @@
       "key": "prd_ids",
       "in": "Components",
       "label": "PRD requirements",
-      "plan": "requirement|\\bR\\d+\\b"
+      "plan": "\\bR\\d+\\b"
     },
     {
       "id": "H5",

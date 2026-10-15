@@ -41,12 +41,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
 
-    def _send(self, code, body, ctype="application/json"):
+    def _send(self, code, body, ctype="application/json", name="prd.docx"):
         if ctype in ("image/png", DOCX):     # a screenshot or a .docx: binary, no text to redact
             self.send_response(code)
             self.send_header("Content-Type", ctype)
             if ctype == DOCX:
-                self.send_header("Content-Disposition", 'attachment; filename="prd.docx"')
+                self.send_header("Content-Disposition", f'attachment; filename="{name}"')
             self.end_headers()
             return self.wfile.write(body)
         data = redact(body if isinstance(body, str) else body.decode("utf-8", "replace")).encode("utf-8")
@@ -75,9 +75,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self._send(200, json.dumps(rec, ensure_ascii=False)) if rec else self._send(404, '{"error": "no such call"}')
         if u.path == "/api/preview":    # an atom's section by its anchor id, from the built page, for the atom card's frame
             r = RUN if not run else None
-            wfs = (r.workflows if r else json.load(open(os.path.join(j2.saved_dir(run) or "", "workflows.json"), encoding="utf-8")))
+            wfs = (r._all_wfs() if r else json.load(open(os.path.join(j2.saved_dir(run) or "", "workflows.json"), encoding="utf-8")))
             at = next((a for w in wfs for a in w.get("atoms") or [] if a["id"] == q.get("atom")), None)
-            anchor = ((at or {}).get("agent_output") or {}).get("anchor")
+            ao = (at or {}).get("agent_output") or {}
+            if ao.get("kind") == "doc":          # a document atom: its section as the page renders markdown
+                body = j2.atom_section_body(r.dir if r else j2.saved_dir(run), wfs, q.get("atom"))
+                return self._send(200, json.dumps({"anchor": None, "html": j2.md_html(body, "Section") if body else None}))
+            anchor = ao.get("anchor")
             page = r.sites[-1] if r and r.sites else ""
             if run and j2.saved_dir(run):
                 p = os.path.join(j2.saved_dir(run), "site", "index.html")
@@ -94,12 +98,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
             d, name = (j2.saved_dir(run) if run else RUN.dir), u.path.rsplit("/", 1)[-1]
             o = j2.OUTPUTS[j2.saved_output(d) if run else RUN.output]
             allowed = [o["file"], o["file"][:-3] + ".docx"] if o.get("file") else []
+            allowed += [f for k in j2._read(d or "", "documents.json", {}) for f in (f"{k}.md", f"{k}.docx")]   # design documents
             path = os.path.join(d or "", name)
             if name not in allowed or not os.path.exists(path):
                 return self._send(404, "not found", "text/plain")
             with open(path, "rb") as f:
                 data = f.read()
-            return self._send(200, data, DOCX) if name.endswith(".docx") else \
+            return self._send(200, data, DOCX, name) if name.endswith(".docx") else \
                 self._send(200, data, "text/markdown")
         if u.path.startswith("/site/") and run:
             d, key = j2.saved_dir(run), u.path.rsplit("/", 1)[-1]
