@@ -306,6 +306,68 @@ def human_problem(t):
         "it is longer than 3 sentences" if n > 3 else None
 
 
+INTERNAL = re.compile(r"\bW-\d+(?:\.a\d+)?\b|\ba\d\b|(?<![\w&])#[A-Za-z][\w-]*|(?<=\s)\.[A-Za-z][\w-]+|\bunits?\b|[<>]|"
+                      r"\b(?:id|class)=|J2:", re.I)
+
+
+def atom_human_problem(t):
+    """Why an atom's human_output is unusable (None when it is fine): the message-level wording rules (human_problem:
+    plain, at least 5 words) but 1 or 2 sentences, and no internal id, selector or "units" (the Requester reads it)."""
+    p = human_problem(t)
+    if p:
+        return p
+    t = str(t).strip()
+    if len([x for x in re.split(r"(?<=[.!?])\s+", t) if x]) > 2:
+        return "it is longer than 2 sentences"
+    m = INTERNAL.search(t)
+    return f"it has an internal id, selector or \"units\" ({m.group(0)!r})" if m else None
+
+
+def atom_done_problem(a):
+    """A work atom is done only with both outputs: a human_output that passes atom_human_problem and an agent_output."""
+    h, ag = a.get("human_output"), a.get("agent_output")
+    return [x for x, bad in (("human_output", atom_human_problem((h or {}).get("text")) if isinstance(h, dict) else True),
+                             ("agent_output", not (isinstance(ag, dict) and ag.get("receipt")))) if bad]
+
+
+def created_in(html):
+    """The element ids and class names a section's HTML creates, in order, each once."""
+    ids = list(dict.fromkeys(re.findall(r"""\bid=["']([^"'\s]+)["']""", html or "")))
+    cls = list(dict.fromkeys(c for v in re.findall(r"""\bclass=["']([^"']*)["']""", html or "") for c in v.split()))
+    return ids, cls
+
+
+def element_by_id(page, eid):
+    """The outer HTML of the element with this id in a page (balanced tags), or None."""
+    m = re.search(rf"""<([a-zA-Z][\w-]*)\b[^>]*\bid=["']{re.escape(eid)}["'][^>]*>""", page or "")
+    if not m:
+        return None
+    tag, depth = m.group(1).lower(), 0
+    for t in re.finditer(rf"<(/?){tag}\b[^>]*?(/?)>", page[m.start():], re.I):
+        depth += -1 if t.group(1) else 0 if t.group(2) else 1
+        if depth == 0:
+            return page[m.start():m.start() + t.end()]
+    return None
+
+
+def preview_doc(page, eid):
+    """A small page for a sandboxed frame: the built page's head (the style guide) and one element by its id."""
+    el = element_by_id(page, eid)
+    head = re.search(r"<head\b[^>]*>(.*?)</head>", page or "", re.S | re.I)
+    return None if el is None else ("<!doctype html><html><head><meta charset=\"utf-8\">" + (head.group(1) if head else "")
+                                    + "</head><body>" + el + "</body></html>")
+
+
+def slim():
+    """J2_SLIM=1: prompts carry finished atoms' agent_output instead of their attempts and receipts, and builders see
+    their own section plus a manifest instead of the whole page. Read per call so tests can switch it."""
+    return os.environ.get("J2_SLIM") == "1"
+
+
+def slim_atom(a):
+    return {k: a[k] for k in ("id", "status", "agent_output")} if a.get("status") == "passed" and a.get("agent_output") else a
+
+
 def squash(t):
     """Case-insensitive, whitespace collapsed; no other rewriting."""
     return re.sub(r"\s+", " ", str(t)).strip().lower()
@@ -2197,8 +2259,7 @@ class J2Run:
                                                          "remaining": self.budget - self.spent},
                            "cycle": self.cycle, "negotiation": {"exchanges_used": self.exchanges,
                                                                 "max_exchanges": MAX_ATTEMPTS},
-                           "workflows": [{k: v for k, v in w.items() if k not in self.COST_KEYS} for w in self.workflows]
-                           if blind else self.workflows, "conflicts": conflicts, "audits": audits,
+                           "workflows": self._wfs_state(blind), "conflicts": conflicts, "audits": audits,
                            "site_versions": len(self.sites),
                            "site_sections": [{"section": k, "owner": x["owner"], "workflow": x.get("workflow")}
                                              for k, x in self.sections.items()],
@@ -2210,6 +2271,11 @@ class J2Run:
                                                             for c in (self.goal or {}).get("done_when") or []],
                                           "fix_rule": "one 'fix' part per Audit finding fixed"}
                                          if RATES and not blind else None)}, ensure_ascii=False)
+
+    def _wfs_state(self, blind):
+        wfs = [{k: v for k, v in w.items() if k not in self.COST_KEYS} for w in self.workflows] if blind else self.workflows
+        return [{**w, "atoms": [slim_atom(a) for a in w.get("atoms") or []]} if w.get("atoms") else w
+                for w in wfs] if slim() else wfs
 
     def chat_view(self):
         """Whole chat while it's short; otherwise a running summary of the older part plus the recent messages.
@@ -4782,11 +4848,13 @@ class J2Run:
                 if self.doc:
                     return (json.dumps({"say": f"@Coordination {fn} done: {w['name']}. Section {sid} written.",
                                         "human_output": f"I wrote the {w['name']} section ({sid}) of the document.",
+                                        "atom_human_output": "This adds a written part of the document that readers can use.",
                                         "next": "Coordination"})
                             + f"\n```markdown\n{self.out['mock_section'](w, self.goal)}```")
                 head, body = mock_section(w, self.goal, self.sections)
                 return (json.dumps({"say": f"@Coordination {fn} done: {w['name']}. Section {sid} written.",
                                     "human_output": f"I built the {w['name']} section ({sid}) of the page.",
+                                    "atom_human_output": "This adds a part of the page that visitors can read and use.",
                                     "next": "Coordination"})
                         + (f"\n```style\n{json.dumps(MOCK_STYLE)}\n```" if first else "")
                         + (f"\n```head\n{head}\n```" if head else "") + (f"\n```section\n{body}\n```" if body else ""))
@@ -4811,7 +4879,7 @@ class J2Run:
                                       if self.doc else (
                                 'First line: a JSON object {"say": str (one short line reporting to @Coordination: '
                                 'what you changed; code runs your checks and reports them, so don\'t claim they pass), '
-                                '"human_output": str (1 to 3 plain sentences telling a person what you built; \"done.\" alone is rejected), "next": "Coordination", ' + self.REASON + '}. '
+                                '"human_output": str (1 to 3 plain sentences telling a person what you built; \"done.\" alone is rejected), "atom_human_output": str (1 or 2 plain sentences telling the Requester what this part created, in everyday words: no ids, no selectors, no \"units\"), "next": "Coordination", ' + self.REASON + '}. '
                                 + ('Then a ```style block with the style guide as JSON: ' + STYLE_FMT + '. ' if first
                                    else '')
                                 + 'Then, '
@@ -4833,7 +4901,9 @@ class J2Run:
                                    f"ATTEMPT AND THESE FAILED:\n{evidence}\nFix the section so they pass." if evidence
                                    else "")
                                 + (f"\nYOUR LAST ATTEMPT WAS REJECTED: {last_err}. Fix that." if last_err else "")
-                                + f"\nTHE WHOLE SITE FILE NOW (v{len(self.sites)}, read only):\n{prev[:SITE_LIMIT]}")),
+                                + (f"\nOTHER SECTIONS (their atoms' agent_output; the rest of the page isn't shown): "
+                                   f"{json.dumps(self._manifest(w), ensure_ascii=False)}" if slim() else
+                                   f"\nTHE WHOLE SITE FILE NOW (v{len(self.sites)}, read only):\n{prev[:SITE_LIMIT]}"))),
                                 mock, max_tokens=16000, json_reply=False)
                 try:
                     parts = parse_doc(raw) if self.doc else parse_section(raw)
@@ -4902,6 +4972,7 @@ class J2Run:
         self.write_lock = self.atom = None
         nxt, note = "coordination", None      # a builder only reports to Coordination: code sets it, whatever "next" says
         human = self._human_output(w, meta, sid)
+        self._atom_outputs(w, meta, attempt)
         w["status"], w["version"] = "done", len(self.sites)
         self.save("workflows.json", self.workflows)
         self._say(fn, f"@Coordination {human}", nxt, note, workflow=fn, human_output=human, version=len(self.sites), section=sid,
@@ -4932,11 +5003,77 @@ class J2Run:
                           f"SECTION:\n{sec[:3000]}",
                           lambda: json.dumps({"human_output": f"I built the {w['name']} section ({sid}) of the "
                                                               f"{self.out['noun']}."}))
-            last = str(r.get("human_output") or "")
+            last = str(r.get("human_output") or "") if isinstance(r, dict) else ""
         if human_problem(last):
             self._event(fn, "invalid_move", f"human_output again: {human_problem(last)}")
             last = f"{fn} built {w['name']} in section {sid}. Code ran its checks; see the receipts."
         return last
+
+    def _atom_outputs(self, w, meta, attempt):
+        """Every atom's human_output (the builder's words, checked by atom_human_problem, asked once more if bad, else
+        written by code from the atom's expected output), then, for an atom whose checks passed, its agent_output."""
+        for n, a in enumerate(w.get("atoms") or []):
+            text = str(meta.get("atom_human_output") or "") if n == 0 else ""
+            if atom_human_problem(text):
+                if n == 0:
+                    self._event(w["id"], "invalid_move", f"atom human_output: {atom_human_problem(text)}")
+                    r = self.call(w["id"], '{"atom_human_output": str (1 or 2 plain sentences)}',
+                                  f"YOUR atom_human_output '{text}' CAN'T BE USED: {atom_human_problem(text)}. Tell the "
+                                  "Requester in 1 or 2 plain sentences what this part created. No ids, no selectors, "
+                                  f"no \"units\". The part: {a.get('goal')}",
+                                  lambda: json.dumps({"atom_human_output": "This adds a part of the page that visitors "
+                                                                           "can read and use."}))
+                    text = str(r.get("atom_human_output") or "") if isinstance(r, dict) else ""
+                if atom_human_problem(text):
+                    parts = [re.sub(INTERNAL, "", x.get("text") or "").strip(" .") for x in a.get("expected_output") or []
+                             if isinstance(x, dict)]
+                    text = f"It created {and_list([p for p in parts if p][:3])}." if any(parts) else ""
+                    if atom_human_problem(text):
+                        text = f"It adds the part of the {self.out['noun']} this step was asked to build."
+            a["human_output"] = {"atom": a["id"], "attempt": attempt, "text": text}
+        self._seal_atoms(w, w.get("atoms") or [], attempt)
+
+    def _agent_output(self, w, a, attempt):
+        """What other agents read instead of searching: built by code from the section as written and the receipts of
+        this attempt. Files, section names, element ids and selectors created, the checks and their results, the
+        receipt id (receipts.jsonl: atom and attempt)."""
+        sid = w["section"]
+        body = (self.sections.get(sid) or {}).get("body") or ""
+        ids, cls = created_in(body)
+        heads = [re.sub(r"<[^>]+>|^#+\s*", "", h).strip() for h in re.findall(r"<h[1-3][^>]*>.*?</h[1-3]>|^#{1,3} .*$", body,
+                                                                               re.S | re.M)]
+        want = [str(x.get("target")) for x in a.get("expected_output") or [] if isinstance(x, dict)
+                and x.get("kind") == "section"]
+        anchor = next((t[1:] for t in want if t.startswith("#") and t[1:] in ids), None) or (ids[0] if ids else None)
+        last = self.audits[-1] if self.audits else {}
+        recs = [r for r in self.receipts if r["atom"] == a["id"] and r["attempt"] == attempt and "check" in r]
+        return {"atom": a["id"], "attempt": attempt, "receipt": f"{a['id']}:{attempt}",
+                "files": [f"site/v{len(self.sites)}.{'md' if self.doc else 'html'}", self.out.get("file") or "site/index.html"],
+                "section": sid, "section_names": [w["name"]] + [h for h in heads if h][:6], "anchor": anchor,
+                "ids": ids[:40], "selectors": [f"#{i}" for i in ids[:40]] + [f".{c}" for c in cls[:40]],
+                "checks": [{"check": r["check"], "type": r["type"], "target": r["target"], "pass": r["pass"]} for r in recs],
+                "conditions": [{"id": c["id"], "met": c["met"]} for c in last.get("conditions") or []]}
+
+    def _seal_atoms(self, w, atoms, attempt):
+        """An atom whose checks passed gets its agent_output; it stays "passed" only with both outputs (else "failed")."""
+        for a in atoms:
+            if a.get("status") != "passed":
+                continue
+            a["agent_output"] = self._agent_output(w, a, attempt)
+            if (miss := atom_done_problem(a)):
+                a["status"] = "failed"
+                self._event(w["id"], "refused", f"{a['id']} can't be done without {', '.join(miss)}")
+                continue
+            os.makedirs(self.dir, exist_ok=True)
+            with open(os.path.join(self.dir, "outputs.jsonl"), "a", encoding="utf-8") as f:
+                f.write(json.dumps({"atom": a["id"], "attempt": attempt, "human_output": a["human_output"],
+                                    "agent_output": a["agent_output"]}, ensure_ascii=False) + "\n")
+        self.save("workflows.json", self.workflows)
+
+    def _manifest(self, w):
+        """J2_SLIM: other atoms' agent_output, short (ids, sections, selectors), so a builder needn't read the page."""
+        return [{k: (x.get("agent_output") or {}).get(k) for k in ("atom", "section", "anchor", "selectors")}
+                for o in self.workflows if o["id"] != w["id"] for x in o.get("atoms") or [] if x.get("agent_output")]
 
     def _blames_other(self, say, fn):
         """The builder's own report puts the cause in another workflow's section (names one besides its own)."""
@@ -4961,7 +5098,7 @@ class J2Run:
         """(reply format, task) for a document section's workflow agent: markdown for its own section only."""
         fn = w["id"]
         return ('First line: a JSON object {"say": str (one short line reporting to @Coordination: what you changed; '
-                'code runs your checks and reports them, so don\'t claim they pass), "human_output": str (1 to 3 plain sentences telling a person what you built; \"done.\" alone is rejected), "next": "Coordination", '
+                'code runs your checks and reports them, so don\'t claim they pass), "human_output": str (1 to 3 plain sentences telling a person what you built; \"done.\" alone is rejected), "atom_human_output": str (1 or 2 plain sentences telling the Requester what this part created, in everyday words: no ids, no selectors, no \"units\"), "next": "Coordination", '
                 + self.REASON + '}. Then a ```markdown block: your section only, starting with its "## <Section>" '
                 'heading. Markdown only, never HTML.',
                 f"YOU ARE {NAMES[fn]}, the agent for one registered workflow.\nYOUR WORKFLOW: "
@@ -4976,7 +5113,9 @@ class J2Run:
                 + (f"\nATTEMPT {attempt} OF {MAX_CHECK_ATTEMPTS}. CODE RAN YOUR CHECKS ON YOUR LAST ATTEMPT AND THESE "
                    f"FAILED:\n{evidence}\nFix the section so they pass." if evidence else "")
                 + (f"\nYOUR LAST ATTEMPT WAS REJECTED: {last_err}. Fix that." if last_err else "")
-                + f"\nTHE WHOLE DOCUMENT NOW (v{len(self.sites)}, read only):\n{prev[:SITE_LIMIT]}")
+                + (f"\nOTHER SECTIONS (their atoms' agent_output; the rest isn't shown): "
+                   f"{json.dumps(self._manifest(w), ensure_ascii=False)}" if slim() else
+                   f"\nTHE WHOLE DOCUMENT NOW (v{len(self.sites)}, read only):\n{prev[:SITE_LIMIT]}"))
 
     def _receipt(self, a, c, attempt, res, **extra):
         """One line of receipts.jsonl: written by code only, never by an agent."""
@@ -5107,7 +5246,9 @@ class J2Run:
                 a["verification"] = new["verification"]
                 if not self._run_checks(w, MAX_CHECK_ATTEMPTS, self.sites[-1], atoms=[a],
                                         recheck="check corrected by Adaptation"):
-                    return self._handoff("coordination", kind="schedule")
+                    self._seal_atoms(w, [a], MAX_CHECK_ATTEMPTS)
+                    if a.get("status") == "passed":
+                        return self._handoff("coordination", kind="schedule")
         a["status"] = "escalated"
         self._event("adaptation", "atom_escalated", f"{a['id']}: {verdict or 'no verdict'}")
         self.save("workflows.json", self.workflows)

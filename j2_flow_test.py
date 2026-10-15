@@ -3181,6 +3181,7 @@ def run_20261015_fixes():
             calls.append(fn)
             body = '<section id="register">mine</section>'
             return ('{"say": "@Coordination written", "human_output": "I wrote the registration section.", '
+                    '"atom_human_output": "This adds the sign-up part of the page.", '
                     '"next": "Coordination"}\n```section\n' + body + "\n```")
         return orig(fn, fmt, task, mock, **k)
     run.call = call
@@ -3200,7 +3201,7 @@ def run_20261015_fixes():
 
     def call3(fn, fmt, task, mock, **k):
         if fn == wid and "human_output" not in fmt.split("}")[0][:40]:
-            return '{"say": "@Coordination done.", "human_output": "done."}\n```section\n<section id="x">x</section>\n```'
+            return '{"say": "@Coordination done.", "human_output": "done.", "atom_human_output": "This adds a short intro for visitors."}\n```section\n<section id="x">x</section>\n```'
         if fn == wid:
             asked.append(task)
             return {"human_output": "I built the hero section with a headline and a button."}
@@ -3213,6 +3214,89 @@ def run_20261015_fixes():
     assert j2.human_problem("done.") and j2.human_problem("a b c d e. f. g. h.") and not j2.human_problem("I built it all today.")
     print("runs/j2-20261015-114723 fixes: wrapper example registers first try, same failure twice escalates after "
           "attempt 2 naming the owner atom, human_output regenerated once and next speaker set by code ok")
+
+
+def calls_file(run):
+    return [json.loads(l) for l in open(os.path.join(run.dir, "calls.jsonl"), encoding="utf-8")]
+
+
+def atom_outputs():
+    """A: every atom that passed carries a human_output (plain, no ids) and a code-built agent_output, both tagged with
+    atom id and attempt, stored in workflows.json and outputs.jsonl; no atom is done without both."""
+    for bad in ("done.", "This adds #hero for visitors.", "It builds W-1.a1 for the team now.", "It costs 3 units to build.",
+                "One. Two. Three sentences here today."):
+        assert j2.atom_human_problem(bad), bad
+    assert not j2.atom_human_problem("This adds a hero part that visitors can read and use.")
+    run = j2.J2Run()
+    say(run, BREW_LAB)
+    assert run.outcome.startswith("Done"), run.outcome
+    passed = [(w, a) for w in run.workflows for a in w["atoms"] if a.get("status") == "passed"]
+    assert passed, [a.get("status") for w in run.workflows for a in w["atoms"]]
+    for w, a in passed:
+        h, ag = a["human_output"], a["agent_output"]
+        assert h["atom"] == ag["atom"] == a["id"] and h["attempt"] == ag["attempt"] >= 1 and not j2.atom_done_problem(a), a
+        assert not j2.atom_human_problem(h["text"]), h
+        assert ag["receipt"] == f"{a['id']}:{ag['attempt']}" and ag["section"] == w["section"] and ag["files"], ag
+        body = run.sections[w["section"]]["body"]
+        assert all(f'id="{i}"' in body for i in ag["ids"]) and all(sel[0] in "#." for sel in ag["selectors"]), ag
+        assert ag["checks"] and all("pass" in c for c in ag["checks"]), ag
+    rows = [json.loads(l) for l in open(os.path.join(run.dir, "outputs.jsonl"), encoding="utf-8")]
+    assert {r["atom"] for r in rows} >= {a["id"] for _, a in passed}
+    saved = json.load(open(os.path.join(run.dir, "workflows.json"), encoding="utf-8"))
+    assert all("human_output" in x["atoms"][0] and "agent_output" in x["atoms"][0] for x in saved
+               if x["atoms"][0].get("status") == "passed"), "run record lacks outputs"
+    # the gate: without a human_output a passed atom becomes failed
+    w, a = passed[0]
+    del a["human_output"], a["agent_output"]
+    assert j2.atom_done_problem(a) == ["human_output", "agent_output"]
+    run._seal_atoms(w, [a], 1)
+    assert a["status"] == "failed", a
+    # a builder reply whose atom_human_output holds an id is asked once more, then code writes the sentence
+    run = j2.J2Run()
+    orig, small = run.call, []
+
+    def call(fn, fmt, task, mock, **k):
+        if fn.startswith("W-") and fmt.startswith('{"atom_human_output"'):
+            small.append(fn)
+            return {"atom_human_output": "It makes #hero for W-1.a1."}
+        r = orig(fn, fmt, task, mock, **k)
+        return re.sub(r'"atom_human_output": "[^"]*"', '"atom_human_output": "Shows #hero."', r) if isinstance(r, str) else r
+    run.call = call
+    say(run, BREW_LAB)
+    w1 = run.workflows[0]["atoms"][0]
+    assert small and not j2.atom_human_problem(w1["human_output"]["text"]) and "#" not in w1["human_output"]["text"], \
+        (small, w1["human_output"])
+    print("atoms: human_output (plain, no ids, one retry then code's sentence) and code-built agent_output on every "
+          "passed atom, stored in workflows.json and outputs.jsonl, no done atom without both ok")
+
+
+def slim_prompts():
+    """C: J2_SLIM=1 sends builders their own section plus a manifest, and slims finished atoms in the shared state; the
+    old path (J2_SLIM unset) still sends the whole page. Both end Done; the slim prompts are shorter."""
+    sizes = {}
+    for mode in ("0", "1"):
+        os.environ["J2_SLIM"] = mode
+        try:
+            run = j2.J2Run()
+            say(run, BREW_LAB)
+            assert run.outcome.startswith("Done"), (mode, run.outcome)
+            rows = calls_file(run)
+            builders = [r for r in rows if r["fn"].startswith("W-")]
+            later = [r for r in builders if r["fn"] != "W-1"]
+            assert later
+            if mode == "1":
+                assert all("THE WHOLE SITE FILE" not in r["prompt"] and "OTHER SECTIONS" in r["prompt"] for r in later)
+                st = [json.loads(r["prompt"].split("STATE:\n", 1)[1].split("\n\nCHAT:", 1)[0]) for r in rows[-3:]]
+                slimmed = [a for s in st for w in s["workflows"] for a in w.get("atoms") or [] if a.get("status") == "passed"]
+                assert slimmed and all(set(a) == {"id", "status", "agent_output"} for a in slimmed), slimmed[:1]
+                assert "audit" in {r["fn"] for r in rows}          # Audit still ran on the full page
+            else:
+                assert all("THE WHOLE SITE FILE" in r["prompt"] and "OTHER SECTIONS" not in r["prompt"] for r in later)
+            sizes[mode] = sum(len(r["prompt"]) for r in rows)
+        finally:
+            os.environ.pop("J2_SLIM", None)
+    assert sizes["1"] < sizes["0"], sizes
+    print(f"slim: both paths Done; prompt characters {sizes['0']:,} (old) -> {sizes['1']:,} (J2_SLIM=1) in the mock run")
 
 
 if __name__ == "__main__":
@@ -3233,6 +3317,8 @@ if __name__ == "__main__":
         print(f"J2_FIXES={mode}: vague brief (both answers), full brief, budget question rejected and re-asked, below-floor proposal with left_out, one decision question after the ruling, core marks from J2.a, deferred twice, connections at three budgets, funded work built before the question ok")
         workflow_agents()
         run_20261015_fixes()
+        atom_outputs()
+        slim_prompts()
         atom_checks()
         behavior_steps()
         charter_facts()
