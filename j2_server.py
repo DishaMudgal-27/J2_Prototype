@@ -73,6 +73,16 @@ class Handler(http.server.BaseHTTPRequestHandler):
             d = j2.saved_dir(run) if run else RUN.dir
             rec = j2.call_record(d, int(q.get("id", "0") or 0))
             return self._send(200, json.dumps(rec, ensure_ascii=False)) if rec else self._send(404, '{"error": "no such call"}')
+        if u.path == "/api/preview":    # an atom's section by its anchor id, from the built page, for the atom card's frame
+            r = RUN if not run else None
+            wfs = (r.workflows if r else json.load(open(os.path.join(j2.saved_dir(run) or "", "workflows.json"), encoding="utf-8")))
+            at = next((a for w in wfs for a in w.get("atoms") or [] if a["id"] == q.get("atom")), None)
+            anchor = ((at or {}).get("agent_output") or {}).get("anchor")
+            page = r.sites[-1] if r and r.sites else ""
+            if run and j2.saved_dir(run):
+                p = os.path.join(j2.saved_dir(run), "site", "index.html")
+                page = open(p, encoding="utf-8").read() if os.path.exists(p) else ""
+            return self._send(200, json.dumps({"anchor": anchor, "html": j2.preview_doc(page, anchor) if anchor else None}))
         if u.path.startswith("/shot/"):        # the screenshot Audit looked at for site vN
             d, n = (j2.saved_dir(run) if run else RUN.dir), u.path.rsplit("/", 1)[-1]
             path = os.path.join(d or "", "site", "shots", f"v{n}.png")

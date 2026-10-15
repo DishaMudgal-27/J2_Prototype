@@ -33,6 +33,9 @@ button{font:500 13px var(--body);cursor:pointer}
 .code{font:500 11px var(--mono);color:var(--muted);white-space:nowrap}.st.on .code{color:var(--on);opacity:.75}
 .atom{border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:6px 0;background:var(--panel)}
 .atom>summary{cursor:pointer}.atom h4{margin:8px 0 2px;font-size:12.5px}.atom p{margin:0 0 4px}
+.ablock{margin:4px 0}.agroup{margin:10px 0 2px;color:var(--muted)}.long>summary{cursor:pointer;color:var(--muted);display:inline}
+.apreview{display:block;width:100%;min-height:48px;max-height:260px;border:1px solid var(--line);border-radius:6px;margin:6px 0;padding:6px;background:#fff;color:#111}
+iframe.apreview{height:220px;padding:0}.linkbtn{border:0;background:none;color:var(--accent,#2a6);text-decoration:underline;cursor:pointer;padding:0;font:inherit}
 .st.on{background:var(--accent);color:var(--on)}
 .st.past{color:var(--ink)}
 main{flex:1;display:grid;grid-template-columns:minmax(320px,1fr) 250px minmax(0,1.3fr);min-height:0}
@@ -322,7 +325,9 @@ function envCell(w){
     + (e.time_limit_minutes != null ? ` · ${e.time_limit_minutes} min` : "")
     + (e.stop_loss ? `<br><span class="empty">stop-loss: ${esc(dv(e.stop_loss))}</span>` : "");
 }
-// A work atom: six rows, each one plain sentence, then its own Run details (only the AI calls tagged with its id).
+// ===== atom cards: start (rendered in a browser-free harness by j2_ui_render.js; keep it free of DOM calls)
+// A work atom card: a preview of what it built, then eight blocks in three groups: particles (goal, how, constraints,
+// context), defined output and verification, outputs (human_output, agent_output). Long blocks are collapsed.
 const ATOM_ROWS = [["goal", "Goal", "What must be true when this is done"], ["constraints", "Constraints", "What must never break"],
   ["context", "Context", "What it needs to know"], ["how", "How", "Who builds it"],
   ["expected_output", "Expected output", "What must exist when it is done"],
@@ -347,6 +352,46 @@ function atomRow(a, k, w){
       : `<span class="${r.pass ? "pass" : "fail"}">${r.pass ? "Passed" : a.status === "escalated" ? "Failed, escalated" : "Failed"}</span>: ${esc(sentence(r.evidence))} <span class="empty">Attempt ${r.attempt} of ${r.of}${r.recheck ? ", " + esc(r.recheck) : ""}.</span>`;
     return `${esc(sentence(typeof c === "string" ? c : c.text))}<br>${st}`; }).join("<br>");
 }
+const PREVIEWS = {};          // atom id -> srcdoc of its section (from /api/preview), "" when it has none
+const blockHTML = (a, key, label, gloss, body, long) => `<div class="ablock" data-block="${key}"><b>${label}</b> <span class="empty">${gloss}</span>
+  ${long ? `<details class="long" data-key="blk-${esc(a.id)}-${key}"><summary>show</summary>${body}</details>` : `<div>${body}</div>`}</div>`;
+function atomPreview(a){
+  const ag = a.agent_output || {}, h = a.human_output && a.human_output.text;
+  if (!ag.anchor) return `<div class="apreview" data-preview="text">${esc(h || "Nothing built yet.")}</div>`;
+  if (PREVIEWS[a.id] === undefined){ if (typeof wantPreview === "function") wantPreview(a.id);
+    return `<div class="apreview" data-preview="wait"><span class="empty">Loading the preview…</span></div>`; }
+  return PREVIEWS[a.id] ? `<iframe class="apreview" data-preview="frame" sandbox="" title="What this atom built" srcdoc="${esc(PREVIEWS[a.id])}"></iframe>`
+    : `<div class="apreview" data-preview="text">${esc(h || "")}</div>`;
+}
+function atomBlocks(a, w){
+  const ag = a.agent_output, res = a.results || [], ok = res.filter(r => r.pass === true).length, bad = res.filter(r => r.pass === false).length;
+  const g = t => `<h4 class="agroup">${t}</h4>`;
+  const site = ag && ag.anchor ? `<a data-link="site" href="/site/latest${runQ().replace("&", "?")}#${esc(ag.anchor)}" target="_blank" rel="noopener">View in site</a>` : "";
+  return g("1. Particles")
+    + blockHTML(a, "goal", "Goal", "What must be true when this is done", atomRow(a, "goal", w), false)
+    + blockHTML(a, "how", "How", "Who builds it", atomRow(a, "how", w), false)
+    + blockHTML(a, "constraints", "Constraints", "What must never break", atomRow(a, "constraints", w), true)
+    + blockHTML(a, "context", "Context", "What it needs to know", atomRow(a, "context", w), true)
+    + g("2. Defined output and verification")
+    + blockHTML(a, "expected_output", "Defined output", "What must exist when it is done", atomRow(a, "expected_output", w), false)
+    + blockHTML(a, "verification", "Verification", "The check that proves the goal is met",
+        `${res.length ? `${ok} passed, ${bad} failed of ${res.length}.` : "Not run yet."} <button type="button" class="linkbtn" data-link="evidence" data-atom="${esc(a.id)}">Verification evidence</button>`
+        + `<details class="long" data-key="blk-${esc(a.id)}-evidence"><summary>show</summary>${atomRow(a, "verification", w)}</details>`, false)
+    + g("3. Outputs")
+    + blockHTML(a, "human_output", "Human output", "What it created, in plain words",
+        a.human_output ? esc(sentence(a.human_output.text)) + ` <span class="empty">Attempt ${a.human_output.attempt}.</span>` : '<span class="empty">Not written yet.</span>', false)
+    + blockHTML(a, "agent_output", "Agent output", "What other agents read",
+        ag ? `${esc(String(ag.section || ""))}: ${(ag.selectors || []).length} selector(s), ${(ag.checks || []).length} check(s), receipt ${esc(ag.receipt)}. `
+          + `<button type="button" class="linkbtn" data-link="agent" data-atom="${esc(a.id)}">Agent output</button> ${site}` : '<span class="empty">Built by code when the checks pass.</span>', false);
+}
+function atomCards(s, w){
+  const atoms = w.atoms || [];
+  if (!atoms.length) return '<p class="empty">No work atoms: registered before work atoms existed.</p>';
+  return atoms.map((a, i) => `<details class="atom" data-key="atom-${esc(a.id)}"${atoms.length === 1 ? " open" : ""}>
+    <summary><b>Work atom ${i + 1}</b> <span class="code">${esc(a.id)}</span> · ${esc(dv(words(a.goal)))} <span class="${a.status === "passed" ? "pass" : a.status && a.status !== "could not run" ? "fail" : "empty"}">· ${(a.verification || []).length} check(s), ${ATOM_STATUS[a.status] || "not run yet"}${a.attempts ? `, attempt ${a.attempts} of 3` : ""}</span></summary>
+    ${atomPreview(a)}${atomBlocks(a, w)}
+    ${runDetails(s, a, w)}</details>`).join("");
+}
 const ATOM_STATUS = {passed: "checks passed", failed: "checks failing", escalated: "ESCALATED", "could not run": "a check could not run"};
 function runDetails(s, a, w){
   const calls = s.call_log.filter(c => c.atom === a.id), none = '<p class="empty">No AI call yet.</p>';
@@ -360,14 +405,7 @@ function runDetails(s, a, w){
     <h4>Cost</h4>${calls.length ? `<p>${calls.length} AI call(s) · ${tok} · ${calls.reduce((n, c) => n + (c.seconds || 0), 0).toFixed(1)} s</p>` : none}
     <h4>Attempts</h4><p>${a.attempts ? `Check attempt ${a.attempts} of 3` : "Checks not run yet"} · ${calls.length} AI call(s), ${w.retries_used || 0} retry(ies) after an unusable reply.</p></details>`;
 }
-function atomCards(s, w){
-  const atoms = w.atoms || [];
-  if (!atoms.length) return '<p class="empty">No work atoms: registered before work atoms existed.</p>';
-  return atoms.map((a, i) => `<details class="atom" data-key="atom-${esc(a.id)}"${atoms.length === 1 ? " open" : ""}>
-    <summary><b>Work atom ${i + 1}</b> <span class="code">${esc(a.id)}</span> · ${esc(dv(words(a.goal)))} <span class="${a.status === "passed" ? "pass" : a.status && a.status !== "could not run" ? "fail" : "empty"}">· ${(a.verification || []).length} check(s), ${ATOM_STATUS[a.status] || "not run yet"}${a.attempts ? `, attempt ${a.attempts} of 3` : ""}</span></summary>
-    <dl>${ATOM_ROWS.map(([k, label, gloss]) => `<dt>${label}<br><span class="empty">${gloss}</span></dt><dd>${atomRow(a, k, w)}</dd>`).join("")}</dl>
-    ${runDetails(s, a, w)}</details>`).join("");
-}
+// ===== atom cards: end
 function renderWorkflows(s){
   const pct = Math.min(100, s.spent / s.budget * 100);
   const rows = s.workflows.map(w => `<tr><td>${w.id}</td><td style="color:${col(w.id)}"><b>${esc(w.agent || who(w.id)[0])}</b><br><span class="empty">section ${esc(w.section || "")}${w.revises ? " (rewrites " + esc(w.revises) + "'s)" : ""}</span></td><td>${esc(dv(w.name))}<br><span class="empty">${esc(dv(w.purpose))}</span></td>
@@ -746,6 +784,18 @@ $("msgs").addEventListener("click", e => { const b = e.target.closest(".msg"); i
 $("pane-timeline").addEventListener("click", e => { const b = e.target.closest("[data-msg]"); if (b) openDetail(b.dataset.msg); });
 $("lanes").addEventListener("click", e => { const b = e.target.closest("[data-msg]"); if (b && b.dataset.msg) openDetail(b.dataset.msg); });
 $("dclose").onclick = () => $("detail").close();
+// Atom card links that open stored data in the detail pane: the atom's agent_output, or its verification evidence.
+async function wantPreview(id){
+  PREVIEWS[id] = "";                                  // asked once; the answer replaces it
+  try { const r = await fetch(`/api/preview?atom=${encodeURIComponent(id)}${runQ()}`, {cache:"no-store"});
+    PREVIEWS[id] = r.ok ? (await r.json()).html || "" : ""; } catch (e) {}
+  if (state) paint($("pane-workflows"), renderWorkflows(state));
+}
+$("pane-workflows").addEventListener("click", e => { const b = e.target.closest("[data-link]"); if (!b || b.tagName === "A") return;
+  const a = state.workflows.flatMap(w => w.atoms || []).find(x => x.id === b.dataset.atom); if (!a) return;
+  $("dtitle").textContent = `${a.id} · ${b.dataset.link === "agent" ? "agent output" : "verification evidence"}`;
+  $("dbody").innerHTML = `<pre>${esc(JSON.stringify(b.dataset.link === "agent" ? a.agent_output : (a.results || []), null, 2))}</pre>`;
+  $("detail").showModal(); });
 // Saved runs: pick one to open it read-only; the URL keeps ?run= so it can be reloaded or shared locally.
 (async () => { try { const r = await (await fetch("/api/runs")).json();
   $("runsel").innerHTML = `<option value="">Live run (${esc(r.live)})</option>` + r.runs.filter(x => x.id !== r.live)

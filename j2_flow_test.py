@@ -1102,10 +1102,8 @@ def work_atom_cards():
     assert one.count('class="atom"') == 1 and re.search(r'class="atom"[^>]*\bopen\b', one), "one atom opens expanded"
     assert not re.search(r'class="atom"[^>]*\bopen\b', two), "two atoms open collapsed"
     a1 = block("atom-W-1.a1")
-    for label, gloss in (("Goal", "What must be true when this is done"), ("Constraints", "What must never break"),
-                         ("Context", "What it needs to know"), ("How", "Who builds it"),
-                         ("Expected output", "What must exist when it is done"), ("Verification", "The check that proves the goal is met")):
-        assert f"<dt>{label}<br>" in a1 and gloss in a1, label
+    for key in ("goal", "how", "constraints", "context", "expected_output", "verification", "human_output", "agent_output"):
+        assert f'data-block="{key}"' in a1, key
     assert re.search(r"Passed</span>: [^<]+ <span class=\"empty\">Attempt 1 of 3", a1) and "not run" not in a1 and "{" not in re.sub(r"<[^>]+>", "", a1.split("Run details")[0])
     run1, run2 = block("run-W-1.a1"), block("run-W-1.a2")
     labels = re.findall(r"<(?:h4|summary)>([^<]*)<", run1)
@@ -3299,6 +3297,111 @@ def slim_prompts():
     print(f"slim: both paths Done; prompt characters {sizes['0']:,} (old) -> {sizes['1']:,} (J2_SLIM=1) in the mock run")
 
 
+def render_node(state, previews=None, html=None):
+    """j2_ui_render.js: the page's script against a stub DOM (no browser). Returns {simple, sprog, cards}."""
+    import subprocess
+    d = tempfile.mkdtemp(prefix="j2-render-")
+    paths = []
+    for name, obj in (("state.json", state), ("previews.json", previews or {})):
+        paths.append(os.path.join(d, name))
+        json.dump(obj, open(paths[-1], "w"), default=str)
+    here = os.path.dirname(os.path.abspath(__file__))
+    r = subprocess.run(["node", os.path.join(here, "j2_ui_render.js"), html or os.path.join(here, "j2_ui.html"), *paths],
+                       capture_output=True, text=True, timeout=60)
+    assert r.returncode == 0, r.stderr[-800:]
+    return json.loads(r.stdout)
+
+
+def atom_cards_render():
+    """B, browser-free: cards rendered from a stored run have the preview, eight blocks in three groups and three
+    links; long blocks are collapsed; the preview source is the section in the saved page; Simple view is unchanged."""
+    import subprocess
+    import html as htmllib
+    import shutil
+    if not shutil.which("node"):
+        print("atom cards render test skipped: node not found")
+        return
+    run = j2.J2Run()
+    say(run, BREW_LAB)
+    assert run.outcome.startswith("Done"), run.outcome
+    page = open(os.path.join(run.dir, "site", "index.html"), encoding="utf-8").read()
+    snap = j2.saved_snapshot(os.path.basename(run.dir), 0)          # the stored run, as the page reads it
+    atoms = [(w, a) for w in snap["workflows"] for a in w["atoms"] if a.get("agent_output")]
+    anchored = [a for _, a in atoms if a["agent_output"]["anchor"]]
+    plain = [a for _, a in atoms if not a["agent_output"]["anchor"]]
+    assert anchored, "the mock run builds sections with ids"
+    previews = {a["id"]: j2.preview_doc(page, a["agent_output"]["anchor"]) for a in anchored}
+    out = render_node(snap, previews)
+    for w, a in atoms:
+        card = out["cards"][w["id"]]
+        card = card[card.index(f'data-key="atom-{a["id"]}"'):]
+        card = card[:card.index("Run details")]
+        blocks = re.findall(r'data-block="([a-z_]+)"', card)
+        assert blocks == ["goal", "how", "constraints", "context", "expected_output", "verification", "human_output",
+                          "agent_output"], blocks
+        assert re.findall(r'<h4 class="agroup">([^<]*)<', card) == ["1. Particles", "2. Defined output and verification",
+                                                                      "3. Outputs"]
+        for link in ("site", "agent", "evidence"):
+            assert (f'data-link="{link}"' in card) == (link != "site" or bool(a["agent_output"]["anchor"])), (link, a["id"])
+        for key in ("constraints", "context"):                      # collapsed by default behind a "show" toggle
+            blk = card.split(f'data-block="{key}"')[1].split('data-block=')[0]
+            assert '<details class="long"' in blk and "<summary>show</summary>" in blk and " open" not in blk.split(">")[0], key
+        assert '<details class="long" data-key="blk-' + a["id"] + '-evidence"><summary>show</summary>' in card
+        for key in ("goal", "expected_output", "human_output"):     # always visible
+            blk = card.split(f'data-block="{key}"')[1].split('data-block=')[0]
+            assert "<details" not in blk, key
+        assert htmllib.escape(a["human_output"]["text"], quote=True).replace("&#x27;", "'") in htmllib.unescape(card) \
+            or a["human_output"]["text"] in htmllib.unescape(card)
+        # the preview comes before the blocks: the section in a sandboxed frame, else the human_output text
+        pre = card.split('<h4 class="agroup">')[0]
+        if a["agent_output"]["anchor"]:
+            src = htmllib.unescape(re.search(r'<iframe class="apreview" data-preview="frame" sandbox="" [^>]*srcdoc="([^"]*)"', pre).group(1))
+            el = j2.element_by_id(page, a["agent_output"]["anchor"])
+            assert src == previews[a["id"]] and el and el in page and el in src, a["id"]
+            assert src.count(el) == 1 and src.endswith(el + "</body></html>")
+        else:
+            assert 'data-preview="text"' in pre and htmllib.unescape(a["human_output"]["text"]) in htmllib.unescape(pre)
+    # no anchor in the stored data: the human_output takes the preview's place, nothing is fetched
+    a0 = anchored[0]
+    saved = json.loads(json.dumps(snap))
+    for w in saved["workflows"]:
+        for a in w["atoms"]:
+            if a["id"] == a0["id"]:
+                a["agent_output"]["anchor"] = None
+    pre = render_node(saved)["cards"][next(w["id"] for w in saved["workflows"] if any(a["id"] == a0["id"] for a in w["atoms"]))]
+    assert 'data-preview="text"' in pre and "<iframe" not in pre.split(f'data-key="atom-{a0["id"]}"')[1].split("Run details")[0]
+    # an atom with an anchor but no preview yet shows a loading note
+    assert 'data-preview="wait"' in render_node(snap)["cards"][atoms[0][0]["id"]] or not atoms[0][1]["agent_output"]["anchor"]
+    # Simple view output is identical to before the atom cards changed (the checkpoint commit's page, same state)
+    old = subprocess.run(["git", "show", "3ab8120:j2_ui.html"], capture_output=True, text=True,
+                         cwd=os.path.dirname(os.path.abspath(__file__)))
+    if old.returncode == 0:
+        p = os.path.join(tempfile.mkdtemp(prefix="j2-old-ui-"), "j2_ui_old.html")
+        open(p, "w", encoding="utf-8").write(old.stdout)
+        before = render_node(snap, html=p)
+        assert before["simple"] == out["simple"] and before["sprog"] == out["sprog"] and before["simple"], "Simple view changed"
+    # the page's preview endpoint serves the same source
+    import threading
+    import urllib.request
+    import j2_server
+    keep, j2_server.RUN = j2_server.RUN, run
+    srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        got = json.load(urllib.request.urlopen(f"http://127.0.0.1:{srv.server_address[1]}/api/preview?atom={a0['id']}"))
+        assert got["anchor"] == a0["agent_output"]["anchor"] and got["html"] == previews[a0["id"]], got
+        # a saved run is read from its folder
+        got = json.load(urllib.request.urlopen(f"http://127.0.0.1:{srv.server_address[1]}/api/preview?atom={a0['id']}"
+                                               f"&run={os.path.basename(run.dir)}"))
+        assert got["html"] == previews[a0["id"]], got
+    finally:
+        j2_server.RUN = keep
+        srv.shutdown()
+    print(f"atom cards (no browser): preview + eight blocks in three groups, three links, collapsed long blocks, preview "
+          f"source = the saved page's section ({len(anchored)} atoms with a frame, {len(plain)} with text), "
+          "Simple view identical to the checkpoint page, /api/preview ok")
+
+
 if __name__ == "__main__":
     if FAST:
         print("--fast: browser measurement stubbed" + ("" if BROWSER else "; tests that drive the page in Chrome are "
@@ -3319,6 +3422,7 @@ if __name__ == "__main__":
         run_20261015_fixes()
         atom_outputs()
         slim_prompts()
+        atom_cards_render()
         atom_checks()
         behavior_steps()
         charter_facts()
