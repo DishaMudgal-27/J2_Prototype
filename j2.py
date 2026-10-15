@@ -35,6 +35,7 @@ J2_FIXES (default 0) picks the mode, so findings can compare the two:
      (b) a change request after done goes to Identity at J2.a first, then J2.b.
 """
 import copy
+from functools import reduce
 import html
 import html.parser
 import json
@@ -494,6 +495,8 @@ def check_problems(a, source, types=CHECK_TYPES):
             out.append(f"{lab} isn't an object with text, type, target and expect")
             continue
         t, target, label = c.get("type"), c.get("target"), str(c.get("text") or "")
+        if t == "lld-slice":          # written by code at registration (the LLD slice is in "spec"), never by Adaptation
+            continue
         if t in HEADING_CHECKS:
             target = heading_target(target)
         if t not in types:
@@ -609,6 +612,9 @@ def run_check(c, site_dir, page, doc=False):
             n = text.count(str(target).lstrip("#."))
             return {"actual": n, "pass": n == as_int(expect, -1),
                     "evidence": f"{target!r} found {n} time(s) in {c.get('file') or 'index.html'}, expected {expect}"}
+        if t == "lld-slice":
+            ok, ev = lld_check(page, c.get("spec") or {})
+            return {"actual": ok, "pass": ok, "evidence": ev}
         if t == "behavior-steps":
             return j2_check.run_steps(target if isinstance(target, list) else [], lambda ops: j2_check.behavior(page, ops))
         scan = PageScan(page)
@@ -1479,10 +1485,85 @@ def mock_charter(text):
             "business_type": guess_type(text), "visitor_needs": NEEDS.get(guess_type(text), [])}
 
 
-def mock_section(w, goal, sections):
+# ---- documents as the blueprint: the LLD's sections, elements and form fields are the website builders' spec
+def lld_slice(spec, ids):
+    """The part of the LLD (parse_lld data) for the given section ids: those sections and their elements and fields."""
+    ids = [str(i) for i in ids or []]
+    return {"sections": [s for s in spec.get("sections") or [] if s["id"] in ids],
+            "elements": [e for e in spec.get("elements") or [] if e["section"] in ids],
+            "fields": [f for f in spec.get("fields") or [] if f["section"] in ids]}
+
+
+def _has_selector(page, sel):
+    sel = str(sel or "")
+    if sel.startswith("#"):
+        return element_by_id(page, sel[1:]) is not None
+    if sel.startswith("."):
+        return bool(re.search(rf"""\bclass=["'][^"']*\b{re.escape(sel[1:])}\b""", page or ""))
+    return False
+
+
+def lld_check(page, sl):
+    """(ok, evidence) for a page against an LLD slice: every section id, element selector (and the selectors its
+    behaviour names) exists, and every form field exists with its type and required flag. Code only, no browser.
+    ponytail: structure, not what a click does; the behaviour steps (behavior-steps) are the upgrade."""
+    bad = []
+    for s in sl.get("sections") or []:
+        if not s.get("anchor") or element_by_id(page, s["anchor"]) is None:
+            bad.append(f"{s['id']} #{s.get('anchor')} isn't on the page")
+    for e in sl.get("elements") or []:
+        for sel in [e.get("selector")] + re.findall(r"`([#.][\w-]+)`", e.get("behaviour") or ""):
+            if sel and not _has_selector(page, sel):
+                bad.append(f"{e['id']} {sel} isn't on the page")
+    for f in sl.get("fields") or []:
+        scope = element_by_id(page, f["form"]) if f.get("form") else page
+        tag = re.search(rf"""<(?:input|select|textarea)\b[^>]*\bname=["']{re.escape(str(f.get('name')))}["'][^>]*>""",
+                        scope or "", re.I)
+        if not tag:
+            bad.append(f"{f['id']} field {f.get('name')} isn't in {'#' + f['form'] if f.get('form') else 'the page'}")
+            continue
+        ty = re.search(r"""\btype=["']([\w-]+)["']""", tag[0], re.I)
+        req = bool(re.search(r"\brequired\b", tag[0], re.I))
+        if (ty[1].lower() if ty else "text") != f.get("type"):
+            bad.append(f"{f['id']} field {f['name']} is type {ty[1] if ty else 'text'}, the spec says {f.get('type')}")
+        if req != bool(f.get("required")):
+            bad.append(f"{f['id']} field {f['name']} is {'required' if req else 'optional'}, the spec says "
+                       f"{'required' if f.get('required') else 'optional'}")
+    n = len(sl.get("sections") or []) + len(sl.get("elements") or []) + len(sl.get("fields") or [])
+    return not bad, "; ".join(bad) if bad else f"all {n} spec item(s) are on the page as written"
+
+
+def lld_markup(sl, title=""):
+    """Mock only: the HTML a scripted builder writes for an LLD slice (sections, elements that show their result,
+    forms with their fields)."""
+    out = ""
+    for s in sl.get("sections") or []:
+        inner = f"<h2>{html.escape(re.sub(r'[0-9]', '', title))}</h2>"
+        for e in [x for x in sl.get("elements") or [] if x["section"] == s["id"]]:
+            sel = e.get("selector") or ""
+            attr = f'id="{sel[1:]}"' if sel.startswith("#") else f'class="{sel[1:]}"'
+            inner += (f'<button {attr} type="button" style="min-height:44px;min-width:44px">Try it</button>')
+            for r in re.findall(r"`#([\w-]+)`", e.get("behaviour") or ""):
+                inner += f'<p id="{r}" hidden>Result shown here.</p>'
+        forms = {}
+        for f in [x for x in sl.get("fields") or [] if x["section"] == s["id"]]:
+            forms.setdefault(f.get("form"), []).append(f)
+        for form, fs in forms.items():
+            rows = "".join(f'<label>{html.escape(f["type"])} field <input name="{f["name"]}" type="{f["type"]}"'
+                           f'{" required" if f.get("required") else ""} style="display:block;min-height:44px"></label>'
+                           for f in fs)
+            fid = f'id="{form}" ' if form else ""
+            inner += (f'<form {fid}action="/send">{rows}<button type="submit" '
+                      'style="min-height:44px;min-width:44px">Send</button></form>')
+        out += f'<section id="{s["anchor"]}">{inner}</section>'
+    return out
+
+
+def mock_section(w, goal, sections, lld=None, anchors=()):
     """mock_page's (head, body) plus the elements the workflow's behaviour steps use (a button for a click, a
     paragraph for anything read)."""
-    head, body = mock_page(w, goal, sections)
+    head, body = mock_page(w, goal, sections, anchors)
+    body += lld_markup(lld, w["name"]) if lld else ""
     made, extra = set(), ""
     for a in w.get("atoms") or []:
         for x in a.get("expected_output") or []:
@@ -1495,7 +1576,7 @@ def mock_section(w, goal, sections):
     return head, body + (f'<div class="j2-try">{extra}</div>' if extra else "")
 
 
-def mock_page(w, goal, sections):
+def mock_page(w, goal, sections, anchors=()):
     """(head, body) a scripted workflow agent writes: the scaffold styles the page, a viewport fix (or a workflow that
     builds a phone item) adds the meta tag,
     anything else adds the done-when items no other section covers yet (or a plain block, not a section). The first
@@ -1512,6 +1593,8 @@ def mock_page(w, goal, sections):
                                f'line-height:44px;padding:0 8px">{html.escape(short(d))}</a>')     # 44px tap targets
     hero = "" if "<nav" in others else (
         '<header id="hero"><nav>' + " ".join(link(i, d) for i, d in shown)
+        + "".join(f' <a href="#{a}" style="display:inline-block;min-height:44px;min-width:44px;line-height:44px;padding:0 8px">More</a>'
+                  for a in anchors)
         + f"</nav><h1>{html.escape(g.get('site_name') or 'Our site')}</h1><p>{html.escape(g.get('statement') or '')}</p>"
         + (link(*main, ' class="j2-btn"') if main else "") + "</header>")
     if "scaffold" in n:
@@ -2406,6 +2489,7 @@ class J2Run:
         # agent_output, and what earlier stages left behind. Empty for every other run.
         self.docset, self.stages, self.stage_i, self.chain, self.docs = [], [], 0, {}, {}
         self.past_workflows, self.stage_archive, self.site_tag, self.budget_total = [], [], "", None
+        self.blueprint, self.proposed_lld, self.lld_revisions, self.lld_conflicts = None, {}, [], {}   # the LLD as the spec
         self.goal, self.stamped, self.request = None, False, ""
         self.spent, self.cycle, self.calls, self.step = 0, 0, 0, 0
         self.budget, self.raises = BUDGET, []
@@ -3122,6 +3206,12 @@ class J2Run:
         self._apply_output(kind)
         if kind == "website":
             self.post("system", "The documents are done. Now the website, built from them.")
+            self.proposed_lld = {}
+            if (self.chain.get("lld") or {}).get("sections"):       # only an LLD is a blueprint; an HLD alone is a summary
+                self.blueprint = copy.deepcopy(self.chain["lld"])
+                self.WF_FMT = self.WF_FMT.replace('"covers": [int]', '"lld_sections": [str] (the LLD section ids this '
+                                                  'workflow implements, e.g. "S1"), "covers": [int]')
+                self.GRANT_FMT = self.GRANT_FMT.replace('"covers": [int]', '"lld_sections": [str], "covers": [int]')
             return self._handoff("identity", kind="intake")
         self.goal = stage_goal(kind, self.stage_archive[0]["goal"], dict(self.chain))
         self.goal["charter_items"] = list(self.goal["done_when"])
@@ -4325,6 +4415,8 @@ class J2Run:
             # The mock declares honest covers/fixes: each workflow's parts pay for the items it covers (J2.e checks).
             if self.doc:
                 return json.dumps(self._mock_doc_plan(fails))
+            if self.blueprint and not self.workflows and not self.feedback:
+                return json.dumps(self._mock_blueprint_plan(crit))
             if self.feedback:
                 return json.dumps({"say": f"@Priority The Requester asked: \"{self.feedback}\". One workflow covers it.",
                                    "act": "PROPOSE", "next": "Priority",
@@ -4439,7 +4531,7 @@ class J2Run:
                       "budget, cost or cutting. When the done-when items cost more than the budget left, still PROPOSE "
                       "the best set that fits and list each item you leave out in left_out with its reason. Never leave "
                       f"out these items (the no-errors check and the brief's core facts): {keep}."
-                      + (self.out["plan"] if self.doc else "") + self.ATOM_RULES
+                      + (self.out["plan"] if self.doc else "") + self._blueprint_plan() + self.ATOM_RULES
                       + f"\nNECESSARY CONDITIONS (code checks every one on the built {self.out['noun']}; it is workable "
                       "only when all are met, so your plan must build what each needs):\n"
                       + "\n".join(f"{c['id']}: {c['text']}" for c in load_conditions(self.out["conditions"])))
@@ -4561,6 +4653,8 @@ class J2Run:
                 r = {**r, "workflows": [w for w in norm(r.get("workflows")) if not self._atom_problems(w)]}
         for w in norm(r.get("workflows")):
             self.proposed_atoms[w.get("name")] = normalise_checks(w["atoms"])
+            if self.blueprint:
+                self.proposed_lld[w.get("name")] = w.get("lld_sections")
         return r
 
     REVISION_EXAMPLE = {"say": "@Priority One revision of W-1: its builder rewrites the section with the corrected check.",
@@ -4632,8 +4726,50 @@ class J2Run:
         met = {c["id"] for c in last.get("conditions") or [] if c["met"]}
         text = json.dumps(list(wfs) + [w for w in self.workflows if w["status"] in ("registered", "held", "running", "done")],
                           ensure_ascii=False)
-        return [c for c in load_conditions(self.out["conditions"])
-                if c.get("plan") and c["id"] not in met and not re.search(c["plan"], text, re.I)]
+        gaps = [c for c in load_conditions(self.out["conditions"])
+                if c.get("plan") and c["id"] not in met and not re.search(c["plan"], text, re.I)
+                and (not c.get("key") or (self.goal or {}).get("chain", {}).get(c["key"]))]   # a link needs the earlier document
+        return gaps + self._lld_gaps(wfs)
+
+    def _mock_blueprint_plan(self, crit):
+        """Mock Adaptation for a site with an LLD: the scaffold, then one workflow per LLD section; the charter's items
+        are spread over them so each pays its rate-card minimum, the last one takes what is left."""
+        secs, items = self.blueprint["sections"], [c for c in crit if "phone" not in str(c).lower()]
+        wfs = [{"name": "Scaffold and styling", "goal_gap": "No site exists", "parts": ["styling"], "covers": [],
+                "lld_sections": [], "outputs": ["index.html"], "completion_check": "index.html loads with a nav to every "
+                                                                                 "section and a main action in the hero"}]
+        for n, sec in enumerate(secs):
+            mine = items[n:n + 1] if n < len(secs) - 1 else items[n:]
+            wfs.append({"name": f"Build section {sec['id']}", "goal_gap": f"LLD section {sec['id']} is not on the page",
+                        "parts": [item_kind(c) for c in mine] or ["interactive_feature"],
+                        "covers": [self._no(c) for c in mine], "lld_sections": [sec["id"]], "outputs": ["index.html"],
+                        "completion_check": f"The page matches LLD section {sec['id']}"})
+        return {"say": "@Priority One workflow per LLD section, after the scaffold.", "act": "PROPOSE", "next": "Priority",
+                "workflows": wfs}
+
+    def _blueprint_plan(self):
+        if not self.blueprint:
+            return ""
+        return ("\nTHE LLD IS THE BLUEPRINT: plan one workflow per LLD section and list the LLD section ids it implements "
+                "in lld_sections (a styling or fix workflow may list none). Every LLD section needs a workflow. LLD "
+                f"SECTIONS: {json.dumps([{'id': x['id'], 'anchor': x['anchor'], 'implements': x['implements']} for x in self.blueprint['sections']])}")
+
+    def _lld_gaps(self, wfs):
+        """Before building the site from the LLD: every LLD section has a workflow, and every workflow that builds
+        something cites the LLD sections it implements. Pseudo-conditions, worded for the plan flag."""
+        if not self.blueprint:
+            return []
+        ids = [x["id"] for x in self.blueprint["sections"]]
+        live = [w for w in self.workflows if w["status"] in ("registered", "held", "running", "done")]
+        cited = {str(i) for w in list(wfs) + live for i in w.get("lld_sections") or []}
+        out = [{"id": i, "text": "an LLD section", "why": f"no workflow implements LLD section {i}"} for i in ids if i not in cited]
+        out += [{"id": w.get("name"), "text": "no LLD citation", "why": f"workflow {w.get('name')!r} cites no LLD section "
+                 "(lld_sections)"} for w in wfs if not w.get("lld_sections") and not w.get("revises")
+                and not set(w.get("parts") or ["x"]) <= {"styling", "fix"}]
+        out += [{"id": w.get("name"), "text": "unknown LLD section", "why": f"workflow {w.get('name')!r} cites "
+                 f"{[i for i in w.get('lld_sections') or [] if str(i) not in ids]}, which are not LLD sections"}
+                for w in wfs if any(str(i) not in ids for i in w.get("lld_sections") or [])]
+        return out
 
     def _plan_checked(self, r, fmt, task, mock):
         """J2.e before building: a plan that leaves a necessary condition with no workflow is flagged and Adaptation
@@ -4642,7 +4778,7 @@ class J2Run:
             gaps = self._plan_gaps(norm(r.get("workflows"))) if norm(r.get("workflows")) else []
             if not gaps:
                 return r
-            why = "; ".join(f"no workflow builds {c['id']} ({c['text']})" for c in gaps)
+            why = "; ".join(c.get("why") or f"no workflow builds {c['id']} ({c['text']})" for c in gaps)
             self.rejections.append({"cycle": self.cycle, "workflow": "plan", "reason": why})
             self._event("validator", "plan_gap", why)
             if retry:
@@ -5037,10 +5173,13 @@ class J2Run:
             missing = [f for f in self.REQUIRED if not (w.get(f) or (f == "goal_gap" and w.get("purpose")))]
             atoms = normalise_checks(w.get("atoms") or self.proposed_atoms.get(name))   # Priority or a ruling may drop them
             no_atom = self._atom_problems({"atoms": atoms})
+            lld = [str(i) for i in (w.get("lld_sections") or self.proposed_lld.get(name) or [])] if self.blueprint else []
+            unknown_lld = [i for i in lld if i not in {x["id"] for x in self.blueprint["sections"]}] if self.blueprint else []
             rc, unknown = price(w)
             reason = ("a check or report on the site is Audit's job, not a workflow" if self.CHECK_WORK.search(str(name))
                       else f"required field(s) missing: {', '.join(missing)}" if missing
                       else "; ".join(no_atom) if no_atom
+                      else f"it cites LLD section(s) that don't exist: {unknown_lld}" if unknown_lld
                       else f"{self.p_refused[name]}, so it can't be registered" if name in self.p_refused
                       else "no rate-card parts, so it has no price" if RATES and rc is None
                       else f"unknown rate-card parts {unknown}; allowed: {', '.join(RATES)}" if unknown
@@ -5069,6 +5208,9 @@ class J2Run:
                   "completion_check": w.get("completion_check", ""), "dependencies": w.get("dependencies") or [],
                   "status": "registered", "cycle": self.cycle}
             wf["atoms"] = [{**a, "id": f"{wf['id']}.a{n}"} for n, a in enumerate(atoms, 1)]
+            if lld:       # the LLD slice is this workflow's spec: code adds the check that the page matches it
+                wf["lld_sections"] = lld
+                wf["atoms"][0]["verification"] = list(wf["atoms"][0].get("verification") or []) + [self._lld_check_for(lld)]
             # J2.e: the workflow gets its own agent, which owns one marked section of the site file. "revises" hands
             # an earlier workflow's section to it (only a section that exists and isn't already being rewritten).
             rv = str(w.get("revises") or "").upper()
@@ -5084,6 +5226,10 @@ class J2Run:
         self._recalc_spent()
         self.save("workflows.json", self.workflows)
         return registered, refused, defaults
+
+    def _lld_check_for(self, ids):
+        return {"text": f"The page matches LLD section(s) {', '.join(ids)}: ids, selectors and form fields as specified",
+                "type": "lld-slice", "target": ", ".join(ids), "expect": True, "spec": lld_slice(self.blueprint, ids)}
 
     def _wf_items(self, w):
         """The current done-when item numbers a registered workflow covers, matched by the item text stored at
@@ -5272,7 +5418,7 @@ class J2Run:
                           for a in w.get("atoms") or []]
         brief["covers_items"] = [((self.goal or {}).get("done_when") or [])[i - 1] for i in self._wf_items(w)]
         self.atom = (w.get("atoms") or [{}])[0].get("id")     # its AI calls are tagged with the atom they build
-        attempt, failed, evidence, prev_sig, early = 0, [], "", set(), None
+        attempt, failed, evidence, prev_sig, early, spec_stop = 0, [], "", set(), None, None
         while True:
             attempt += 1
             prev = self.sites[-1] if self.sites else ""
@@ -5291,7 +5437,8 @@ class J2Run:
                                         "atom_human_output": "This adds a written part of the document that readers can use.",
                                         "next": "Coordination"})
                             + f"\n```markdown\n{self.out['mock_section'](w, self.goal)}```")
-                head, body = mock_section(w, self.goal, self.sections)
+                head, body = mock_section(w, self.goal, self.sections, self._lld_slice_for(w),
+                                          [x["anchor"] for x in self.blueprint["sections"]] if self.blueprint else ())
                 return (json.dumps({"say": f"@Coordination {fn} done: {w['name']}. Section {sid} written.",
                                     "human_output": f"I built the {w['name']} section ({sid}) of the page.",
                                     "atom_human_output": "This adds a part of the page that visitors can read and use.",
@@ -5319,7 +5466,7 @@ class J2Run:
                                       if self.doc else (
                                 'First line: a JSON object {"say": str (one short line reporting to @Coordination: '
                                 'what you changed; code runs your checks and reports them, so don\'t claim they pass), '
-                                '"human_output": str (1 to 3 plain sentences telling a person what you built; \"done.\" alone is rejected), "atom_human_output": str (1 or 2 plain sentences telling the Requester what this part created, in everyday words: no ids, no selectors, no \"units\"), "next": "Coordination", ' + self.REASON + '}. '
+                                '"human_output": str (1 to 3 plain sentences telling a person what you built; \"done.\" alone is rejected), "atom_human_output": str (1 or 2 plain sentences telling the Requester what this part created, in everyday words: no ids, no selectors, no \"units\"), "next": "Coordination", ' + (self.SPEC_FMT if self.blueprint else '') + self.REASON + '}. '
                                 + ('Then a ```style block with the style guide as JSON: ' + STYLE_FMT + '. ' if first
                                    else '')
                                 + 'Then, '
@@ -5341,9 +5488,7 @@ class J2Run:
                                    f"ATTEMPT AND THESE FAILED:\n{evidence}\nFix the section so they pass." if evidence
                                    else "")
                                 + (f"\nYOUR LAST ATTEMPT WAS REJECTED: {last_err}. Fix that." if last_err else "")
-                                + (f"\nOTHER SECTIONS (their atoms' agent_output; the rest of the page isn't shown): "
-                                   f"{json.dumps(self._manifest(w), ensure_ascii=False)}" if slim() else
-                                   f"\nTHE WHOLE SITE FILE NOW (v{len(self.sites)}, read only):\n{prev[:SITE_LIMIT]}"))),
+                                + self._page_context(w, prev))),
                                 mock, max_tokens=16000, json_reply=False)
                 try:
                     parts = parse_doc(raw) if self.doc else parse_section(raw)
@@ -5393,7 +5538,17 @@ class J2Run:
                 with open(os.path.join(self.dir, name), "w", encoding="utf-8") as f:
                     f.write(html_out)
             self.save("sections.json", self.sections)
+            if self.blueprint and (verdict := self._spec_conflict(w, meta)):
+                if verdict == "revised":
+                    for a in w["atoms"]:      # the check now holds the revised slice
+                        a["verification"] = [self._lld_check_for(w["lld_sections"]) if c.get("type") == "lld-slice" else c
+                                             for c in a.get("verification") or []]
+                else:
+                    spec_stop = meta["spec_conflict"]
             failed = self._run_checks(w, attempt, html_out)
+            if spec_stop:
+                early = f"the builder reports a second conflict with LLD section {spec_stop.get('section')}"
+                break
             if not failed or attempt >= MAX_CHECK_ATTEMPTS:
                 break
             # Another attempt can't help when the same check fails on the same evidence again, or when the builder
@@ -5410,6 +5565,9 @@ class J2Run:
             self.post("system", f"Code ran {fn}'s checks on attempt {attempt} of {MAX_CHECK_ATTEMPTS}: {len(failed)} "
                                 f"failed. {fn} gets the evidence and tries again.")
         self.write_lock = self.atom = None
+        if spec_stop:
+            for a in w["atoms"]:
+                a["status"] = "failed"
         nxt, note = "coordination", None      # a builder only reports to Coordination: code sets it, whatever "next" says
         human = self._human_output(w, meta, sid)
         self._atom_outputs(w, meta, attempt)
@@ -5421,9 +5579,12 @@ class J2Run:
         if size > SITE_WARN_BYTES:
             self.post("system", f"Warning: site v{len(self.sites)} is {size / 1000:.0f} KB, over builder.md's ~60 KB "
                                 "single-page rule.", warning=True)
-        if failed:
-            bad = sorted({r["atom"] for r in failed})
-            owner = self._owner_note(failed, sid) if early else ""
+        if failed or spec_stop:
+            bad = sorted({r["atom"] for r in failed}) or [a["id"] for a in w["atoms"]]
+            for a in w["atoms"]:
+                if a["id"] in bad:
+                    a["status"] = "failed"
+            owner = (self._lld_owner_note(spec_stop) if spec_stop else self._owner_note(failed, sid)) if early else ""
             self.post("system", f"{', '.join(bad)} failed its checks on " + (f"attempt {attempt}: {early}, so no more "
                                 f"attempts. {owner}" if early else f"all {MAX_CHECK_ATTEMPTS} attempts.") + " Code sends "
                                 "the receipts to Adaptation, which decides whether the check or the build is wrong.")
@@ -5492,10 +5653,93 @@ class J2Run:
                                     "agent_output": a["agent_output"]}, ensure_ascii=False) + "\n")
         self.save("workflows.json", self.workflows)
 
+    SPEC_FMT = ('"spec_conflict": null|{"section": str (the LLD section id), "reason": str, "use": {"#spec-selector": '
+                '"#selector-you-built"}} (only when your spec can\'t be built as written; never deviate silently), ')
+
+    def _hld_summary(self):
+        comps = (self.chain.get("hld") or {}).get("components")
+        return ("\nHLD SUMMARY (components): " + json.dumps([{k: c[k] for k in ("id", "name", "responsibility")} for c in comps],
+                                                            ensure_ascii=False)) if comps else ""
+
+    def _page_context(self, w, prev):
+        """What a builder sees of the rest of the site. Plain runs: the whole page (J2_SLIM=1: the manifest). With an
+        LLD: its own slice of it (its spec) and a short HLD summary instead of the page; J2_SLIM=1 adds the manifest."""
+        manifest = ("\nOTHER SECTIONS (their atoms' agent_output; the rest of the page isn't shown): "
+                    f"{json.dumps(self._manifest(w), ensure_ascii=False)}")
+        if self.blueprint and w.get("lld_sections"):
+            return ("\nYOUR SPEC (the LLD sections you implement: build exactly these ids, selectors and form fields with "
+                    "their behaviour; if one can't be built as written, report it in spec_conflict, never deviate "
+                    f"silently): {json.dumps(self._lld_slice_for(w), ensure_ascii=False)}" + self._hld_summary()
+                    + (manifest if slim() else ""))
+        if slim():
+            return manifest + self._hld_summary()
+        return f"\nTHE WHOLE SITE FILE NOW (v{len(self.sites)}, read only):\n{prev[:SITE_LIMIT]}" + self._hld_summary()
+
+    def _lld_slice_for(self, w):
+        return lld_slice(self.blueprint, w.get("lld_sections") or []) if self.blueprint else None
+
     def _manifest(self, w):
         """J2_SLIM: other atoms' agent_output, short (ids, sections, selectors), so a builder needn't read the page."""
         return [{k: (x.get("agent_output") or {}).get(k) for k in ("atom", "section", "anchor", "selectors")}
                 for o in self.workflows if o["id"] != w["id"] for x in o.get("atoms") or [] if x.get("agent_output")]
+
+    def _spec_conflict(self, w, meta):
+        """A builder says its LLD slice can't be built as written (spec_conflict). The first time for a section, that
+        LLD section is revised once, with a version note and the reason (_revise_lld); the second time it is
+        escalated. None when there is no usable conflict."""
+        c = meta.get("spec_conflict")
+        sec = str(c.get("section")) if isinstance(c, dict) else ""
+        if sec not in {x["id"] for x in (self.blueprint or {}).get("sections") or []}:
+            return None
+        self.lld_conflicts[sec] = self.lld_conflicts.get(sec, 0) + 1
+        self._event(w["id"], "spec_conflict", f"{sec}: {c.get('reason')}")
+        if self.lld_conflicts[sec] > 1:
+            return "escalate"
+        self._revise_lld(w, sec, c)
+        return "revised"
+
+    def _revise_lld(self, w, sec, c):
+        """Revise one LLD section once: apply the builder's selector changes to the spec and to lld.md, add a version
+        note, and record the reason in the LLD's agent_output (document and owner atom)."""
+        use = {str(k): str(v) for k, v in (c.get("use") or {}).items() if str(k).startswith(("#", ".")) and str(v)[:1] in "#."}
+        spec, v = self.blueprint, 2
+        fix = lambda t: reduce(lambda a, kv: str(a).replace(kv[0], kv[1]), use.items(), t) if t else t
+        for x in spec["sections"]:
+            if x["id"] == sec:
+                x["version"] = v
+                x["anchor"] = (fix("#" + str(x["anchor"])) or "#")[1:]
+        for x in spec["elements"]:
+            if x["section"] == sec:
+                x["selector"], x["behaviour"] = fix(x["selector"]), fix(x["behaviour"])
+        for x in spec["fields"]:
+            if x["section"] == sec and x.get("form"):
+                x["form"] = (fix("#" + x["form"]))[1:]
+        note = {"section": sec, "version": v, "reason": str(c.get("reason") or "").strip(), "changes": use, "by": w["id"]}
+        self.lld_revisions.append(note)
+        lld = self.docs.get("lld") or {}
+        path = os.path.join(self.dir, "lld.md")
+        if os.path.exists(path):
+            text = fix(open(path, encoding="utf-8").read())
+            text = re.sub(rf"(?m)^(\s*[-*+]\s*\*\*{sec}\*\*.*?)$", lambda m: m.group(1) + f" Version {v}: {note['reason']}.", text, count=1)
+            open(path, "w", encoding="utf-8").write(text)
+            export_lld(text, self.dir)
+        if lld:
+            lld["agent_output"] = {**lld["agent_output"], **{k: spec[k] for k in ("sections", "elements", "fields")},
+                                   "revisions": self.lld_revisions}
+        for o in self.past_workflows:        # the LLD atom that wrote the sections carries the reason in its agent_output
+            if "Pages and sections" in o.get("name", ""):
+                for a in o.get("atoms") or []:
+                    if a.get("agent_output"):
+                        a["agent_output"] = {**a["agent_output"], "revisions": self.lld_revisions}
+        self.save("documents.json", self.docs)
+        self.post("system", f"{w['id']} says LLD section {sec} can't be built as written ({note['reason']}). The section is "
+                            f"revised once, to version {v}; the checks now use the revised section.", warning=True)
+
+    def _lld_owner_note(self, c):
+        o = next((x for x in reversed(self.past_workflows) if "Pages and sections" in x.get("name", "")), None)
+        a = ((o or {}).get("atoms") or [{}])[0].get("id")
+        return (f"Owner atom: {a or 'the LLD'} (the LLD section {c.get('section')} was already revised once; "
+                f"reason: {c.get('reason')}).")
 
     def _blames_other(self, say, fn):
         """The builder's own report puts the cause in another workflow's section (names one besides its own)."""
@@ -5785,6 +6029,8 @@ class J2Run:
                  "rubric": rubric, "mechanical": mech, "screenshot": os.path.relpath(shot, self.dir) if shot else None,
                  "all_pass": bool(results) and all(x.get("pass") for x in results + rubric)
                  and not any(blocks(c) for c in extra.get("conditions") or []), **extra}
+        if self.blueprint and not self.doc:
+            audit["lld"] = self._lld_compare(site)
         self.audits.append(audit)
         self.save("audits.json", self.audits)
         nxt, note = self._pick("audit", r.get("next"), ("identity",), "identity",
@@ -5802,6 +6048,44 @@ class J2Run:
         failed = [f"workflow {w['id']} {w['name']} failed (envelope limits)" for w in self.workflows
                   if w["status"] == "failed" and w["cycle"] == self.cycle]
         self._handoff("identity", kind="audit", why=f"Failed workflows this cycle: {failed}" if failed else "")
+
+    def _lld_compare(self, page):
+        """The finished page against the whole LLD, by code: which sections match, which are on the page but differ
+        (a mismatch), and which no workflow built (dropped by Priority: a warning, not a failure)."""
+        built = {i for w in self.workflows if w["status"] in ("registered", "held", "running", "done")
+                 for i in w.get("lld_sections") or []}
+        out = {"matches": [], "mismatches": [], "dropped": []}
+        for x in self.blueprint["sections"]:
+            ok, ev = lld_check(page, lld_slice(self.blueprint, [x["id"]]))
+            (out["matches"] if ok else out["mismatches"] if x["id"] in built else out["dropped"]).append(
+                x["id"] if ok else {"section": x["id"], "evidence": ev})
+        return out
+
+    def _lld_audit_text(self, page):
+        if not self.blueprint:
+            return ""
+        c = self._lld_compare(page)
+        return ("LLD COMPARISON (checked by code: the page against the LLD; report what matches and what does not; "
+                "sections no workflow built were dropped by Priority and are a warning only): "
+                f"{json.dumps(c, ensure_ascii=False)}\n")
+
+    def _chain_record(self):
+        """requirement -> HLD component -> LLD section -> built atom, from the documents' agent_output and the site's
+        workflows (each cites the LLD sections it implements). Code only."""
+        reqs = (self.chain.get("prd") or {}).get("requirements") or []
+        comps = (self.chain.get("hld") or {}).get("components") or []
+        secs = (self.chain.get("lld") or {}).get("sections") or []
+        atoms_of = lambda sid: [a["id"] for w in self._all_wfs() if sid in (w.get("lld_sections") or [])
+                                for a in w.get("atoms") or []]
+        rows = []
+        for r in reqs or [{"id": None}]:
+            cs = [c for c in comps if r["id"] in c.get("covers", [])] or [{"id": None}]
+            for c in cs:
+                ss = [x for x in secs if c["id"] in x.get("implements", [])] or [{"id": None}]
+                for x in ss:
+                    rows.append({"requirement": r["id"], "component": c["id"], "lld_section": x["id"],
+                                 "atoms": atoms_of(x["id"]) if x["id"] else []})
+        return rows
 
     def _audit_site(self, site, crit):
         """J2.g for a website: the render check and screenshot in headless Chrome, then Audit's call.
@@ -5861,7 +6145,7 @@ class J2Run:
                       f"MEASURED PROBLEMS (code; you can't PASS these items): {json.dumps(measured, ensure_ascii=False)}\n"
                       + ("SCREENSHOT ATTACHED: the first screen at 360px (left) and 1280px (right). Judge R-1 to R-5 on "
                          "what you see.\n" if shot else "No screenshot this time: judge from the code and the measurements.\n")
-                      + f"SITE v{len(self.sites)}:\n{site[:SITE_LIMIT]}", mock,
+                      + self._lld_audit_text(site) + f"SITE v{len(self.sites)}:\n{site[:SITE_LIMIT]}", mock,
                       max_tokens=1600, images=[shot] if shot else None)
         return r, mech, shot, measured, conds
 
@@ -6172,8 +6456,14 @@ class J2Run:
                        if o.startswith(p)), "stopped")
         last = self.audits[-1] if self.audits else None
         conds = (last or {}).get("conditions")
+        if self.docset:
+            self.save("chain.json", self._chain_record())
         self.save("summary.json", {
             "run": self.run_id, "output_type": self.output, "j2_fixes": int(self.fixes),
+            **({"design_documents": {"requested": self.docset, "stages": self.stages, "files": {k: v["file"] for k, v in self.docs.items()},
+                                     "chain": self._chain_record(), "lld_revisions": self.lld_revisions,
+                                     "lld_compare": (self.audits[-1].get("lld") if self.audits else None)}}
+               if self.docset else {}),
             "provider": None if llm.MOCK else llm.PROVIDER,
             "sections": [{"heading": h, "words": md_words(b)} for lv, h, b in md_sections(self.sites[-1]) if lv == 2]
             if self.doc and self.sites else list(self.sections),
