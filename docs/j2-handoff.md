@@ -81,3 +81,53 @@ dupattas 899/1,099); size guide XS32..XXL42; 3 reviews; lookbook 3 outfits; deli
 - .env.example not yet committed: pre-commit hook blocks any .env.* file. Prompt 1 (allow exactly .env.example) pending.
 - Third pass pending: nav fix rejected as 'styling' (should be 'fix'); fund blocking fixes before optional sections via a validator rule; check-only report on loop and bargain limits.
 - After that: live clothing test on new code, grep runs/ and logs for the key value, then steps 3 to 6 above.
+
+## Status (15 Oct 2026)
+
+**Commits since ff1cafd** (each range starts at a checkpoint commit; every change is committed before and after)
+- Atom outputs, detailed-view cards and slim mode: 3ab8120 to c2e0fcb (82c8ca7 atom human_output and agent_output, J2_SLIM prompts; 56b8223 atom cards with preview, eight blocks, links, browser-free render test; c2e0fcb replay script).
+- Design documents (PRD, HLD, LLD) and the LLD as blueprint for the site: 0657d93 to fe9d7c9 (fc06c02, 6c13ff7, 9520e1f, fe9d7c9).
+- Budget rule for the document chain: 387792d to e1e4607.
+- Tests: `python3 j2_flow_test.py --fast` and `--fast --browser` both pass at e1e4607.
+
+**J2_SLIM=1** (off by default; the old path is unchanged and tested)
+- A builder gets its own section's HTML plus a short manifest of other atoms' agent_output (ids, sections, selectors), not the whole page.
+- Finished atoms in the shared state shrink to id, status and agent_output. Audit still sees the full page. Coordination's role and wording are unchanged.
+
+**Documents are opt-in** (code matches explicit words in the brief or the Requester's answers; never a default)
+- Set request, all three in one chain: "design document(s)", "design docs", "design documentation", "full documentation".
+- Single requests: PRD / product requirements; HLD / high-level design / architecture overview; LLD / low-level design / detailed design. Naming one or two makes exactly those. "Modern design" or "design a logo" trigger nothing.
+- Order is PRD, HLD, LLD; each reads the one before by its agent_output. A website follows only if the brief also names one. With an LLD it is built from it (each builder gets its LLD slice and an HLD summary; the page is checked against the slice). With no document asked for, the flow is unchanged (tested against 0657d93).
+- Files per document: `<kind>.md` and `<kind>.docx`. Checks: P1-P8 (unchanged), H1-H6, L1-L6.
+
+**Budget**
+- Least each stage can cost on the rate card: PRD 65, HLD 65, LLD 55, website essentials 50 (235 for all four).
+- The cap is 2x the start budget (J2_BUDGET, default 100, so the default cap is 200). A documents-plus-site run needs a start budget of about 240 (J2_BUDGET=240) to run with no question; at the default it is asked.
+- Nothing is skipped by code. When the credits left cannot cover the stages still to do, the Requester gets the decision question (add credits, leave out, finish as it is) with each document and the site as items, once before the first plan and again before each later stage.
+
+**Replay estimates** (`python3 j2_replay_size.py`, `--documents` for documents; no model calls). These are estimates, not measurements.
+- Run j2-20261015-114723, 57 calls: input 6,639,854 characters old, 5,183,068 with slim (-21.9%). About 1.66M to 1.30M tokens at characters / 4. That run's measured input was 2,950,102 tokens at 2.25 characters per token, so characters / 4 understates real tokens by about 1.8x.
+- New atom fields: about 25K characters once for 18 atoms, plus about 150 characters per builder call.
+- Documents, from one mock run of the chain: PRD 17 calls, HLD 16, LLD 14 (47 total), then 24 for the site. Stand-in size (the replayed run's average prompt per agent) is about 4.4M characters (about 1.1M tokens at /4) for the three documents; the mock run's own prompts are 1.6M characters. Stand-in overstates a document (no page, smaller state) and mock content understates it: read them as a range.
+- A site builder's LLD slice plus HLD summary is about 935 characters in the mock run, against about 132K characters of whole page on the old path.
+
+**Open items**
+- Live token measurement: no live run has measured slim mode or the documents yet.
+- Coordination relay cost: its calls stay about 90-120K characters each in the replay (the chat dominates) and slim mode only trims them 1-21%.
+- Priority ruling before stage-level questions: the stage funding check is code on minimum prices; Priority is not asked first.
+- LLD checks are structure only (ids, selectors, form fields with type and required flag); what a click does is not run.
+- GitHub push: nothing has been pushed.
+
+**Mock documents run for the Detailed view** (no credits; run from the repo folder; it writes to /tmp, not runs/)
+```
+export STUDIO_MOCK=1 J2_MEMORY=0 J2_RUNS_DIR=/tmp/j2-mock-docs
+python3 - <<'PY'
+import time, j2
+r = j2.J2Run(); r.budget = 900
+r.user_says("A one-page website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru. Visitors see the menu with prices, the opening hours and where to find us, and pre-order a coffee for pickup. Write the design docs first. Users: coffee lovers and office staff. Problem: people can't see the menu or order ahead. Must-have features: see the menu with prices, pre-order a coffee, find the shop, read the opening hours. Constraints: one page only. Success: 30 pre-orders per week.")
+while r.status != "waiting": time.sleep(0.05)
+print(r.outcome); print("OPEN: http://127.0.0.1:8773/?run=j2-" + r.run_id + "&view=detail")
+PY
+python3 j2_server.py --port 8773 --no-browser
+```
+Open the URL it prints after "OPEN:". Stop the server with Ctrl+C.
