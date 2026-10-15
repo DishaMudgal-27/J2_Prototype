@@ -358,6 +358,32 @@ def preview_doc(page, eid):
                                     + "</head><body>" + el + "</body></html>")
 
 
+def fallback_human(a, noun):
+    """Code's own human_output when the builder's is unusable twice: the atom's expected output in plain words."""
+    parts = [re.sub(INTERNAL, "", x.get("text") or "").strip(" .") for x in a.get("expected_output") or []
+             if isinstance(x, dict)]
+    text = f"It created {and_list([p for p in parts if p][:3])}." if any(parts) else ""
+    return text if not atom_human_problem(text) else f"It adds the part of the {noun} this step was asked to build."
+
+
+def build_agent_output(w, a, attempt, body, receipts, last_audit, n_sites, doc, out_file):
+    """What other agents read instead of searching: built by code from the section as written and the receipts of
+    this attempt (no model). Files, section names, element ids and selectors created, the checks and their results,
+    the audit's N/P conditions, the receipt id (receipts.jsonl: atom and attempt)."""
+    ids, cls = created_in(body)
+    heads = [re.sub(r"<[^>]+>|^#+\s*", "", h).strip() for h in re.findall(r"<h[1-3][^>]*>.*?</h[1-3]>|^#{1,3} .*$", body or "",
+                                                                           re.S | re.M)]
+    want = [str(x.get("target")) for x in a.get("expected_output") or [] if isinstance(x, dict) and x.get("kind") == "section"]
+    anchor = next((t[1:] for t in want if t.startswith("#") and t[1:] in ids), None) or (ids[0] if ids else None)
+    recs = [r for r in receipts if r["atom"] == a["id"] and r["attempt"] == attempt and "check" in r]
+    return {"atom": a["id"], "attempt": attempt, "receipt": f"{a['id']}:{attempt}",
+            "files": [f"site/v{n_sites}.{'md' if doc else 'html'}", out_file or "site/index.html"],
+            "section": w["section"], "section_names": [w["name"]] + [h for h in heads if h][:6], "anchor": anchor,
+            "ids": ids[:40], "selectors": [f"#{i}" for i in ids[:40]] + [f".{c}" for c in cls[:40]],
+            "checks": [{"check": r["check"], "type": r["type"], "target": r["target"], "pass": r["pass"]} for r in recs],
+            "conditions": [{"id": c["id"], "met": c["met"]} for c in (last_audit or {}).get("conditions") or []]}
+
+
 def slim():
     """J2_SLIM=1: prompts carry finished atoms' agent_output instead of their attempts and receipts, and builders see
     their own section plus a manifest instead of the whole page. Read per call so tests can switch it."""
@@ -5025,11 +5051,7 @@ class J2Run:
                                                                            "can read and use."}))
                     text = str(r.get("atom_human_output") or "") if isinstance(r, dict) else ""
                 if atom_human_problem(text):
-                    parts = [re.sub(INTERNAL, "", x.get("text") or "").strip(" .") for x in a.get("expected_output") or []
-                             if isinstance(x, dict)]
-                    text = f"It created {and_list([p for p in parts if p][:3])}." if any(parts) else ""
-                    if atom_human_problem(text):
-                        text = f"It adds the part of the {self.out['noun']} this step was asked to build."
+                    text = fallback_human(a, self.out["noun"])
             a["human_output"] = {"atom": a["id"], "attempt": attempt, "text": text}
         self._seal_atoms(w, w.get("atoms") or [], attempt)
 
@@ -5037,22 +5059,8 @@ class J2Run:
         """What other agents read instead of searching: built by code from the section as written and the receipts of
         this attempt. Files, section names, element ids and selectors created, the checks and their results, the
         receipt id (receipts.jsonl: atom and attempt)."""
-        sid = w["section"]
-        body = (self.sections.get(sid) or {}).get("body") or ""
-        ids, cls = created_in(body)
-        heads = [re.sub(r"<[^>]+>|^#+\s*", "", h).strip() for h in re.findall(r"<h[1-3][^>]*>.*?</h[1-3]>|^#{1,3} .*$", body,
-                                                                               re.S | re.M)]
-        want = [str(x.get("target")) for x in a.get("expected_output") or [] if isinstance(x, dict)
-                and x.get("kind") == "section"]
-        anchor = next((t[1:] for t in want if t.startswith("#") and t[1:] in ids), None) or (ids[0] if ids else None)
-        last = self.audits[-1] if self.audits else {}
-        recs = [r for r in self.receipts if r["atom"] == a["id"] and r["attempt"] == attempt and "check" in r]
-        return {"atom": a["id"], "attempt": attempt, "receipt": f"{a['id']}:{attempt}",
-                "files": [f"site/v{len(self.sites)}.{'md' if self.doc else 'html'}", self.out.get("file") or "site/index.html"],
-                "section": sid, "section_names": [w["name"]] + [h for h in heads if h][:6], "anchor": anchor,
-                "ids": ids[:40], "selectors": [f"#{i}" for i in ids[:40]] + [f".{c}" for c in cls[:40]],
-                "checks": [{"check": r["check"], "type": r["type"], "target": r["target"], "pass": r["pass"]} for r in recs],
-                "conditions": [{"id": c["id"], "met": c["met"]} for c in last.get("conditions") or []]}
+        return build_agent_output(w, a, attempt, (self.sections.get(w["section"]) or {}).get("body") or "", self.receipts,
+                                  self.audits[-1] if self.audits else None, len(self.sites), self.doc, self.out.get("file"))
 
     def _seal_atoms(self, w, atoms, attempt):
         """An atom whose checks passed gets its agent_output; it stays "passed" only with both outputs (else "failed")."""

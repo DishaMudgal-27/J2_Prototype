@@ -3402,6 +3402,20 @@ def atom_cards_render():
           "Simple view identical to the checkpoint page, /api/preview ok")
 
 
+def replay_size():
+    """D: the replay script reads a saved run (no model call, nothing written) and shows the slim prompts are smaller."""
+    import subprocess
+    here = os.path.dirname(os.path.abspath(__file__))
+    if not os.path.isdir(os.path.join(here, "runs", "j2-20261015-114723")):
+        print("replay test skipped: runs/j2-20261015-114723 not found")
+        return
+    r = subprocess.run([sys.executable, os.path.join(here, "j2_replay_size.py")], capture_output=True, text=True, timeout=300)
+    assert r.returncode == 0, r.stderr[-600:]
+    m = re.search(r"new vs old: ([+-][\d.]+)%", r.stdout)
+    assert m and float(m.group(1)) < 0 and "TOTAL" in r.stdout and "the fields cost less than they save: yes" in r.stdout, r.stdout[-500:]
+    print(f"replay of runs/j2-20261015-114723: slim prompts {m.group(1)}% vs old, no model call ok")
+
+
 if __name__ == "__main__":
     if FAST:
         print("--fast: browser measurement stubbed" + ("" if BROWSER else "; tests that drive the page in Chrome are "
@@ -3423,6 +3437,7 @@ if __name__ == "__main__":
         atom_outputs()
         slim_prompts()
         atom_cards_render()
+        replay_size()
         atom_checks()
         behavior_steps()
         charter_facts()
