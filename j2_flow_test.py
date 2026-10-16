@@ -2468,7 +2468,7 @@ def prd_run():
     os.environ["J2_OUTPUT"] = "prd"
     try:
         run = j2.J2Run()
-        assert run.output == "prd" and run.doc and j2.RATES == {"doc_section": 10, "requirements_section": 15, "fix": 8}
+        assert run.output == "prd" and run.doc and j2.RATES == {"doc_section": 10, "requirements_section": 48, "fix": 8}
         say(run, PRD_BRIEF)
     finally:
         os.environ.pop("J2_OUTPUT")
@@ -2487,7 +2487,7 @@ def prd_run():
     assert s["verification"]["passed"] == 6 and not s["verification"]["failed"] and s["verification"]["checks_run"], s
     # one workflow per section, one atom each, priced from the document rate card
     assert [w["name"] for w in run.workflows] == [f"Write {x}" for x in j2.PRD_SECTIONS], run.workflows
-    assert all(len(w["atoms"]) == 1 for w in run.workflows) and run.spent == 65, run.spent
+    assert all(len(w["atoms"]) == 1 for w in run.workflows) and run.spent == 98, run.spent
     md = open(os.path.join(run.dir, "prd.md"), encoding="utf-8").read()
     assert md.startswith("# QuickQueue") and [h for lv, h, _ in j2.md_sections(md) if lv == 2] == list(j2.PRD_SECTIONS)
     assert "1. **R1**:" in md and "<" not in md, md
@@ -3847,9 +3847,9 @@ def docs_funding():
     say(run, "Option 1")
     assert run.budget == 200 and run.paused and run.stage_kind == "prd" and list(run.docs) == ["prd"], (run.budget, run.outcome)
     text = stage_question(run)
-    assert "the website (needs at least 50 work credits; not covered)" in text and "the high-level design (needs at least 65 work credits)" in text, text
+    assert "the low-level design (needs at least 88 work credits; not covered)" in text and "the high-level design (needs at least 98 work credits)" in text, text
     opts = run.paused["questions"][0]["options"]
-    assert [o.split(":")[0] for o in opts] == ["Leave out the website", "Finish as it is"] and "hld.md" not in os.listdir(run.dir)
+    assert [o.split(":")[0] for o in opts] == ["Leave out the low-level design and the website", "Finish as it is"] and "hld.md" not in os.listdir(run.dir)
     assert not any("is left out so" in m["text"] for m in run.chat)
     # finish as it is: what is written stays, the rest is named as not made
     fin = docs_run(DESIGN_BRIEF, 100)
@@ -3857,15 +3857,87 @@ def docs_funding():
     say(fin, "Option 2")
     assert fin.outcome.startswith("Done with open items") and "Not made: the high-level design, the low-level design and the website" in fin.outcome, fin.outcome
     assert "prd.md" in os.listdir(fin.dir) and "hld.md" not in os.listdir(fin.dir)
-    # leave out the website only: the documents go on, and the chain finishes without a site
+    # leave out what doesn't fit (at the calibrated minimums the LLD and the site): the HLD is made, the chain ends
     say(run, "Option 1")
-    assert run.stages == ["prd", "hld", "lld"] and not run.paused and run.outcome.startswith("Done") and list(run.docs) == ["prd", "hld", "lld"], \
+    assert run.stages == ["prd", "hld"] and not run.paused and run.outcome.startswith("Done") and list(run.docs) == ["prd", "hld"], \
         (run.stages, run.outcome)
     # enough credits: no question at all
     run = docs_run(DESIGN_BRIEF, 900)
     assert not any(m.get("act") == "ASK_REQUESTER" for m in run.chat) and run.outcome.startswith("Done")
     print("funding: short credits ask the decision question with each document and the site as items, nothing is "
           "skipped by code; leave out, add and keep going, finish as it is, and no question when the credits cover it ok")
+
+
+def docs_repeat_failure():
+    """The same document check fails twice in a chain: "Finish as it is" accepts that document and the chain goes on,
+    "Stop the whole run here" is its own option, the words are about a document (never "site" or "missing parts"), and
+    Identity's message states check results from code (never "passes" while a necessary condition is unmet)."""
+    orig_cm = j2.condition_met
+    holder = []
+
+    def failing_p4(cond, *a, **k):
+        if holder and cond.get("check") == "no-invented-facts" and holder[0].stage_kind == "prd":
+            return False, "not in the charter or the Requester's answers, and not marked Assumption: This"
+        return orig_cm(cond, *a, **k)
+
+    def lying(run, orig):
+        def call(fn, fmt, task, mock, **k):
+            r = orig(fn, fmt, task, mock, **k)
+            if fn == "identity" and "LIMIT:" in task:
+                r["say"] = "The document has all its parts, and each one has been checked and passes."
+            return r
+        return call
+
+    def start(text, budget=900):
+        run = j2.J2Run()
+        run.budget = budget
+        run.call = lying(run, run.call)
+        holder[:] = [run]
+        say(run, text)
+        return run
+    j2.condition_met = failing_p4
+    try:
+        brief = "Design docs for Campus Notes." + CAMPUS
+        run = start(brief)
+        assert run.paused and run.paused["kind"] == "limit" and run.stage_kind == "prd", run.outcome
+        h, q = run.paused["handoff"], run.paused["questions"][0]
+        assert "ship" in h["choices"] and "stop" in h["choices"], h["choices"]
+        text = stage_question(run) + json.dumps(q)
+        # item 2: the message is code's, with counts, and says which condition is unmet; no pass claim
+        assert re.search(r"\d+ of \d+ required conditions are met", text) and "Not met: No invented facts" in text, text
+        assert not re.search(r"checked and passes|all its parts", text), text
+        # item 3: words about a document
+        assert not re.search(r"\b(?:web)?site\b|missing parts", text, re.I), text
+        ship = next(o for o in q["options"] if o.startswith("Finish as it is"))
+        assert "the product requirements" in ship and "goes on with the high-level design and the low-level design" in ship, ship
+        assert any(o.startswith("Stop the whole run here") and "not made" in o for o in q["options"]), q["options"]
+        say(run, str(h["choices"].index("ship") + 1))        # finish as it is: this document is accepted, the chain goes on
+        assert list(run.docs) == ["prd", "hld", "lld"] and run.stage_kind == "lld", (list(run.docs), run.stage_kind, run.outcome)
+        assert run.outcome.startswith("Done with open items") and "the product requirements" in run.outcome, run.outcome
+        assert "P4" not in run.outcome or "No invented facts" in run.outcome
+        assert set(docs_files(run)) == {"hld.docx", "hld.md", "lld.docx", "lld.md", "prd.docx", "prd.md"}, docs_files(run)
+        # stop the whole run: the rest is named as not made
+        run = start(brief)
+        say(run, str(run.paused["handoff"]["choices"].index("stop") + 1))
+        assert run.outcome.startswith("Done with open items") and "Not made: the high-level design and the low-level design" in run.outcome, run.outcome
+        assert list(run.docs) == [] or list(run.docs) == ["prd"], list(run.docs)
+        # a single document: "finish as it is" ends the run, and there is no "stop the whole run" option
+        run = start("Write a PRD for Campus Notes." + CAMPUS)
+        h, q = run.paused["handoff"], run.paused["questions"][0]
+        assert run.paused["kind"] == "limit" and "stop" not in h["choices"], h["choices"]
+        assert not any(o.startswith("Stop") for o in q["options"]) and "goes on" not in " ".join(q["options"]), q["options"]
+        say(run, str(h["choices"].index("ship") + 1))
+        assert run.outcome.startswith("Done with open items") and docs_files(run) == ["prd.docx", "prd.md"], run.outcome
+    finally:
+        j2.condition_met = orig_cm
+    # item 2 at the source: a necessary condition unmet is never reported as passing
+    audit = {"results": [{"pass": True}] * 9, "rubric": [{"pass": True}] * 3,
+             "conditions": [{"id": f"P{i}", "text": f"Condition {i}", "met": i != 4} for i in range(1, 9)]}
+    msg = j2.check_summary(audit, "the product requirements")
+    assert "7 of 8 required conditions are met" in msg and "Not met: Condition 4." in msg and "9 of 9 checklist items pass" in msg, msg
+    assert not re.search(r"checked and passes|all .* pass", msg), msg
+    print("repeat failure in a chain: finish as it is accepts the document and goes on, stop the whole run is its own option, "
+          "a single document ends, wording is about the document, the message's check results are code's and never claim a pass over an unmet condition ok")
 
 
 if __name__ == "__main__":
@@ -3893,6 +3965,7 @@ if __name__ == "__main__":
         docs_detection()
         docs_chain()
         docs_funding()
+        docs_repeat_failure()
         docs_blueprint()
         docs_views()
         atom_checks()

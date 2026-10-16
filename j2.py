@@ -1299,7 +1299,7 @@ DECIDE_FMT = ('"needs_decision": bool (true when the Requester must choose to ad
               'as is), "budget_needed": int|null (work credits needed to finish, your estimate)')
 DECIDE_RULE = ("Never offer adding budget, leaving items out or finishing as is in your own question: set needs_decision "
                "instead and code asks the Requester with the exact amounts it can apply.")
-DECISION_FMT = ('"decision": "continue"|"drop"|"ship"|null (null if the answer doesn\'t say), "add": int|null (work credits the '
+DECISION_FMT = ('"decision": "continue"|"drop"|"ship"|"stop"|null (null if the answer doesn\'t say), "add": int|null (work credits the '
                 'Requester asked to add, as they typed it), "drop_items": [int] (done-when item numbers they asked to '
                 'leave out)')
 BUILT_CLAIM = re.compile(r"\b(?:now has|already has|so far the (?:page|site) has|the (?:page|site) has|is built|"
@@ -1441,7 +1441,9 @@ def parse_decision(answer, q, choices, crit, nums=None):
         part = re.sub(r"^\s*(the|a|an)\s+", "", part.strip(), flags=re.I).strip().lower()
         drops |= {nums[j] for j, c in enumerate(crit) if len(part) > 2 and part in c.lower()}
     drops = sorted(n for n in drops if n in nums)
-    if re.search(r"\bship\b|as is|\bfinish|go live", answer, re.I) and not add:
+    if "stop" in choices and re.search(r"\bstop\b", answer, re.I) and not add:
+        decision = "stop"
+    elif re.search(r"\bship\b|as is|\bfinish|go live", answer, re.I) and not add:
         decision = "ship"
     elif add or picked == "continue":
         decision = "continue"
@@ -1983,6 +1985,10 @@ PRD_BUILDER = """# Workflow agent for a PRD section (one per registered workflow
   none, write "measurement window not set".
 - Any statement that goes beyond the charter and the Requester's answers starts with "Assumption:" on its own line
   or list item. Nothing else may add a claim. Code collects these lines into "Assumptions to confirm" at the end.
+- Never write an "Assumptions to confirm" heading or list yourself, and never repeat a claim without the label: every
+  line that carries an assumption starts with "Assumption:", wherever it is.
+- Never start a sentence with a capitalised word followed by "PRD" or another capitalised word that is not in the
+  charter ("This PRD ..."): the invented-names check reads it as a made-up name. Write "This document ...".
 - If your reply can't be used, code tells you why and you retry, within your envelope. Then report to
   @Coordination what you changed."""
 PRD_INTAKE = ("J2.a for a PRD: is there enough information to write it? You need these product facts: the product "
@@ -2233,6 +2239,27 @@ def workable(audit):
     if not mech.get("available"):
         return out + [f"render check didn't run, so JS errors, overflow and forms are unverified: {mech.get('note')}"]
     return out + j2_check.problems(mech)
+
+
+def check_summary(audit, what="the document"):
+    """What the last audit found, in plain words, written by code from its results (never by a model): how many checklist
+    items and conditions are met, and which are not."""
+    if not audit:
+        return f"Nothing has been checked in {what} yet."
+    res, rub = audit.get("results") or [], audit.get("rubric") or []
+    conds = [c for c in audit.get("conditions") or [] if c.get("severity") != "warn"]
+    bad = [c for c in conds if not c["met"]]
+    out = [f"{sum(r['pass'] for r in res)} of {len(res)} checklist items pass"]
+    if rub:
+        out.append(f"{sum(r['pass'] for r in rub)} of {len(rub)} quality checks pass")
+    out.append(f"{len(conds) - len(bad)} of {len(conds)} required conditions are met")
+    txt = f"Check results for {what}: " + ", ".join(out) + "."
+    if bad:
+        txt += " Not met: " + "; ".join(c["text"] for c in bad) + "."
+    unmet = [r["criterion"] for r in res + rub if not r["pass"]]
+    if unmet:
+        txt += " Still failing: " + "; ".join(unmet) + "."
+    return txt
 
 
 def failure_signature(audit):
@@ -2521,6 +2548,7 @@ class J2Run:
         # design documents (opt-in, code-detected): the stages of a run (PRD, HLD, LLD, then the site), each document's
         # agent_output, and what earlier stages left behind. Empty for every other run.
         self.docset, self.stages, self.stage_i, self.chain, self.docs = [], [], 0, {}, {}
+        self.open_docs = []          # documents the Requester accepted as they were, with what was still not right
         self.past_workflows, self.stage_archive, self.site_tag, self.stage_checked = [], [], "", True
         self.blueprint, self.proposed_lld, self.lld_revisions, self.lld_conflicts = None, {}, [], {}   # the LLD as the spec
         self.stage_calls0 = 0         # AI calls before the current stage (a document's call range, for the cost estimate)
@@ -2595,6 +2623,7 @@ class J2Run:
         if not self.sites:
             return f"Stopped {why}: nothing was built."
         fails = workable(self.audits[-1]) if self.audits else ["nothing has been checked"]
+        fails = self.open_docs + fails
         if not fails:
             return self.out["done"]
         return f"Done with open items: shipped as is {why}. Still not workable: {'; '.join(fails)}."
@@ -3759,7 +3788,7 @@ class J2Run:
                                "clause": "done_when", **({} if limit else {"decision": "ship" if ship else "drop" if
                                                                              drop else "continue"}),
                                "confirmed": [] if unknown or ship or drop or d.get("add") or d.get("drop_items")
-                               or d.get("decision") in ("ship", "drop") else facts,
+                               or d.get("decision") in ("ship", "drop", "stop") else facts,
                                "still_to_be_confirmed": facts if unknown else [],
                                "instruction_to_adaptation": f"Put the Requester's answer in: {answer}",
                                "next": "Adaptation"})
@@ -3853,10 +3882,25 @@ class J2Run:
             self.post("system", f"Left out on the Requester's decision: {names}.")
         if add and decision != "ship":
             self._raise_budget(add, f"the Requester's answer: {answer}")
-        if decision == "ship":
-            self.post("identity", r.get("to_requester") or "We'll finish the site as it is now.", to_user=True,
+        if decision == "ship" and limit and self.doc and self.stages and self.stage_i + 1 < len(self.stages):
+            # A document in a chain: accept it as it is (open items recorded) and go on with the next stage.
+            fails = workable(self.audits[-1]) if self.audits else []
+            self.open_docs.append(f"{self.STAGE_WORDS[self.stage_kind]}: {'; '.join(fails)}" if fails else
+                                  self.STAGE_WORDS[self.stage_kind])
+            self.post("identity", f"Got it. We'll keep {self.STAGE_WORDS[self.stage_kind]} as it is and go on with "
+                      f"{and_list(self.STAGE_WORDS[k] for k in self.stages[self.stage_i + 1:])}.", to_user=True, next="user")
+            self.post("system", f"Accepted as it is on the Requester's decision: {self.STAGE_WORDS[self.stage_kind]}.")
+            if self._next_stage():
+                return
+        if decision in ("ship", "stop"):
+            rest = and_list(self.STAGE_WORDS[k] for k in self.stages[self.stage_i + 1:]) if decision == "stop" else ""
+            self.post("identity", r.get("to_requester") or ("We'll finish the site as it is now." if not self.doc else
+                                                            f"We'll finish with what is already written."
+                                                            + (f" Not made: {rest}." if rest else "")), to_user=True,
                       next="user", done=True)
             self.outcome = self._ship_outcome(f"on the Requester's decision ({limit or 'their answer'})")
+            if rest:
+                self.outcome += f" Not made: {rest}."
             self.turn = None
             return
         if h.get("after_ruling") and (gone or decision == "drop"):
@@ -4005,10 +4049,13 @@ class J2Run:
         state = (len(self.sites), len(self.workflows), self.spent)   # an audit alone changes nothing
         stale = self.last_limit and self.last_limit["state"] == state and self.last_limit["decision"] == "continue"
         opts, budget, choices = [], [], []
+        dw = (self.STAGE_WORDS.get(self.stage_kind) or f"the {self.out['noun']}") if self.doc else None   # a document in plain words
+        later = self.stages[self.stage_i + 1:] if self.doc and self.stages else []
         if (not short or self.budget + add - self.spent >= cheapest) and not stale and (add or not h.get("budget_needed")):
-            opts.append((f"Add {add} work credits{' (the most allowed)' if add < want else ''} and keep going: you get more "
-                         f"of the missing parts built. Or type your own number, up to {room}" if add else
-                         "Keep going: you get more of the missing parts built")
+            more = f"the team works on what is not right in {dw}" if dw else "you get more of the missing parts built"
+            opts.append((f"Add {add} work credits{' (the most allowed)' if add < want else ''} and keep going: {more}. "
+                         f"Or type your own number, up to {room}" if add else
+                         f"Keep going: {more}")
                         + (" (send the missing details with your answer)" if h.get("tbc") else ""))
             budget.append(add)
             choices.append("continue")
@@ -4022,17 +4069,23 @@ class J2Run:
         drop = [crit.index(t) + 1 for r in named for t in r.get("texts", [r["text"]])]
         shown = [f"{r['name']} ({r['status']})" for r in rows]      # the list under Identity's words
         if named:
-            opts.append(f"Leave out {and_list(r['name'] for r in named)}: you get the site without "
+            opts.append(f"Leave out {and_list(r['name'] for r in named)}: you get {dw or 'the site'} without "
                         f"{'it' if len(named) == 1 else 'them'}."
                         + "".join(f" {r['name']} stays as it is, {STILL[r['status']]}." for r in rows if not r["drop"]))
             budget.append(0)
             choices.append("drop")
         if self.sites:                    # finishing needs a site to finish
-            opts.append("Finish as it is: you get the site as it is now" + (f", with {len(gaps)} thing"
+            opts.append(f"Finish as it is: you get {dw or 'the site'} as it is now" + (f", with {len(gaps)} thing"
                         f"{'s' if len(gaps) > 1 else ''} still not right: {and_list(r['name'] for r in rows)}"
-                        if gaps else ""))
+                        if gaps else "") + (f". Then the team goes on with {and_list(self.STAGE_WORDS[k] for k in later)}"
+                                            if later else ""))
             budget.append(0)
             choices.append("ship")
+            if later:         # a chain: "finish as it is" accepts this document; stopping the whole run is its own option
+                opts.append(f"Stop the whole run here: you get what is already written, and "
+                            f"{and_list(self.STAGE_WORDS[k] for k in later)} {'is' if len(later) == 1 else 'are'} not made")
+                budget.append(0)
+                choices.append("stop")
         if not self.sites and len(choices) < 2:
             opts.append("Stop here: nothing is built yet, so you get no site")
             budget.append(0)
@@ -4045,13 +4098,14 @@ class J2Run:
                 "Only you can give what's still missing." if reason.startswith("Only you") else
                 "The team needs your decision.")
         say_choices = {"continue": "add more and keep going" if add else "keep going",
-                       "drop": "leave out the missing parts", "ship": "finish as it is" if self.sites else "stop here"}
+                       "drop": "leave out the missing parts" if not dw else "leave out what is not right",
+                       "ship": "finish as it is" if self.sites else "stop here", "stop": "stop the whole run here"}
         ask = [say_choices[c] for c in choices]
         ask = ", ".join(ask[:-1]) + (", or " if len(ask) > 2 else " or ") + ask[-1] if len(ask) > 1 else ask[0]
         q = {"question": f"{lead} {ask[0].upper() + ask[1:]}?", "options": opts,
              **({"budget": budget} if any(budget) else {})}
         self._event("system", "limit", reason)
-        plain_missing = "The site isn't finished yet."
+        plain_missing = f"{dw[0].upper() + dw[1:]} isn't finished yet." if dw else "The site isn't finished yet."
         passed, funded = self._built_and_funded(last)
         r = self.call("identity", '{"say": str (to the Requester, in plain words: what has been done so far, at most 2 '
                       'short sentences; don\'t list what is missing, code adds that list; no question, it is asked '
@@ -4065,6 +4119,8 @@ class J2Run:
                       f"{json.dumps(q, ensure_ascii=False)}\nTell the Requester.",
                       lambda: json.dumps({"say": plain_missing}))
         say = r.get("say") or plain_missing
+        if self.doc:      # a document: the check results are written by code, whatever Identity said
+            say = check_summary(last, dw)
         if not passed and BUILT_CLAIM.search(say):
             # Nothing has passed Audit, so nothing may be described as built (runs/j2-20261009-133203 msg 29).
             self._event("identity", "invalid_move", "described unbuilt work as built")
@@ -4222,12 +4278,14 @@ class J2Run:
                 self.post("system", f"The {self.out['noun']} is workable: every check passes.")
                 if self._next_stage():
                     return
-            self.post("identity", ("Your design documents are ready." if self.docset and self.stage_kind != "website" and
+            self.post("identity", ("We're finished. Kept as they were: " + "; ".join(self.open_docs) + "." if self.open_docs else
+                                   "Your design documents are ready." if self.docset and self.stage_kind != "website" and
                                    len(self.docset) > 1 else
                                    r.get("to_requester") or r.get("say") or ("Your document is ready." if self.doc else
                                                                              "Your website is ready.")), done=True,
                       to_user=True, next="user")
-            self.outcome = ("Done: the design documents are workable. Every done-when item, rubric item and necessary "
+            self.outcome = (self._ship_outcome("after the Requester accepted a document as it is") if self.open_docs else
+                            "Done: the design documents are workable. Every done-when item, rubric item and necessary "
                             "condition passes in each." if self.docset and self.doc and len(self.docset) > 1
                             else self.out["done"])
             self.turn = None

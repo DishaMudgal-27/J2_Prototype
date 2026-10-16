@@ -10,10 +10,10 @@
     "styling": 5,
     "fix": 8
   },
-  "_note_prd": "Document rate card for PRD runs (J2_OUTPUT=prd): one section per workflow. Website rates above are unchanged.",
+  "_note_prd": "Document rate card (PRD, HLD, LLD): one section per workflow. Website rates above are unchanged. Calibrated 16 Oct from runs/ (only PRDs measured): doc_section 10 as measured; requirements_section 48 so the least a PRD costs is 98, the cheapest measured finished PRD (j2-20261013-165916: 90 first pass + one 8 fix). Other PRDs finished at 133 and 160. HLD and LLD are not measured yet.",
   "rates_prd": {
     "doc_section": 10,
-    "requirements_section": 15,
+    "requirements_section": 48,
     "fix": 8
   }
 }
