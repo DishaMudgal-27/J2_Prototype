@@ -357,20 +357,27 @@ function atomRow(a, k, w){
 const PREVIEWS = {};          // atom id -> srcdoc of its section (from /api/preview), "" when it has none
 const blockHTML = (a, key, label, gloss, body, long) => `<div class="ablock" data-block="${key}"><b>${label}</b> <span class="empty">${gloss}</span>
   ${long ? `<details class="long" data-key="blk-${esc(a.id)}-${key}"><summary>show</summary>${body}</details>` : `<div>${body}</div>`}</div>`;
-function atomPreview(a){
-  const ag = a.agent_output || {}, h = a.human_output && a.human_output.text;
-  if (!ag.anchor && ag.kind !== "doc") return `<div class="apreview" data-preview="text">${esc(h || "Nothing built yet.")}</div>`;
+// atom/1 (s.atoms_v1): the artifact refs say what the atom made; effects and atoms without a section have no preview or link
+const artifact = (v, kind) => ((v && v.output) || []).find(o => o.type === "artifact" && o.kind === kind);
+function atomPreview(a, v){
+  const h = a.human_output && a.human_output.text;
+  if (!artifact(v, "section") && !artifact(v, "document-section")) return `<div class="apreview" data-preview="text">${esc(h || "Nothing built yet.")}</div>`;
   if (PREVIEWS[a.id] === undefined){ if (typeof wantPreview === "function") wantPreview(a.id);
     return `<div class="apreview" data-preview="wait"><span class="empty">Loading the preview…</span></div>`; }
   return PREVIEWS[a.id] ? `<iframe class="apreview" data-preview="frame" sandbox="" title="What this atom built" srcdoc="${esc(PREVIEWS[a.id])}"></iframe>`
     : `<div class="apreview" data-preview="text">${esc(h || "")}</div>`;
 }
-function atomBlocks(a, w){
+function atomBlocks(a, w, v){
   const ag = a.agent_output, res = a.results || [], ok = res.filter(r => r.pass === true).length, bad = res.filter(r => r.pass === false).length;
   const g = t => `<h4 class="agroup">${t}</h4>`;
-  const q = runQ().replace("&", "?"), base = ag && ag.file ? String(ag.file).replace(/\.md$/, "") : "";
-  const site = ag && ag.kind === "doc" ? `<a data-link="md" href="/file/${esc(base)}.md${q}" download>Download the markdown (.md)</a> <a data-link="docx" href="/file/${esc(base)}.docx${q}" download>Download the Word file (.docx)</a>`
-    : ag && ag.anchor ? `<a data-link="site" href="/site/latest${q}#${esc(ag.anchor)}" target="_blank" rel="noopener">View in site</a>` : "";
+  const q = runQ().replace("&", "?"), sec = artifact(v, "section"), dsec = artifact(v, "document-section");
+  const base = dsec ? String(dsec.ref.split("#")[0]).replace(/\.md$/, "") : "";
+  const site = dsec ? `<a data-link="md" href="/file/${esc(base)}.md${q}" download>Download the markdown (.md)</a> <a data-link="docx" href="/file/${esc(base)}.docx${q}" download>Download the Word file (.docx)</a>`
+    : sec ? `<a data-link="site" href="/site/latest${q}#${esc(sec.ref.split("#")[1])}" target="_blank" rel="noopener">View in site</a>` : "";
+  const edges = (t, l) => l && l.length ? `<details class="long" data-key="blk-${esc(a.id)}-${t}"><summary>${l.length} atom(s)</summary>${l.map(e => esc(e.atom) + ": " + esc(sentence(e.why))).join("<br>")}</details>` : "none recorded";
+  const wout = v ? ((v.output || []).map(o => `${esc(o.name)} <span class="empty">${esc(o.type)}${o.kind ? ", " + esc(o.kind) : ""}</span>`).join("<br>") || '<span class="empty">Nothing made yet.</span>')
+    + `<br>Depends on: ${edges("dep", v.depends_on)}<br>Used by: ${edges("used", v.used_by)} <button type="button" class="linkbtn" data-link="agent" data-atom="${esc(a.id)}">Agent output</button>`
+    : '<span class="empty">Built by code when the checks pass.</span>';
   return g("1. Particles")
     + blockHTML(a, "goal", "Goal", "What must be true when this is done", atomRow(a, "goal", w), false)
     + blockHTML(a, "how", "How", "Who builds it", atomRow(a, "how", w), false)
@@ -382,18 +389,17 @@ function atomBlocks(a, w){
         `${res.length ? `${ok} passed, ${bad} failed of ${res.length}.` : "Not run yet."} <button type="button" class="linkbtn" data-link="evidence" data-atom="${esc(a.id)}">Verification evidence</button>`
         + `<details class="long" data-key="blk-${esc(a.id)}-evidence"><summary>show</summary>${atomRow(a, "verification", w)}</details>`, false)
     + g("3. Outputs")
-    + blockHTML(a, "human_output", "Human output", "What it created, in plain words",
+    + blockHTML(a, "human_output", "Notes", "What it did, in plain words",
         a.human_output ? esc(sentence(a.human_output.text)) + ` <span class="empty">Attempt ${a.human_output.attempt}.</span>` : '<span class="empty">Not written yet.</span>', false)
-    + blockHTML(a, "agent_output", "Agent output", "What other agents read",
-        ag ? `${esc(String(ag.section || ""))}: ${ag.kind === "doc" ? esc(String(ag.file || "")) : (ag.selectors || []).length + " selector(s)"}, ${(ag.checks || []).length} check(s), receipt ${esc(ag.receipt)}. `
-          + `<button type="button" class="linkbtn" data-link="agent" data-atom="${esc(a.id)}">Agent output</button> ${site}` : '<span class="empty">Built by code when the checks pass.</span>', false);
+    + blockHTML(a, "agent_output", "Workflow output", "What it made, what it used and who uses it", wout, false)
+    + blockHTML(a, "result", "Result", "What it looks like", atomPreview(a, v) + (site ? ` ${site}` : ""), false);
 }
 function atomCards(s, w){
   const atoms = w.atoms || [];
   if (!atoms.length) return '<p class="empty">No work atoms: registered before work atoms existed.</p>';
   return atoms.map((a, i) => `<details class="atom" data-key="atom-${esc(a.id)}"${atoms.length === 1 ? " open" : ""}>
     <summary><b>Work atom ${i + 1}</b> <span class="code">${esc(a.id)}</span> · ${esc(dv(words(a.goal)))} <span class="${a.status === "passed" ? "pass" : a.status && a.status !== "could not run" ? "fail" : "empty"}">· ${(a.verification || []).length} check(s), ${ATOM_STATUS[a.status] || "not run yet"}${a.attempts ? `, attempt ${a.attempts} of 3` : ""}</span></summary>
-    ${atomPreview(a)}${atomBlocks(a, w)}
+    ${atomBlocks(a, w, (s.atoms_v1 || {})[a.id])}
     ${runDetails(s, a, w)}</details>`).join("");
 }
 const ATOM_STATUS = {passed: "checks passed", failed: "checks failing", escalated: "ESCALATED", "could not run": "a check could not run"};

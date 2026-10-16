@@ -45,6 +45,7 @@ import threading
 import time
 
 import j2_check
+import j2_schema
 import llm
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -2476,6 +2477,7 @@ def saved_snapshot(name, since=0):
             "steps": STEPS, "goal": _read(d, "goal.json"), "stamped": True, "workflows": wfs,
             "budget": b.get("granted") or BUDGET, "spent": b.get("used") or 0, "conflicts": _read(d, "conflicts.json", []),
             "audits": audits, "versions": versions, "cycle": s.get("cycles") or 0, "calls": s.get("ai_calls") or len(calls),
+            "atoms_v1": {v["id"]: v for v in (_read(d, "atoms.json", {}).get("atoms") or j2_schema.run_views(wfs)[0])},
             "error": None, "done": True, "turn": None, "cycle_turns": 0, "max_turns": MAX_TURNS, "paused": None,
             "mock": head.get("mock"), "model": head.get("model"), "fixes": head.get("j2_fixes", 0), "placeholders": [],
             "force_audit_fail": head.get("force_audit_fail"), "test_lessons": bool(head.get("test_lessons")),
@@ -2549,6 +2551,7 @@ class J2Run:
         # agent_output, and what earlier stages left behind. Empty for every other run.
         self.docset, self.stages, self.stage_i, self.chain, self.docs = [], [], 0, {}, {}
         self.open_docs = []          # documents the Requester accepted as they were, with what was still not right
+        self.given = {}              # workflow id -> {"edges": [{atom, why}], "whole": bool}: what its builder's prompt held (atom/1)
         self.past_workflows, self.stage_archive, self.site_tag, self.stage_checked = [], [], "", True
         self.blueprint, self.proposed_lld, self.lld_revisions, self.lld_conflicts = None, {}, [], {}   # the LLD as the spec
         self.stage_calls0 = 0         # AI calls before the current stage (a document's call range, for the cost estimate)
@@ -2632,12 +2635,19 @@ class J2Run:
         """Turns allowed this cycle, scaled with the work: each workflow registered this cycle needs its own turns."""
         return max(MAX_TURNS, 10 + 4 * sum(w.get("cycle") == self.cycle for w in self.workflows))
 
+    def _atoms_v1(self):
+        try:
+            return {v["id"]: v for v in j2_schema.run_views(self._all_wfs(), self.given)[0]}
+        except Exception:
+            return {}
+
     def snapshot(self, since=0):
         return {"chat": self.chat[since:], "total": len(self.chat), "status": self.status,
                 "thinking": self.thinking, "step": self.step, "steps": STEPS, "goal": self.goal,
                 "stamped": self.stamped, "workflows": self._all_wfs(), "budget": self.budget, "spent": self.spent,
                 "conflicts": self.conflicts, "audits": self.audits, "versions": len(self.sites),
                 "cycle": self.cycle, "calls": self.calls, "error": self.error, "done": self.done,
+                "atoms_v1": self._atoms_v1(),
                 "turn": self.turn, "cycle_turns": self.cycle_turns, "max_turns": self._turn_cap(),
                 "paused": ({k: self.paused[k] for k in ("kind", "questions", "msg")}
                            | {"label": PAUSES.get(self.paused["kind"], ""),
@@ -5881,6 +5891,9 @@ class J2Run:
         LLD: its own slice of it (its spec) and a short HLD summary instead of the page; J2_SLIM=1 adds the manifest."""
         manifest = ("\nOTHER SECTIONS (their atoms' agent_output; the rest of the page isn't shown): "
                     f"{json.dumps(self._manifest(w), ensure_ascii=False)}")
+        lld = bool(self.blueprint and w.get("lld_sections"))
+        self._record_given(w, (self._slice_edges(w) if lld else []) + self._hld_edges() + (self._manifest_edges(w) if slim() else []),
+                           whole=not lld and not slim())
         if self.blueprint and w.get("lld_sections"):
             return ("\nYOUR SPEC (the LLD sections you implement: build exactly these ids, selectors and form fields with "
                     "their behaviour; if one can't be built as written, report it in spec_conflict, never deviate "
@@ -5889,6 +5902,38 @@ class J2Run:
         if slim():
             return manifest + self._hld_summary()
         return f"\nTHE WHOLE SITE FILE NOW (v{len(self.sites)}, read only):\n{prev[:SITE_LIMIT]}" + self._hld_summary()
+
+    # ---- atom/1 edges: what a builder's prompt actually held, recorded where the prompt is made (no prompt changes)
+    def _record_given(self, w, edges, whole=False):
+        self.given[w["id"]] = {"edges": edges, "whole": whole}
+
+    def _manifest_edges(self, w):
+        return [{"atom": x["id"], "why": "its section, anchor and selectors were listed in this builder's prompt"}
+                for o in self.workflows if o["id"] != w["id"] for x in o.get("atoms") or [] if x.get("agent_output")]
+
+    def _doc_atoms(self, kind, heading):
+        ids = (self.docs.get(kind) or {}).get("workflows") or []
+        return [a["id"] for o in self._all_wfs() if o["id"] in ids and heading.lower() in str(o.get("name")).lower()
+                for a in o.get("atoms") or []]
+
+    def _slice_edges(self, w):
+        sl = self._lld_slice_for(w) or {}
+        ids = ", ".join(w.get("lld_sections") or [])
+        return [{"atom": a, "why": f"LLD slice {ids}: its {h.lower()} were in this builder's prompt"}
+                for key, h in (("sections", "Pages and sections"), ("elements", "Interactive elements"), ("fields", "Form fields"))
+                if sl.get(key) for a in self._doc_atoms("lld", h)]
+
+    def _hld_edges(self):
+        return [{"atom": a, "why": "the HLD component summary was in this builder's prompt"}
+                for a in (self._doc_atoms("hld", "Components") if (self.chain.get("hld") or {}).get("components") else [])]
+
+    def _chain_edges(self):
+        """A document builder is given the charter, which carries the earlier documents' agent_output."""
+        ch = (self.goal or {}).get("chain") or {}
+        return [{"atom": a, "why": why} for kind, h, why in (("prd", "Requirements", "the PRD's requirements were in this builder's "
+                                                              "prompt (charter)"),
+                                                             ("hld", "Components", "the HLD's components were in this builder's "
+                                                              "prompt (charter)")) if ch.get(kind) for a in self._doc_atoms(kind, h)]
 
     def _lld_slice_for(self, w):
         return lld_slice(self.blueprint, w.get("lld_sections") or []) if self.blueprint else None
@@ -5978,6 +6023,7 @@ class J2Run:
     def _doc_prompt(self, w, brief, sid, mine, attempt, evidence, last_err, prev):
         """(reply format, task) for a document section's workflow agent: markdown for its own section only."""
         fn = w["id"]
+        self._record_given(w, self._chain_edges() + (self._manifest_edges(w) if slim() else []), whole=not slim())
         return ('First line: a JSON object {"say": str (one short line reporting to @Coordination: what you changed; '
                 'code runs your checks and reports them, so don\'t claim they pass), "human_output": str (1 to 3 plain sentences telling a person what you built; \"done.\" alone is rejected), "atom_human_output": str (1 or 2 plain sentences telling the Requester what this part created, in everyday words: no ids, no selectors, no \"units\"), "next": "Coordination", '
                 + self.REASON + '}. Then a ```markdown block: your section only, starting with its "## <Section>" '
@@ -6673,6 +6719,11 @@ class J2Run:
         conds = (last or {}).get("conditions")
         if self.docset:
             self.save("chain.json", self._chain_record())
+        try:      # atom/1 views: a new file; a failure here never changes the run
+            views, warns = j2_schema.run_views(self._all_wfs(), self.given)
+            self.save("atoms.json", {"schema": j2_schema.SCHEMA, "atoms": views, "warnings": warns})
+        except Exception as e:
+            self._event("system", "atoms_json", f"atoms.json not written: {e}")
         self.save("summary.json", {
             "run": self.run_id, "output_type": self.output, "j2_fixes": int(self.fixes),
             **({"design_documents": {"requested": self.docset, "stages": self.stages, "files": {k: v["file"] for k, v in self.docs.items()},

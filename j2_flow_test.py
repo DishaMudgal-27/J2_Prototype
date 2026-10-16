@@ -3339,7 +3339,8 @@ def atom_cards_render():
         card = card[:card.index("Run details")]
         blocks = re.findall(r'data-block="([a-z_]+)"', card)
         assert blocks == ["goal", "how", "constraints", "context", "expected_output", "verification", "human_output",
-                          "agent_output"], blocks
+                          "agent_output", "result"], blocks
+        assert all(f"<b>{x}</b>" in card for x in ("Notes", "Workflow output", "Result")) and "<b>Human output</b>" not in card
         assert re.findall(r'<h4 class="agroup">([^<]*)<', card) == ["1. Particles", "2. Defined output and verification",
                                                                       "3. Outputs"]
         for link in ("site", "agent", "evidence"):
@@ -3353,8 +3354,8 @@ def atom_cards_render():
             assert "<details" not in blk, key
         assert htmllib.escape(a["human_output"]["text"], quote=True).replace("&#x27;", "'") in htmllib.unescape(card) \
             or a["human_output"]["text"] in htmllib.unescape(card)
-        # the preview comes before the blocks: the section in a sandboxed frame, else the human_output text
-        pre = card.split('<h4 class="agroup">')[0]
+        # the Result block holds the preview: the section in a sandboxed frame, else the Notes text
+        pre = card.split('data-block="result"')[1]
         if a["agent_output"]["anchor"]:
             src = htmllib.unescape(re.search(r'<iframe class="apreview" data-preview="frame" sandbox="" [^>]*srcdoc="([^"]*)"', pre).group(1))
             el = j2.element_by_id(page, a["agent_output"]["anchor"])
@@ -3362,15 +3363,17 @@ def atom_cards_render():
             assert src.count(el) == 1 and src.endswith(el + "</body></html>")
         else:
             assert 'data-preview="text"' in pre and htmllib.unescape(a["human_output"]["text"]) in htmllib.unescape(pre)
-    # no anchor in the stored data: the human_output takes the preview's place, nothing is fetched
+    # no section artifact in the stored data: the Notes text takes the preview's place, nothing is fetched, no link
     a0 = anchored[0]
     saved = json.loads(json.dumps(snap))
+    saved["atoms_v1"][a0["id"]]["output"] = [o for o in saved["atoms_v1"][a0["id"]]["output"] if o["kind"] != "section"]
     for w in saved["workflows"]:
         for a in w["atoms"]:
             if a["id"] == a0["id"]:
                 a["agent_output"]["anchor"] = None
     pre = render_node(saved)["cards"][next(w["id"] for w in saved["workflows"] if any(a["id"] == a0["id"] for a in w["atoms"]))]
-    assert 'data-preview="text"' in pre and "<iframe" not in pre.split(f'data-key="atom-{a0["id"]}"')[1].split("Run details")[0]
+    card0 = pre.split(f'data-key="atom-{a0["id"]}"')[1].split("Run details")[0]
+    assert 'data-preview="text"' in pre and "<iframe" not in card0 and 'data-link="site"' not in card0
     # an atom with an anchor but no preview yet shows a loading note
     assert 'data-preview="wait"' in render_node(snap)["cards"][atoms[0][0]["id"]] or not atoms[0][1]["agent_output"]["anchor"]
     # Simple view output is identical to before the atom cards changed (the checkpoint commit's page, same state)
@@ -3784,8 +3787,8 @@ def docs_views():
         a = w["atoms"][0]
         card = card[card.index(f'data-key="atom-{a["id"]}"'):].split("Run details")[0]
         assert re.findall(r'data-block="([a-z_]+)"', card) == ["goal", "how", "constraints", "context", "expected_output",
-                                                              "verification", "human_output", "agent_output"], w["id"]
-        pre = card.split('<h4 class="agroup">')[0]
+                                                              "verification", "human_output", "agent_output", "result"], w["id"]
+        pre = card.split('data-block="result"')[1]
         assert 'data-preview="frame"' in pre and "sandbox" in pre and "srcdoc=" in pre, pre[:200]
         src = htmllib.unescape(re.search(r'srcdoc="([^"]*)"', pre).group(1))
         assert src == previews[a["id"]] and "<h2>" in src
@@ -3945,6 +3948,107 @@ def docs_repeat_failure():
           "a single document ends, wording is about the document, the message's check results are code's and never claim a pass over an unmet condition ok")
 
 
+def atom_schema():
+    """atom/1: the adapter maps a stored run (artifacts and effects), edges are what each builder's prompt actually held
+    (manifest, LLD slice, earlier document), used_by is the exact inverse, warnings never change a run, atoms.json is
+    written, and a builder given the whole page has no attributable edge."""
+    import j2_schema as S
+    keys = ["schema", "id", "workflow", "name", "owner", "status", "attempt", "goal", "how", "constraints", "context",
+            "defined_output", "verification", "output", "depends_on", "used_by", "notes", "details"]
+    # the adapter, on a stored website run: standard fields only, website words only in details
+    run = j2.J2Run()
+    say(run, BREW_LAB)
+    wfs = json.loads(json.dumps(run.workflows))
+    views, warns = S.run_views(wfs)
+    assert views and all(list(v) == keys and v["schema"] == "atom/1" for v in views), views[0].keys()
+    a, v = next((a, v) for w in wfs for a in w["atoms"] for v in views if v["id"] == a["id"] and a.get("agent_output", {}).get("anchor"))
+    assert v["notes"] == a["human_output"]["text"] and v["defined_output"] == a["expected_output"] and v["owner"] == a["how"]["agent"]
+    assert v["status"] == a["status"] and v["goal"] == a["goal"] and v["workflow"] == a["id"].split(".")[0]
+    sec = next(o for o in v["output"] if o["kind"] == "section")
+    assert sec == {"name": a["agent_output"]["section_names"][0], "type": "artifact", "kind": "section",
+                   "ref": f"{a['agent_output']['files'][-1]}#{a['agent_output']['anchor']}"}, sec
+    assert any(o["kind"] == "file" and o["type"] == "artifact" for o in v["output"])
+    assert v["details"]["selectors"] == a["agent_output"]["selectors"] and "selectors" not in v
+    assert len(v["verification"]) == len(a["results"]) and all(set(x) == {"check", "applies_to", "method", "met", "evidence"}
+                                                                  for x in v["verification"])
+    assert {x["check"] for x in v["verification"]} <= {"exists", "matches the defined output", "valid under the rules"}
+    # a behaviour step is an effect of kind "behaviour", scope self, checked as "occurred" with the receipt as its trace
+    eff = json.loads(json.dumps(a))
+    eff["results"] = [{"atom": a["id"], "check": "Total updates", "type": "behavior-steps", "target": [], "pass": True,
+                       "evidence": "step 3 saw 12", "attempt": 1}]
+    ev = S.atom_view(eff)
+    assert [o for o in ev["output"] if o["type"] == "effect"] == [{"name": "Total updates", "type": "effect", "kind": "behaviour",
+                                                                  "ref": a["agent_output"]["receipt"]}], ev["output"]
+    assert ev["verification"][0]["check"] == "occurred" and ev["verification"][0]["evidence"] == "step 3 saw 12"
+    assert ev["details"]["scope"] == "self" and "scope" not in v["details"]
+    # a document atom: its output is a document section, ref = file and heading
+    prd = docs_run("Write a PRD for Campus Notes." + CAMPUS, 200)
+    d = next(x for w in prd.workflows for x in w["atoms"])
+    dv = S.atom_view(d)
+    assert [o for o in dv["output"] if o["kind"] == "document-section"] == [
+        {"name": d["agent_output"]["section_names"][0], "type": "artifact", "kind": "document-section",
+         "ref": f"prd.md#{d['expected_output'][0]['target']}"}], dv["output"]
+    # whole page given and nothing attributable: no edge is guessed; dependencies only when the workflow declares them
+    assert all(g["whole"] and not g["edges"] for g in run.given.values()), run.given
+    assert not any(e for w in wfs if not w.get("dependencies") for x in S.run_views([w])[0] for e in x["depends_on"])
+    # edges from a manifest run: every edge is an atom named in that builder's prompt, and no manifest atom is left out
+    os.environ["J2_SLIM"] = "1"
+    try:
+        slim_run = j2.J2Run()
+        say(slim_run, BREW_LAB)
+    finally:
+        os.environ.pop("J2_SLIM", None)
+    rows = calls_file(slim_run)
+    n_edges = 0
+    for wid, g in slim_run.given.items():
+        p = [r["prompt"] for r in rows if r["fn"] == wid and "OTHER SECTIONS" in r["prompt"]][-1]
+        listed = set(re.findall(r'"atom": "([^"]+)"', p.split("OTHER SECTIONS")[1].split("\n")[0]))
+        assert {e["atom"] for e in g["edges"]} == listed and not g["whole"], (wid, listed, g)
+        n_edges += len(g["edges"])
+    assert n_edges, "later builders see earlier atoms"
+    # edges from an LLD-slice run and a chain run (earlier document), and used_by is the exact inverse of depends_on
+    full = docs_run(DESIGN_BRIEF, 900)
+    assert full.outcome.startswith("Done"), full.outcome
+    rows, fv, fw = calls_file(full), S.run_views(full._all_wfs(), full.given)[0], {w["id"]: w for w in full._all_wfs()}
+    lld_atoms = {x for x in (full.docs["lld"]["atoms"])}
+    hld_atoms = {x for x in (full.docs["hld"]["atoms"])}
+    prd_req = set(full._doc_atoms("prd", "Requirements"))
+    build = [w for w in full.workflows if w.get("lld_sections")]
+    assert build
+    for w in build:
+        edges = full.given[w["id"]]["edges"]
+        assert {e["atom"] for e in edges} & lld_atoms and all(e["atom"] in lld_atoms | hld_atoms for e in edges), (w["id"], edges)
+        assert any("LLD slice" in e["why"] and w["lld_sections"][0] in e["why"] for e in edges)
+        p = [r["prompt"] for r in rows if r["fn"] == w["id"]][-1]
+        assert "YOUR SPEC" in p and "HLD SUMMARY" in p and "THE WHOLE SITE FILE" not in p
+    hld_w = [x for x in fw.values() if x["id"] in full.docs["hld"]["workflows"]]
+    assert all(set(e["atom"] for e in full.given[x["id"]]["edges"]) == prd_req for x in hld_w), "HLD builders were given the PRD"
+    assert any("PRD" in e["why"] for x in hld_w for e in full.given[x["id"]]["edges"])
+    pairs = {(v["id"], e["atom"]) for v in fv for e in v["depends_on"]}
+    assert pairs and pairs == {(u["atom"], v["id"]) for v in fv for u in v["used_by"]}, "used_by is the inverse of depends_on"
+    assert all(e["why"] for v in fv for e in v["depends_on"] + v["used_by"])
+    # warnings only: dangling edge, cycle, orphan, missing type
+    mk = lambda i, out=None, dep=(): {**S.atom_view({"id": i, "status": "passed"}), "output": out or [], "depends_on": [{"atom": d, "why": "x"} for d in dep]}
+    final = [{"name": "p", "type": "artifact", "kind": "section", "ref": "site/index.html#p"}]
+    side = [{"name": "f", "type": "artifact", "kind": "file", "ref": "f.txt"}]
+    w = S.validate_views(S.link_views([mk("A.a1", final, ["ZZ.a1"])]))
+    assert any("ZZ.a1" in x and "not an atom" in x for x in w), w
+    w = S.validate_views(S.link_views([mk("A.a1", final, ["B.a1"]), mk("B.a1", final, ["A.a1"])]))
+    assert any(x.startswith("cycle: ") for x in w), w
+    w = S.validate_views(S.link_views([mk("A.a1", side), mk("B.a1", final)]))
+    assert w == ["A.a1: its output is never used and is not a final output"], w
+    w = S.validate_views(S.link_views([mk("A.a1", [{"name": "x", "kind": "file", "ref": "x"}] + final)]))
+    assert any("no type" in x for x in w), w
+    # atoms.json: written at the end of a run with the atom/1 views; existing run files are unchanged in name
+    f = json.load(open(os.path.join(full.dir, "atoms.json")))
+    assert f["schema"] == "atom/1" and [v["id"] for v in f["atoms"]] == [v["id"] for v in fv] and "warnings" in f
+    assert f["atoms"][-1]["depends_on"] and set(os.listdir(full.dir)) >= {"summary.json", "workflows.json", "atoms.json"}
+    assert json.load(open(os.path.join(full.dir, "workflows.json")))[0]["atoms"][0].keys() >= {"expected_output", "human_output", "agent_output"}
+    print(f"atom/1: adapter (artifact and effect items, details, notes), edges from a manifest run ({n_edges}), an LLD-slice run "
+          f"and a chain run ({len(pairs)} in the full chain), used_by the exact inverse, warnings for dangling, cycle, orphan "
+          "and missing type, atoms.json written ok")
+
+
 if __name__ == "__main__":
     if FAST:
         print("--fast: browser measurement stubbed" + ("" if BROWSER else "; tests that drive the page in Chrome are "
@@ -3972,6 +4076,7 @@ if __name__ == "__main__":
         docs_funding()
         docs_repeat_failure()
         plain_unchanged()
+        atom_schema()
         docs_blueprint()
         docs_views()
         atom_checks()
