@@ -51,16 +51,37 @@ STUDIO_PROVIDER=claude-cli python3 j2_server.py
 
 Opens http://127.0.0.1:8773. Type a brief (or pick an example card) and answer the team's questions.
 
-### Clean test run: fixed budget, no memory, no delay
+### Clean test run: no memory, no delay
 
 ```bash
-J2_FIXES=0 J2_BUDGET=40 J2_MEMORY=0 STUDIO_PROVIDER=claude-cli J2_DELAY=0 python3 j2_server.py
+J2_FIXES=0 J2_MEMORY=0 STUDIO_PROVIDER=claude-cli J2_DELAY=0 python3 j2_server.py
 ```
 
 - `J2_FIXES=0`: baseline flow, as close to the J2 diagram as possible
-- `J2_BUDGET=40`: starts with a budget of 40 instead of 100, so budget pressure shows up sooner
 - `J2_MEMORY=0`: no lessons read or written, so runs do not affect each other
 - `J2_DELAY=0`: no pause between AI calls (the pause is only for free-tier API rate limits)
+
+### Which budget fits which run
+
+The budget is counted in work credits. Set it with `J2_BUDGET` (the default is 100).
+
+| Run | Budget |
+|---|---|
+| A short test run, or a small website. Budget pressure shows up early | `J2_BUDGET=40` |
+| A normal one-page website | the default, 100 |
+| One document (PRD, HLD or LLD) | not measured live. Start with the default and raise it if the team runs out |
+| A full documents-plus-website run | `J2_BUDGET=500` or more. One measured live run used all 500 credits, so the default of 100 is too low |
+
+`J2_BUDGET_CAP` (default 2 x the budget) is the most your approvals can raise it to.
+
+### Design docs and websites
+
+- Asking for "design docs" (or "design documents", or a PRD, HLD or LLD by name) builds those documents, in the order
+  PRD, HLD, LLD. Naming one or two builds exactly those.
+- A website is built from the documents only when the brief also names a website. With no document asked for, the
+  run is the normal website flow.
+- The details question comes first. When a website is also asked for, the team asks once, before the first document,
+  for what only you know (menu and prices, hours, address, contact, form fields). The answers go to every later stage.
 
 ### Other ways to run
 
@@ -91,9 +112,9 @@ Set any of these before `python3 j2_server.py`, like the examples above.
 |---|---|---|
 | `STUDIO_PROVIDER` | unset | `claude-cli` runs on your Claude subscription |
 | `CLAUDE_CLI_MODEL` | `sonnet` | Model for `claude -p` |
-| `STUDIO_MOCK` | off | `1` runs offline with scripted agents |
+| `STUDIO_MOCK` | off | `1` runs offline with scripted agents. Mock also runs when no provider or key is set |
 | `J2_FIXES` | 0 | `1` turns on the two flow fixes |
-| `J2_BUDGET` | 100 | Starting budget |
+| `J2_BUDGET` | 100 | Starting budget, in work credits (see "Which budget fits which run") |
 | `J2_BUDGET_CAP` | 2 x budget | Most your approvals can raise the budget to |
 | `J2_MEMORY` | 1 | `0` turns lessons and playbooks off |
 | `J2_DELAY` | 2 | Seconds between AI calls |
@@ -101,20 +122,33 @@ Set any of these before `python3 j2_server.py`, like the examples above.
 | `J2_MAX_TURNS` | 30 | Agent turns per cycle |
 | `J2_LIMIT_ADD` | 30 | Budget "keep working" adds when the budget runs out |
 | `J2_RATES` | 1 | `0` turns the rate card off |
+| `J2_SLIM` | on | Builders get their own section plus a short list of the other sections, not the whole page. `0` turns it off |
+| `J2_RUNS_DIR` | `runs/` | Folder runs are saved to |
 | `J2_CHROME` | auto | Path to Chrome for Audit screenshots |
 | `J2_OVERRIDE_KEY` | unset | Owner override key, set in `.env` only (see `README.md`) |
 
 ## Checks
 
 ```bash
-python3 j2_flow_test.py           # offline flow test in mock mode, both J2_FIXES modes
-python3 j2_check.py site.html     # render check on any HTML page
+python3 j2_flow_test.py --fast             # offline flow test in mock mode, no browser steps. About 35 seconds
+python3 j2_flow_test.py --fast --browser   # adds the tests that drive the page in Chrome. About 8 to 9 minutes
+python3 j2_flow_test.py                    # the full test, both J2_FIXES modes. Longest
+python3 j2_check.py site.html              # render check on any HTML page
 ```
+
+`plain_unchanged` is one of the checks. It compares the plain website path (no documents asked for) with a fixed
+checkpoint commit, so a change that alters the plain path shows up. It runs twice: with `J2_SLIM=0` against the
+older commit, and with the default against the commit made right after `J2_SLIM` became the default.
 
 ## Where output goes
 
-Each run is saved under `runs/` (chat log, AI calls, site versions, screenshots). Past runs open read-only from
-the page. Lessons are kept in `memory/`. Both folders are git-ignored.
+Each run is saved under `runs/` (or `J2_RUNS_DIR`): chat log, AI calls, site versions, screenshots. Also:
+
+- `atoms.json`: every work atom of the run in the `atom/1` shape, with its warnings. The shape is described in
+  `docs/atom-schema.md` (machine form: `docs/atom-schema.json`)
+- the document files of a documents run: `prd.md`, `hld.md`, `lld.md`, and `.docx` copies (needs `python-docx`)
+
+Past runs open read-only from the page. Lessons are kept in `memory/`. Both folders are git-ignored.
 
 ## Troubleshooting
 
@@ -124,3 +158,4 @@ the page. Lessons are kept in `memory/`. Both folders are git-ignored.
 | `claude: command not found` | Install Claude Code and make sure it is on your `PATH` |
 | `Chrome not found` in Audit | Install Chrome or set `J2_CHROME` |
 | Port 8773 in use | Add `--port 8780` |
+| Run is in mock mode, or saved to a temporary folder | An earlier `export STUDIO_MOCK=1` or `export J2_RUNS_DIR=...` is still set in that Terminal window. Run `unset STUDIO_MOCK J2_RUNS_DIR`, or open a new window |
