@@ -3366,7 +3366,7 @@ def atom_cards_render():
     # no section artifact in the stored data: the Notes text takes the preview's place, nothing is fetched, no link
     a0 = anchored[0]
     saved = json.loads(json.dumps(snap))
-    saved["atoms_v1"][a0["id"]]["output"] = [o for o in saved["atoms_v1"][a0["id"]]["output"] if o["kind"] != "section"]
+    saved["atoms_v1"][a0["id"]]["output"] = [o for o in saved["atoms_v1"][a0["id"]]["output"] if "#" not in o["ref"]]
     for w in saved["workflows"]:
         for a in w["atoms"]:
             if a["id"] == a0["id"]:
@@ -3963,11 +3963,11 @@ def atom_schema():
     assert views and all(list(v) == keys and v["schema"] == "atom/1" for v in views), views[0].keys()
     a, v = next((a, v) for w in wfs for a in w["atoms"] for v in views if v["id"] == a["id"] and a.get("agent_output", {}).get("anchor"))
     assert v["notes"] == a["human_output"]["text"] and v["defined_output"] == a["expected_output"] and v["owner"] == a["how"]["agent"]
-    assert v["status"] == a["status"] and v["goal"] == a["goal"] and v["workflow"] == a["id"].split(".")[0]
-    sec = next(o for o in v["output"] if o["kind"] == "section")
-    assert sec == {"name": a["agent_output"]["section_names"][0], "type": "artifact", "kind": "section",
+    assert v["status"] == {"passed": "closed"}.get(a["status"], v["status"]) and v["goal"] == a["goal"] and v["workflow"] == a["id"].split(".")[0]
+    sec = next(o for o in v["output"] if o["kind"] == "page" and "#" in o["ref"])
+    assert sec == {"name": a["agent_output"]["section_names"][0], "type": "artifact", "kind": "page",
                    "ref": f"{a['agent_output']['files'][-1]}#{a['agent_output']['anchor']}"}, sec
-    assert any(o["kind"] == "file" and o["type"] == "artifact" for o in v["output"])
+    assert any(o["kind"] == "page" and o["ref"].endswith(".html") and o["type"] == "artifact" for o in v["output"])
     assert v["details"]["selectors"] == a["agent_output"]["selectors"] and "selectors" not in v
     assert len(v["verification"]) == len(a["results"]) and all(set(x) == {"check", "applies_to", "method", "met", "evidence"}
                                                                   for x in v["verification"])
@@ -3985,8 +3985,8 @@ def atom_schema():
     prd = docs_run("Write a PRD for Campus Notes." + CAMPUS, 200)
     d = next(x for w in prd.workflows for x in w["atoms"])
     dv = S.atom_view(d)
-    assert [o for o in dv["output"] if o["kind"] == "document-section"] == [
-        {"name": d["agent_output"]["section_names"][0], "type": "artifact", "kind": "document-section",
+    assert [o for o in dv["output"] if o["kind"] == "doc" and "#" in o["ref"]] == [
+        {"name": d["agent_output"]["section_names"][0], "type": "artifact", "kind": "doc",
          "ref": f"prd.md#{d['expected_output'][0]['target']}"}], dv["output"]
     # whole page given and nothing attributable: no edge is guessed; dependencies only when the workflow declares them
     assert all(g["whole"] and not g["edges"] for g in run.given.values()), run.given
@@ -4027,9 +4027,26 @@ def atom_schema():
     pairs = {(v["id"], e["atom"]) for v in fv for e in v["depends_on"]}
     assert pairs and pairs == {(u["atom"], v["id"]) for v in fv for u in v["used_by"]}, "used_by is the inverse of depends_on"
     assert all(e["why"] for v in fv for e in v["depends_on"] + v["used_by"])
+    # status: exactly four values, mapped from today's names; kinds: from the open list, none called "section"
+    st = lambda s, ws=None, ended=False, att=1: S.atom_status({"status": s, "attempts": att}, {"status": ws}, ended)
+    assert S.STATUSES == ("open", "closed", "verify_failed", "abandoned")
+    assert [st("passed", "done"), st("escalated", "done"), st("failed", "failed"), st("failed", "done"), st("failed", "running", att=3),
+            st("failed", "running", att=1), st(None, "registered"), st(None, "held"), st(None, "running"), st("could not run", "done"),
+            st(None, "held", ended=True), st(None, "registered", ended=True), st(None, "unfunded"), st(None, "done", ended=True),
+            st("could not run", "held", ended=True)] == \
+        ["closed", "verify_failed", "verify_failed", "verify_failed", "verify_failed", "open", "open", "open", "open", "open",
+         "abandoned", "abandoned", "abandoned", "open", "open"]
+    seen = {o["kind"] for v in fv for o in v["output"]}
+    assert all(v["status"] in S.STATUSES for v in fv + views) and "section" not in seen and "document-section" not in seen, seen
+    assert {"page", "doc"} <= seen and all(o["kind"] in S.KINDS for v in fv for o in v["output"] if o["type"] == "artifact"), seen
+    odd = S.atom_view({"id": "X.a1"}); odd["output"].append({"name": "n", "type": "artifact", "kind": "diagram", "ref": "d"})
+    assert S.validate_atom(odd) == [], "an unknown kind is recorded, never rejected"
+    f_done = json.load(open(os.path.join(full.dir, "atoms.json")))
+    assert all(v["status"] in S.STATUSES for v in f_done["atoms"])
+    print("atom/1 statuses: four values; kinds seen in the full chain: " + ", ".join(sorted(seen)))
     # warnings only: dangling edge, cycle, orphan, missing type
     mk = lambda i, out=None, dep=(): {**S.atom_view({"id": i, "status": "passed"}), "output": out or [], "depends_on": [{"atom": d, "why": "x"} for d in dep]}
-    final = [{"name": "p", "type": "artifact", "kind": "section", "ref": "site/index.html#p"}]
+    final = [{"name": "p", "type": "artifact", "kind": "page", "ref": "site/index.html#p"}]
     side = [{"name": "f", "type": "artifact", "kind": "file", "ref": "f.txt"}]
     w = S.validate_views(S.link_views([mk("A.a1", final, ["ZZ.a1"])]))
     assert any("ZZ.a1" in x and "not an atom" in x for x in w), w

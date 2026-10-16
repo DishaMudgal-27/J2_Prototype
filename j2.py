@@ -2477,7 +2477,7 @@ def saved_snapshot(name, since=0):
             "steps": STEPS, "goal": _read(d, "goal.json"), "stamped": True, "workflows": wfs,
             "budget": b.get("granted") or BUDGET, "spent": b.get("used") or 0, "conflicts": _read(d, "conflicts.json", []),
             "audits": audits, "versions": versions, "cycle": s.get("cycles") or 0, "calls": s.get("ai_calls") or len(calls),
-            "atoms_v1": {v["id"]: v for v in (_read(d, "atoms.json", {}).get("atoms") or j2_schema.run_views(wfs)[0])},
+            "atoms_v1": {v["id"]: v for v in (_read(d, "atoms.json", {}).get("atoms") or j2_schema.run_views(wfs, ended=True)[0])},
             "error": None, "done": True, "turn": None, "cycle_turns": 0, "max_turns": MAX_TURNS, "paused": None,
             "mock": head.get("mock"), "model": head.get("model"), "fixes": head.get("j2_fixes", 0), "placeholders": [],
             "force_audit_fail": head.get("force_audit_fail"), "test_lessons": bool(head.get("test_lessons")),
@@ -6720,7 +6720,7 @@ class J2Run:
         if self.docset:
             self.save("chain.json", self._chain_record())
         try:      # atom/1 views: a new file; a failure here never changes the run
-            views, warns = j2_schema.run_views(self._all_wfs(), self.given)
+            views, warns = j2_schema.run_views(self._all_wfs(), self.given, ended=True)
             self.save("atoms.json", {"schema": j2_schema.SCHEMA, "atoms": views, "warnings": warns})
         except Exception as e:
             self._event("system", "atoms_json", f"atoms.json not written: {e}")

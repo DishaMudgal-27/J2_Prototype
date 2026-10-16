@@ -358,10 +358,10 @@ const PREVIEWS = {};          // atom id -> srcdoc of its section (from /api/pre
 const blockHTML = (a, key, label, gloss, body, long) => `<div class="ablock" data-block="${key}"><b>${label}</b> <span class="empty">${gloss}</span>
   ${long ? `<details class="long" data-key="blk-${esc(a.id)}-${key}"><summary>show</summary>${body}</details>` : `<div>${body}</div>`}</div>`;
 // atom/1 (s.atoms_v1): the artifact refs say what the atom made; effects and atoms without a section have no preview or link
-const artifact = (v, kind) => ((v && v.output) || []).find(o => o.type === "artifact" && o.kind === kind);
+const artifact = (v, kind) => ((v && v.output) || []).find(o => o.type === "artifact" && o.kind === kind && String(o.ref).includes("#"));
 function atomPreview(a, v){
   const h = a.human_output && a.human_output.text;
-  if (!artifact(v, "section") && !artifact(v, "document-section")) return `<div class="apreview" data-preview="text">${esc(h || "Nothing built yet.")}</div>`;
+  if (!artifact(v, "page") && !artifact(v, "doc")) return `<div class="apreview" data-preview="text">${esc(h || "Nothing built yet.")}</div>`;
   if (PREVIEWS[a.id] === undefined){ if (typeof wantPreview === "function") wantPreview(a.id);
     return `<div class="apreview" data-preview="wait"><span class="empty">Loading the preview…</span></div>`; }
   return PREVIEWS[a.id] ? `<iframe class="apreview" data-preview="frame" sandbox="" title="What this atom built" srcdoc="${esc(PREVIEWS[a.id])}"></iframe>`
@@ -370,7 +370,7 @@ function atomPreview(a, v){
 function atomBlocks(a, w, v){
   const ag = a.agent_output, res = a.results || [], ok = res.filter(r => r.pass === true).length, bad = res.filter(r => r.pass === false).length;
   const g = t => `<h4 class="agroup">${t}</h4>`;
-  const q = runQ().replace("&", "?"), sec = artifact(v, "section"), dsec = artifact(v, "document-section");
+  const q = runQ().replace("&", "?"), sec = artifact(v, "page"), dsec = artifact(v, "doc");
   const base = dsec ? String(dsec.ref.split("#")[0]).replace(/\.md$/, "") : "";
   const site = dsec ? `<a data-link="md" href="/file/${esc(base)}.md${q}" download>Download the markdown (.md)</a> <a data-link="docx" href="/file/${esc(base)}.docx${q}" download>Download the Word file (.docx)</a>`
     : sec ? `<a data-link="site" href="/site/latest${q}#${esc(sec.ref.split("#")[1])}" target="_blank" rel="noopener">View in site</a>` : "";

@@ -4,14 +4,32 @@ atom_view adapts a stored atom (no stored field is renamed or changed); validate
 only: they never change an outcome, a prompt or a retry. Pure functions, no model call.
 """
 SCHEMA = "atom/1"
-FINAL_KINDS = ("section", "document-section", "document", "page")      # outputs that are part of the deliverable itself
+STATUSES = ("open", "closed", "verify_failed", "abandoned")
+KINDS = ("doc", "code", "page", "test", "plan", "skill", "app")      # an open list: unknown kinds are recorded, never rejected
+EFFECT_KINDS = ("behaviour", "fetch", "send")      # behaviour has scope self; fetch and send are external and not produced yet
+FINAL_KINDS = ("page", "doc")      # outputs that are part of the deliverable itself
+MAX_ATTEMPTS = 3
 ARTIFACT_CHECKS = {"file-exists": "exists", "element-count": "exists", "grep-count": "exists", "heading-present": "exists",
                    "section-not-empty": "exists", "facts-present": "matches the defined output",
                    "lld-slice": "matches the defined output"}      # anything else: "valid under the rules"
 EFFECT_CHECKS = {"behavior-steps": "occurred"}      # "observed result" and "within limits" are defined, not produced yet
 
 
-def atom_view(atom, wf=None, edges=None):
+def atom_status(atom, wf=None, ended=False):
+    """One of STATUSES from today's names. atom: passed, failed (after every attempt, and also after each one that will be
+    retried), escalated, could not run, or none yet. wf: its workflow's status (registered, held, running, done, failed,
+    unfunded). ended: the run is over, so what was never built is abandoned."""
+    s, ws = atom.get("status"), (wf or {}).get("status")
+    if s == "passed":
+        return "closed"
+    if s == "escalated" or (s == "failed" and (ws != "running" or (atom.get("attempts") or 0) >= MAX_ATTEMPTS)):
+        return "verify_failed"
+    if ws == "unfunded" or (ended and not s and ws not in (None, "done")):
+        return "abandoned"
+    return "open"      # none yet, retrying after a failed attempt, or a check that could not run
+
+
+def atom_view(atom, wf=None, edges=None, ended=False):
     """The atom/1 view of a stored atom. wf: its workflow (for the name); edges: [{atom, why}] it depends on."""
     ag, a = atom.get("agent_output") or {}, atom
     wid = str(a["id"]).split(".")[0]
@@ -29,7 +47,7 @@ def atom_view(atom, wf=None, edges=None):
     if any(o["type"] == "effect" for o in out):
         details["scope"] = "self"
     return {"schema": SCHEMA, "id": a["id"], "workflow": wid, "name": name, "owner": (a.get("how") or {}).get("agent"),
-            "status": a.get("status"), "attempt": a.get("attempts") or ag.get("attempt"),
+            "status": atom_status(a, wf, ended), "attempt": a.get("attempts") or ag.get("attempt"),
             "goal": a.get("goal"), "how": a.get("how"), "constraints": a.get("constraints") or [],
             "context": a.get("context") or [], "defined_output": a.get("expected_output") or [],
             "verification": ver, "output": out, "depends_on": [dict(e) for e in edges or []], "used_by": [],
@@ -39,7 +57,7 @@ def atom_view(atom, wf=None, edges=None):
 def _outputs(a, ag):
     """Artifacts: the section (or document section) the atom wrote and the files it is in. Effects: each behaviour step
     check run on the page (kind "behaviour", scope self), its ref the receipt."""
-    out, files = [], ag.get("files") or []
+    out, files = [], ag.get("files") or []     # a built website section is a "page" (ref: its anchor); PRD, HLD, LLD are "doc"
     doc = ag.get("kind") == "doc"
     if ag:
         head = next((x.get("target") for x in a.get("expected_output") or [] if isinstance(x, dict) and x.get("kind") == "heading"), None)
@@ -47,8 +65,9 @@ def _outputs(a, ag):
             if ag.get("anchor") else None
         if ref:
             out.append({"name": (ag.get("section_names") or [a["id"]])[0], "type": "artifact",
-                        "kind": "document-section" if doc else "section", "ref": ref})
-        out += [{"name": f, "type": "artifact", "kind": "file", "ref": f} for f in files]
+                        "kind": "doc" if doc else "page", "ref": ref})
+        out += [{"name": f, "type": "artifact", "kind": "doc" if f.endswith((".md", ".docx")) else "page" if f.endswith(".html")
+                 else "file", "ref": f} for f in files]
     out += [{"name": r.get("check"), "type": "effect", "kind": "behaviour", "ref": ag.get("receipt") or f"{a['id']}:{r.get('attempt')}"}
             for r in a.get("results") or [] if r.get("type") in EFFECT_CHECKS]
     return out
@@ -81,7 +100,7 @@ def dependency_edges(wf, workflows):
             for d in wf.get("dependencies") or [] if d in ids and ids[d] is not wf for a in ids[d].get("atoms") or []]
 
 
-def run_views(workflows, given=None):
+def run_views(workflows, given=None, ended=False):
     """(views, warnings) for a run. given: {workflow id: {"edges": [{atom, why}], "whole": bool}}, what each builder's
     prompt actually held (recorded by the run). Without a record, or with the whole page given and no attributable
     edge, edges come from workflow dependencies, else stay empty."""
@@ -90,7 +109,7 @@ def run_views(workflows, given=None):
         g = given.get(w["id"]) or {}
         edges = g.get("edges") or (dependency_edges(w, workflows) if g.get("whole", True) else [])
         for a in w.get("atoms") or []:
-            views.append(atom_view(a, w, [e for e in edges if e["atom"] != a["id"]]))
+            views.append(atom_view(a, w, [e for e in edges if e["atom"] != a["id"]], ended))
     link_views(views)
     return views, validate_views(views)
 

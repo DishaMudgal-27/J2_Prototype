@@ -8,7 +8,7 @@
   "properties": {
     "schema": {"const": "atom/1"},
     "id": {"type": "string"}, "workflow": {"type": "string"}, "name": {"type": "string"},
-    "owner": {"type": ["string", "null"]}, "status": {"type": ["string", "null"]}, "attempt": {"type": ["integer", "null"]},
+    "owner": {"type": ["string", "null"]}, "status": {"enum": ["open", "closed", "verify_failed", "abandoned"]}, "attempt": {"type": ["integer", "null"]},
     "goal": {"type": ["string", "null"]}, "how": {"type": ["object", "null"]},
     "constraints": {"type": "array"}, "context": {"type": "array"}, "defined_output": {"type": "array"},
     "verification": {"type": "array", "items": {"type": "object", "required": ["check", "applies_to", "method", "met", "evidence"],
@@ -17,7 +17,7 @@
                      "applies_to": {"type": ["string", "null"]}, "method": {"type": "string"},
                      "met": {"type": ["boolean", "null"]}, "evidence": {"type": ["string", "null"]}}}},
     "output": {"type": "array", "items": {"type": "object", "required": ["name", "type", "kind", "ref"],
-      "properties": {"name": {"type": "string"}, "type": {"enum": ["artifact", "effect"]}, "kind": {"type": "string"},
+      "properties": {"name": {"type": "string"}, "type": {"enum": ["artifact", "effect"]}, "kind": {"type": "string", "description": "open list; artifacts: doc, code, page, test, plan, skill, app; effects: behaviour, fetch, send; unknown kinds are recorded"},
                      "ref": {"type": "string", "description": "file path, section anchor, document heading or trace id"}}}},
     "depends_on": {"$ref": "#/definitions/edges"},
     "used_by": {"$ref": "#/definitions/edges"},
