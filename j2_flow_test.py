@@ -4110,6 +4110,67 @@ def atom_schema():
           "and missing verb, atoms.json written ok")
 
 
+def docs_intake_and_compare():
+    """A documents-plus-website run asks for the website's details once, before the first document stage, and the answers
+    reach every stage's charter; the website stage doesn't ask again. And lld_compare follows the revised LLD section: a
+    revision that removes a field is compared as removed."""
+    ANSWER = "Menu: Filter coffee 90, Latte 180. Hours: Monday to Sunday 8 am to 9 pm. Address: 12, 100 Feet Road. Form: name, phone, items."
+    seen = []
+
+    def asker(run, orig):
+        def call(fn, fmt, task, mock, **k):
+            if fn == "identity" and "EARLIER QUESTIONS AND ANSWERS" in task:
+                seen.append((run.stage_kind, bool(run.intake), "Ask for them once, now" in task, "asked for the website's details before them" in task))
+                if "Ask for them once, now" in task and not run.intake:
+                    return {"say": "To build the page I need a few real details only you know. Please send them as you'd like them to appear.",
+                            "enough": False, "next": "Requester",
+                            "questions": [{"question": "Please send these: the menu and prices, the opening hours, the address, "
+                                                       "and what the pre-order form should ask for.", "options": []}]}
+            return orig(fn, fmt, task, mock, **k)
+        return call
+    run = docs_run(DESIGN_BRIEF, 900, asker)
+    assert run.paused and run.paused["kind"] == "info" and run.stage_kind == "prd" and not run.workflows and not run.docs, run.outcome
+    say(run, ANSWER)
+    assert run.outcome.startswith("Done") and run.stages == ["prd", "hld", "lld", "website"], run.outcome
+    asks = [m for m in run.chat if m.get("act") == "ASK_REQUESTER" and m["who"] == "identity"]
+    assert len(asks) == 1 and "details only you know" in asks[0]["text"], [m["text"][:80] for m in asks]
+    first_doc = next(i for i, m in enumerate(run.chat) if m.get("workflow") or "registered" in m.get("text", "") and m["who"] == "priority")
+    assert run.chat.index(asks[0]) < first_doc
+    assert [x for x in seen if x[2]] and all(x[3] for x in seen if x[0] == "website"), seen        # asked first; the website stage knows
+    assert [x for x in seen if x[0] == "website"] and not [x for x in seen if x[0] == "website" and x[2]], seen
+    for g in run.stage_archive[1:3]:                                  # the HLD's and the LLD's charters carry the answer
+        assert g["goal"]["requester_answers"] == [ANSWER], g["stage"]
+    hld = next(w for w in run._all_wfs() if w["id"] in run.docs["hld"]["workflows"])
+    assert any(ANSWER in c["prompt"] for c in calls_file(run) if c["fn"] == hld["id"]), "the HLD builder sees the details"
+    # a run without a website, and a plain brief, are not asked this way
+    tasks = []
+
+    def spy(run2, orig):
+        def call(fn, fmt, task, mock, **k):
+            tasks.append(task)
+            return orig(fn, fmt, task, mock, **k)
+        return call
+    docs_run("Write a PRD for Campus Notes." + CAMPUS, 200, spy)
+    docs_run(BREW_LAB, 200, spy)
+    assert tasks and not any("Ask for them once, now" in t or "asked for the website's details before them" in t for t in tasks)
+    # lld_compare follows the revised section: a revision that removes a field
+    full = docs_run(DESIGN_BRIEF, 900)
+    assert full.outcome.startswith("Done"), full.outcome
+    f = full.blueprint["fields"][0]
+    page = "<html><body>" + j2.lld_markup(full.blueprint) + "</body></html>"
+    page = re.sub(rf"<label>[^<]*<input name=\"{f['name']}\"[^>]*></label>", "", page)
+    assert f["name"] not in page and any(m["section"] == f["section"] for m in full._lld_compare(page)["mismatches"])
+    w = next(x for x in full.workflows if f["section"] in (x.get("lld_sections") or []))
+    full._revise_lld(w, f["section"], {"reason": "the charter has no such field", "use": {}, "fields": {f["id"]: None}})
+    cmp = full._lld_compare(page)
+    assert f["section"] in cmp["matches"] and not cmp["mismatches"], cmp
+    assert all(x["id"] != f["id"] for x in full.blueprint["fields"]) and all(x["id"] != f["id"] for x in full.docs["lld"]["agent_output"]["fields"])
+    assert f"**{f['id']}**" not in open(os.path.join(full.dir, "lld.md"), encoding="utf-8").read()
+    assert full.lld_revisions[-1]["fields"] == {f["id"]: None}
+    print("documents run: the website's details are asked once before the PRD and reach every stage; lld_compare follows "
+          "the revised section (a removed field is a match) ok")
+
+
 if __name__ == "__main__":
     if FAST:
         print("--fast: browser measurement stubbed" + ("" if BROWSER else "; tests that drive the page in Chrome are "
@@ -4136,6 +4197,7 @@ if __name__ == "__main__":
         docs_chain()
         docs_funding()
         docs_repeat_failure()
+        docs_intake_and_compare()
         plain_unchanged("f6938b2", slim="0")      # J2_SLIM=0 is the old path, prompt for prompt
         plain_unchanged()                         # the default (slim) path against the commit made right after the flip
         atom_schema()

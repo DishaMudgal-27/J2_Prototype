@@ -1993,6 +1993,15 @@ PRD_BUILDER = """# Workflow agent for a PRD section (one per registered workflow
   charter ("This PRD ..."): the invented-names check reads it as a made-up name. Write "This document ...".
 - If your reply can't be used, code tells you why and you retry, within your envelope. Then report to
   @Coordination what you changed."""
+# A documents run that ends with the website: its details are asked once, before the first document (the answers go into the
+# charter every stage uses), and the website stage asks again only for what is genuinely missing.
+SITE_FIRST = ("\nA website will be built from these documents. In this same round, also ask the Requester (one question) "
+              "for the content details only they know that the website and its forms need and the brief lacks: for example "
+              "menu items and prices, opening hours, the address, the phone number and email, and the fields a form should "
+              "ask for. Ask for them once, now: they go into the charter every document and the website use. Never invent "
+              "them. If the brief already gives them, ask nothing about them.")
+SITE_LATER = ("\nThe documents are written and the Requester was already asked for the website's details before them (see "
+              "EARLIER QUESTIONS AND ANSWERS). Ask again only for what is genuinely missing; never repeat a question.")
 PRD_INTAKE = ("J2.a for a PRD: is there enough information to write it? You need these product facts: the product "
               "name, who the users are, the problem, the must-have features, constraints, and how success is measured. "
               "Ask the Requester only for the ones the brief lacks (set enough=false, 1-4 specific questions); ask about "
@@ -3402,6 +3411,8 @@ class J2Run:
                 self.GRANT_FMT = self.GRANT_FMT.replace('"covers": [int]', '"lld_sections": [str], "covers": [int]')
             return self._handoff("identity", kind="intake")
         self.goal = stage_goal(kind, self.stage_archive[0]["goal"], dict(self.chain))
+        if self.intake:      # what the Requester told Identity before the first document (details, form fields) is in every stage's charter
+            self.goal["requester_answers"] = [x["answer"] for x in self.intake]
         self.goal["charter_items"] = list(self.goal["done_when"])
         self.goal["core_items"] = list(self.goal["done_when"])
         self.goal.pop("core", None)
@@ -3469,7 +3480,7 @@ class J2Run:
                       + next_field(("user", "adaptation"), "Requester when you ask; Adaptation once the charter is "
                                    "recorded") + "}",
                       f"REQUESTER'S BRIEF: {self.request}\nEARLIER QUESTIONS AND ANSWERS: {json.dumps(self.intake)}\n"
-                      f"{feedback}\n" + (self.out["intake"] if self.doc else
+                      f"{feedback}\n" + (self.out["intake"] + (SITE_FIRST if "website" in self.stages and not change else "") if self.doc else
                       "J2.a: is there enough information to work? You need enough to write the charter: "
                       "goal, audience, standards, rules and a checkable done-when list. Never invent a missing fact.\n"
                       "- Work out what kind of business this is and what its visitors usually need (for example a "
@@ -3490,7 +3501,7 @@ class J2Run:
                       "number of the done-when item it blocks: that item is not met until they confirm it. Done-when "
                       "may not refer to the Requester, Audit, verification, approval or launch. Keep everything the brief "
                       "asks for; if the charter leaves any of it out, list it in dropped_from_brief with the reason. "
-                      "Don't plan costs or resources.")
+                      "Don't plan costs or resources.") + (SITE_LATER if self.docset and not self.doc and not change else "")
                       + ("\nRecord the charter now (enough=true) from what you have." if last else ""), mock,
                       defaults=("Thanks, I have everything I need. I'm starting the build now.",
                                 "Charter is ready. Propose the first workflows."))
@@ -5880,7 +5891,9 @@ class J2Run:
         self.save("workflows.json", self.workflows)
 
     SPEC_FMT = ('"spec_conflict": null|{"section": str (the LLD section id), "reason": str, "use": {"#spec-selector": '
-                '"#selector-you-built"}} (only when your spec can\'t be built as written; never deviate silently), ')
+                '"#selector-you-built"}, "fields": {"F4": null|"text"} (optional: null removes that spec field because the charter has no '
+                'such field, a string gives its new type)} (only when your spec can\'t be built as written; never deviate '
+                'silently), ')
 
     def _hld_summary(self):
         comps = (self.chain.get("hld") or {}).get("components")
@@ -5964,6 +5977,7 @@ class J2Run:
         note, and record the reason in the LLD's agent_output (document and owner atom)."""
         use = {str(k): str(v) for k, v in (c.get("use") or {}).items() if str(k).startswith(("#", ".")) and str(v)[:1] in "#."}
         spec, v = self.blueprint, 2
+        fld = {str(k): x for k, x in (c.get("fields") or {}).items()} if isinstance(c.get("fields"), dict) else {}
         fix = lambda t: reduce(lambda a, kv: str(a).replace(kv[0], kv[1]), use.items(), t) if t else t
         for x in spec["sections"]:
             if x["id"] == sec:
@@ -5975,12 +5989,20 @@ class J2Run:
         for x in spec["fields"]:
             if x["section"] == sec and x.get("form"):
                 x["form"] = (fix("#" + x["form"]))[1:]
-        note = {"section": sec, "version": v, "reason": str(c.get("reason") or "").strip(), "changes": use, "by": w["id"]}
+        spec["fields"] = [f for f in spec["fields"] if not (f["section"] == sec and f["id"] in fld and fld[f["id"]] is None)]
+        for f in spec["fields"]:      # a field the builder retyped (a string) is retyped in the spec
+            if f["section"] == sec and isinstance(fld.get(f["id"]), str) and fld[f["id"]]:
+                f["type"] = fld[f["id"]]
+        note = {"section": sec, "version": v, "reason": str(c.get("reason") or "").strip(), "changes": use, "by": w["id"],
+                **({"fields": fld} if fld else {})}
         self.lld_revisions.append(note)
         lld = self.docs.get("lld") or {}
         path = os.path.join(self.dir, "lld.md")
         if os.path.exists(path):
             text = fix(open(path, encoding="utf-8").read())
+            for fid, new in fld.items():      # a removed field's line goes; a retyped field's line says its new type
+                text = re.sub(rf"(?m)^\s*[-*+]\s*\*\*{re.escape(fid)}\*\*.*\n?", "" if new is None else
+                              lambda m: re.sub(r"type [\w-]+", f"type {new}", m.group(0)), text)
             text = re.sub(rf"(?m)^(\s*[-*+]\s*\*\*{sec}\*\*.*?)$", lambda m: m.group(1) + f" Version {v}: {note['reason']}.", text, count=1)
             open(path, "w", encoding="utf-8").write(text)
             export_lld(text, self.dir)
