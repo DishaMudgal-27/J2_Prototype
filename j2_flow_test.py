@@ -3426,7 +3426,7 @@ BREW_FACTS = (" Users: coffee lovers and office staff. Problem: people can't see
               "features: see the menu with prices, pre-order a coffee, find the shop, read the opening hours. "
               "Constraints: one page only. Success: 30 pre-orders per week.")
 DESIGN_BRIEF = BREW_LAB + " Write the design docs first." + BREW_FACTS
-PLAIN_CHECKPOINT = "3a1e66c"   # plain_unchanged compares the working tree with this commit; move it when the plain path changes on purpose
+PLAIN_CHECKPOINT = "13ccccd"   # plain_unchanged compares the working tree with this commit; move it when the plain path changes on purpose
 CHECKPOINT = "0657d93"         # the commit before the design-document work: a plain brief must behave exactly as there
 
 
@@ -4137,6 +4137,7 @@ if __name__ == "__main__":
         docs_funding()
         docs_repeat_failure()
         plain_unchanged("f6938b2", slim="0")      # J2_SLIM=0 is the old path, prompt for prompt
+        plain_unchanged()                         # the default (slim) path against the commit made right after the flip
         atom_schema()
         docs_blueprint()
         docs_views()

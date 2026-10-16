@@ -131,3 +131,28 @@ PY
 python3 j2_server.py --port 8773 --no-browser
 ```
 Open the URL it prints after "OPEN:". Stop the server with Ctrl+C.
+
+## Status (16 Oct 2026)
+
+**Commits since 7d43a29** (each range starts at a checkpoint commit)
+- Repeat-failure choices, code-written check results, rate card, PRD builder rules: e900d95 to 3a1e66c.
+- `plain_unchanged` wired into the suite: ff5d5f8 to 889229d.
+- atom/1 (schema, adapter, edges, atoms.json, cards, statuses, verbs): 405f2ae to f6938b2 (status and kinds: e56e444 to de0abbe; verb and noun: d75c6b3 to f6938b2).
+- Slim on by default: c83bc5b to the commit that holds this note (the flip is 13ccccd; the next commit moves `PLAIN_CHECKPOINT` to it).
+- Tests: `python3 j2_flow_test.py --fast` and `--fast --browser` pass; `J2_SLIM=0 python3 j2_flow_test.py --fast` passes too.
+
+**Slim is now the default.** J2_SLIM is on unless it is set to 0; `J2_SLIM=0` turns it off and gives the prompts of f6938b2 for a plain website, tested against that commit. Audit still reads the full page. `PLAIN_CHECKPOINT` in `j2_flow_test.py` is the commit made right after the flip, so `plain_unchanged` guards the new default; move it when the plain path changes on purpose.
+
+**atom/1** (`docs/atom-schema.md`, `docs/atom-schema.json`, `j2_schema.py`)
+- Status has four values: open, closed, verify_failed, abandoned (mapping table in the schema doc; three names do not map cleanly and are flagged there).
+- Each output item has a verb (make or do), a name, a form and a ref. Makes are artifacts, proven by exists, valid and meets the defined output ("done when"). Dos are deeds, proven by one receipt check (the receipt id from receipts.jsonl). An atom is make, do or mixed, derived by code and never stored.
+- `depends_on` and `used_by` are recorded from what each builder's prompt actually held (manifest lines, an LLD slice, the HLD summary, the earlier document); `used_by` is built by code as the exact inverse. A builder given the whole page gets no edge unless its workflow declares dependencies.
+- `runs/<id>/atoms.json` is written per run with the views and warnings (dangling edge, cycle, unused output, missing verb, and an info line for each mixed atom). Warnings never change an outcome, a prompt or a retry.
+- Detailed view cards show Notes, Workflow output (verb, noun, form, ref, depends_on, used_by) and Result (preview and links). The Simple view is unchanged.
+
+**Open items**
+- The P4 name detector reads "This PRD" as a made-up name; the fix awaits the owner's approval.
+- External deeds (fetch, send) are defined in the schema doc; nothing produces them.
+- Chrome-driven receipts are untested: the behaviour receipt check has only run with the fake driver.
+- HLD and LLD cost minimums (98 and 88) are not measured; only PRDs have been.
+- The owner's artifact kinds file is still to be shared.
