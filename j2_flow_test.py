@@ -3684,9 +3684,11 @@ def docs_blueprint():
           "atom, Audit compares the page to the LLD, chain recorded, J2_SLIM keeps the manifest ok")
 
 
-def plain_unchanged():
+def plain_unchanged(checkpoint=None, slim=None):
     """3: with no document asked for, the website flow is unchanged: same prompts, same page, same result as the
-    checkpoint commit (run in a copy of it)."""
+    checkpoint commit (run in a copy of it). checkpoint: the commit to compare with (default PLAIN_CHECKPOINT); slim: set
+    J2_SLIM to this in both runs ("0" = the old whole-page path), else it is left unset (the default)."""
+    checkpoint = checkpoint or PLAIN_CHECKPOINT
     import subprocess
     import shutil
     here = os.path.dirname(os.path.abspath(__file__))
@@ -3706,10 +3708,11 @@ def plain_unchanged():
              "  'calls': [[c['fn'], h(c['system']), h(c['prompt'])] for c in rows],\n"
              "  'workflows': h(json.dumps([{k: v for k, v in w.items() if k not in ('t',)} for w in r.workflows], sort_keys=True))}))\n")
     old = tempfile.mkdtemp(prefix="j2-checkpoint-")
-    tar = subprocess.run(["git", "archive", PLAIN_CHECKPOINT, "--", "j2.py", "j2_check.py", "llm.py", "conditions", "agents"], cwd=here,
+    tar = subprocess.run(["git", "archive", checkpoint, "--", "j2.py", "j2_check.py", "llm.py", "conditions", "agents"]
+                         + (["j2_schema.py"] if subprocess.run(["git", "cat-file", "-e", f"{checkpoint}:j2_schema.py"], cwd=here).returncode == 0 else []), cwd=here,
                          capture_output=True)
     if tar.returncode:
-        print(f"plain brief unchanged: skipped (checkpoint {PLAIN_CHECKPOINT} not in this clone)")
+        print(f"plain brief unchanged: skipped (checkpoint {checkpoint} not in this clone)")
         shutil.rmtree(old, ignore_errors=True)
         return
     subprocess.run(["tar", "-x", "-C", old], input=tar.stdout, check=True)
@@ -3719,6 +3722,9 @@ def plain_unchanged():
         results = []
         for cwd in (old, here):
             env = {**os.environ, "STUDIO_MOCK": "1", "J2_MEMORY": "0", "J2_FIXES": os.environ.get("J2_FIXES", "0")}
+            env.pop("J2_SLIM", None)
+            if slim is not None:
+                env["J2_SLIM"] = slim
             r = subprocess.run([sys.executable, "-c", probe], input=BREW_LAB, cwd=cwd, capture_output=True, text=True, env=env, timeout=300)
             assert r.returncode == 0, r.stderr[-800:]
             results.append(json.loads(r.stdout.strip().splitlines()[-1]))
@@ -3729,7 +3735,7 @@ def plain_unchanged():
         assert not diff, f"prompts differ at calls {diff[:5]}"
         assert a["workflows"] == b["workflows"]
         print(f"plain brief unchanged: {len(b['calls'])} calls, every system prompt and prompt, the page, the sections, the workflows "
-              f"and the outcome are identical to checkpoint {PLAIN_CHECKPOINT}")
+              f"and the outcome are identical to checkpoint {checkpoint}" + (f" with J2_SLIM={slim}" if slim is not None else ""))
     finally:
         shutil.rmtree(old, ignore_errors=True)
 
@@ -3956,8 +3962,12 @@ def atom_schema():
     keys = ["schema", "id", "workflow", "name", "owner", "status", "attempt", "goal", "how", "constraints", "context",
             "defined_output", "verification", "output", "depends_on", "used_by", "notes", "details"]
     # the adapter, on a stored website run: standard fields only, website words only in details
-    run = j2.J2Run()
-    say(run, BREW_LAB)
+    os.environ["J2_SLIM"] = "0"          # the old whole-page path: no edge can be attributed
+    try:
+        run = j2.J2Run()
+        say(run, BREW_LAB)
+    finally:
+        os.environ.pop("J2_SLIM", None)
     wfs = json.loads(json.dumps(run.workflows))
     views, warns = S.run_views(wfs)
     assert views and all(list(v) == keys and v["schema"] == "atom/1" for v in views), views[0].keys()
@@ -3997,14 +4007,13 @@ def atom_schema():
     assert all(g["whole"] and not g["edges"] for g in run.given.values()), run.given
     assert not any(e for w in wfs if not w.get("dependencies") for x in S.run_views([w])[0] for e in x["depends_on"])
     # edges from a manifest run: every edge is an atom named in that builder's prompt, and no manifest atom is left out
-    os.environ["J2_SLIM"] = "1"
     try:
         slim_run = j2.J2Run()
         say(slim_run, BREW_LAB)
     finally:
         os.environ.pop("J2_SLIM", None)
     rows = calls_file(slim_run)
-    n_edges = 0
+    n_edges, n_old = 0, sum(len(x["depends_on"]) for x in views)
     for wid, g in slim_run.given.items():
         p = [r["prompt"] for r in rows if r["fn"] == wid and "OTHER SECTIONS" in r["prompt"]][-1]
         listed = set(re.findall(r'"atom": "([^"]+)"', p.split("OTHER SECTIONS")[1].split("\n")[0]))
@@ -4022,12 +4031,13 @@ def atom_schema():
     assert build
     for w in build:
         edges = full.given[w["id"]]["edges"]
-        assert {e["atom"] for e in edges} & lld_atoms and all(e["atom"] in lld_atoms | hld_atoms for e in edges), (w["id"], edges)
+        spec_e = [e for e in edges if "LLD slice" in e["why"] or "HLD" in e["why"]]      # the manifest adds site atoms too
+        assert {e["atom"] for e in spec_e} & lld_atoms and all(e["atom"] in lld_atoms | hld_atoms for e in spec_e), (w["id"], edges)
         assert any("LLD slice" in e["why"] and w["lld_sections"][0] in e["why"] for e in edges)
         p = [r["prompt"] for r in rows if r["fn"] == w["id"]][-1]
         assert "YOUR SPEC" in p and "HLD SUMMARY" in p and "THE WHOLE SITE FILE" not in p
     hld_w = [x for x in fw.values() if x["id"] in full.docs["hld"]["workflows"]]
-    assert all(set(e["atom"] for e in full.given[x["id"]]["edges"]) == prd_req for x in hld_w), "HLD builders were given the PRD"
+    assert all(set(e["atom"] for e in full.given[x["id"]]["edges"] if "PRD" in e["why"]) == prd_req for x in hld_w), "HLD builders were given the PRD"
     assert any("PRD" in e["why"] for x in hld_w for e in full.given[x["id"]]["edges"])
     pairs = {(v["id"], e["atom"]) for v in fv for e in v["depends_on"]}
     assert pairs and pairs == {(u["atom"], v["id"]) for v in fv for u in v["used_by"]}, "used_by is the inverse of depends_on"
@@ -4094,6 +4104,7 @@ def atom_schema():
     assert f["schema"] == "atom/1" and [v["id"] for v in f["atoms"]] == [v["id"] for v in fv] and "warnings" in f
     assert f["atoms"][-1]["depends_on"] and set(os.listdir(full.dir)) >= {"summary.json", "workflows.json", "atoms.json"}
     assert json.load(open(os.path.join(full.dir, "workflows.json")))[0]["atoms"][0].keys() >= {"expected_output", "human_output", "agent_output"}
+    print(f"atom/1 edges in a plain website run: J2_SLIM=0 {n_old}, default (slim) {n_edges}")
     print(f"atom/1: adapter (make and do items, details, notes), edges from a manifest run ({n_edges}), an LLD-slice run "
           f"and a chain run ({len(pairs)} in the full chain), used_by the exact inverse, warnings for dangling, cycle, orphan "
           "and missing verb, atoms.json written ok")
@@ -4125,7 +4136,7 @@ if __name__ == "__main__":
         docs_chain()
         docs_funding()
         docs_repeat_failure()
-        plain_unchanged()
+        plain_unchanged("f6938b2", slim="0")      # J2_SLIM=0 is the old path, prompt for prompt
         atom_schema()
         docs_blueprint()
         docs_views()

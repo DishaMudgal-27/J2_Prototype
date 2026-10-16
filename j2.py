@@ -405,9 +405,10 @@ def build_agent_output(w, a, attempt, body, receipts, last_audit, n_sites, doc, 
 
 
 def slim():
-    """J2_SLIM=1: prompts carry finished atoms' agent_output instead of their attempts and receipts, and builders see
-    their own section plus a manifest instead of the whole page. Read per call so tests can switch it."""
-    return os.environ.get("J2_SLIM") == "1"
+    """On unless J2_SLIM=0: prompts carry finished atoms' agent_output instead of their attempts and receipts, and builders
+    see their own section plus a manifest instead of the whole page. Audit still reads the full page. J2_SLIM=0 is the old
+    path, prompt for prompt. Read per call so tests can switch it."""
+    return os.environ.get("J2_SLIM") != "0"
 
 
 def slim_atom(a):
