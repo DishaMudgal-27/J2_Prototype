@@ -3949,7 +3949,7 @@ def docs_repeat_failure():
 
 
 def atom_schema():
-    """atom/1: the adapter maps a stored run (artifacts and effects), edges are what each builder's prompt actually held
+    """atom/1: the adapter maps a stored run (makes and dos), edges are what each builder's prompt actually held
     (manifest, LLD slice, earlier document), used_by is the exact inverse, warnings never change a run, atoms.json is
     written, and a builder given the whole page has no attributable edge."""
     import j2_schema as S
@@ -3964,29 +3964,34 @@ def atom_schema():
     a, v = next((a, v) for w in wfs for a in w["atoms"] for v in views if v["id"] == a["id"] and a.get("agent_output", {}).get("anchor"))
     assert v["notes"] == a["human_output"]["text"] and v["defined_output"] == a["expected_output"] and v["owner"] == a["how"]["agent"]
     assert v["status"] == {"passed": "closed"}.get(a["status"], v["status"]) and v["goal"] == a["goal"] and v["workflow"] == a["id"].split(".")[0]
-    sec = next(o for o in v["output"] if o["kind"] == "page" and "#" in o["ref"])
-    assert sec == {"name": a["agent_output"]["section_names"][0], "type": "artifact", "kind": "page",
+    sec = next(o for o in v["output"] if o["form"] == "page" and "#" in o["ref"])
+    assert sec == {"verb": "make", "name": a["agent_output"]["section_names"][0], "form": "page",
                    "ref": f"{a['agent_output']['files'][-1]}#{a['agent_output']['anchor']}"}, sec
-    assert any(o["kind"] == "page" and o["ref"].endswith(".html") and o["type"] == "artifact" for o in v["output"])
+    assert any(o["form"] == "page" and o["ref"].endswith(".html") and o["verb"] == "make" for o in v["output"])
     assert v["details"]["selectors"] == a["agent_output"]["selectors"] and "selectors" not in v
     assert len(v["verification"]) == len(a["results"]) and all(set(x) == {"check", "applies_to", "method", "met", "evidence"}
                                                                   for x in v["verification"])
-    assert {x["check"] for x in v["verification"]} <= {"exists", "matches the defined output", "valid under the rules"}
-    # a behaviour step is an effect of kind "behaviour", scope self, checked as "occurred" with the receipt as its trace
+    assert {x["check"] for x in v["verification"]} <= {"exists", "valid", "meets the defined output", "receipt"}
+    assert all(x["applies_to"] in {o["name"] for o in v["output"]} for x in v["verification"] if v["output"]), v["verification"]
+    # a behaviour step is a do item of form "behaviour" (scope self), checked by one "receipt" check: the receipt id
     eff = json.loads(json.dumps(a))
     eff["results"] = [{"atom": a["id"], "check": "Total updates", "type": "behavior-steps", "target": [], "pass": True,
                        "evidence": "step 3 saw 12", "attempt": 1}]
     ev = S.atom_view(eff)
-    assert [o for o in ev["output"] if o["type"] == "effect"] == [{"name": "Total updates", "type": "effect", "kind": "behaviour",
-                                                                  "ref": a["agent_output"]["receipt"]}], ev["output"]
-    assert ev["verification"][0]["check"] == "occurred" and ev["verification"][0]["evidence"] == "step 3 saw 12"
+    assert [o for o in ev["output"] if o["verb"] == "do"] == [{"verb": "do", "name": "Total updates", "form": "behaviour",
+                                                              "ref": f"{a['id']}:1"}], ev["output"]
+    assert ev["verification"][0]["check"] == "receipt" and ev["verification"][0]["evidence"] == f"{a['id']}:1" \
+        and ev["verification"][0]["met"] is True and ev["verification"][0]["applies_to"] == "Total updates"
+    assert S.atom_kind(ev) == "mixed" and S.atom_kind(v) == "make" and not any("kind" in x or "type" in x for x in ev["output"])
+    assert any(x.startswith("info: ") and "mixed atom" in x for x in S.validate_views(S.link_views([ev]))), "mixed is flagged"
+    assert not S.validate_atom(ev), "a mixed atom is valid"
     assert ev["details"]["scope"] == "self" and "scope" not in v["details"]
     # a document atom: its output is a document section, ref = file and heading
     prd = docs_run("Write a PRD for Campus Notes." + CAMPUS, 200)
     d = next(x for w in prd.workflows for x in w["atoms"])
     dv = S.atom_view(d)
-    assert [o for o in dv["output"] if o["kind"] == "doc" and "#" in o["ref"]] == [
-        {"name": d["agent_output"]["section_names"][0], "type": "artifact", "kind": "doc",
+    assert [o for o in dv["output"] if o["form"] == "doc" and "#" in o["ref"]] == [
+        {"verb": "make", "name": d["agent_output"]["section_names"][0], "form": "doc",
          "ref": f"prd.md#{d['expected_output'][0]['target']}"}], dv["output"]
     # whole page given and nothing attributable: no edge is guessed; dependencies only when the workflow declares them
     assert all(g["whole"] and not g["edges"] for g in run.given.values()), run.given
@@ -4036,34 +4041,62 @@ def atom_schema():
             st("could not run", "held", ended=True)] == \
         ["closed", "verify_failed", "verify_failed", "verify_failed", "verify_failed", "open", "open", "open", "open", "open",
          "abandoned", "abandoned", "abandoned", "open", "open"]
-    seen = {o["kind"] for v in fv for o in v["output"]}
+    seen = {o["form"] for v in fv for o in v["output"]}
+    assert all(o["verb"] in ("make", "do") and "type" not in o and "kind" not in o for v in fv + views for o in v["output"])
     assert all(v["status"] in S.STATUSES for v in fv + views) and "section" not in seen and "document-section" not in seen, seen
-    assert {"page", "doc"} <= seen and all(o["kind"] in S.KINDS for v in fv for o in v["output"] if o["type"] == "artifact"), seen
-    odd = S.atom_view({"id": "X.a1"}); odd["output"].append({"name": "n", "type": "artifact", "kind": "diagram", "ref": "d"})
+    assert {"page", "doc"} <= seen and all(o["form"] in S.MAKE_FORMS for v in fv for o in v["output"] if o["verb"] == "make"), seen
+    odd = S.atom_view({"id": "X.a1"}); odd["output"].append({"verb": "make", "name": "n", "form": "diagram", "ref": "d"})
     assert S.validate_atom(odd) == [], "an unknown kind is recorded, never rejected"
     f_done = json.load(open(os.path.join(full.dir, "atoms.json")))
     assert all(v["status"] in S.STATUSES for v in f_done["atoms"])
-    print("atom/1 statuses: four values; kinds seen in the full chain: " + ", ".join(sorted(seen)))
+    print("atom/1 statuses: four values; forms seen in the full chain: " + ", ".join(sorted(seen)))
+    # a run with behaviour steps (a calculator): do items of form "behaviour", each with a receipt check that passes
+    calc = j2.J2Run()
+    say(calc, BREW_LAB.replace("and where to find us", "where to find us, and a price calculator for an order"))
+    finish(calc)
+    cv = S.run_views(calc._all_wfs(), calc.given)[0]
+    dos = [(v, o) for v in cv for o in v["output"] if o["verb"] == "do"]
+    assert dos and all(o["form"] == "behaviour" and o["ref"].startswith(v["id"] + ":") for v, o in dos), dos
+    chk = [x for v, o in dos for x in v["verification"] if x["applies_to"] == o["name"] and x["check"] == "receipt"]
+    assert len(chk) == len(dos) and all(x["evidence"] == o["ref"] for (v, o), x in zip(dos, chk)), chk
+    if not BROWSER or j2.j2_check.find_chrome():
+        assert all(x["met"] is True for x in chk), chk
+    assert {S.atom_kind(v) for v, _ in dos} == {"mixed"} and all(v["status"] in S.STATUSES for v in cv)
+    assert any(x.startswith("info: ") and "mixed atom" in x for x in S.validate_views(cv)), "mixed is flagged in the run's warnings"
+    atoms_json = json.load(open(os.path.join(calc.dir, "atoms.json")))
+    assert any(x.startswith("info: ") for x in atoms_json["warnings"]), atoms_json["warnings"]
+    kinds = lambda vs: {k: sum(S.atom_kind(v) == k for v in vs) for k in ("make", "do", "mixed")}
+    import shutil
+    if shutil.which("node"):                       # the card: verb, noun, form and ref; "mixed" shown only on a mixed atom
+        card = render_node(j2.saved_snapshot(os.path.basename(calc.dir), 0))["cards"]
+        mixed_ids = {v["workflow"] for v, _ in dos}
+        for w in calc._all_wfs():
+            c = card[w["id"]]
+            assert ('data-note="mixed"' in c) == (w["id"] in mixed_ids), w["id"]
+        mc = card[next(iter(mixed_ids))]
+        assert "make · artifact · page" in mc and "do · deed · behaviour" in mc and "effect" not in mc.lower(), mc[:200]
+    print(f"atom/1 verbs: full chain {kinds(fv)}, behaviour run {kinds(cv)} (make-only, do-only, mixed); behaviour run has "
+          f"{len(dos)} do item(s) of form behaviour, each with a receipt check")
     # warnings only: dangling edge, cycle, orphan, missing type
     mk = lambda i, out=None, dep=(): {**S.atom_view({"id": i, "status": "passed"}), "output": out or [], "depends_on": [{"atom": d, "why": "x"} for d in dep]}
-    final = [{"name": "p", "type": "artifact", "kind": "page", "ref": "site/index.html#p"}]
-    side = [{"name": "f", "type": "artifact", "kind": "file", "ref": "f.txt"}]
+    final = [{"verb": "make", "name": "p", "form": "page", "ref": "site/index.html#p"}]
+    side = [{"verb": "make", "name": "f", "form": "file", "ref": "f.txt"}]
     w = S.validate_views(S.link_views([mk("A.a1", final, ["ZZ.a1"])]))
     assert any("ZZ.a1" in x and "not an atom" in x for x in w), w
     w = S.validate_views(S.link_views([mk("A.a1", final, ["B.a1"]), mk("B.a1", final, ["A.a1"])]))
     assert any(x.startswith("cycle: ") for x in w), w
     w = S.validate_views(S.link_views([mk("A.a1", side), mk("B.a1", final)]))
-    assert w == ["A.a1: its output is never used and is not a final output"], w
-    w = S.validate_views(S.link_views([mk("A.a1", [{"name": "x", "kind": "file", "ref": "x"}] + final)]))
-    assert any("no type" in x for x in w), w
+    assert w == ["A.a1: its output is never used and is not a final output"], w     # no info line: not mixed
+    w = S.validate_views(S.link_views([mk("A.a1", [{"name": "x", "form": "file", "ref": "x"}] + final)]))
+    assert any("no verb" in x for x in w), w
     # atoms.json: written at the end of a run with the atom/1 views; existing run files are unchanged in name
     f = json.load(open(os.path.join(full.dir, "atoms.json")))
     assert f["schema"] == "atom/1" and [v["id"] for v in f["atoms"]] == [v["id"] for v in fv] and "warnings" in f
     assert f["atoms"][-1]["depends_on"] and set(os.listdir(full.dir)) >= {"summary.json", "workflows.json", "atoms.json"}
     assert json.load(open(os.path.join(full.dir, "workflows.json")))[0]["atoms"][0].keys() >= {"expected_output", "human_output", "agent_output"}
-    print(f"atom/1: adapter (artifact and effect items, details, notes), edges from a manifest run ({n_edges}), an LLD-slice run "
+    print(f"atom/1: adapter (make and do items, details, notes), edges from a manifest run ({n_edges}), an LLD-slice run "
           f"and a chain run ({len(pairs)} in the full chain), used_by the exact inverse, warnings for dangling, cycle, orphan "
-          "and missing type, atoms.json written ok")
+          "and missing verb, atoms.json written ok")
 
 
 if __name__ == "__main__":

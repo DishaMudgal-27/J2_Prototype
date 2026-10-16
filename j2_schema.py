@@ -5,14 +5,17 @@ only: they never change an outcome, a prompt or a retry. Pure functions, no mode
 """
 SCHEMA = "atom/1"
 STATUSES = ("open", "closed", "verify_failed", "abandoned")
-KINDS = ("doc", "code", "page", "test", "plan", "skill", "app")      # an open list: unknown kinds are recorded, never rejected
-EFFECT_KINDS = ("behaviour", "fetch", "send")      # behaviour has scope self; fetch and send are external and not produced yet
-FINAL_KINDS = ("page", "doc")      # outputs that are part of the deliverable itself
+# Each output item has a verb: MAKE gives an artifact, DO gives a deed (the noun follows from the verb). Forms are open
+# lists: unknown forms are recorded, never rejected.
+NOUN = {"make": "artifact", "do": "deed"}
+MAKE_FORMS = ("doc", "code", "page", "test", "plan", "skill", "app")
+DO_FORMS = ("behaviour", "fetch", "send")      # behaviour has scope self and is produced; fetch and send are external, not produced yet
+FINAL_FORMS = ("page", "doc")      # makes that are the deliverable itself
 MAX_ATTEMPTS = 3
-ARTIFACT_CHECKS = {"file-exists": "exists", "element-count": "exists", "grep-count": "exists", "heading-present": "exists",
-                   "section-not-empty": "exists", "facts-present": "matches the defined output",
-                   "lld-slice": "matches the defined output"}      # anything else: "valid under the rules"
-EFFECT_CHECKS = {"behavior-steps": "occurred"}      # "observed result" and "within limits" are defined, not produced yet
+MAKE_CHECKS = {"file-exists": "exists", "element-count": "exists", "grep-count": "exists", "heading-present": "exists",
+               "section-not-empty": "exists", "facts-present": "meets the defined output",
+               "lld-slice": "meets the defined output"}      # anything else: "valid"
+DO_CHECKS = ("behavior-steps",)      # a do item has one check, "receipt": a receipt exists and shows success
 
 
 def atom_status(atom, wf=None, ended=False):
@@ -36,16 +39,16 @@ def atom_view(atom, wf=None, edges=None, ended=False):
     name = (wf or {}).get("name") or ag.get("section_names", [None])[0] or a["id"]
     out, ver = _outputs(a, ag), []
     for r in a.get("results") or []:
-        kind = "effect" if r.get("type") in EFFECT_CHECKS else "artifact"
-        ver.append({"check": EFFECT_CHECKS[r["type"]] if kind == "effect" else ARTIFACT_CHECKS.get(r.get("type"), "valid under the rules"),
-                    "applies_to": _applies_to(kind, r, out), "method": f"{r.get('type')}: {r.get('check')}",
-                    "met": r.get("pass"), "evidence": r.get("evidence")})
+        do = r.get("type") in DO_CHECKS
+        ver.append({"check": "receipt" if do else MAKE_CHECKS.get(r.get("type"), "valid"),
+                    "applies_to": _applies_to(do, r, out), "method": f"{r.get('type')}: {r.get('check')}",
+                    "met": r.get("pass"), "evidence": f"{a['id']}:{r.get('attempt')}" if do else r.get("evidence")})
     details = {k: ag[k] for k in ("selectors", "ids", "section", "anchor") if ag.get(k)}
     els = [x for x in a.get("expected_output") or [] if isinstance(x, dict) and x.get("kind") == "element"]
     if els:
         details["elements"] = [x.get("target") for x in els]
-    if any(o["type"] == "effect" for o in out):
-        details["scope"] = "self"
+    if any(o["verb"] == "do" for o in out):
+        details["scope"] = "self"      # the deeds produced today are behaviour steps on the thing built
     return {"schema": SCHEMA, "id": a["id"], "workflow": wid, "name": name, "owner": (a.get("how") or {}).get("agent"),
             "status": atom_status(a, wf, ended), "attempt": a.get("attempts") or ag.get("attempt"),
             "goal": a.get("goal"), "how": a.get("how"), "constraints": a.get("constraints") or [],
@@ -54,30 +57,38 @@ def atom_view(atom, wf=None, edges=None, ended=False):
             "notes": (a.get("human_output") or {}).get("text") or "", "details": details}
 
 
+def atom_kind(view):
+    """make, do or mixed, derived from the output items (never stored)."""
+    verbs = {o.get("verb") for o in view.get("output") or []}
+    return "mixed" if verbs >= {"make", "do"} else "do" if "do" in verbs else "make"
+
+
 def _outputs(a, ag):
-    """Artifacts: the section (or document section) the atom wrote and the files it is in. Effects: each behaviour step
-    check run on the page (kind "behaviour", scope self), its ref the receipt."""
-    out, files = [], ag.get("files") or []     # a built website section is a "page" (ref: its anchor); PRD, HLD, LLD are "doc"
+    """MAKE items: the section (or document section) the atom wrote and the files it is in (form page or doc; a section's
+    ref is its anchor, a document section's its file and heading). DO items: each behaviour step check run on the page
+    (form "behaviour"), its ref the receipt id (atom:attempt) in receipts.jsonl."""
+    out, files = [], ag.get("files") or []
     doc = ag.get("kind") == "doc"
     if ag:
         head = next((x.get("target") for x in a.get("expected_output") or [] if isinstance(x, dict) and x.get("kind") == "heading"), None)
         ref = f"{ag.get('file')}#{head or ag.get('section')}" if doc else f"{files[-1] if files else 'site/index.html'}#{ag['anchor']}" \
             if ag.get("anchor") else None
         if ref:
-            out.append({"name": (ag.get("section_names") or [a["id"]])[0], "type": "artifact",
-                        "kind": "doc" if doc else "page", "ref": ref})
-        out += [{"name": f, "type": "artifact", "kind": "doc" if f.endswith((".md", ".docx")) else "page" if f.endswith(".html")
+            out.append({"verb": "make", "name": (ag.get("section_names") or [a["id"]])[0], "form": "doc" if doc else "page", "ref": ref})
+        out += [{"verb": "make", "name": f, "form": "doc" if f.endswith((".md", ".docx")) else "page" if f.endswith(".html")
                  else "file", "ref": f} for f in files]
-    out += [{"name": r.get("check"), "type": "effect", "kind": "behaviour", "ref": ag.get("receipt") or f"{a['id']}:{r.get('attempt')}"}
-            for r in a.get("results") or [] if r.get("type") in EFFECT_CHECKS]
+    out += [{"verb": "do", "name": r.get("check"), "form": "behaviour", "ref": f"{a['id']}:{r.get('attempt')}"}
+            for r in a.get("results") or [] if r.get("type") in DO_CHECKS]
     return out
 
 
-def _applies_to(kind, r, out):
-    if kind == "effect":
-        return next((o["name"] for o in out if o["type"] == "effect" and o["name"] == r.get("check")), r.get("check"))
+def _applies_to(do, r, out):
+    """The output item a check is about: a do check names its deed; a make check names the section or document the atom wrote."""
+    if do:
+        return r.get("check")
     t = r.get("target")
-    return next((o["name"] for o in out if o["kind"] in FINAL_KINDS), None) or (", ".join(map(str, t)) if isinstance(t, list) else str(t))
+    return next((o["name"] for o in out if o["verb"] == "make" and o["form"] in FINAL_FORMS and "#" in o["ref"]), None) or \
+        next((o["name"] for o in out if o["verb"] == "make"), None) or (", ".join(map(str, t)) if isinstance(t, list) else str(t))
 
 
 def link_views(views):
@@ -115,8 +126,8 @@ def run_views(workflows, given=None, ended=False):
 
 
 def validate_atom(view, known=None):
-    """Warnings for one view: an output item without a type, an edge to a missing atom (when known ids are given)."""
-    out = [f"{view['id']}: output item {o.get('name')!r} has no type" for o in view.get("output") or [] if not o.get("type")]
+    """Warnings for one view: an output item without a verb, an edge to a missing atom (when known ids are given)."""
+    out = [f"{view['id']}: output item {o.get('name')!r} has no verb" for o in view.get("output") or [] if o.get("verb") not in NOUN]
     if known is not None:
         out += [f"{view['id']}: depends on {e['atom']}, which is not an atom of this run"
                 for e in view.get("depends_on") or [] if e["atom"] not in known]
@@ -124,7 +135,8 @@ def validate_atom(view, known=None):
 
 
 def validate_views(views):
-    """Warnings for a run: dangling edges, missing types, cycles, outputs never used that are not final outputs."""
+    """Warnings for a run: dangling edges, missing verbs, cycles, outputs never used that are not final outputs, and an
+    informational note for each mixed atom (valid; recorded in atoms.json only)."""
     known = {v["id"] for v in views}
     out = [w for v in views for w in validate_atom(v, known)]
     state, stack = {}, []
@@ -147,5 +159,7 @@ def validate_views(views):
         if i not in state:
             walk(i)
     out += [f"{v['id']}: its output is never used and is not a final output" for v in views
-            if v["output"] and not v["used_by"] and not any(o.get("kind") in FINAL_KINDS for o in v["output"])]
+            if v["output"] and not v["used_by"] and not any(o.get("form") in FINAL_FORMS for o in v["output"])]
+    out += [f"info: {v['id']} is a mixed atom ({sum(o['verb'] == 'make' for o in v['output'])} make, "
+            f"{sum(o['verb'] == 'do' for o in v['output'])} do)" for v in views if atom_kind(v) == "mixed"]
     return out

@@ -12,10 +12,10 @@ The machine form is `docs/atom-schema.json`.
 | goal, how, constraints, context | what it was asked | same names |
 | defined_output | what must exist when it is done | expected_output |
 | verification | list of `{check, applies_to, method, met, evidence}` | results (the receipts) |
-| output | list of `{name, type, kind, ref}` | agent_output |
+| output | list of `{verb, name, form, ref}` | agent_output, receipts |
 | depends_on, used_by | lists of `{atom, why}` | recorded by the run (see Edges) |
 | notes | plain words, 1 to 2 sentences | human_output |
-| details | optional free object, type-specific | agent_output (selectors, ids, anchor), expected_output (elements) |
+| details | optional free object, specific to the output | agent_output (selectors, ids, anchor), expected_output (elements) |
 
 Website words (selectors, elements, sections) are never standard fields: they live in `details`.
 
@@ -39,28 +39,32 @@ Exactly four values: `open`, `closed`, `verify_failed`, `abandoned`.
 Dropped or left-out items have no atom status of their own: an atom of a workflow the run never built is `abandoned` once
 the run has ended.
 
-## Output items
+## Output items: verb, name, form, ref
 
-- `type`: `artifact` (a thing made) or `effect` (a change caused).
-- `kind`: open-ended text; unknown kinds are recorded, never rejected. Artifact kinds start from `doc`, `code`, `page`,
-  `test`, `plan`, `skill`, `app`. A built website section is `page` (ref: its anchor); PRD, HLD and LLD are `doc`
-  (ref: file and heading). Their files use the same kinds by extension (`.md`, `.docx` are `doc`, `.html` is `page`).
-  There is no `section` kind. Effect kinds: `behaviour` (scope self), `fetch`, `send` (the last two are external and not
-  produced yet).
-- `ref`: a file path, a section anchor (`site/index.html#hero`), a document heading (`prd.md#Problem`) or a trace id (`W-3.a1:1`, the receipt).
-- An effect's `details.scope` is `self` (it changes only the thing built) or `external` (it reaches outside).
+Each item is `{verb, name, form, ref}`.
 
-## Checks by type
+- `verb`: `make` (gives an artifact) or `do` (gives a deed). The noun follows from the verb; it is not stored.
+- `form`: open-ended; unknown forms are recorded, never rejected. Makes start from `doc`, `code`, `page`, `test`, `plan`,
+  `skill`, `app`. Dos: `behaviour`, `fetch`, `send`. A built website section is make, form `page`, ref its anchor
+  (`site/index.html#hero`); PRD, HLD and LLD are make, form `doc`, ref file and heading (`prd.md#Problem`). Their files use
+  the same forms by extension (`.md`, `.docx` are `doc`, `.html` is `page`). There is no `section` form.
+- `ref`: a file path, a section anchor, a document heading or a receipt id (`W-3.a1:1`, atom and attempt in `receipts.jsonl`).
+- An atom may hold several items of either verb (for example one make and three do). Atoms are not split. The atom's kind is
+  derived by code (`make`, `do` or `mixed`) and never stored. A mixed atom is valid; it shows "mixed" on its card and gets
+  an informational warning in `atoms.json`.
+- A deed's `details.scope` is `self` (it acts only on the thing built) or `external` (it reaches outside).
 
-| Type | Check | Meaning | Produced today |
+## Checks by verb
+
+Each check names the output item it is about in `applies_to`.
+
+| Verb | Check | Meaning | Produced today |
 |---|---|---|---|
-| artifact | exists | the thing is there | yes (element-count, heading-present, section-not-empty, file-exists, grep-count) |
-| artifact | matches the defined output | it is what was asked | yes (facts-present, lld-slice) |
-| artifact | valid under the rules | it breaks no rule | yes (named-test, tap-targets, ids-unique) |
-| effect | occurred | evidence is a trace or log | yes, for behaviour steps run in Chrome or by the fake driver (scope self); ref is the receipt |
-| effect | observed result | what was seen after it | defined, not produced |
-| effect | within limits | it stayed inside its limits | defined, not produced |
-| effect, scope external | all three | fetching data, sending | defined, nothing produces them |
+| make | exists | the thing is there | yes (element-count, heading-present, section-not-empty, file-exists, grep-count) |
+| make | valid | it breaks no rule | yes (named-test, tap-targets, ids-unique) |
+| make | meets the defined output | it is what "done when" asked | yes (facts-present, lld-slice) |
+| do | receipt | a receipt exists and shows success; evidence is the receipt id from `receipts.jsonl` | yes, for behaviour steps run in Chrome or by the fake driver (scope self) |
+| do, scope external | receipt | the same, for fetching data or sending | defined, nothing produces them yet |
 
 ## Edges
 
@@ -77,5 +81,5 @@ guessed. Runs stored before this schema have no record of what a prompt held, so
 
 ## Warnings (never change an outcome, a prompt or a retry)
 
-An edge to a missing atom; a cycle; an atom whose output is never used and is not a final output (kinds `page`,
-`doc`); an output item without a type.
+An edge to a missing atom; a cycle; an atom whose output is never used and is not a final output (forms `page`,
+`doc`); an output item without a verb.
