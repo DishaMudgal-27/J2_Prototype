@@ -3423,6 +3423,7 @@ BREW_FACTS = (" Users: coffee lovers and office staff. Problem: people can't see
               "features: see the menu with prices, pre-order a coffee, find the shop, read the opening hours. "
               "Constraints: one page only. Success: 30 pre-orders per week.")
 DESIGN_BRIEF = BREW_LAB + " Write the design docs first." + BREW_FACTS
+PLAIN_CHECKPOINT = "3a1e66c"   # plain_unchanged compares the working tree with this commit; move it when the plain path changes on purpose
 CHECKPOINT = "0657d93"         # the commit before the design-document work: a plain brief must behave exactly as there
 
 
@@ -3702,28 +3703,32 @@ def plain_unchanged():
              "  'calls': [[c['fn'], h(c['system']), h(c['prompt'])] for c in rows],\n"
              "  'workflows': h(json.dumps([{k: v for k, v in w.items() if k not in ('t',)} for w in r.workflows], sort_keys=True))}))\n")
     old = tempfile.mkdtemp(prefix="j2-checkpoint-")
-    tar = subprocess.run(["git", "archive", CHECKPOINT, "--", "j2.py", "j2_check.py", "llm.py", "conditions", "agents"], cwd=here,
+    tar = subprocess.run(["git", "archive", PLAIN_CHECKPOINT, "--", "j2.py", "j2_check.py", "llm.py", "conditions", "agents"], cwd=here,
                          capture_output=True)
     if tar.returncode:
-        print(f"plain brief unchanged: skipped (checkpoint {CHECKPOINT} not in this clone)")
+        print(f"plain brief unchanged: skipped (checkpoint {PLAIN_CHECKPOINT} not in this clone)")
+        shutil.rmtree(old, ignore_errors=True)
         return
     subprocess.run(["tar", "-x", "-C", old], input=tar.stdout, check=True)
     for name in ("j2_check.py",):
         pass
-    results = []
-    for cwd in (old, here):
-        env = {**os.environ, "STUDIO_MOCK": "1", "J2_MEMORY": "0", "J2_FIXES": os.environ.get("J2_FIXES", "0")}
-        r = subprocess.run([sys.executable, "-c", probe], input=BREW_LAB, cwd=cwd, capture_output=True, text=True, env=env, timeout=300)
-        assert r.returncode == 0, r.stderr[-800:]
-        results.append(json.loads(r.stdout.strip().splitlines()[-1]))
-    a, b = results
-    assert a["outcome"] == b["outcome"] and a["spent"] == b["spent"] and a["site"] == b["site"] and a["sections"] == b["sections"], (a, b)
-    assert [c[:2] for c in a["calls"]] == [c[:2] for c in b["calls"]], "different agents or system prompts"
-    diff = [i for i, (x, y) in enumerate(zip(a["calls"], b["calls"])) if x != y]
-    assert not diff, f"prompts differ at calls {diff[:5]}"
-    assert a["workflows"] == b["workflows"]
-    print(f"plain brief unchanged: {len(b['calls'])} calls, every system prompt and prompt, the page, the sections, the workflows "
-          f"and the outcome are identical to checkpoint {CHECKPOINT}")
+    try:
+        results = []
+        for cwd in (old, here):
+            env = {**os.environ, "STUDIO_MOCK": "1", "J2_MEMORY": "0", "J2_FIXES": os.environ.get("J2_FIXES", "0")}
+            r = subprocess.run([sys.executable, "-c", probe], input=BREW_LAB, cwd=cwd, capture_output=True, text=True, env=env, timeout=300)
+            assert r.returncode == 0, r.stderr[-800:]
+            results.append(json.loads(r.stdout.strip().splitlines()[-1]))
+        a, b = results
+        assert a["outcome"] == b["outcome"] and a["spent"] == b["spent"] and a["site"] == b["site"] and a["sections"] == b["sections"], (a, b)
+        assert [c[:2] for c in a["calls"]] == [c[:2] for c in b["calls"]], "different agents or system prompts"
+        diff = [i for i, (x, y) in enumerate(zip(a["calls"], b["calls"])) if x != y]
+        assert not diff, f"prompts differ at calls {diff[:5]}"
+        assert a["workflows"] == b["workflows"]
+        print(f"plain brief unchanged: {len(b['calls'])} calls, every system prompt and prompt, the page, the sections, the workflows "
+              f"and the outcome are identical to checkpoint {PLAIN_CHECKPOINT}")
+    finally:
+        shutil.rmtree(old, ignore_errors=True)
 
 
 def docs_views():
@@ -3966,6 +3971,7 @@ if __name__ == "__main__":
         docs_chain()
         docs_funding()
         docs_repeat_failure()
+        plain_unchanged()
         docs_blueprint()
         docs_views()
         atom_checks()
