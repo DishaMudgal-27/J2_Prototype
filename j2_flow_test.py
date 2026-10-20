@@ -3472,8 +3472,8 @@ def docs_tab():
     assert "<b>Context</b> <span class=\"empty\">What it needs to know</span>" in card and "What this workflow was given" not in card
     rows = dict.fromkeys(re.findall(r'<li data-ctx="([\w-]+)">', ctx))
     assert list(rows) == ["charter", "section", "prd", "hld", "lld", "finding", "from-workflow"], list(rows)
-    assert '<li data-ctx="charter"><b class="ctype">Charter</b> item 1: The page shows the menu</li>' in ctx, ctx
-    assert 'item 2: The page shows the hours</li>' in ctx
+    assert '<li data-ctx="charter"><b class="ctype">Charter</b> <a href="#" data-charter="1">item 1</a>: The page shows the menu</li>' in ctx, ctx
+    assert 'data-charter="2">item 2</a>: The page shows the hours</li>' in ctx
     assert 'item 9</li>' not in ctx and 'item 9 <span class="empty">no source on record</span>' in ctx, "a row with no source says so"
     assert '<b class="ctype">Section</b> <a href="#" data-doc="lld" data-item="S1">S1</a>: #menu: the menu with prices</li>' in ctx, ctx
     assert '<b class="ctype">PRD</b> <a href="#" data-doc="prd" data-item="R2">R2</a>: The pre-order form</li>' in ctx, ctx
@@ -3491,10 +3491,12 @@ def docs_tab():
     d = out["docs"]
     assert re.findall(r'data-doc-kind="(\w+)"', d) == ["prd", "hld", "lld"]
     assert re.findall(r'data-docjump="(\w+)"', d.split('<section')[0]) == ["prd", "hld", "lld"], "jump bar first"
-    heads = re.findall(r'<header class="dochead" style="background:var\(--(\w+)\)"><b>([^<]*)</b> <span class="code">(\w+)</span>([^<]*)</header>', d)
+    heads = re.findall(r'<header class="dochead" style="background:var\(--(\w+)\)"><b>([^<]*)</b> <span class="code">(\w+)</span>(?:<span class="docmeta">([^<]*)</span>)?</header>', d)
     assert [h[:3] for h in heads] == [("prd", "Product requirements", "PRD"), ("hld", "High-level design", "HLD"),
                                       ("lld", "Low-level design", "LLD")], heads
-    assert heads[0][3] == f" · 2 items · built by W-1 {snap['workflows'][0]['name']}, W-2 {snap['workflows'][1]['name']}"[:len(heads[0][3])] or "2 items" in heads[0][3], heads[0]
+    assert heads[0][3] == f"2 items · built by W-1 {snap['workflows'][0]['name']}, W-2 {snap['workflows'][1]['name']}", heads[0]
+    assert all(not h[3].startswith(("·", " ·")) for h in heads), "no stray leading dot before the count"
+    assert 'data-tabjump="charter">Charter</a>' in d.split("<section")[0], "the jump bar has a Charter entry"
     assert "2 items" in heads[1][3] and "built by W-9" in heads[1][3] and "items" in heads[2][3] and "built by" not in heads[2][3], heads
     assert re.findall(r'<span>(End of \w+|Start of \w+)</span>', d) == ["End of PRD", "Start of HLD", "End of HLD", "Start of LLD", "End of LLD"], d
     assert d.count('data-docjump="top"') == 3
@@ -3635,6 +3637,74 @@ def card_content():
         assert "W-13 HLD Hosting and deployment section builder" in c13
     print("card content: original headings, revise label, workflow/condition/finding rows, no source noted, no blank rows, "
           "collapsed dependencies, outputs vs Saved in ok")
+
+
+def charter_tab():
+    """UI: the read-only Charter tab (kept apart from the Goal tab): header, note, brief, items with source and Used by,
+    business type and answers, the empty case, and "Charter item N" links that open it at that item."""
+    import shutil
+    if not shutil.which("node"):
+        print("charter tab test skipped: node not found")
+        return
+    run = docs_run(DESIGN_BRIEF, 900)
+    assert run.outcome.startswith("Done"), run.outcome
+    snap = j2.saved_snapshot(os.path.basename(run.dir), 0)
+    w1, w2 = snap["workflows"][0], snap["workflows"][1]
+    for w in snap["workflows"]:
+        for at in w["atoms"]:
+            at["context"] = []
+    w1["atoms"][0]["context"] = ["charter item 1", "section Problem"]
+    w2["atoms"][0]["context"] = ["charter items 1 and 2", "PRD R1"]
+    w1["atoms"][0]["goal"] = "Per charter item 2 the page opens"
+    g = snap["goal"]
+    g["charter_items"] = ["The page shows the menu", "The page shows the hours", "Nobody cites this"]
+    g["business_type"] = "coffee shop"
+    g["requester_answers"] = ["Pickup only", "", "Open 7 to 9"]
+    snap["chat"] = [{"who": "user", "text": "A website for Brew Lab", "id": 1}]
+    out = render_node(snap, docs={"docs": {}, "chfocus": 2})
+    c = out["charter"]
+    assert c.startswith('<p class="chnote empty">The charter is the list of things the Requester confirmed. Every agent works from it.</p>'), c[:200]
+    assert c.index("data-brief") < c.index('id="charterblock"') and "A website for Brew Lab" in c, "the brief is at the top"
+    head = re.search(r'<header class="dochead" style="background:var\(--charter\)"><b>Charter</b> <span class="code">CHARTER</span><span class="docmeta">([^<]*)</span></header>', c)
+    assert head and head.group(1) == "3 items · Recorded by Identity", head
+    assert re.findall(r'<li value="(\d)" id="charter-item-\d" class="dl( hit)?"', c) == [("1", ""), ("2", " hit"), ("3", "")], "numbered in order, item 2 highlighted"
+    for n, t in ((1, "The page shows the menu"), (2, "The page shows the hours")):
+        assert f'data-item="{n}">{t}' in c
+    # no run stores where an item came from: nothing is shown or guessed; a stored source (charter_sources) is shown
+    assert "data-chsrc" not in c and "Came from" not in c
+    g["charter_sources"] = {"1": "Brief: \"menu with prices\""}
+    c2 = render_node(snap, docs={"docs": {}})["charter"]
+    assert c2.count("data-chsrc") == 1 and 'Came from: Brief: &quot;menu with prices&quot;</div>' in c2.split('data-item="2"')[0]
+    # Used by: the workflows whose Context cites the item, as links that open the card
+    used = lambda n: re.search(rf'data-item="{n}">.*?<div class="chused" data-chused>Used by: (.*?)</div>', c, re.S).group(1)
+    assert f'<a href="#" data-wfcard="{w1["id"]}">{w1["id"]} {w1["name"]}</a>' in used(1) and f'data-wfcard="{w2["id"]}"' in used(1), used(1)
+    assert f'data-wfcard="{w2["id"]}"' in used(2) and f'data-wfcard="{w1["id"]}"' not in used(2), used(2)
+    assert used(3) == "no workflow cites it"
+    # type, then answers under their own headings; blank answers skipped
+    assert "<h4>Business type</h4><p>coffee shop</p>" in c and "<h4>The Requester's confirmed answers</h4>" in c
+    assert c.count("<li>Pickup only</li>") == 1 and "<li>Open 7 to 9</li>" in c and "<li></li>" not in c
+    assert c.index("Used by") < c.index("<h4>Business type</h4>") < c.index("confirmed answers")
+    # the Goal tab is still there
+    html = html_page()
+    assert 'data-tab="goal"' in html and 'data-tab="charter"' in html and 'id="pane-goal"' in html and 'id="pane-charter"' in html
+    # empty: no charter yet
+    empty = json.loads(json.dumps(snap))
+    empty["goal"] = None
+    assert render_node(empty, docs={"docs": {}})["charter"].endswith('<p class="empty">No charter recorded yet.</p>')
+    # without business type and answers, no empty headings
+    bare = json.loads(json.dumps(snap))
+    bare["goal"].pop("business_type"), bare["goal"].pop("requester_answers")
+    assert "<h4>Business type" not in render_node(bare, docs={"docs": {}})["charter"]
+    # "Charter item N" on a card is a link that opens the tab at that item (Context rows and plain text)
+    cards = render_node(snap, docs={"docs": {}})["cards"]
+    card1 = cards[w1["id"]].split('data-key="atom-' + w1["atoms"][0]["id"] + '"')[1].split("Run details")[0]
+    assert '<b class="ctype">Charter</b> <a href="#" data-charter="1">item 1</a>: The page shows the menu' in card1
+    assert 'Per charter item <a href="#" data-charter="2">2</a> the page opens' in card1.replace("Per charter item", "Per charter item", 1) or \
+        'charter item <a href="#" data-charter="2">2</a>' in card1, card1[:1500]
+    card2 = cards[w2["id"]].split('data-key="atom-' + w2["atoms"][0]["id"] + '"')[1].split("Run details")[0]
+    assert 'data-charter="1">item 1</a>' in card2 and 'data-charter="2">item 2</a>' in card2
+    print("charter tab: header, note, brief, numbered items with highlight, source only when stored, Used by links, business type "
+          "and answers, empty case, item links on cards, jump-bar entry, Goal tab kept ok")
 
 
 def replay_size():
@@ -4436,6 +4506,7 @@ if __name__ == "__main__":
         docs_views()
         docs_tab()
         card_content()
+        charter_tab()
         atom_checks()
         behavior_steps()
         charter_facts()
