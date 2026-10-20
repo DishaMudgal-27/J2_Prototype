@@ -102,6 +102,17 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 out[k] = {"asked": text is not None or k in made or (not run and k in RUN.docset), "text": text,
                           "workflows": (made.get(k) or {}).get("workflows", [])}
             return self._send(200, json.dumps(out, ensure_ascii=False))
+        if u.path == "/api/audits":     # earlier stages' audits, condensed to ids and results, for a revise atom's Fixes line
+            d = j2.saved_dir(run) if run else RUN.dir
+            if not d:
+                return self._send(404, '{"error": "no such run"}')
+            pick = lambda rows, *keys: [{k: r.get(k) for k in keys if k in r} for r in rows or []]
+            out = [{"stage": st.get("stage"), "cycle": a.get("cycle"), "results": pick(a.get("results"), "id", "verdict", "pass"),
+                    "extra_issues": pick(a.get("extra_issues"), "id", "verdict"), "rubric": pick(a.get("rubric"), "id", "verdict", "pass"),
+                    "conditions": pick(a.get("conditions"), "id", "met")}
+                   for f in sorted(os.listdir(d)) if re.fullmatch(r"stage-\w+\.json", f)
+                   for st in [j2._read(d, f, {}) or {}] for a in st.get("audits") or []]
+            return self._send(200, json.dumps(out, ensure_ascii=False))
         if u.path == "/api/refs":       # ids the cards name, with their text: conditions/*.json and every output type's rubric
             conds = {}
             for n in ("website", "prd", "hld", "lld"):

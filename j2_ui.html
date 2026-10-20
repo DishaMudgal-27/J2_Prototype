@@ -394,6 +394,29 @@ function whyShown(why, atomId){
   return o ? `the ${o.ref.slice(0, 3).toUpperCase()} ${o.ref.split("#")[1]} section was in this builder's prompt` : why;
 }
 const builderName = w => `${w.id} ${w.name} builder`;
+const STAGE_AUDITS = [];   // earlier stages' audits, condensed, from /api/audits (the state holds only the current stage's)
+const VERDICT = {PASS: "passed", PASS_WITH_WARNING: "passed with a warning", NEEDS_REVISION: "needs revision", FAIL: "failed"};
+function idStatus(a, id){        // what one audit recorded for a finding, rubric item or condition; "" if it did not record it
+  const r = [...(a.results || []), ...(a.extra_issues || []), ...(a.rubric || [])].find(x => x.id === id);
+  if (r) return r.verdict ? (VERDICT[r.verdict] || String(r.verdict).toLowerCase().replace(/_/g, " ")) : r.pass === true ? "passed" : r.pass === false ? "failed" : "";
+  const c = (a.conditions || []).find(x => x.id === id);
+  return c && typeof c.met === "boolean" ? (c.met ? "met" : "not met") : "";
+}
+// "Fixes: ids. Before: status. After: status." for a revise atom, from stored audits only; a status nobody recorded says so.
+function fixesLine(a, w){
+  if (!w.revises) return "";
+  const ids = [...new Set((Array.isArray(a.context) ? a.context : [a.context]).flatMap(r => { const m = typeof r === "string" && r.trim().match(/^(?:findings?|(?:necessary\s+)?conditions?)\s+(.+)$/i);
+    return m ? m[1].split(/\s*(?:,|\band\b)\s*/).filter(x => /^[A-Z]{1,2}-?\d+$/.test(x)) : []; }))];
+  const fixes = ids.length ? ids : (w.fixes || []);
+  if (!fixes.length) return `Fixes: <span class="empty">not recorded</span>.`;
+  const c = w.cycle, pool = [...STAGE_AUDITS, ...((CTX && CTX.audits) || [])].filter(x => x && x.cycle != null);
+  const pick = (list, id) => { for (const x of list){ const t = idStatus(x, id); if (t) return t; } return ""; };
+  const before = id => pick(pool.filter(x => x.cycle < c).sort((x, y) => y.cycle - x.cycle), id), after = id => pick(pool.filter(x => x.cycle === c), id);
+  const show = f => { const t = fixes.map(id => [id, f(id)]), got = new Set(t.map(x => x[1]).filter(Boolean));
+    if (!got.size) return '<span class="empty">not recorded</span>';
+    return got.size === 1 && t.every(x => x[1]) ? esc([...got][0]) : t.map(([id, x]) => `${esc(id)} ${x ? esc(x) : '<span class="empty">not recorded</span>'}`).join(", "); };
+  return `Fixes: ${fixes.map(esc).join(", ")}. Before: ${show(before)}. After: ${show(after)}.`;
+}
 const REFS = {conditions: {}, rubric: {}};   // id -> text, from /api/refs: conditions/*.json and each output type's rubric
 const wfById = id => ((CTX && CTX.workflows) || []).find(x => x.id === id);
 const wfOrigin = w => { const id = w.revises || (w.section && w.section !== w.id ? w.section : null); return id && wfById(id); };
@@ -513,6 +536,7 @@ function atomBlocks(a, w, v){
     + (outs.some(isFile) ? `<br><span data-note="saved">Saved in: ${outs.filter(isFile).map(o => esc(o.ref)).join(", ")}</span>` : "")
     + `<br>Depends on: ${edges("dep", v.depends_on)}<br>Used by: ${edges("used", v.used_by)} <button type="button" class="linkbtn" data-link="agent" data-atom="${esc(a.id)}">Workflow output</button>`
     : '<span class="empty">Built by code when the checks pass.</span>';
+  const fx = fixesLine(a, w);
   const mix = mixed(v) ? ' <span class="empty" data-note="mixed">mixed: makes and does</span>' : "";
   return g("1. Particles")
     + blockHTML(a, "goal", "Goal", "What must be true when this is done", atomRow(a, "goal", w), false)
@@ -527,7 +551,7 @@ function atomBlocks(a, w, v){
     + g("3. Outputs")
     + blockHTML(a, "human_output", "Notes", "What it did, in plain words",
         a.human_output ? linkDocItems(esc(sentence(a.human_output.text))) + ` <span class="empty">Attempt ${a.human_output.attempt}.</span>` : '<span class="empty">Not written yet.</span>', false)
-    + blockHTML(a, "agent_output", "Workflow output", "What it made or did, what it used and who uses it" + mix, wout, false)
+    + blockHTML(a, "agent_output", "Workflow output", "What it made or did, what it used and who uses it" + mix, wout + (fx ? `<br><span data-note="fixes">${fx}</span>` : ""), false)
     + blockHTML(a, "result", "Result", "What it looks like", atomPreview(a, v) + (site ? ` ${site}` : ""), false);
 }
 function atomCards(s, w){
@@ -926,6 +950,8 @@ let docsKey = null;
 async function loadDocs(){
   try { const r = await fetch(`/api/docs?${runQ().slice(1)}`, {cache:"no-store"});
     if (r.ok) Object.assign(DOCS, await r.json()); } catch (e) {}
+  try { const r = await fetch(`/api/audits?${runQ().slice(1)}`, {cache:"no-store"});
+    if (r.ok){ STAGE_AUDITS.length = 0; STAGE_AUDITS.push(...await r.json()); } } catch (e) {}
   if (state) paint($("pane-workflows"), renderWorkflows(state));
   paint($("pane-docs"), renderDocs());
 }

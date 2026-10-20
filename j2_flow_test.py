@@ -3707,6 +3707,86 @@ def charter_tab():
           "and answers, empty case, item links on cards, jump-bar entry, Goal tab kept ok")
 
 
+def fixes_line():
+    """UI: a revise atom's "Fixes: ids. Before: status. After: status." line from stored audits only; a status nobody recorded
+    says "not recorded"; an atom that revises nothing has no line. Also the /api/audits endpoint, on a stored run."""
+    import shutil
+    import threading
+    import urllib.request
+    import j2_server
+    if not shutil.which("node"):
+        print("fixes line test skipped: node not found")
+        return
+    run = docs_run(DESIGN_BRIEF, 900)
+    assert run.outcome.startswith("Done"), run.outcome
+    snap = j2.saved_snapshot(os.path.basename(run.dir), 0)
+    w1, w2, w3 = snap["workflows"][:3]
+    a1, a2, a3 = w1["atoms"][0], w2["atoms"][0], w3["atoms"][0]
+    w2["revises"], w2["cycle"], w2["fixes"] = w1["id"], 3, ["F-1"]
+    a2["context"] = ["finding F-1", "condition H5", "charter item 1"]
+    w3["revises"], w3["cycle"], w3["fixes"] = w1["id"], 3, []
+    a3["context"] = ["finding F-1"]
+    for a in (a1,):
+        a["context"] = ["finding F-1"]                       # w1 revises nothing: no line, whatever its Context says
+    w1.pop("revises", None)
+    snap["audits"] = [{"cycle": 2, "results": [{"id": "F-1", "verdict": "NEEDS_REVISION", "pass": False}], "conditions": [{"id": "H5", "met": False}]},
+                      {"cycle": 3, "results": [{"id": "F-1", "verdict": "PASS", "pass": True}], "conditions": [{"id": "H5", "met": True}]}]
+
+    def line(sn, a, w, stage=None):
+        c = render_node(sn, docs={"docs": {}, "stage_audits": stage or []})["cards"][w["id"]]
+        blk = c[c.index(f'data-key="atom-{a["id"]}"'):].split("Run details")[0].split('data-block="agent_output"')[1].split("data-block=")[0]
+        m = re.search(r'<span data-note="fixes">(.*?)</span>(?=</div>|<span|$)', blk.replace('<span class="empty">not recorded</span>', "NOTREC"), re.S)
+        return m.group(1).replace("NOTREC", "not recorded") if m else None
+    # both recorded
+    assert line(snap, a2, w2) == "Fixes: F-1, H5. Before: F-1 needs revision, H5 not met. After: F-1 passed, H5 met.", line(snap, a2, w2)
+    # a single id: one status for the whole line
+    assert line(snap, a3, w3) == "Fixes: F-1. Before: needs revision. After: passed."
+    # only the before is recorded: the after says so, and nothing is guessed
+    only_before = json.loads(json.dumps(snap))
+    only_before["audits"] = only_before["audits"][:1]
+    assert line(only_before, a3, w3) == "Fixes: F-1. Before: needs revision. After: not recorded."
+    # only the after is recorded
+    only_after = json.loads(json.dumps(snap))
+    only_after["audits"] = only_after["audits"][1:]
+    assert line(only_after, a3, w3) == "Fixes: F-1. Before: not recorded. After: passed."
+    assert line(only_after, a2, w2) == "Fixes: F-1, H5. Before: not recorded. After: F-1 passed, H5 met."
+    # nothing recorded
+    none = json.loads(json.dumps(snap))
+    none["audits"] = []
+    assert line(none, a3, w3) == "Fixes: F-1. Before: not recorded. After: not recorded."
+    # earlier stages come from /api/audits: the stage audits fill in what the current stage's audits lack
+    stage = [{"cycle": 2, "results": [{"id": "F-1", "verdict": "FAIL"}], "conditions": []}]
+    assert line(none, a3, w3, stage) == "Fixes: F-1. Before: failed. After: not recorded."
+    # no ids in Context: the stored fixes list; neither: "not recorded"
+    a3["context"] = ["charter item 1"]
+    w3["fixes"] = ["F-1"]
+    assert line(snap, a3, w3).startswith("Fixes: F-1. Before:")
+    w3["fixes"] = []
+    assert line(snap, a3, w3) == "Fixes: not recorded."
+    # a non-revise atom has no Fixes line
+    assert line(snap, a1, w1) is None
+    # the endpoint reads the stage files, nothing else
+    here = os.path.dirname(os.path.abspath(__file__))
+    name = "j2-20261016-160511"
+    if os.path.isdir(os.path.join(here, "runs", name)):
+        keep_dir, j2.RUNS_DIR = j2.RUNS_DIR, os.path.join(here, "runs")             # read-only: the stored run is evidence
+        srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        try:
+            got = json.load(urllib.request.urlopen(f"http://127.0.0.1:{srv.server_address[1]}/api/audits?run={name}"))
+            real = j2.saved_snapshot(name, 0)
+        finally:
+            j2.RUNS_DIR = keep_dir
+            srv.shutdown()
+        assert sorted({a["cycle"] for a in got}) == [1, 2, 3, 4, 5, 6, 7, 8, 9] and all("note" not in r for a in got for r in a["results"]), got[:1]
+        w8 = next(w for w in real["workflows"] if w["id"] == "W-8")
+        c = render_node(real, docs={"docs": {}, "stage_audits": got})["cards"]["W-8"]
+        assert re.search(r'Fixes: D-5\. Before: (passed|passed with a warning|needs revision|failed)\. After: ', c), "W-8 records D-5 before and after"
+        c15 = render_node(real, docs={"docs": {}, "stage_audits": got})["cards"]["W-15"]
+        assert "Fixes: D-5, H5. Before:" in c15 and "not recorded" not in c15.split("Fixes:")[1].split("</span>")[0] or "Fixes: D-5, H5" in c15, c15[:50]
+    print("fixes line: both statuses, one status, none recorded, stage audits, stored fixes fallback, no line without a revision, /api/audits ok")
+
+
 def replay_size():
     """D: the replay script reads a saved run (no model call, nothing written) and shows the slim prompts are smaller."""
     import subprocess
@@ -4507,6 +4587,7 @@ if __name__ == "__main__":
         docs_tab()
         card_content()
         charter_tab()
+        fixes_line()
         atom_checks()
         behavior_steps()
         charter_facts()
