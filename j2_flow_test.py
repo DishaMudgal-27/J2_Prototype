@@ -3468,11 +3468,11 @@ def docs_tab():
     ctx = card.split('data-block="context"')[1].split("data-block=")[0]
     assert "<b>Context</b> <span class=\"empty\">What it needs to know</span>" in card and "What this workflow was given" not in card
     rows = dict.fromkeys(re.findall(r'<li data-ctx="([\w-]+)">', ctx))
-    assert list(rows) == ["charter", "section", "prd", "hld", "lld", "finding", "from-workflow"], list(rows)
+    assert list(rows) == ["charter", "lld", "prd", "hld", "finding", "from-workflow"], list(rows)
     assert '<li data-ctx="charter"><b class="ctype">Charter</b> <a href="#" data-charter="1">item 1</a>: The page shows the menu</li>' in ctx, ctx
     assert 'data-charter="2">item 2</a>: The page shows the hours</li>' in ctx
     assert 'item 9</li>' not in ctx and 'item 9 <span class="empty">no source on record</span>' in ctx, "a row with no source says so"
-    assert '<b class="ctype">Section</b> <a href="#" data-doc="lld" data-item="S1">S1</a>: #menu: the menu with prices</li>' in ctx, ctx
+    assert '<b class="ctype">LLD</b> <a href="#" data-doc="lld" data-item="S1">S1</a>: #menu: the menu with prices</li>' in ctx, ctx
     assert '<b class="ctype">PRD</b> <a href="#" data-doc="prd" data-item="R2">R2</a>: The pre-order form</li>' in ctx, ctx
     assert '<b class="ctype">PRD</b> R7 <span class="empty">no source on record</span>' in ctx or 'data-item="R7">R7</a> <span class="empty">' in ctx, ctx
     assert '<b class="ctype">HLD</b> <a href="#" data-doc="hld" data-item="C1">C1</a>: Menu display: shows the menu</li>' in ctx, ctx
@@ -3942,6 +3942,71 @@ def output_tags():
         assert "show more</button>" in ro.split("data-summary>")[1].split("<b>Credits")[0], "a long outcome is cut at a word with show more"
     print("output tags: tags per workflow (several, none), saved-in files not tagged, filter and clear, group lines with compressed ids, "
           "legend colours = Documents colours, summary numbers = atoms.json ok")
+
+
+def lineage_rows():
+    """UI: a website atom in a documents run shows its document lineage in Context: LLD section text, the HLD component it
+    implements, the PRD requirements it serves, each a link to the Documents tab; slice and summary text on From workflow rows;
+    an unknown id says "not found in the documents"; a run without documents gets no such rows."""
+    import shutil
+    import html as htmllib
+    if not shutil.which("node"):
+        print("lineage rows test skipped: node not found")
+        return
+    run = docs_run(DESIGN_BRIEF, 900)
+    assert run.outcome.startswith("Done"), run.outcome
+    snap = j2.saved_snapshot(os.path.basename(run.dir), 0)
+    wfs = snap["workflows"]
+    w, wd1, wd2 = wfs[0], wfs[1], wfs[2]
+    a, ad1, ad2 = w["atoms"][0], wd1["atoms"][0], wd2["atoms"][0]
+    a["context"] = ["charter item 1", "section S1", "section S9"]
+    snap["goal"]["charter_items"] = ["The page shows the menu"]
+    snap["atoms_v1"][a["id"]]["depends_on"] = [
+        {"atom": ad1["id"], "why": "LLD slice S1: its pages and sections were in this builder's prompt"},
+        {"atom": ad2["id"], "why": "the HLD component summary was in this builder's prompt"}]
+    snap["atoms_v1"][ad1["id"]]["output"] = [{"verb": "make", "name": "x", "form": "doc", "ref": "lld.md#Pages and sections"}]
+    snap["atoms_v1"][ad2["id"]]["output"] = [{"verb": "make", "name": "y", "form": "doc", "ref": "hld.md#Components"}]
+    long_slice = "the menu with each item and its price so visitors see what things cost before they visit the shop in Indiranagar today"
+    docs = {"docs": {
+        "prd": {"asked": True, "text": "- **R1**: The page shows the menu\n- **R5**: One page only"},
+        "hld": {"asked": True, "text": "## Components\n- **C1** Menu display: shows each menu item\n- **C2** Form: the pre-order form\n"},
+        "lld": {"asked": True, "text": "## Pages and sections\n- **S1** `#menu`: " + long_slice + ". Implements C1, C9. Serves R1, R5, R6.\n- **S2** `#form`: other\n"}}}
+
+    def ctx_of(sn, d):
+        c = render_node(sn, docs=d)["cards"][w["id"]]
+        return htmllib.unescape(c[c.index(f'data-key="atom-{a["id"]}"'):].split("Run details")[0].split('data-block="context"')[1].split("data-block=")[0])
+    ctx = ctx_of(snap, docs)
+    rows = re.findall(r'<li data-ctx="([\w-]+)">', ctx)
+    assert rows == ["charter", "lld", "lld", "hld", "prd", "from-workflow", "from-workflow"], rows
+    # LLD S1 with its own text (cut at a word, show more), linked
+    assert re.search(r'<b class="ctype">LLD</b> <a href="#" data-doc="lld" data-item="S1">S1</a>: #menu: the menu with each item[^<]*… <button', ctx), ctx
+    # HLD C1 (from "Implements C1, C9"): its text and a link; C9 is not in the HLD: no link, said plainly
+    assert '<b class="ctype">HLD</b> <a href="#" data-doc="hld" data-item="C1">C1</a>, C9 <span class="empty">not found in the documents</span>: Menu display: shows each menu item</li>' in ctx, ctx
+    # PRD R1, R5, R6 (from "Serves"): the two found are linked with their text; R6 is not found
+    prd = re.search(r'<b class="ctype">PRD</b> (.*?)</li>', ctx).group(1)
+    assert '<a href="#" data-doc="prd" data-item="R1">R1</a>, <a href="#" data-doc="prd" data-item="R5">R5</a>, R6 <span class="empty">not found in the documents</span>: R1 The page shows the menu; R5 One page only' == prd.replace("&amp;", "&"), prd
+    # an unknown section id in a documents run: no link, "not found in the documents"
+    assert '<b class="ctype">LLD</b> S9 <span class="empty">not found in the documents</span></li>' in ctx, ctx
+    # From workflow rows show the slice and the summary themselves
+    assert f'<b class="ctype">From workflow</b> {wd1["id"]} {wd1["name"]}: LLD slice S1: S1 #menu: the menu with each item' in ctx, ctx
+    assert f'{wd2["id"]} {wd2["name"]}: HLD component summary: C1 Menu display: shows each menu item C2 Form: the pre-order form</li>' in ctx, ctx
+    assert "was in this builder" not in ctx.split(f"{wd1['id']} {wd1['name']}")[1].split("</li>")[0]
+    # a slice or summary missing from the documents is said so, not guessed
+    gone = json.loads(json.dumps(docs))
+    gone["docs"]["lld"]["text"] = "## Other\n- **S1** `#menu`: x\n"
+    assert "LLD slice S1 <span class=\"empty\">not found in the documents</span>" in ctx_of(snap, gone)
+    # every LLD / HLD / PRD row is a link to the Documents tab at that item
+    assert all(re.search(r'data-doc="(prd|hld|lld)" data-item="[A-Z]\d+"', r) for r in re.findall(r'<li data-ctx="(?:prd|hld|lld)">.*?</li>', ctx) if "not found" not in r.split(":")[0])
+    # a plain website atom in a run without documents: no lineage rows, nothing new
+    plain = json.loads(json.dumps(snap))
+    plain["atoms_v1"][a["id"]]["depends_on"] = []
+    pa = next(x for x in plain["workflows"] if x["id"] == w["id"])["atoms"][0]
+    pa["context"] = ["charter item 1", "section menu"]
+    pc = ctx_of(plain, {"docs": {}})
+    assert re.findall(r'<li data-ctx="([\w-]+)">', pc) == ["charter", "section"], pc
+    assert '<b class="ctype">Section</b> menu <span class="empty">no source on record</span>' in pc and "not found in the documents" not in pc
+    print("lineage rows: LLD section text, HLD component, PRD requirements (all linked), slice and summary text, unknown ids 'not found "
+          "in the documents', plain website run unchanged ok")
 
 
 def missing_run_endpoints():
@@ -4798,6 +4863,7 @@ if __name__ == "__main__":
         charter_tab()
         fixes_line()
         output_tags()
+        lineage_rows()
         fresh_page_run()
         missing_run_endpoints()
         atom_checks()

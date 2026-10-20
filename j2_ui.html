@@ -393,6 +393,18 @@ function whyShown(why, atomId){
   const o = ((((CTX && CTX.atoms_v1) || {})[atomId] || {}).output || []).find(x => x.verb === "make" && x.form === "doc" && /^(prd|hld|lld)\.md#/.test(String(x.ref)));
   return o ? `the ${o.ref.slice(0, 3).toUpperCase()} ${o.ref.split("#")[1]} section was in this builder's prompt` : why;
 }
+// The text of a document section, from the saved document: "## heading" down to the next "## ".
+const docSection = (kind, heading) => { const lines = (((DOCS[kind] || {}).text) || "").split("\n"), i = lines.findIndex(l => l.replace(/^#+\s*/, "").trim() === heading && /^#/.test(l));
+  if (i < 0) return ""; const j = lines.findIndex((l, k) => k > i && /^#{1,2}\s/.test(l)); return lines.slice(i + 1, j < 0 ? undefined : j).join("\n").trim(); };
+const sectionOf = (atomId, kind) => { const o = ((((CTX && CTX.atoms_v1) || {})[atomId] || {}).output || []).find(x => new RegExp("^" + kind + "\\.md#").test(String(x.ref))); return o ? o.ref.split("#")[1] : ""; };
+// "LLD slice S2" and "the HLD component summary" rows: show the slice or summary itself (cut at a word, with show more), not only that it was in the prompt.
+function sliceText(e, a){
+  const m = String(e.why || "").match(/^LLD slice ([A-Z]\d+)/), h = /^the HLD component summary/.test(String(e.why || ""));
+  if (!m && !h) return "";
+  const kind = m ? "lld" : "hld", body = docSection(kind, sectionOf(e.atom, kind)), label = m ? `LLD slice ${m[1]}` : "HLD component summary";
+  const text = m ? body.split("\n").filter(l => new RegExp("\\b" + m[1] + "\\b").test(l)).map(l => l.replace(/^\s*[-*]\s+/, "")).join(" ").replace(/\s+/g, " ").replace(/[`*]/g, "").trim() : body.split("\n").map(l => l.replace(/^\s*[-*]\s+/, "")).join(" ").replace(/\s+/g, " ").replace(/[`*]/g, "").trim();
+  return text ? `${esc(label)}: ${clip(`ctx-${a && a.id}-${e.atom}`, text)}` : `${esc(label)} <span class="empty">not found in the documents</span>`;
+}
 const builderName = w => `${w.id} ${w.name} builder`;
 const STAGE_AUDITS = [];   // earlier stages' audits, condensed, from /api/audits (the state holds only the current stage's)
 const VERDICT = {PASS: "passed", PASS_WITH_WARNING: "passed with a warning", NEEDS_REVISION: "needs revision", FAIL: "failed"};
@@ -431,6 +443,10 @@ function contextHTML(v, a, w){
     : ctxRow(label || (KIND_OF[id[0]] || "other").toUpperCase(), esc(id), true); };
   const dtext = (id, t) => clip(`ctx-${a && a.id}-${id}`, t);
   const shown = new Set();
+  const lineage = {impl: new Set(), serves: new Set()}, docsLoaded = () => DOC_KINDS.some(([k]) => (DOCS[k] || {}).text);
+  const lineRow = (label, ids) => { if (!ids.size) return []; const f = [...ids].map(id => ({id, d: docLine(id)})), ok = f.filter(x => x.d);
+    const t = ok.map(x => ok.length > 1 ? `${x.id} ${x.d.text}` : x.d.text).join("; ");
+    return [ctxRow(label, f.map(x => x.d ? docLink(x.d.kind, x.id) : esc(x.id) + ' <span class="empty">not found in the documents</span>').join(", ") + (t ? ": " + clip(`ctx-${a && a.id}-${label}`, t) : ""))]; };
   const wfRow = id => { const x = wfById(id), e0 = deps.find(e => (x.atoms || []).some(at => at.id === e.atom)) || {}, why = whyShown(e0.why, e0.atom); shown.add(id);
     return ctxRow(w && w.revises === id ? "Revises" : "From workflow", `${esc(x.id)} ${esc(x.name)}` + (why ? ": " + esc(sentence(why)) : "")); };
   const rows = (Array.isArray(v) ? v : [v]).map(r => typeof r === "string" ? r.trim() : r ? words(r).trim() : "").filter(Boolean).flatMap(r => {
@@ -440,9 +456,14 @@ function contextHTML(v, a, w){
       return [ctxRow("Charter", esc(m[1]) + (t ? ": " + esc(t) : ""), !t)]; }
     if (m = r.match(/^conditions?\s+([A-Z]\d+)$/i)) { const t = REFS.conditions[m[1].toUpperCase()]; return [ctxRow("Condition", esc(m[1]) + (t ? ": " + esc(t) : ""), !t)]; }
     if (m = r.match(/^findings?\s+(.+)$/i)) return m[1].split(/\s*(?:,|\band\b)\s*/).filter(Boolean).map(id => { const t = findingText(id); return ctxRow("Finding", esc(id) + (t ? ": " + esc(t) : ""), !t); });
-    if (m = r.match(/^sections?\s+(?:ids?\s+)?(.+)$/i)) return m[1].split(/\s*(?:,|\band\b)\s*/).filter(Boolean).map(id => {
+    if (m = r.match(/^sections?\s+(?:ids?\s+)?(.+)$/i)) return m[1].split(/\s*(?:,|\band\b)\s*/).filter(Boolean).flatMap(idRange).map(id => {
       if (wfById(id)) return wfRow(id);                                 // a workflow id is never a "Section"
       const d = docLine(id), sec = ((CTX && CTX.sections) || []).find(x => x.id === id), t = (sec && sec.workflow) || (d && d.text);
+      if (d && d.kind === "lld"){                                       // a documents run: the section's own text from the LLD, and what it implements and serves
+        (d.text.match(/\bImplements\s+([A-Z]\d+(?:(?:,\s*|\s+and\s+)[A-Z]\d+)*)/) || [, ""])[1].match(/[A-Z]\d+/g)?.forEach(x => lineage.impl.add(x));
+        (d.text.match(/\bServes\s+([A-Z]\d+(?:(?:,\s*|\s+and\s+)[A-Z]\d+)*)/) || [, ""])[1].match(/[A-Z]\d+/g)?.forEach(x => lineage.serves.add(x));
+        return ctxRow("LLD", docLink("lld", id) + ": " + dtext(id, d.text)); }
+      if (!t && docsLoaded() && /^[A-Z]\d+$/.test(id)) return ctxRow((KIND_OF[id[0]] || "section").toUpperCase(), esc(id) + ' <span class="empty">not found in the documents</span>');
       return ctxRow("Section", (d ? docLink(d.kind, id) : esc(id)) + (t ? ": " + dtext(id, t) : ""), !t); });
     if (/^W-\d+$/.test(r) && wfById(r)) return [wfRow(r)];
     if (m = r.match(/^(PRD|HLD|LLD)\s+(.+)$/)) return m[2].split(/\s*(?:,|\band\b)\s*/).filter(Boolean).flatMap(idRange).map(id => /^[A-Z]{1,2}-?\d+$/.test(id) ? docRow(m[1], id)
@@ -450,9 +471,10 @@ function contextHTML(v, a, w){
     if (/^[A-Z]{1,2}\d+(?:\s+to\s+[A-Z]{1,2}\d+)?$/.test(r)) return idRange(r).map(id => docRow("", id));
     return [ctxRow("Other", linkDocItems(esc(r)), true)];
   });
+  const lin = lineRow("HLD", lineage.impl).concat(lineRow("PRD", lineage.serves));
   const given = deps.map(e => ({e, x: ((CTX && CTX.workflows) || []).find(x => (x.atoms || []).some(at => at.id === e.atom))})).filter(({x}) => !x || !shown.has(x.id))
-    .map(({e, x}) => ctxRow("From workflow", x ? `${esc(x.id)} ${esc(x.name)}: ${esc(sentence(whyShown(e.why, e.atom) || "its output"))}` : esc(e.atom) + (e.why ? ": " + esc(sentence(whyShown(e.why, e.atom))) : ""), !x));
-  const all = rows.concat(given);
+    .map(({e, x}) => ctxRow("From workflow", x ? `${esc(x.id)} ${esc(x.name)}: ` + (sliceText(e, a) || esc(sentence(whyShown(e.why, e.atom) || "its output"))) : esc(e.atom) + (e.why ? ": " + esc(sentence(whyShown(e.why, e.atom))) : ""), !x));
+  const all = rows.concat(lin, given);
   return all.length ? `<ul class="clist">${all.join("")}</ul>` : '<span class="empty">None written.</span>';
 }
 // Same stored lines, grouped under short labels by what they say; a line that fits no group stays in a plain list.
