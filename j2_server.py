@@ -87,6 +87,20 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 p = os.path.join(j2.saved_dir(run), "site", "index.html")
                 page = open(p, encoding="utf-8").read() if os.path.exists(p) else ""
             return self._send(200, json.dumps({"anchor": anchor, "html": j2.preview_doc(page, anchor) if anchor else None}))
+        if u.path == "/api/docs":       # the Documents tab: prd.md, hld.md, lld.md of a run, read-only, only those names
+            d = j2.saved_dir(run) if run else RUN.dir
+            if not d:
+                return self._send(404, '{"error": "no such run"}')
+            asked = j2._read(d, "documents.json", {}) if run else RUN.docset
+            out = {}
+            for k in ("prd", "hld", "lld"):
+                try:
+                    with open(os.path.join(d, f"{k}.md"), encoding="utf-8") as f:
+                        text = f.read()
+                except OSError:
+                    text = None
+                out[k] = {"asked": text is not None or k in asked, "text": text}
+            return self._send(200, json.dumps(out, ensure_ascii=False))
         if u.path.startswith("/shot/"):        # the screenshot Audit looked at for site vN
             d, n = (j2.saved_dir(run) if run else RUN.dir), u.path.rsplit("/", 1)[-1]
             path = os.path.join(d or "", "site", "shots", f"v{n}.png")

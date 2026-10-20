@@ -3298,12 +3298,12 @@ def slim_prompts():
     print(f"slim: both paths Done; prompt characters {sizes['0']:,} (old) -> {sizes['1']:,} (J2_SLIM=1) in the mock run")
 
 
-def render_node(state, previews=None, html=None):
+def render_node(state, previews=None, html=None, docs=None):
     """j2_ui_render.js: the page's script against a stub DOM (no browser). Returns {simple, sprog, cards}."""
     import subprocess
     d = tempfile.mkdtemp(prefix="j2-render-")
     paths = []
-    for name, obj in (("state.json", state), ("previews.json", previews or {})):
+    for name, obj in (("state.json", state), ("previews.json", previews or {}), ("docs.json", docs or {"docs": {}})):
         paths.append(os.path.join(d, name))
         json.dump(obj, open(paths[-1], "w"), default=str)
     here = os.path.dirname(os.path.abspath(__file__))
@@ -3404,6 +3404,82 @@ def atom_cards_render():
     print(f"atom cards (no browser): preview + eight blocks in three groups, three links, collapsed long blocks, preview "
           f"source = the saved page's section ({len(anchored)} atoms with a frame, {len(plain)} with text), "
           "Simple view identical to the checkpoint page, /api/preview ok")
+
+
+def docs_tab():
+    """UI: Context and Constraints in plain words, the read-only Documents tab (/api/docs and its render), and links from
+    an atom card to a document item. Nothing stored changes: the same lines are shown, grouped."""
+    import shutil
+    import threading
+    import urllib.request
+    import urllib.error
+    import j2_server
+    if not shutil.which("node"):
+        print("docs tab test skipped: node not found")
+        return
+    plain = j2.J2Run()
+    say(plain, BREW_LAB)
+    run = docs_run(DESIGN_BRIEF, 900)
+    assert run.outcome.startswith("Done"), run.outcome
+    keep, j2_server.RUN = j2_server.RUN, run
+    srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{srv.server_address[1]}"
+    try:
+        for q in ("", f"?run={os.path.basename(run.dir)}"):          # live and saved: the three files, exactly as written
+            got = json.load(urllib.request.urlopen(f"{base}/api/docs{q}"))
+            assert list(got) == ["prd", "hld", "lld"], got
+            for k in got:
+                assert got[k]["asked"] and got[k]["text"] == open(os.path.join(run.dir, f"{k}.md"), encoding="utf-8").read(), k
+        for bad in ("?run=../..", "?run=nope"):                      # no path tricks: a run name only
+            try:
+                urllib.request.urlopen(f"{base}/api/docs{bad}")
+                raise AssertionError(bad)
+            except urllib.error.HTTPError as e:
+                assert e.code == 404, (bad, e.code)
+        j2_server.RUN = plain                                        # no document asked for: noted, no text
+        got = json.load(urllib.request.urlopen(f"{base}/api/docs"))
+        assert all(v == {"asked": False, "text": None} for v in got.values()), got
+    finally:
+        j2_server.RUN = keep
+        srv.shutdown()
+    # render: a card's constraints grouped, its context in words, document items linked
+    snap = j2.saved_snapshot(os.path.basename(run.dir), 0)
+    w = snap["workflows"][0]
+    a = w["atoms"][0]
+    a["constraints"] = ["Create only #menu and .j2-card", "Other sections stay unchanged", "No invented items or prices",
+                        "Ids R1, R2 ... unique and sequential", "Placeholder for any photo"]
+    a["context"] = ["charter items 1 and 2", "section S1", "PRD R2, R7", "finding F-3"]
+    snap["goal"]["charter_items"] = ["The page shows the menu", "The page shows the hours"]
+    docs = {"docs": {"prd": {"asked": True, "text": "# P\n\n- **G1**: Goal one\n2. **R2**: The pre-order form\n| G1 | 30 |\n"},
+                     "hld": {"asked": False, "text": None},
+                     "lld": {"asked": True, "text": "- **S1** `#menu`: the menu with prices"}}, "focus": {"kind": "prd", "item": "R2"}}
+    out = render_node(snap, docs=docs)
+    card = out["cards"][w["id"]]
+    card = card[card.index(f'data-key="atom-{a["id"]}"'):].split("Run details")[0]
+    con = card.split('data-block="constraints"')[1].split("data-block=")[0]
+    assert re.findall(r"<b>([^<]*)</b><ul", con) == ["Only build", "No inventing", "Do not touch", "Format"], con
+    for line in a["constraints"]:
+        assert line in con, line
+    assert re.search(r"</div><ul class=\"clist\"><li>Placeholder for any photo</li></ul>", con), "ungrouped line: plain list"
+    ctx = card.split('data-block="context"')[1].split("data-block=")[0]
+    assert "<li>Charter item 1: The page shows the menu</li>" in ctx and "<li>Charter item 2: The page shows the hours</li>" in ctx, ctx
+    assert '<a href="#" data-doc="lld" data-item="S1">Section S1</a>: #menu: the menu with prices' in ctx, ctx
+    assert 'PRD <a href="#" data-doc="prd" data-item="R2">R2</a>, <a href="#" data-doc="prd" data-item="R7">R7</a>' in ctx, ctx
+    assert "<li>finding F-3</li>" in ctx, ctx
+    assert "charter item" not in ctx.replace("Charter item", "") and "Never break" not in card and "Uses " not in ctx
+    # no group fits: a plain list only
+    a["constraints"] = ["Placeholder for any photo"]
+    plain_card = render_node(snap, docs=docs)["cards"][w["id"]].split('data-block="constraints"')[1].split("data-block=")[0]
+    assert "<b>" not in plain_card.split("<summary>")[1] and "<li>Placeholder for any photo</li>" in plain_card
+    # the tab: three documents, the missing one noted, the linked item marked and findable
+    d = out["docs"]
+    assert re.findall(r'data-doc-kind="(\w+)"', d) == ["prd", "hld", "lld"]
+    assert "Not asked for in this run." in d.split('data-doc-kind="hld"')[1].split("</section>")[0]
+    assert '<p class="dl hit" id="doc-prd-R2">' in d and '<p class="dl" id="doc-prd-G1">' in d and 'id="doc-lld-S1"' in d, d
+    assert d.count('id="doc-prd-G1"') == 1 and "<h4>P</h4>" in d, "an item's first line only carries the id"
+    print("docs tab: Context in words, Constraints grouped (stored text unchanged, ungrouped in a plain list), document "
+          "items linked, Documents tab render, /api/docs live and saved, 404 for bad runs, not-asked note ok")
 
 
 def replay_size():
@@ -4203,6 +4279,7 @@ if __name__ == "__main__":
         atom_schema()
         docs_blueprint()
         docs_views()
+        docs_tab()
         atom_checks()
         behavior_steps()
         charter_facts()

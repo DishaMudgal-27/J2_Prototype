@@ -1,7 +1,7 @@
-// Browser-free render of j2_ui.html for tests: node j2_ui_render.js <j2_ui.html> <state.json> [previews.json]
+// Browser-free render of j2_ui.html for tests: node j2_ui_render.js <j2_ui.html> <state.json> [previews.json] [docs.json]
 // Runs the page's script against a stub DOM and prints {simple, sprog, cards: {workflow id: html}} as JSON.
 const fs = require("fs"), vm = require("vm");
-const [html, statePath, previewPath] = process.argv.slice(2);
+const [html, statePath, previewPath, docsPath] = process.argv.slice(2);
 const noop = () => noop;
 const el = () => new Proxy({innerHTML: "", textContent: "", value: "", style: {}, dataset: {}, disabled: false, open: false,
   classList: {toggle: noop, add: noop, remove: noop, contains: () => false}, children: [], scrollHeight: 0},
@@ -18,7 +18,10 @@ vm.runInContext(scripts[scripts.length - 1][1], ctx);
 const state = JSON.parse(fs.readFileSync(statePath, "utf8"));
 state.allChat = state.chat;
 const previews = previewPath ? JSON.parse(fs.readFileSync(previewPath, "utf8")) : {};
-const out = vm.runInContext(`(s, p) => { if (typeof PREVIEWS !== "undefined") Object.assign(PREVIEWS, p); renderSimple(s);
+const docs = docsPath ? JSON.parse(fs.readFileSync(docsPath, "utf8")) : {docs: {}};
+const out = vm.runInContext(`(s, p, d) => { if (typeof PREVIEWS !== "undefined") Object.assign(PREVIEWS, p);
+  if (typeof DOCS !== "undefined"){ Object.assign(DOCS, d.docs); FOCUS = d.focus || {}; }
+  renderSimple(s);
   return {simple: $("smsgs").innerHTML, sprog: $("sprog").innerHTML,
-          cards: Object.fromEntries(s.workflows.map(w => [w.id, atomCards(s, w)]))}; }`, ctx)(state, previews);
+          cards: Object.fromEntries(s.workflows.map(w => [w.id, atomCards(s, w)])), docs: typeof renderDocs === "function" ? renderDocs() : ""}; }`, ctx)(state, previews, docs);
 console.log(JSON.stringify(out));

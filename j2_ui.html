@@ -33,7 +33,7 @@ button{font:500 13px var(--body);cursor:pointer}
 .code{font:500 11px var(--mono);color:var(--muted);white-space:nowrap}.st.on .code{color:var(--on);opacity:.75}
 .atom{border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:6px 0;background:var(--panel)}
 .atom>summary{cursor:pointer}.atom h4{margin:8px 0 2px;font-size:12.5px}.atom p{margin:0 0 4px}
-.ablock{margin:4px 0}.agroup{margin:10px 0 2px;color:var(--muted)}.long>summary{cursor:pointer;color:var(--muted);display:inline}
+.cgroup{margin:4px 0}.clist{margin:2px 0 4px;padding-left:20px}.dl.hit{background:var(--hit,#fff3b0);color:#111;border-radius:4px;padding:2px 4px}.doc h3{margin:14px 0 4px}.ablock{margin:4px 0}.agroup{margin:10px 0 2px;color:var(--muted)}.long>summary{cursor:pointer;color:var(--muted);display:inline}
 .apreview{display:block;width:100%;min-height:48px;max-height:260px;border:1px solid var(--line);border-radius:6px;margin:6px 0;padding:6px;background:#fff;color:#111}
 iframe.apreview{height:220px;padding:0}.linkbtn{border:0;background:none;color:var(--accent,#2a6);text-decoration:underline;cursor:pointer;padding:0;font:inherit}
 .st.on{background:var(--accent);color:var(--on)}
@@ -208,6 +208,7 @@ body.simple #dview{display:none}body:not(.simple) #sview{display:none}
       <button role="tab" data-tab="conflicts" aria-selected="false">Conflicts</button>
       <button role="tab" data-tab="timeline" aria-selected="false">Timeline</button>
       <button role="tab" data-tab="audit" aria-selected="false">Audit</button>
+      <button role="tab" data-tab="docs" aria-selected="false">Documents</button>
       <button role="tab" data-tab="style" aria-selected="false">Style guide</button>
       <button role="tab" data-tab="lessons" aria-selected="false">Lessons</button>
       <button role="tab" data-tab="playbooks" aria-selected="false">Playbooks</button>
@@ -220,6 +221,7 @@ body.simple #dview{display:none}body:not(.simple) #sview{display:none}
     <div class="pane" id="pane-conflicts" hidden></div>
     <div class="pane" id="pane-timeline" hidden></div>
     <div class="pane" id="pane-audit" hidden></div>
+    <div class="pane" id="pane-docs" hidden></div>
     <div class="pane" id="pane-style" hidden></div>
     <div class="pane" id="pane-lessons" hidden></div>
     <div class="pane" id="pane-playbooks" hidden></div>
@@ -338,9 +340,9 @@ const sentence = t => { t = dv(t).trim(); return t && !/[.!?]$/.test(t) ? t + ".
 const words = v => (Array.isArray(v) ? v : [v]).filter(Boolean).map(x => typeof x === "string" ? x : Object.values(x).join(" ")).join("; ");
 function atomRow(a, k, w){
   const v = a[k];
-  if (k === "goal") return esc(sentence(words(v)));
-  if (k === "constraints") return esc(sentence("Never break: " + words(v)));
-  if (k === "context") return esc(sentence("Uses " + words(v)));
+  if (k === "goal") return linkDocItems(esc(sentence(words(v))));
+  if (k === "constraints") return constraintsHTML(v);
+  if (k === "context") return contextHTML(v);
   if (k === "how") return esc(sentence((v && v.kind === "code" ? "Code builds it" : "AI builds it")
     + (v && v.agent ? ": " + (v.kind !== "code" && /^builder$/i.test(v.agent) && w.agent ? w.agent : v.agent) : "")));
   // one line per item, marked once code has run the atom's checks
@@ -354,6 +356,55 @@ function atomRow(a, k, w){
       : `<span class="${r.pass ? "pass" : "fail"}">${r.pass ? "Passed" : a.status === "escalated" ? "Failed, escalated" : "Failed"}</span>: ${esc(sentence(r.evidence))} <span class="empty">Attempt ${r.attempt} of ${r.of}${r.recheck ? ", " + esc(r.recheck) : ""}.</span>`;
     return `${esc(sentence(typeof c === "string" ? c : c.text))}<br>${st}`; }).join("<br>");
 }
+// Context and Constraints in plain words; a document item named on a card (PRD R2, S1) links to the Documents tab.
+let CTX = null, FOCUS = {};   // CTX: the state the cards are drawn from (charter items, sections); FOCUS: the item the Documents tab shows
+const DOCS = {};              // "prd" | "hld" | "lld" -> {asked, text} from /api/docs
+const DOC_KINDS = [["prd", "PRD", "Product requirements"], ["hld", "HLD", "High-level design"], ["lld", "LLD", "Low-level design"]];
+const ITEM_AT = /^\s*(?:[-*]\s+|\d+\.\s+)?\**([A-Z]{1,2}-?\d+)\**/;
+const docLine = id => { for (const [k] of DOC_KINDS){ const l = ((DOCS[k] || {}).text || "").split("\n").find(x => (x.match(ITEM_AT) || [])[1] === id);
+  if (l) return {kind: k, text: l.replace(ITEM_AT, "").replace(/^[\s:]+/, "").replace(/[`*]/g, "").slice(0, 140)}; } return null; };
+const docLink = (kind, id, label) => `<a href="#" data-doc="${kind}" data-item="${esc(id)}">${esc(label || id)}</a>`;
+const linkDocItems = html => html.replace(/\b(PRD|HLD|LLD)(\s+)([A-Z]\d+(?:(?:,\s*|\s+and\s+|\s+to\s+)[A-Z]\d+)*)/g,
+  (m, k, sp, ids) => k + sp + ids.replace(/[A-Z]\d+/g, id => docLink(k.toLowerCase(), id)));
+const charterNums = t => [...t.matchAll(/(\d+)(?:\s*(?:to|-)\s*(\d+))?/g)].flatMap(m => Array.from({length: Math.min((+(m[2] || m[1])) - +m[1] + 1, 50)}, (_, i) => +m[1] + i));
+function contextHTML(v){
+  const g = (CTX && CTX.goal) || {}, items = g.charter_items || g.done_when || [];
+  const one = (label, text, link) => `<li>${link || esc(label)}${text ? ": " + esc(text) : ""}</li>`;
+  const lines = (Array.isArray(v) ? v : [v]).filter(Boolean).map(r => typeof r === "string" ? r.trim() : words(r)).flatMap(r => {
+    let m = r.match(/^(?:charter\s+)?(?:done[- ]when\s+)?items?\s+([\d\s,andto-]+)$/i);
+    if (m) return charterNums(m[1]).map(n => one("Charter item " + n, items[n - 1]));
+    if (m = r.match(/^sections?\s+(?:ids?\s+)?(.+)$/i)) return m[1].split(/\s*(?:,|\band\b)\s*/).map(id => {
+      const d = docLine(id), sec = ((CTX && CTX.sections) || []).find(x => x.id === id);
+      return one("Section " + id, (sec && sec.workflow) || (d && d.text), d ? docLink(d.kind, id, "Section " + id) : "");
+    });
+    if (m = r.match(/^([A-Z]{1,2}\d+)$/)) { const d = docLine(m[1]); return [one(r, d && d.text, d ? docLink(d.kind, r) : "")]; }
+    return ["<li>" + linkDocItems(esc(r)) + "</li>"];
+  });
+  return lines.length ? `<ul class="clist">${lines.join("")}</ul>` : '<span class="empty">None written.</span>';
+}
+// Same stored lines, grouped under short labels by what they say; a line that fits no group stays in a plain list.
+const CGROUPS = [["Only build", /^(?:create|change|touch)\s+only\b|^only\b/i],
+  ["No inventing", /invent|\bfacts\b|beyond the (?:brief|charter)|not in the brief|exactly as (?:in|given)|copied exactly|only (?:the )?(?:brief|charter)/i],
+  ["Do not touch", /^(?:do not|don't)\s+(?:change|touch|edit|alter)|^touch no\b|^change nothing|^keep\b|\bunchanged\b|\bother sections?\b/i],
+  ["Format", /markdown|\bhtml\b|\bformat\b|\bids?\b|plain language|rupees|overflow|mobile|sequential|\bunique\b|palette|wa\.me|mailto|\bscripts?\b/i]];
+function constraintsHTML(v){
+  const by = {}, rest = [], ul = a => `<ul class="clist">${a.map(x => `<li>${linkDocItems(esc(x))}</li>`).join("")}</ul>`;
+  (Array.isArray(v) ? v : [v]).filter(Boolean).map(x => typeof x === "string" ? x : words(x)).forEach(l => {
+    const g = CGROUPS.find(([, re]) => re.test(l)); if (g) (by[g[0]] = by[g[0]] || []).push(l); else rest.push(l); });
+  return CGROUPS.filter(([n]) => by[n]).map(([n]) => `<div class="cgroup"><b>${n}</b>${ul(by[n])}</div>`).join("")
+    + (rest.length ? ul(rest) : "") || '<span class="empty">None written.</span>';
+}
+// The Documents tab: prd.md, hld.md, lld.md as readable lines; an item's first line has an id the links scroll to.
+function docBody(kind, text){
+  const seen = {};
+  return text.split("\n").map(l => { if (!l.trim()) return "";
+    const h = l.match(/^#{1,6}\s+(.*)$/); if (h) return `<h4>${md(h[1])}</h4>`;
+    const id = (l.match(ITEM_AT) || [])[1], first = id && !seen[id]; if (first) seen[id] = 1;
+    return `<p class="dl${first && FOCUS.kind === kind && FOCUS.item === id ? " hit" : ""}"${first ? ` id="doc-${kind}-${esc(id)}"` : ""}>${md(l.replace(/^\s*[-*]\s+/, "• ").replace(/`/g, ""))}</p>`; }).join("");
+}
+const renderDocs = () => DOC_KINDS.map(([k, tag, name]) => { const d = DOCS[k];
+  return `<section class="doc" data-doc-kind="${k}"><h3>${name} <span class="code">${tag}</span></h3>` + (!d ? '<p class="empty">Loading…</p>'
+    : d.text ? docBody(k, d.text) : d.asked ? '<p class="empty">Not written yet.</p>' : '<p class="empty">Not asked for in this run.</p>') + "</section>"; }).join("");
 const PREVIEWS = {};          // atom id -> srcdoc of its section (from /api/preview), "" when it has none
 const blockHTML = (a, key, label, gloss, body, long) => `<div class="ablock" data-block="${key}"><b>${label}</b> <span class="empty">${gloss}</span>
   ${long ? `<details class="long" data-key="blk-${esc(a.id)}-${key}"><summary>show</summary>${body}</details>` : `<div>${body}</div>`}</div>`;
@@ -393,11 +444,12 @@ function atomBlocks(a, w, v){
         + `<details class="long" data-key="blk-${esc(a.id)}-evidence"><summary>show</summary>${atomRow(a, "verification", w)}</details>`, false)
     + g("3. Outputs")
     + blockHTML(a, "human_output", "Notes", "What it did, in plain words",
-        a.human_output ? esc(sentence(a.human_output.text)) + ` <span class="empty">Attempt ${a.human_output.attempt}.</span>` : '<span class="empty">Not written yet.</span>', false)
+        a.human_output ? linkDocItems(esc(sentence(a.human_output.text))) + ` <span class="empty">Attempt ${a.human_output.attempt}.</span>` : '<span class="empty">Not written yet.</span>', false)
     + blockHTML(a, "agent_output", "Workflow output", "What it made or did, what it used and who uses it" + mix, wout, false)
     + blockHTML(a, "result", "Result", "What it looks like", atomPreview(a, v) + (site ? ` ${site}` : ""), false);
 }
 function atomCards(s, w){
+  CTX = s;
   const atoms = w.atoms || [];
   if (!atoms.length) return '<p class="empty">No work atoms: registered before work atoms existed.</p>';
   return atoms.map((a, i) => `<details class="atom" data-key="atom-${esc(a.id)}"${atoms.length === 1 ? " open" : ""}>
@@ -771,6 +823,7 @@ async function poll(){
     paint($("pane-report"), renderReport(s));
     paint($("pane-timeline"), renderTimeline(s)); paint($("pane-lessons"), renderLessons(s));
     paint($("pane-style"), renderStyle(s)); paint($("pane-playbooks"), renderPlaybooks(s));
+    const dk = s.total + "|" + (s.docset || []).join(); if (dk !== docsKey){ docsKey = dk; loadDocs(); }
     renderSimple(s);
     if (!state || state.status !== s.status || state.total !== s.total) quick(s);
     state = s;
@@ -778,10 +831,23 @@ async function poll(){
   if (!(state && state.saved)) setTimeout(poll, 700);   // a saved run doesn't change: load it once
 }
 $("ver").onchange = () => $("frame").src = `/site/${$("ver").value}?t=${Date.now()}${runQ()}`;
-document.querySelectorAll(".tabs [role=tab]").forEach(b => b.onclick = () => {
-  document.querySelectorAll(".tabs [role=tab]").forEach(x => x.setAttribute("aria-selected", x === b));
-  ["preview","goal","workflows","conflicts","timeline","audit","style","lessons","playbooks","report"].forEach(t => $("pane-"+t).hidden = t !== b.dataset.tab);
-});
+function showTab(name){
+  document.querySelectorAll(".tabs [role=tab]").forEach(x => x.setAttribute("aria-selected", x.dataset.tab === name));
+  ["preview","goal","workflows","conflicts","timeline","audit","docs","style","lessons","playbooks","report"].forEach(t => $("pane-"+t).hidden = t !== name);
+}
+document.querySelectorAll(".tabs [role=tab]").forEach(b => b.onclick = () => showTab(b.dataset.tab));
+// Documents: read-only, reloaded when the run's chat or documents change; a link on an atom card opens the tab at that item.
+let docsKey = null;
+async function loadDocs(){
+  try { const r = await fetch(`/api/docs?${runQ().slice(1)}`, {cache:"no-store"});
+    if (r.ok) Object.assign(DOCS, await r.json()); } catch (e) {}
+  if (state) paint($("pane-workflows"), renderWorkflows(state));
+  paint($("pane-docs"), renderDocs());
+}
+$("pane-workflows").addEventListener("click", e => { const a = e.target.closest("[data-doc]"); if (!a) return;
+  e.preventDefault(); FOCUS = {kind: a.dataset.doc, item: a.dataset.item};
+  paint($("pane-docs"), renderDocs()); showTab("docs");
+  const t = document.getElementById(`doc-${FOCUS.kind}-${FOCUS.item}`); if (t && t.scrollIntoView) t.scrollIntoView({block: "center"}); });
 async function send(){
   const text = $("box").value.trim(); if (!text) return;
   $("box").value = "";
