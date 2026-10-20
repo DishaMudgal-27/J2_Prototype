@@ -343,9 +343,11 @@ function atomRow(a, k, w){
   const v = a[k];
   if (k === "goal") return linkDocItems(esc(sentence(words(v))));
   if (k === "constraints") return constraintsHTML(v);
-  if (k === "context") return contextHTML(v, a);
-  if (k === "how") return esc(sentence((v && v.kind === "code" ? "Code builds it" : "AI builds it")
-    + (v && v.agent ? ": " + (v.kind !== "code" && /^builder$/i.test(v.agent) && w.agent ? w.agent : v.agent) : "")));
+  if (k === "context") return contextHTML(v, a, w);
+  if (k === "how"){ const ai = !(v && v.kind === "code"); let ag = v && v.agent;
+    if (ai && (!ag || /^builder$/i.test(ag) || w.revises)) ag = w.agent || (ag && w.id + " " + ag) || ag;   // the workflow's own name, never a bare "Builder"
+    const o = ai && wfOrigin(w);
+    return esc(sentence((ai ? "AI builds it" : "Code builds it") + (ag ? ": " + ag : "") + (o ? ` as a revision of ${o.id} ${o.name}` : ""))); }
   // one line per item, marked once code has run the atom's checks
   if (k === "expected_output") return (Array.isArray(v) ? v : []).map(x => esc(sentence(typeof x === "string" ? x : x.text))
     + (!a.attempts ? "" : x.met === true ? ' <span class="pass">Met</span>' : x.met === false ? ' <span class="fail">Not met</span>'
@@ -369,28 +371,40 @@ const linkDocItems = html => html.replace(/\b(PRD|HLD|LLD)(\s+)([A-Z]\d+(?:(?:,\
   (m, k, sp, ids) => k + sp + ids.replace(/[A-Z]\d+/g, id => docLink(k.toLowerCase(), id)));
 const charterNums = t => [...t.matchAll(/(\d+)(?:\s*(?:to|-)\s*(\d+))?/g)].flatMap(m => Array.from({length: Math.min((+(m[2] || m[1])) - +m[1] + 1, 50)}, (_, i) => +m[1] + i));
 const KIND_OF = {R: "prd", G: "prd", C: "hld", S: "lld"};      // a bare id's document, when no document holds it yet
-const ctxRow = (type, body, nosrc) => `<li data-ctx="${type.toLowerCase().replace(/\W+/g, "-")}"><b class="ctype">${esc(type)}</b> ${body}${nosrc ? ' <span class="empty">no source on record</span>' : ""}</li>`;
-const idRange = t => (t.match(/^([A-Z]{1,2})(\d+)\s+to\s+\1(\d+)$/) ? Array.from({length: Math.min(+t.match(/(\d+)$/)[1] - +t.match(/^[A-Z]+(\d+)/)[1] + 1, 50)}, (_, i) => t[0] + (+t.match(/^[A-Z]+(\d+)/)[1] + i)) : [t]);
-function contextHTML(v, a){
-  const g = (CTX && CTX.goal) || {}, items = g.charter_items || g.done_when || [];
-  const docRow = (label, id, kind) => { const d = docLine(id); return d ? ctxRow(label || d.kind.toUpperCase(), docLink(d.kind, id) + ": " + esc(d.text))
+const REFS = {conditions: {}, rubric: {}};   // id -> text, from /api/refs: conditions/*.json and each output type's rubric
+const wfById = id => ((CTX && CTX.workflows) || []).find(x => x.id === id);
+const wfOrigin = w => { const id = w.revises || (w.section && w.section !== w.id ? w.section : null); return id && wfById(id); };
+const ctxRow = (type, body, nosrc) => `<li data-ctx="${type.toLowerCase().replace(/\W+/g, "-")}"><b class="ctype">${esc(type)}</b> ${String(body).trim() || '<span class="empty">nothing on record</span>'}${nosrc ? ' <span class="empty">no source on record</span>' : ""}</li>`;
+const idRange = t => { const m = t.match(/^([A-Z]{1,2})(\d+)\s+to\s+\1(\d+)$/); return m ? Array.from({length: Math.min(+m[3] - +m[2] + 1, 50)}, (_, i) => m[1] + (+m[2] + i)) : [t]; };
+const findingText = id => { if (REFS.rubric[id]) return REFS.rubric[id]; if (REFS.conditions[id]) return REFS.conditions[id];
+  const r = [...((CTX && CTX.audits) || [])].reverse().flatMap(x => x.results || []).find(x => x.id === id);
+  return r ? [r.criterion, r.note].filter(Boolean).join(": ") : ""; };
+function contextHTML(v, a, w){
+  const g = (CTX && CTX.goal) || {}, items = g.charter_items || g.done_when || [], deps = (((CTX && CTX.atoms_v1) || {})[a && a.id] || {}).depends_on || [];
+  const docRow = (label, id) => { const d = docLine(id); return d ? ctxRow(label || d.kind.toUpperCase(), docLink(d.kind, id) + ": " + esc(d.text))
     : ctxRow(label || (KIND_OF[id[0]] || "other").toUpperCase(), esc(id), true); };
-  const rows = (Array.isArray(v) ? v : [v]).filter(Boolean).map(r => typeof r === "string" ? r.trim() : words(r)).flatMap(r => {
+  const shown = new Set();
+  const wfRow = id => { const x = wfById(id), why = (deps.find(e => (x.atoms || []).some(at => at.id === e.atom)) || {}).why; shown.add(id);
+    return ctxRow(w && w.revises === id ? "Revises" : "From workflow", `${esc(x.id)} ${esc(x.name)}` + (why ? ": " + esc(sentence(why)) : "")); };
+  const rows = (Array.isArray(v) ? v : [v]).map(r => typeof r === "string" ? r.trim() : r ? words(r).trim() : "").filter(Boolean).flatMap(r => {
     let m = r.match(/^(?:charter\s+)?(?:done[- ]when\s+)?items?\s+([\d\s,andto-]+)$/i);
     if (m) return charterNums(m[1]).map(n => ctxRow("Charter", `item ${n}` + (items[n - 1] ? ": " + esc(items[n - 1]) : ""), !items[n - 1]));
     if (m = r.match(/^charter[.\s]+([a-z_]+)$/i)) { const f = g[m[1]]; const t = Array.isArray(f) ? f.join("; ") : typeof f === "string" ? f : "";
       return [ctxRow("Charter", esc(m[1]) + (t ? ": " + esc(t) : ""), !t)]; }
-    if (m = r.match(/^sections?\s+(?:ids?\s+)?(.+)$/i)) return m[1].split(/\s*(?:,|\band\b)\s*/).flatMap(id => {
+    if (m = r.match(/^conditions?\s+([A-Z]\d+)$/i)) { const t = REFS.conditions[m[1].toUpperCase()]; return [ctxRow("Condition", esc(m[1]) + (t ? ": " + esc(t) : ""), !t)]; }
+    if (m = r.match(/^findings?\s+(.+)$/i)) return m[1].split(/\s*(?:,|\band\b)\s*/).filter(Boolean).map(id => { const t = findingText(id); return ctxRow("Finding", esc(id) + (t ? ": " + esc(t) : ""), !t); });
+    if (m = r.match(/^sections?\s+(?:ids?\s+)?(.+)$/i)) return m[1].split(/\s*(?:,|\band\b)\s*/).filter(Boolean).map(id => {
+      if (wfById(id)) return wfRow(id);                                 // a workflow id is never a "Section"
       const d = docLine(id), sec = ((CTX && CTX.sections) || []).find(x => x.id === id), t = (sec && sec.workflow) || (d && d.text);
-      return [ctxRow("Section", (d ? docLink(d.kind, id) : esc(id)) + (t ? ": " + esc(t) : ""), !t)]; });
-    if (m = r.match(/^(PRD|HLD|LLD)\s+(.+)$/)) return m[2].split(/\s*(?:,|\band\b)\s*/).flatMap(idRange).map(id => /^[A-Z]{1,2}-?\d+$/.test(id) ? docRow(m[1], id)
+      return ctxRow("Section", (d ? docLink(d.kind, id) : esc(id)) + (t ? ": " + esc(t) : ""), !t); });
+    if (/^W-\d+$/.test(r) && wfById(r)) return [wfRow(r)];
+    if (m = r.match(/^(PRD|HLD|LLD)\s+(.+)$/)) return m[2].split(/\s*(?:,|\band\b)\s*/).filter(Boolean).flatMap(idRange).map(id => /^[A-Z]{1,2}-?\d+$/.test(id) ? docRow(m[1], id)
       : ctxRow(m[1], esc(id), !((DOCS[m[1].toLowerCase()] || {}).text)));
     if (/^[A-Z]{1,2}\d+(?:\s+to\s+[A-Z]{1,2}\d+)?$/.test(r)) return idRange(r).map(id => docRow("", id));
     return [ctxRow("Other", linkDocItems(esc(r)), true)];
   });
-  const wfOf = id => ((CTX && CTX.workflows) || []).find(w => (w.atoms || []).some(x => x.id === id));
-  const given = ((((CTX && CTX.atoms_v1) || {})[a && a.id] || {}).depends_on || []).map(e => { const w = wfOf(e.atom);
-    return ctxRow("From workflow", w ? `${esc(w.id)} ${esc(w.name)}: ${esc(sentence(e.why || "its output"))}` : esc(e.atom) + ": " + esc(sentence(e.why || "")), !w); });
+  const given = deps.map(e => ({e, x: ((CTX && CTX.workflows) || []).find(x => (x.atoms || []).some(at => at.id === e.atom))})).filter(({x}) => !x || !shown.has(x.id))
+    .map(({e, x}) => ctxRow("From workflow", x ? `${esc(x.id)} ${esc(x.name)}: ${esc(sentence(e.why || "its output"))}` : esc(e.atom) + (e.why ? ": " + esc(sentence(e.why)) : ""), !x));
   const all = rows.concat(given);
   return all.length ? `<ul class="clist">${all.join("")}</ul>` : '<span class="empty">None written.</span>';
 }
@@ -446,8 +460,12 @@ function atomBlocks(a, w, v){
   const base = dsec ? String(dsec.ref.split("#")[0]).replace(/\.md$/, "") : "";
   const site = dsec ? `<a data-link="md" href="/file/${esc(base)}.md${q}" download>Download the markdown (.md)</a> <a data-link="docx" href="/file/${esc(base)}.docx${q}" download>Download the Word file (.docx)</a>`
     : sec ? `<a data-link="site" href="/site/latest${q}#${esc(sec.ref.split("#")[1])}" target="_blank" rel="noopener">View in site</a>` : "";
-  const edges = (t, l) => l && l.length ? `<details class="long" data-key="blk-${esc(a.id)}-${t}"><summary>${l.length} atom(s)</summary>${l.map(e => esc(e.atom) + ": " + esc(sentence(e.why))).join("<br>")}</details>` : "none recorded";
-  const wout = v ? ((v.output || []).map(o => `${esc(o.name)} <span class="empty">${esc(o.verb)} · ${esc(NOUN[o.verb] || "")} · ${esc(o.form)} · ${esc(o.ref)}</span>`).join("<br>") || '<span class="empty">Nothing made yet.</span>')
+  const rowsOf = l => l.map(e => esc(e.atom) + ": " + esc(sentence(e.why))).join("<br>");
+  const edges = (t, l) => !l || !l.length ? "none recorded" : l.length > 4 ? `<details class="long" data-key="blk-${esc(a.id)}-${t}"><summary>${l.length} atoms (show)</summary>${rowsOf(l)}</details>` : "<br>" + rowsOf(l);
+  const isFile = o => !String(o.ref).includes("#") && /^[\w./-]+\.(md|html|docx|css|js|json)$/.test(o.ref);   // hld.md, site/v9.md: where it is kept, not what it made
+  const outs = v ? (v.output || []) : [], made = outs.filter(o => !isFile(o)).sort((x, y) => String(y.ref).includes("#") - String(x.ref).includes("#"));
+  const wout = v ? (made.map(o => `${esc(o.name)} <span class="empty">${esc(o.verb)} · ${esc(NOUN[o.verb] || "")} · ${esc(o.form)} · ${esc(o.ref)}</span>`).join("<br>") || '<span class="empty">Nothing made yet.</span>')
+    + (outs.some(isFile) ? `<br><span data-note="saved">Saved in: ${outs.filter(isFile).map(o => esc(o.ref)).join(", ")}</span>` : "")
     + `<br>Depends on: ${edges("dep", v.depends_on)}<br>Used by: ${edges("used", v.used_by)} <button type="button" class="linkbtn" data-link="agent" data-atom="${esc(a.id)}">Agent output</button>`
     : '<span class="empty">Built by code when the checks pass.</span>';
   const mix = mixed(v) ? ' <span class="empty" data-note="mixed">mixed: makes and does</span>' : "";
@@ -455,7 +473,7 @@ function atomBlocks(a, w, v){
     + blockHTML(a, "goal", "Goal", "What must be true when this is done", atomRow(a, "goal", w), false)
     + blockHTML(a, "how", "How", "Who builds it", atomRow(a, "how", w), false)
     + blockHTML(a, "constraints", "Constraints", "What must never break", atomRow(a, "constraints", w), true)
-    + blockHTML(a, "context", "What this workflow was given", "Each row says where it comes from", atomRow(a, "context", w), true)
+    + blockHTML(a, "context", "Context", "What it needs to know", atomRow(a, "context", w), true)
     + g("2. Defined output and verification")
     + blockHTML(a, "expected_output", "Defined output", "What must exist when it is done", atomRow(a, "expected_output", w), false)
     + blockHTML(a, "verification", "Verification", "The check that proves the goal is met",
@@ -858,6 +876,7 @@ function showTab(name){
 document.querySelectorAll(".tabs [role=tab]").forEach(b => b.onclick = () => showTab(b.dataset.tab));
 // Documents: read-only, reloaded when the run's chat or documents change; a link on an atom card opens the tab at that item.
 let docsKey = null;
+(async () => { try { const r = await fetch("/api/refs"); if (r.ok){ Object.assign(REFS, await r.json()); if (state) paint($("pane-workflows"), renderWorkflows(state)); } } catch (e) {} })();
 async function loadDocs(){
   try { const r = await fetch(`/api/docs?${runQ().slice(1)}`, {cache:"no-store"});
     if (r.ok) Object.assign(DOCS, await r.json()); } catch (e) {}

@@ -20,7 +20,7 @@ state.allChat = state.chat;
 const previews = previewPath ? JSON.parse(fs.readFileSync(previewPath, "utf8")) : {};
 const docs = docsPath ? JSON.parse(fs.readFileSync(docsPath, "utf8")) : {docs: {}};
 const out = vm.runInContext(`(s, p, d) => { if (typeof PREVIEWS !== "undefined") Object.assign(PREVIEWS, p);
-  if (typeof DOCS !== "undefined"){ Object.assign(DOCS, d.docs); FOCUS = d.focus || {}; }
+  if (typeof DOCS !== "undefined"){ Object.assign(DOCS, d.docs); FOCUS = d.focus || {}; Object.assign(REFS, d.refs || {}); }
   renderSimple(s);
   return {simple: $("smsgs").innerHTML, sprog: $("sprog").innerHTML,
           cards: Object.fromEntries(s.workflows.map(w => [w.id, atomCards(s, w)])), docs: typeof renderDocs === "function" ? renderDocs() : ""}; }`, ctx)(state, previews, docs);

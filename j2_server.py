@@ -102,6 +102,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 out[k] = {"asked": text is not None or k in made or (not run and k in RUN.docset), "text": text,
                           "workflows": (made.get(k) or {}).get("workflows", [])}
             return self._send(200, json.dumps(out, ensure_ascii=False))
+        if u.path == "/api/refs":       # ids the cards name, with their text: conditions/*.json and every output type's rubric
+            conds = {}
+            for n in ("website", "prd", "hld", "lld"):
+                conds.update({c["id"]: c["text"] for c in j2.load_conditions(f"{n}.json")})
+            rub = {i: t for o in j2.OUTPUTS.values() for i, t in o.get("rubric") or ()}
+            return self._send(200, json.dumps({"conditions": conds, "rubric": rub}, ensure_ascii=False))
         if u.path.startswith("/shot/"):        # the screenshot Audit looked at for site vN
             d, n = (j2.saved_dir(run) if run else RUN.dir), u.path.rsplit("/", 1)[-1]
             path = os.path.join(d or "", "site", "shots", f"v{n}.png")

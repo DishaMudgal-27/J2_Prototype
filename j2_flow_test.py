@@ -3467,9 +3467,9 @@ def docs_tab():
         assert line in con, line
     assert re.search(r"</div><ul class=\"clist\"><li>Placeholder for any photo</li></ul>", con), "ungrouped line: plain list"
     ctx = card.split('data-block="context"')[1].split("data-block=")[0]
-    assert "What this workflow was given" in card and "<b>Context</b>" not in card
+    assert "<b>Context</b> <span class=\"empty\">What it needs to know</span>" in card and "What this workflow was given" not in card
     rows = dict.fromkeys(re.findall(r'<li data-ctx="([\w-]+)">', ctx))
-    assert list(rows) == ["charter", "section", "prd", "hld", "lld", "other", "from-workflow"], list(rows)
+    assert list(rows) == ["charter", "section", "prd", "hld", "lld", "finding", "from-workflow"], list(rows)
     assert '<li data-ctx="charter"><b class="ctype">Charter</b> item 1: The page shows the menu</li>' in ctx, ctx
     assert 'item 2: The page shows the hours</li>' in ctx
     assert 'item 9</li>' not in ctx and 'item 9 <span class="empty">no source on record</span>' in ctx, "a row with no source says so"
@@ -3478,7 +3478,7 @@ def docs_tab():
     assert '<b class="ctype">PRD</b> R7 <span class="empty">no source on record</span>' in ctx or 'data-item="R7">R7</a> <span class="empty">' in ctx, ctx
     assert '<b class="ctype">HLD</b> <a href="#" data-doc="hld" data-item="C1">C1</a>: Menu display: shows the menu</li>' in ctx, ctx
     assert '<b class="ctype">LLD</b> <a href="#" data-doc="lld" data-item="S1">S1</a>' in ctx
-    assert '<b class="ctype">Other</b> finding F-3 <span class="empty">no source on record</span>' in ctx, ctx
+    assert re.search(r'<b class="ctype">Finding</b> F-3: [^<]+</li>', ctx), "F-3 is found in the run's audit"
     assert f'<b class="ctype">From workflow</b> {w2["id"]} {w2["name"]}: the section it wrote.</li>' in ctx.replace("&amp;", "&"), ctx
     assert "Never break" not in card and "Uses " not in ctx
     # no group fits: a plain list only
@@ -3503,6 +3503,97 @@ def docs_tab():
     assert "Not asked for in this run." in nd.split('data-doc-kind="hld"')[1].split("</section>")[0] and nd.count("End of HLD") == 1
     print("docs tab: Context in words, Constraints grouped (stored text unchanged, ungrouped in a plain list), document "
           "items linked, Documents tab render, /api/docs live and saved, 404 for bad runs, not-asked note ok")
+
+
+def card_content():
+    """UI: card headings unchanged; a revise atom names what it revises; Context rows by type (workflow ids, condition and
+    finding lookups, no source on record, never a blank row); long dependency lists collapsed; outputs vs "Saved in"."""
+    import shutil
+    if not shutil.which("node"):
+        print("card content test skipped: node not found")
+        return
+    run = docs_run(DESIGN_BRIEF, 900)
+    assert run.outcome.startswith("Done"), run.outcome
+    snap = j2.saved_snapshot(os.path.basename(run.dir), 0)
+    wfs = snap["workflows"]
+    w1, w2, w3 = wfs[0], wfs[1], wfs[2]
+    a1, a2 = w1["atoms"][0], w2["atoms"][0]
+    w2["revises"], w2["section"], w2["agent"] = w1["id"], w1["id"], f"{w2['id']} Builder"
+    a2["how"] = {"kind": "AI", "agent": f"{w1['id']} Builder", "steps": "Rewrite"}
+    a2["context"] = [f"section {w1['id']}", f"section {w3['id']}", "condition H5", "finding D-5", "finding F-1", "finding X-9",
+                     "condition Z9", "", "   ", None, "PRD R9"]
+    snap["audits"] = [{"results": [{"id": "F-1", "criterion": "The page opens", "note": "it parsed"}]}]
+    deps = snap["atoms_v1"][a2["id"]]
+    deps["depends_on"] = [{"atom": w["atoms"][0]["id"], "why": f"why {i}"} for i, w in enumerate(wfs[:6])]
+    deps["used_by"] = deps["depends_on"][:2]
+    deps["output"] = [{"verb": "make", "name": "hld.md", "form": "doc", "ref": "hld.md"},
+                      {"verb": "make", "name": "A section", "form": "doc", "ref": "hld.md#Sec"},
+                      {"verb": "make", "name": "site/v9.md", "form": "doc", "ref": "site/v9.md"}]
+    hld = {c["id"]: c["text"] for c in j2.load_conditions("hld.json")}
+    refs = {"conditions": hld, "rubric": {i: t for o in j2.OUTPUTS.values() for i, t in o.get("rubric") or ()}}
+    out = render_node(snap, docs={"docs": {"prd": {"asked": True, "text": "- **R1**: One"}}, "refs": refs})
+
+    def card(i, wf):
+        c = out["cards"][wf["id"]]
+        return c[c.index(f'data-key="atom-{i}"'):].split("Run details")[0]
+    c1, c2 = card(a1["id"], w1), card(a2["id"], w2)
+    # headings and glosses are the original ones
+    for lab in ("Goal", "How", "Constraints", "Context", "Defined output", "Verification", "Notes", "Workflow output", "Result"):
+        assert f"<b>{lab}</b>" in c1, lab
+    assert '<b>Context</b> <span class="empty">What it needs to know</span>' in c1 and 'Who builds it' in c1
+    assert "Depends on:" in c2 and "Used by:" in c2 and "What this workflow was given" not in c2
+    # a revise atom: its own builder name and what it revises
+    how = c2.split('data-block="how"')[1].split("data-block=")[0]
+    assert f"AI builds it: {w2['id']} Builder as a revision of {w1['id']} {w1['name']}." in how.replace("&amp;", "&"), how
+    assert "as a revision" not in c1.split('data-block="how"')[1].split("data-block=")[0]
+    import html as htmllib
+    ctx = htmllib.unescape(c2.split('data-block="context"')[1].split("data-block=")[0])
+    row = lambda t: re.findall(rf'<li data-ctx="[\w-]+"><b class="ctype">{t}</b> ([^<]*(?:<[^>]*>[^<]*)*?)</li>', ctx)
+    assert f'<li data-ctx="revises"><b class="ctype">Revises</b> {w1["id"]} {w1["name"]}: why 0.</li>' in ctx, ctx
+    assert f'<b class="ctype">From workflow</b> {w3["id"]} {w3["name"]}: why 2.' in ctx, ctx
+    assert '<b class="ctype">Section</b>' not in ctx, "a workflow id is never a Section"
+    assert f'<b class="ctype">Condition</b> H5: {hld["H5"]}</li>' in ctx, ctx
+    assert f'<b class="ctype">Finding</b> D-5: {refs["rubric"]["D-5"]}</li>' in ctx, ctx
+    assert '<b class="ctype">Finding</b> F-1: The page opens: it parsed</li>' in ctx, ctx
+    assert '<b class="ctype">Finding</b> X-9 <span class="empty">no source on record</span>' in ctx
+    assert '<b class="ctype">Condition</b> Z9 <span class="empty">no source on record</span>' in ctx
+    assert '<b class="ctype">PRD</b> R9 <span class="empty">no source on record</span>' in ctx
+    # a workflow shown from Context is not repeated from depends_on
+    assert ctx.count(f'{w1["id"]} {w1["name"]}') == 1 and ctx.count(f'{w3["id"]} {w3["name"]}') == 1
+    # never a blank row: empty references are skipped, every row has text after its label
+    rows = re.findall(r'<li data-ctx="[\w-]+">(.*?)</li>', ctx)
+    assert rows and all(re.sub(r"<[^>]+>", "", r).replace(re.search(r'<b class="ctype">([^<]*)</b>', r).group(1), "", 1).strip() for r in rows), rows
+    # collapsed dependency list: 6 rows collapse with a count, reasons kept; 2 used_by rows stay inline
+    dep = c2.split("Depends on:")[1].split("Used by:")[0]
+    assert re.search(r'<summary>\d+ atoms \(show\)</summary>', dep) and "why 5" in dep and dep.count("why ") >= 6, dep
+    used = c2.split("Used by:")[1]
+    assert "atoms (show)" not in used.split("Agent output")[0] and "why 1" in used
+    # outputs: the section first, files on a "Saved in" line
+    wo = c2.split('data-block="agent_output"')[1].split("data-block=")[0]
+    assert wo.index("A section") < wo.index("Depends on") and "A section" in wo.split("Saved in")[0]
+    assert 'Saved in: hld.md, site/v9.md' in wo and "site/v9.md" not in wo.split("Saved in")[0] and "hld.md</span>" not in wo.split("Saved in")[0]
+    assert wo.index("A section") < wo.index("Saved in")
+    # W-13's own data (a stored run, when present): nine rows, none blank
+    here = os.path.dirname(os.path.abspath(__file__))
+    name = "j2-20261016-160511"
+    if os.path.isdir(os.path.join(here, "runs", name)):
+        keep_dir, j2.RUNS_DIR = j2.RUNS_DIR, os.path.join(here, "runs")       # read-only: the stored run is evidence
+        try:
+            s13 = j2.saved_snapshot(name, 0)
+        finally:
+            j2.RUNS_DIR = keep_dir
+        R = os.path.join(here, "runs", name)
+        d13 = {"docs": {k: {"asked": True, "text": open(os.path.join(R, k + ".md"), encoding="utf-8").read()} for k in ("prd", "hld", "lld")}, "refs": refs}
+        c13 = render_node(s13, docs=d13)["cards"]["W-13"]
+        c13 = c13[c13.index('data-key="atom-W-13.a1"'):].split("Run details")[0]
+        x13 = c13.split('data-block="context"')[1].split("data-block=")[0]
+        r13 = re.findall(r'<li data-ctx="([\w-]+)">(.*?)</li>', x13)
+        assert len(r13) == 9 and [t for t, _ in r13].count("from-workflow") == 6, r13
+        assert all(re.sub(r"<[^>]+>", "", b).split(" ", 1)[-1].strip() for _, b in r13), r13
+        assert "<li></li>" not in x13 and "<li data-ctx=\"\">" not in x13
+        assert re.search(r'<summary>6 atoms \(show\)</summary>', c13.split("Depends on:")[1]), "W-13 depends on 6: collapsed"
+    print("card content: original headings, revise label, workflow/condition/finding rows, no source noted, no blank rows, "
+          "collapsed dependencies, outputs vs Saved in ok")
 
 
 def replay_size():
@@ -4303,6 +4394,7 @@ if __name__ == "__main__":
         docs_blueprint()
         docs_views()
         docs_tab()
+        card_content()
         atom_checks()
         behavior_steps()
         charter_facts()
