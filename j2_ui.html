@@ -397,13 +397,14 @@ function whyShown(why, atomId){
 const docSection = (kind, heading) => { const lines = (((DOCS[kind] || {}).text) || "").split("\n"), i = lines.findIndex(l => l.replace(/^#+\s*/, "").trim() === heading && /^#/.test(l));
   if (i < 0) return ""; const j = lines.findIndex((l, k) => k > i && /^#{1,2}\s/.test(l)); return lines.slice(i + 1, j < 0 ? undefined : j).join("\n").trim(); };
 const sectionOf = (atomId, kind) => { const o = ((((CTX && CTX.atoms_v1) || {})[atomId] || {}).output || []).find(x => new RegExp("^" + kind + "\\.md#").test(String(x.ref))); return o ? o.ref.split("#")[1] : ""; };
-// "LLD slice S2" and "the HLD component summary" rows: show the slice or summary itself (cut at a word, with show more), not only that it was in the prompt.
-function sliceText(e, a){
+// "LLD slice S2" and "the HLD component summary" rows: the slice or summary itself, not only that it was in the prompt.
+function sliceInfo(e){
   const m = String(e.why || "").match(/^LLD slice ([A-Z]\d+)/), h = /^the HLD component summary/.test(String(e.why || ""));
-  if (!m && !h) return "";
-  const kind = m ? "lld" : "hld", body = docSection(kind, sectionOf(e.atom, kind)), label = m ? `LLD slice ${m[1]}` : "HLD component summary";
-  const text = m ? body.split("\n").filter(l => new RegExp("\\b" + m[1] + "\\b").test(l)).map(l => l.replace(/^\s*[-*]\s+/, "")).join(" ").replace(/\s+/g, " ").replace(/[`*]/g, "").trim() : body.split("\n").map(l => l.replace(/^\s*[-*]\s+/, "")).join(" ").replace(/\s+/g, " ").replace(/[`*]/g, "").trim();
-  return text ? `${esc(label)}: ${clip(`ctx-${a && a.id}-${e.atom}`, text)}` : `${esc(label)} <span class="empty">not found in the documents</span>`;
+  if (!m && !h) return null;
+  const kind = m ? "lld" : "hld", sec = sectionOf(e.atom, kind), body = docSection(kind, sec), label = m ? `LLD slice ${m[1]}` : "HLD component summary";
+  const strip = t => t.map(l => l.replace(/^\s*[-*]\s+/, "")).join(" ").replace(/\s+/g, " ").replace(/[`*]/g, "").trim();
+  const text = strip(m ? body.split("\n").filter(l => new RegExp("\\b" + m[1] + "\\b").test(l)) : body.split("\n"));
+  return {label, text, headline: m ? label : `HLD ${sec || "component"} summary`, id: m && m[1]};
 }
 const builderName = w => `${w.id} ${w.name} builder`;
 const STAGE_AUDITS = [];   // earlier stages' audits, condensed, from /api/audits (the state holds only the current stage's)
@@ -443,9 +444,10 @@ function contextHTML(v, a, w){
     : ctxRow(label || (KIND_OF[id[0]] || "other").toUpperCase(), esc(id), true); };
   const dtext = (id, t) => clip(`ctx-${a && a.id}-${id}`, t);
   const shown = new Set();
-  const lineage = {impl: new Set(), serves: new Set()}, docsLoaded = () => DOC_KINDS.some(([k]) => (DOCS[k] || {}).text);
+  const typed = new Map(), norm = t => String(t).replace(/\s+/g, " ").trim(), lineage = {impl: new Set(), serves: new Set()}, docsLoaded = () => DOC_KINDS.some(([k]) => (DOCS[k] || {}).text);
   const lineRow = (label, ids) => { if (!ids.size) return []; const f = [...ids].map(id => ({id, d: docLine(id)})), ok = f.filter(x => x.d);
     const t = ok.map(x => ok.length > 1 ? `${x.id} ${x.d.text}` : x.d.text).join("; ");
+    if (ok.length) typed.set(norm(t), docLink(ok[0].d.kind, ok[0].id, label + " " + f.map(x => x.id).join(", ")));
     return [ctxRow(label, f.map(x => x.d ? docLink(x.d.kind, x.id) : esc(x.id) + ' <span class="empty">not found in the documents</span>').join(", ") + (t ? ": " + clip(`ctx-${a && a.id}-${label}`, t) : ""))]; };
   const wfRow = id => { const x = wfById(id), e0 = deps.find(e => (x.atoms || []).some(at => at.id === e.atom)) || {}, why = whyShown(e0.why, e0.atom); shown.add(id);
     return ctxRow(w && w.revises === id ? "Revises" : "From workflow", `${esc(x.id)} ${esc(x.name)}` + (why ? ": " + esc(sentence(why)) : "")); };
@@ -462,6 +464,7 @@ function contextHTML(v, a, w){
       if (d && d.kind === "lld"){                                       // a documents run: the section's own text from the LLD, and what it implements and serves
         (d.text.match(/\bImplements\s+([A-Z]\d+(?:(?:,\s*|\s+and\s+)[A-Z]\d+)*)/) || [, ""])[1].match(/[A-Z]\d+/g)?.forEach(x => lineage.impl.add(x));
         (d.text.match(/\bServes\s+([A-Z]\d+(?:(?:,\s*|\s+and\s+)[A-Z]\d+)*)/) || [, ""])[1].match(/[A-Z]\d+/g)?.forEach(x => lineage.serves.add(x));
+        typed.set(norm(`${id} ${d.text}`), docLink("lld", id, "LLD " + id));
         return ctxRow("LLD", docLink("lld", id) + ": " + dtext(id, d.text)); }
       if (!t && docsLoaded() && /^[A-Z]\d+$/.test(id)) return ctxRow((KIND_OF[id[0]] || "section").toUpperCase(), esc(id) + ' <span class="empty">not found in the documents</span>');
       return ctxRow("Section", (d ? docLink(d.kind, id) : esc(id)) + (t ? ": " + dtext(id, t) : ""), !t); });
@@ -472,8 +475,21 @@ function contextHTML(v, a, w){
     return [ctxRow("Other", linkDocItems(esc(r)), true)];
   });
   const lin = lineRow("HLD", lineage.impl).concat(lineRow("PRD", lineage.serves));
-  const given = deps.map(e => ({e, x: ((CTX && CTX.workflows) || []).find(x => (x.atoms || []).some(at => at.id === e.atom))})).filter(({x}) => !x || !shown.has(x.id))
-    .map(({e, x}) => ctxRow("From workflow", x ? `${esc(x.id)} ${esc(x.name)}: ` + (sliceText(e, a) || esc(sentence(whyShown(e.why, e.atom) || "its output"))) : esc(e.atom) + (e.why ? ": " + esc(sentence(whyShown(e.why, e.atom))) : ""), !x));
+  const wfLink = id => `<a href="#" data-wfcard="${esc(id)}">${esc(id)}</a>`;
+  const ents = deps.map(e => ({e, x: ((CTX && CTX.workflows) || []).find(x => (x.atoms || []).some(at => at.id === e.atom))})).filter(({x}) => !x || !shown.has(x.id))
+    .map(({e, x}) => { const si = x && sliceInfo(e), why = esc(sentence(whyShown(e.why, e.atom) || "its output"));
+      return {e, x, si, text: si ? si.text : "", key: x ? (si ? si.label + "|" + norm(si.text) : "plain|" + why) : "", why}; });
+  const groups = []; ents.forEach(en => { const g = en.key && groups.find(q => q.key === en.key); if (g) g.list.push(en); else groups.push({key: en.key, list: [en]}); });
+  let gi = 0;
+  const given = groups.map(g => { const en = g.list[0], {e, x, si} = en;
+    if (!x) return ctxRow("From workflow", esc(e.atom) + (e.why ? ": " + esc(sentence(whyShown(e.why, e.atom))) : ""), true);
+    if (si && si.text && typed.has(norm(si.text))) return ctxRow("From workflow", g.list.map(q => wfLink(q.x.id)).join(", ") + ": same as " + typed.get(norm(si.text)) + " above");   // not the same text twice
+    const body = si ? (si.text ? `${esc(si.label)}: ${clip(`ctx-${a && a.id}-${e.atom}`, si.text)}` : `${esc(si.label)} <span class="empty">not found in the documents</span>`) : en.why;
+    if (g.list.length === 1) return ctxRow("From workflow", `${esc(x.id)} ${esc(x.name)}: ` + body);
+    const made = g.list.filter(q => !q.x.revises), revised = g.list.filter(q => q.x.revises);       // an original and its revision(s): the text once
+    const head = si ? si.headline : (made[0] || g.list[0]).x.name, names = l => l.map(q => wfLink(q.x.id)).join(", ");
+    return ctxRow("From workflow", esc(head) + (made.length ? ", made by " + names(made) : "") + (revised.length ? ", revised by " + names(revised) : "") + ": "
+      + (si ? (si.text ? clip(`ctx-${a && a.id}-m${gi++}`, si.text) : '<span class="empty">not found in the documents</span>') : en.why)); });
   const all = rows.concat(lin, given);
   return all.length ? `<ul class="clist">${all.join("")}</ul>` : '<span class="empty">None written.</span>';
 }
@@ -1023,7 +1039,7 @@ $("pane-workflows").addEventListener("click", e => { const b = e.target.closest(
 document.addEventListener("click", e => { const a = e.target.closest("[data-charter]"), t = e.target.closest("[data-tabjump]"); if (!a && !t) return;
   e.preventDefault(); CHFOCUS = a ? +a.dataset.charter : 0; paint($("pane-charter"), renderCharter(state)); showTab("charter");
   const el = a && document.getElementById("charter-item-" + CHFOCUS); if (el && el.scrollIntoView) el.scrollIntoView({block: "center"}); });
-$("pane-charter").addEventListener("click", e => { const a = e.target.closest("[data-wfcard]"); if (!a) return; e.preventDefault();
+document.addEventListener("click", e => { const a = e.target.closest("[data-wfcard]"); if (!a) return; e.preventDefault();
   const w = (state.workflows || []).find(x => x.id === a.dataset.wfcard); showTab("workflows");
   [`wf-${a.dataset.wfcard}`, ...((w && w.atoms) || []).map(x => `atom-${x.id}`)].forEach(k => { const d = document.querySelector(`details[data-key="${CSS.escape(k)}"]`); if (d) d.open = true; });
   const d = document.querySelector(`details[data-key="atom-${CSS.escape((w && w.atoms && w.atoms[0] || {}).id || "")}"]`); if (d && d.scrollIntoView) d.scrollIntoView({block: "start"}); });

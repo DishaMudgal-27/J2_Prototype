@@ -3626,7 +3626,7 @@ def card_content():
         c13 = c13[c13.index('data-key="atom-W-13.a1"'):].split("Run details")[0]
         x13 = c13.split('data-block="context"')[1].split("data-block=")[0]
         r13 = re.findall(r'<li data-ctx="([\w-]+)">(.*?)</li>', x13)
-        assert len(r13) == 9 and [t for t, _ in r13].count("from-workflow") == 6, r13
+        assert len(r13) == 8 and [t for t, _ in r13].count("from-workflow") == 5, r13          # W-4 and its revision W-8 carry the same text: one row
         assert all(re.sub(r"<[^>]+>", "", b).split(" ", 1)[-1].strip() for _, b in r13), r13
         assert "<li></li>" not in x13 and "<li data-ctx=\"\">" not in x13
         assert re.search(r'6 atoms \(<button[^>]*>show</button>\)<span class="foldbody" hidden>', c13.split("Depends on:")[1]), "W-13 depends on 6: collapsed"
@@ -3988,9 +3988,35 @@ def lineage_rows():
     # an unknown section id in a documents run: no link, "not found in the documents"
     assert '<b class="ctype">LLD</b> S9 <span class="empty">not found in the documents</span></li>' in ctx, ctx
     # From workflow rows show the slice and the summary themselves
-    assert f'<b class="ctype">From workflow</b> {wd1["id"]} {wd1["name"]}: LLD slice S1: S1 #menu: the menu with each item' in ctx, ctx
+    # the slice is the same text as the LLD S1 row above: a short pointer that keeps the link, not the text twice
+    assert f'<b class="ctype">From workflow</b> <a href="#" data-wfcard="{wd1["id"]}">{wd1["id"]}</a>: same as <a href="#" data-doc="lld" data-item="S1">LLD S1</a> above</li>' in ctx, ctx
+    assert ctx.count("the menu with each item") == 1, "the same text is not shown twice"
     assert f'{wd2["id"]} {wd2["name"]}: HLD component summary: C1 Menu display: shows each menu item C2 Form: the pre-order form</li>' in ctx, ctx
-    assert "was in this builder" not in ctx.split(f"{wd1['id']} {wd1['name']}")[1].split("</li>")[0]
+    assert "was in this builder" not in ctx, "the text, not the prompt wording"
+    # an original and its revision with the same text: one row, the text once, both ids visible and linked
+    wd3 = wfs[3]
+    ad3 = wd3["atoms"][0]
+    wd3["revises"] = wd2["id"]
+    snap["atoms_v1"][ad3["id"]]["output"] = [{"verb": "make", "name": "y2", "form": "doc", "ref": "hld.md#Components"}]
+    snap["atoms_v1"][a["id"]]["depends_on"].append({"atom": ad3["id"], "why": "the HLD component summary was in this builder's prompt"})
+    mctx = ctx_of(snap, docs)
+    merged = re.search(r'<li data-ctx="from-workflow"><b class="ctype">From workflow</b> (HLD Components summary, made by .*?)</li>', mctx).group(1)
+    assert merged.startswith(f'HLD Components summary, made by <a href="#" data-wfcard="{wd2["id"]}">{wd2["id"]}</a>, revised by <a href="#" data-wfcard="{wd3["id"]}">{wd3["id"]}</a>: C1 Menu display'), merged
+    assert mctx.count("C2 Form: the pre-order form") == 1 and mctx.count("HLD component summary:") == 0, "the text once"
+    assert len(re.findall(r'<li data-ctx="from-workflow">', mctx)) == 2, "pointer row and merged row"
+    # a long merged text keeps the show-more rule
+    long_docs = json.loads(json.dumps(docs))
+    long_docs["docs"]["hld"]["text"] = "## Components\n" + "- **C1** Menu display: " + "shows each menu item with its price " * 8 + "\n"
+    assert re.search(r"made by .*?: C1 Menu display[^<]*… <button[^>]*data-fold=\"ctx-[^\"]*-m0\"[^>]*>show more</button>", ctx_of(snap, long_docs))
+    # no duplicates: different texts stay separate rows in the usual form, and Depends on lists every atom as before
+    nd = json.loads(json.dumps(snap))
+    nd["atoms_v1"][a["id"]]["depends_on"] = [{"atom": ad1["id"], "why": "LLD slice S2: its pages and sections were in this builder's prompt"},
+                                             {"atom": ad2["id"], "why": "the HLD component summary was in this builder's prompt"}]
+    nctx = ctx_of(nd, docs)
+    assert f'{wd1["id"]} {wd1["name"]}: LLD slice S2: S2 #form: other</li>' in nctx and f'{wd2["id"]} {wd2["name"]}: HLD component summary: C1 Menu display' in nctx
+    assert "same as" not in nctx and "made by" not in nctx
+    dep_card = render_node(snap, docs=docs)["cards"][w["id"]].split(f'data-key="atom-{a["id"]}"')[1].split("Run details")[0]
+    assert f'{ad1["id"]}: LLD slice S1' in dep_card.split("Depends on:")[1] and f'{ad3["id"]}: the HLD component summary was in this builder' in dep_card.split("Depends on:")[1], "Depends on is unchanged"
     # a slice or summary missing from the documents is said so, not guessed
     gone = json.loads(json.dumps(docs))
     gone["docs"]["lld"]["text"] = "## Other\n- **S1** `#menu`: x\n"
