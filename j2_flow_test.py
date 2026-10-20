@@ -3833,6 +3833,117 @@ def fresh_page_run():
           "is not created, Charter and Documents render 'nothing yet' with no error ok")
 
 
+def htmllib_unescape(t):
+    import html
+    return html.unescape(t)
+
+
+def output_tags():
+    """UI: output tags on the workflow list and cards (from atoms.json refs), the filter, group lines, legend colours and the
+    run summary. Expected values are computed here from the stored atoms, not from the page's own code."""
+    import shutil
+    if not shutil.which("node"):
+        print("output tags test skipped: node not found")
+        return
+    run = docs_run(DESIGN_BRIEF, 900)
+    assert run.outcome.startswith("Done"), run.outcome
+    snap = j2.saved_snapshot(os.path.basename(run.dir), 0)
+    stored = json.load(open(os.path.join(run.dir, "atoms.json"), encoding="utf-8"))["atoms"]
+    by_atom = {a["id"]: a for a in stored}
+
+    def expect(wf, views):                                    # tags a workflow should show, in order, from its atoms' output refs
+        tags = []
+        for a in wf["atoms"]:
+            for o in views[a["id"]]["output"]:
+                ref = o["ref"]
+                m = re.match(r"(prd|hld|lld)\.md(#|$)", ref)
+                if m:
+                    t = m.group(1).upper()
+                elif o["verb"] == "make" and re.fullmatch(r"[\w./-]+\.(md|html|docx|css|js|json)", ref):
+                    continue
+                elif o["verb"] == "make" and "#" in ref and re.search(r"\.html?#", ref):
+                    t = "Site " + ref.split("#")[1]
+                else:
+                    t = "Other"
+                if t not in tags:
+                    tags.append(t)
+        return tags
+
+    def runs(ids):
+        nums = sorted(int(i[2:]) for i in ids)
+        out, i = [], 0
+        while i < len(nums):
+            j = i
+            while j + 1 < len(nums) and nums[j + 1] == nums[j] + 1:
+                j += 1
+            out += [f"W-{nums[i]} to W-{nums[j]}"] if j - i >= 2 else [f"W-{n}" for n in nums[i:j + 1]]
+            i = j + 1
+        return ", ".join(out)
+    views = snap["atoms_v1"]
+    w_first, w_multi, w_none = snap["workflows"][0], snap["workflows"][1], snap["workflows"][2]
+    views[w_multi["atoms"][0]["id"]]["output"] = [{"verb": "make", "name": "x", "form": "doc", "ref": "prd.md#Users"},
+                                                  {"verb": "make", "name": "y", "form": "page", "ref": "index.html#menu"},
+                                                  {"verb": "do", "name": "z", "form": "behaviour", "ref": "check-1"},
+                                                  {"verb": "make", "name": "f", "form": "doc", "ref": "site/v3.md"}]
+    views[w_none["atoms"][0]["id"]]["output"] = []
+    out = render_node(snap, docs={"docs": {}})["workflows"]
+    row = lambda o, wid: o.split(f"<tr><td>{wid}</td>")[1].split("</tr>")[0]
+    card = lambda o, wid: o.split(f'data-key="wf-{wid}"')[1].split("<summary>")[0] and o.split(f'data-key="wf-{wid}"')[1].split("</summary>")[1].split("<details")[0]
+    for w in snap["workflows"]:
+        want = expect(w, views)
+        got = re.findall(r'<button type="button" class="otag[^"]*" data-otag="\w+" style="[^"]*" title="[^"]*">([^<]*)</button>', row(out, w["id"]))
+        assert got == want, (w["id"], got, want)
+        assert (not want) == ("no output recorded" in row(out, w["id"])), w["id"]
+        cardtags = re.findall(r'data-otag="\w+"[^>]*>([^<]*)</button>', card(out, w["id"]).split('<div class="ablock"')[0].split('<details class="atom"')[0])
+        assert cardtags == want, (w["id"], cardtags, want)
+    assert expect(w_multi, views) == ["PRD", "Site menu", "Other"], "several outputs, several tags (a saved-in file is not one)"
+    assert "no output recorded" in row(out, w_none["id"]) and "no output recorded" in card(out, w_none["id"])
+    # group lines: one per type, consecutive ids compressed, what has no output listed too
+    lines = re.findall(r"<div>([^<]*)</div>", out.split('data-groups>')[1].split("<h3>")[0].replace("</div></div>", "</div>"))
+    for label, key in (("PRD", "PRD"), ("HLD", "HLD"), ("LLD", "LLD"), ("Site", "Site"), ("Other", "Other")):
+        ids = [w["id"] for w in snap["workflows"] if any(t == key or t.startswith(key + " ") for t in expect(w, views))]
+        assert (f"{label}: {runs(ids)}" in lines) == bool(ids), (label, ids, lines)
+    none_ids = [w["id"] for w in snap["workflows"] if not expect(w, views)]
+    assert w_none["id"] in none_ids and f"No output recorded: {runs(none_ids)}" in lines, (none_ids, lines)
+    # legend: one colour per type, the Documents headers use the same ones; status stays a word
+    legend = out.split("data-legend>")[1].split("</div>")[0]
+    assert re.findall(r'data-otag="(\w+)" style="background:var\(--(\w+)\)"', legend) == [(k, k) for k in ("prd", "hld", "lld", "site", "other")]
+    page = html_page()
+    assert all(re.search(rf"--{k}:var\(--\w+\)", page) for k in ("prd", "hld", "lld", "site", "other"))
+    assert 'style="background:var(--prd)"><b>Product requirements' in render_node(snap, docs={"docs": {"prd": {"asked": True, "text": "- **R1**: x"}}})["docs"]
+    assert "Status is always a word as well as a colour" in legend and '<span class="pill ' in out
+    # filter: only workflows with that type; the same click again (filter cleared) is the full list
+    n_all = out.count('<details data-key="wf-')
+    for k in ("hld", "site"):
+        f = render_node(snap, docs={"docs": {}, "otag": k})["workflows"]
+        keep = [w["id"] for w in snap["workflows"] if any(t.lower().startswith(k) for t in expect(w, views))]
+        assert re.findall(r'<details data-key="wf-([\w-]+)"', f) == keep and 0 < len(keep) < n_all or k == "site", (k, keep)
+        assert f"Showing {len(keep)} of {n_all} workflows" in f and 'otag on" data-otag="' + k + '"' in f
+    assert render_node(snap, docs={"docs": {}, "otag": ""})["workflows"] == out
+    # summary: the numbers match atoms.json
+    summ = out.split("data-summary>")[1].split('<div class="legend"')[0]
+    closed = sum(a["status"] == "closed" for a in stored)
+    failed = sum(a["status"] in ("verify_failed", "abandoned") for a in stored)
+    assert f"{closed} closed · {failed} failed · {len(stored) - closed - failed} open" in summ, summ
+    assert f"{snap['spent']} of {snap['budget']} used" in summ and htmllib_unescape(snap["outcome"][:60]) in htmllib_unescape(summ), summ
+    assert "<b>Built:</b> PRD, HLD, LLD, website" in summ, summ
+    # a stored run, when present: the document groups are the documents' own workflows
+    here = os.path.dirname(os.path.abspath(__file__))
+    name = "j2-20261016-160511"
+    if os.path.isdir(os.path.join(here, "runs", name)):
+        keep_dir, j2.RUNS_DIR = j2.RUNS_DIR, os.path.join(here, "runs")
+        try:
+            real = j2.saved_snapshot(name, 0)
+        finally:
+            j2.RUNS_DIR = keep_dir
+        ro = render_node(real, docs={"docs": {}})["workflows"]
+        assert "PRD: W-1 to W-8" in ro and "HLD: W-9 to W-17" in ro and "LLD: W-18 to W-25" in ro, re.findall(r"<div>((?:PRD|HLD|LLD)[^<]*)</div>", ro)
+        assert "31 closed · 0 failed · 0 open" in ro
+        assert "show more</button>" in ro.split("data-summary>")[1].split("<b>Credits")[0], "a long outcome is cut at a word with show more"
+    print("output tags: tags per workflow (several, none), saved-in files not tagged, filter and clear, group lines with compressed ids, "
+          "legend colours = Documents colours, summary numbers = atoms.json ok")
+
+
 def missing_run_endpoints():
     """Every GET endpoint that reads a run folder gives an empty result in its usual shape (404 for a file) when the folder
     is not there, for a saved run id and for a live run whose folder was never written; never a dropped connection."""
@@ -4686,6 +4797,7 @@ if __name__ == "__main__":
         card_content()
         charter_tab()
         fixes_line()
+        output_tags()
         fresh_page_run()
         missing_run_endpoints()
         atom_checks()

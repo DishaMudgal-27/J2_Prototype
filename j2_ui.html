@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 :root{
-  --charter:var(--priority);--prd:var(--identity);--hld:var(--adaptation);--lld:var(--coordination);
+  --charter:var(--priority);--site:var(--accent);--other:var(--builder);--prd:var(--identity);--hld:var(--adaptation);--lld:var(--coordination);
   --bg:#f1f3f2;--panel:#fff;--panel2:#eaeeec;--ink:#18201e;--muted:#5d6865;--line:#d6ddd9;--on:#fff;
   --user:#18201e;--validator:#8a6d1d;--identity:#6b45b3;--adaptation:#3056b8;--priority:#b0680f;
   --coordination:#1f7a55;--builder:#5d6865;--audit:#b4487e;--system:#8a6d1d;--bad:#b83a32;--ok:#2c7d4f;--accent:#0e6b61;
@@ -34,7 +34,7 @@ button{font:500 13px var(--body);cursor:pointer}
 .code{font:500 11px var(--mono);color:var(--muted);white-space:nowrap}.st.on .code{color:var(--on);opacity:.75}
 .atom{border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:6px 0;background:var(--panel)}
 .atom>summary{cursor:pointer}.atom h4{margin:8px 0 2px;font-size:12.5px}.atom p{margin:0 0 4px}
-.foldbody[hidden]{display:none}.dochead .code{color:var(--on);background:rgba(0,0,0,.3);border-radius:4px;padding:0 6px;font-size:12px}.docmeta{margin-left:8px}.chnote,.brief{margin:0 0 10px}.brief{border:1px solid var(--line);border-radius:8px;padding:8px 12px;white-space:pre-wrap}.chitems{padding-left:26px}.chitems li{margin:6px 0}.chsrc,.chused{color:var(--muted);font-size:13px}.cgroup{margin:4px 0}.clist{margin:2px 0 4px;padding-left:20px}.dl.hit{background:var(--hit,#fff3b0);color:#111;border-radius:4px;padding:2px 4px}.doc{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}.dochead{color:var(--on);padding:8px 12px}.docbody{padding:4px 12px 10px}.docbody h4{margin:10px 0 2px}.docjump{position:sticky;top:-16px;z-index:1;margin:-16px -16px 10px;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--line)}.docjump a{margin-right:10px}.docdiv{display:flex;gap:16px;justify-content:space-between;margin:12px 0;padding:6px 0;border-top:2px dashed var(--line);border-bottom:2px dashed var(--line);color:var(--muted);font-size:13px}.ablock{margin:4px 0}.agroup{margin:10px 0 2px;color:var(--muted)}.long>summary{cursor:pointer;color:var(--muted);display:inline}
+.foldbody[hidden]{display:none}.otag{border:0;border-radius:10px;padding:1px 8px;margin:2px 4px 2px 0;color:var(--on);font:inherit;font-size:12px;cursor:pointer}.otag.on{outline:2px solid var(--ink)}.runsum{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:0 0 10px}.runsum div{margin:2px 0}.ogroups{margin:6px 0 10px}.ogroups div{margin:2px 0}.dochead .code{color:var(--on);background:rgba(0,0,0,.3);border-radius:4px;padding:0 6px;font-size:12px}.docmeta{margin-left:8px}.chnote,.brief{margin:0 0 10px}.brief{border:1px solid var(--line);border-radius:8px;padding:8px 12px;white-space:pre-wrap}.chitems{padding-left:26px}.chitems li{margin:6px 0}.chsrc,.chused{color:var(--muted);font-size:13px}.cgroup{margin:4px 0}.clist{margin:2px 0 4px;padding-left:20px}.dl.hit{background:var(--hit,#fff3b0);color:#111;border-radius:4px;padding:2px 4px}.doc{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}.dochead{color:var(--on);padding:8px 12px}.docbody{padding:4px 12px 10px}.docbody h4{margin:10px 0 2px}.docjump{position:sticky;top:-16px;z-index:1;margin:-16px -16px 10px;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--line)}.docjump a{margin-right:10px}.docdiv{display:flex;gap:16px;justify-content:space-between;margin:12px 0;padding:6px 0;border-top:2px dashed var(--line);border-bottom:2px dashed var(--line);color:var(--muted);font-size:13px}.ablock{margin:4px 0}.agroup{margin:10px 0 2px;color:var(--muted)}.long>summary{cursor:pointer;color:var(--muted);display:inline}
 .apreview{display:block;width:100%;min-height:48px;max-height:260px;border:1px solid var(--line);border-radius:6px;margin:6px 0;padding:6px;background:#fff;color:#111}
 iframe.apreview{height:220px;padding:0}.linkbtn{border:0;background:none;color:var(--accent,#2a6);text-decoration:underline;cursor:pointer;padding:0;font:inherit}
 .st.on{background:var(--accent);color:var(--on)}
@@ -578,15 +578,50 @@ function runDetails(s, a, w){
     <h4>Attempts</h4><p>${a.attempts ? `Check attempt ${a.attempts} of 3` : "Checks not run yet"} · ${calls.length} AI call(s), ${w.retries_used || 0} retry(ies) after an unusable reply.</p></details>`;
 }
 // ===== atom cards: end
+// Output tags: what each workflow made, from the atoms' output refs (atoms.json): PRD, HLD, LLD, Site <section id>, Other.
+const OTYPES = [["prd", "PRD"], ["hld", "HLD"], ["lld", "LLD"], ["site", "Site"], ["other", "Other"]];
+let OTAG = "";                                       // the output type the list is filtered to; "" = all
+function outTags(s, w){
+  const tags = [], add = (type, label) => { if (!tags.some(t => t.label === label)) tags.push({type, label}); };
+  (w.atoms || []).forEach(a => (((s.atoms_v1 || {})[a.id] || {}).output || []).forEach(o => { const ref = String(o.ref || ""), d = ref.match(/^(prd|hld|lld)\.md(?:#|$)/);
+    if (d) add(d[1], d[1].toUpperCase());
+    else if (o.verb === "make" && /^[\w./-]+\.(md|html|docx|css|js|json)$/.test(ref)) return;          // a file it was saved in, not what it made
+    else if (o.verb === "make" && ref.includes("#") && /\.html?#/.test(ref)) add("site", "Site " + ref.split("#")[1]);
+    else add("other", "Other"); }));
+  return tags;
+}
+const otagBtn = t => `<button type="button" class="otag${OTAG === t.type ? " on" : ""}" data-otag="${t.type}" style="background:var(--${t.type})" title="Show only ${esc(t.type === "site" ? "site" : t.label)} workflows">${esc(t.label)}</button>`;
+const tagsHTML = tags => tags.length ? tags.map(otagBtn).join("") : '<span class="empty" data-otag-none>no output recorded</span>';
+function idRuns(ids){        // W-1, W-2, W-3, W-5 -> "W-1 to W-3, W-5"; ids that are not W-n are listed as they are
+  const nums = ids.map(x => (String(x).match(/^W-(\d+)$/) || [])[1]).filter(Boolean).map(Number).sort((a, b) => a - b), out = [];
+  for (let i = 0; i < nums.length;){ let j = i; while (j + 1 < nums.length && nums[j + 1] === nums[j] + 1) j++;
+    if (j - i >= 2) out.push(`W-${nums[i]} to W-${nums[j]}`); else for (let k = i; k <= j; k++) out.push("W-" + nums[k]); i = j + 1; }
+  return out.concat(ids.filter(x => !/^W-\d+$/.test(x))).join(", ");
+}
+function runSummary(s){
+  const at = Object.values(s.atoms_v1 || {}), n = st => at.filter(a => st(a.status)).length;
+  const built = [...(s.docset_files || []).map(d => d.kind.toUpperCase()), ...(s.doc && !(s.docset_files || []).length && (s.files || []).length ? ["PRD"] : []), ...(s.versions ? ["website"] : [])];
+  return `<div class="runsum" data-summary><div><b>Outcome:</b> ${clip("sum-outcome", s.outcome || s.status || "not started", 160)}</div>`
+    + `<div><b>Credits:</b> ${s.spent} of ${s.budget} used</div>`
+    + `<div><b>Work atoms:</b> ${n(x => x === "closed")} closed · ${n(x => x === "verify_failed" || x === "abandoned")} failed · ${n(x => x !== "closed" && x !== "verify_failed" && x !== "abandoned")} open</div>`
+    + `<div><b>Built:</b> ${built.length ? built.join(", ") : "nothing yet"}</div></div>`;
+}
 function renderWorkflows(s){
   const pct = Math.min(100, s.spent / s.budget * 100);
-  const rows = s.workflows.map(w => `<tr><td>${w.id}</td><td style="color:${col(w.id)}"><b>${esc(w.agent || who(w.id)[0])}</b><br><span class="empty">section ${esc(w.section || "")}${w.revises ? " (rewrites " + esc(w.revises) + "'s)" : ""}</span></td><td>${esc(dv(w.name))}<br><span class="empty">${esc(dv(w.purpose))}</span></td>
+  const tags = Object.fromEntries(s.workflows.map(w => [w.id, outTags(s, w)])), shown = s.workflows.filter(w => !OTAG || tags[w.id].some(t => t.type === OTAG));
+  const rows = shown.map(w => `<tr><td>${w.id}</td><td style="color:${col(w.id)}"><b>${esc(w.agent || who(w.id)[0])}</b><br><span class="empty">section ${esc(w.section || "")}${w.revises ? " (rewrites " + esc(w.revises) + "'s)" : ""}</span><br>${tagsHTML(tags[w.id])}</td>
     <td>${w.cost}${w.charged === false ? '<br><span class="empty">released</span>' : ""}</td>
     <td>${envCell(w)}</td><td>${w.cycle}</td><td><span class="pill ${w.status}">${w.status}</span></td></tr>
-    <tr><td colspan="7"><details data-key="wf-${esc(w.id)}"><summary>Open ${esc(w.id)}: ${(w.atoms || []).length} work atom(s)</summary>${atomCards(s, w)}</details></td></tr>`).join("");
-  return `<h3>Budget: ${s.spent} of ${s.budget} work credits used</h3><div class="bar"><i style="width:${pct}%"></i></div>
+    <tr><td colspan="7"><details data-key="wf-${esc(w.id)}"><summary>Open ${esc(w.id)}: ${(w.atoms || []).length} work atom(s)</summary><div class="wtags">Made: ${tagsHTML(tags[w.id])}</div>${atomCards(s, w)}</details></td></tr>`).join("");
+  const groups = OTYPES.map(([k, label]) => [label, s.workflows.filter(w => tags[w.id].some(t => t.type === k)).map(w => w.id)]).filter(g => g[1].length)
+    .concat([["No output recorded", s.workflows.filter(w => !tags[w.id].length).map(w => w.id)]].filter(g => g[1].length));
+  const legend = OTYPES.map(([k, label]) => otagBtn({type: k, label})).join("");
+  return (s.workflows.length ? runSummary(s) + `<div class="legend" data-legend><b>Output types</b> ${legend} <span class="empty">Click one to filter; click again to clear. Status is always a word as well as a colour.</span></div>`
+      + `<div class="ogroups" data-groups>${groups.map(([l, ids]) => `<div>${esc(l)}: ${esc(idRuns(ids))}</div>`).join("")}</div>`
+      + (OTAG ? `<p data-filter>Showing ${shown.length} of ${s.workflows.length} workflows with ${esc(OTYPES.find(t => t[0] === OTAG)[1])} output.</p>` : "") : "")
+    + `<h3>Budget: ${s.spent} of ${s.budget} work credits used</h3><div class="bar"><i style="width:${pct}%"></i></div>
     ${rows ? `<table><tr><th>ID</th><th>Agent</th><th>Workflow</th><th>Charged</th><th>Limits</th><th>Cycle</th><th>Status</th></tr>${rows}</table>`
-      : `<p class="empty">Nothing registered yet. Adaptation proposes, Priority answers, the validator registers what's agreed.</p>`}`;
+      : `<p class="empty">${s.workflows.length ? "No workflow has that output." : "Nothing registered yet. Adaptation proposes, Priority answers, the validator registers what's agreed."}</p>`}`;
 }
 function renderConflicts(s){
   if (!s.conflicts.length) return `<p class="empty">No conflicts yet. Any two agents that disagree get 4 attempts to settle it; then Identity resolves it from the charter, or asks you. Every disagreement is logged here and in conflicts.json.</p>`;
@@ -959,6 +994,8 @@ async function loadDocs(){
 $("pane-docs").addEventListener("click", e => { const a = e.target.closest("[data-docjump]"); if (!a) return; e.preventDefault();
   const t = a.dataset.docjump === "top" ? $("pane-docs") : document.getElementById("docblock-" + a.dataset.docjump);
   if (t && t.scrollIntoView) t.scrollIntoView({block: "start"}); });
+$("pane-workflows").addEventListener("click", e => { const b = e.target.closest("[data-otag]"); if (!b) return;
+  OTAG = OTAG === b.dataset.otag ? "" : b.dataset.otag; if (state) paint($("pane-workflows"), renderWorkflows(state)); });
 $("pane-workflows").addEventListener("click", e => { const b = e.target.closest("[data-fold]"); if (!b) return;
   const k = b.dataset.fold; FOLD.has(k) ? FOLD.delete(k) : FOLD.add(k); if (state) paint($("pane-workflows"), renderWorkflows(state)); });
 document.addEventListener("click", e => { const a = e.target.closest("[data-charter]"), t = e.target.closest("[data-tabjump]"); if (!a && !t) return;
