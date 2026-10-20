@@ -532,11 +532,12 @@ function atomBlocks(a, w, v){
   const edges = (t, l) => !l || !l.length ? "none recorded" : l.length > 4 ? foldList(`blk-${a.id}-${t}`, l.length, rowsOf(l)) : "<br>" + rowsOf(l);
   const isFile = o => !String(o.ref).includes("#") && /^[\w./-]+\.(md|html|docx|css|js|json)$/.test(o.ref);   // hld.md, site/v9.md: where it is kept, not what it made
   const outs = v ? (v.output || []) : [], made = outs.filter(o => !isFile(o)).sort((x, y) => String(y.ref).includes("#") - String(x.ref).includes("#"));
+  const fx = fixesLine(a, w), fxHTML = fx ? `<br><span data-note="fixes">${fx}</span>` : "";
   const wout = v ? (made.map(o => `${esc(o.name)} <span class="empty">${esc(o.verb)} · ${esc(NOUN[o.verb] || "")} · ${esc(o.form)} · ${esc(o.ref)}</span>`).join("<br>") || '<span class="empty">Nothing made yet.</span>')
+    + fxHTML      // a revise atom's Fixes line sits right under what it made, above Saved in, Depends on and Used by
     + (outs.some(isFile) ? `<br><span data-note="saved">Saved in: ${outs.filter(isFile).map(o => esc(o.ref)).join(", ")}</span>` : "")
     + `<br>Depends on: ${edges("dep", v.depends_on)}<br>Used by: ${edges("used", v.used_by)} <button type="button" class="linkbtn" data-link="agent" data-atom="${esc(a.id)}">Workflow output</button>`
-    : '<span class="empty">Built by code when the checks pass.</span>';
-  const fx = fixesLine(a, w);
+    : '<span class="empty">Built by code when the checks pass.</span>' + fxHTML;
   const mix = mixed(v) ? ' <span class="empty" data-note="mixed">mixed: makes and does</span>' : "";
   return g("1. Particles")
     + blockHTML(a, "goal", "Goal", "What must be true when this is done", atomRow(a, "goal", w), false)
@@ -551,7 +552,7 @@ function atomBlocks(a, w, v){
     + g("3. Outputs")
     + blockHTML(a, "human_output", "Notes", "What it did, in plain words",
         a.human_output ? linkDocItems(esc(sentence(a.human_output.text))) + ` <span class="empty">Attempt ${a.human_output.attempt}.</span>` : '<span class="empty">Not written yet.</span>', false)
-    + blockHTML(a, "agent_output", "Workflow output", "What it made or did, what it used and who uses it" + mix, wout + (fx ? `<br><span data-note="fixes">${fx}</span>` : ""), false)
+    + blockHTML(a, "agent_output", "Workflow output", "What it made or did, what it used and who uses it" + mix, wout, false)
     + blockHTML(a, "result", "Result", "What it looks like", atomPreview(a, v) + (site ? ` ${site}` : ""), false);
 }
 function atomCards(s, w){

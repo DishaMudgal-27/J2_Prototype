@@ -3735,7 +3735,7 @@ def fixes_line():
     def line(sn, a, w, stage=None):
         c = render_node(sn, docs={"docs": {}, "stage_audits": stage or []})["cards"][w["id"]]
         blk = c[c.index(f'data-key="atom-{a["id"]}"'):].split("Run details")[0].split('data-block="agent_output"')[1].split("data-block=")[0]
-        m = re.search(r'<span data-note="fixes">(.*?)</span>(?=</div>|<span|$)', blk.replace('<span class="empty">not recorded</span>', "NOTREC"), re.S)
+        m = re.search(r'<span data-note="fixes">(.*?)</span>(?=<br>|</div>|$)', blk.replace('<span class="empty">not recorded</span>', "NOTREC"), re.S)
         return m.group(1).replace("NOTREC", "not recorded") if m else None
     # both recorded
     assert line(snap, a2, w2) == "Fixes: F-1, H5. Before: F-1 needs revision, H5 not met. After: F-1 passed, H5 met.", line(snap, a2, w2)
@@ -3763,6 +3763,10 @@ def fixes_line():
     assert line(snap, a3, w3).startswith("Fixes: F-1. Before:")
     w3["fixes"] = []
     assert line(snap, a3, w3) == "Fixes: not recorded."
+    # the line sits right under what the atom made, above Saved in, Depends on and Used by
+    blk = render_node(snap, docs={"docs": {}})["cards"][w2["id"]].split('data-key="atom-' + a2["id"] + '"')[1].split("Run details")[0].split('data-block="agent_output"')[1]
+    assert blk.index("make · ") < blk.index('data-note="fixes"') < blk.index("Depends on:") < blk.index("Used by:"), "Fixes under the section line"
+    assert 'data-note="saved"' not in blk or blk.index('data-note="fixes"') < blk.index('data-note="saved"')
     # a non-revise atom has no Fixes line
     assert line(snap, a1, w1) is None
     # the endpoint reads the stage files, nothing else
