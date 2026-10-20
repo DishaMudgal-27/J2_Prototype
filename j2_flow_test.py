@@ -3347,8 +3347,10 @@ def atom_cards_render():
             assert (f'data-link="{link}"' in card) == (link != "site" or bool(a["agent_output"]["anchor"])), (link, a["id"])
         for key in ("constraints", "context"):                      # collapsed by default behind a "show" toggle
             blk = card.split(f'data-block="{key}"')[1].split('data-block=')[0]
-            assert '<details class="long"' in blk and "<summary>show</summary>" in blk and " open" not in blk.split(">")[0], key
-        assert '<details class="long" data-key="blk-' + a["id"] + '-evidence"><summary>show</summary>' in card
+            assert '<div class="fold" data-foldlist="blk-' + a["id"] + "-" + key + '">' in blk and ">show</button>" in blk \
+                and '<div class="foldbody" hidden>' in blk and "<details" not in blk, key
+        assert 'data-foldlist="blk-' + a["id"] + '-evidence"><button type="button" class="linkbtn" data-fold="blk-' + a["id"] \
+            + '-evidence" aria-expanded="false">show</button><div class="foldbody" hidden>' in card
         for key in ("goal", "expected_output", "human_output"):     # always visible
             blk = card.split(f'data-block="{key}"')[1].split('data-block=')[0]
             assert "<details" not in blk, key
@@ -3484,7 +3486,7 @@ def docs_tab():
     # no group fits: a plain list only
     a["constraints"] = ["Placeholder for any photo"]
     plain_card = render_node(snap, docs=docs)["cards"][w["id"]].split('data-block="constraints"')[1].split("data-block=")[0]
-    assert "<b>" not in plain_card.split("<summary>")[1] and "<li>Placeholder for any photo</li>" in plain_card
+    assert "<b>" not in plain_card.split("</button>")[1] and "<li>Placeholder for any photo</li>" in plain_card
     # the tab: a jump bar, one coloured block per document (name, item count, builders), dividers, the note, the highlight
     d = out["docs"]
     assert re.findall(r'data-doc-kind="(\w+)"', d) == ["prd", "hld", "lld"]
@@ -3505,6 +3507,10 @@ def docs_tab():
           "items linked, Documents tab render, /api/docs live and saved, 404 for bad runs, not-asked note ok")
 
 
+def html_page():
+    return open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "j2_ui.html"), encoding="utf-8").read()
+
+
 def card_content():
     """UI: card headings unchanged; a revise atom names what it revises; Context rows by type (workflow ids, condition and
     finding lookups, no source on record, never a blank row); long dependency lists collapsed; outputs vs "Saved in"."""
@@ -3522,6 +3528,7 @@ def card_content():
     a2["how"] = {"kind": "AI", "agent": f"{w1['id']} Builder", "steps": "Rewrite"}
     a2["context"] = [f"section {w1['id']}", f"section {w3['id']}", "condition H5", "finding D-5", "finding F-1", "finding X-9",
                      "condition Z9", "", "   ", None, "PRD R9", "PRD R8"]
+    a2["constraints"] = ["Create only #menu", "Do not change other sections"]
     snap["audits"] = [{"results": [{"id": "F-1", "criterion": "The page opens", "note": "it parsed"}]}]
     deps = snap["atoms_v1"][a2["id"]]
     SITE = "its section, anchor and selectors were listed in this builder's prompt"
@@ -3538,7 +3545,8 @@ def card_content():
     refs = {"conditions": hld, "rubric": {i: t for o in j2.OUTPUTS.values() for i, t in o.get("rubric") or ()}}
     out = render_node(snap, docs={"docs": {"prd": {"asked": True, "text": "- **R1**: One\n- **R9**: " + long_r9}}, "refs": refs})
     opened = render_node(snap, docs={"docs": {"prd": {"asked": True, "text": "- **R1**: One\n- **R9**: " + long_r9}}, "refs": refs,
-                                     "open": [f"blk-{a2['id']}-dep", f"blk-{a2['id']}-used", f"ctx-{a2['id']}-R9"]})
+                                     "open": [f"blk-{a2['id']}-dep", f"blk-{a2['id']}-used", f"ctx-{a2['id']}-R9",
+                                              f"blk-{a2['id']}-context", f"blk-{a2['id']}-constraints", f"blk-{a2['id']}-evidence"]})
 
     def card_of(o, i, wf):
         c = o["cards"][wf["id"]]
@@ -3567,6 +3575,17 @@ def card_content():
     assert '<b class="ctype">Finding</b> X-9 <span class="empty">no source on record</span>' in ctx
     assert '<b class="ctype">Condition</b> Z9 <span class="empty">no source on record</span>' in ctx
     assert '<b class="ctype">PRD</b> R8 <span class="empty">no source on record</span>' in ctx
+    # the Context, Constraints and Verification toggles: hidden "show" by default, shown "hide" once open, text present either way
+    oc = card_of(opened, a2["id"], w2)
+    for key, text in (("context", "Condition</b> H5"), ("constraints", "Only build"), ("evidence", "")):
+        for card_html, label, hid in ((c2, "show", " hidden"), (oc, "hide", "")):
+            blk = card_html.split(f'data-foldlist="blk-{a2["id"]}-{key}"')[1]
+            assert blk.startswith(f'><button type="button" class="linkbtn" data-fold="blk-{a2["id"]}-{key}" aria-expanded="{str(hid == "").lower()}">{label}</button>'
+                                  f'<div class="foldbody"{hid}>'), (key, label, blk[:200])
+            assert text in blk.split("data-block=")[0] and "<details" not in blk.split("data-block=")[0], (key, label)
+    assert "Agent output" not in c2 and "Workflow output</button>" in c2 and 'data-link="agent"' in c2
+    # the type label sits right before its text: one space, no padding
+    assert '<b class="ctype">Condition</b> H5: ' in ctx and not re.search(r"\.ctype\{[^}]*(?:min-width|width|padding|margin)", html_page())
     # a long line is cut at a word boundary, with "show more"; open, the full text and "show less"
     m = re.search(r'<b class="ctype">PRD</b> <a [^>]*>R9</a>: ([^<]*)… <button[^>]*data-fold="ctx-[^"]*"[^>]*>show more</button>', ctx)
     assert m and long_r9.startswith(m.group(1)) and long_r9[len(m.group(1))] == " ", ("cut inside a word", m and m.group(1))
@@ -3584,7 +3603,7 @@ def card_content():
     odep = card_of(opened, a2["id"], w2).split("Depends on:")[1].split("Used by:")[0]
     assert re.search(r'6 atoms \(<button[^>]*aria-expanded="true">hide</button>\)<span class="foldbody">', odep) and "why 3" in odep, odep
     used = c2.split("Used by:")[1]
-    assert "atoms (" not in used.split("Agent output")[0] and "why 1" in used
+    assert "atoms (" not in used.split("Workflow output")[0] and "why 1" in used
     # reason text: a document section builder's edge names the document and section; the website wording stays
     assert f"{wfs[4]['atoms'][0]['id']}: the PRD Success metrics section was in this builder's prompt." in odep, odep
     assert f"{wfs[5]['atoms'][0]['id']}: {SITE}." in odep, odep
