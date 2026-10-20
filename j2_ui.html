@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 :root{
+  --prd:var(--identity);--hld:var(--adaptation);--lld:var(--coordination);
   --bg:#f1f3f2;--panel:#fff;--panel2:#eaeeec;--ink:#18201e;--muted:#5d6865;--line:#d6ddd9;--on:#fff;
   --user:#18201e;--validator:#8a6d1d;--identity:#6b45b3;--adaptation:#3056b8;--priority:#b0680f;
   --coordination:#1f7a55;--builder:#5d6865;--audit:#b4487e;--system:#8a6d1d;--bad:#b83a32;--ok:#2c7d4f;--accent:#0e6b61;
@@ -33,7 +34,7 @@ button{font:500 13px var(--body);cursor:pointer}
 .code{font:500 11px var(--mono);color:var(--muted);white-space:nowrap}.st.on .code{color:var(--on);opacity:.75}
 .atom{border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:6px 0;background:var(--panel)}
 .atom>summary{cursor:pointer}.atom h4{margin:8px 0 2px;font-size:12.5px}.atom p{margin:0 0 4px}
-.cgroup{margin:4px 0}.clist{margin:2px 0 4px;padding-left:20px}.dl.hit{background:var(--hit,#fff3b0);color:#111;border-radius:4px;padding:2px 4px}.doc h3{margin:14px 0 4px}.ablock{margin:4px 0}.agroup{margin:10px 0 2px;color:var(--muted)}.long>summary{cursor:pointer;color:var(--muted);display:inline}
+.cgroup{margin:4px 0}.clist{margin:2px 0 4px;padding-left:20px}.dl.hit{background:var(--hit,#fff3b0);color:#111;border-radius:4px;padding:2px 4px}.doc{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}.dochead{color:var(--on);padding:8px 12px}.docbody{padding:4px 12px 10px}.docbody h4{margin:10px 0 2px}.docjump{position:sticky;top:-16px;z-index:1;margin:-16px -16px 10px;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--line)}.docjump a{margin-right:10px}.docdiv{display:flex;gap:16px;justify-content:space-between;margin:12px 0;padding:6px 0;border-top:2px dashed var(--line);border-bottom:2px dashed var(--line);color:var(--muted);font-size:13px}.ctype{display:inline-block;min-width:92px}.ablock{margin:4px 0}.agroup{margin:10px 0 2px;color:var(--muted)}.long>summary{cursor:pointer;color:var(--muted);display:inline}
 .apreview{display:block;width:100%;min-height:48px;max-height:260px;border:1px solid var(--line);border-radius:6px;margin:6px 0;padding:6px;background:#fff;color:#111}
 iframe.apreview{height:220px;padding:0}.linkbtn{border:0;background:none;color:var(--accent,#2a6);text-decoration:underline;cursor:pointer;padding:0;font:inherit}
 .st.on{background:var(--accent);color:var(--on)}
@@ -342,7 +343,7 @@ function atomRow(a, k, w){
   const v = a[k];
   if (k === "goal") return linkDocItems(esc(sentence(words(v))));
   if (k === "constraints") return constraintsHTML(v);
-  if (k === "context") return contextHTML(v);
+  if (k === "context") return contextHTML(v, a);
   if (k === "how") return esc(sentence((v && v.kind === "code" ? "Code builds it" : "AI builds it")
     + (v && v.agent ? ": " + (v.kind !== "code" && /^builder$/i.test(v.agent) && w.agent ? w.agent : v.agent) : "")));
   // one line per item, marked once code has run the atom's checks
@@ -367,20 +368,31 @@ const docLink = (kind, id, label) => `<a href="#" data-doc="${kind}" data-item="
 const linkDocItems = html => html.replace(/\b(PRD|HLD|LLD)(\s+)([A-Z]\d+(?:(?:,\s*|\s+and\s+|\s+to\s+)[A-Z]\d+)*)/g,
   (m, k, sp, ids) => k + sp + ids.replace(/[A-Z]\d+/g, id => docLink(k.toLowerCase(), id)));
 const charterNums = t => [...t.matchAll(/(\d+)(?:\s*(?:to|-)\s*(\d+))?/g)].flatMap(m => Array.from({length: Math.min((+(m[2] || m[1])) - +m[1] + 1, 50)}, (_, i) => +m[1] + i));
-function contextHTML(v){
+const KIND_OF = {R: "prd", G: "prd", C: "hld", S: "lld"};      // a bare id's document, when no document holds it yet
+const ctxRow = (type, body, nosrc) => `<li data-ctx="${type.toLowerCase().replace(/\W+/g, "-")}"><b class="ctype">${esc(type)}</b> ${body}${nosrc ? ' <span class="empty">no source on record</span>' : ""}</li>`;
+const idRange = t => (t.match(/^([A-Z]{1,2})(\d+)\s+to\s+\1(\d+)$/) ? Array.from({length: Math.min(+t.match(/(\d+)$/)[1] - +t.match(/^[A-Z]+(\d+)/)[1] + 1, 50)}, (_, i) => t[0] + (+t.match(/^[A-Z]+(\d+)/)[1] + i)) : [t]);
+function contextHTML(v, a){
   const g = (CTX && CTX.goal) || {}, items = g.charter_items || g.done_when || [];
-  const one = (label, text, link) => `<li>${link || esc(label)}${text ? ": " + esc(text) : ""}</li>`;
-  const lines = (Array.isArray(v) ? v : [v]).filter(Boolean).map(r => typeof r === "string" ? r.trim() : words(r)).flatMap(r => {
+  const docRow = (label, id, kind) => { const d = docLine(id); return d ? ctxRow(label || d.kind.toUpperCase(), docLink(d.kind, id) + ": " + esc(d.text))
+    : ctxRow(label || (KIND_OF[id[0]] || "other").toUpperCase(), esc(id), true); };
+  const rows = (Array.isArray(v) ? v : [v]).filter(Boolean).map(r => typeof r === "string" ? r.trim() : words(r)).flatMap(r => {
     let m = r.match(/^(?:charter\s+)?(?:done[- ]when\s+)?items?\s+([\d\s,andto-]+)$/i);
-    if (m) return charterNums(m[1]).map(n => one("Charter item " + n, items[n - 1]));
-    if (m = r.match(/^sections?\s+(?:ids?\s+)?(.+)$/i)) return m[1].split(/\s*(?:,|\band\b)\s*/).map(id => {
-      const d = docLine(id), sec = ((CTX && CTX.sections) || []).find(x => x.id === id);
-      return one("Section " + id, (sec && sec.workflow) || (d && d.text), d ? docLink(d.kind, id, "Section " + id) : "");
-    });
-    if (m = r.match(/^([A-Z]{1,2}\d+)$/)) { const d = docLine(m[1]); return [one(r, d && d.text, d ? docLink(d.kind, r) : "")]; }
-    return ["<li>" + linkDocItems(esc(r)) + "</li>"];
+    if (m) return charterNums(m[1]).map(n => ctxRow("Charter", `item ${n}` + (items[n - 1] ? ": " + esc(items[n - 1]) : ""), !items[n - 1]));
+    if (m = r.match(/^charter[.\s]+([a-z_]+)$/i)) { const f = g[m[1]]; const t = Array.isArray(f) ? f.join("; ") : typeof f === "string" ? f : "";
+      return [ctxRow("Charter", esc(m[1]) + (t ? ": " + esc(t) : ""), !t)]; }
+    if (m = r.match(/^sections?\s+(?:ids?\s+)?(.+)$/i)) return m[1].split(/\s*(?:,|\band\b)\s*/).flatMap(id => {
+      const d = docLine(id), sec = ((CTX && CTX.sections) || []).find(x => x.id === id), t = (sec && sec.workflow) || (d && d.text);
+      return [ctxRow("Section", (d ? docLink(d.kind, id) : esc(id)) + (t ? ": " + esc(t) : ""), !t)]; });
+    if (m = r.match(/^(PRD|HLD|LLD)\s+(.+)$/)) return m[2].split(/\s*(?:,|\band\b)\s*/).flatMap(idRange).map(id => /^[A-Z]{1,2}-?\d+$/.test(id) ? docRow(m[1], id)
+      : ctxRow(m[1], esc(id), !((DOCS[m[1].toLowerCase()] || {}).text)));
+    if (/^[A-Z]{1,2}\d+(?:\s+to\s+[A-Z]{1,2}\d+)?$/.test(r)) return idRange(r).map(id => docRow("", id));
+    return [ctxRow("Other", linkDocItems(esc(r)), true)];
   });
-  return lines.length ? `<ul class="clist">${lines.join("")}</ul>` : '<span class="empty">None written.</span>';
+  const wfOf = id => ((CTX && CTX.workflows) || []).find(w => (w.atoms || []).some(x => x.id === id));
+  const given = ((((CTX && CTX.atoms_v1) || {})[a && a.id] || {}).depends_on || []).map(e => { const w = wfOf(e.atom);
+    return ctxRow("From workflow", w ? `${esc(w.id)} ${esc(w.name)}: ${esc(sentence(e.why || "its output"))}` : esc(e.atom) + ": " + esc(sentence(e.why || "")), !w); });
+  const all = rows.concat(given);
+  return all.length ? `<ul class="clist">${all.join("")}</ul>` : '<span class="empty">None written.</span>';
 }
 // Same stored lines, grouped under short labels by what they say; a line that fits no group stays in a plain list.
 const CGROUPS = [["Only build", /^(?:create|change|touch)\s+only\b|^only\b/i],
@@ -402,9 +414,16 @@ function docBody(kind, text){
     const id = (l.match(ITEM_AT) || [])[1], first = id && !seen[id]; if (first) seen[id] = 1;
     return `<p class="dl${first && FOCUS.kind === kind && FOCUS.item === id ? " hit" : ""}"${first ? ` id="doc-${kind}-${esc(id)}"` : ""}>${md(l.replace(/^\s*[-*]\s+/, "• ").replace(/`/g, ""))}</p>`; }).join("");
 }
-const renderDocs = () => DOC_KINDS.map(([k, tag, name]) => { const d = DOCS[k];
-  return `<section class="doc" data-doc-kind="${k}"><h3>${name} <span class="code">${tag}</span></h3>` + (!d ? '<p class="empty">Loading…</p>'
-    : d.text ? docBody(k, d.text) : d.asked ? '<p class="empty">Not written yet.</p>' : '<p class="empty">Not asked for in this run.</p>') + "</section>"; }).join("");
+const docItems = text => new Set(text.split("\n").map(l => (l.match(ITEM_AT) || [])[1]).filter(Boolean)).size;
+const docBuilt = d => (d.workflows || []).map(id => { const w = ((CTX && CTX.workflows) || []).find(x => x.id === id); return w ? `${id} ${w.name}` : id; }).join(", ");
+const docBlock = ([k, tag, name]) => { const d = DOCS[k];
+  const head = `<header class="dochead" style="background:var(--${k})"><b>${name}</b> <span class="code">${tag}</span>` + (d && d.text
+    ? ` · ${docItems(d.text)} items${(d.workflows || []).length ? ` · built by ${esc(docBuilt(d))}` : ""}` : "") + "</header>";
+  return `<section class="doc" id="docblock-${k}" data-doc-kind="${k}">${head}<div class="docbody">` + (!d ? '<p class="empty">Loading…</p>'
+    : d.text ? docBody(k, d.text) : d.asked ? '<p class="empty">Not written yet.</p>' : '<p class="empty">Not asked for in this run.</p>') + "</div></section>"; };
+const renderDocs = () => `<nav class="docjump" id="doc-top">Jump to ` + DOC_KINDS.map(([k, tag]) => `<a href="#" data-docjump="${k}"${(DOCS[k] || {}).text ? "" : ' class="empty"'}>${tag}</a>`).join(" ") + "</nav>"
+  + DOC_KINDS.map((x, i) => docBlock(x) + (i < DOC_KINDS.length - 1 ? `<div class="docdiv" data-div="${x[0]}"><span>End of ${x[1]}</span><span>Start of ${DOC_KINDS[i + 1][1]}</span><a href="#" data-docjump="top">Back to top</a></div>`
+    : `<div class="docdiv" data-div="${x[0]}"><span>End of ${x[1]}</span><a href="#" data-docjump="top">Back to top</a></div>`)).join("");
 const PREVIEWS = {};          // atom id -> srcdoc of its section (from /api/preview), "" when it has none
 const blockHTML = (a, key, label, gloss, body, long) => `<div class="ablock" data-block="${key}"><b>${label}</b> <span class="empty">${gloss}</span>
   ${long ? `<details class="long" data-key="blk-${esc(a.id)}-${key}"><summary>show</summary>${body}</details>` : `<div>${body}</div>`}</div>`;
@@ -436,7 +455,7 @@ function atomBlocks(a, w, v){
     + blockHTML(a, "goal", "Goal", "What must be true when this is done", atomRow(a, "goal", w), false)
     + blockHTML(a, "how", "How", "Who builds it", atomRow(a, "how", w), false)
     + blockHTML(a, "constraints", "Constraints", "What must never break", atomRow(a, "constraints", w), true)
-    + blockHTML(a, "context", "Context", "What it needs to know", atomRow(a, "context", w), true)
+    + blockHTML(a, "context", "What this workflow was given", "Each row says where it comes from", atomRow(a, "context", w), true)
     + g("2. Defined output and verification")
     + blockHTML(a, "expected_output", "Defined output", "What must exist when it is done", atomRow(a, "expected_output", w), false)
     + blockHTML(a, "verification", "Verification", "The check that proves the goal is met",
@@ -783,6 +802,7 @@ function quick(s){
 async function poll(){
   try{
     const s = await (await fetch(`/api/state?since=${seen}${runQ()}`, {cache:"no-store"})).json();
+    CTX = s;
     s.chat.forEach(addMsg);
     allChat = allChat.concat(s.chat); s.allChat = allChat;
     if (s.chat.length){ seen = s.total; $("msgs").scrollTop = $("msgs").scrollHeight; }
@@ -844,6 +864,9 @@ async function loadDocs(){
   if (state) paint($("pane-workflows"), renderWorkflows(state));
   paint($("pane-docs"), renderDocs());
 }
+$("pane-docs").addEventListener("click", e => { const a = e.target.closest("[data-docjump]"); if (!a) return; e.preventDefault();
+  const t = a.dataset.docjump === "top" ? $("pane-docs") : document.getElementById("docblock-" + a.dataset.docjump);
+  if (t && t.scrollIntoView) t.scrollIntoView({block: "start"}); });
 $("pane-workflows").addEventListener("click", e => { const a = e.target.closest("[data-doc]"); if (!a) return;
   e.preventDefault(); FOCUS = {kind: a.dataset.doc, item: a.dataset.item};
   paint($("pane-docs"), renderDocs()); showTab("docs");

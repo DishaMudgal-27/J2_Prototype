@@ -91,7 +91,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             d = j2.saved_dir(run) if run else RUN.dir
             if not d:
                 return self._send(404, '{"error": "no such run"}')
-            asked = j2._read(d, "documents.json", {}) if run else RUN.docset
+            made = j2._read(d, "documents.json", {}) if run else RUN.docs        # the documents run's record, with the workflows that built each
             out = {}
             for k in ("prd", "hld", "lld"):
                 try:
@@ -99,7 +99,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
                         text = f.read()
                 except OSError:
                     text = None
-                out[k] = {"asked": text is not None or k in asked, "text": text}
+                out[k] = {"asked": text is not None or k in made or (not run and k in RUN.docset), "text": text,
+                          "workflows": (made.get(k) or {}).get("workflows", [])}
             return self._send(200, json.dumps(out, ensure_ascii=False))
         if u.path.startswith("/shot/"):        # the screenshot Audit looked at for site vN
             d, n = (j2.saved_dir(run) if run else RUN.dir), u.path.rsplit("/", 1)[-1]

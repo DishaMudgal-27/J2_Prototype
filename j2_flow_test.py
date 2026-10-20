@@ -3431,6 +3431,7 @@ def docs_tab():
             assert list(got) == ["prd", "hld", "lld"], got
             for k in got:
                 assert got[k]["asked"] and got[k]["text"] == open(os.path.join(run.dir, f"{k}.md"), encoding="utf-8").read(), k
+                assert got[k]["workflows"] == run.docs[k]["workflows"] and got[k]["workflows"], k
         for bad in ("?run=../..", "?run=nope"):                      # no path tricks: a run name only
             try:
                 urllib.request.urlopen(f"{base}/api/docs{bad}")
@@ -3439,7 +3440,7 @@ def docs_tab():
                 assert e.code == 404, (bad, e.code)
         j2_server.RUN = plain                                        # no document asked for: noted, no text
         got = json.load(urllib.request.urlopen(f"{base}/api/docs"))
-        assert all(v == {"asked": False, "text": None} for v in got.values()), got
+        assert all(v == {"asked": False, "text": None, "workflows": []} for v in got.values()), got
     finally:
         j2_server.RUN = keep
         srv.shutdown()
@@ -3449,10 +3450,13 @@ def docs_tab():
     a = w["atoms"][0]
     a["constraints"] = ["Create only #menu and .j2-card", "Other sections stay unchanged", "No invented items or prices",
                         "Ids R1, R2 ... unique and sequential", "Placeholder for any photo"]
-    a["context"] = ["charter items 1 and 2", "section S1", "PRD R2, R7", "finding F-3"]
+    a["context"] = ["charter items 1 and 2", "section S1", "PRD R2, R7", "HLD C1", "LLD S1", "finding F-3", "charter item 9"]
+    w2 = snap["workflows"][1]
+    snap["atoms_v1"][a["id"]]["depends_on"] = [{"atom": w2["atoms"][0]["id"], "why": "the section it wrote"}]
     snap["goal"]["charter_items"] = ["The page shows the menu", "The page shows the hours"]
-    docs = {"docs": {"prd": {"asked": True, "text": "# P\n\n- **G1**: Goal one\n2. **R2**: The pre-order form\n| G1 | 30 |\n"},
-                     "hld": {"asked": False, "text": None},
+    docs = {"docs": {"prd": {"asked": True, "workflows": ["W-1", "W-2"],
+                             "text": "# P\n\n- **G1**: Goal one\n2. **R2**: The pre-order form\n| G1 | 30 |\n"},
+                     "hld": {"asked": True, "text": "- **C1** Menu display: shows the menu\n- **C2** Form", "workflows": ["W-9"]},
                      "lld": {"asked": True, "text": "- **S1** `#menu`: the menu with prices"}}, "focus": {"kind": "prd", "item": "R2"}}
     out = render_node(snap, docs=docs)
     card = out["cards"][w["id"]]
@@ -3463,21 +3467,40 @@ def docs_tab():
         assert line in con, line
     assert re.search(r"</div><ul class=\"clist\"><li>Placeholder for any photo</li></ul>", con), "ungrouped line: plain list"
     ctx = card.split('data-block="context"')[1].split("data-block=")[0]
-    assert "<li>Charter item 1: The page shows the menu</li>" in ctx and "<li>Charter item 2: The page shows the hours</li>" in ctx, ctx
-    assert '<a href="#" data-doc="lld" data-item="S1">Section S1</a>: #menu: the menu with prices' in ctx, ctx
-    assert 'PRD <a href="#" data-doc="prd" data-item="R2">R2</a>, <a href="#" data-doc="prd" data-item="R7">R7</a>' in ctx, ctx
-    assert "<li>finding F-3</li>" in ctx, ctx
-    assert "charter item" not in ctx.replace("Charter item", "") and "Never break" not in card and "Uses " not in ctx
+    assert "What this workflow was given" in card and "<b>Context</b>" not in card
+    rows = dict.fromkeys(re.findall(r'<li data-ctx="([\w-]+)">', ctx))
+    assert list(rows) == ["charter", "section", "prd", "hld", "lld", "other", "from-workflow"], list(rows)
+    assert '<li data-ctx="charter"><b class="ctype">Charter</b> item 1: The page shows the menu</li>' in ctx, ctx
+    assert 'item 2: The page shows the hours</li>' in ctx
+    assert 'item 9</li>' not in ctx and 'item 9 <span class="empty">no source on record</span>' in ctx, "a row with no source says so"
+    assert '<b class="ctype">Section</b> <a href="#" data-doc="lld" data-item="S1">S1</a>: #menu: the menu with prices</li>' in ctx, ctx
+    assert '<b class="ctype">PRD</b> <a href="#" data-doc="prd" data-item="R2">R2</a>: The pre-order form</li>' in ctx, ctx
+    assert '<b class="ctype">PRD</b> R7 <span class="empty">no source on record</span>' in ctx or 'data-item="R7">R7</a> <span class="empty">' in ctx, ctx
+    assert '<b class="ctype">HLD</b> <a href="#" data-doc="hld" data-item="C1">C1</a>: Menu display: shows the menu</li>' in ctx, ctx
+    assert '<b class="ctype">LLD</b> <a href="#" data-doc="lld" data-item="S1">S1</a>' in ctx
+    assert '<b class="ctype">Other</b> finding F-3 <span class="empty">no source on record</span>' in ctx, ctx
+    assert f'<b class="ctype">From workflow</b> {w2["id"]} {w2["name"]}: the section it wrote.</li>' in ctx.replace("&amp;", "&"), ctx
+    assert "Never break" not in card and "Uses " not in ctx
     # no group fits: a plain list only
     a["constraints"] = ["Placeholder for any photo"]
     plain_card = render_node(snap, docs=docs)["cards"][w["id"]].split('data-block="constraints"')[1].split("data-block=")[0]
     assert "<b>" not in plain_card.split("<summary>")[1] and "<li>Placeholder for any photo</li>" in plain_card
-    # the tab: three documents, the missing one noted, the linked item marked and findable
+    # the tab: a jump bar, one coloured block per document (name, item count, builders), dividers, the note, the highlight
     d = out["docs"]
     assert re.findall(r'data-doc-kind="(\w+)"', d) == ["prd", "hld", "lld"]
-    assert "Not asked for in this run." in d.split('data-doc-kind="hld"')[1].split("</section>")[0]
+    assert re.findall(r'data-docjump="(\w+)"', d.split('<section')[0]) == ["prd", "hld", "lld"], "jump bar first"
+    heads = re.findall(r'<header class="dochead" style="background:var\(--(\w+)\)"><b>([^<]*)</b> <span class="code">(\w+)</span>([^<]*)</header>', d)
+    assert [h[:3] for h in heads] == [("prd", "Product requirements", "PRD"), ("hld", "High-level design", "HLD"),
+                                      ("lld", "Low-level design", "LLD")], heads
+    assert heads[0][3] == f" · 2 items · built by W-1 {snap['workflows'][0]['name']}, W-2 {snap['workflows'][1]['name']}"[:len(heads[0][3])] or "2 items" in heads[0][3], heads[0]
+    assert "2 items" in heads[1][3] and "built by W-9" in heads[1][3] and "items" in heads[2][3] and "built by" not in heads[2][3], heads
+    assert re.findall(r'<span>(End of \w+|Start of \w+)</span>', d) == ["End of PRD", "Start of HLD", "End of HLD", "Start of LLD", "End of LLD"], d
+    assert d.count('data-docjump="top"') == 3
     assert '<p class="dl hit" id="doc-prd-R2">' in d and '<p class="dl" id="doc-prd-G1">' in d and 'id="doc-lld-S1"' in d, d
     assert d.count('id="doc-prd-G1"') == 1 and "<h4>P</h4>" in d, "an item's first line only carries the id"
+    docs["docs"]["hld"] = {"asked": False, "text": None, "workflows": []}
+    nd = render_node(snap, docs=docs)["docs"]
+    assert "Not asked for in this run." in nd.split('data-doc-kind="hld"')[1].split("</section>")[0] and nd.count("End of HLD") == 1
     print("docs tab: Context in words, Constraints grouped (stored text unchanged, ungrouped in a plain list), document "
           "items linked, Documents tab render, /api/docs live and saved, 404 for bad runs, not-asked note ok")
 
