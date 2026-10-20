@@ -34,7 +34,7 @@ button{font:500 13px var(--body);cursor:pointer}
 .code{font:500 11px var(--mono);color:var(--muted);white-space:nowrap}.st.on .code{color:var(--on);opacity:.75}
 .atom{border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:6px 0;background:var(--panel)}
 .atom>summary{cursor:pointer}.atom h4{margin:8px 0 2px;font-size:12.5px}.atom p{margin:0 0 4px}
-.cgroup{margin:4px 0}.clist{margin:2px 0 4px;padding-left:20px}.dl.hit{background:var(--hit,#fff3b0);color:#111;border-radius:4px;padding:2px 4px}.doc{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}.dochead{color:var(--on);padding:8px 12px}.docbody{padding:4px 12px 10px}.docbody h4{margin:10px 0 2px}.docjump{position:sticky;top:-16px;z-index:1;margin:-16px -16px 10px;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--line)}.docjump a{margin-right:10px}.docdiv{display:flex;gap:16px;justify-content:space-between;margin:12px 0;padding:6px 0;border-top:2px dashed var(--line);border-bottom:2px dashed var(--line);color:var(--muted);font-size:13px}.ctype{display:inline-block;min-width:92px}.ablock{margin:4px 0}.agroup{margin:10px 0 2px;color:var(--muted)}.long>summary{cursor:pointer;color:var(--muted);display:inline}
+.foldbody[hidden]{display:none}.cgroup{margin:4px 0}.clist{margin:2px 0 4px;padding-left:20px}.dl.hit{background:var(--hit,#fff3b0);color:#111;border-radius:4px;padding:2px 4px}.doc{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}.dochead{color:var(--on);padding:8px 12px}.docbody{padding:4px 12px 10px}.docbody h4{margin:10px 0 2px}.docjump{position:sticky;top:-16px;z-index:1;margin:-16px -16px 10px;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--line)}.docjump a{margin-right:10px}.docdiv{display:flex;gap:16px;justify-content:space-between;margin:12px 0;padding:6px 0;border-top:2px dashed var(--line);border-bottom:2px dashed var(--line);color:var(--muted);font-size:13px}.ctype{display:inline-block;min-width:92px}.ablock{margin:4px 0}.agroup{margin:10px 0 2px;color:var(--muted)}.long>summary{cursor:pointer;color:var(--muted);display:inline}
 .apreview{display:block;width:100%;min-height:48px;max-height:260px;border:1px solid var(--line);border-radius:6px;margin:6px 0;padding:6px;background:#fff;color:#111}
 iframe.apreview{height:220px;padding:0}.linkbtn{border:0;background:none;color:var(--accent,#2a6);text-decoration:underline;cursor:pointer;padding:0;font:inherit}
 .st.on{background:var(--accent);color:var(--on)}
@@ -345,7 +345,7 @@ function atomRow(a, k, w){
   if (k === "constraints") return constraintsHTML(v);
   if (k === "context") return contextHTML(v, a, w);
   if (k === "how"){ const ai = !(v && v.kind === "code"); let ag = v && v.agent;
-    if (ai && (!ag || /^builder$/i.test(ag) || w.revises)) ag = w.agent || (ag && w.id + " " + ag) || ag;   // the workflow's own name, never a bare "Builder"
+    if (ai && (!ag || /^(W-\d+ )?builder$/i.test(ag) || w.revises)) ag = builderName(w);   // "W-1 PRD Problem section builder", never a bare "Builder"
     const o = ai && wfOrigin(w);
     return esc(sentence((ai ? "AI builds it" : "Code builds it") + (ag ? ": " + ag : "") + (o ? ` as a revision of ${o.id} ${o.name}` : ""))); }
   // one line per item, marked once code has run the atom's checks
@@ -365,12 +365,30 @@ const DOCS = {};              // "prd" | "hld" | "lld" -> {asked, text} from /ap
 const DOC_KINDS = [["prd", "PRD", "Product requirements"], ["hld", "HLD", "High-level design"], ["lld", "LLD", "Low-level design"]];
 const ITEM_AT = /^\s*(?:[-*]\s+|\d+\.\s+)?\**([A-Z]{1,2}-?\d+)\**/;
 const docLine = id => { for (const [k] of DOC_KINDS){ const l = ((DOCS[k] || {}).text || "").split("\n").find(x => (x.match(ITEM_AT) || [])[1] === id);
-  if (l) return {kind: k, text: l.replace(ITEM_AT, "").replace(/^[\s:]+/, "").replace(/[`*]/g, "").slice(0, 140)}; } return null; };
+  if (l) return {kind: k, text: l.replace(ITEM_AT, "").replace(/^[\s:]+/, "").replace(/[`*]/g, "")}; } return null; };
 const docLink = (kind, id, label) => `<a href="#" data-doc="${kind}" data-item="${esc(id)}">${esc(label || id)}</a>`;
 const linkDocItems = html => html.replace(/\b(PRD|HLD|LLD)(\s+)([A-Z]\d+(?:(?:,\s*|\s+and\s+|\s+to\s+)[A-Z]\d+)*)/g,
   (m, k, sp, ids) => k + sp + ids.replace(/[A-Z]\d+/g, id => docLink(k.toLowerCase(), id)));
 const charterNums = t => [...t.matchAll(/(\d+)(?:\s*(?:to|-)\s*(\d+))?/g)].flatMap(m => Array.from({length: Math.min((+(m[2] || m[1])) - +m[1] + 1, 50)}, (_, i) => +m[1] + i));
 const KIND_OF = {R: "prd", G: "prd", C: "hld", S: "lld"};      // a bare id's document, when no document holds it yet
+// Folds are drawn from FOLD (open keys), not from <details>, so a collapsed list is hidden whatever the browser does with <summary>.
+const FOLD = new Set();
+const foldBtn = (key, label) => `<button type="button" class="linkbtn" data-fold="${esc(key)}" aria-expanded="${FOLD.has(key)}">${label}</button>`;
+const foldList = (key, n, rows) => `<span class="fold" data-foldlist="${esc(key)}">${n} atoms (${foldBtn(key, FOLD.has(key) ? "hide" : "show")})<span class="foldbody"${FOLD.has(key) ? "" : " hidden"}><br>${rows}</span></span>`;
+// A long line is cut at a word boundary, never inside a word; "show more" reveals the rest.
+const clip = (key, text, n = 140) => { text = String(text);
+  if (text.length <= n) return esc(text);
+  if (FOLD.has(key)) return esc(text) + " " + foldBtn(key, "show less");
+  const cut = text.slice(0, n), sp = cut.lastIndexOf(" ");
+  return esc((sp > 0 && text[n] !== " " ? cut.slice(0, sp) : cut).trimEnd()) + "… " + foldBtn(key, "show more"); };
+// Reason text for a document section builder names the document and the section; website wording stays.
+const SITE_WHY = /^its section, anchor and selectors were listed in this builder's prompt/;
+function whyShown(why, atomId){
+  if (!SITE_WHY.test(why || "")) return why;
+  const o = ((((CTX && CTX.atoms_v1) || {})[atomId] || {}).output || []).find(x => x.verb === "make" && x.form === "doc" && /^(prd|hld|lld)\.md#/.test(String(x.ref)));
+  return o ? `the ${o.ref.slice(0, 3).toUpperCase()} ${o.ref.split("#")[1]} section was in this builder's prompt` : why;
+}
+const builderName = w => `${w.id} ${w.name} builder`;
 const REFS = {conditions: {}, rubric: {}};   // id -> text, from /api/refs: conditions/*.json and each output type's rubric
 const wfById = id => ((CTX && CTX.workflows) || []).find(x => x.id === id);
 const wfOrigin = w => { const id = w.revises || (w.section && w.section !== w.id ? w.section : null); return id && wfById(id); };
@@ -381,10 +399,11 @@ const findingText = id => { if (REFS.rubric[id]) return REFS.rubric[id]; if (REF
   return r ? [r.criterion, r.note].filter(Boolean).join(": ") : ""; };
 function contextHTML(v, a, w){
   const g = (CTX && CTX.goal) || {}, items = g.charter_items || g.done_when || [], deps = (((CTX && CTX.atoms_v1) || {})[a && a.id] || {}).depends_on || [];
-  const docRow = (label, id) => { const d = docLine(id); return d ? ctxRow(label || d.kind.toUpperCase(), docLink(d.kind, id) + ": " + esc(d.text))
+  const docRow = (label, id) => { const d = docLine(id); return d ? ctxRow(label || d.kind.toUpperCase(), docLink(d.kind, id) + ": " + dtext(id, d.text))
     : ctxRow(label || (KIND_OF[id[0]] || "other").toUpperCase(), esc(id), true); };
+  const dtext = (id, t) => clip(`ctx-${a && a.id}-${id}`, t);
   const shown = new Set();
-  const wfRow = id => { const x = wfById(id), why = (deps.find(e => (x.atoms || []).some(at => at.id === e.atom)) || {}).why; shown.add(id);
+  const wfRow = id => { const x = wfById(id), e0 = deps.find(e => (x.atoms || []).some(at => at.id === e.atom)) || {}, why = whyShown(e0.why, e0.atom); shown.add(id);
     return ctxRow(w && w.revises === id ? "Revises" : "From workflow", `${esc(x.id)} ${esc(x.name)}` + (why ? ": " + esc(sentence(why)) : "")); };
   const rows = (Array.isArray(v) ? v : [v]).map(r => typeof r === "string" ? r.trim() : r ? words(r).trim() : "").filter(Boolean).flatMap(r => {
     let m = r.match(/^(?:charter\s+)?(?:done[- ]when\s+)?items?\s+([\d\s,andto-]+)$/i);
@@ -396,7 +415,7 @@ function contextHTML(v, a, w){
     if (m = r.match(/^sections?\s+(?:ids?\s+)?(.+)$/i)) return m[1].split(/\s*(?:,|\band\b)\s*/).filter(Boolean).map(id => {
       if (wfById(id)) return wfRow(id);                                 // a workflow id is never a "Section"
       const d = docLine(id), sec = ((CTX && CTX.sections) || []).find(x => x.id === id), t = (sec && sec.workflow) || (d && d.text);
-      return ctxRow("Section", (d ? docLink(d.kind, id) : esc(id)) + (t ? ": " + esc(t) : ""), !t); });
+      return ctxRow("Section", (d ? docLink(d.kind, id) : esc(id)) + (t ? ": " + dtext(id, t) : ""), !t); });
     if (/^W-\d+$/.test(r) && wfById(r)) return [wfRow(r)];
     if (m = r.match(/^(PRD|HLD|LLD)\s+(.+)$/)) return m[2].split(/\s*(?:,|\band\b)\s*/).filter(Boolean).flatMap(idRange).map(id => /^[A-Z]{1,2}-?\d+$/.test(id) ? docRow(m[1], id)
       : ctxRow(m[1], esc(id), !((DOCS[m[1].toLowerCase()] || {}).text)));
@@ -404,7 +423,7 @@ function contextHTML(v, a, w){
     return [ctxRow("Other", linkDocItems(esc(r)), true)];
   });
   const given = deps.map(e => ({e, x: ((CTX && CTX.workflows) || []).find(x => (x.atoms || []).some(at => at.id === e.atom))})).filter(({x}) => !x || !shown.has(x.id))
-    .map(({e, x}) => ctxRow("From workflow", x ? `${esc(x.id)} ${esc(x.name)}: ${esc(sentence(e.why || "its output"))}` : esc(e.atom) + (e.why ? ": " + esc(sentence(e.why)) : ""), !x));
+    .map(({e, x}) => ctxRow("From workflow", x ? `${esc(x.id)} ${esc(x.name)}: ${esc(sentence(whyShown(e.why, e.atom) || "its output"))}` : esc(e.atom) + (e.why ? ": " + esc(sentence(whyShown(e.why, e.atom))) : ""), !x));
   const all = rows.concat(given);
   return all.length ? `<ul class="clist">${all.join("")}</ul>` : '<span class="empty">None written.</span>';
 }
@@ -460,8 +479,8 @@ function atomBlocks(a, w, v){
   const base = dsec ? String(dsec.ref.split("#")[0]).replace(/\.md$/, "") : "";
   const site = dsec ? `<a data-link="md" href="/file/${esc(base)}.md${q}" download>Download the markdown (.md)</a> <a data-link="docx" href="/file/${esc(base)}.docx${q}" download>Download the Word file (.docx)</a>`
     : sec ? `<a data-link="site" href="/site/latest${q}#${esc(sec.ref.split("#")[1])}" target="_blank" rel="noopener">View in site</a>` : "";
-  const rowsOf = l => l.map(e => esc(e.atom) + ": " + esc(sentence(e.why))).join("<br>");
-  const edges = (t, l) => !l || !l.length ? "none recorded" : l.length > 4 ? `<details class="long" data-key="blk-${esc(a.id)}-${t}"><summary>${l.length} atoms (show)</summary>${rowsOf(l)}</details>` : "<br>" + rowsOf(l);
+  const rowsOf = l => l.map(e => esc(e.atom) + ": " + esc(sentence(whyShown(e.why, e.atom)))).join("<br>");
+  const edges = (t, l) => !l || !l.length ? "none recorded" : l.length > 4 ? foldList(`blk-${a.id}-${t}`, l.length, rowsOf(l)) : "<br>" + rowsOf(l);
   const isFile = o => !String(o.ref).includes("#") && /^[\w./-]+\.(md|html|docx|css|js|json)$/.test(o.ref);   // hld.md, site/v9.md: where it is kept, not what it made
   const outs = v ? (v.output || []) : [], made = outs.filter(o => !isFile(o)).sort((x, y) => String(y.ref).includes("#") - String(x.ref).includes("#"));
   const wout = v ? (made.map(o => `${esc(o.name)} <span class="empty">${esc(o.verb)} · ${esc(NOUN[o.verb] || "")} · ${esc(o.form)} · ${esc(o.ref)}</span>`).join("<br>") || '<span class="empty">Nothing made yet.</span>')
@@ -886,6 +905,8 @@ async function loadDocs(){
 $("pane-docs").addEventListener("click", e => { const a = e.target.closest("[data-docjump]"); if (!a) return; e.preventDefault();
   const t = a.dataset.docjump === "top" ? $("pane-docs") : document.getElementById("docblock-" + a.dataset.docjump);
   if (t && t.scrollIntoView) t.scrollIntoView({block: "start"}); });
+$("pane-workflows").addEventListener("click", e => { const b = e.target.closest("[data-fold]"); if (!b) return;
+  const k = b.dataset.fold; FOLD.has(k) ? FOLD.delete(k) : FOLD.add(k); if (state) paint($("pane-workflows"), renderWorkflows(state)); });
 $("pane-workflows").addEventListener("click", e => { const a = e.target.closest("[data-doc]"); if (!a) return;
   e.preventDefault(); FOCUS = {kind: a.dataset.doc, item: a.dataset.item};
   paint($("pane-docs"), renderDocs()); showTab("docs");

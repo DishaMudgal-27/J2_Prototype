@@ -3521,21 +3521,29 @@ def card_content():
     w2["revises"], w2["section"], w2["agent"] = w1["id"], w1["id"], f"{w2['id']} Builder"
     a2["how"] = {"kind": "AI", "agent": f"{w1['id']} Builder", "steps": "Rewrite"}
     a2["context"] = [f"section {w1['id']}", f"section {w3['id']}", "condition H5", "finding D-5", "finding F-1", "finding X-9",
-                     "condition Z9", "", "   ", None, "PRD R9"]
+                     "condition Z9", "", "   ", None, "PRD R9", "PRD R8"]
     snap["audits"] = [{"results": [{"id": "F-1", "criterion": "The page opens", "note": "it parsed"}]}]
     deps = snap["atoms_v1"][a2["id"]]
-    deps["depends_on"] = [{"atom": w["atoms"][0]["id"], "why": f"why {i}"} for i, w in enumerate(wfs[:6])]
+    SITE = "its section, anchor and selectors were listed in this builder's prompt"
+    deps["depends_on"] = [{"atom": w["atoms"][0]["id"], "why": SITE if i >= 4 else f"why {i}"} for i, w in enumerate(wfs[:6])]
+    snap["atoms_v1"][wfs[4]["atoms"][0]["id"]]["output"] = [{"verb": "make", "name": "S", "form": "doc", "ref": "prd.md#Success metrics"}]
+    snap["atoms_v1"][wfs[5]["atoms"][0]["id"]]["output"] = [{"verb": "make", "name": "S", "form": "page", "ref": "index.html#menu"}]
+    long_r9 = ("The pre-order form lets coffee lovers and office staff nearby choose items and a pickup time and send the order "
+               "to the shop so that it is ready when they arrive and nothing is paid online at all")
     deps["used_by"] = deps["depends_on"][:2]
     deps["output"] = [{"verb": "make", "name": "hld.md", "form": "doc", "ref": "hld.md"},
                       {"verb": "make", "name": "A section", "form": "doc", "ref": "hld.md#Sec"},
                       {"verb": "make", "name": "site/v9.md", "form": "doc", "ref": "site/v9.md"}]
     hld = {c["id"]: c["text"] for c in j2.load_conditions("hld.json")}
     refs = {"conditions": hld, "rubric": {i: t for o in j2.OUTPUTS.values() for i, t in o.get("rubric") or ()}}
-    out = render_node(snap, docs={"docs": {"prd": {"asked": True, "text": "- **R1**: One"}}, "refs": refs})
+    out = render_node(snap, docs={"docs": {"prd": {"asked": True, "text": "- **R1**: One\n- **R9**: " + long_r9}}, "refs": refs})
+    opened = render_node(snap, docs={"docs": {"prd": {"asked": True, "text": "- **R1**: One\n- **R9**: " + long_r9}}, "refs": refs,
+                                     "open": [f"blk-{a2['id']}-dep", f"blk-{a2['id']}-used", f"ctx-{a2['id']}-R9"]})
 
-    def card(i, wf):
-        c = out["cards"][wf["id"]]
+    def card_of(o, i, wf):
+        c = o["cards"][wf["id"]]
         return c[c.index(f'data-key="atom-{i}"'):].split("Run details")[0]
+    card = lambda i, wf: card_of(out, i, wf)
     c1, c2 = card(a1["id"], w1), card(a2["id"], w2)
     # headings and glosses are the original ones
     for lab in ("Goal", "How", "Constraints", "Context", "Defined output", "Verification", "Notes", "Workflow output", "Result"):
@@ -3544,7 +3552,8 @@ def card_content():
     assert "Depends on:" in c2 and "Used by:" in c2 and "What this workflow was given" not in c2
     # a revise atom: its own builder name and what it revises
     how = c2.split('data-block="how"')[1].split("data-block=")[0]
-    assert f"AI builds it: {w2['id']} Builder as a revision of {w1['id']} {w1['name']}." in how.replace("&amp;", "&"), how
+    assert f"AI builds it: {w2['id']} {w2['name']} builder as a revision of {w1['id']} {w1['name']}." in how.replace("&amp;", "&"), how
+    assert f"AI builds it: {w1['id']} {w1['name']} builder." in c1.split('data-block="how"')[1].split("data-block=")[0].replace("&amp;", "&")
     assert "as a revision" not in c1.split('data-block="how"')[1].split("data-block=")[0]
     import html as htmllib
     ctx = htmllib.unescape(c2.split('data-block="context"')[1].split("data-block=")[0])
@@ -3557,17 +3566,28 @@ def card_content():
     assert '<b class="ctype">Finding</b> F-1: The page opens: it parsed</li>' in ctx, ctx
     assert '<b class="ctype">Finding</b> X-9 <span class="empty">no source on record</span>' in ctx
     assert '<b class="ctype">Condition</b> Z9 <span class="empty">no source on record</span>' in ctx
-    assert '<b class="ctype">PRD</b> R9 <span class="empty">no source on record</span>' in ctx
+    assert '<b class="ctype">PRD</b> R8 <span class="empty">no source on record</span>' in ctx
+    # a long line is cut at a word boundary, with "show more"; open, the full text and "show less"
+    m = re.search(r'<b class="ctype">PRD</b> <a [^>]*>R9</a>: ([^<]*)… <button[^>]*data-fold="ctx-[^"]*"[^>]*>show more</button>', ctx)
+    assert m and long_r9.startswith(m.group(1)) and long_r9[len(m.group(1))] == " ", ("cut inside a word", m and m.group(1))
+    octx = htmllib.unescape(card_of(opened, a2["id"], w2).split('data-block="context"')[1].split("data-block=")[0])
+    assert long_r9 in octx and ">show less</button>" in octx and "… " not in octx.split("R9")[1].split("</li>")[0], octx
     # a workflow shown from Context is not repeated from depends_on
     assert ctx.count(f'{w1["id"]} {w1["name"]}') == 1 and ctx.count(f'{w3["id"]} {w3["name"]}') == 1
     # never a blank row: empty references are skipped, every row has text after its label
     rows = re.findall(r'<li data-ctx="[\w-]+">(.*?)</li>', ctx)
     assert rows and all(re.sub(r"<[^>]+>", "", r).replace(re.search(r'<b class="ctype">([^<]*)</b>', r).group(1), "", 1).strip() for r in rows), rows
-    # collapsed dependency list: 6 rows collapse with a count, reasons kept; 2 used_by rows stay inline
+    # collapsed dependency list: 6 rows hidden behind "show" with a count; "hide" and the rows once opened; 2 rows stay inline
     dep = c2.split("Depends on:")[1].split("Used by:")[0]
-    assert re.search(r'<summary>\d+ atoms \(show\)</summary>', dep) and "why 5" in dep and dep.count("why ") >= 6, dep
+    assert re.search(r'6 atoms \(<button[^>]*data-fold="blk-[^"]*-dep"[^>]*aria-expanded="false">show</button>\)<span class="foldbody" hidden>', dep), dep
+    assert "why 3" in dep, "rows are in the page text, hidden"
+    odep = card_of(opened, a2["id"], w2).split("Depends on:")[1].split("Used by:")[0]
+    assert re.search(r'6 atoms \(<button[^>]*aria-expanded="true">hide</button>\)<span class="foldbody">', odep) and "why 3" in odep, odep
     used = c2.split("Used by:")[1]
-    assert "atoms (show)" not in used.split("Agent output")[0] and "why 1" in used
+    assert "atoms (" not in used.split("Agent output")[0] and "why 1" in used
+    # reason text: a document section builder's edge names the document and section; the website wording stays
+    assert f"{wfs[4]['atoms'][0]['id']}: the PRD Success metrics section was in this builder's prompt." in odep, odep
+    assert f"{wfs[5]['atoms'][0]['id']}: {SITE}." in odep, odep
     # outputs: the section first, files on a "Saved in" line
     wo = c2.split('data-block="agent_output"')[1].split("data-block=")[0]
     assert wo.index("A section") < wo.index("Depends on") and "A section" in wo.split("Saved in")[0]
@@ -3591,7 +3611,9 @@ def card_content():
         assert len(r13) == 9 and [t for t, _ in r13].count("from-workflow") == 6, r13
         assert all(re.sub(r"<[^>]+>", "", b).split(" ", 1)[-1].strip() for _, b in r13), r13
         assert "<li></li>" not in x13 and "<li data-ctx=\"\">" not in x13
-        assert re.search(r'<summary>6 atoms \(show\)</summary>', c13.split("Depends on:")[1]), "W-13 depends on 6: collapsed"
+        assert re.search(r'6 atoms \(<button[^>]*>show</button>\)<span class="foldbody" hidden>', c13.split("Depends on:")[1]), "W-13 depends on 6: collapsed"
+        assert "the HLD Purpose and scope section was in this builder's prompt" in c13 and SITE not in c13, "document wording in a document run"
+        assert "W-13 HLD Hosting and deployment section builder" in c13
     print("card content: original headings, revise label, workflow/condition/finding rows, no source noted, no blank rows, "
           "collapsed dependencies, outputs vs Saved in ok")
 
