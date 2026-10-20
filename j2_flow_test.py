@@ -3434,12 +3434,9 @@ def docs_tab():
             for k in got:
                 assert got[k]["asked"] and got[k]["text"] == open(os.path.join(run.dir, f"{k}.md"), encoding="utf-8").read(), k
                 assert got[k]["workflows"] == run.docs[k]["workflows"] and got[k]["workflows"], k
-        for bad in ("?run=../..", "?run=nope"):                      # no path tricks: a run name only
-            try:
-                urllib.request.urlopen(f"{base}/api/docs{bad}")
-                raise AssertionError(bad)
-            except urllib.error.HTTPError as e:
-                assert e.code == 404, (bad, e.code)
+        for bad in ("?run=../..", "?run=nope"):                      # no path tricks: a run name only; anything else is an empty result
+            got = json.load(urllib.request.urlopen(f"{base}/api/docs{bad}"))
+            assert all(v == {"asked": False, "text": None, "workflows": []} for v in got.values()), (bad, got)
         j2_server.RUN = plain                                        # no document asked for: noted, no text
         got = json.load(urllib.request.urlopen(f"{base}/api/docs"))
         assert all(v == {"asked": False, "text": None, "workflows": []} for v in got.values()), got
@@ -3789,6 +3786,58 @@ def fixes_line():
         c15 = render_node(real, docs={"docs": {}, "stage_audits": got})["cards"]["W-15"]
         assert "Fixes: D-5, H5. Before:" in c15 and "not recorded" not in c15.split("Fixes:")[1].split("</span>")[0] or "Fixes: D-5, H5" in c15, c15[:50]
     print("fixes line: both statuses, one status, none recorded, stage audits, stored fixes fallback, no line without a revision, /api/audits ok")
+
+
+def missing_run_endpoints():
+    """Every GET endpoint that reads a run folder gives an empty result in its usual shape (404 for a file) when the folder
+    is not there, for a saved run id and for a live run whose folder was never written; never a dropped connection."""
+    import threading
+    import urllib.request
+    import urllib.error
+    import j2_server
+    srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{srv.server_address[1]}"
+    keep, keep_dir = j2_server.RUN, None
+
+    def hit(u):
+        try:
+            r = urllib.request.urlopen(base + u)
+            return r.status, r.read().decode("utf-8")
+        except urllib.error.HTTPError as e:
+            return e.code, e.read().decode("utf-8")
+    empty_docs = {k: {"asked": False, "text": None, "workflows": []} for k in ("prd", "hld", "lld")}
+    try:
+        live = j2.J2Run()
+        j2_server.RUN = live
+        keep_dir, live.dir = live.dir, os.path.join(tempfile.mkdtemp(prefix="j2-missing-"), "j2-never-written")
+        for q in ("run=j2-20261020-144628", "run=j2-nope", "run=..%2F..", ""):         # saved ids that do not exist, a bad id, the live run
+            def u(path):
+                return path + (("&" if "?" in path else "?") + q if q else "")
+            assert json.loads(hit(u("/api/audits"))[1]) == [], q
+            code, body = hit(u("/api/docs"))
+            assert code == 200 and json.loads(body) == empty_docs, (q, code, body)
+            code, body = hit(u("/api/preview?atom=W-1.a1"))
+            assert code == 200 and json.loads(body) == {"anchor": None, "html": None}, (q, code, body)
+            code, body = hit(u("/api/preview?atom=W-1.a1&x=1"))
+            assert code == 200, (q, code)
+            assert hit(u("/api/refs"))[0] == 200 and "conditions" in json.loads(hit(u("/api/refs"))[1])
+            for f in ("/shot/1", "/file/prd.md", "/file/hld.docx", "/file/site.html"):
+                assert hit(u(f))[0] == 404, (q, f)
+            code, body = hit(u("/api/call?id=1"))
+            assert code == 404 and "error" in json.loads(body), (q, code)
+            assert hit(u("/site/latest"))[0] == 200 and hit(u("/site/v1"))[0] == 200, q
+            if q:
+                code, body = hit(u("/api/state"))
+                assert code == 404 and "error" in json.loads(body), (q, code)
+            assert hit(u("/api/runs"))[0] == 200
+    finally:
+        j2_server.RUN = keep
+        if keep_dir:
+            live.dir = keep_dir
+        srv.shutdown()
+    print("missing run folder: /api/audits, /api/docs, /api/preview give empty results; /api/refs, /api/runs, /site ok; /shot, /file, "
+          "/api/call, /api/state answer 404 with no exception ok")
 
 
 def replay_size():
@@ -4592,6 +4641,7 @@ if __name__ == "__main__":
         card_content()
         charter_tab()
         fixes_line()
+        missing_run_endpoints()
         atom_checks()
         behavior_steps()
         charter_facts()

@@ -75,11 +75,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self._send(200, json.dumps(rec, ensure_ascii=False)) if rec else self._send(404, '{"error": "no such call"}')
         if u.path == "/api/preview":    # an atom's section by its anchor id, from the built page, for the atom card's frame
             r = RUN if not run else None
-            wfs = (r._all_wfs() if r else json.load(open(os.path.join(j2.saved_dir(run) or "", "workflows.json"), encoding="utf-8")))
+            sd = j2.saved_dir(run)
+            wfs = r._all_wfs() if r else (j2._read(sd, "workflows.json", []) if sd else [])          # a missing run has no workflows
             at = next((a for w in wfs for a in w.get("atoms") or [] if a["id"] == q.get("atom")), None)
             ao = (at or {}).get("agent_output") or {}
             if ao.get("kind") == "doc":          # a document atom: its section as the page renders markdown
-                body = j2.atom_section_body(r.dir if r else j2.saved_dir(run), wfs, q.get("atom"))
+                bd = r.dir if r else sd
+                body = j2.atom_section_body(bd, wfs, q.get("atom")) if bd and os.path.isdir(bd) else None
                 return self._send(200, json.dumps({"anchor": None, "html": j2.md_html(body, "Section") if body else None}))
             anchor = ao.get("anchor")
             page = r.sites[-1] if r and r.sites else ""
@@ -89,28 +91,26 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self._send(200, json.dumps({"anchor": anchor, "html": j2.preview_doc(page, anchor) if anchor else None}))
         if u.path == "/api/docs":       # the Documents tab: prd.md, hld.md, lld.md of a run, read-only, only those names
             d = j2.saved_dir(run) if run else RUN.dir
-            if not d:
-                return self._send(404, '{"error": "no such run"}')
-            made = j2._read(d, "documents.json", {}) if run else RUN.docs        # the documents run's record, with the workflows that built each
+            d = d if d and os.path.isdir(d) else None                               # a missing run folder: the empty shape below
+            made = (j2._read(d, "documents.json", {}) if d else {}) if run else RUN.docs   # the documents run's record, with the workflows that built each
             out = {}
             for k in ("prd", "hld", "lld"):
                 try:
                     with open(os.path.join(d, f"{k}.md"), encoding="utf-8") as f:
                         text = f.read()
-                except OSError:
+                except (OSError, TypeError):
                     text = None
                 out[k] = {"asked": text is not None or k in made or (not run and k in RUN.docset), "text": text,
                           "workflows": (made.get(k) or {}).get("workflows", [])}
             return self._send(200, json.dumps(out, ensure_ascii=False))
         if u.path == "/api/audits":     # earlier stages' audits, condensed to ids and results, for a revise atom's Fixes line
             d = j2.saved_dir(run) if run else RUN.dir
-            if not d:
-                return self._send(404, '{"error": "no such run"}')
+            d = d if d and os.path.isdir(d) else None                               # a missing run folder: no audits
             pick = lambda rows, *keys: [{k: r.get(k) for k in keys if k in r} for r in rows or []]
             out = [{"stage": st.get("stage"), "cycle": a.get("cycle"), "results": pick(a.get("results"), "id", "verdict", "pass"),
                     "extra_issues": pick(a.get("extra_issues"), "id", "verdict"), "rubric": pick(a.get("rubric"), "id", "verdict", "pass"),
                     "conditions": pick(a.get("conditions"), "id", "met")}
-                   for f in sorted(os.listdir(d)) if re.fullmatch(r"stage-\w+\.json", f)
+                   for f in sorted(os.listdir(d) if d else []) if re.fullmatch(r"stage-\w+\.json", f)
                    for st in [j2._read(d, f, {}) or {}] for a in st.get("audits") or []]
             return self._send(200, json.dumps(out, ensure_ascii=False))
         if u.path == "/api/refs":       # ids the cards name, with their text: conditions/*.json and every output type's rubric
