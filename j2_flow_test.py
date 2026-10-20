@@ -3788,6 +3788,51 @@ def fixes_line():
     print("fixes line: both statuses, one status, none recorded, stage audits, stored fixes fallback, no line without a revision, /api/audits ok")
 
 
+def fresh_page_run():
+    """A fresh page: the live run has an id but no folder, because no prompt was sent. That is normal and empty: every endpoint
+    answers (by the live path or by the run's own id), and the page's state renders with no error and no leftover content."""
+    import shutil
+    import threading
+    import urllib.request
+    import j2_server
+    keep = j2_server.RUN
+    live = j2.J2Run()
+    assert not os.path.exists(live.dir), "a fresh run has no folder yet"
+    j2_server.RUN = live
+    srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{srv.server_address[1]}"
+    try:
+        rid = os.path.basename(live.dir)
+        for q in ("", f"run={rid}"):                               # the page asks without ?run=, or with the live run's own id
+            def get(path):
+                return json.load(urllib.request.urlopen(base + path + (("&" if "?" in path else "?") + q if q else "")))
+            st = get("/api/state?since=0")
+            assert st.get("status") == "idle" and st["chat"] == [] and not st.get("error") and st["workflows"] == [], (q, list(st)[:6])
+            assert get("/api/audits") == [] and all(v["text"] is None and not v["asked"] for v in get("/api/docs").values()), q
+            assert get("/api/preview?atom=W-1.a1") == {"anchor": None, "html": None}
+            assert "conditions" in get("/api/refs") and get("/api/runs")["live"] == rid
+        assert not os.path.exists(live.dir), "reading must not create the run folder"
+        # the page's render of that state: Charter, Documents and cards say "nothing yet", no error text, no blank rows
+        if shutil.which("node"):
+            docs = {"docs": get("/api/docs"), "stage_audits": get("/api/audits")}
+            out = render_node(st, docs=docs)
+            assert out["charter"].endswith("No charter recorded yet.</p>") and out["cards"] == {}, out["charter"][-80:]
+            assert out["docs"].count("Not asked for in this run.") == 3 and "undefined" not in out["docs"] + out["charter"], out["docs"][:300]
+            assert "Something went wrong" not in out["simple"] + out["docs"] + out["charter"]
+        if j2.j2_check.find_chrome() and (BROWSER or not FAST):       # the real page: no error text in the page's own elements
+            import subprocess
+            for q in ("?view=detail", f"?view=detail&run={rid}", "?view=simple"):
+                dom = subprocess.run([j2.j2_check.find_chrome(), "--headless=new", "--disable-gpu", "--virtual-time-budget=6000",
+                                      "--dump-dom", base + "/" + q], capture_output=True, text=True, timeout=90).stdout
+                assert re.search(r'id="sstatus">\s*</', dom) and 'class="oops"' not in dom.split("</script>")[-1], q
+    finally:
+        j2_server.RUN = keep
+        srv.shutdown()
+    print("fresh page: live run with an id and no folder: every endpoint answers empty (with and without its own id), the folder "
+          "is not created, Charter and Documents render 'nothing yet' with no error ok")
+
+
 def missing_run_endpoints():
     """Every GET endpoint that reads a run folder gives an empty result in its usual shape (404 for a file) when the folder
     is not there, for a saved run id and for a live run whose folder was never written; never a dropped connection."""
@@ -4641,6 +4686,7 @@ if __name__ == "__main__":
         card_content()
         charter_tab()
         fixes_line()
+        fresh_page_run()
         missing_run_endpoints()
         atom_checks()
         behavior_steps()

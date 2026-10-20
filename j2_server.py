@@ -63,6 +63,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 return self._send(200, f.read(), "text/html")
         q = {k: v[0] for k, v in parse_qs(u.query).items()}
         run = q.get("run")              # a saved run's folder name, opened read-only
+        if run and run == os.path.basename(RUN.dir) and not os.path.isdir(RUN.dir):
+            run = None                  # the live run's id before its folder exists (no prompt sent yet): the live run, empty
         if u.path == "/api/state":
             since = int(q.get("since", "0"))
             snap = j2.saved_snapshot(run, since) if run else {**RUN.snapshot(since), "saved": None}
