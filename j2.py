@@ -44,6 +44,7 @@ import re
 import threading
 import time
 
+import j2_artifacts
 import j2_check
 import j2_schema
 import j2_send
@@ -6900,6 +6901,15 @@ class J2Run:
                           for c in (self.goal or {}).get("done_when") or []],
             "route_check_violations": [{"agent": e["agent"], "detail": e["detail"], "msg": e["msg"], "cycle": e["cycle"]}
                                        for e in self.events if e["type"] == "redirect"]})
+        self._write_artifacts()
+
+    def _write_artifacts(self):
+        """artifacts.json: a new file listing what the run made (artifacts/types.json). Written with the summary and
+        again once the report exists; a failure here never changes the run."""
+        try:
+            j2_artifacts.write(self.dir)
+        except Exception as e:
+            self._event("system", "artifacts_json", f"artifacts.json not written: {e}")
 
     def _review(self, metrics):
         """One extra model call, outside J2: a reviewer reads the run and writes learnings. Its scores are judgment."""
@@ -6955,6 +6965,7 @@ class J2Run:
         self.save("report.json", self.report)
         with open(os.path.join(self.dir, "report.md"), "w", encoding="utf-8") as f:
             f.write(self._report_md())
+        self._write_artifacts()
 
     def _report_md(self):
         m, r = self.report["metrics"], self.report["review"]

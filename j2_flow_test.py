@@ -4800,6 +4800,246 @@ def send_deeds():
           "plain briefs untouched ok")
 
 
+def artifact_types():
+    """artifacts/types.json mirrors the Python for prd, hld, lld and website, field by field: sections, file names,
+    trigger words, groups, tags, labels, colours, conditions file, builder, rate card, minimum cost and what each reads.
+    The same comparison fails when either side drifts (checked on edited copies)."""
+    import collections
+    import copy
+    import j2_artifacts as A
+    T = A.load_types()
+    ui = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "j2_ui.html"), encoding="utf-8").read()
+    kinds = {k: (tag, label) for k, tag, label in re.findall(r'\["(prd|hld|lld)", "([A-Z]+)", "([^"]+)"\]', ui)}
+    site_tag = re.search(r'\["site", "([^"]+)"\]', ui).group(1)
+    corpus = ["write a PRD", "the HLD", "an LLD please", "product requirements", "high-level design", "low level design",
+              "architecture overview", "detailed design", "design docs", "a modern design", "BRD", "HLDs", "LLDs and PRDs"]
+    run = j2.J2Run()
+
+    def problems(T):
+        by, bad = {t["name"]: t for t in T["types"]}, []
+        chk = lambda ok, what: bad.append(what) if not ok else None
+        types = [t for t in T["types"] if t["kind"] == "type"]
+        chk([t["name"] for t in types] == [*j2.DOC_SET, "website"], "type order")
+        chk(T["site_words"] == j2._SITE_WORDS.pattern, "site words")
+        g = T["groups"]["design-docs"]
+        chk(g["pattern"] == j2._DOC_SET_WORDS.pattern and g["members"] == list(j2.DOC_SET), "design-docs group")
+        for k in j2.DOC_SET:
+            t, o = by[k], j2.OUTPUTS[k]
+            chk(t["workflow"]["sections"] == list(o["sections"]), f"{k} sections")
+            chk(t["file"] == o["file"] and t["export"] == "docx" and bool(o["export"]) and t["form"] == "doc", f"{k} file")
+            chk(t["conditions"] == o["conditions"] and os.path.isfile(os.path.join(j2.CONDITIONS_DIR, t["conditions"])), f"{k} conditions")
+            chk(getattr(j2, t["workflow"]["builder"].split(":", 1)[1], None) is o["builder"], f"{k} builder")
+            chk(t["cost"]["card"] == o["rates"], f"{k} rate card")
+            chk(t["cost"]["parts"] == {"doc_section": len(o["sections"]) - 1, "requirements_section": 1}, f"{k} cost parts")
+            card = A_rates(t["cost"]["card"])
+            chk(sum(card.get(p, 0) * n for p, n in t["cost"]["parts"].items()) == run._stage_cost(k), f"{k} minimum cost")
+            chk(t["triggers"] == [j2._DOC_WORDS[k].pattern], f"{k} trigger words")
+            rx = re.compile("|".join(t["triggers"]), re.I)
+            chk(all(bool(rx.search(x)) == bool(j2._DOC_WORDS[k].search(x)) for x in corpus), f"{k} trigger behaviour")
+            chk(t["groups"] == ["design-docs"] and k in g["members"], f"{k} groups")
+            chk((t["tag"], t["label"]) == (kinds[k][0], kinds[k][1]) and t["label"].lower() == j2.DOC_NAMES[k], f"{k} tag and label")
+            chk(t["color"] == f"--{k}" and f"--{k}:" in ui, f"{k} colour")
+        w, o = by["website"], j2.OUTPUTS["website"]
+        chk(w["file"] == "site/index.html" and w["form"] == "page" and w["triggers"] == [] and w["also_when"] == "site-words", "website file and triggers")
+        chk(w["conditions"] == o["conditions"] and w["workflow"]["builder"] == o["builder"] and w["cost"]["card"] == o["rates"], "website conditions, builder, card")
+        chk(w["cost"]["parts"] == dict(collections.Counter(j2.J2Run.SITE_ESSENTIALS)), "website cost parts")
+        chk(sum(A_rates(w["cost"]["card"]).get(p, 0) * n for p, n in w["cost"]["parts"].items()) == run._stage_cost("website"), "website minimum cost")
+        chk((w["tag"], w["color"]) == (site_tag, "--site") and "--site:" in ui and w["label"] == o["label"], "website tag, colour, label")
+        return bad
+
+    def A_rates(card):
+        return {k: int(v) for k, v in json.load(open(os.path.join(j2.J2_DIR, "rates.json"))).get(card, {}).items()}
+    assert problems(T) == [], problems(T)
+    # drift on either side is caught
+    for path, val in (("types.0.workflow.sections", ["Problem"]), ("types.1.color", "--x"), ("types.2.triggers", ["\\bLLD\\b"]),
+                      ("types.3.cost.parts", {"form": 9}), ("types.0.file", "p.md"), ("types.1.tag", "H"), ("types.3.file", "x.html"),
+                      ("types.2.conditions", "none.json"), ("groups.design-docs.members", ["prd"])):
+        bent, node, keys = copy.deepcopy(T), None, path.split(".")
+        node = bent
+        for kx in keys[:-1]:
+            node = node[int(kx)] if kx.isdigit() else node[kx]
+        node[keys[-1]] = val
+        assert problems(bent), path
+    keep = j2._DOC_WORDS["hld"]
+    j2._DOC_WORDS["hld"] = re.compile(r"\bHLD\b", re.I)
+    try:
+        assert problems(T), "Python trigger words changed and the list did not notice"
+    finally:
+        j2._DOC_WORDS["hld"] = keep
+    keep = j2.OUTPUTS["lld"]["sections"]
+    j2.OUTPUTS["lld"]["sections"] = keep[:-1]
+    try:
+        assert problems(T), "Python sections changed and the list did not notice"
+    finally:
+        j2.OUTPUTS["lld"]["sections"] = keep
+    # records: every record is a kind record, not a deliverable, with a file pattern; a full run keeps the ones a mock run writes
+    recs = [t for t in T["types"] if t["kind"] == "record"]
+    assert [t["name"] for t in recs] == ["screenshots", "atoms", "audits", "receipts", "conditions", "chain", "goal", "workflows",
+                                         "summary", "report", "chat"] and not any(t["deliverable"] for t in recs)
+    # depends_on matches the edges a real chain run records between the documents and the site
+    run = docs_run(DESIGN_BRIEF, 900)
+    owner = {a: k for k, v in json.load(open(os.path.join(run.dir, "documents.json"))).items() for a in v["atoms"]}
+    for w in run._all_wfs():
+        for a in w["atoms"]:
+            owner.setdefault(a["id"], "website")
+    seen = collections.defaultdict(set)
+    for v in json.load(open(os.path.join(run.dir, "atoms.json")))["atoms"]:
+        for e in v["depends_on"]:
+            if owner[e["atom"]] != owner[v["id"]]:
+                seen[owner[v["id"]]].add(owner[e["atom"]])
+    by = {t["name"]: t for t in T["types"]}
+    for k in (*j2.DOC_SET, "website"):
+        assert set(by[k]["depends_on"]) == seen.get(k, set()), (k, by[k]["depends_on"], seen.get(k))
+    rows = A.rows(run.dir)
+    docs = json.load(open(os.path.join(run.dir, "documents.json")))
+    for k in j2.DOC_SET:      # the workflows a row names are the workflows the run recorded for that document
+        assert next(r for r in rows if r["type"] == k)["workflows"] == sorted(docs[k]["workflows"], key=lambda x: int(x[2:])), k
+    for t in recs:
+        if t["name"] != "screenshots":      # a mock run takes no screenshots
+            assert os.path.isfile(os.path.join(run.dir, t["file"])), t["file"]
+    print("artifact types: prd, hld, lld and website match the Python field by field (sections, files, triggers, groups, tags, "
+          "colours, conditions, builder, rates, minimum cost, depends_on); drift on either side fails; 11 record entries ok")
+
+
+def artifacts_tab():
+    """Artifacts: artifacts.json written at the end of a run (additive), the same rows rebuilt from an old folder, the
+    endpoints serve only files the list names, and the tab renders two headings with tags, workflows, dependencies and an
+    Open button per form (document text, website preview, screenshot image, data text)."""
+    import shutil
+    import threading
+    import urllib.error
+    import urllib.request
+    import j2_artifacts as A
+    import j2_server
+    run = docs_run(DESIGN_BRIEF, 900)
+    name = os.path.basename(run.dir)
+    saved = json.load(open(os.path.join(run.dir, "artifacts.json")))
+    assert saved["schema"] == "artifacts/1" and all(set(r) == {"name", "type", "kind", "form", "file", "deliverable", "workflows",
+                                                                "depends_on", "version", "sha256", "time"} for r in saved["rows"])
+    by = {r["type"]: r for r in saved["rows"]}
+    assert [r["type"] for r in saved["rows"] if r["deliverable"]] == ["prd", "hld", "lld", "website"]
+    assert by["prd"]["workflows"][0] == "W-1" and by["lld"]["depends_on"] == ["prd", "hld"] and by["website"]["depends_on"] == ["hld", "lld"]
+    assert by["prd"]["version"] >= 1 and by["website"]["file"] == "site/index.html"
+    assert by["prd"]["sha256"] == hashlib.sha256(open(os.path.join(run.dir, "prd.md"), "rb").read()).hexdigest()
+    now = A.rows(run.dir)      # an old run has no artifacts.json: the scan gives the same rows (the chat log grew after the file was written)
+    assert [r for r in now if r["file"] != "chat.jsonl"] == [r for r in saved["rows"] if r["file"] != "chat.jsonl"]
+    assert {k: v for k, v in next(r for r in now if r["file"] == "chat.jsonl").items() if k not in ("sha256", "time")} == \
+        {k: v for k, v in next(r for r in saved["rows"] if r["file"] == "chat.jsonl").items() if k not in ("sha256", "time")}
+    # a plain website run: artifacts.json lists the site and the records, no documents
+    plain = docs_run(BREW_LAB, 200)
+    prow = json.load(open(os.path.join(plain.dir, "artifacts.json")))["rows"]
+    assert [r["type"] for r in prow if r["deliverable"]] == ["website"] and prow[0]["depends_on"] == [] and prow[0]["workflows"]
+    # an old run: the same folder with no artifacts.json, and a screenshot added by hand
+    old = os.path.join(j2.RUNS_DIR, "j2-20200101-000000")
+    shutil.copytree(run.dir, old)
+    os.remove(os.path.join(old, "artifacts.json"))
+    os.makedirs(os.path.join(old, "site", "shots"), exist_ok=True)
+    open(os.path.join(old, "site", "shots", "v4.png"), "wb").write(b"\x89PNG\r\n\x1a\n" + b"0" * 16)
+    lst = A.listing(old)
+    assert not lst["deliverables"][0]["saved"] and [r["type"] for r in lst["deliverables"]] == ["prd", "hld", "lld", "website"]
+    assert any(r["form"] == "image" and r["file"] == "site/shots/v4.png" and r["open"] == "image" for r in lst["records"])
+    assert not os.path.exists(os.path.join(old, "artifacts.json")), "listing an old run must not write to it"
+    # a real stored run from before artifacts existed, when present (read-only evidence)
+    here = os.path.dirname(os.path.abspath(__file__))
+    real = "j2-20261016-160511"
+    if os.path.isdir(os.path.join(here, "runs", real)):
+        keep_dir, j2.RUNS_DIR = j2.RUNS_DIR, os.path.join(here, "runs")
+        try:
+            assert not os.path.exists(os.path.join(here, "runs", real, "artifacts.json"))
+            got = A.listing(j2.saved_dir(real))
+            assert got["deliverables"] and not got["deliverables"][0]["saved"] and [r["type"] for r in got["deliverables"]][0] == "prd"
+            assert not os.path.exists(os.path.join(here, "runs", real, "artifacts.json"))
+        finally:
+            j2.RUNS_DIR = keep_dir
+    empty = A.listing(None)
+    assert empty == {"deliverables": [], "records": []} and A.rows(os.path.join(run.dir, "nope")) == []
+    # endpoints: live and saved, serving only the files the list names
+    keep, j2_server.RUN = j2_server.RUN, run
+    srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{srv.server_address[1]}"
+    get = lambda path: urllib.request.urlopen(base + path)
+    try:
+        for q in ("", f"?run={name}", "?run=j2-20200101-000000"):
+            got = json.load(get("/api/artifacts" + q))
+            assert [r["type"] for r in got["deliverables"]] == ["prd", "hld", "lld", "website"], q
+            assert {"summary", "atoms", "receipts", "chat"} <= {r["type"] for r in got["records"]}, q
+            row = got["deliverables"][0]
+            assert row["label"] == "Product requirements" and row["tag"] == "PRD" and row["color"] == "--prd" and row["open"] == "text"
+            assert got["deliverables"][3]["open"] == "preview" and got["deliverables"][3]["depends_on_labels"] == ["High-level design", "Low-level design"]
+        r = get("/api/artifact?name=prd.md")
+        assert r.read().decode().startswith("# ") and r.headers["Content-Type"].startswith("text/plain")
+        assert get(f"/api/artifact?name=site/index.html&run={name}").read().decode().lstrip().lower().startswith("<!doctype")
+        assert get("/api/artifact?name=site/shots/v4.png&run=j2-20200101-000000").read()[:4] == b"\x89PNG"
+        assert json.loads(get("/api/artifact?name=atoms.json").read())["schema"] == "atom/1"
+        for bad in ("prd.docx", "../j2.py", "/etc/passwd", "site/v1.html", "hld-v1.md", "site/hld-v1.md", "nothing.json", "", "calls.jsonl",
+                    "artifacts.json", "prd.md/../goal.json"):
+            try:
+                get("/api/artifact?name=" + urllib.request.quote(bad))
+                assert False, f"served {bad!r}"
+            except urllib.error.HTTPError as e:
+                assert e.code == 404, (bad, e.code)
+        try:
+            get("/api/artifact?name=prd.md&run=j2-20990101-000000")
+            assert False
+        except urllib.error.HTTPError as e:
+            assert e.code == 404
+        assert json.load(get("/api/artifacts?run=j2-20990101-000000")) == {"deliverables": [], "records": []}
+        for f in ("documents.json",):      # the Documents tab's own endpoints are untouched
+            assert get("/file/prd.md").read().startswith(b"# ")
+    finally:
+        j2_server.RUN = keep
+        srv.shutdown()
+        shutil.rmtree(old, ignore_errors=True)
+    if not shutil.which("node"):
+        print("artifacts tab render skipped: node not found")
+        return
+    snap = j2.saved_snapshot(name, 0)
+    lst = A.listing(run.dir)
+    html = render_node(snap, docs={"docs": {}, "artifacts": lst})["artifacts"]
+    assert html.index("<h3>Deliverables</h3>") < html.index("<h3>Evidence and records</h3>") and html.count("<h3>") == 2
+    top, rest = html.split("<h3>Evidence and records</h3>")
+    assert top.count('class="artrow"') == 4 and rest.count('class="artrow"') == len(lst["records"])
+    for r in lst["deliverables"]:
+        row = top[top.index(f'data-art="{r["file"]}"'):].split('<div class="artrow"')[0]
+        assert f"<b>{r['label']}</b>" in row and f'style="background:var({r["color"]})">{r["tag"]}</span>' in row and "Open</button>" in row
+        assert (f"made by {j2_ui_idruns(r['workflows'])}" in row) and r["form"] in row
+    assert "depends on nothing in this run" in top.split('data-art="hld.md"')[0] and "depends on Product requirements" in top.split('data-art="hld.md"')[1].split('data-art="lld.md"')[0]
+    assert "depends on High-level design, Low-level design" in top.split('data-art="site/index.html"')[1]
+    assert "Open</button>" in rest and "iframe" not in html and "<img" not in html and "<pre" not in html      # nothing open by default
+    # Open: a document shows readable text, the site a preview frame, a screenshot an image, a data file plain text
+    lst["records"].append({**lst["records"][0], "name": "Screenshot v4", "type": "screenshots", "form": "image", "file": "site/shots/v4.png",
+                           "open": "image", "tag": "Other", "color": "--other"})
+    for f, mode, mark in (("prd.md", "text", '<pre class="arttext">'), ("site/index.html", "preview", '<iframe class="artframe" sandbox=""'),
+                          ("site/shots/v4.png", "image", '<img class="artimg"'), ("atoms.json", "text", '<pre class="arttext">')):
+        out = render_node(snap, docs={"docs": {}, "artifacts": lst, "artopen": f, "arttext": {f: "# Product\n<b>x</b>"}})["artifacts"]
+        assert out.count(mark) == 1 and "Close</button>" in out, (f, mode)
+        if mode == "text":
+            assert "# Product\n&lt;b&gt;x&lt;/b&gt;" in out      # escaped, never run as markup
+        assert f"/api/artifact?name={urllib.request.quote(f, safe='')}" in out or mode == "text"
+    out = render_node(snap, docs={"docs": {}, "artifacts": {"deliverables": [], "records": []}})["artifacts"]
+    assert "Nothing built yet." in out and "Nothing recorded yet." in out
+    # the Documents and Charter tabs still render as before
+    both = render_node(snap, docs={"docs": {k: {"asked": True, "text": open(os.path.join(run.dir, k + ".md"), encoding="utf-8").read()}
+                                            for k in ("prd", "hld", "lld")}})
+    assert 'id="docblock-prd"' in both["docs"] and "Charter" in both["charter"]
+    print("artifacts: artifacts.json written at run end (additive), an old run gets the same rows from its folder, endpoints serve "
+          "only listed files (live, saved, missing run), the tab shows two headings with tag, workflows, dependencies and an Open "
+          "button per form ok")
+
+
+def j2_ui_idruns(ids):
+    """The page's idRuns(): W-1, W-2, W-3, W-5 -> "W-1 to W-3, W-5"."""
+    nums, out, i = sorted(int(x[2:]) for x in ids), [], 0
+    while i < len(nums):
+        j = i
+        while j + 1 < len(nums) and nums[j + 1] == nums[j] + 1:
+            j += 1
+        out += [f"W-{nums[i]} to W-{nums[j]}"] if j - i >= 2 else [f"W-{n}" for n in nums[i:j + 1]]
+        i = j + 1
+    return ", ".join(out)
+
+
 def atom_schema():
     """atom/1: the adapter maps a stored run (makes and dos), edges are what each builder's prompt actually held
     (manifest, LLD slice, earlier document), used_by is the exact inverse, warnings never change a run, atoms.json is
@@ -5043,6 +5283,8 @@ if __name__ == "__main__":
         docs_chain()
         docs_funding()
         send_deeds()
+        artifact_types()
+        artifacts_tab()
         docs_repeat_failure()
         docs_intake_and_compare()
         plain_unchanged("f6938b2", slim="0")      # J2_SLIM=0 is the old path, prompt for prompt

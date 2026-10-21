@@ -34,7 +34,7 @@ button{font:500 13px var(--body);cursor:pointer}
 .code{font:500 11px var(--mono);color:var(--muted);white-space:nowrap}.st.on .code{color:var(--on);opacity:.75}
 .atom{border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:6px 0;background:var(--panel)}
 .atom>summary{cursor:pointer}.atom h4{margin:8px 0 2px;font-size:12.5px}.atom p{margin:0 0 4px}
-.foldbody[hidden]{display:none}.otag{border:0;border-radius:10px;padding:1px 8px;margin:2px 4px 2px 0;color:var(--on);font:inherit;font-size:12px;cursor:pointer}.otag.on{outline:2px solid var(--ink)}.runsum{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:0 0 10px}.runsum div{margin:2px 0}.ogroups{margin:6px 0 10px}.ogroups div{margin:2px 0}.dochead .code{color:var(--on);background:rgba(0,0,0,.3);border-radius:4px;padding:0 6px;font-size:12px}.docmeta{margin-left:8px}.chnote,.brief{margin:0 0 10px}.brief{border:1px solid var(--line);border-radius:8px;padding:8px 12px;white-space:pre-wrap}.chitems{padding-left:26px}.chitems li{margin:6px 0}.chsrc,.chused{color:var(--muted);font-size:13px}.cgroup{margin:4px 0}.clist{margin:2px 0 4px;padding-left:20px}.dl.hit{background:var(--hit,#fff3b0);color:#111;border-radius:4px;padding:2px 4px}.doc{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}.dochead{color:var(--on);padding:8px 12px}.docbody{padding:4px 12px 10px}.docbody h4{margin:10px 0 2px}.docjump{position:sticky;top:-16px;z-index:1;margin:-16px -16px 10px;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--line)}.docjump a{margin-right:10px}.docdiv{display:flex;gap:16px;justify-content:space-between;margin:12px 0;padding:6px 0;border-top:2px dashed var(--line);border-bottom:2px dashed var(--line);color:var(--muted);font-size:13px}.ablock{margin:4px 0}.agroup{margin:10px 0 2px;color:var(--muted)}.long>summary{cursor:pointer;color:var(--muted);display:inline}
+.foldbody[hidden]{display:none}.otag{border:0;border-radius:10px;padding:1px 8px;margin:2px 4px 2px 0;color:var(--on);font:inherit;font-size:12px;cursor:pointer}.otag.on{outline:2px solid var(--ink)}.artrow{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:6px 0}.arttext{white-space:pre-wrap;max-height:420px;overflow:auto;margin:8px 0 0;font-size:13px}.artimg{max-width:100%;margin-top:8px}.artframe{width:100%;height:420px;border:1px solid var(--line);margin-top:8px;background:#fff}.runsum{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:0 0 10px}.runsum div{margin:2px 0}.ogroups{margin:6px 0 10px}.ogroups div{margin:2px 0}.dochead .code{color:var(--on);background:rgba(0,0,0,.3);border-radius:4px;padding:0 6px;font-size:12px}.docmeta{margin-left:8px}.chnote,.brief{margin:0 0 10px}.brief{border:1px solid var(--line);border-radius:8px;padding:8px 12px;white-space:pre-wrap}.chitems{padding-left:26px}.chitems li{margin:6px 0}.chsrc,.chused{color:var(--muted);font-size:13px}.cgroup{margin:4px 0}.clist{margin:2px 0 4px;padding-left:20px}.dl.hit{background:var(--hit,#fff3b0);color:#111;border-radius:4px;padding:2px 4px}.doc{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}.dochead{color:var(--on);padding:8px 12px}.docbody{padding:4px 12px 10px}.docbody h4{margin:10px 0 2px}.docjump{position:sticky;top:-16px;z-index:1;margin:-16px -16px 10px;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--line)}.docjump a{margin-right:10px}.docdiv{display:flex;gap:16px;justify-content:space-between;margin:12px 0;padding:6px 0;border-top:2px dashed var(--line);border-bottom:2px dashed var(--line);color:var(--muted);font-size:13px}.ablock{margin:4px 0}.agroup{margin:10px 0 2px;color:var(--muted)}.long>summary{cursor:pointer;color:var(--muted);display:inline}
 .apreview{display:block;width:100%;min-height:48px;max-height:260px;border:1px solid var(--line);border-radius:6px;margin:6px 0;padding:6px;background:#fff;color:#111}
 iframe.apreview{height:220px;padding:0}.linkbtn{border:0;background:none;color:var(--accent,#2a6);text-decoration:underline;cursor:pointer;padding:0;font:inherit}
 .st.on{background:var(--accent);color:var(--on)}
@@ -211,6 +211,7 @@ body.simple #dview{display:none}body:not(.simple) #sview{display:none}
       <button role="tab" data-tab="audit" aria-selected="false">Audit</button>
       <button role="tab" data-tab="charter" aria-selected="false">Charter</button>
       <button role="tab" data-tab="docs" aria-selected="false">Documents</button>
+      <button role="tab" data-tab="artifacts" aria-selected="false">Artifacts</button>
       <button role="tab" data-tab="style" aria-selected="false">Style guide</button>
       <button role="tab" data-tab="lessons" aria-selected="false">Lessons</button>
       <button role="tab" data-tab="playbooks" aria-selected="false">Playbooks</button>
@@ -225,6 +226,7 @@ body.simple #dview{display:none}body:not(.simple) #sview{display:none}
     <div class="pane" id="pane-audit" hidden></div>
     <div class="pane" id="pane-charter" hidden></div>
     <div class="pane" id="pane-docs" hidden></div>
+    <div class="pane" id="pane-artifacts" hidden></div>
     <div class="pane" id="pane-style" hidden></div>
     <div class="pane" id="pane-lessons" hidden></div>
     <div class="pane" id="pane-playbooks" hidden></div>
@@ -1005,7 +1007,7 @@ async function poll(){
     paint($("pane-charter"), renderCharter(s));
     paint($("pane-timeline"), renderTimeline(s)); paint($("pane-lessons"), renderLessons(s));
     paint($("pane-style"), renderStyle(s)); paint($("pane-playbooks"), renderPlaybooks(s));
-    const dk = s.total + "|" + (s.docset || []).join(); if (dk !== docsKey){ docsKey = dk; loadDocs(); }
+    const dk = s.total + "|" + (s.docset || []).join(); if (dk !== docsKey){ docsKey = dk; loadDocs(); loadArtifacts(); }
     renderSimple(s);
     if (!state || state.status !== s.status || state.total !== s.total) quick(s);
     state = s;
@@ -1015,9 +1017,37 @@ async function poll(){
 $("ver").onchange = () => $("frame").src = `/site/${$("ver").value}?t=${Date.now()}${runQ()}`;
 function showTab(name){
   document.querySelectorAll(".tabs [role=tab]").forEach(x => x.setAttribute("aria-selected", x.dataset.tab === name));
-  ["preview","goal","workflows","conflicts","timeline","audit","charter","docs","style","lessons","playbooks","report"].forEach(t => $("pane-"+t).hidden = t !== name);
+  ["preview","goal","workflows","conflicts","timeline","audit","charter","docs","artifacts","style","lessons","playbooks","report"].forEach(t => $("pane-"+t).hidden = t !== name);
 }
 document.querySelectorAll(".tabs [role=tab]").forEach(b => b.onclick = () => showTab(b.dataset.tab));
+// Artifacts: read-only list driven by artifacts/types.json (/api/artifacts): deliverables, then evidence and records.
+const ARTS = {deliverables: [], records: []}, ARTTEXT = {};      // ARTTEXT: file -> text already fetched for an open row
+let ARTOPEN = "";
+const artUrl = f => `/api/artifact?name=${encodeURIComponent(f)}${runQ()}`;
+function artRow(r){
+  const open = ARTOPEN === r.file, made = (r.workflows || []).length ? `made by ${esc(idRuns(r.workflows))}` : "no workflow recorded";
+  const dep = (r.depends_on_labels || []).length ? `depends on ${r.depends_on_labels.map(esc).join(", ")}` : "depends on nothing in this run";
+  const body = !open ? "" : r.open === "image" ? `<img class="artimg" alt="${esc(r.name)}" src="${artUrl(r.file)}">`
+    : r.open === "preview" ? `<iframe class="artframe" sandbox="" title="${esc(r.name)}" src="${artUrl(r.file)}"></iframe>`
+    : `<pre class="arttext">${esc(ARTTEXT[r.file] === undefined ? "Loading..." : ARTTEXT[r.file])}</pre>`;
+  return `<div class="artrow" data-art="${esc(r.file)}"><div><b>${esc(r.name)}</b> <span class="empty">${esc(r.form)}</span> `
+    + `<span class="otag" style="background:var(${esc(r.color)})">${esc(r.tag)}</span> <span class="empty">${made} · ${dep}</span> `
+    + `<button type="button" class="linkbtn" data-artopen="${esc(r.file)}" aria-expanded="${open}">${open ? "Close" : "Open"}</button></div>${body}</div>`;
+}
+const renderArtifacts = () => {
+  const part = (title, rows, none) => `<h3>${title}</h3>` + (rows.length ? rows.map(artRow).join("") : `<p class="empty">${none}</p>`);
+  return part("Deliverables", ARTS.deliverables, "Nothing built yet.") + part("Evidence and records", ARTS.records, "Nothing recorded yet.");
+};
+async function loadArtifacts(){
+  try { const r = await fetch(`/api/artifacts?${runQ().slice(1)}`, {cache:"no-store"}); if (r.ok) Object.assign(ARTS, await r.json()); } catch (e) {}
+  paint($("pane-artifacts"), renderArtifacts());
+}
+$("pane-artifacts").addEventListener("click", async e => { const b = e.target.closest("[data-artopen]"); if (!b) return;
+  const f = b.dataset.artopen; ARTOPEN = ARTOPEN === f ? "" : f;
+  const r = [...ARTS.deliverables, ...ARTS.records].find(x => x.file === f);
+  if (ARTOPEN && r && r.open === "text" && ARTTEXT[f] === undefined){ paint($("pane-artifacts"), renderArtifacts());
+    try { const x = await fetch(artUrl(f), {cache:"no-store"}); ARTTEXT[f] = x.ok ? await x.text() : "Could not open this file."; } catch (err) { ARTTEXT[f] = "Could not open this file."; } }
+  paint($("pane-artifacts"), renderArtifacts()); });
 // Documents: read-only, reloaded when the run's chat or documents change; a link on an atom card opens the tab at that item.
 let docsKey = null;
 (async () => { try { const r = await fetch("/api/refs"); if (r.ok){ Object.assign(REFS, await r.json()); if (state) paint($("pane-workflows"), renderWorkflows(state)); } } catch (e) {} })();
