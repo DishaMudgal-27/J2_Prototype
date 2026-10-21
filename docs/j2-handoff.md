@@ -5,15 +5,14 @@ Start a new Claude chat, connect the agent-studio folder, and say:
 (The round 1 handoff is kept as docs/j2-handoff-round1.md.)
 
 ## Who / what
-Disha (intern, Testlify) builds and tests a prototype of **J2**, a multi-agent "department" designed by her manager
-(Sankalp). Diagram: docs/j2-flow.jpg. J2 page: https://sankalpasawa.github.io/asawa-site/native/system/department.html
+The developer (intern, Testlify) builds and tests a prototype of **J2**, a multi-agent "department" designed by the project owner. Diagram: docs/j2-flow.jpg. J2 page: https://sankalpasawa.github.io/asawa-site/native/system/department.html
 Agents: Identity, Adaptation, Priority, Coordination, Audit (official md files in agents/j2/, NEVER edit them),
 plus one builder agent per workflow; validator is plain code. No CEO: only Identity talks to the user.
 The prototype builds a website from a user's brief. Claude Code (in the project) does all code changes;
 this chat plans, writes prompts for Claude Code, reads runs and writes reports.
 
 ## Documents (Claude Docs)
-- Round 1 findings (already shared with manager): https://claude.ai/code/artifact/4503e532-d714-45ad-9cdc-5b3872fb533d
+- Round 1 findings (already shared with the project owner): https://claude.ai/code/artifact/4503e532-d714-45ad-9cdc-5b3872fb533d
 - Round 1 proposed solutions: https://claude.ai/code/artifact/f6201d73-93a9-4a24-b4e4-f2dd7759ad29
 - Round 2 findings (after changes, 7 Oct runs): https://claude.ai/code/artifact/f09ff16a-ea7f-4b9f-b6a0-f565fe27c312
 Label findings: J2 design / Agent behaviour / Prototype.
@@ -34,7 +33,7 @@ Label findings: J2 design / Agent behaviour / Prototype.
     lsof -ti :8773 | xargs kill        # only if "Address already in use"
     source .venv/bin/activate && J2_FIXES=0 J2_BUDGET=40 J2_MEMORY=0 STUDIO_PROVIDER=claude-cli J2_DELAY=0 python3 j2_server.py
 Open http://127.0.0.1:8773/ . Sharing: second tab `cloudflared tunnel --url http://127.0.0.1:8773` (temporary link,
-uses Disha's Claude subscription, single user at a time, stop with Ctrl+C).
+uses the developer's Claude subscription, single user at a time, stop with Ctrl+C).
 Rules: use only fake numbers starting +91 00000 (a made-up number once hit a real person). Never delete runs/ (evidence).
 
 ## Standard test: clothing shop, low budget
@@ -57,7 +56,7 @@ dupattas 899/1,099); size guide XS32..XXL42; 3 reviews; lookbook 3 outfits; deli
 1. Live check of 94a9a6c: clothing test at budget 40. At the money question type
    "Add 25 more. Leave out the lookbook, new arrivals and reviews." (expect 40->65, items never return);
    next time choose "finish as is" (run must end, no repeat question).
-2. If OK, send Claude Code the SECOND PASS (manager's 8 Oct asks):
+2. If OK, send Claude Code the SECOND PASS (project owner's 8 Oct asks):
    - to_requester / to_agents split for every Identity reply (user never sees @Agent text); Simple view strips any leading @Agent.
    - Simpler user messages: max 3 short sentences + one question, max 3 options, question shown once, no jargon.
    - Owner override: J2_OVERRIDE_KEY in .env (never committed/shown to agents, redacted); "<key> budget +N" ignores cap,
@@ -66,7 +65,7 @@ dupattas 899/1,099); size guide XS32..XXL42; 3 reviews; lookbook 3 outfits; deli
    Mock tests, full suite, commit before/after.
 3. Prove memory: same florist brief 3x with J2_MEMORY=1, compare Playbooks tab.
 4. Test a non-shop site (college fest) for question quality.
-5. Deployment: needs company Anthropic API key + hosting account (manager said ok if not too much effort; Tesla team can help).
+5. Deployment: needs company Anthropic API key + hosting account (project owner said ok if not too much effort; Tesla team can help).
 6. Update round 2 doc / write round 3 findings after these runs.
 
 ## Risks and corrections (added 8 Oct, read before writing prompts)
@@ -90,7 +89,7 @@ dupattas 899/1,099); size guide XS32..XXL42; 3 reviews; lookbook 3 outfits; deli
 - Budget rule for the document chain: 387792d to e1e4607.
 - Tests: `python3 j2_flow_test.py --fast` and `--fast --browser` both pass at e1e4607.
 
-**J2_SLIM=1** (off by default; the old path is unchanged and tested)
+**J2_SLIM** (on by default; `J2_SLIM=0` reproduces the older full prompts, commit f6938b2)
 - A builder gets its own section's HTML plus a short manifest of other atoms' agent_output (ids, sections, selectors), not the whole page.
 - Finished atoms in the shared state shrink to id, status and agent_output. Audit still sees the full page. Coordination's role and wording are unchanged.
 
