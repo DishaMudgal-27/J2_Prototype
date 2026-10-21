@@ -69,13 +69,25 @@ In a finished run the page says "left open", never "running".
   addressed to them), and function to function (`who` to `next`). Messages to and from workflow agents (W-n) are not drawn.
   Up to three function-to-function pairs are drawn as thin dotted lines with their counts; more go in a small table under
   the row, so lines never cross.
-- `made`: a function to a step, `n` = its AI calls in that step. Only where `documents.json` recorded the call range (the
-  PRD, HLD and LLD steps); for the site and a deed the step says "which function made this step: not recorded". Shown in a
-  table ("Who made each step"), not as lines.
+- `speaks_to` from a function to a work box (`to` is `work:...`), from recorded data only, `n` and `label` say what:
+  - Identity to the Charter: `label: "wrote the charter"`, `n: null` (from `goal.json`; the run recorded no count).
+  - each function to the PRD, HLD and LLD boxes: `label: "calls"`, `n` = its AI calls in the call range `documents.json`
+    recorded for that document.
+  - Audit to every box that has an audit in `stage-*.json` (documents and website; a plain site run uses `audits.json`):
+    `label: "audits"`, `n` = the number of audits, unless the call range already gave Audit a `calls` edge.
+  - The website and a deed get only the Audit line. Anything without a line is listed in `not_recorded`
+    ("which function worked on X: not recorded", or "which other function worked on X (only Audit is recorded)").
+  These replace the earlier `made` edges. A step node still has `made_by` (the same call counts per step) for the
+  "Who made each step" table.
 - `draws_on`: a later version.
 
 ## The page
 
+Function-to-work lines use the same dotted "speaks to" style, are drawn under the boxes and stop at the top of a box, so
+they never hide text. They are faint by default; hovering or clicking a function (or focusing it and pressing Enter)
+highlights its lines and shows each count; a click keeps it highlighted until the next click. With more than 12 lines
+none is shown until a function is hovered or clicked. A small "view" link on each function opens its tab.
 `renderMap(map)` is one pure function: inline SVG at wide widths and a card list at 600px and under (the functions and the
-work as a top-to-bottom list with "speaks to ...", "hands off to ..." and "made by ..." lines). Status is never colour alone. Every box with a `file` links to its Open view
+work as a top-to-bottom list: "speaks to ...", "worked on: ..." on a function, "made with: Identity 3, Audit 2" on a work box,
+"hands off to ...", and "made by ..." on a step; no SVG lines). Status is never colour alone. Every box with a `file` links to its Open view
 in the Artifacts tab; the full text is in a tooltip. All text goes through the Detailed view's plain-words helper.

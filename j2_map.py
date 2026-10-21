@@ -15,7 +15,7 @@ import j2_artifacts as A
 
 SCHEMA = "map/1"
 NODE_KINDS = ("person", "function", "engine", "work", "know")      # v2 draws person, function, engine and work
-EDGE_KINDS = ("handoff", "step", "speaks_to", "made", "draws_on")   # v2 draws handoff, step and speaks_to; made is listed, not drawn
+EDGE_KINDS = ("handoff", "step", "speaks_to", "draws_on")           # speaks_to: Requester and Identity, function and function, function and work
 STATUSES = ("filed", "running", "waiting", "waiting_on_you", "fault", "left_open", "not_made", "idle")
 WORDS = {"filed": "filed and checked", "running": "running now", "waiting_on_you": "waiting on you", "waiting": "waiting", "fault": "fault",
          "left_open": "left open", "not_made": "not made", "idle": "idle"}
@@ -135,6 +135,40 @@ def _functions(chat, calls, snap, requester_waiting, nr):
         if not said and not snap:
             nr.append(f"what {NAMES[fn]} did (chat)")
         out.append(node)
+    return out
+
+
+def _work_lines(d, work, calls, docs, nr):
+    """speaks_to edges from a function to a work box it acted on, from recorded data only: Identity to the Charter
+    (goal.json); each function to a document by its AI calls in the range documents.json recorded; Audit to every box that
+    has an audit in stage-*.json. Nothing else is drawn: the rest is listed as not recorded, never guessed."""
+    audits = {}
+    for f in sorted(os.listdir(d)):
+        m = re.fullmatch(r"stage-(\w+)\.json", f)
+        if m:
+            audits[m.group(1)] = len((_read(d, f, {}) or {}).get("audits") or [])
+    site = next((n for n in work if n["id"] == "work:website" and n.get("file")), None)
+    if site and "website" not in audits and isinstance(_read(d, "audits.json"), list):      # a plain site run has no stage file: its audits are audits.json
+        audits["website"] = len(_read(d, "audits.json"))
+    out = []
+    for n in work:
+        if n["kind"] != "work" or n["status"] == "not_made":
+            continue
+        k = n["id"].split(":")[1]
+        got = {}
+        if k == "charter":
+            out.append({"from": "fn:identity", "to": n["id"], "kind": "speaks_to", "label": "wrote the charter", "n": None, "basis": "recorded"})
+            continue
+        rng = (docs.get(k) or {}).get("calls")
+        if rng and calls:
+            got = {fn: sum(1 for c in calls if c.get("fn") == fn and rng["from"] <= c.get("id", 0) <= rng["to"]) for fn in FUNCS}
+            got = {fn: c for fn, c in got.items() if c}
+            out += [{"from": f"fn:{fn}", "to": n["id"], "kind": "speaks_to", "label": "calls", "n": c, "basis": "recorded"} for fn, c in got.items()]
+        if audits.get(k) and "audit" not in got:
+            out.append({"from": "fn:audit", "to": n["id"], "kind": "speaks_to", "label": "audits", "n": audits[k], "basis": "recorded"})
+            got["audit"] = audits[k]
+        if not rng:      # no call range: only an audit count is recorded, or nothing
+            nr.append(f"which other function worked on {n['label']} (only Audit is recorded)" if got else f"which function worked on {n['label']}: not recorded")
     return out
 
 
@@ -276,19 +310,15 @@ def build(d, live=None):
         nr.append("AI calls per function (calls.jsonl)")
     funcs = _functions(chat, calls, snap if live else None, waiting, nr)
     speaks = _speaks(chat, bool(chat))
-    made_edges = []
     docs = _read(d, "documents.json", {}) or {}
     for st in steps:      # which functions made a step: only where documents.json recorded the call range
-        k = st["id"].split(">")[1]
-        rng = (docs.get(k) or {}).get("calls")
+        rng = (docs.get(st["id"].split(">")[1]) or {}).get("calls")
         if rng and calls:
             per = {fn: sum(1 for c in calls if c.get("fn") == fn and rng["from"] <= c.get("id", 0) <= rng["to"]) for fn in FUNCS}
-            per = {fn: n for fn, n in per.items() if n}
-            st["made_by"] = {"calls": rng, "functions": per, "basis": "recorded"}
-            made_edges += [{"from": f"fn:{fn}", "to": st["id"], "kind": "made", "label": None, "n": n, "basis": "recorded"} for fn, n in per.items()]
+            st["made_by"] = {"calls": rng, "functions": {fn: n for fn, n in per.items() if n}, "basis": "recorded"}
         else:
             st["made_by"] = None
-            nr.append(f"which function made the step into {st['id'].split('>')[1]}")
+    lines = _work_lines(d, work, calls, docs, nr)
     if state == "not recorded":
         nr.append("how the run ended (summary.json)")
     # interleave the steps with the boxes in drawing order
@@ -305,7 +335,7 @@ def build(d, live=None):
     ch = _checks(atoms)
     return {"schema": SCHEMA, "run": os.path.basename(d), "live": bool(live),
             "status": {"state": state, "state_status": state_status, "checks": ch},
-            "nodes": out_nodes, "edges": edges + handoffs + speaks + made_edges, "legend": LEGEND, "built_from": built_from,
+            "nodes": out_nodes, "edges": edges + handoffs + speaks + lines, "legend": LEGEND, "built_from": built_from,
             "not_recorded": list(dict.fromkeys(nr + ["messages to and from workflow agents (W-n) are not drawn",
                                                      "what the work draws on (Knows row, later version)"]))}
 

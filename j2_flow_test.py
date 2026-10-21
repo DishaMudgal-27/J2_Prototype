@@ -5088,7 +5088,7 @@ def map_tab():
     assert sum(1 for e in saved["edges"] if e["kind"] == "step") == 8
     ck = [x for a in atoms for x in a["verification"] if x["met"] is not None]
     assert saved["status"] == {"state": "Done", "state_status": "idle", "checks": {"passed": sum(x["met"] is True for x in ck), "run": len(ck)}}
-    assert "version of Charter" in saved["not_recorded"] and "which function made the step into website" in saved["not_recorded"] and \
+    assert "version of Charter" in saved["not_recorded"] and "which other function worked on Website (only Audit is recorded)" in saved["not_recorded"] and \
         any("Knows row" in x for x in saved["not_recorded"]) and not any("Functions row" in x for x in saved["not_recorded"]) and \
         not any(n["kind"] == "know" for n in saved["nodes"]) and "messages to and from workflow agents (W-n) are not drawn" in saved["not_recorded"]
     assert [l["key"] for l in saved["legend"] if not l["drawn"]] == []
@@ -5106,7 +5106,7 @@ def map_tab():
             "input": sum((c["tokens"] or {}).get("input", 0) for c in mine), "output": sum((c["tokens"] or {}).get("output", 0) for c in mine)}, n["id"]
         assert n["status"] == "idle" and n["detail"] == "last seen: " + said[-1]["text"][:140], n["id"]
     assert not any(n["status"] in ("running", "waiting") for n in fnn) and "running" not in json.dumps([n["status"] for n in saved["nodes"] if n["row"] != "work"])
-    ud = [(e["from"], e["to"], e["n"]) for e in saved["edges"] if e["kind"] == "speaks_to"]      # speaks to: counts from the chat
+    ud = [(e["from"], e["to"], e["n"]) for e in saved["edges"] if e["kind"] == "speaks_to" and not e["to"].startswith("work:")]      # speaks to: counts from the chat
     want = collections.Counter((m["who"], m["next"]) for m in chat if m.get("who") in ("identity", "adaptation", "priority", "coordination", "audit")
                                and m.get("next") in ("identity", "adaptation", "priority", "coordination", "audit") and m["who"] != m["next"])
     assert ud[:2] == [("person:requester", "fn:identity", sum(1 for m in chat if m.get("who") == "user")),
@@ -5117,9 +5117,22 @@ def map_tab():
         rng, st = docs_rec[k]["calls"], next(n for n in saved["nodes"] if n["id"] == f"step:{step}")
         per = {f: sum(1 for c in calls if c["fn"] == f and rng["from"] <= c["id"] <= rng["to"]) for f in ("identity", "adaptation", "priority", "coordination", "audit")}
         assert st["made_by"] == {"calls": rng, "functions": {f: n for f, n in per.items() if n}, "basis": "recorded"}, step
-        assert {(e["from"][3:], e["n"]) for e in saved["edges"] if e["kind"] == "made" and e["to"] == f"step:{step}"} == {(f, n) for f, n in per.items() if n}
+        assert {(e["from"][3:], e["n"], e["label"]) for e in saved["edges"] if e["kind"] == "speaks_to" and e["to"] == f"work:{k}"} == {(f, n, "calls") for f, n in per.items() if n}
     assert next(n for n in saved["nodes"] if n["id"] == "step:lld>website")["made_by"] is None      # the site: not recorded, never guessed
-    assert not [e for e in saved["edges"] if e["kind"] == "made" and e["to"] == "step:lld>website"]
+    # function to work, golden: recorded data only. Identity to the Charter; each function to a document by its calls in the recorded range;
+    # the site and a deed get only Audit (its audits in stage-*.json); nothing is a "made" edge any more
+    lines = [(e["from"][3:], e["to"][5:], e["n"], e["label"], e["basis"]) for e in saved["edges"] if e["kind"] == "speaks_to" and e["to"].startswith("work:")]
+    stage_web = json.load(open(os.path.join(run.dir, "stage-website.json")))
+    exp = [("identity", "charter", None, "wrote the charter", "recorded")]
+    for k in ("prd", "hld", "lld"):
+        rng = docs_rec[k]["calls"]
+        exp += [(f, k, by_fn(f, rng, calls), "calls", "recorded") for f in ("identity", "adaptation", "priority", "coordination", "audit") if by_fn(f, rng, calls)]
+    exp += [("audit", "website", len(stage_web["audits"]), "audits", "recorded")]
+    assert lines == exp, (lines, exp)
+    assert not any(e["kind"] == "made" for e in saved["edges"]) and not [e for e in saved["edges"] if e["kind"] == "speaks_to" and e["to"].startswith("step:")]
+    assert not [x for x in lines if x[1] == "website" and x[0] != "audit"], "the site gets only the Audit line"
+    for k in ("prd", "hld", "lld"):      # every document with an audit in its stage file has an Audit line
+        assert json.load(open(os.path.join(run.dir, f"stage-{k}.json")))["audits"] and any(x[0] == "audit" and x[1] == k for x in lines)
     assert by["person:requester"]["detail"] == "1 message from you" and by["person:requester"]["status"] == "idle"
     # a plain website run has the Charter and the site only; a PRD-only run has no site
     plain = docs_run(BREW_LAB, 200)
@@ -5142,7 +5155,20 @@ def map_tab():
     f3 = [n for n in m3["nodes"] if n["kind"] == "function"]
     assert len(f3) == 5 and all(n["detail"] == "no message recorded" and n["status"] == "idle" for n in f3)
     assert "what Identity did (chat)" in m3["not_recorded"] and next(n for n in m3["nodes"] if n["id"] == "person:requester")["detail"] == "not recorded"
-    assert not [e for e in m3["edges"] if e["kind"] == "speaks_to"] and not [e for e in m3["edges"] if e["kind"] == "made"]
+    assert not [e for e in m3["edges"] if e["kind"] == "speaks_to" and not e["to"].startswith("work:")] and not [e for e in m3["edges"] if e["kind"] == "made"]
+    # an old run with no call ranges (no documents.json): only the Charter line and Audit's audits are drawn, the rest is listed as not recorded
+    for f in [x for x in os.listdir(old) if x == "documents.json"]:
+        os.remove(os.path.join(old, f))
+    m4 = M.build(old)
+    l4 = [(e["from"][3:], e["to"][5:], e["label"]) for e in m4["edges"] if e["kind"] == "speaks_to" and e["to"].startswith("work:")]
+    assert l4 == [("identity", "charter", "wrote the charter"), ("audit", "prd", "audits"), ("audit", "hld", "audits"), ("audit", "lld", "audits"), ("audit", "website", "audits")], l4
+    for lab in ("Product requirements", "High-level design", "Low-level design", "Website"):
+        assert f"which other function worked on {lab} (only Audit is recorded)" in m4["not_recorded"], lab
+    for f in [x for x in os.listdir(old) if x.startswith("stage-")]:
+        os.remove(os.path.join(old, f))
+    m5 = M.build(old)
+    l5 = [(e["from"][3:], e["to"][5:]) for e in m5["edges"] if e["kind"] == "speaks_to" and e["to"].startswith("work:")]
+    assert l5 == [("identity", "charter"), ("audit", "website")] and "which function worked on Product requirements: not recorded" in m5["not_recorded"], l5      # the site's audits are still in audits.json
     assert M.build(None)["nodes"] == [] and M.build(os.path.join(run.dir, "nope"))["not_recorded"] == ["run not found"]
     # statuses: a finished run says "left open", never "running"; fault and not made
     edit = os.path.join(j2.RUNS_DIR, "j2-20200103-000000")
@@ -5244,7 +5270,7 @@ def map_tab():
     mp2 = {**mp, "nodes": [nodes[0], *fnodes, *nodes[1:]], "edges": edges + few}
     out2 = render_node(snap, docs={"docs": {}, "map": mp2})["map"]
     svg2 = out2[out2.index("<svg class=\"mapsvg\""):out2.index("</svg>", out2.index("<svg class=\"mapsvg\"")) + 6]
-    fbox = lambda k: svg2.split(f'data-maptab="{ {"identity": "charter", "adaptation": "workflows", "priority": "conflicts", "coordination": "timeline", "audit": "audit"}[k] }"')[1].split("</a>")[0]
+    fbox = lambda k: svg2.split(f'data-fn="fn:{k}"')[1].split('<a href="#" data-maptab=')[0]
     assert ">FUNCTIONS</text>" in svg2 and svg2.index(">PEOPLE<") < svg2.index(">FUNCTIONS<") < svg2.index(">WORK<") and svg2.count("data-maptab=") == 5
     assert fbox("identity").count("<rect") == 2 and ">running now<" in fbox("identity") and "writing the charter" in fbox("identity") and ">3 calls<" in fbox("identity")      # double = running now
     assert 'stroke="var(--validator)" stroke-width="4"' in fbox("adaptation") and ">?</text>" in fbox("adaptation") and ">waiting on Priority<" in fbox("adaptation")
@@ -5263,6 +5289,31 @@ def map_tab():
     assert cards2.count('data-node="fn:') == 5 and cards2.count('class="mapcard st-') == 1 + 5 + 6 and "speaks to Adaptation · 4" in cards2 and "speaks to Priority · 7" in cards2
     assert "waiting on Priority" in cards2 and "blocked" in cards2 and "speaks to Identity · 2" in cards2 and "Identity speaks to you · 5" in cards2 and "<b>?</b>" in cards2
     assert 'data-maptab="charter"' in cards2 and not re.search(r"envelope|done.when", out2 + out3, re.I)
+    # function-to-work lines: drawn under the boxes, faint, highlighted per function (hover, click), only on demand when there are many
+    wk = lambda f, t, n, lab="calls": {"from": f, "to": t, "kind": "speaks_to", "label": lab, "n": n, "basis": "recorded"}
+    few_w = [wk("fn:identity", "work:t0", None, "wrote the charter"), wk("fn:identity", "work:t1", 2), wk("fn:audit", "work:t1", 1, "audits"), wk("fn:coordination", "work:t3", 4)]
+    o4 = render_node(snap, docs={"docs": {}, "map": {**mp2, "edges": edges + few + few_w}, "mappin": "fn:identity"})["map"]
+    s4 = o4[o4.index("<svg class=\"mapsvg"):o4.index("</svg>", o4.index("<svg class=\"mapsvg")) + 6]
+    assert re.findall(r'<path class="mapln" data-from="([^"]+)" data-to="([^"]+)"', s4) == [("fn:identity", "work:t0"), ("fn:identity", "work:t1"), ("fn:audit", "work:t1"), ("fn:coordination", "work:t3")]
+    assert s4.startswith('<svg class="mapsvg" data-pin="fn:identity"') and ">wrote it<" in s4 and re.findall(r'class="maplbl" data-from="[^"]+" data-to="[^"]+" x="[^"]+" y="[^"]+">([^<]+)<', s4) == ["wrote it", "2", "1", "4"]
+    for fid in ("identity", "adaptation", "priority", "coordination", "audit"):      # the rules that highlight one function's lines and labels
+        assert f'.mapsvg[data-hover="fn:{fid}"] .mapln[data-from="fn:{fid}"],.mapsvg[data-pin="fn:{fid}"] .mapln[data-from="fn:{fid}"]{{opacity:1;stroke-width:2.2}}' in s4 and \
+            f'.mapsvg[data-pin="fn:{fid}"] .maplbl[data-from="fn:{fid}"]{{opacity:1}}' in s4, fid
+    assert ".mapln{opacity:.2}" in s4 and ".maplbl{opacity:0" in s4 and ".mapsvg.many .mapln{opacity:0}" in s4      # faint by default; hidden when many
+    assert len(re.findall(r'<g class="mapfn"[^>]*aria-pressed="true"', s4)) == 1 and 'data-fn="fn:identity" tabindex="0" role="button" aria-pressed="true"' in s4 and 'data-fn="fn:audit" tabindex="0" role="button" aria-pressed="false"' in s4
+    assert s4.index('class="mapln"') < s4.index('class="mapfn"') < s4.index('data-mapopen=') and s4.rindex('class="mapln"') < s4.index('class="mapfn"'), "lines are drawn under the boxes"
+    ends = [re.search(r'd="M[\d.]+ ([\d.]+) C[^"]* ([\d.]+)"', x).groups() for x in re.findall(r'<path class="mapln"[^>]*>', s4)]
+    assert len({a for a, _ in ends}) == 1 and all(float(b) == float(a) + 90 for a, b in ends), "lines run in the gap between the rows and stop at the top of the box"
+    for tip in ("Identity wrote the Box 0 with a very long name", "Identity made 2 AI calls on Box 1 with a very long name", "Audit audited Box 1 with a very long name 1 time", "Coordination made 4 AI calls on Box 3 with a very long name"):
+        assert f"<title>{tip}</title>" in s4, tip
+    assert 'class="mapsvg many"' not in s4, "four lines are not many"
+    lots = [wk(f"fn:{f}", f"work:t{i}", i + 1) for i in range(5) for f in ("identity", "adaptation", "priority")]      # 15 lines
+    s5 = (lambda o: o[o.index("<svg class=\"mapsvg"):o.index("</svg>", o.index("<svg class=\"mapsvg")) + 6])(render_node(snap, docs={"docs": {}, "map": {**mp2, "edges": edges + lots}})["map"])
+    assert s5.startswith('<svg class="mapsvg many"') and s5.count('class="mapln"') == 15, "more than 12 lines: shown only on hover or click"
+    c4 = o4.split('<div class="mapcards">')[1].split('<div class="maplegend"')[0]      # small screens: no lines, plain sentences
+    assert "mapln" not in c4 and "made with: Identity, " not in c4 and "made with: Identity 2, Audit 1" in c4 and "which function worked on this: not recorded" in c4
+    assert "worked on: Box 0 with a very long name, Box 1 with a very long name 2" in c4 and "worked on: Box 1 with a very long name 1" in c4 and "worked on: Box 3 with a very long name 4" in c4
+    assert not re.search(r"envelope|done.when", o4 + s5, re.I)
     out = render_node(snap, docs={"docs": {}, "map": mp})["map"]
     svg = out[out.index("<svg class=\"mapsvg\""):out.index("</svg>", out.index("<svg class=\"mapsvg\"")) + 6]
     assert out.count("data-mapopen=") >= 6 * 2 and 'data-mapopen="f0.md"' in svg and 'aria-label="Open Box 0 with a very long name"' in svg      # linked in the SVG and in the cards
@@ -5296,6 +5347,12 @@ def map_tab():
     assert "<caption>Who made each step (calls by function)</caption>" in real and "<td>Low-level design to Website</td><td>not recorded</td>" in real
     assert "<td>Charter to Product requirements</td><td>%d</td>" % by_fn("identity", docs_rec["prd"]["calls"], calls) in real
     rc = real.split('<div class="mapcards">')[1].split('<div class="maplegend"')[0]
+    lab = {k: by[f"work:{k}"]["label"] for k in ("prd", "hld", "lld", "website")}
+    mw = lambda k: ", ".join(f"{f.capitalize()} {n}" for f, t, n, lb, _ in lines if t == k)
+    assert f"made with: {mw('prd')}" in rc and f"made with: {mw('lld')}" in rc and "made with: Audit 2" in rc and "made with: Identity<" in rc.replace("</div>", "<")
+    assert rc.count("which other function worked on this: not recorded") == 1 and "worked on: Charter, " + lab["prd"] + " " + str(by_fn("identity", docs_rec["prd"]["calls"], calls)) in rc
+    assert "worked on: " + lab["prd"] + " 1, " + lab["hld"] + " 1, " + lab["lld"] + " 1, " + lab["website"] + " 2" in rc      # Audit
+    assert real.split("<svg")[1].split(">")[0].startswith(' class="mapsvg many"') and real.count('class="mapln"') == len([x for x in lines]), "17 lines: only on hover or click"
     assert "which function made this step: not recorded" in rc and "made by Identity 2, Adaptation 1, Priority 1, Coordination 6, Audit 1" in rc and rc.count('data-node="fn:') == 5
     # a browser: no sideways scroll at 500px, cards shown, SVG hidden; the tab sits after Artifacts and the pane reads plain
     chrome = j2.j2_check.find_chrome()
@@ -5304,12 +5361,39 @@ def map_tab():
         css = re.search(r"<style>(.*?)</style>", ui, re.S).group(1)
         page = os.path.join(tempfile.mkdtemp(prefix="j2-map-"), "map.html")
         open(page, "w", encoding="utf-8").write(f"<html><head><meta name=viewport content='width=device-width'><style>{css}</style></head><body>{real}"
-            "<script>document.body.setAttribute('data-m', [document.documentElement.scrollWidth, innerWidth, getComputedStyle(document.querySelector('.mapsvgwrap')).display, getComputedStyle(document.querySelector('.mapcards')).display].join('|'))</script></body></html>")
-        for width, want in ((500, "none|block"), (1100, "block|none")):
+            "<script>document.body.setAttribute('data-m', [document.documentElement.scrollWidth, innerWidth, getComputedStyle(document.querySelector('.mapsvgwrap')).display, getComputedStyle(document.querySelector('.mapcards')).display, [...document.querySelectorAll('.mapln')].every(x => x.getBoundingClientRect().width === 0)].join('|'))</script></body></html>")
+        for width, want in ((500, "none|block|true"), (1100, "block|none|false")):
             dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", f"--window-size={width},800", "--virtual-time-budget=2000", "--dump-dom", "file://" + page],
                                  capture_output=True, text=True, timeout=120).stdout
-            sw, iw, a, b = re.search(r'data-m="([^"]+)"', dom).group(1).split("|")
-            assert int(sw) <= int(iw) and f"{a}|{b}" == want, (width, sw, iw, a, b)
+            sw, iw, a, b, c = re.search(r'data-m="([^"]+)"', dom).group(1).split("|")
+            assert int(sw) <= int(iw) and f"{a}|{b}|{c}" == want, (width, sw, iw, a, b, c)      # at 500px the function-to-work lines take no space
+    if chrome and BROWSER:      # the real page: hover, click and click again on function boxes highlight and release their lines
+        import subprocess
+        tmp = tempfile.mkdtemp(prefix="j2-maphl-")
+        probe = ("<script>setTimeout(() => { const q = s => [...document.querySelectorAll(s)], op = s => q(s).map(x => getComputedStyle(x).opacity), svg = () => document.querySelector('.mapsvg'), r = {},"
+                 "fire = (el, t) => el.dispatchEvent(new MouseEvent(t, {bubbles: true})), fn = id => document.querySelector('.mapfn[data-fn=\"fn:' + id + '\"]');"
+                 "r.many = svg().classList.contains('many'); r.idle = op('.mapln'); r.idleLbl = op('.maplbl');"
+                 "fire(fn('coordination'), 'mouseover'); r.hoverOwn = op('.mapln[data-from=\"fn:coordination\"]'); r.hoverOther = op('.mapln[data-from=\"fn:identity\"]'); r.lblOwn = op('.maplbl[data-from=\"fn:coordination\"]'); r.lblOther = op('.maplbl[data-from=\"fn:audit\"]');"
+                 "fire(fn('coordination'), 'mouseout'); r.after = op('.mapln[data-from=\"fn:coordination\"]');"
+                 "fire(fn('coordination'), 'click'); r.pin = svg().dataset.pin; r.pinOwn = op('.mapln[data-from=\"fn:coordination\"]'); r.pressed = fn('coordination').getAttribute('aria-pressed'); r.pinOther = op('.mapln[data-from=\"fn:identity\"]');"
+                 "fire(fn('audit'), 'click'); r.repin = svg().dataset.pin; fire(fn('audit'), 'click'); r.unpin = svg().dataset.pin;"
+                 "document.body.setAttribute('data-r', JSON.stringify(r)); }, 4500)</script>")
+        open(os.path.join(tmp, "j2_ui.html"), "w", encoding="utf-8").write(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "j2_ui.html"), encoding="utf-8").read().replace("</body>", probe + "</body>"))
+        keep_here, j2_server.HERE = j2_server.HERE, tmp
+        keep, j2_server.RUN = j2_server.RUN, run
+        srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        try:
+            dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=12000", "--dump-dom",
+                                  f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={name}"], capture_output=True, text=True, timeout=180).stdout
+        finally:
+            j2_server.HERE, j2_server.RUN = keep_here, keep
+            srv.shutdown()
+        got = json.loads(htmllib.unescape(re.search(r'data-r="([^"]*)"', dom).group(1)))
+        assert got["many"] is True and set(got["idle"]) == {"0"} and set(got["idleLbl"]) == {"0"}, got      # 17 lines: nothing drawn until a function is hovered or clicked
+        assert got["hoverOwn"] and set(got["hoverOwn"]) == {"1"} and set(got["hoverOther"]) == {"0"} and set(got["lblOwn"]) == {"1"} and set(got["lblOther"]) == {"0"}, got
+        assert set(got["after"]) == {"0"} and got["pin"] == "fn:coordination" and set(got["pinOwn"]) == {"1"} and got["pressed"] == "true" and set(got["pinOther"]) == {"0"}, got
+        assert got["repin"] == "fn:audit" and got["unpin"] == "", got      # another click moves the highlight; clicking it again releases it
     if chrome and BROWSER:      # the real page, a saved run: the Map tab is after Artifacts and its pane reads in plain words
         import subprocess
         keep, j2_server.RUN = j2_server.RUN, run
@@ -5325,7 +5409,7 @@ def map_tab():
         text = htmllib.unescape(re.sub(r"<[^>]+>", " ", pane))
         assert "Product requirements" in text and re.search(r"\d+ of \d+ checks passed", text) and "Done" in text, text[:300]
         assert 'data-mapopen="prd.md"' in pane and 'data-maptab="charter"' in pane and "FUNCTIONS" in pane and not re.search(r"envelope|done.when", text, re.I), "plain words in the Map tab"
-        boxes = [x.split("</a>")[0] for x in pane.split('data-maptab="')[1:6]]      # the five function boxes in the page (the legend may say "running now")
+        boxes = [x.split('<a href="#" data-maptab=')[0] for x in pane.split('data-fn="')[1:6]]      # the five function boxes in the page (the legend may say "running now")
         assert len(boxes) == 5 and all("last seen: " in b and "running now" not in b and ">waiting on" not in b for b in boxes), "a saved run never says running"
         assert dom.index('data-tab="artifacts"') < dom.index('data-tab="map"')
     print("map: map.json written beside atoms.json and equal to the folder's build, golden nodes/edges/statuses, counts from the atoms, "
