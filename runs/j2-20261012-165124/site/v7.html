@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spark 2026</title>
+<!-- J2:style head start (owner W-1) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;700&amp;display=swap"><style>:root{--j2-primary:#FFD60A;--j2-secondary:#22D3EE;--j2-accent:#FF3D9A;--j2-background:#0B0B1A;--j2-surface:#171730;--j2-text:#F5F5FF;--j2-muted:#B4B4D0;--j2-font-heading:'Space Grotesk', 'Segoe UI', system-ui, sans-serif;--j2-font-body:'Inter', 'Segoe UI', system-ui, sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:14px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#FFD60A;color:#0B0B1A;border:2px solid #FFD60A;min-height:48px;padding:12px 24px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-btn-secondary{display:inline-block;background:transparent;color:#22D3EE;border:2px solid #22D3EE;min-height:48px;padding:12px 24px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-card{background:#171730;border:1px solid #2C2C52;padding:24px;color:#F5F5FF}</style>
+<!-- J2:style head end -->
+<!-- J2:W-1 head start (owner W-1) -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden}
+body{background:var(--j2-background,#0B0B1A);color:var(--j2-text,#F5F5FF);font-family:var(--j2-font-body,'Inter',system-ui,sans-serif);line-height:1.6}
+img,svg{max-width:100%}
+</style>
+<!-- J2:W-1 head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<section id="hero">
+<style>
+#hero{position:relative;overflow:hidden;padding:48px 20px 56px;background:radial-gradient(circle at 15% 10%,rgba(255,61,154,.28),transparent 45%),radial-gradient(circle at 90% 30%,rgba(34,211,238,.22),transparent 45%),var(--j2-background,#0B0B1A)}
+#hero .hero-inner{max-width:1100px;margin:0 auto;display:grid;gap:32px;align-items:center}
+#hero .hero-eyebrow{display:inline-block;margin:0 0 16px;padding:6px 14px;border:1px solid var(--j2-secondary,#22D3EE);border-radius:999px;color:var(--j2-secondary,#22D3EE);font-size:.85rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+#hero h1{margin:0 0 16px;font-family:var(--j2-font-heading,'Space Grotesk',sans-serif);font-size:clamp(2.75rem,13vw,5.75rem);line-height:1;font-weight:700;letter-spacing:-.02em;overflow-wrap:break-word;background:linear-gradient(90deg,var(--j2-primary,#FFD60A),var(--j2-accent,#FF3D9A));-webkit-background-clip:text;background-clip:text;color:transparent}
+#hero .hero-college{margin:0 0 8px;font-family:var(--j2-font-heading,'Space Grotesk',sans-serif);font-size:clamp(1.15rem,5vw,1.75rem);font-weight:700;overflow-wrap:break-word}
+#hero .hero-dates{margin:0;font-size:clamp(1.05rem,4.5vw,1.4rem);font-weight:600;color:var(--j2-primary,#FFD60A)}
+#hero .hero-copy{min-width:0}
+#hero .photo-placeholder{display:flex;align-items:center;justify-content:center;text-align:center;width:100%;aspect-ratio:4/3;padding:16px;border:2px dashed var(--j2-secondary,#22D3EE);border-radius:var(--j2-radius,14px);background:repeating-linear-gradient(135deg,rgba(255,255,255,.04) 0 14px,rgba(255,255,255,.08) 14px 28px);color:var(--j2-muted,#B4B4D0);font-weight:600;letter-spacing:.04em}
+@media (min-width:800px){
+#hero{padding:88px 32px 96px}
+#hero .hero-inner{grid-template-columns:1.1fr .9fr;gap:56px}
+}
+</style>
+<div class="hero-inner">
+<div class="hero-copy">
+<p class="hero-eyebrow">College tech fest</p>
+<h1>Spark 2026</h1>
+<p class="hero-college">Northfield College of Engineering, Pune</p>
+<p class="hero-dates">14 to 16 February 2027</p>
+</div>
+<div class="photo-placeholder" role="img" aria-label="Photo placeholder">Photo placeholder</div>
+</div>
+</section>
+<!-- J2:W-1 end -->
+<!-- J2:W-2 start (owner W-2) -->
+<section id="schedule">
+<style>
+#schedule{padding:var(--j2-section,64px) 20px}
+#schedule .sch-inner{max-width:1100px;margin:0 auto;min-width:0}
+#schedule h2{margin:0 0 8px;font-family:var(--j2-font-heading);font-size:clamp(2rem,8vw,3rem);line-height:1.1;font-weight:700;color:var(--j2-text)}
+#schedule .sch-intro{margin:0 0 24px;color:var(--j2-muted)}
+#schedule .tab-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 24px}
+#schedule .day-tab{min-width:0;min-height:48px;padding:12px 8px;border:2px solid var(--j2-secondary);border-radius:var(--j2-radius);background:transparent;color:var(--j2-secondary);font-family:var(--j2-font-heading);font-size:.95rem;font-weight:700;line-height:1.2;cursor:pointer;overflow-wrap:break-word}
+#schedule .day-tab[aria-selected="true"]{background:var(--j2-primary);border-color:var(--j2-primary);color:var(--j2-background)}
+#schedule .day-tab:focus-visible{outline:3px solid var(--j2-accent);outline-offset:2px}
+#schedule .day-panel[hidden]{display:none}
+#schedule .sch-list{list-style:none;margin:0;padding:0;display:grid;gap:16px}
+#schedule .schedule-item{display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px;border-radius:var(--j2-radius);border-left:6px solid var(--j2-accent);min-width:0}
+#schedule .si-time{flex:0 0 auto;font-family:var(--j2-font-heading);font-size:1.25rem;font-weight:700;color:var(--j2-primary)}
+#schedule .si-body{flex:1 1 180px;min-width:0}
+#schedule .si-name{margin:0 0 4px;font-size:1.25rem;line-height:1.2;color:var(--j2-text);overflow-wrap:break-word}
+#schedule .si-cat{margin:0;font-size:.85rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--j2-secondary)}
+@media (min-width:800px){
+#schedule{padding:var(--j2-section,64px) 32px}
+#schedule .tab-row{max-width:560px;gap:16px}
+#schedule .day-tab{font-size:1.05rem}
+#schedule .si-time{min-width:160px}
+}
+</style>
+<div class="sch-inner">
+<h2>Schedule</h2>
+<p class="sch-intro">Pick a day to see what is on.</p>
+<div class="tab-row" role="tablist" aria-label="Fest days">
+<button type="button" class="day-tab" role="tab" id="tab-day1" aria-controls="panel-day1" aria-selected="true" data-day="1">Day 1 14 Feb</button>
+<button type="button" class="day-tab" role="tab" id="tab-day2" aria-controls="panel-day2" aria-selected="false" tabindex="-1" data-day="2">Day 2 15 Feb</button>
+<button type="button" class="day-tab" role="tab" id="tab-day3" aria-controls="panel-day3" aria-selected="false" tabindex="-1" data-day="3">Day 3 16 Feb</button>
+</div>
+
+<div class="day-panel" role="tabpanel" id="panel-day1" aria-labelledby="tab-day1" data-day="1">
+<ul class="sch-list">
+<li class="schedule-item j2-card">
+<span class="si-time">10am-1pm</span>
+<div class="si-body"><h3 class="si-name">Code Sprint</h3><p class="si-cat">Coding</p></div>
+</li>
+<li class="schedule-item j2-card">
+<span class="si-time">2pm-5pm</span>
+<div class="si-body"><h3 class="si-name">Line Follower</h3><p class="si-cat">Robotics</p></div>
+</li>
+<li class="schedule-item j2-card">
+<span class="si-time">5:30pm-6:30pm</span>
+<div class="si-body"><h3 class="si-name">AI in Daily Life</h3><p class="si-cat">Talks</p></div>
+</li>
+</ul>
+</div>
+
+<div class="day-panel" role="tabpanel" id="panel-day2" aria-labelledby="tab-day2" data-day="2" hidden>
+<ul class="sch-list">
+<li class="schedule-item j2-card">
+<span class="si-time">11am-1pm</span>
+<div class="si-body"><h3 class="si-name">Bug Hunt</h3><p class="si-cat">Coding</p></div>
+</li>
+<li class="schedule-item j2-card">
+<span class="si-time">2pm-4pm</span>
+<div class="si-body"><h3 class="si-name">Poster Jam</h3><p class="si-cat">Design</p></div>
+</li>
+</ul>
+</div>
+
+<div class="day-panel" role="tabpanel" id="panel-day3" aria-labelledby="tab-day3" data-day="3" hidden>
+<ul class="sch-list">
+<li class="schedule-item j2-card">
+<span class="si-time">10am-1pm</span>
+<div class="si-body"><h3 class="si-name">Drone Dash</h3><p class="si-cat">Robotics</p></div>
+</li>
+<li class="schedule-item j2-card">
+<span class="si-time">2pm-5pm</span>
+<div class="si-body"><h3 class="si-name">UI Duel</h3><p class="si-cat">Design</p></div>
+</li>
+<li class="schedule-item j2-card">
+<span class="si-time">5:30pm-6:30pm</span>
+<div class="si-body"><h3 class="si-name">Startup Stories</h3><p class="si-cat">Talks</p></div>
+</li>
+</ul>
+</div>
+</div>
+<script>
+(function () {
+  var root = document.getElementById('schedule');
+  if (!root) return;
+  var tabs = Array.prototype.slice.call(root.querySelectorAll('.day-tab'));
+  var panels = Array.prototype.slice.call(root.querySelectorAll('.day-panel'));
+  function show(day, focus) {
+    tabs.forEach(function (t) {
+      var on = t.getAttribute('data-day') === day;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.setAttribute('tabindex', on ? '0' : '-1');
+      if (on && focus) t.focus();
+    });
+    panels.forEach(function (p) {
+      if (p.getAttribute('data-day') === day) p.removeAttribute('hidden');
+      else p.setAttribute('hidden', '');
+    });
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { show(t.getAttribute('data-day'), false); });
+    t.addEventListener('keydown', function (e) {
+      var n = null;
+      if (e.key === 'ArrowRight') n = (i + 1) % tabs.length;
+      else if (e.key === 'ArrowLeft') n = (i - 1 + tabs.length) % tabs.length;
+      if (n !== null) { e.preventDefault(); show(tabs[n].getAttribute('data-day'), true); }
+    });
+  });
+  show('1', false);
+})();
+</script>
+</section>
+<!-- J2:W-2 end -->
+<!-- J2:W-3 start (owner W-3) -->
+<section id="events">
+<style>
+#events{padding:var(--j2-section,64px) 20px}
+#events .ev-inner{max-width:1100px;margin:0 auto;min-width:0}
+#events h2{margin:0 0 8px;font-family:var(--j2-font-heading);font-size:clamp(2rem,8vw,3rem);line-height:1.1;font-weight:700;color:var(--j2-text)}
+#events .ev-intro{margin:0 0 24px;color:var(--j2-muted)}
+#events .filter-row{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+#events .filter-btn{flex:1 1 auto;min-width:0;min-height:48px;padding:12px 16px;border:2px solid var(--j2-secondary);border-radius:var(--j2-radius);background:transparent;color:var(--j2-secondary);font-family:var(--j2-font-heading);font-size:.95rem;font-weight:700;line-height:1.2;cursor:pointer}
+#events .filter-btn[aria-pressed="true"]{background:var(--j2-primary);border-color:var(--j2-primary);color:var(--j2-background)}
+#events .filter-btn:focus-visible{outline:3px solid var(--j2-accent);outline-offset:2px}
+#events .ev-count{margin:0 0 24px;font-size:.9rem;color:var(--j2-muted)}
+#events .ev-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+#events .event-card{display:flex;flex-direction:column;gap:8px;min-width:0;border-radius:var(--j2-radius);border-top:6px solid var(--j2-accent)}
+#events .event-card[hidden]{display:none}
+#events .ev-cat{margin:0;font-size:.85rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--j2-secondary)}
+#events .ev-name{margin:0;font-size:1.35rem;line-height:1.2;color:var(--j2-text);overflow-wrap:break-word}
+#events .ev-fee{margin:8px 0 0;font-family:var(--j2-font-heading);font-size:1.5rem;font-weight:700;color:var(--j2-primary)}
+@media (min-width:600px){
+#events .ev-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+#events .filter-btn{flex:0 0 auto;min-width:112px}
+}
+@media (min-width:800px){
+#events{padding:var(--j2-section,64px) 32px}
+}
+@media (min-width:1000px){
+#events .ev-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+</style>
+<div class="ev-inner">
+<h2>Events</h2>
+<p class="ev-intro">Pick a category to see the events and their fees.</p>
+<div class="filter-row" role="group" aria-label="Filter events by category">
+<button type="button" class="filter-btn" data-filter="All" aria-pressed="true">All</button>
+<button type="button" class="filter-btn" data-filter="Coding" aria-pressed="false">Coding</button>
+<button type="button" class="filter-btn" data-filter="Robotics" aria-pressed="false">Robotics</button>
+<button type="button" class="filter-btn" data-filter="Design" aria-pressed="false">Design</button>
+<button type="button" class="filter-btn" data-filter="Talks" aria-pressed="false">Talks</button>
+</div>
+<p class="ev-count" id="ev-count" aria-live="polite">Showing 8 events</p>
+<ul class="ev-grid">
+<li class="event-card j2-card" data-category="Coding">
+<p class="ev-cat">Coding</p>
+<h3 class="ev-name">Code Sprint</h3>
+<p class="ev-fee">Rs 100</p>
+</li>
+<li class="event-card j2-card" data-category="Coding">
+<p class="ev-cat">Coding</p>
+<h3 class="ev-name">Bug Hunt</h3>
+<p class="ev-fee">Rs 50</p>
+</li>
+<li class="event-card j2-card" data-category="Robotics">
+<p class="ev-cat">Robotics</p>
+<h3 class="ev-name">Line Follower</h3>
+<p class="ev-fee">Rs 150</p>
+</li>
+<li class="event-card j2-card" data-category="Robotics">
+<p class="ev-cat">Robotics</p>
+<h3 class="ev-name">Drone Dash</h3>
+<p class="ev-fee">Rs 200</p>
+</li>
+<li class="event-card j2-card" data-category="Design">
+<p class="ev-cat">Design</p>
+<h3 class="ev-name">Poster Jam</h3>
+<p class="ev-fee">Free</p>
+</li>
+<li class="event-card j2-card" data-category="Design">
+<p class="ev-cat">Design</p>
+<h3 class="ev-name">UI Duel</h3>
+<p class="ev-fee">Rs 100</p>
+</li>
+<li class="event-card j2-card" data-category="Talks">
+<p class="ev-cat">Talks</p>
+<h3 class="ev-name">AI in Daily Life</h3>
+<p class="ev-fee">Free</p>
+</li>
+<li class="event-card j2-card" data-category="Talks">
+<p class="ev-cat">Talks</p>
+<h3 class="ev-name">Startup Stories</h3>
+<p class="ev-fee">Free</p>
+</li>
+</ul>
+</div>
+<script>
+(function () {
+  var root = document.getElementById('events');
+  if (!root) return;
+  var buttons = Array.prototype.slice.call(root.querySelectorAll('.filter-btn'));
+  var cards = Array.prototype.slice.call(root.querySelectorAll('.event-card'));
+  var count = root.querySelector('#ev-count');
+  function apply(cat) {
+    var shown = 0;
+    buttons.forEach(function (b) {
+      b.setAttribute('aria-pressed', b.getAttribute('data-filter') === cat ? 'true' : 'false');
+    });
+    cards.forEach(function (c) {
+      var match = cat === 'All' || c.getAttribute('data-category') === cat;
+      if (match) { c.removeAttribute('hidden'); shown++; }
+      else { c.setAttribute('hidden', ''); }
+    });
+    if (count) count.textContent = 'Showing ' + shown + (shown === 1 ? ' event' : ' events');
+  }
+  buttons.forEach(function (b) {
+    b.addEventListener('click', function () { apply(b.getAttribute('data-filter')); });
+  });
+  apply('All');
+})();
+</script>
+</section>
+<!-- J2:W-3 end -->
+<!-- J2:W-4 start (owner W-4) -->
+<section id="register">
+<style>
+#register{padding:var(--j2-section,64px) 20px}
+#register .reg-inner{max-width:720px;margin:0 auto;min-width:0}
+#register h2{margin:0 0 8px;font-family:var(--j2-font-heading);font-size:clamp(2rem,8vw,3rem);line-height:1.1;font-weight:700;color:var(--j2-text)}
+#register .reg-intro{margin:0 0 24px;color:var(--j2-muted)}
+#register .reg-form{display:grid;gap:20px;min-width:0;border-radius:var(--j2-radius);border-top:6px solid var(--j2-primary)}
+#register .reg-field{display:grid;gap:8px;min-width:0}
+#register label{font-family:var(--j2-font-heading);font-size:1rem;font-weight:700;color:var(--j2-text)}
+#register .reg-input{width:100%;min-width:0;min-height:48px;padding:12px 16px;border:2px solid var(--j2-muted);border-radius:var(--j2-radius);background:var(--j2-background);color:var(--j2-text);font-family:var(--j2-font-body);font-size:1rem;line-height:1.4}
+#register select.reg-input{appearance:auto}
+#register .reg-input:focus-visible{outline:3px solid var(--j2-accent);outline-offset:2px;border-color:var(--j2-secondary)}
+#register .reg-hp{display:none}
+#register .reg-submit{width:100%;border-radius:var(--j2-radius);font-family:var(--j2-font-heading);font-size:1.05rem}
+#register .reg-submit:focus-visible{outline:3px solid var(--j2-accent);outline-offset:2px}
+#register .reg-submit[disabled]{opacity:.6;cursor:not-allowed}
+#register .reg-status{margin:0;min-height:1.6em;font-weight:600;overflow-wrap:break-word}
+#register .reg-status[data-state="success"]{color:var(--j2-secondary)}
+#register .reg-status[data-state="error"]{color:var(--j2-accent)}
+#register .reg-note{margin:0;font-size:.9rem;color:var(--j2-muted);overflow-wrap:break-word}
+@media (min-width:800px){
+#register{padding:var(--j2-section,64px) 32px}
+#register .reg-submit{width:auto;justify-self:start;min-width:220px}
+}
+</style>
+<div class="reg-inner">
+<h2>Register</h2>
+<p class="reg-intro">Choose an event and send us your details. We receive them at spark2026@example.com.</p>
+<form class="reg-form j2-card" id="reg-form" method="post" action="https://formsubmit.co/spark2026@example.com">
+<div class="reg-field">
+<label for="reg-name">Name</label>
+<input class="reg-input" type="text" id="reg-name" name="name" autocomplete="name" required>
+</div>
+<div class="reg-field">
+<label for="reg-email">Email</label>
+<input class="reg-input" type="email" id="reg-email" name="email" autocomplete="email" required>
+</div>
+<div class="reg-field">
+<label for="reg-college">College</label>
+<input class="reg-input" type="text" id="reg-college" name="college" autocomplete="organization" required>
+</div>
+<div class="reg-field">
+<label for="reg-event">Event</label>
+<select class="reg-input" id="reg-event" name="event" required>
+<option value="" selected disabled>Choose an event</option>
+<option class="event-option" value="Code Sprint">Code Sprint</option>
+<option class="event-option" value="Bug Hunt">Bug Hunt</option>
+<option class="event-option" value="Line Follower">Line Follower</option>
+<option class="event-option" value="Drone Dash">Drone Dash</option>
+<option class="event-option" value="Poster Jam">Poster Jam</option>
+<option class="event-option" value="UI Duel">UI Duel</option>
+<option class="event-option" value="AI in Daily Life">AI in Daily Life</option>
+<option class="event-option" value="Startup Stories">Startup Stories</option>
+</select>
+</div>
+<input class="reg-hp" type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true">
+<button type="submit" class="j2-btn reg-submit" id="reg-submit">Register now</button>
+<p class="reg-status" id="reg-status" role="status" aria-live="polite"></p>
+<p class="reg-note">Prefer email? Write to spark2026@example.com.</p>
+</form>
+</div>
+<script>
+(function () {
+  var root = document.getElementById('register');
+  if (!root) return;
+  var form = root.querySelector('.reg-form');
+  var status = root.querySelector('#reg-status');
+  var submit = root.querySelector('#reg-submit');
+  if (!form || !status || !submit) return;
+  var ENDPOINT = 'https://formsubmit.co/ajax/spark2026@example.com';
+  function setStatus(state, text) {
+    status.setAttribute('data-state', state);
+    status.textContent = text;
+  }
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!form.checkValidity()) {
+      if (form.reportValidity) form.reportValidity();
+      setStatus('error', 'Please fill in your name, email, college and event.');
+      return;
+    }
+    var payload = {
+      name: form.elements['name'].value.trim(),
+      email: form.elements['email'].value.trim(),
+      college: form.elements['college'].value.trim(),
+      event: form.elements['event'].value,
+      _subject: 'Spark 2026 registration: ' + form.elements['event'].value,
+      _honey: form.elements['_honey'].value
+    };
+    submit.disabled = true;
+    setStatus('', 'Sending your registration...');
+    fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (data) {
+        var failed = !res.ok || data.success === false || data.success === 'false';
+        if (failed) throw new Error('send failed');
+        setStatus('success', 'Thanks ' + payload.name + '! Your registration for ' + payload.event + ' has been sent.');
+        form.reset();
+      });
+    }).catch(function () {
+      setStatus('error', 'Sorry, we could not send your registration. Please try again or email spark2026@example.com.');
+    }).then(function () {
+      submit.disabled = false;
+    });
+  });
+})();
+</script>
+</section>
+<!-- J2:W-4 end -->
+<!-- J2:W-5 start (owner W-5) -->
+<section id="sponsors">
+<style>
+#sponsors{padding:var(--j2-section,64px) 20px}
+#sponsors .sp-inner{max-width:1100px;margin:0 auto;min-width:0}
+#sponsors h2{margin:0 0 8px;font-family:var(--j2-font-heading);font-size:clamp(2rem,8vw,3rem);line-height:1.1;font-weight:700;color:var(--j2-text)}
+#sponsors .sp-intro{margin:0 0 24px;color:var(--j2-muted)}
+#sponsors .sp-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+#sponsors .sp-item{min-width:0}
+#sponsors .sponsor-name{display:flex;align-items:center;justify-content:center;text-align:center;min-height:96px;min-width:0;margin:0;border-radius:var(--j2-radius);border-bottom:6px solid var(--j2-primary);font-family:var(--j2-font-heading);font-size:clamp(1.35rem,6vw,1.75rem);font-weight:700;line-height:1.2;color:var(--j2-text);overflow-wrap:break-word}
+#sponsors .sp-item:nth-child(2) .sponsor-name{border-bottom-color:var(--j2-secondary)}
+#sponsors .sp-item:nth-child(3) .sponsor-name{border-bottom-color:var(--j2-accent)}
+@media (min-width:600px){
+#sponsors .sp-list{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (min-width:800px){
+#sponsors{padding:var(--j2-section,64px) 32px}
+}
+</style>
+<div class="sp-inner">
+<h2>Sponsors</h2>
+<p class="sp-intro">Spark 2026 is backed by these sponsors.</p>
+<ul class="sp-list">
+<li class="sp-item"><p class="sponsor-name j2-card">Nimbus Cloud</p></li>
+<li class="sp-item"><p class="sponsor-name j2-card">Orbit Labs</p></li>
+<li class="sp-item"><p class="sponsor-name j2-card">Pixel Press</p></li>
+</ul>
+</div>
+</section>
+<!-- J2:W-5 end -->
+<!-- J2:W-6 start (owner W-6) -->
+<section id="venue">
+<style>
+#venue{padding:var(--j2-section,64px) 20px}
+#venue .ve-inner{max-width:1100px;margin:0 auto;min-width:0}
+#venue h2{margin:0 0 8px;font-family:var(--j2-font-heading);font-size:clamp(2rem,8vw,3rem);line-height:1.1;font-weight:700;color:var(--j2-text)}
+#venue .ve-intro{margin:0 0 24px;color:var(--j2-muted)}
+#venue .ve-card{display:grid;gap:20px;min-width:0;border-radius:var(--j2-radius);border-left:6px solid var(--j2-secondary)}
+#venue .ve-label{margin:0;font-size:.85rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--j2-secondary)}
+#venue .ve-address{margin:0;font-style:normal;font-family:var(--j2-font-heading);font-size:clamp(1.25rem,5vw,1.75rem);font-weight:700;line-height:1.3;color:var(--j2-text);overflow-wrap:break-word}
+#venue .map-link{border-radius:var(--j2-radius);width:100%;text-align:center;font-family:var(--j2-font-heading);font-size:1.05rem}
+#venue .map-link:focus-visible{outline:3px solid var(--j2-accent);outline-offset:2px}
+@media (min-width:800px){
+#venue{padding:var(--j2-section,64px) 32px}
+#venue .map-link{width:auto;justify-self:start;min-width:240px}
+}
+</style>
+<div class="ve-inner">
+<h2>Venue</h2>
+<p class="ve-intro">Find us on campus at Northfield College of Engineering.</p>
+<div class="ve-card j2-card">
+<p class="ve-label">Address</p>
+<address class="ve-address">Northfield College of Engineering, 22 University Road, Pune 411007</address>
+<a class="map-link j2-btn" href="https://www.google.com/maps/search/?api=1&amp;query=Northfield+College+of+Engineering%2C+22+University+Road%2C+Pune+411007" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
+</div>
+</div>
+</section>
+<!-- J2:W-6 end -->
+<!-- J2:W-7 start (owner W-7) -->
+<section id="contact">
+<style>
+#contact{padding:var(--j2-section,64px) 20px}
+#contact .ct-inner{max-width:1100px;margin:0 auto;min-width:0}
+#contact h2{margin:0 0 8px;font-family:var(--j2-font-heading);font-size:clamp(2rem,8vw,3rem);line-height:1.1;font-weight:700;color:var(--j2-text)}
+#contact .ct-intro{margin:0 0 24px;color:var(--j2-muted)}
+#contact .ct-card{display:grid;gap:20px;min-width:0;border-radius:var(--j2-radius);border-left:6px solid var(--j2-primary)}
+#contact .ct-row{display:grid;gap:4px;min-width:0}
+#contact .ct-label{margin:0;font-size:.85rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--j2-secondary)}
+#contact .ct-value{margin:0;font-family:var(--j2-font-heading);font-size:clamp(1.15rem,5vw,1.6rem);font-weight:700;line-height:1.3;color:var(--j2-text);overflow-wrap:anywhere}
+#contact .ct-email{color:var(--j2-text);text-decoration:underline;text-decoration-color:var(--j2-accent);text-underline-offset:4px}
+#contact .ct-email:focus-visible{outline:3px solid var(--j2-accent);outline-offset:2px}
+#contact .whatsapp-btn{border-radius:var(--j2-radius);width:100%;text-align:center;font-family:var(--j2-font-heading);font-size:1.05rem}
+#contact .whatsapp-btn:focus-visible{outline:3px solid var(--j2-accent);outline-offset:2px}
+@media (min-width:800px){
+#contact{padding:var(--j2-section,64px) 32px}
+#contact .whatsapp-btn{width:auto;justify-self:start;min-width:260px}
+}
+</style>
+<div class="ct-inner">
+<h2>Contact the organisers</h2>
+<p class="ct-intro">Questions about Spark 2026? Message us on WhatsApp or send an email.</p>
+<div class="ct-card j2-card">
+<div class="ct-row">
+<p class="ct-label">WhatsApp</p>
+<p class="ct-value">+91 00000 33333</p>
+</div>
+<a class="whatsapp-btn j2-btn" href="https://wa.me/910000033333" target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a>
+<div class="ct-row">
+<p class="ct-label">Email</p>
+<p class="ct-value"><a class="ct-email" href="mailto:spark2026@example.com">spark2026@example.com</a></p>
+</div>
+</div>
+</div>
+</section>
+<!-- J2:W-7 end -->
+</body>
+</html>

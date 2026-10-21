@@ -1,0 +1,280 @@
+[
+  {
+    "cycle": 1,
+    "version": 10,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The site shows the name Spark 2026, Northfield College of Engineering, Pune, and the dates 14 to 16 February 2027",
+        "verdict": "PASS",
+        "note": "Hero has h1 'Spark 2026', 'Northfield College of Engineering, Pune' and '14 to 16 February 2027'; visible in the screenshot.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "A day-by-day schedule (Day 1, Day 2, Day 3) lists all 8 events with start and end times: Code Sprint, Line Follower and AI in Daily Life on Day 1; Bug Hunt and Poster Jam on Day 2; Drone Dash, UI Duel and Startup Stories on Day 3",
+        "verdict": "PASS",
+        "note": "3 .j2-day groups, 8 .j2-slot items; Day 1: Code Sprint, Line Follower, AI in Daily Life; Day 2: Bug Hunt, Poster Jam; Day 3: Drone Dash, UI Duel, Startup Stories; times match the brief.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "Events can be browsed by category (Coding, Robotics, Design, Talks), and each event shows its price: Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, Poster Jam free, UI Duel Rs 100, AI in Daily Life free, Startup Stories free",
+        "verdict": "PASS",
+        "note": "All + 4 filter buttons with JS toggling hidden on 8 cards; prices Rs 100, 50, 150, 200, free, Rs 100, free, free match the brief; no JS errors.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "A registration form asks for name, email, college and an event chosen from a dropdown listing all 8 events, and submitting it sends the details by email to spark2026@example.com",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Form has 4 required fields and 8 .j2-event-option items; submit opens mailto:spark2026@example.com with details; mechanical submit ok, no errors. The student must still press send in their email app, and the confirmation shows before that.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A sponsors section shows Nimbus Cloud, Orbit Labs and Pixel Press by name",
+        "verdict": "PASS",
+        "note": "3 .j2-sponsor items: Nimbus Cloud, Orbit Labs, Pixel Press; no images.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A venue section shows Northfield College of Engineering, 22 University Road, Pune 411007, with a link to open it in maps",
+        "verdict": "PASS",
+        "note": "Section shows 'Northfield College of Engineering' and '22 University Road, Pune 411007'; one .j2-map-link to a Google Maps search URL built from the address.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "A WhatsApp link opens a chat with +91 00000 33333, and the email spark2026@example.com is also shown",
+        "verdict": "PASS",
+        "note": "a.j2-whatsapp href https://wa.me/910000033333; number text '+91 00000 33333' and mailto link spark2026@example.com are present.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The page has no horizontal overflow at 360px and 1280px widths",
+        "verdict": "PASS",
+        "note": "Mechanical check: phone overflow_px 0 at 360, desktop overflow_px 0 at 1280.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "PASS",
+        "note": "js_errors [], broken_in_page_links [], overflow 0 at both widths; all 10 in-page links resolve.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-10",
+        "criterion": "Valid, maintainable HTML (extra issue)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "W-1 wraps the hero in a non-standard <j2-hero> element, added so a bare tap-targets selector would resolve. Page parses and renders correctly; no measured impact.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "Screenshot and fonts list show only Inter and Space Grotesk, with the palette pink, violet and yellow on dark navy, and consistent pill buttons at both widths.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "Contrast measured on 100 elements at each width, 0 low.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "1 h1, 0 skipped heading levels; the gradient title dominates the first screen.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "Pink 'Register for an event' is the single first-screen action, with the yellow-outline 'See the schedule' as secondary.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "One nav with 6 section links plus brand, but at 360px the bar scrolls sideways and 'Register' is cut off in the screenshot, so Sponsors, Venue and Contact are hidden until swiped.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "Phone small_tap_targets count 0 at the 44px minimum.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "0 images, 0 without alt; the photo placeholder has role=img and an aria-label.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 37972,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com",
+        "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;700&amp;display=swap",
+        "https://fonts.gstatic.com",
+        "https://wa.me/910000033333",
+        "https://www.google.com/maps/search/?api=1&amp;query=Northfield+College+of+Engineering%2C+22+University+Road%2C+Pune+411007"
+      ],
+      "forms": 1,
+      "scripts": 2,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "design": {
+        "desktop": {
+          "contrast": {
+            "checked": 100,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 10
+          },
+          "first_screen_actions": [
+            "Register for an event"
+          ]
+        },
+        "phone": {
+          "contrast": {
+            "checked": 100,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 10
+          },
+          "first_screen_actions": [
+            "Register for an event"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        }
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v10.png",
+    "all_pass": true
+  }
+]

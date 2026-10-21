@@ -1,0 +1,267 @@
+{
+  "run": "20261006-132605",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "model": "sonnet",
+  "mock": false,
+  "brief": "Brew Lab, Indiranagar, Bengaluru. One-page site with menu, hours, location and pre-order for pickup. We want a big photo gallery of the cafe AND a detailed story section about each of our three coffee farms. Keep costs low.",
+  "change_requests": [],
+  "status": "done",
+  "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): Menu items, categories and prices; Opening hours for each day; Street address and map location; Phone or WhatsApp number and the channel through which pre-orders reach the cafe; Pickup lead time and any order cutoff; Names and locations of the three coffee farms; Story content for each farm (history, people, growing and processing methods); Cafe photos for the gallery and farm photos; Logo, brand colours and tagline, if any.",
+  "budget": {
+    "start": 35,
+    "granted": 40,
+    "used": 40,
+    "raises": [
+      {
+        "cycle": 2,
+        "asked": 5,
+        "from": 35,
+        "to": 40,
+        "why": "the Requester chose option 1: 1: Raise the budget from 35 to 40 (+5) and build the pickup-only pre-order form with an order summary. Orders show on the page and reach the cafe only once you supply an order channel."
+      }
+    ]
+  },
+  "ai_calls": 30,
+  "cycles": 2,
+  "questions_to_user": [
+    {
+      "kind": "audit",
+      "asked": [
+        "Option A (recommended): raise the budget from 35 to 40 so a pickup-only pre-order form with an order summary is built. Cost: +5. The other five sections stay as they are. Choose A or B.",
+        "Option B: keep the budget at 35 and park pre-order. The site ships with a marked placeholder in the Pre-order section, and you accept that the pre-order requirement in your brief is not met. Choose A or B."
+      ],
+      "answer": "A"
+    },
+    {
+      "kind": "question",
+      "asked": [
+        "Your earlier choice of A was not applied to the budget, so pre-order (cost 10) is still blocked with only 5 left. Please confirm which you want: raise the budget from 35 to 40 so a pickup-only pre-order form with an order summary is built, or keep 35 and leave a marked placeholder in the Pre-order section, meaning the pre-order requirement in your brief is not met."
+      ],
+      "answer": "option a",
+      "unclear": true
+    },
+    {
+      "kind": "question",
+      "asked": [
+        "Your earlier choice of A was not applied to the budget, so pre-order (cost 10) is still blocked with only 5 left. Please confirm which you want: raise the budget from 35 to 40 so a pickup-only pre-order form with an order summary is built, or keep 35 and leave a marked placeholder in the Pre-order section, meaning the pre-order requirement in your brief is not met."
+      ],
+      "answer": "A"
+    },
+    {
+      "kind": "question",
+      "asked": [
+        "Please reply with the digit only, 1 or 2. Your earlier 'A' replies were not applied to the budget. Pre-order costs 10 and only 5 remains of 35."
+      ],
+      "answer": "1",
+      "option": 1,
+      "budget_added": 5
+    }
+  ],
+  "conflicts": [
+    {
+      "id": "C-1",
+      "pair": [
+        "adaptation",
+        "priority"
+      ],
+      "topic": "proposal",
+      "subject": "what to fund in cycle 1",
+      "attempts": 4,
+      "escalated": false,
+      "resolved_by": "agents",
+      "repriced": false,
+      "user_question": null,
+      "user_answer": null,
+      "outcome": "Adaptation accepted Priority's COUNTER: Single-file page: nav, Menu, Hours, Location (10), Large photo gallery with enlarged view (10), Three coffee farm story blocks (10) goes to the validator."
+    },
+    {
+      "id": "C-2",
+      "pair": [
+        "adaptation",
+        "priority"
+      ],
+      "topic": "proposal",
+      "subject": "what to fund in cycle 1",
+      "attempts": 4,
+      "escalated": false,
+      "resolved_by": "agents",
+      "repriced": false,
+      "user_question": null,
+      "user_answer": null,
+      "outcome": "Adaptation parked the proposal; nothing registered."
+    }
+  ],
+  "validator_rejections": [],
+  "holds": [],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 3,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "version": 4,
+      "all_pass": true,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "PASS"
+        }
+      ]
+    }
+  ],
+  "site_versions": 4,
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The site is a single HTML file with inline or CDN-loaded CSS and JavaScript and no build step",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "The file has a navigation linking to sections for Menu, Hours, Location, Pre-order, Gallery and Farms",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "The Menu section lists items grouped by category, with each price present or marked as a placeholder",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "The Hours section lists opening times for all seven days, or marks them as placeholders",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "The Location section names Indiranagar, Bengaluru, and has an address (or marked placeholder) and a map link or embed",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "The Pre-order section has a form with item selection, quantity, customer name, phone and pickup time, and produces an order summary; it offers no delivery option",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "The Gallery section has at least 12 image slots shown in a large grid, each with alt text, and an enlarged view when an image is clicked",
+      "pass": true
+    },
+    {
+      "item": 8,
+      "criterion": "The Farms section has three separate farm blocks, each with a name (or marked placeholder), location, a story of at least three paragraphs or labelled subsections, and an image slot",
+      "pass": true
+    },
+    {
+      "item": 9,
+      "criterion": "The layout includes responsive CSS rules for narrow phone screens",
+      "pass": true
+    },
+    {
+      "item": 10,
+      "criterion": "Every unsupplied fact in the file is visibly marked as a placeholder, and the file contains no API keys or paid-service dependencies",
+      "pass": true
+    }
+  ],
+  "route_check_violations": []
+}

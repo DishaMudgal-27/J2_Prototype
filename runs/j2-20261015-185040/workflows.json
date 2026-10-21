@@ -1,0 +1,1496 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "hero-location",
+    "name": "Header, nav and location with map link",
+    "covers": [
+      1,
+      6
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+      "A map or map link for the shop location is on the page next to the address"
+    ],
+    "purpose": "The page has no name, address, nav or map link",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 3,
+      "time_limit_minutes": 15,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same validator or Audit failure repeats twice in a row, or spend reaches 20"
+    },
+    "charged": true,
+    "calls_used": 2,
+    "retries_used": 0,
+    "outputs": [
+      "#top",
+      "#site-nav",
+      "#location"
+    ],
+    "completion_check": "Name, address and a map link show, and nav links resolve",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-1.a1",
+        "goal": "Visitors see the shop name, the full address, a nav to every section and a map link next to the address.",
+        "constraints": [
+          "Use only charter facts",
+          "Create only #top, #site-nav, #location, #map-link, .j2-btn",
+          "No payment content"
+        ],
+        "context": [
+          "charter item 1",
+          "charter item 6"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "Builder",
+          "steps": "Create header #top with the name Brew Lab, nav #site-nav linking to #location, #menu, #hours, #contact and #preorder, and one main action link .j2-btn pointing to #preorder. Create section #location with the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 and a Google Maps search link #map-link for that address, opening in a new tab."
+        },
+        "expected_output": [
+          {
+            "text": "The top header",
+            "kind": "section",
+            "target": "#top",
+            "met": true
+          },
+          {
+            "text": "The location section",
+            "kind": "section",
+            "target": "#location",
+            "met": true
+          },
+          {
+            "text": "The map link",
+            "kind": "element",
+            "target": "#map-link",
+            "met": true
+          },
+          {
+            "text": "Name and address as given",
+            "kind": "facts",
+            "target": [
+              "Brew Lab",
+              "12, 100 Feet Road, Indiranagar, Bengaluru 560038"
+            ],
+            "met": true
+          },
+          {
+            "text": "Nav and location controls are big enough to tap on a phone",
+            "kind": "tap",
+            "target": "#site-nav",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "One location section is on the page",
+            "type": "element-count",
+            "target": "#location",
+            "expect": 1,
+            "item": 2
+          },
+          {
+            "text": "One map link is on the page",
+            "type": "element-count",
+            "target": "#map-link",
+            "expect": 1,
+            "item": 3
+          },
+          {
+            "text": "Name and address appear exactly",
+            "type": "facts-present",
+            "target": [
+              "Brew Lab",
+              "12, 100 Feet Road, Indiranagar, Bengaluru 560038"
+            ],
+            "expect": true,
+            "item": 4
+          },
+          {
+            "text": "One nav is on the page",
+            "type": "element-count",
+            "target": "#site-nav",
+            "expect": 1
+          },
+          {
+            "text": "The top header",
+            "type": "element-count",
+            "target": "#top",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "Nav and location controls are big enough to tap on a phone",
+            "type": "tap-targets",
+            "expect": 44,
+            "item": 5,
+            "target": "#site-nav"
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-1.a1",
+            "check": "One location section is on the page",
+            "type": "element-count",
+            "target": "#location",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#location', expected 1",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-15T18:56:06",
+            "by": "code",
+            "recheck": "check corrected by Adaptation"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "One map link is on the page",
+            "type": "element-count",
+            "target": "#map-link",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#map-link', expected 1",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-15T18:56:06",
+            "by": "code",
+            "recheck": "check corrected by Adaptation"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Name and address appear exactly",
+            "type": "facts-present",
+            "target": [
+              "Brew Lab",
+              "12, 100 Feet Road, Indiranagar, Bengaluru 560038"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 2 fact(s) on the page",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-15T18:56:06",
+            "by": "code",
+            "recheck": "check corrected by Adaptation"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "One nav is on the page",
+            "type": "element-count",
+            "target": "#site-nav",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#site-nav', expected 1",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-15T18:56:06",
+            "by": "code",
+            "recheck": "check corrected by Adaptation"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "The top header",
+            "type": "element-count",
+            "target": "#top",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#top', expected 1",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-15T18:56:06",
+            "by": "code",
+            "recheck": "check corrected by Adaptation"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Nav and location controls are big enough to tap on a phone",
+            "type": "tap-targets",
+            "target": "#site-nav",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 5,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 5 tap target(s) in '#site-nav' at least 44x44px at 360px",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-15T18:56:07",
+            "by": "code",
+            "recheck": "check corrected by Adaptation"
+          }
+        ],
+        "attempts": 3,
+        "status": "passed",
+        "human_output": {
+          "atom": "W-1.a1",
+          "attempt": 2,
+          "text": "The top of the page shows Brew Lab, a menu bar, the full address and a button that opens the shop in Google Maps. The menu bar links will work as soon as the other sections are added."
+        },
+        "agent_output": {
+          "atom": "W-1.a1",
+          "attempt": 3,
+          "receipt": "W-1.a1:3",
+          "files": [
+            "site/v2.html",
+            "site/index.html"
+          ],
+          "section": "W-1",
+          "section_names": [
+            "Header, nav and location with map link",
+            "Brew Lab",
+            "Find us"
+          ],
+          "anchor": "top",
+          "ids": [
+            "top",
+            "site-nav",
+            "location",
+            "location-heading",
+            "map-link"
+          ],
+          "selectors": [
+            "#top",
+            "#site-nav",
+            "#location",
+            "#location-heading",
+            "#map-link",
+            ".w1-inner",
+            ".w1-tagline",
+            ".j2-btn",
+            ".w1-panel"
+          ],
+          "checks": [
+            {
+              "check": "One location section is on the page",
+              "type": "element-count",
+              "target": "#location",
+              "pass": true
+            },
+            {
+              "check": "One map link is on the page",
+              "type": "element-count",
+              "target": "#map-link",
+              "pass": true
+            },
+            {
+              "check": "Name and address appear exactly",
+              "type": "facts-present",
+              "target": [
+                "Brew Lab",
+                "12, 100 Feet Road, Indiranagar, Bengaluru 560038"
+              ],
+              "pass": true
+            },
+            {
+              "check": "One nav is on the page",
+              "type": "element-count",
+              "target": "#site-nav",
+              "pass": true
+            },
+            {
+              "check": "The top header",
+              "type": "element-count",
+              "target": "#top",
+              "pass": true
+            },
+            {
+              "check": "Nav and location controls are big enough to tap on a phone",
+              "type": "tap-targets",
+              "target": "#site-nav",
+              "pass": true
+            }
+          ],
+          "conditions": []
+        }
+      }
+    ],
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "usable section and head tags",
+    "style_guide": true,
+    "version": 2
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "menu",
+    "name": "Menu with prices",
+    "covers": [
+      2
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The menu lists all seven items with their prices in rupees: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120"
+    ],
+    "purpose": "Visitors cannot see what is sold or the prices",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 12,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same failure repeats twice in a row, or spend reaches 10"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#menu"
+    ],
+    "completion_check": "All seven items and prices appear in cards",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-2.a1",
+        "goal": "Visitors see all seven menu items with their rupee prices.",
+        "constraints": [
+          "Use only the seven items and prices given",
+          "Create only #menu and .j2-card",
+          "Other sections stay unchanged"
+        ],
+        "context": [
+          "charter item 2"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "Builder",
+          "steps": "Create section #menu with a heading and seven cards, each with class .j2-card, one per item, showing the name and price in rupees: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120."
+        },
+        "expected_output": [
+          {
+            "text": "The menu section",
+            "kind": "section",
+            "target": "#menu",
+            "met": true
+          },
+          {
+            "text": "Menu item cards",
+            "kind": "element",
+            "target": ".j2-card",
+            "count": 7,
+            "met": true
+          },
+          {
+            "text": "All items and prices",
+            "kind": "facts",
+            "target": [
+              "Filter coffee 90",
+              "Cappuccino 160",
+              "Latte 180",
+              "Cold brew 200",
+              "Masala chai 80",
+              "Almond croissant 140",
+              "Banana bread slice 120"
+            ],
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "One menu section is on the page",
+            "type": "element-count",
+            "target": "#menu",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "Menu item cards on the page",
+            "type": "element-count",
+            "target": ".j2-card",
+            "expect": 7,
+            "item": 2
+          },
+          {
+            "text": "All items and prices",
+            "type": "facts-present",
+            "target": [
+              "Filter coffee 90",
+              "Cappuccino 160",
+              "Latte 180",
+              "Cold brew 200",
+              "Masala chai 80",
+              "Almond croissant 140",
+              "Banana bread slice 120"
+            ],
+            "expect": true,
+            "item": 3
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-2.a1",
+            "check": "One menu section is on the page",
+            "type": "element-count",
+            "target": "#menu",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#menu', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:56:33",
+            "by": "code"
+          },
+          {
+            "atom": "W-2.a1",
+            "check": "Menu item cards on the page",
+            "type": "element-count",
+            "target": ".j2-card",
+            "expect": 7,
+            "actual": 7,
+            "pass": true,
+            "evidence": "7 element(s) match '.j2-card', expected 7",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:56:33",
+            "by": "code"
+          },
+          {
+            "atom": "W-2.a1",
+            "check": "All items and prices",
+            "type": "facts-present",
+            "target": [
+              "Filter coffee 90",
+              "Cappuccino 160",
+              "Latte 180",
+              "Cold brew 200",
+              "Masala chai 80",
+              "Almond croissant 140",
+              "Banana bread slice 120"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 7 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:56:33",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed",
+        "human_output": {
+          "atom": "W-2.a1",
+          "attempt": 1,
+          "text": "Your menu is now on the page: all seven items with their prices in rupees, laid out as easy-to-read cards that fit phones and desktops."
+        },
+        "agent_output": {
+          "atom": "W-2.a1",
+          "attempt": 1,
+          "receipt": "W-2.a1:1",
+          "files": [
+            "site/v3.html",
+            "site/index.html"
+          ],
+          "section": "W-2",
+          "section_names": [
+            "Menu with prices",
+            "Menu"
+          ],
+          "anchor": "menu",
+          "ids": [
+            "menu",
+            "menu-heading"
+          ],
+          "selectors": [
+            "#menu",
+            "#menu-heading",
+            ".w2-inner",
+            ".w2-title",
+            ".w2-note",
+            ".w2-grid",
+            ".j2-card",
+            ".w2-name",
+            ".w2-price"
+          ],
+          "checks": [
+            {
+              "check": "One menu section is on the page",
+              "type": "element-count",
+              "target": "#menu",
+              "pass": true
+            },
+            {
+              "check": "Menu item cards on the page",
+              "type": "element-count",
+              "target": ".j2-card",
+              "pass": true
+            },
+            {
+              "check": "All items and prices",
+              "type": "facts-present",
+              "target": [
+                "Filter coffee 90",
+                "Cappuccino 160",
+                "Latte 180",
+                "Cold brew 200",
+                "Masala chai 80",
+                "Almond croissant 140",
+                "Banana bread slice 120"
+              ],
+              "pass": true
+            }
+          ],
+          "conditions": []
+        }
+      }
+    ],
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "hours-contact",
+    "name": "Opening hours and contact details",
+    "covers": [
+      3,
+      4
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The opening hours show Monday to Saturday 7:30 am to 9:00 pm and Sunday 8:30 am to 6:00 pm",
+      "The phone +91 98450 12345 and the email hello@brewlab.example are shown"
+    ],
+    "purpose": "Visitors cannot see when the shop is open or how to reach it",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 3,
+      "time_limit_minutes": 12,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same failure repeats twice in a row, or spend reaches 15"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#hours",
+      "#contact"
+    ],
+    "completion_check": "Both hours lines, the phone and the email are shown",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-3.a1",
+        "goal": "Visitors see the opening hours, the phone number and the email address.",
+        "constraints": [
+          "Use only charter facts",
+          "Create only #hours, #contact, #phone-link, #email-link",
+          "Other sections stay unchanged"
+        ],
+        "context": [
+          "charter item 3",
+          "charter item 4"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "Builder",
+          "steps": "Create section #hours listing Monday to Saturday 7:30 am to 9:00 pm and Sunday 8:30 am to 6:00 pm. Create section #contact with a tel link #phone-link for +91 98450 12345 (href tel:+919845012345) and a mailto link #email-link for hello@brewlab.example."
+        },
+        "expected_output": [
+          {
+            "text": "The hours section",
+            "kind": "section",
+            "target": "#hours",
+            "met": true
+          },
+          {
+            "text": "The contact section",
+            "kind": "section",
+            "target": "#contact",
+            "met": true
+          },
+          {
+            "text": "Hours, phone and email",
+            "kind": "facts",
+            "target": [
+              "Monday to Saturday 7:30 am to 9:00 pm",
+              "Sunday 8:30 am to 6:00 pm",
+              "+91 98450 12345",
+              "hello@brewlab.example"
+            ],
+            "met": true
+          },
+          {
+            "text": "Contact links are big enough to tap on a phone",
+            "kind": "tap",
+            "target": "#contact",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "One hours section is on the page",
+            "type": "element-count",
+            "target": "#hours",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "One contact section is on the page",
+            "type": "element-count",
+            "target": "#contact",
+            "expect": 1,
+            "item": 2
+          },
+          {
+            "text": "Hours, phone and email appear exactly",
+            "type": "facts-present",
+            "target": [
+              "Monday to Saturday 7:30 am to 9:00 pm",
+              "Sunday 8:30 am to 6:00 pm",
+              "+91 98450 12345",
+              "hello@brewlab.example"
+            ],
+            "expect": true,
+            "item": 3
+          },
+          {
+            "text": "Contact links are big enough to tap on a phone",
+            "type": "tap-targets",
+            "expect": 44,
+            "item": 4,
+            "target": "#contact"
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-3.a1",
+            "check": "One hours section is on the page",
+            "type": "element-count",
+            "target": "#hours",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#hours', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:56:58",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "One contact section is on the page",
+            "type": "element-count",
+            "target": "#contact",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#contact', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:56:58",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Hours, phone and email appear exactly",
+            "type": "facts-present",
+            "target": [
+              "Monday to Saturday 7:30 am to 9:00 pm",
+              "Sunday 8:30 am to 6:00 pm",
+              "+91 98450 12345",
+              "hello@brewlab.example"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 4 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:56:58",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Contact links are big enough to tap on a phone",
+            "type": "tap-targets",
+            "target": "#contact",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 2,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 2 tap target(s) in '#contact' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:56:59",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed",
+        "human_output": {
+          "atom": "W-3.a1",
+          "attempt": 1,
+          "text": "Visitors can now see when Brew Lab is open, and tap once to call +91 98450 12345 or email hello@brewlab.example."
+        },
+        "agent_output": {
+          "atom": "W-3.a1",
+          "attempt": 1,
+          "receipt": "W-3.a1:1",
+          "files": [
+            "site/v4.html",
+            "site/index.html"
+          ],
+          "section": "W-3",
+          "section_names": [
+            "Opening hours and contact details",
+            "Opening hours",
+            "Contact us"
+          ],
+          "anchor": "hours",
+          "ids": [
+            "hours",
+            "contact",
+            "phone-link",
+            "email-link"
+          ],
+          "selectors": [
+            "#hours",
+            "#contact",
+            "#phone-link",
+            "#email-link",
+            ".w3-band",
+            ".w3-inner",
+            ".w3-title",
+            ".w3-lead",
+            ".j2-card",
+            ".w3-card",
+            ".w3-list",
+            ".w3-band-alt",
+            ".w3-actions",
+            ".j2-btn",
+            ".j2-btn-secondary"
+          ],
+          "checks": [
+            {
+              "check": "One hours section is on the page",
+              "type": "element-count",
+              "target": "#hours",
+              "pass": true
+            },
+            {
+              "check": "One contact section is on the page",
+              "type": "element-count",
+              "target": "#contact",
+              "pass": true
+            },
+            {
+              "check": "Hours, phone and email appear exactly",
+              "type": "facts-present",
+              "target": [
+                "Monday to Saturday 7:30 am to 9:00 pm",
+                "Sunday 8:30 am to 6:00 pm",
+                "+91 98450 12345",
+                "hello@brewlab.example"
+              ],
+              "pass": true
+            },
+            {
+              "check": "Contact links are big enough to tap on a phone",
+              "type": "tap-targets",
+              "target": "#contact",
+              "pass": true
+            }
+          ],
+          "conditions": []
+        }
+      }
+    ],
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 4
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "preorder",
+    "name": "Pre-order form",
+    "covers": [
+      5
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A pre-order form has name, phone, items and pickup time fields, sends the order to hello@brewlab.example, works when submitted, and states that payment is at pickup with no payment fields"
+    ],
+    "purpose": "Visitors cannot order ahead",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 3,
+      "time_limit_minutes": 18,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the empty-submit behavior test fails twice in a row, or spend reaches 15"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#preorder"
+    ],
+    "completion_check": "Form has four fields and a submit button, targets the shop email, and states payment at pickup",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-4.a1",
+        "goal": "Visitors can enter name, phone, items and pickup time and send the order to hello@brewlab.example, with payment at pickup.",
+        "constraints": [
+          "No payment fields of any kind",
+          "Create only #preorder, #po-form, #po-name, #po-phone, #po-items, #po-time, #po-submit, #po-status, .po-field",
+          "Use no facts beyond the charter"
+        ],
+        "context": [
+          "charter item 5",
+          "charter item 4"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "Builder",
+          "steps": "Create section #preorder with form #po-form (action mailto:hello@brewlab.example, method post, enctype text/plain, novalidate). Add four fields, each wrapped in .po-field: #po-name (text), #po-phone (tel), #po-items (textarea), #po-time (time). Add submit button #po-submit with class .j2-btn. Add hidden-by-default message #po-status. A script checks the submit: if any field is empty, prevent sending and show #po-status asking to fill every field; otherwise let the mailto submit go and show a thank-you in #po-status. Add the text: Payment is at pickup. No online payment."
+        },
+        "expected_output": [
+          {
+            "text": "The pre-order section",
+            "kind": "section",
+            "target": "#preorder",
+            "met": true
+          },
+          {
+            "text": "The four field wrappers",
+            "kind": "element",
+            "target": ".po-field",
+            "count": 4,
+            "met": true
+          },
+          {
+            "text": "The submit button",
+            "kind": "element",
+            "target": "#po-submit",
+            "met": true
+          },
+          {
+            "text": "Email and pay at pickup text",
+            "kind": "facts",
+            "target": [
+              "hello@brewlab.example",
+              "Payment is at pickup"
+            ],
+            "met": true
+          },
+          {
+            "text": "Form controls are big enough to tap on a phone",
+            "kind": "tap",
+            "target": "#preorder",
+            "met": true
+          },
+          {
+            "text": "Submitting an empty form shows a message and does not send",
+            "kind": "behavior",
+            "target": "#po-status",
+            "steps": [
+              "click #po-submit",
+              "expect-visible #po-status"
+            ],
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "One pre-order section is on the page",
+            "type": "element-count",
+            "target": "#preorder",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "Field wrappers on the form",
+            "type": "element-count",
+            "target": ".po-field",
+            "expect": 4,
+            "item": 2
+          },
+          {
+            "text": "The form has a submit control and a destination",
+            "type": "named-test",
+            "target": "form-has-submit",
+            "expect": true
+          },
+          {
+            "text": "Shop email and pay at pickup wording appear",
+            "type": "facts-present",
+            "target": [
+              "hello@brewlab.example",
+              "Payment is at pickup"
+            ],
+            "expect": true,
+            "item": 4
+          },
+          {
+            "text": "The submit button",
+            "type": "element-count",
+            "target": "#po-submit",
+            "expect": 1,
+            "item": 3
+          },
+          {
+            "text": "Form controls are big enough to tap on a phone",
+            "type": "tap-targets",
+            "expect": 44,
+            "item": 5,
+            "target": "#preorder"
+          },
+          {
+            "text": "Submitting an empty form shows a message and does not send",
+            "type": "behavior-steps",
+            "expect": true,
+            "item": 6,
+            "target": [
+              "click #po-submit",
+              "expect-visible #po-status"
+            ]
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-4.a1",
+            "check": "One pre-order section is on the page",
+            "type": "element-count",
+            "target": "#preorder",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#preorder', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:57:26",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Field wrappers on the form",
+            "type": "element-count",
+            "target": ".po-field",
+            "expect": 4,
+            "actual": 4,
+            "pass": true,
+            "evidence": "4 element(s) match '.po-field', expected 4",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:57:26",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "The form has a submit control and a destination",
+            "type": "named-test",
+            "target": "form-has-submit",
+            "expect": true,
+            "actual": [
+              1
+            ],
+            "pass": true,
+            "evidence": "1 form(s), each with a submit control",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:57:26",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Shop email and pay at pickup wording appear",
+            "type": "facts-present",
+            "target": [
+              "hello@brewlab.example",
+              "Payment is at pickup"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 2 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:57:26",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "The submit button",
+            "type": "element-count",
+            "target": "#po-submit",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#po-submit', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:57:26",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Form controls are big enough to tap on a phone",
+            "type": "tap-targets",
+            "target": "#preorder",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 5,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 5 tap target(s) in '#preorder' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:57:27",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Submitting an empty form shows a message and does not send",
+            "type": "behavior-steps",
+            "target": [
+              "click #po-submit",
+              "expect-visible #po-status"
+            ],
+            "expect": true,
+            "actual": {
+              "steps": 2
+            },
+            "pass": true,
+            "evidence": "all 2 step(s) behaved as expected",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:57:28",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed",
+        "human_output": {
+          "atom": "W-4.a1",
+          "attempt": 1,
+          "text": "Visitors can now fill in their name, phone, what they want and when they will pick it up, then send the order by email to the shop. The form says clearly that they pay at pickup and there is no online payment."
+        },
+        "agent_output": {
+          "atom": "W-4.a1",
+          "attempt": 1,
+          "receipt": "W-4.a1:1",
+          "files": [
+            "site/v5.html",
+            "site/index.html"
+          ],
+          "section": "W-4",
+          "section_names": [
+            "Pre-order form",
+            "Pre-order for pickup"
+          ],
+          "anchor": "preorder",
+          "ids": [
+            "preorder",
+            "po-heading",
+            "po-form",
+            "po-name",
+            "po-phone",
+            "po-items",
+            "po-time",
+            "po-submit",
+            "po-status"
+          ],
+          "selectors": [
+            "#preorder",
+            "#po-heading",
+            "#po-form",
+            "#po-name",
+            "#po-phone",
+            "#po-items",
+            "#po-time",
+            "#po-submit",
+            "#po-status",
+            ".po-wrap",
+            ".po-lead",
+            ".j2-card",
+            ".po-field",
+            ".j2-btn",
+            ".po-note"
+          ],
+          "checks": [
+            {
+              "check": "One pre-order section is on the page",
+              "type": "element-count",
+              "target": "#preorder",
+              "pass": true
+            },
+            {
+              "check": "Field wrappers on the form",
+              "type": "element-count",
+              "target": ".po-field",
+              "pass": true
+            },
+            {
+              "check": "The form has a submit control and a destination",
+              "type": "named-test",
+              "target": "form-has-submit",
+              "pass": true
+            },
+            {
+              "check": "Shop email and pay at pickup wording appear",
+              "type": "facts-present",
+              "target": [
+                "hello@brewlab.example",
+                "Payment is at pickup"
+              ],
+              "pass": true
+            },
+            {
+              "check": "The submit button",
+              "type": "element-count",
+              "target": "#po-submit",
+              "pass": true
+            },
+            {
+              "check": "Form controls are big enough to tap on a phone",
+              "type": "tap-targets",
+              "target": "#preorder",
+              "pass": true
+            },
+            {
+              "check": "Submitting an empty form shows a message and does not send",
+              "type": "behavior-steps",
+              "target": [
+                "click #po-submit",
+                "expect-visible #po-status"
+              ],
+              "pass": true
+            }
+          ],
+          "conditions": []
+        }
+      }
+    ],
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 5
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "mobile-footer",
+    "name": "Mobile setup, overflow guard and footer",
+    "covers": [
+      7,
+      8
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The file is a single page with a mobile viewport setting and has no horizontal overflow at 360px and 1280px",
+      "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+    ],
+    "purpose": "The page is not yet guaranteed to fit phones or to be error free",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 12,
+      "retry_limit": 2,
+      "stop_loss": "Stop if page-parses or links-resolve fails twice in a row, or spend reaches 10"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#site-footer"
+    ],
+    "completion_check": "Page parses, links resolve, footer exists, tap targets pass",
+    "dependencies": [
+      "hero-location",
+      "menu",
+      "hours-contact",
+      "preorder"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-5.a1",
+        "goal": "The page is a single page with a mobile viewport tag, no horizontal overflow and no script errors, ending in a footer.",
+        "constraints": [
+          "Do not change section content",
+          "Create only #site-footer and .j2-wrap",
+          "Keep everything in one file"
+        ],
+        "context": [
+          "charter item 7",
+          "charter item 8",
+          "section W-1"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "Builder",
+          "steps": "Ensure a meta viewport tag (width=device-width, initial-scale=1). Add global CSS: box-sizing border-box, images and cards max-width 100%, long text wraps, class .j2-wrap with max-width and padding around each section. Create footer #site-footer with the name Brew Lab and a link to #top."
+        },
+        "expected_output": [
+          {
+            "text": "The footer",
+            "kind": "section",
+            "target": "#site-footer",
+            "met": true
+          },
+          {
+            "text": "The page parses",
+            "kind": "test",
+            "target": "page-parses",
+            "met": true
+          },
+          {
+            "text": "In-page links resolve",
+            "kind": "test",
+            "target": "links-resolve",
+            "met": true
+          },
+          {
+            "text": "Footer link is big enough to tap on a phone",
+            "kind": "tap",
+            "target": "#site-footer",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "One footer is on the page",
+            "type": "element-count",
+            "target": "#site-footer",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "The page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true,
+            "item": 2
+          },
+          {
+            "text": "In-page links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true,
+            "item": 3
+          },
+          {
+            "text": "Shop name shows in the footer",
+            "type": "facts-present",
+            "target": [
+              "Brew Lab"
+            ],
+            "expect": true
+          },
+          {
+            "text": "Footer link is big enough to tap on a phone",
+            "type": "tap-targets",
+            "expect": 44,
+            "item": 4,
+            "target": "#site-footer"
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-5.a1",
+            "check": "One footer is on the page",
+            "type": "element-count",
+            "target": "#site-footer",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#site-footer', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:57:49",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "The page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true,
+            "actual": {
+              "body": true,
+              "unbalanced": []
+            },
+            "pass": true,
+            "evidence": "page parses, tags balanced",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:57:49",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "In-page links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true,
+            "actual": [],
+            "pass": true,
+            "evidence": "every in-page link resolves",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:57:49",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "Shop name shows in the footer",
+            "type": "facts-present",
+            "target": [
+              "Brew Lab"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 1 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:57:49",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "Footer link is big enough to tap on a phone",
+            "type": "tap-targets",
+            "target": "#site-footer",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 1,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 1 tap target(s) in '#site-footer' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-15T18:57:50",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed",
+        "human_output": {
+          "atom": "W-5.a1",
+          "attempt": 1,
+          "text": "The page now fits phone screens and ends with a footer that shows the Brew Lab name and a button to jump back to the top."
+        },
+        "agent_output": {
+          "atom": "W-5.a1",
+          "attempt": 1,
+          "receipt": "W-5.a1:1",
+          "files": [
+            "site/v6.html",
+            "site/index.html"
+          ],
+          "section": "W-5",
+          "section_names": [
+            "Mobile setup, overflow guard and footer"
+          ],
+          "anchor": "site-footer",
+          "ids": [
+            "site-footer"
+          ],
+          "selectors": [
+            "#site-footer",
+            ".j2-wrap",
+            ".w5-inner",
+            ".w5-name",
+            ".w5-top"
+          ],
+          "checks": [
+            {
+              "check": "One footer is on the page",
+              "type": "element-count",
+              "target": "#site-footer",
+              "pass": true
+            },
+            {
+              "check": "The page parses",
+              "type": "named-test",
+              "target": "page-parses",
+              "pass": true
+            },
+            {
+              "check": "In-page links resolve",
+              "type": "named-test",
+              "target": "links-resolve",
+              "pass": true
+            },
+            {
+              "check": "Shop name shows in the footer",
+              "type": "facts-present",
+              "target": [
+                "Brew Lab"
+              ],
+              "pass": true
+            },
+            {
+              "check": "Footer link is big enough to tap on a phone",
+              "type": "tap-targets",
+              "target": "#site-footer",
+              "pass": true
+            }
+          ],
+          "conditions": []
+        }
+      }
+    ],
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section and head tags",
+    "version": 6
+  }
+]

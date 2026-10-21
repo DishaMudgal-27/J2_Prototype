@@ -1,0 +1,151 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "catalogue-order",
+    "name": "Catalogue with WhatsApp ordering",
+    "covers": [
+      3,
+      9,
+      10
+    ],
+    "fixes": [],
+    "purpose": "The site has no products and no way to order; site_versions is 0.",
+    "cost": 40,
+    "estimate": 40,
+    "envelope": {
+      "money_limit": 40,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the run exceeds 3 model calls or 10 minutes, or if the same JavaScript error or wrong wa.me link appears twice in a row."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "products section with 10 product cards",
+      "per-product WhatsApp order buttons",
+      "top-of-page Order on WhatsApp button"
+    ],
+    "completion_check": "Page shows all 10 products with the supplied names and prices; every product button opens a wa.me link for the correct number with that product's name in the message; the top button opens the same number; no JavaScript errors on load.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "style guide, usable section and head tags",
+    "style_guide": true,
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "fix-category-tabs",
+    "name": "Fix category tabs with view all",
+    "covers": [],
+    "fixes": [
+      "F-2"
+    ],
+    "purpose": "F-2: cards carry data-category but there are no tabs or script, so a visitor cannot switch categories.",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 1,
+      "time_limit_minutes": 5,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the run exceeds 1 model call or 5 minutes, or if the same JavaScript error appears twice in a row."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "category tab buttons",
+      "small script that filters cards by data-category"
+    ],
+    "completion_check": "Page has tabs for All, Kurtas, Sarees, Shirts, Dupattas; clicking each shows only matching cards (All shows 10); no JavaScript errors on load or on click.",
+    "dependencies": [
+      "W-1"
+    ],
+    "status": "done",
+    "cycle": 3,
+    "section": "W-1",
+    "revises": "W-1",
+    "agent": "W-2 Builder",
+    "last_check": "usable section and head tags",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "fix-nav-menu",
+    "name": "Fix navigation menu",
+    "covers": [],
+    "fixes": [
+      "F-16"
+    ],
+    "purpose": "F-16: nav_elements 0 and in_page_links 0, so there is no menu.",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 1,
+      "time_limit_minutes": 5,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the run exceeds 1 model call or 5 minutes, or if any nav link points to a missing id twice in a row."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "nav element in header",
+      "anchor links to existing section ids"
+    ],
+    "completion_check": "At least one nav element exists; every in-page link href matches an existing element id; no link points to the lookbook, new arrivals or reviews.",
+    "dependencies": [
+      "W-1"
+    ],
+    "status": "done",
+    "cycle": 3,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "fix-360-overflow",
+    "name": "Fix 360px overflow",
+    "covers": [],
+    "fixes": [
+      "F-17"
+    ],
+    "purpose": "F-17: the page overflows sideways by 13px at 360px because product buttons run past their cards.",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 1,
+      "time_limit_minutes": 5,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the run exceeds 1 model call or 5 minutes, or if measured overflow at 360px is still above 0 after the retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "box-sizing:border-box on the buttons and cards in the CSS"
+    ],
+    "completion_check": "Measured horizontal overflow is 0 at 360px and 1280px, and product buttons sit inside their card edges.",
+    "dependencies": [
+      "W-1"
+    ],
+    "status": "done",
+    "cycle": 3,
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  }
+]

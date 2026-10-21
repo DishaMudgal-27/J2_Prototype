@@ -1,0 +1,34 @@
+{
+  "statement": "Build a one-page website for Brew Lab, a cafe in Indiranagar, Bengaluru, showing the menu, hours, location, a large gallery of the cafe, a story section for each of its three coffee farms, and a pre-order form for pickup.",
+  "site_name": "Brew Lab",
+  "audience": "Local customers in and around Indiranagar, Bengaluru, who want to check the menu and hours, find the cafe, and order coffee and food for pickup, including on a phone.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file, no build step; CDN libraries allowed.",
+    "Usable at 360px and 1280px widths with no horizontal scrolling.",
+    "No JavaScript errors on load or on using the form.",
+    "Prices shown in rupees (₹).",
+    "Low running cost: no paid services or subscriptions."
+  ],
+  "rules": [
+    "Use only the menu, prices, hours, address, phone, farm facts and WhatsApp number the Requester supplied; do not invent facts.",
+    "Pre-orders go to WhatsApp +91 98450 00000 and are paid at pickup.",
+    "Pickup is within 15 minutes of ordering.",
+    "Gallery images are simple drawings until real photos are supplied."
+  ],
+  "done_when": [
+    "The menu section lists exactly: Coffee: Espresso ₹120, Cappuccino ₹180, Pour-over ₹220; Cold: Cold brew ₹200; Food: Croissant ₹150, Banana bread ₹130.",
+    "The page shows hours as 8am to 10pm every day, the address 100 Feet Road, Indiranagar, Bengaluru 560038, and the phone +91 80 4000 2468.",
+    "The pre-order form lets a visitor pick menu items with quantities, enter a name, and submit; submitting opens a WhatsApp message to +91 98450 00000 containing the chosen items, quantities and name.",
+    "The pre-order form area states that payment is at pickup and that pickup is within 15 minutes of ordering.",
+    "The gallery section shows 6 drawn images in a large layout, each with alt text.",
+    "The farms section has three separate story blocks: Ratnagiri Estate, Chikmagalur (family estate, shade-grown Arabica at 1,400 m, natural-process lots with fruity notes); Kerehaklu, Chikmagalur (fourth-generation farm, replants native forest trees, grows coffee alongside pepper and cardamom); Baarbara Estate, Coorg (small estate, hand-picks only ripe cherries, dries them slowly on raised beds).",
+    "The file is one HTML page with sections for menu, hours, location, pre-order, gallery and farms, and every in-page navigation link points to an existing section.",
+    "The file loads with no JavaScript errors and has no horizontal overflow at 360px and 1280px widths.",
+    "The file uses no paid service, API key or build step."
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [
+    "Real cafe photos: none exist yet, so the gallery uses simple drawings in 6 spots, as the Requester agreed.",
+    "Farm stories beyond the supplied facts: the Requester gave one description per farm, so each story is built only from those facts and no extra detail will be invented."
+  ]
+}

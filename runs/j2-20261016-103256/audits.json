@@ -1,0 +1,512 @@
+[
+  {
+    "cycle": 1,
+    "version": 6,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "Problem section states that people cannot see the menu or order ahead at Brew Lab",
+        "verdict": "PASS",
+        "note": "Problem: 'Brew Lab is a small specialty coffee shop... people cannot see the menu or order ahead.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "Users section names coffee lovers and office staff nearby and what each does: see the menu, hours and location, and pre-order for pickup",
+        "verdict": "PASS",
+        "note": "Users lists 'Coffee lovers' and 'Office staff nearby', each with: see the menu with prices; see opening hours and where to find the shop; pre-order a coffee for pickup.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "Goals section states that visitors can see the menu, opening hours and location and pre-order a coffee for pickup",
+        "verdict": "PASS",
+        "note": "G1 menu with prices, G2 opening hours and where to find the shop, G3 pre-order a coffee for pickup.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "Requirements section lists the menu with all seven items and their rupee prices exactly as given",
+        "verdict": "PASS",
+        "note": "R1 lists Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120; matches the brief.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "Requirements section lists the pre-order form with the fields name, phone, items and pickup time, and says the order is emailed to hello@brewlab.example",
+        "verdict": "PASS",
+        "note": "R3 gives fields 'name, phone, items and pickup time'; R4 says the order is emailed to hello@brewlab.example.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "Requirements section lists the opening hours for Monday to Saturday and Sunday exactly as given",
+        "verdict": "PASS",
+        "note": "R6: 'Monday to Saturday 7:30 am to 9:00 pm, and Sunday 8:30 am to 6:00 pm'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "Requirements section lists the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as the map or address, and the phone +91 98450 12345 and email hello@brewlab.example as contact details",
+        "verdict": "PASS",
+        "note": "R7 gives '12, 100 Feet Road, Indiranagar, Bengaluru 560038'; R8 gives '+91 98450 12345' and 'hello@brewlab.example'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "Requirements section states the constraints: one page only, works on phones, no online payment (pay at pickup)",
+        "verdict": "PASS",
+        "note": "R9 'one page only'; R10 'works on phones'; R5 'No online payment, they pay at pickup'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "Success metrics section states 30 pre-orders per week",
+        "verdict": "PASS",
+        "note": "Table row G3: '30 pre-orders per week, measured per week.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "Out of scope section lists online payment and any additional pages",
+        "verdict": "PASS",
+        "note": "Out of scope bullets: 'Online payment' and 'Any additional pages'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-11",
+        "criterion": "Standards: nothing invented; PRD has exactly the six named sections; charter says nothing to be confirmed (P4 not met, D-5)",
+        "verdict": "NEEDS_REVISION",
+        "note": "Extra section 'Assumptions to confirm' repeats '- a pre-order is counted each time the pre-order form sends an order to hello@brewlab.example.' without the 'Assumption:' label; the labelled copy in Success metrics is fine.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-12",
+        "criterion": "P8: numeric success metric states its measurement window",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "G3 says 'measured per week' but gives no start date or reporting period; the code flag on G2 is triggered by the hours text and G2 has no target number.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "D-1",
+        "item": "D-1",
+        "criterion": "Every requirement is specific and testable",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "R1 to R9 are specific and checkable; R10 'works on phones' sets no width or test, so it is less testable.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "D-2",
+        "item": "D-2",
+        "criterion": "Goals and success metrics are measurable",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "G3 has a number (30 per week); G1 and G2 are visible-on-page checks; no start date or window for the weekly count.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "D-3",
+        "item": "D-3",
+        "criterion": "Users and problem are consistent with the requirements",
+        "verdict": "PASS",
+        "note": "Problem and Users name the same two groups and three actions that R11 and R1 to R10 deliver.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "D-4",
+        "item": "D-4",
+        "criterion": "Out of scope is explicit",
+        "verdict": "PASS",
+        "note": "Out of scope names online payment and any additional pages, each tied to a Requirements constraint.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "D-5",
+        "item": "D-5",
+        "criterion": "No invented facts: every fact comes from the brief or the Requester's answers, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim not in the brief",
+        "verdict": "NEEDS_REVISION",
+        "note": "Unlabelled in 'Assumptions to confirm': 'a pre-order is counted each time the pre-order form sends an order to hello@brewlab.example.' No other unlabelled claims beyond the brief.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      }
+    ],
+    "mechanical": {},
+    "screenshot": null,
+    "all_pass": false,
+    "output": "prd",
+    "conditions": [
+      {
+        "id": "P1",
+        "text": "All six sections are present and not empty",
+        "check": "sections-present",
+        "met": true,
+        "evidence": "all 6 sections present, none empty"
+      },
+      {
+        "id": "P2",
+        "text": "Requirement ids are unique and sequential (R1, R2, ...)",
+        "check": "ids-sequential",
+        "met": true,
+        "evidence": "R1 to R11, unique and in order"
+      },
+      {
+        "id": "P3",
+        "text": "Every brief fact appears exactly",
+        "check": "facts-present-all",
+        "met": true,
+        "evidence": "all 17 brief fact(s) appear"
+      },
+      {
+        "id": "P4",
+        "text": "No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+        "check": "no-invented-facts",
+        "met": false,
+        "evidence": "not in the charter or the Requester's answers, and not marked Assumption: This",
+        "assumptions": [
+          "a pre-order is counted each time the pre-order form sends an order to hello@brewlab.example."
+        ]
+      },
+      {
+        "id": "P5",
+        "text": "Nothing is \"to be confirmed\"",
+        "check": "nothing-to-be-confirmed",
+        "met": true,
+        "evidence": "nothing to be confirmed"
+      },
+      {
+        "id": "P6",
+        "text": "Every goal has a matching success metric",
+        "check": "ids-covered",
+        "met": true,
+        "evidence": "each of G1, G2, G3 has a Success metrics entry"
+      },
+      {
+        "id": "P7",
+        "text": "Every user group named in the charter appears in Requirements or in a \"no actions in this version\" statement",
+        "check": "groups-covered",
+        "met": true,
+        "evidence": "each of the 2 user group(s) has a requirement or a \"no actions\" statement"
+      },
+      {
+        "id": "P8",
+        "text": "Each numeric success metric states its measurement window, or says \"measurement window not set\"",
+        "check": "metric-window",
+        "met": false,
+        "evidence": "no measurement window: G2 | The opening hours (Monday to Saturday 7:30 am to 9:00 p",
+        "severity": "warn"
+      }
+    ],
+    "read": "Read all six PRD v6 sections in full: Problem (about 60 words), Users (about 90), Goals (about 70), Requirements (R1 to R11, about 380), Success metrics (table plus one assumption line, about 120), Out of scope (about 60). Also read a seventh section, 'Assumptions to confirm' (one line). Read the P1 to P8 code results and the brief facts."
+  },
+  {
+    "cycle": 2,
+    "version": 7,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "Problem section states that people cannot see the menu or order ahead at Brew Lab",
+        "verdict": "PASS",
+        "note": "Problem: 'Brew Lab is a small specialty coffee shop... people cannot see the menu or order ahead.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "Users section names coffee lovers and office staff nearby and what each does: see the menu, hours and location, and pre-order for pickup",
+        "verdict": "PASS",
+        "note": "Users lists Coffee lovers and Office staff nearby, each with: see the menu with prices; see opening hours and where to find the shop; pre-order a coffee for pickup.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "Goals section states that visitors can see the menu, opening hours and location and pre-order a coffee for pickup",
+        "verdict": "PASS",
+        "note": "G1 menu with prices; G2 opening hours and where to find the shop; G3 pre-order a coffee for pickup.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "Requirements section lists the menu with all seven items and their rupee prices exactly as given",
+        "verdict": "PASS",
+        "note": "R1: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "Requirements section lists the pre-order form with the fields name, phone, items and pickup time, and says the order is emailed to hello@brewlab.example",
+        "verdict": "PASS",
+        "note": "R3: 'name, phone, items and pickup time'; R4: order emailed to hello@brewlab.example.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "Requirements section lists the opening hours for Monday to Saturday and Sunday exactly as given",
+        "verdict": "PASS",
+        "note": "R6: 'Monday to Saturday 7:30 am to 9:00 pm, and Sunday 8:30 am to 6:00 pm'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "Requirements section lists the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as the map or address, and the phone +91 98450 12345 and email hello@brewlab.example as contact details",
+        "verdict": "PASS",
+        "note": "R7: '12, 100 Feet Road, Indiranagar, Bengaluru 560038'; R8: '+91 98450 12345' and 'hello@brewlab.example'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "Requirements section states the constraints: one page only, works on phones, no online payment (pay at pickup)",
+        "verdict": "PASS",
+        "note": "R9 'one page only'; R10 'works on phones'; R5 'No online payment, they pay at pickup'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "Success metrics section states 30 pre-orders per week",
+        "verdict": "PASS",
+        "note": "Table row G3: '30 pre-orders per week, measured per week.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "Out of scope section lists online payment and any additional pages",
+        "verdict": "PASS",
+        "note": "Bullets: 'Online payment' and 'Any additional pages'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-11",
+        "criterion": "Standards: PRD has exactly the six named sections; no unlabelled claims (P4, D-5)",
+        "verdict": "NEEDS_REVISION",
+        "note": "A seventh section '## Assumptions to confirm' remains and holds 'a pre-order is counted each time the pre-order form sends an order to hello@brewlab.example.' with no 'Assumption:' label. W-7 changed nothing; code P4 is still NOT MET.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-12",
+        "criterion": "P8: numeric metric states its measurement window",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Code flags the G2 row, which has no number. The only numeric target, G3, says 'measured per week'. No start date or reporting window is given, and the brief gives none.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "D-1",
+        "item": "D-1",
+        "criterion": "Every requirement is specific and testable",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Most requirements are testable (R1, R4, R6, R7). R10 'works on phones' names no screen width or pass test, and R2 'visible without leaving it' is loose.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "D-2",
+        "item": "D-2",
+        "criterion": "Goals and success metrics are measurable",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "G3 has a number (30 pre-orders per week). G1 and G2 metrics are visibility checks only, and no start date or window is given for the weekly count.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "D-3",
+        "item": "D-3",
+        "criterion": "Users and problem are consistent with the requirements",
+        "verdict": "PASS",
+        "note": "Problem and Users name the same two groups and the same three actions. R11 and R1 to R10 cover them.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "D-4",
+        "item": "D-4",
+        "criterion": "Out of scope is explicit",
+        "verdict": "PASS",
+        "note": "Out of scope names 'Online payment' and 'Any additional pages', each tied to a constraint.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "D-5",
+        "item": "D-5",
+        "criterion": "No invented facts: every fact comes from the brief or the Requester's answers, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim not in the brief",
+        "verdict": "NEEDS_REVISION",
+        "note": "Unlabelled claim in the extra section: 'a pre-order is counted each time the pre-order form sends an order to hello@brewlab.example.' The labelled copy under Success metrics is fine. No other unlabelled claims found.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      }
+    ],
+    "mechanical": {},
+    "screenshot": null,
+    "all_pass": false,
+    "output": "prd",
+    "conditions": [
+      {
+        "id": "P1",
+        "text": "All six sections are present and not empty",
+        "check": "sections-present",
+        "met": true,
+        "evidence": "all 6 sections present, none empty"
+      },
+      {
+        "id": "P2",
+        "text": "Requirement ids are unique and sequential (R1, R2, ...)",
+        "check": "ids-sequential",
+        "met": true,
+        "evidence": "R1 to R11, unique and in order"
+      },
+      {
+        "id": "P3",
+        "text": "Every brief fact appears exactly",
+        "check": "facts-present-all",
+        "met": true,
+        "evidence": "all 17 brief fact(s) appear"
+      },
+      {
+        "id": "P4",
+        "text": "No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+        "check": "no-invented-facts",
+        "met": false,
+        "evidence": "not in the charter or the Requester's answers, and not marked Assumption: This",
+        "assumptions": [
+          "a pre-order is counted each time the pre-order form sends an order to hello@brewlab.example."
+        ]
+      },
+      {
+        "id": "P5",
+        "text": "Nothing is \"to be confirmed\"",
+        "check": "nothing-to-be-confirmed",
+        "met": true,
+        "evidence": "nothing to be confirmed"
+      },
+      {
+        "id": "P6",
+        "text": "Every goal has a matching success metric",
+        "check": "ids-covered",
+        "met": true,
+        "evidence": "each of G1, G2, G3 has a Success metrics entry"
+      },
+      {
+        "id": "P7",
+        "text": "Every user group named in the charter appears in Requirements or in a \"no actions in this version\" statement",
+        "check": "groups-covered",
+        "met": true,
+        "evidence": "each of the 2 user group(s) has a requirement or a \"no actions\" statement"
+      },
+      {
+        "id": "P8",
+        "text": "Each numeric success metric states its measurement window, or says \"measurement window not set\"",
+        "check": "metric-window",
+        "met": false,
+        "evidence": "no measurement window: G2 | The opening hours (Monday to Saturday 7:30 am to 9:00 p",
+        "severity": "warn"
+      }
+    ],
+    "read": "Full PRD v7: Problem (about 60 words), Users (about 90), Goals (about 70), Requirements (R1 to R11, about 330), Success metrics (table plus one Assumption line, about 110), Out of scope (about 60), and a seventh section 'Assumptions to confirm' (one line). Also the code condition results P1 to P8, the cycle 1 findings, and chat messages 36 to 45 (W-7 report)."
+  }
+]

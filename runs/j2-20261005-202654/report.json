@@ -1,0 +1,223 @@
+{
+  "metrics": {
+    "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): Real 'starting from' price ranges for each service; Real dentist names, qualifications and profile details; Clinic phone number, WhatsApp number and email address for booking requests; Emergency contact number and emergency hours; Review of the Marathi text by the Requester or a named Marathi speaker.",
+    "brief": "A website for SmileCare Dental Clinic in Pune: book appointments, services with prices, dentist profiles, emergency dental contact, patient FAQs, and a Marathi version.",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 1,
+    "ai_calls": 15,
+    "minutes": 5.8,
+    "budget": {
+      "total": 60,
+      "start": 60,
+      "cap": 120,
+      "raises": [],
+      "spent": 57,
+      "rate_card": true
+    },
+    "site_versions": 3,
+    "site_bytes": 40430,
+    "agents": {
+      "identity": {
+        "turns": 3,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "ceo": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 3,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "builder": {
+        "turns": 3,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 1,
+      "grants": 0,
+      "counters": 1,
+      "refuses": 0,
+      "refuses_converted_by_code": 0,
+      "withdrawals": 0,
+      "conflicts": 0,
+      "ceo_decisions": 3,
+      "resolutions": []
+    },
+    "workflows": {
+      "registered": 3,
+      "done": 3,
+      "failed": 0,
+      "held_ever": 1,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "Core English site: booking and services (with one placeholder dentist card)",
+          "agent_estimate": 25,
+          "charged": 25
+        },
+        {
+          "id": "W-2",
+          "name": "Emergency contact and patient FAQ section",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-3",
+          "name": "Marathi translation and language toggle",
+          "agent_estimate": 22,
+          "charged": 22
+        }
+      ]
+    },
+    "ceo_choices": {
+      "made": 3,
+      "picked_shown_first": 0,
+      "picked_identity_first": 2,
+      "note": "options are shuffled before the CEO sees them; shown_first measures position bias, identity_first measures pull toward the option Identity listed first"
+    },
+    "validator_refusals": 0,
+    "role_refusals": 0,
+    "pauses": 0,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 0,
+    "audits": [
+      {
+        "cycle": 1,
+        "version": 3,
+        "all_pass": true,
+        "pass": 7,
+        "warn": 1,
+        "fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      }
+    ],
+    "open_inputs": [
+      "Real 'starting from' price ranges for each service",
+      "Real dentist names, qualifications and profile details",
+      "Clinic phone number, WhatsApp number and email address for booking requests",
+      "Emergency contact number and emergency hours",
+      "Review of the Marathi text by the Requester or a named Marathi speaker"
+    ]
+  },
+  "review": {
+    "verdict": "A clean happy-path run (1 cycle, 14 calls, 57 of 60 budget, no redirects or refusals) that passed all 8 done-when items [21], but the site cannot take a real booking or show a real number until the Requester supplies 5 inputs, and one safety warning was lost at hand-off.",
+    "agents": {
+      "identity": {
+        "score": 3,
+        "note": "Stayed in role and closed correctly [4][21]. The CEO question bundled three decisions, Q3 option 2 has no description, and Q1 option 2 is a strawman [2]. [21] says clinical FAQ review should be tracked as an open input, but the final list in [22] omits it. The done ruling names no charter clause."
+      },
+      "adaptation": {
+        "score": 4,
+        "note": "One proposal, and it accepted Priority's counter within two exchanges [6][8]. It pre-cut styling and said 'Fund W1 and W2 first' [6], which is Priority and Coordination territory. Asking Priority to pick the cut invited the overreach in [7]."
+      },
+      "priority": {
+        "score": 4,
+        "note": "Good opportunity-cost reasoning: no raise, and it named that 3 credits left cannot buy a fix [7]. It overreached by prescribing where the dentist card goes and judging the profiles part low value, which is design and relevance, not envelope. Envelope fields (stop-loss, retry limit, validity) are not visible in chat, so I cannot check them."
+      },
+      "coordination": {
+        "score": 4,
+        "note": "States the scheduling rule and the file lock every time and the order is correct [10][12][15]. The HOLD on W-3 in [12] was true but pointless, since W-2 was running next. It caused a release and recharge of 22 [13][16], net cost zero."
+      },
+      "audit": {
+        "score": 3,
+        "note": "Surfaced two real issues: empty booking recipients and unreviewed clinical advice [20]. But it chose not to route them to Adaptation because only 3 credits were left. That is Priority's call and it hides a correctable finding. Its PASS rests on code reading plus a mechanical check that did not exercise the toggle or the form output [19]."
+      },
+      "ceo": {
+        "score": 4,
+        "note": "Three decisions, each with a reason and a named trade-off [3], and no position bias (shown-first picks 0 of 3). It did not say the brief was silent, though it was silent on all three. The reply repeats full option text and is long."
+      },
+      "builder": {
+        "score": 5,
+        "note": "Ran W-1, W-2 and W-3 in order on one file. Result is 40 KB, 0 external resources, no JS errors, no overflow at 360 or 1280 px [19]. Reports are short and say what changed. The only extra was two nav links in W-2 [14]."
+      }
+    },
+    "went_well": [
+      "Protocol discipline: 0 redirects, 0 invalid moves, 0 validator refusals, 0 role refusals.",
+      "The Adaptation and Priority bargain closed in 2 exchanges with no Identity ruling needed [6][8].",
+      "The honesty rules held: request form with phone confirmation, 'starting from' prices, marked placeholders, Marathi labelled pending review [19][20].",
+      "Coordination stated its ordering rule and single file lock each turn, so no collisions."
+    ],
+    "problems": [
+      "Clinical FAQ and emergency advice review was meant to become an open input [21] but is missing from the final handoff list [22]. This is the one health-safety warning, and the Requester will not see it.",
+      "Audit decided not to route correctable findings because of budget [20]. The 3-credit margin set by Priority [7] left no rework capacity at all.",
+      "'Done' means a template. Booking recipients, emergency number, prices and dentist names are all placeholders. The Requester pause never ran (pauses 0) because the done-when list was written so placeholders count as done [3].",
+      "Dentist profiles ended up as a card inside the services section after Priority's cut [7][8]. Audit passed it, but it is weaker than the charter's 'dentist profiles section' wording.",
+      "The ASK_CEO had a blank option and a strawman option [2], so the CEO's choice was less informed than it looks."
+    ],
+    "learnings": [
+      "Change audit.md: Audit files and routes every correctable finding to Adaptation, and Priority decides funding. Evidence: [20].",
+      "Test next: a brief where the cheap cut does not exist and an audit fails with no budget left. This run never reached Identity conflict rulings, the CEO budget raise (raises: []), validator refusals or rework, so those paths are untested.",
+      "Test next: a brief where a done-when item needs a Requester-only fact, to see whether Identity pauses correctly instead of the item being designed away. Evidence: pauses 0, [3].",
+      "Test system: add a code check that every open input Identity names appears in the final open_inputs list. Evidence: [21] against [22].",
+      "Test system: validate ASK_CEO before sending (every option has text, one decision per question). Evidence: [2].",
+      "Test system: the CEO bias metric is too thin to use. n=3, and the chat shows the picked options as 'Option 3' while the log says original_pos 0 [2][3]. Fix the logging, then rerun with Identity's first option deliberately the weakest.",
+      "Test system: estimate_vs_charged is identical for all three workflows (25/25, 10/10, 22/22) because charges come from a rate card. It does not test Adaptation's estimating, and 57 spent is a charge, not a measurement.",
+      "Consider letting code advance a linear single-file queue. Coordination took 3 of 14 calls with no real decision. This is an estimate from one run, not a measured saving; keep Coordination for holds and parallel work.",
+      "Add a browser-level mechanical check: click the toggle and confirm no English text remains, and read the WhatsApp or email link target. Evidence: [19] covers only overflow, JS errors and links. Marathi quality is unchecked, and I could not see the HTML."
+    ]
+  },
+  "events": [
+    {
+      "agent": "ceo",
+      "type": "decision",
+      "detail": "charter Q1: option 3 of 3",
+      "msg": 3,
+      "cycle": 0,
+      "shown_pos": 2,
+      "original_pos": 0,
+      "n_options": 3
+    },
+    {
+      "agent": "ceo",
+      "type": "decision",
+      "detail": "charter Q2: option 2 of 3",
+      "msg": 3,
+      "cycle": 0,
+      "shown_pos": 1,
+      "original_pos": 2,
+      "n_options": 3
+    },
+    {
+      "agent": "ceo",
+      "type": "decision",
+      "detail": "charter Q3: option 3 of 3",
+      "msg": 3,
+      "cycle": 0,
+      "shown_pos": 2,
+      "original_pos": 0,
+      "n_options": 3
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-3: W-2 (w2-emergency-faq) must be done before W-3 can run",
+      "msg": 12,
+      "cycle": 1
+    }
+  ],
+  "made": "2026-10-05 20:34:20"
+}

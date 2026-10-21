@@ -1,0 +1,196 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "wf-hours",
+    "name": "Page shell and opening hours",
+    "purpose": "Site is empty (v0); no page shell and no opening hours section.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 5,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the run is still failing the JS-error or 360px overflow check after 1 retry, or if calls exceed 5."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "page shell with base CSS",
+      "hours section with today highlight",
+      "shared hours data object"
+    ],
+    "completion_check": "Page loads with no JS errors; 7 days listed with the stated hours and no closed days; exactly one row is highlighted and it matches the current weekday; no horizontal overflow at 360px and 1280px.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "usable section and head tags",
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "wf-menu",
+    "name": "Menu with prices",
+    "purpose": "No menu section; prices are not shown.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any of the six prices is wrong or missing after 1 retry, or if calls exceed 3."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "menu section"
+    ],
+    "completion_check": "Six items shown under three groups, each with the exact ₹ price listed; no horizontal overflow at 360px.",
+    "dependencies": [
+      "wf-hours"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "wf-preorder",
+    "name": "Pre-order form with WhatsApp handoff",
+    "purpose": "Visitors cannot pre-order or see a running total.",
+    "cost": 25,
+    "estimate": 25,
+    "envelope": {
+      "money_limit": 25,
+      "model_call_limit": 6,
+      "time_limit_minutes": 18,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the total is wrong or the wa.me link lacks any required field after 1 retry, or if calls exceed 6."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "pre-order form section",
+      "WhatsApp wa.me link builder"
+    ],
+    "completion_check": "Changing quantities updates the ₹ total correctly; a pickup time outside that day's hours is rejected with a message; a valid submit opens a wa.me/919845000000 link whose text contains name, phone, pickup time, items and total; payment-at-pickup text is visible; no JS errors; usable at 360px.",
+    "dependencies": [
+      "wf-hours",
+      "wf-menu"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "wf-loyalty",
+    "name": "Loyalty card",
+    "purpose": "No loyalty section.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the circle count is not exactly 10 or they overflow at 360px after 1 retry, or if calls exceed 3."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "loyalty section"
+    ],
+    "completion_check": "Exactly 10 stamp circles render; the 10th shows FREE; the free-drink-of-any-size text is present; circles do not overflow at 360px.",
+    "dependencies": [
+      "wf-hours"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "wf-location",
+    "name": "Location and directions",
+    "purpose": "No location section or directions link.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the address or href differs from the charter after 1 retry, or if calls exceed 3."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "location section"
+    ],
+    "completion_check": "Address text matches exactly; a link labelled Get directions has the exact maps URL as its href; no overflow at 360px.",
+    "dependencies": [
+      "wf-hours"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section",
+    "version": 5
+  },
+  {
+    "id": "W-6",
+    "proposal_id": "wf-menu-price-fix",
+    "name": "Menu price visibility fix",
+    "purpose": "Audit F-2: two of the six menu items show no visible price, so done-when item 2 fails.",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 2,
+      "time_limit_minutes": 6,
+      "retry_limit": 0,
+      "stop_loss": "Stop after one run if any of the six prices is still not visible next to its item, if there is overflow at 360px or 1280px, or if calls exceed 2; report the gap to Identity."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "menu section with all six prices visible"
+    ],
+    "completion_check": "Six menu items each show the exact ₹ price from the charter next to the item; no horizontal overflow at 360px and 1280px; no JS errors.",
+    "dependencies": [
+      "wf-menu"
+    ],
+    "status": "done",
+    "cycle": 2,
+    "section": "W-2",
+    "revises": "W-2",
+    "agent": "W-6 Builder",
+    "last_check": "usable section",
+    "version": 6
+  }
+]

@@ -1,0 +1,137 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "wf-emergency-shell",
+    "name": "Create file with emergency section",
+    "purpose": "No site file exists and there is no emergency information.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the completion check still fails after one retry, or if spend would exceed 10 units."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "citycare.html"
+    ],
+    "completion_check": "File is one HTML document with no build step. Emergency section shows 108 labelled ambulance and 112 labelled emergency. Hospital address, phone, directions and emergency desk each show a visibly marked placeholder such as 'To be confirmed by CityCare', and none looks like a real number or address.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "wf-booking-form",
+    "name": "Add booking form with validation and mailto",
+    "purpose": "Patients have no way to request a visit.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 2,
+      "time_limit_minutes": 30,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the completion check still fails after one retry, or if spend would exceed 15 units."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "booking form section and inline JavaScript in citycare.html"
+    ],
+    "completion_check": "Empty or malformed required fields (name, phone, email, date) are rejected before sending. Valid submit builds a mailto link to a marked placeholder address and shows a confirmation with a hospital phone marked as a placeholder. The form or confirmation says the request is sent by email and is not a confirmed appointment until the hospital replies.",
+    "dependencies": [
+      "wf-emergency-shell"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "wf-doctor-profiles",
+    "name": "Add sample doctor profiles",
+    "purpose": "No doctor information is shown.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the completion check still fails after one retry, or if spend would exceed 10 units."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "doctor profiles section in citycare.html"
+    ],
+    "completion_check": "Section contains at least two profiles, and each profile and the section heading carry a visible 'Sample content' label.",
+    "dependencies": [
+      "wf-emergency-shell"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "wf-health-blog",
+    "name": "Add one sample health blog post",
+    "purpose": "No health advice content exists.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the completion check still fails after one retry, or if spend would exceed 10 units."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "blog section in citycare.html"
+    ],
+    "completion_check": "File contains exactly one blog post with a title and body text, and a visible 'Sample content' label.",
+    "dependencies": [
+      "wf-emergency-shell"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "wf-styling",
+    "name": "Add responsive styling",
+    "purpose": "The sections are unstyled and may not be readable on mobile.",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 2,
+      "time_limit_minutes": 16,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the completion check still fails after one retry, or if spend would exceed 5 units."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "inline CSS in citycare.html"
+    ],
+    "completion_check": "File has inline or CDN CSS covering all sections with consistent fonts, spacing and colours, plus a media query or flexible layout that keeps content readable at 360px width without horizontal scrolling.",
+    "dependencies": [
+      "wf-booking-form",
+      "wf-doctor-profiles",
+      "wf-health-blog"
+    ],
+    "status": "done",
+    "cycle": 1
+  }
+]

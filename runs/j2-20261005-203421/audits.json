@@ -1,0 +1,86 @@
+[
+  {
+    "cycle": 1,
+    "version": 3,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The site is one HTML file with inline CSS and JavaScript, needs no build step, and names Ananya Rao and Jaipur.",
+        "verdict": "PASS",
+        "note": "Mechanical check: 20140 bytes, 0 external resources, no JS errors. The code has inline <style> and <script> tags, and the title and h1 read 'Ananya Rao' and 'Wedding Photographer, Jaipur'.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "A gallery section renders multiple images from one editable list, and each image is visibly labelled as a placeholder.",
+        "verdict": "PASS",
+        "note": "GALLERY has 8 entries, all with placeholder:true. The render loop adds a visible 'Placeholder' badge to each tile. Mechanical check shows no overflow at 360px or 1280px.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "A testimonials section renders from one editable list, and each testimonial carries a visible 'sample' label.",
+        "verdict": "PASS",
+        "note": "TESTIMONIALS has 3 entries with sample:true. The render loop adds a 'Sample' badge to each blockquote, and the quote text and author are also marked as samples.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "An enquiry form has a wedding date field, a name field and a contact field, validates them before submit, and shows a confirmation message after a valid submit.",
+        "verdict": "PASS",
+        "note": "The form has novalidate and fields #name, #contact and #date. validate() runs before the fetch, with per-field errors covering empty, short name, bad contact, past date and non-existent date. A valid submit shows #confirm, with a draft line when the endpoint is unset. I read the code and did not run submit paths; the mechanical check only covers overflow, errors and links.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The form's delivery endpoint is one named placeholder constant, and the page shows a visible note that enquiries are not delivered until it is set.",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "const ENQUIRY_ENDPOINT = \"PLACEHOLDER_SET_ENQUIRY_ENDPOINT\" is the single constant. #endpoint-note is visible while it is unset. Warning: the top banner line 'Launch blocker: ... enquiries are not delivered yet' is static HTML and stays after the endpoint is set, so it would then be false.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 5,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-6",
+        "criterion": "Brief and charter statement: packages and prices section, with prices labelled 'sample, replace before launch'",
+        "verdict": "POLICY_CONCERN",
+        "note": "The site has no packages or prices section. It has only Gallery, Testimonials and Enquiry in the nav and main. The item was moved to open_inputs and is unbuilt. Budget is 35 of 40 against a 10 cost, and Adaptation's request for a ruling (a) or (b) has no recorded answer.",
+        "severity": "medium",
+        "confidence": "high"
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 20140,
+      "broken_in_page_links": [],
+      "external_resources": [],
+      "forms": 1,
+      "scripts": 4,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

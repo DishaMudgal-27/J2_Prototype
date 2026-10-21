@@ -1,0 +1,20 @@
+{
+  "statement": "Build a single-page website for CityCare Hospital in Bengaluru allowing patients to book visits and easily find emergency information.",
+  "site_name": "CityCare Hospital Bengaluru",
+  "audience": "Patients and individuals needing emergency assistance in Bengaluru",
+  "standards": [
+    "Highly visible and legible emergency contact section",
+    "Functional and intuitive patient appointment booking interface",
+    "Single file HTML layout containing all styling and scripting"
+  ],
+  "rules": [
+    "Highlight General Medicine, Pediatrics, and Cardiology in the initial booking flow.",
+    "Display emergency helpline '+91 80 4999 9999' prominently.",
+    "Display clear instructions to call 108 for immediate ambulance dispatch."
+  ],
+  "done_when": [
+    "The booking system clearly features General Medicine, Pediatrics, and Cardiology.",
+    "The emergency helpline '+91 80 4999 9999' and 'call 108' instructions are highly visible on load.",
+    "All features run correctly within a single plain HTML/CSS/JS file."
+  ]
+}

@@ -1,0 +1,108 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "w1-shell-location",
+    "name": "Page shell, warm styling and location",
+    "purpose": "No file exists. The page needs the Brew Lab and Indiranagar, Bengaluru identity, a warm look with no photos, and a location section.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 2,
+      "time_limit_minutes": 25,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the file lacks any completion_check item after the one retry, or if any img element or photo reference appears."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site/index.html"
+    ],
+    "completion_check": "The file has the viewport meta tag, CSS variables for the palette, a @media rule for narrow screens, at least one inline SVG or CSS art element, the text Brew Lab and Indiranagar, Bengaluru, a marked street-address placeholder, no img elements and no photo references.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "w2-menu-hours",
+    "name": "Menu with price slots and opening hours",
+    "purpose": "No menu or hours sections exist.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 2,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any price or hour value appears that is not a marked placeholder."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site/index.html (menu and hours sections)"
+    ],
+    "completion_check": "The menu section has multiple item slots, each with a price shown as a marked placeholder. The hours section is present with marked placeholders. All new placeholders appear in the comment block. No invented prices or hours.",
+    "dependencies": [
+      "w1-shell-location"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "w3-preorder",
+    "name": "Pre-order form",
+    "purpose": "Customers cannot pre-order.",
+    "cost": 25,
+    "estimate": 25,
+    "envelope": {
+      "money_limit": 25,
+      "model_call_limit": 2,
+      "time_limit_minutes": 25,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the form action or handler points to any real or invented destination."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site/index.html (pre-order section)"
+    ],
+    "completion_check": "The form contains name, item, quantity and pickup time fields. A visibly marked placeholder states the order destination, and the form action or handler does not point to an invented destination. The placeholder is listed in the comment block.",
+    "dependencies": [
+      "w1-shell-location"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "w4-farm-map",
+    "name": "Farm section with map container and coordinates data block",
+    "purpose": "No farm section exists, and farm coordinates arrive next week.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 2,
+      "time_limit_minutes": 25,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any coordinate value is invented or the script throws an error on the awaiting state after the one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site/index.html (farm section and data block)"
+    ],
+    "completion_check": "The farm section has a map container and one labelled data block with exactly three farm entries, each marked as awaiting coordinates and containing no invented coordinates. The page shows the awaiting state without errors. The comment block lists every placeholder on the page.",
+    "dependencies": [
+      "w1-shell-location"
+    ],
+    "status": "done",
+    "cycle": 1
+  }
+]

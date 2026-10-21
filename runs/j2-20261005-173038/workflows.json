@@ -1,0 +1,86 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": null,
+    "name": "Choose stack and scaffold",
+    "purpose": "No site exists",
+    "cost": 15,
+    "outputs": [
+      "index.html"
+    ],
+    "completion_check": "index.html loads",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": null,
+    "name": "Core sections",
+    "purpose": "Hero, departments, doctors, appointment form, contact",
+    "cost": 45,
+    "outputs": [
+      "index.html"
+    ],
+    "completion_check": "All done-when sections present",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-3",
+    "proposal_id": null,
+    "name": "Animations",
+    "purpose": "Scroll and hover effects",
+    "cost": 10,
+    "outputs": [
+      "CSS"
+    ],
+    "completion_check": "Effects run on scroll",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-4",
+    "proposal_id": null,
+    "name": "Health tips strip",
+    "purpose": "Some trust content",
+    "cost": 10,
+    "outputs": [
+      "index.html"
+    ],
+    "completion_check": "3 tips visible on the home page",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-5",
+    "proposal_id": null,
+    "name": "Sticky emergency bar",
+    "purpose": "Emergency number visible on every screen",
+    "cost": 8,
+    "outputs": [
+      "index.html"
+    ],
+    "completion_check": "Emergency number visible while scrolling",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 2
+  },
+  {
+    "id": "W-6",
+    "proposal_id": null,
+    "name": "User change",
+    "purpose": "Add a visiting hours section",
+    "cost": 6,
+    "outputs": [
+      "index.html"
+    ],
+    "completion_check": "Change visible",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 3
+  }
+]

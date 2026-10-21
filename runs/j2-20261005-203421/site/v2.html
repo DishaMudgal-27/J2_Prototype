@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ananya Rao, Wedding Photographer, Jaipur</title>
+<meta name="description" content="Portfolio of Ananya Rao, a wedding photographer based in Jaipur.">
+<style>
+  :root {
+    --ink: #2b2220;
+    --muted: #6f625d;
+    --bg: #fbf7f2;
+    --card: #ffffff;
+    --accent: #9c4a3a;
+    --warn-bg: #fff3cd;
+    --warn-ink: #5c4400;
+    --line: #e7ddd3;
+    --err: #a3261b;
+    --ok-bg: #e6f2e6;
+    --ok-ink: #1f4d25;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .notice {
+    background: var(--warn-bg);
+    color: var(--warn-ink);
+    font: 14px/1.5 system-ui, sans-serif;
+    padding: 10px 0;
+    border-bottom: 1px solid #ecd48a;
+  }
+  .notice p { margin: 0 0 4px; }
+  .notice p:last-child { margin-bottom: 0; }
+  header.site-header { padding: 56px 0 40px; text-align: center; border-bottom: 1px solid var(--line); }
+  header.site-header h1 { margin: 0 0 8px; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: normal; letter-spacing: .02em; }
+  header.site-header p.tagline { margin: 0; color: var(--muted); font-size: 1.1rem; }
+  nav { margin-top: 22px; font: 14px system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+  nav a { color: var(--accent); text-decoration: none; margin: 0 12px; }
+  nav a:hover, nav a:focus { text-decoration: underline; }
+  section { padding: 56px 0; }
+  section h2 { margin: 0 0 6px; font-size: 2rem; font-weight: normal; text-align: center; }
+  section p.lead { margin: 0 auto 32px; text-align: center; color: var(--muted); max-width: 640px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+  figure.tile { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .frame { position: relative; aspect-ratio: 4 / 5; display: flex; align-items: center; justify-content: center; }
+  .frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .frame .ph-art { font: 600 13px system-ui, sans-serif; color: rgba(255,255,255,.9); letter-spacing: .1em; text-transform: uppercase; text-align: center; padding: 0 12px; }
+  .badge {
+    position: absolute; top: 10px; left: 10px;
+    background: var(--warn-bg); color: var(--warn-ink);
+    font: 700 11px system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase;
+    padding: 4px 8px; border-radius: 3px; border: 1px solid #ecd48a;
+  }
+  figcaption { padding: 10px 14px; font: 14px system-ui, sans-serif; color: var(--muted); }
+
+  /* Enquiry form */
+  #enquiry { border-top: 1px solid var(--line); }
+  .form-card { max-width: 560px; margin: 0 auto; background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 24px; font-family: system-ui, sans-serif; }
+  .blocker {
+    background: var(--warn-bg); color: var(--warn-ink);
+    border: 1px solid #ecd48a; border-radius: 4px;
+    padding: 10px 12px; margin: 0 0 20px; font: 14px/1.5 system-ui, sans-serif;
+  }
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+  .field .hint { font-weight: normal; color: var(--muted); }
+  .field input, .field textarea {
+    width: 100%; font: 16px system-ui, sans-serif; color: var(--ink);
+    padding: 10px 12px; border: 1px solid #c9bcb1; border-radius: 4px; background: #fff;
+  }
+  .field textarea { min-height: 90px; resize: vertical; }
+  .field input:focus, .field textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .field.invalid input { border-color: var(--err); }
+  .error { color: var(--err); font-size: 13px; margin: 6px 0 0; min-height: 0; }
+  button.submit {
+    font: 600 15px system-ui, sans-serif; letter-spacing: .04em;
+    background: var(--accent); color: #fff; border: 0; border-radius: 4px;
+    padding: 12px 22px; cursor: pointer;
+  }
+  button.submit:hover, button.submit:focus { background: #823a2d; }
+  button.submit[disabled] { opacity: .6; cursor: default; }
+  .confirm {
+    background: var(--ok-bg); color: var(--ok-ink);
+    border: 1px solid #b7d6b8; border-radius: 4px;
+    padding: 14px 16px; margin-top: 18px; font: 15px/1.5 system-ui, sans-serif;
+  }
+  .confirm p { margin: 0 0 6px; }
+  .confirm p:last-child { margin-bottom: 0; }
+  .send-fail {
+    background: #fdeceb; color: var(--err); border: 1px solid #f0b8b3; border-radius: 4px;
+    padding: 12px 14px; margin-top: 18px; font: 14px/1.5 system-ui, sans-serif;
+  }
+  [hidden] { display: none !important; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0; text-align: center; font: 14px system-ui, sans-serif; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- ======================================================================
+     EDITABLE BLOCK: everything the Requester must supply lives here.
+     Edit these values only. Items marked PLACEHOLDER must be replaced
+     before launch. A later workflow adds TESTIMONIALS here.
+     ====================================================================== -->
+<script>
+const SITE = {
+  name: "Ananya Rao",
+  city: "Jaipur",
+  tagline: "Wedding photography in Jaipur"
+};
+
+// PLACEHOLDER (LAUNCH BLOCKER): where enquiries are sent.
+// Replace the value below with a form-service URL (for example a Formspree
+// endpoint) that emails Ananya. The form POSTs JSON to this URL.
+// While the value is empty or still reads "PLACEHOLDER_SET_ENQUIRY_ENDPOINT",
+// the page shows a notice and NO enquiry is delivered.
+const ENQUIRY_ENDPOINT = "PLACEHOLDER_SET_ENQUIRY_ENDPOINT";
+
+// PLACEHOLDER: gallery images. To use a real photo, set `src` to the image URL
+// and set `placeholder: false` (this removes the placeholder label for that image).
+// Leave `src` empty to show a generated placeholder tile.
+const GALLERY = [
+  { src: "", alt: "Placeholder for a ceremony photo",        caption: "Ceremony",         placeholder: true, tint: "#9c4a3a" },
+  { src: "", alt: "Placeholder for a couple portrait",       caption: "Couple portrait",  placeholder: true, tint: "#7a5c3e" },
+  { src: "", alt: "Placeholder for a detail shot",           caption: "Details",          placeholder: true, tint: "#5e6b4f" },
+  { src: "", alt: "Placeholder for a family photo",          caption: "Family",           placeholder: true, tint: "#4f6b78" },
+  { src: "", alt: "Placeholder for a candid moment",         caption: "Candid moments",   placeholder: true, tint: "#7b4f6b" },
+  { src: "", alt: "Placeholder for a venue photo",           caption: "Venue",            placeholder: true, tint: "#a0763a" },
+  { src: "", alt: "Placeholder for a celebration photo",     caption: "Celebration",      placeholder: true, tint: "#5a5f86" },
+  { src: "", alt: "Placeholder for a getting-ready photo",   caption: "Getting ready",    placeholder: true, tint: "#8a4a55" }
+];
+</script>
+<!-- ====================== END EDITABLE BLOCK ====================== -->
+
+<div class="notice">
+  <div class="wrap">
+    <p><strong>Draft site.</strong> Gallery images below are placeholders and must be replaced with Ananya's real photos before launch.</p>
+    <p><strong>Launch blocker:</strong> the enquiry form's delivery endpoint is not set, so enquiries are not delivered yet.</p>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="wrap">
+    <h1 id="site-title">Ananya Rao</h1>
+    <p class="tagline" id="site-tagline">Wedding photography in Jaipur</p>
+    <nav aria-label="Main">
+      <a href="#gallery">Gallery</a>
+      <a href="#enquiry">Enquire</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section id="gallery" aria-labelledby="gallery-h">
+    <div class="wrap">
+      <h2 id="gallery-h">Gallery</h2>
+      <p class="lead" id="gallery-lead">A selection of wedding photography from Jaipur.</p>
+      <div class="grid" id="gallery-grid"></div>
+      <noscript><p class="lead">Please enable JavaScript to view the gallery.</p></noscript>
+    </div>
+  </section>
+
+  <section id="enquiry" aria-labelledby="enquiry-h">
+    <div class="wrap">
+      <h2 id="enquiry-h">Enquire about your wedding date</h2>
+      <p class="lead">Tell Ananya your date and how to reach you, and she will check availability.</p>
+
+      <div class="form-card">
+        <p class="blocker" id="endpoint-note" hidden>
+          <strong>Launch blocker:</strong> enquiries are not delivered until the form endpoint (ENQUIRY_ENDPOINT) is set in the editable block at the top of this file.
+        </p>
+
+        <form id="enquiry-form" novalidate>
+          <div class="field" id="f-name">
+            <label for="name">Your name</label>
+            <input id="name" name="name" type="text" autocomplete="name" aria-describedby="name-err" required>
+            <p class="error" id="name-err" role="alert"></p>
+          </div>
+
+          <div class="field" id="f-contact">
+            <label for="contact">Email or phone number</label>
+            <input id="contact" name="contact" type="text" autocomplete="email" aria-describedby="contact-err" required>
+            <p class="error" id="contact-err" role="alert"></p>
+          </div>
+
+          <div class="field" id="f-date">
+            <label for="date">Wedding date</label>
+            <input id="date" name="date" type="date" aria-describedby="date-err" required>
+            <p class="error" id="date-err" role="alert"></p>
+          </div>
+
+          <div class="field" id="f-details">
+            <label for="details">Venue or other details <span class="hint">(optional)</span></label>
+            <textarea id="details" name="details"></textarea>
+          </div>
+
+          <button type="submit" class="submit" id="submit-btn">Send enquiry</button>
+        </form>
+
+        <div class="send-fail" id="send-fail" role="alert" hidden>
+          Sorry, your enquiry could not be sent. Please try again in a moment.
+        </div>
+
+        <div class="confirm" id="confirm" role="status" aria-live="polite" hidden>
+          <p><strong>Thank you, <span id="confirm-name"></span>.</strong> Your enquiry for <span id="confirm-date"></span> has been received.</p>
+          <p id="confirm-draft" hidden>Draft mode: this enquiry was not sent anywhere because the delivery endpoint is not set yet.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap"><span id="footer-text"></span></div>
+</footer>
+
+<script>
+(function () {
+  document.title = SITE.name + ", Wedding Photographer, " + SITE.city;
+  document.getElementById("site-title").textContent = SITE.name;
+  document.getElementById("site-tagline").textContent = SITE.tagline;
+  document.getElementById("gallery-lead").textContent = "A selection of wedding photography from " + SITE.city + ".";
+  document.getElementById("footer-text").textContent = SITE.name + ", Wedding Photographer, " + SITE.city;
+
+  var grid = document.getElementById("gallery-grid");
+  GALLERY.forEach(function (item) {
+    var fig = document.createElement("figure");
+    fig.className = "tile";
+
+    var frame = document.createElement("div");
+    frame.className = "frame";
+
+    if (item.src) {
+      var img = document.createElement("img");
+      img.src = item.src;
+      img.alt = item.alt || item.caption || "";
+      img.loading = "lazy";
+      frame.appendChild(img);
+    } else {
+      frame.style.background = "linear-gradient(145deg, " + (item.tint || "#777") + ", #2b2220)";
+      frame.setAttribute("role", "img");
+      frame.setAttribute("aria-label", item.alt || "Placeholder image");
+      var art = document.createElement("span");
+      art.className = "ph-art";
+      art.textContent = "Photo goes here";
+      frame.appendChild(art);
+    }
+
+    if (item.placeholder) {
+      var badge = document.createElement("span");
+      badge.className = "badge";
+      badge.textContent = "Placeholder";
+      frame.appendChild(badge);
+    }
+
+    fig.appendChild(frame);
+
+    var cap = document.createElement("figcaption");
+    cap.textContent = item.caption || "";
+    fig.appendChild(cap);
+
+    grid.appendChild(fig);
+  });
+})();
+</script>
+
+<script>
+/* Enquiry form: validation, confirmation, delivery via ENQUIRY_ENDPOINT */
+(function () {
+  var form = document.getElementById("enquiry-form");
+  var btn = document.getElementById("submit-btn");
+  var confirmBox = document.getElementById("confirm");
+  var failBox = document.getElementById("send-fail");
+  var endpointNote = document.getElementById("endpoint-note");
+  var dateInput = document.getElementById("date");
+
+  function endpointIsSet() {
+    var v = (typeof ENQUIRY_ENDPOINT === "string") ? ENQUIRY_ENDPOINT.trim() : "";
+    return v !== "" && v !== "PLACEHOLDER_SET_ENQUIRY_ENDPOINT";
+  }
+
+  // Show the launch-blocker note while the endpoint is unset.
+  endpointNote.hidden = endpointIsSet();
+
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function todayStr() {
+    var d = new Date();
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  }
+  dateInput.min = todayStr();
+
+  function setError(fieldId, errId, msg) {
+    var field = document.getElementById(fieldId);
+    var err = document.getElementById(errId);
+    err.textContent = msg || "";
+    if (msg) { field.classList.add("invalid"); } else { field.classList.remove("invalid"); }
+    var input = field.querySelector("input");
+    if (input) { input.setAttribute("aria-invalid", msg ? "true" : "false"); }
+  }
+
+  function validName(v) { return v.trim().length >= 2; }
+  function validContact(v) {
+    v = v.trim();
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) { return true; }
+    var digits = v.replace(/[\s\-().+]/g, "");
+    return /^\d{7,15}$/.test(digits) && /^[\d\s\-().+]+$/.test(v);
+  }
+  function validDate(v) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) { return "Please enter your wedding date (YYYY-MM-DD)."; }
+    var p = v.split("-");
+    var y = +p[0], m = +p[1], d = +p[2];
+    var dt = new Date(y, m - 1, d);
+    if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) {
+      return "That date does not exist. Please check it.";
+    }
+    if (v < todayStr()) { return "The wedding date cannot be in the past."; }
+    return "";
+  }
+
+  function validate() {
+    var name = form.elements["name"].value;
+    var contact = form.elements["contact"].value;
+    var date = form.elements["date"].value;
+    var firstBad = null;
+
+    var nameMsg = "";
+    if (!name.trim()) { nameMsg = "Please enter your name."; }
+    else if (!validName(name)) { nameMsg = "Name must be at least 2 characters."; }
+    setError("f-name", "name-err", nameMsg);
+    if (nameMsg && !firstBad) { firstBad = form.elements["name"]; }
+
+    var contactMsg = "";
+    if (!contact.trim()) { contactMsg = "Please enter an email address or phone number."; }
+    else if (!validContact(contact)) { contactMsg = "Enter a valid email (name@example.com) or a phone number with 7 to 15 digits."; }
+    setError("f-contact", "contact-err", contactMsg);
+    if (contactMsg && !firstBad) { firstBad = form.elements["contact"]; }
+
+    var dateMsg = date ? validDate(date) : "Please choose your wedding date.";
+    setError("f-date", "date-err", dateMsg);
+    if (dateMsg && !firstBad) { firstBad = form.elements["date"]; }
+
+    if (firstBad) { firstBad.focus(); }
+    return !firstBad;
+  }
+
+  function showConfirmation(name, date, delivered) {
+    document.getElementById("confirm-name").textContent = name.trim();
+    document.getElementById("confirm-date").textContent = date;
+    document.getElementById("confirm-draft").hidden = delivered;
+    confirmBox.hidden = false;
+    failBox.hidden = true;
+    form.reset();
+    dateInput.min = todayStr();
+  }
+
+  // Clear a field's error as the visitor corrects it.
+  ["name", "contact", "date"].forEach(function (n) {
+    form.elements[n].addEventListener("input", function () {
+      setError("f-" + n, n + "-err", "");
+    });
+  });
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    confirmBox.hidden = true;
+    failBox.hidden = true;
+    if (!validate()) { return; }
+
+    var payload = {
+      name: form.elements["name"].value.trim(),
+      contact: form.elements["contact"].value.trim(),
+      weddingDate: form.elements["date"].value,
+      details: form.elements["details"].value.trim(),
+      site: SITE.name + ", " + SITE.city
+    };
+
+    if (!endpointIsSet()) {
+      showConfirmation(payload.name, payload.weddingDate, false);
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Sending...";
+    fetch(ENQUIRY_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(payload)
+    }).then(function (res) {
+      if (!res.ok) { throw new Error("HTTP " + res.status); }
+      showConfirmation(payload.name, payload.weddingDate, true);
+    }).catch(function () {
+      failBox.hidden = false;
+    }).then(function () {
+      btn.disabled = false;
+      btn.textContent = "Send enquiry";
+    });
+  });
+})();
+</script>
+</body>
+</html>

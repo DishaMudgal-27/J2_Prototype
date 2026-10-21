@@ -1,0 +1,276 @@
+[
+  {
+    "cycle": 1,
+    "version": 2,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The file is a single HTML file with its CSS and JavaScript inside it, and needs no build step or server.",
+        "verdict": "PASS",
+        "note": "One document with one style block and one script block (scripts: 1). Mechanical check lists only https://wa.me/ as an external resource, which is a link target.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The page names Sweet Crumbs Bakery and Pune, and has three clearly labelled sections: menu, cake orders, contact.",
+        "verdict": "PASS",
+        "note": "The title, h1 and footer name the bakery and Pune. Sections have ids menu, cake-orders and contact, with h2 headings Menu, Cake Orders and Contact. No broken in-page links.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The menu section lists items in groups; cake entries show a 'starting from' price and non-cake entries show a fixed price; any price not yet known is a visibly marked placeholder.",
+        "verdict": "PASS",
+        "note": "Three groups (Cakes plus two non-cake categories). Cake rows carry a 'starting from' label with a [PLACEHOLDER: starting price]. Non-cake rows carry [PLACEHOLDER: fixed price].",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The cake order section has a form with fields for cake details (size, flavour, date, message), pickup or delivery choice, delivery area and delivery address.",
+        "verdict": "PASS",
+        "note": "Form#cake-form has inputs cake-size, cake-flavour, cake-date and cake-message, a fulfilment radio pair, a cake-area select and a cake-address textarea. Area and address are enabled only for Delivery.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "Submitting the form opens a WhatsApp link (wa.me) whose message text is built from the form fields; the WhatsApp number is a single marked placeholder value in the script.",
+        "verdict": "PASS",
+        "note": "Single const WHATSAPP_NUMBER = \"[PLACEHOLDER: WhatsApp number]\". The submit handler builds 'https://wa.me/' + digits + '?text=' + encodeURIComponent(lines). Not run with a real number. With the placeholder it shows a preview instead of opening WhatsApp, which fits the placeholder rule.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The page states that delivery is available within a named list of Pune areas plus pickup, and the area list is in one editable block; if areas are not yet known the block holds marked placeholders.",
+        "verdict": "PASS",
+        "note": "The #area-list ul sits between EDITABLE BLOCK comments and holds three [PLACEHOLDER: Pune delivery area N] items. The page text says pickup or delivery within these areas. The form dropdown is built from this list.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "The page states that orders are confirmed by the bakery after the WhatsApp message is sent.",
+        "verdict": "PASS",
+        "note": "The notice reads 'Orders are confirmed by the bakery... after you send the WhatsApp message.' The submit status text repeats it.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The contact section shows the bakery's address, phone, WhatsApp link and opening hours; any value not yet known is a visibly marked placeholder.",
+        "verdict": "PASS",
+        "note": "Four contact cards. Address, phone and hours are [PLACEHOLDER] markers. The WhatsApp link (#whatsapp-link) is set from the constant and is inert with a marker while the number is a placeholder.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The file contains no payment processing, no server calls and no storage of customer data.",
+        "verdict": "PASS",
+        "note": "The script contains no fetch, XHR, localStorage, cookie or payment code. The only outbound action is window.open to wa.me. js_errors is empty. The page states it takes no payment and stores no details.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "Every placeholder in the file uses one consistent visible marker, and each one corresponds to an entry in open_inputs.",
+        "verdict": "PASS",
+        "note": "Every unknown fact uses the .ph style with the [PLACEHOLDER: ...] text. Each maps to an open_inputs entry: menu items and categories, prices, areas, address, phone, hours, WhatsApp number. The logo and brand colours input has no marker, but it is not a fact the page needs to state.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 10,
+        "pass": true
+      },
+      {
+        "id": "F-11",
+        "criterion": "The file includes a responsive layout rule (viewport meta tag and a small-screen style) so the three sections stack and stay readable on a phone.",
+        "verdict": "NEEDS_REVISION",
+        "note": "Viewport meta and @media (max-width: 640px) stacking rules are present, but the mechanical check shows phone 360px overflow_px: 61 (desktop 1280px: 0). The overflowing element is not identified, so the cause is unverified.",
+        "severity": "medium",
+        "confidence": "high",
+        "item": 11,
+        "pass": false
+      }
+    ],
+    "extra_issues": [],
+    "mechanical": {
+      "available": true,
+      "bytes": 18455,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://wa.me/"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 61
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": false
+  },
+  {
+    "cycle": 2,
+    "version": 3,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The file is a single HTML file with its CSS and JavaScript inside it, and needs no build step or server.",
+        "verdict": "PASS",
+        "note": "One document with one style block and one script block (scripts: 1); the only external resource is the https://wa.me/ link target; no build step.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The page names Sweet Crumbs Bakery and Pune, and has three clearly labelled sections: menu, cake orders, contact.",
+        "verdict": "PASS",
+        "note": "Title, h1 and footer name the bakery and Pune; sections #menu, #cake-orders and #contact have h2 headings; broken_in_page_links is empty.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The menu section lists items in groups; cake entries show a 'starting from' price and non-cake entries show a fixed price; any price not yet known is a visibly marked placeholder.",
+        "verdict": "PASS",
+        "note": "Three .menu-group blocks. Cake rows carry a 'starting from' label with a [PLACEHOLDER: starting price]; non-cake rows carry [PLACEHOLDER: fixed price].",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The cake order section has a form with fields for cake details (size, flavour, date, message), pickup or delivery choice, delivery area and delivery address.",
+        "verdict": "PASS",
+        "note": "form#cake-form has cake-size, cake-flavour, cake-date, cake-message, fulfilment radios, cake-area select and cake-address textarea.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "Submitting the form opens a WhatsApp link (wa.me) whose message text is built from the form fields; the WhatsApp number is a single marked placeholder value in the script.",
+        "verdict": "PASS",
+        "note": "const WHATSAPP_NUMBER = \"[PLACEHOLDER: WhatsApp number]\"; the handler builds 'https://wa.me/' + digits + '?text=' + encodeURIComponent(text) from the fields. Read in code, not run with a real number; with the placeholder it shows a preview instead of opening WhatsApp.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The page states that delivery is available within a named list of Pune areas plus pickup, and the area list is in one editable block; if areas are not yet known the block holds marked placeholders.",
+        "verdict": "PASS",
+        "note": "#area-list sits between EDITABLE BLOCK comments with three [PLACEHOLDER: Pune delivery area N] items; the page text names pickup and delivery; the dropdown is built from this list.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "The page states that orders are confirmed by the bakery after the WhatsApp message is sent.",
+        "verdict": "PASS",
+        "note": "Notice reads 'Orders are confirmed by the bakery... after you send the WhatsApp message.'",
+        "severity": "low",
+        "confidence": "high",
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The contact section shows the bakery's address, phone, WhatsApp link and opening hours; any value not yet known is a visibly marked placeholder.",
+        "verdict": "PASS",
+        "note": "Four .contact-card blocks: address, phone and hours are [PLACEHOLDER] markers; #whatsapp-link is inert with a marked note while the number is a placeholder.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The file contains no payment processing, no server calls and no storage of customer data.",
+        "verdict": "PASS",
+        "note": "Script has no fetch, XHR, localStorage, cookie or payment code; the only outbound action is window.open to wa.me; js_errors is empty.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "Every placeholder in the file uses one consistent visible marker, and each one corresponds to an entry in open_inputs.",
+        "verdict": "PASS",
+        "note": "Every unknown uses the .ph style with [PLACEHOLDER: ...] text and maps to an open_inputs entry. The logo and brand colours input has no marker, but it is not a fact the page states.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 10,
+        "pass": true
+      },
+      {
+        "id": "F-11",
+        "criterion": "The file includes a responsive layout rule (viewport meta tag and a small-screen style) so the three sections stack and stay readable on a phone.",
+        "verdict": "PASS",
+        "note": "Mechanical check: phone 360px overflow_px 0, desktop 1280px overflow_px 0; viewport meta and @media (max-width: 640px) stacking rules present (previously 61px overflow at 360px).",
+        "severity": "low",
+        "confidence": "high",
+        "item": 11,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "mechanical": {
+      "available": true,
+      "bytes": 19191,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://wa.me/"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

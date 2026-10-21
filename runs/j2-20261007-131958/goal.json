@@ -1,0 +1,28 @@
+{
+  "statement": "Build a one-page website for Brew Lab, a cafe on 100 Feet Road, Indiranagar, Bengaluru, that shows today's hours, the menu with prices, a pre-order form with a running rupee total sent by WhatsApp, a loyalty stamp card and directions, and works on a 360px phone screen.",
+  "site_name": "Brew Lab",
+  "audience": "Customers in and around Indiranagar, Bengaluru, mostly on phones, who want to check if the cafe is open, see prices, pre-order for pickup and find the way there.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file, no build step",
+    "Works at 360px and 1280px wide with no horizontal overflow",
+    "No JavaScript errors on load or on use",
+    "All prices shown in rupees (₹)",
+    "No broken in-page links"
+  ],
+  "rules": [
+    "Use only the hours, menu, prices, address, map link and WhatsApp number the Requester supplied",
+    "Pre-orders go to WhatsApp +91 98450 00000; payment is at pickup; pickup is within 15 minutes of ordering",
+    "The pre-order form uses the same six menu items and prices as the menu section"
+  ],
+  "done_when": [
+    "The hours section lists Monday to Friday 8am to 10pm and Saturday and Sunday 9am to 11pm, and JavaScript highlights today's row automatically from the visitor's current day.",
+    "The menu shows every item with a ₹ price: Coffee: Espresso 120, Cappuccino 180, Pour-over 220; Cold: Cold brew 200; Food: Croissant 150, Banana bread 130.",
+    "The pre-order form lists the same six items with quantity inputs and shows a running total in ₹ that updates as quantities change.",
+    "Submitting the pre-order form opens a WhatsApp message to +91 98450 00000 containing the chosen items and the total, and the page states pay at pickup and pickup within 15 minutes of ordering.",
+    "The loyalty section shows 10 stamp circles, with the 10th circle marked FREE.",
+    "The location section shows the address 100 Feet Road, Indiranagar, Bengaluru 560038 and a \"Get directions\" link to https://maps.google.com/?q=100+Feet+Road+Indiranagar+Bengaluru+560038.",
+    "At 360px and 1280px wide the page has no horizontal overflow, and loading and using the page throws no JavaScript errors."
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": []
+}

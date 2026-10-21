@@ -1,0 +1,81 @@
+{
+  "statement": "Build a single-file website (plain HTML, CSS and JavaScript) for Brew Lab, a small specialty coffee shop, so coffee lovers and nearby office staff can see the menu with prices, check the opening hours, find the address and pre-order for pickup at the shop.",
+  "site_name": "Brew Lab",
+  "audience": "Coffee lovers and office staff nearby, mostly on phones, who today cannot see the menu or order ahead.",
+  "standards": [
+    "Works on phones: no horizontal overflow at 360px and 1280px",
+    "No JavaScript errors",
+    "Plain HTML, CSS and JavaScript in one file, no build step",
+    "No broken in-page link",
+    "Every fact shown exactly as given in the brief",
+    "Nothing to be confirmed"
+  ],
+  "rules": [
+    "The address is shown as text with no embedded map",
+    "No online payment is taken",
+    "Customers collect the order at the shop",
+    "The page does not show a phone number for the shop",
+    "No invented facts"
+  ],
+  "done_when": [
+    "The page shows the name Brew Lab",
+    "The page shows the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map",
+    "The page shows a menu of seven items with these prices in rupees: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+    "The page shows the opening hours 7 am to 10 pm, every day",
+    "The page has a pre-order form with the fields name, phone, items and pickup time",
+    "The form sends the order to hello@brewlab.example",
+    "The page says customers collect the order at the shop and that no online payment is taken",
+    "The page does not show a phone number for the shop",
+    "The layout works on phones, with no horizontal overflow at 360px and 1280px",
+    "Every in-page link goes to a section that exists",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ],
+  "business_type": "coffee shop",
+  "visitor_needs": [
+    "See the menu with prices",
+    "Check the opening hours",
+    "Find the address",
+    "Place a pre-order for pickup"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [],
+  "facts": [
+    "Brew Lab",
+    "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+    "Filter coffee 90",
+    "Cappuccino 160",
+    "Latte 180",
+    "Cold brew 200",
+    "Masala chai 80",
+    "Almond croissant 140",
+    "Banana bread slice 120",
+    "7 am to 10 pm, every day",
+    "hello@brewlab.example",
+    "20 pre-orders a week within the first month"
+  ],
+  "charter_items": [
+    "The page shows the name Brew Lab",
+    "The page shows the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map",
+    "The page shows a menu of seven items with these prices in rupees: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+    "The page shows the opening hours 7 am to 10 pm, every day",
+    "The page has a pre-order form with the fields name, phone, items and pickup time",
+    "The form sends the order to hello@brewlab.example",
+    "The page says customers collect the order at the shop and that no online payment is taken",
+    "The page does not show a phone number for the shop",
+    "The layout works on phones, with no horizontal overflow at 360px and 1280px",
+    "Every in-page link goes to a section that exists",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ],
+  "core_items": [
+    "The page shows the name Brew Lab",
+    "The page shows the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map",
+    "The page shows a menu of seven items with these prices in rupees: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+    "The page shows the opening hours 7 am to 10 pm, every day",
+    "The page has a pre-order form with the fields name, phone, items and pickup time",
+    "The form sends the order to hello@brewlab.example",
+    "The page says customers collect the order at the shop and that no online payment is taken",
+    "The layout works on phones, with no horizontal overflow at 360px and 1280px",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ],
+  "confirmed_facts": []
+}

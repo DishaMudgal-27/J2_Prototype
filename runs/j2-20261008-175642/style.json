@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#7A3E2B",
+    "secondary": "#55663A",
+    "accent": "#B8862B",
+    "background": "#FAF4EA",
+    "surface": "#FFFFFF",
+    "text": "#2E2420",
+    "muted": "#6B5A4E"
+  },
+  "fonts": {
+    "heading": "'Cormorant Garamond', Georgia, 'Times New Roman', serif",
+    "body": "'Nunito Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap"
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "64px"
+  },
+  "radius": "12px",
+  "buttons": {
+    "primary": "display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:12px 24px;background:#7A3E2B;color:#FFFFFF;border:2px solid #7A3E2B;border-radius:12px;font-weight:700;text-decoration:none;cursor:pointer",
+    "secondary": "display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:12px 24px;background:transparent;color:#7A3E2B;border:2px solid #7A3E2B;border-radius:12px;font-weight:700;text-decoration:none;cursor:pointer"
+  },
+  "card": "background:#FFFFFF;border:1px solid #E6D8C3;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(46,36,32,0.06)",
+  "notes": "Terracotta, olive and mustard on warm cream echo natural dyes and handloom cloth; a serif heading gives elegance and all text pairs pass WCAG AA."
+}

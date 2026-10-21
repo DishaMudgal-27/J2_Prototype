@@ -1,0 +1,150 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "catalogue-core",
+    "name": "Product catalogue with filters and WhatsApp ordering",
+    "covers": [
+      1,
+      2,
+      3
+    ],
+    "fixes": [],
+    "purpose": "Site v0 has no products, filters or order path.",
+    "cost": 35,
+    "estimate": 35,
+    "envelope": {
+      "money_limit": 35,
+      "model_call_limit": 4,
+      "time_limit_minutes": 25,
+      "retry_limit": 1,
+      "stop_loss": "Stop if a run produces a JavaScript error or horizontal overflow at 360px twice in a row, or if spend reaches 35."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "products section",
+      "category, size and price filter controls",
+      "10 product cards with order buttons"
+    ],
+    "completion_check": "10 cards show exact names and prices in groups of 3/3/2/2; category buttons show only the chosen category; size and price filters combine and narrow by supplied sizes; each order button opens wa.me/910000011111 with the product name in the message.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "style guide, usable section",
+    "style_guide": true,
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "nav-mobile",
+    "name": "Mobile viewport and navigation",
+    "covers": [
+      11
+    ],
+    "fixes": [],
+    "purpose": "No viewport setting or navigation that works at 360px.",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any nav link points to a missing section id or the nav overflows at 360px twice in a row, or if spend reaches 5."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "viewport meta tag",
+      "responsive navigation with anchor links to existing sections"
+    ],
+    "completion_check": "Viewport meta present; nav usable with no horizontal overflow at 360px and 1280px; every nav link targets an existing section id.",
+    "dependencies": [
+      "catalogue-core"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section and head tags",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "size-guide",
+    "name": "Size guide table",
+    "covers": [
+      4
+    ],
+    "fixes": [],
+    "purpose": "No size guide section exists (F-4, item 4).",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the table values differ from the supplied chest sizes, or a JavaScript error or horizontal overflow at 360px appears twice in a row, or spend reaches 10."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section id size-guide with a heading and a 6-row table"
+    ],
+    "completion_check": "Section #size-guide exists and its table shows exactly XS 32, S 34, M 36, L 38, XL 40, XXL 42 in inches, with no overflow at 360px and 1280px.",
+    "dependencies": [
+      "catalogue-core"
+    ],
+    "status": "done",
+    "cycle": 2,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "visit-section",
+    "name": "Visit section: address, timings, shop phone",
+    "covers": [
+      5
+    ],
+    "fixes": [],
+    "purpose": "Address, timings and shop phone appear nowhere on the page (F-5, item 5).",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if address, timings or phone differ from the supplied text, or overflow at 360px appears twice in a row, or spend reaches 10."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section id visit with address, timings and phone link"
+    ],
+    "completion_check": "Section #visit shows 18 FC Road, Shivajinagar, Pune 411005; 11am to 9pm Tuesday to Sunday, closed Monday; and +91 00000 22222, with no overflow at 360px and 1280px.",
+    "dependencies": [
+      "catalogue-core"
+    ],
+    "status": "done",
+    "cycle": 2,
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  }
+]

@@ -1,0 +1,41 @@
+{
+  "statement": "Build a one-page, mobile-first website for Brew Lab, a specialty coffee shop in Indiranagar, Bengaluru, where visitors can see the menu with prices, opening hours and location, pre-order a coffee for pickup, learn about the beans and their farms, and understand the loyalty card.",
+  "site_name": "Brew Lab",
+  "audience": "Local coffee drinkers in and around Indiranagar, Bengaluru, mostly on phones, who want to check the menu, hours and location and order ahead for pickup.",
+  "standards": [
+    "Warm and modern look: earthy coffee-toned palette, clean type, generous spacing",
+    "Mobile-first: usable at 360px width, tap targets at least 44px, no horizontal scroll",
+    "One file of plain HTML, CSS and JavaScript, no build step (CDN libraries allowed)",
+    "Every fact the Requester has not supplied is shown as a visibly marked placeholder, never invented",
+    "Readable text contrast and semantic headings, with alt text on images"
+  ],
+  "rules": [
+    "Single page with sections reached by anchor navigation",
+    "Never invent prices, hours, address, phone numbers, farm names or any other fact not in the brief",
+    "Loyalty rule is exactly: buy 9, get the 10th free",
+    "Pre-order is for pickup only"
+  ],
+  "done_when": [
+    "The file is a single HTML document with inline or CDN CSS and JS and no build step",
+    "The page has a menu section listing items with a price shown for each (real or marked placeholder)",
+    "The page has an opening-hours section with every day of the week listed (real or marked placeholder)",
+    "The page has a where-to-find-us section naming Indiranagar, Bengaluru, with an address and a map link or embed (address marked placeholder if unknown)",
+    "The page has a pre-order-for-pickup form where a visitor picks items and quantities, enters name, phone and pickup time, and gets an order summary on submit; the order destination is a marked placeholder",
+    "The page has a beans-and-farms section describing the beans and their farms (farm details marked placeholder if unknown)",
+    "The page has a loyalty-card explainer stating buy 9, get the 10th free",
+    "The file has a viewport meta tag and responsive CSS rules with a mobile layout",
+    "Every placeholder is visibly marked in the page text, and none is presented as fact",
+    "Navigation links to each section work as in-page anchors"
+  ],
+  "open_inputs": [
+    "Menu items and prices in INR",
+    "Opening hours for each day",
+    "Street address and map location",
+    "Phone, WhatsApp or email for contact",
+    "How pre-orders reach the shop (WhatsApp number, email or other) and whether payment is at pickup or online",
+    "Pickup time rules (earliest slot, lead time)",
+    "Bean names, roast details, and the farms and regions they come from",
+    "Photos and logo, if any"
+  ],
+  "dropped_from_brief": []
+}

@@ -1,0 +1,82 @@
+{
+  "statement": "Build a single-file HTML, CSS and JavaScript website for Riverside Run 2027, a city running event in Pune, that lets runners compare the races, estimate fees, register, see schedules, routes, FAQs and sponsors, lets volunteers sign up, and feels sporty and clear on phones.",
+  "site_name": "Riverside Run 2027",
+  "audience": "Runners of all levels (5K, 10K, Half Marathon) and prospective volunteers in and around Pune, mostly on phones.",
+  "standards": [
+    "Sporty, clear look with strong type and bold colour",
+    "Mobile first, no horizontal overflow at 360px or 1280px",
+    "High-contrast mode applies to the whole page",
+    "Sticky menu that shows the current section",
+    "Placeholders for route maps and photos",
+    "Plain HTML, CSS and JavaScript in one file, CDN libraries allowed, no build step"
+  ],
+  "rules": [
+    "Use only facts the Requester supplied; never invent details",
+    "Race fees are Rs 300 (5K), Rs 500 (10K), Rs 800 (Half Marathon); T-shirt is Rs 250",
+    "Early-bird is 10% off race fees only, not T-shirts, for registrations up to 31 December 2026",
+    "Registration is not refundable; race changes by email until 31 January 2027"
+  ],
+  "done_when": [
+    "The site shows the name Riverside Run 2027, Pune, race day Sunday 14 February 2027, and expo day Saturday 13 February 2027 (10am to 6pm) at Riverside Grounds, 5 River Road, Pune 411001",
+    "A race comparison shows 5K (7:30am, Rs 300, min age 12, 1 hour cutoff), 10K (6:45am, Rs 500, min age 16, 2 hour cutoff) and Half Marathon (6:00am, Rs 800, min age 18, 3 hours 30 minutes cutoff)",
+    "A fee calculator takes race, number of runners (1 to 10) and number of T-shirts (Rs 250 each) and shows the total, applying 10% off race fees only up to 31 December 2026",
+    "A registration form has name, email, phone, date of birth, race dropdown, T-shirt yes/no, T-shirt size (shown only when yes), emergency contact name and phone, and guardian name (required only when the runner is under 18), and is set to send to run@example.com",
+    "The schedule shows Expo day (10am bib collection opens, 4pm route briefing, 6pm expo closes) and Race day (5:00am gates open, 6:00am Half Marathon, 6:45am 10K, 7:30am 5K, 10:00am prize ceremony)",
+    "A route section for each race shows a map placeholder and its water stations (5K at 2.5 km; 10K at 2.5, 5 and 7.5 km; Half Marathon every 3 km)",
+    "An FAQ section answers: changing race (yes, until 31 January 2027 by email), parking (free at Gate 2), refunds (no), bib collection (at the expo on 13 February), bag drop (near the start line), pacers (10K and Half Marathon)",
+    "A sponsors section lists Gold: Meridian Bank; Silver: Trailhead Sports and Aqua Pure; Community: Pune Runners Club",
+    "A separate volunteer form has name, email, preferred role (Water station, Registration desk, Route marshal) and availability (Saturday, Sunday, both), and is set to send to volunteers@example.com",
+    "A countdown shows the time left until race day, 14 February 2027",
+    "A menu stays on screen while scrolling and highlights the section currently in view",
+    "A high-contrast toggle changes colours across the whole page and can be switched back",
+    "The layout works on phones, with no horizontal overflow at 360px and 1280px, and photo placeholders are used where images would go",
+    "Contact details run@example.com and WhatsApp +91 00000 44444 are shown on the site",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ],
+  "business_type": "running event",
+  "visitor_needs": [
+    "Compare the three races",
+    "Calculate what they will pay",
+    "Register online",
+    "See race-day and expo-day schedules",
+    "See route and water stations per race",
+    "Read FAQs",
+    "See sponsors by tier",
+    "Volunteer sign-up",
+    "Countdown to race day"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [],
+  "charter_items": [
+    "The site shows the name Riverside Run 2027, Pune, race day Sunday 14 February 2027, and expo day Saturday 13 February 2027 (10am to 6pm) at Riverside Grounds, 5 River Road, Pune 411001",
+    "A race comparison shows 5K (7:30am, Rs 300, min age 12, 1 hour cutoff), 10K (6:45am, Rs 500, min age 16, 2 hour cutoff) and Half Marathon (6:00am, Rs 800, min age 18, 3 hours 30 minutes cutoff)",
+    "A fee calculator takes race, number of runners (1 to 10) and number of T-shirts (Rs 250 each) and shows the total, applying 10% off race fees only up to 31 December 2026",
+    "A registration form has name, email, phone, date of birth, race dropdown, T-shirt yes/no, T-shirt size (shown only when yes), emergency contact name and phone, and guardian name (required only when the runner is under 18), and is set to send to run@example.com",
+    "The schedule shows Expo day (10am bib collection opens, 4pm route briefing, 6pm expo closes) and Race day (5:00am gates open, 6:00am Half Marathon, 6:45am 10K, 7:30am 5K, 10:00am prize ceremony)",
+    "A route section for each race shows a map placeholder and its water stations (5K at 2.5 km; 10K at 2.5, 5 and 7.5 km; Half Marathon every 3 km)",
+    "An FAQ section answers: changing race (yes, until 31 January 2027 by email), parking (free at Gate 2), refunds (no), bib collection (at the expo on 13 February), bag drop (near the start line), pacers (10K and Half Marathon)",
+    "A sponsors section lists Gold: Meridian Bank; Silver: Trailhead Sports and Aqua Pure; Community: Pune Runners Club",
+    "A separate volunteer form has name, email, preferred role (Water station, Registration desk, Route marshal) and availability (Saturday, Sunday, both), and is set to send to volunteers@example.com",
+    "A countdown shows the time left until race day, 14 February 2027",
+    "A menu stays on screen while scrolling and highlights the section currently in view",
+    "A high-contrast toggle changes colours across the whole page and can be switched back",
+    "The layout works on phones, with no horizontal overflow at 360px and 1280px, and photo placeholders are used where images would go",
+    "Contact details run@example.com and WhatsApp +91 00000 44444 are shown on the site",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ],
+  "core_items": [
+    "The site shows the name Riverside Run 2027, Pune, race day Sunday 14 February 2027, and expo day Saturday 13 February 2027 (10am to 6pm) at Riverside Grounds, 5 River Road, Pune 411001",
+    "A race comparison shows 5K (7:30am, Rs 300, min age 12, 1 hour cutoff), 10K (6:45am, Rs 500, min age 16, 2 hour cutoff) and Half Marathon (6:00am, Rs 800, min age 18, 3 hours 30 minutes cutoff)",
+    "A fee calculator takes race, number of runners (1 to 10) and number of T-shirts (Rs 250 each) and shows the total, applying 10% off race fees only up to 31 December 2026",
+    "A registration form has name, email, phone, date of birth, race dropdown, T-shirt yes/no, T-shirt size (shown only when yes), emergency contact name and phone, and guardian name (required only when the runner is under 18), and is set to send to run@example.com",
+    "The schedule shows Expo day (10am bib collection opens, 4pm route briefing, 6pm expo closes) and Race day (5:00am gates open, 6:00am Half Marathon, 6:45am 10K, 7:30am 5K, 10:00am prize ceremony)",
+    "Contact details run@example.com and WhatsApp +91 00000 44444 are shown on the site",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ],
+  "confirmed_facts": [
+    {
+      "criterion": "A registration form has name, email, phone, date of birth, race dropdown, T-shirt yes/no, T-shirt size (shown only when yes), emergency contact name and phone, and guardian name (required only when the runner is under 18), and is set to send to run@example.com",
+      "fact": "T-shirt sizes offered: S, M, L and XL"
+    }
+  ]
+}

@@ -1,0 +1,739 @@
+[
+  {
+    "cycle": 1,
+    "version": 6,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The site shows the name Thread & Loom and the address 18 FC Road, Shivajinagar, Pune 411005.",
+        "verdict": "PASS",
+        "note": "The h1 reads 'Thread & Loom'. The #visit section has <address>18 FC Road, Shivajinagar, Pune 411005</address>, exact match.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The site shows the WhatsApp order number +91 00000 11111 and the shop phone +91 00000 22222, each as a tappable link (WhatsApp link and tel link).",
+        "verdict": "PASS",
+        "note": "#contact has a link to https://wa.me/910000011111 with text '+91 00000 11111', and a link to tel:+910000022222 with text '+91 00000 22222'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The site shows store timings 11am to 9pm, Tuesday to Sunday, closed on Monday.",
+        "verdict": "PASS",
+        "note": "#timings has the text '11am to 9pm', 'Tuesday to Sunday' and 'Closed on Monday'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "All 10 products appear with name, category and price: Indigo block-print kurta 1,499; Mustard handloom kurta 1,699; White chikankari kurta 2,199; Ikat handloom saree 3,499; Khadi silk saree 4,999; Cotton jamdani saree 3,999; Khadi cotton shirt 1,299; Linen-blend shirt 1,599; Block-print dupatta 899; Chanderi dupatta 1,099.",
+        "verdict": "PASS",
+        "note": "10 article cards in #products. Names, categories and prices (₹1,499 to ₹1,099) match the charter. J2_PRODUCTS has the same values.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-missing-5",
+        "verdict": "WITHDRAWN",
+        "note": "Audit filed no finding for this item. (withdrawn in C-3)",
+        "severity": "medium",
+        "confidence": "high",
+        "item": 5,
+        "criterion": "Each product has an order button that opens a WhatsApp chat to +91 00000 11111 with the product name in the message.",
+        "pass": true
+      },
+      {
+        "id": "F-missing-6",
+        "verdict": "BLOCKED_BY_EVIDENCE",
+        "note": "Audit filed no finding for this item.",
+        "severity": "medium",
+        "confidence": "high",
+        "item": 6,
+        "criterion": "The page has a viewport setting, an earthy colour palette, and no horizontal overflow at 360px and 1280px.",
+        "pass": false
+      },
+      {
+        "id": "F-missing-7",
+        "verdict": "BLOCKED_BY_EVIDENCE",
+        "note": "Audit filed no finding for this item.",
+        "severity": "medium",
+        "confidence": "high",
+        "item": 7,
+        "criterion": "The page runs with no JavaScript errors, filters and category browsing work, and every in-page link points to an existing section.",
+        "pass": false
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-5",
+        "criterion": "Each product has a WhatsApp order button to +91 00000 11111 with the product name",
+        "verdict": "PASS",
+        "note": "The W-3 script fills all 10 .w2-order-slot elements with a link to https://wa.me/910000011111?text=encodeURIComponent('Hello Thread & Loom, I would like to order: '+name). I read the code and did not count the rendered buttons.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-6",
+        "criterion": "Viewport setting, earthy palette, no horizontal overflow at 360px and 1280px",
+        "verdict": "PASS",
+        "note": "The viewport meta is present. The palette is terracotta, olive and cream. Mechanical check: overflow_px is 0 at 360px and at 1280px.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-7",
+        "criterion": "No JS errors; every in-page link points to an existing section (filters and category browsing dropped by the Requester)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "js_errors is [] and broken_in_page_links is []. The links #products and #visit both resolve. The site has no filters or category tabs, which the Requester dropped.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "The screenshot shows Cormorant Garamond headings, Nunito Sans body text, terracotta and olive buttons and cream cards, all matching the style guide.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "Contrast check: 74 text pairs checked, 0 low, at both widths.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "One h1, 0 skipped heading levels. The shop name stands out on the screenshot.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "The only first-screen action is the filled 'Browse the collection' button, and 'Visit us' is clearly secondary.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "There is no nav element and only 2 in-page links, both in the header. The timings and contact sections can only be reached by scrolling.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "small_tap_targets count is 0 at 360px, and the minimum measured size is 44px.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "There are 0 img elements. Each placeholder is a div with role=img and an aria-label.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 19920,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Nunito+Sans:wght@400;600;700&amp;display=swap",
+        "https://wa.me/910000011111"
+      ],
+      "forms": 0,
+      "scripts": 3,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "design": {
+        "desktop": {
+          "contrast": {
+            "checked": 74,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Nunito Sans",
+            "Cormorant Garamond"
+          ],
+          "nav": {
+            "nav_elements": 0,
+            "in_page_links": 2
+          },
+          "first_screen_actions": [
+            "Browse the collection"
+          ]
+        },
+        "phone": {
+          "contrast": {
+            "checked": 74,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Nunito Sans",
+            "Cormorant Garamond"
+          ],
+          "nav": {
+            "nav_elements": 0,
+            "in_page_links": 2
+          },
+          "first_screen_actions": [
+            "Browse the collection"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        }
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [],
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v6.png",
+    "all_pass": false
+  },
+  {
+    "cycle": 2,
+    "version": 6,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The site shows the name Thread & Loom and the address 18 FC Road, Shivajinagar, Pune 411005.",
+        "verdict": "PASS",
+        "note": "h1 reads 'Thread & Loom'; #visit has <address>18 FC Road, Shivajinagar, Pune 411005</address>, exact match.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The site shows the WhatsApp order number +91 00000 11111 and the shop phone +91 00000 22222, each as a tappable link (WhatsApp link and tel link).",
+        "verdict": "PASS",
+        "note": "#contact: a href=https://wa.me/910000011111 with text '+91 00000 11111'; a href=tel:+910000022222 with text '+91 00000 22222'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The site shows store timings 11am to 9pm, Tuesday to Sunday, closed on Monday.",
+        "verdict": "PASS",
+        "note": "#timings text: '11am to 9pm', 'Tuesday to Sunday', 'Closed on Monday'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "All 10 products appear with name, category and price: Indigo block-print kurta 1,499; Mustard handloom kurta 1,699; White chikankari kurta 2,199; Ikat handloom saree 3,499; Khadi silk saree 4,999; Cotton jamdani saree 3,999; Khadi cotton shirt 1,299; Linen-blend shirt 1,599; Block-print dupatta 899; Chanderi dupatta 1,099.",
+        "verdict": "PASS",
+        "note": "10 article cards in #products and J2_PRODUCTS; names, categories and prices (₹899 to ₹4,999) match the charter.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "Each product has an order button that opens a WhatsApp chat to +91 00000 11111 with the product name in the message.",
+        "verdict": "PASS",
+        "note": "10 .w2-order-slot elements; W-3 script adds an a.w3-order to each, href wa.me/910000011111?text=encodeURIComponent('Hello Thread & Loom, I would like to order: '+name). Read from code, rendered buttons not counted.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The page has a viewport setting, an earthy colour palette, and no horizontal overflow at 360px and 1280px.",
+        "verdict": "PASS",
+        "note": "meta viewport present; palette vars #7A3B1E/#4F5D2F/#B5763A/#F7F1E8; mechanical check overflow 0px at 360 and 1280.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "The page runs with no JavaScript errors, filters and category browsing work, and every in-page link points to an existing section.",
+        "verdict": "UNPAID",
+        "note": "Built on the page, but no workflow covers item 7, so nobody paid for it. Register a workflow that covers it at its rate-card minimum (interactive_feature, 10). (Audit's own note: Mechanical check: js_errors [], broken_in_page_links []; #products and #visit both exist. Filters and category browsing are out of scope per the Requester's drop.)",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": false
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-8",
+        "criterion": "Navigation (rubric R-5)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "nav_elements 0; only 2 in-page links (#products, #visit); #contact and #timings have no link.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "Fonts measured as Cormorant Garamond and Nunito Sans; screenshot shows style-guide terracotta and olive buttons, cream cards and dashed accent placeholders at both widths.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "74 text elements checked at each width, 0 low-contrast.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "One h1, 0 skipped heading levels; the screenshot shows the shop name as the largest element.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "First-screen action is 'Browse the collection', the filled primary button, with 'Visit us' as outlined secondary.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "No nav element; only 2 in-page links, so Contact and Store timings are reachable only by scrolling.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "BLOCKED_BY_EVIDENCE",
+        "note": "Audit filed no result for this rubric item.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "BLOCKED_BY_EVIDENCE",
+        "note": "Audit filed no result for this rubric item.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 19920,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Nunito+Sans:wght@400;600;700&amp;display=swap",
+        "https://wa.me/910000011111"
+      ],
+      "forms": 0,
+      "scripts": 3,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 74,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Nunito Sans",
+            "Cormorant Garamond"
+          ],
+          "nav": {
+            "nav_elements": 0,
+            "in_page_links": 2
+          },
+          "first_screen_actions": [
+            "Browse the collection"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 74,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Nunito Sans",
+            "Cormorant Garamond"
+          ],
+          "nav": {
+            "nav_elements": 0,
+            "in_page_links": 2
+          },
+          "first_screen_actions": [
+            "Browse the collection"
+          ]
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v6.png",
+    "all_pass": false
+  },
+  {
+    "cycle": 3,
+    "version": 7,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The site shows the name Thread & Loom and the address 18 FC Road, Shivajinagar, Pune 411005.",
+        "verdict": "PASS",
+        "note": "h1 'Thread & Loom'; #visit <address>18 FC Road, Shivajinagar, Pune 411005</address>, exact match.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The site shows the WhatsApp order number +91 00000 11111 and the shop phone +91 00000 22222, each as a tappable link (WhatsApp link and tel link).",
+        "verdict": "PASS",
+        "note": "#contact: a href=https://wa.me/910000011111 text '+91 00000 11111'; a href=tel:+910000022222 text '+91 00000 22222'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The site shows store timings 11am to 9pm, Tuesday to Sunday, closed on Monday.",
+        "verdict": "PASS",
+        "note": "#timings text: '11am to 9pm', 'Tuesday to Sunday', 'Closed on Monday'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "All 10 products appear with name, category and price: Indigo block-print kurta 1,499; Mustard handloom kurta 1,699; White chikankari kurta 2,199; Ikat handloom saree 3,499; Khadi silk saree 4,999; Cotton jamdani saree 3,999; Khadi cotton shirt 1,299; Linen-blend shirt 1,599; Block-print dupatta 899; Chanderi dupatta 1,099.",
+        "verdict": "PASS",
+        "note": "10 article cards in #products and J2_PRODUCTS; all names, categories and prices (899 to 4,999) match the charter.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "Each product has an order button that opens a WhatsApp chat to +91 00000 11111 with the product name in the message.",
+        "verdict": "PASS",
+        "note": "W-3 script adds a.w3-order to each of 10 .w2-order-slot elements, href wa.me/910000011111?text=encodeURIComponent('Hello Thread & Loom, I would like to order: '+name). Read from code; rendered buttons not counted.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The page has a viewport setting, an earthy colour palette, and no horizontal overflow at 360px and 1280px.",
+        "verdict": "PASS",
+        "note": "meta viewport present; palette #7A3B1E/#4F5D2F/#B5763A/#F7F1E8; mechanical check overflow 0px at 360 and 1280.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "The page runs with no JavaScript errors, filters and category browsing work, and every in-page link points to an existing section.",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "js_errors [], broken_in_page_links []; nav has 4 links to #products, #visit, #contact, #timings, all present. No filters or category tabs exist, out of scope per the Requester's drop.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "Fonts measured as Nunito Sans and Cormorant Garamond; screenshot shows style-guide terracotta, olive and cream with matching buttons and cards.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "78 text pairs checked at both widths, 0 low contrast.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "1 h1, 0 skipped heading levels; the screenshot shows the shop name as the largest element.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "First-screen action is 'Browse the collection' as the filled primary button, with 'Visit us' as the secondary.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS",
+        "note": "Sticky nav with Products, Visit, Contact, Timings is visible at 360px and 1280px; 6 in-page links, all resolve.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "Phone small_tap_targets count 0 at a 44px minimum; nav links are 48px tall in the CSS.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "0 img elements and 0 without alt; the 10 placeholder pictures are div role=img with aria-label.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 22829,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Nunito+Sans:wght@400;600;700&amp;display=swap",
+        "https://wa.me/910000011111"
+      ],
+      "forms": 0,
+      "scripts": 4,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 78,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Nunito Sans",
+            "Cormorant Garamond"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 6
+          },
+          "first_screen_actions": [
+            "Browse the collection"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 78,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Nunito Sans",
+            "Cormorant Garamond"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 6
+          },
+          "first_screen_actions": [
+            "Browse the collection"
+          ]
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v7.png",
+    "all_pass": true
+  }
+]

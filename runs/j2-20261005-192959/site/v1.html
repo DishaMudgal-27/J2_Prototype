@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Specialty Coffee, Indiranagar, Bengaluru</title>
+<meta name="description" content="Brew Lab is a small specialty coffee shop in Indiranagar, Bengaluru.">
+<style>
+  :root {
+    --espresso: #3b2418;
+    --roast: #6b4129;
+    --caramel: #b9783f;
+    --cream: #faf3e8;
+    --latte: #efe1cc;
+    --paper: #fffaf2;
+    --ink: #2b1b12;
+    --muted: #6f5a4c;
+    --ph-bg: #fff1c9;
+    --ph-line: #c99a1e;
+    --radius: 16px;
+    --font-head: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    color: var(--ink);
+    background: var(--cream);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  img, svg { max-width: 100%; }
+  a { color: var(--roast); }
+  h1, h2, h3 { font-family: var(--font-head); color: var(--espresso); line-height: 1.2; margin: 0 0 .5em; }
+  h1 { font-size: clamp(2.2rem, 8vw, 3.6rem); }
+  h2 { font-size: clamp(1.6rem, 5vw, 2.2rem); }
+  h3 { font-size: 1.15rem; }
+  p { margin: 0 0 1em; }
+
+  .wrap { width: 100%; max-width: 960px; margin: 0 auto; padding: 0 20px; }
+  section { padding: 56px 0; }
+  section:nth-of-type(even) { background: var(--paper); }
+  .eyebrow { text-transform: uppercase; letter-spacing: .14em; font-size: .78rem; color: var(--caramel); font-weight: 700; margin-bottom: .5em; }
+
+  /* header */
+  header.top { background: var(--espresso); color: var(--cream); position: sticky; top: 0; z-index: 10; }
+  header.top .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 16px; padding-top: 10px; padding-bottom: 10px; }
+  .brand { font-family: var(--font-head); font-size: 1.3rem; font-weight: 700; color: var(--cream); text-decoration: none; }
+  nav { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+  nav a { color: var(--latte); text-decoration: none; font-size: .9rem; padding: 4px 0; }
+  nav a:hover { color: #fff; text-decoration: underline; }
+
+  /* hero */
+  .hero { background: linear-gradient(160deg, var(--espresso) 0%, var(--roast) 100%); color: var(--cream); padding: 72px 0 64px; }
+  .hero h1 { color: var(--cream); }
+  .hero p { max-width: 36em; font-size: 1.1rem; color: var(--latte); }
+  .hero .eyebrow { color: #e3b184; }
+
+  /* placeholder marking */
+  .ph {
+    display: inline-block;
+    background: var(--ph-bg);
+    border: 1px dashed var(--ph-line);
+    color: #6a4d00;
+    border-radius: 6px;
+    padding: 0 6px;
+    font-size: .8rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .ph-block { background: var(--ph-bg); border: 1px dashed var(--ph-line); border-radius: 10px; padding: 10px 14px; color: #5a4200; font-size: .92rem; }
+
+  /* menu */
+  .menu-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  .menu-group { background: #fff; border-radius: var(--radius); padding: 18px 20px; box-shadow: 0 2px 10px rgba(59,36,24,.07); }
+  .menu-group h3 { border-bottom: 2px solid var(--latte); padding-bottom: 8px; margin-bottom: 8px; }
+  .menu-item { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--latte); }
+  .menu-item:last-child { border-bottom: 0; }
+  .menu-item .name { font-weight: 600; }
+  .menu-item .desc { display: block; font-size: .85rem; color: var(--muted); font-weight: 400; }
+  .price { text-align: right; font-weight: 700; color: var(--roast); flex-shrink: 0; }
+  .price .ph { display: block; margin-top: 2px; }
+
+  /* hours + location */
+  .two-col { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  .card { background: #fff; border-radius: var(--radius); padding: 22px; box-shadow: 0 2px 10px rgba(59,36,24,.07); }
+  table.hours { width: 100%; border-collapse: collapse; }
+  table.hours td { padding: 8px 0; border-bottom: 1px solid var(--latte); }
+  table.hours td:last-child { text-align: right; }
+  address { font-style: normal; }
+  .map-box { margin-top: 14px; min-height: 140px; border-radius: 12px; border: 2px dashed var(--ph-line); background: var(--ph-bg); display: flex; align-items: center; justify-content: center; text-align: center; padding: 14px; color: #5a4200; font-size: .92rem; }
+
+  /* beans */
+  .beans-points { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 18px; }
+  .beans-points .card h3 { color: var(--roast); }
+
+  /* loyalty */
+  .stamps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; max-width: 420px; margin: 18px 0; }
+  .stamp { aspect-ratio: 1; border-radius: 50%; border: 2px dashed var(--caramel); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--roast); background: var(--cream); font-size: .95rem; }
+  .stamp.free { background: var(--caramel); color: #fff; border: 2px solid var(--roast); font-size: .72rem; text-align: center; line-height: 1.1; }
+  .steps { padding-left: 1.2em; }
+  .steps li { margin-bottom: .4em; }
+
+  /* placeholder list */
+  .ph-list { list-style: none; padding: 0; margin: 0; }
+  .ph-list li { padding: 10px 14px; margin-bottom: 8px; background: var(--ph-bg); border: 1px dashed var(--ph-line); border-radius: 10px; color: #5a4200; }
+
+  footer { background: var(--espresso); color: var(--latte); padding: 28px 0; font-size: .9rem; text-align: center; }
+  footer p { margin: 0; }
+
+  @media (min-width: 640px) {
+    .menu-grid { grid-template-columns: 1fr 1fr; }
+    .two-col { grid-template-columns: 1fr 1fr; }
+    .beans-points { grid-template-columns: repeat(3, 1fr); }
+    section { padding: 72px 0; }
+  }
+  @media (max-width: 380px) {
+    .stamps { gap: 6px; }
+    .stamp.free { font-size: .62rem; }
+    .menu-item { flex-direction: column; gap: 2px; }
+    .price { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top">Brew Lab</a>
+    <nav aria-label="Main">
+      <a href="#menu">Menu</a>
+      <a href="#hours">Hours</a>
+      <a href="#location">Find us</a>
+      <a href="#beans">Beans</a>
+      <a href="#loyalty">Loyalty</a>
+      <a href="#placeholders">To confirm</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Specialty coffee &middot; Indiranagar, Bengaluru</p>
+      <h1>Small shop.<br>Carefully brewed coffee.</h1>
+      <p>Brew Lab is a small specialty coffee shop in Indiranagar. See the menu, check when we are open and find us. Pre-order for pickup is coming to this page.</p>
+    </div>
+  </div>
+
+  <!-- MENU -->
+  <section id="menu" aria-labelledby="menu-h">
+    <div class="wrap">
+      <p class="eyebrow">What we serve</p>
+      <h2 id="menu-h">Menu</h2>
+      <p class="ph-block"><strong>Placeholder menu.</strong> Items and prices below are examples only. The shop will confirm the real menu and prices.</p>
+      <div class="menu-grid" style="margin-top:16px">
+        <div class="menu-group">
+          <h3>Espresso</h3>
+          <div class="menu-item"><span class="name">Espresso<span class="desc">Single shot</span></span><span class="price">&#8377;120<span class="ph">placeholder price</span></span></div>
+          <div class="menu-item"><span class="name">Americano<span class="desc">Espresso with hot water</span></span><span class="price">&#8377;150<span class="ph">placeholder price</span></span></div>
+          <div class="menu-item"><span class="name">Cappuccino<span class="desc">Espresso, steamed milk, foam</span></span><span class="price">&#8377;180<span class="ph">placeholder price</span></span></div>
+          <div class="menu-item"><span class="name">Latte<span class="desc">Espresso with silky milk</span></span><span class="price">&#8377;190<span class="ph">placeholder price</span></span></div>
+        </div>
+        <div class="menu-group">
+          <h3>Filter and cold</h3>
+          <div class="menu-item"><span class="name">Pour Over<span class="desc">Brewed by hand, one cup</span></span><span class="price">&#8377;220<span class="ph">placeholder price</span></span></div>
+          <div class="menu-item"><span class="name">Cold Brew<span class="desc">Slow steeped, served over ice</span></span><span class="price">&#8377;210<span class="ph">placeholder price</span></span></div>
+          <div class="menu-item"><span class="name">Iced Latte<span class="desc">Espresso, cold milk, ice</span></span><span class="price">&#8377;200<span class="ph">placeholder price</span></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOURS -->
+  <section id="hours" aria-labelledby="hours-h">
+    <div class="wrap">
+      <p class="eyebrow">Drop by</p>
+      <h2 id="hours-h">Opening hours</h2>
+      <div class="card">
+        <p class="ph-block">Placeholder hours. The shop will confirm the real opening times.</p>
+        <table class="hours">
+          <tr><td>Monday to Friday</td><td><span class="ph">placeholder: 8:00 am &ndash; 9:00 pm</span></td></tr>
+          <tr><td>Saturday</td><td><span class="ph">placeholder: 8:00 am &ndash; 10:00 pm</span></td></tr>
+          <tr><td>Sunday</td><td><span class="ph">placeholder: 9:00 am &ndash; 10:00 pm</span></td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOCATION -->
+  <section id="location" aria-labelledby="loc-h">
+    <div class="wrap">
+      <p class="eyebrow">Where we are</p>
+      <h2 id="loc-h">Find us in Indiranagar</h2>
+      <div class="card">
+        <address>
+          <strong>Brew Lab</strong><br>
+          <span class="ph">placeholder: street address</span><br>
+          Indiranagar, Bengaluru, Karnataka<br>
+          <span class="ph">placeholder: PIN code</span>
+        </address>
+        <div class="map-box">Placeholder: map and directions link will be added once the shop confirms its address.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BEANS AND FARMS -->
+  <section id="beans" aria-labelledby="beans-h">
+    <div class="wrap">
+      <p class="eyebrow">From farm to cup</p>
+      <h2 id="beans-h">Our beans and the farms behind them</h2>
+      <p>We care about where our coffee comes from. Good coffee starts with the people who grow it, and we want to tell that story properly.</p>
+      <div class="beans-points">
+        <div class="card">
+          <h3>Grown with care</h3>
+          <p>Specialty coffee depends on careful farming and picking, so we choose beans with that in mind.</p>
+        </div>
+        <div class="card">
+          <h3>Roasted for flavour</h3>
+          <p>Roast level shapes how a cup tastes. We aim to bring out the character of each bean.</p>
+        </div>
+        <div class="card">
+          <h3>Fresh in your cup</h3>
+          <p>Fresh beans, ground and brewed to order, make a noticeable difference.</p>
+        </div>
+      </div>
+      <p class="ph-block" style="margin-top:16px"><strong>Placeholder.</strong> The names of our partner farms, where they are and how we source from them will be added once the shop confirms them.</p>
+    </div>
+  </section>
+
+  <!-- LOYALTY -->
+  <section id="loyalty" aria-labelledby="loy-h">
+    <div class="wrap">
+      <p class="eyebrow">Our thank-you</p>
+      <h2 id="loy-h">Loyalty card</h2>
+      <p><strong>Buy 9, get the 10th free.</strong></p>
+      <div class="stamps" role="img" aria-label="Loyalty card with nine stamps and a tenth free drink">
+        <div class="stamp">1</div><div class="stamp">2</div><div class="stamp">3</div><div class="stamp">4</div><div class="stamp">5</div>
+        <div class="stamp">6</div><div class="stamp">7</div><div class="stamp">8</div><div class="stamp">9</div><div class="stamp free">10th free</div>
+      </div>
+      <ol class="steps">
+        <li>Ask for a loyalty card at the counter.</li>
+        <li>Get a stamp each time you buy a coffee.</li>
+        <li>When you buy 9 drinks, your 10th free drink is on us.</li>
+      </ol>
+      <p class="ph-block">Placeholder: fine print, such as which drinks count, is to be confirmed by the shop.</p>
+    </div>
+  </section>
+
+  <!-- PRE-ORDER SECTION INSERTED HERE BY W-2 -->
+
+  <!-- PLACEHOLDER LIST -->
+  <section id="placeholders" aria-labelledby="ph-h">
+    <div class="wrap">
+      <p class="eyebrow">Work in progress</p>
+      <h2 id="ph-h">Details still to be confirmed</h2>
+      <p>These details on the page are placeholders until the shop confirms them:</p>
+      <ul class="ph-list">
+        <li>Menu items and all prices</li>
+        <li>Opening hours</li>
+        <li>Street address, PIN code and map location</li>
+        <li>Bean details, farm names and sourcing</li>
+        <li>Loyalty card fine print</li>
+        <li>Shop WhatsApp number for pre-orders (coming with the pre-order form)</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>&copy; Brew Lab &middot; Indiranagar, Bengaluru</p>
+  </div>
+</footer>
+
+</body>
+</html>

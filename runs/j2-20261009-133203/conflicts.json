@@ -1,0 +1,600 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 1,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 1",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 11,
+        "text": "@Priority Core items alone (1, 2, 3, 4, 9, 15, 16) price at 75 on the rate card against 40 left. I propose only those, in six small workflows, and leave out the rest for Priority to fund in whatever order it picks.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 12,
+        "text": "@Adaptation COUNTER: I fund foundation-style, product-catalogue and whatsapp-order-buttons (30 of 40). I cut shop-identity (20), contact-links (15) and nav-and-integrity (10) because the 75 total exceeds the 40 left. Orders come first because they are the revenue path, and nav is cheaper to add once sections exist. 10 is held back for one fix. Items 1, 2, 3 and 16 stay unfunded, so please say whether you can reshape any of them under 10.",
+        "position": "COUNTER: Foundation and earthy styling (5), Product catalogue (10), Per-product WhatsApp order buttons (15)",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 13,
+        "text": "@Priority I accept your three and add one 10-point section, shop-identity, which puts the name, address and timings in the header and footer. That makes 40 of 40 and leaves nothing held for a fix. Items 2 and 16 still can't be reshaped under 10, because the rate card minimums are 15 and 10.",
+        "position": "Foundation and earthy styling (5), Product catalogue (10), Per-product WhatsApp order buttons (15), Shop name, address and timings (10)",
+        "agree": false
+      },
+      {
+        "n": 3,
+        "who": "priority",
+        "msg": 14,
+        "text": "@Adaptation COUNTER: I fund all four workflows (40 of 40), but shop-identity covers item 1 only (name and address). Items 1 and 3 have a rate-card minimum of 20 together, so 10 buys one section, not both. Item 3 (timings) stays unfunded, along with items 2 and 16. With zero held for fixes, any Audit finding means Identity asks the Requester for more budget.",
+        "position": "COUNTER: Foundation and earthy styling (5), Product catalogue (10), Per-product WhatsApp order buttons (15), Shop name and address (10)",
+        "agree": false
+      },
+      {
+        "n": 4,
+        "who": "adaptation",
+        "msg": 15,
+        "text": "@Priority I accept all four (40 of 40): foundation-style, product-catalogue, whatsapp-order-buttons and shop-identity. They cover items 15, 4, 9 and 1. Items 2, 3, 6 and the other unfunded ones stay open and will need more budget, and with zero held for fixes any Audit finding goes to Identity for a budget decision.",
+        "position": "accepts Priority's offer",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "priority",
+    "outcome": "Adaptation accepted Priority's COUNTER: Foundation and earthy styling (5), Product catalogue (10), Per-product WhatsApp order buttons (15), Shop name and address (10) goes to the validator.",
+    "priority_final": [
+      {
+        "id": "foundation-style",
+        "name": "Foundation and earthy styling",
+        "goal_gap": "No page exists; no viewport setting, palette or overflow-safe layout.",
+        "expected_outcome": "HTML shell with viewport meta, earthy palette, elegant type and mobile-first layout with no horizontal overflow at 360px and 1280px.",
+        "outputs": [
+          "page shell",
+          "CSS variables and base styles"
+        ],
+        "completion_check": "Viewport meta present; earthy palette variables defined; no horizontal overflow at 360px and 1280px.",
+        "dependencies": [],
+        "parts": [
+          "styling"
+        ],
+        "covers": [
+          15
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 5,
+          "calls": 1,
+          "time_minutes": 5
+        },
+        "envelope": {
+          "money_limit": 5,
+          "model_call_limit": 2,
+          "time_limit_minutes": 8,
+          "retry_limit": 1,
+          "stop_loss": "Stop if the page shell still overflows horizontally at 360px after one retry."
+        },
+        "estimate": 5,
+        "cost": 5
+      },
+      {
+        "id": "product-catalogue",
+        "name": "Product catalogue",
+        "goal_gap": "No products are listed.",
+        "expected_outcome": "Grid of all 10 products with name, category and rupee price, each with a clearly marked placeholder picture, no sale tags.",
+        "outputs": [
+          "products section",
+          "product data array"
+        ],
+        "completion_check": "10 product cards render with exact names, categories and prices from the charter, and placeholder labels on every picture.",
+        "dependencies": [
+          "foundation-style"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          4
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 2,
+          "time_limit_minutes": 12,
+          "retry_limit": 1,
+          "stop_loss": "Stop if any product name, category or price differs from the charter after one retry."
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "whatsapp-order-buttons",
+        "name": "Per-product WhatsApp order buttons",
+        "goal_gap": "Visitors cannot order from a product.",
+        "expected_outcome": "Each product card has an Order on WhatsApp button opening a chat to +91 00000 11111 with a message containing the product name.",
+        "outputs": [
+          "order buttons",
+          "message builder"
+        ],
+        "completion_check": "All 10 buttons link to wa.me/910000011111 with the URL-encoded product name in the text parameter.",
+        "dependencies": [
+          "product-catalogue"
+        ],
+        "parts": [
+          "form"
+        ],
+        "covers": [
+          9
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 15,
+          "calls": 1,
+          "time_minutes": 8
+        },
+        "envelope": {
+          "money_limit": 15,
+          "model_call_limit": 2,
+          "time_limit_minutes": 10,
+          "retry_limit": 1,
+          "stop_loss": "Stop if fewer than 10 buttons carry the correct number and product name after one retry."
+        },
+        "estimate": 15,
+        "cost": 15
+      },
+      {
+        "id": "shop-identity",
+        "name": "Shop name and address",
+        "goal_gap": "The page does not show the shop name or address.",
+        "expected_outcome": "Header shows Thread & Loom; a visit block shows 18 FC Road, Shivajinagar, Pune 411005.",
+        "outputs": [
+          "header with name",
+          "visit block with address"
+        ],
+        "completion_check": "Page text contains Thread & Loom and the exact address 18 FC Road, Shivajinagar, Pune 411005.",
+        "dependencies": [
+          "foundation-style"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          1
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 8
+        },
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 2,
+          "time_limit_minutes": 10,
+          "retry_limit": 1,
+          "stop_loss": "Stop if the name or address differs from the charter after one retry."
+        },
+        "estimate": 10,
+        "cost": 10
+      }
+    ],
+    "adaptation_final": [
+      {
+        "id": "foundation-style",
+        "name": "Foundation and earthy styling",
+        "goal_gap": "No page exists; no viewport setting, palette or overflow-safe layout.",
+        "expected_outcome": "HTML shell with viewport meta, earthy palette, elegant type and mobile-first layout with no horizontal overflow at 360px and 1280px.",
+        "outputs": [
+          "page shell",
+          "CSS variables and base styles"
+        ],
+        "completion_check": "Viewport meta present; earthy palette variables defined; no horizontal overflow at 360px and 1280px.",
+        "dependencies": [],
+        "parts": [
+          "styling"
+        ],
+        "covers": [
+          15
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 5,
+          "calls": 1,
+          "time_minutes": 5
+        },
+        "estimate": 5,
+        "cost": 5
+      },
+      {
+        "id": "product-catalogue",
+        "name": "Product catalogue",
+        "goal_gap": "No products are listed.",
+        "expected_outcome": "Grid of all 10 products with name, category and rupee price, each with a clearly marked placeholder picture, no sale tags.",
+        "outputs": [
+          "products section",
+          "product data array"
+        ],
+        "completion_check": "10 product cards render with exact names, categories and prices from the charter, and placeholder labels on every picture.",
+        "dependencies": [
+          "foundation-style"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          4
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "whatsapp-order-buttons",
+        "name": "Per-product WhatsApp order buttons",
+        "goal_gap": "Visitors cannot order from a product.",
+        "expected_outcome": "Each product card has an Order on WhatsApp button opening a chat to +91 00000 11111 with a message containing the product name.",
+        "outputs": [
+          "order buttons",
+          "message builder"
+        ],
+        "completion_check": "All 10 buttons link to wa.me/910000011111 with the URL-encoded product name in the text parameter.",
+        "dependencies": [
+          "product-catalogue"
+        ],
+        "parts": [
+          "form"
+        ],
+        "covers": [
+          9
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 15,
+          "calls": 1,
+          "time_minutes": 8
+        },
+        "estimate": 15,
+        "cost": 15
+      },
+      {
+        "id": "shop-identity",
+        "name": "Shop name, address and timings",
+        "goal_gap": "The page does not show the shop name, address or opening hours.",
+        "expected_outcome": "Header shows Thread & Loom; a footer or visit block shows 18 FC Road, Shivajinagar, Pune 411005 and 11am to 9pm, Tuesday to Sunday, closed Monday.",
+        "outputs": [
+          "header with name",
+          "visit block with address and timings"
+        ],
+        "completion_check": "Page text contains Thread & Loom, the exact address 18 FC Road, Shivajinagar, Pune 411005, and the timings 11am to 9pm, Tuesday to Sunday, closed on Monday.",
+        "dependencies": [
+          "foundation-style"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          1,
+          3
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 8
+        },
+        "estimate": 10,
+        "cost": 10
+      }
+    ],
+    "attempts_used": 4,
+    "registered": [
+      "Foundation and earthy styling",
+      "Product catalogue",
+      "Per-product WhatsApp order buttons",
+      "Shop name and address"
+    ]
+  },
+  {
+    "id": "C-2",
+    "cycle": 1,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 1",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 23,
+        "text": "@Priority Budget left is 40. I propose contact links (15), store timings (10) and nav-and-integrity (10), 35 in total. Together they cover items 2, 3 and 16, which must not be left out. The other nine items cost at least 10 each and cannot fit in the remaining 5.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 24,
+        "text": "@Adaptation COUNTER: I fund contact-links (15) and store-timings (10), 25 of 40. I cut nav-and-integrity (10): item 16 also needs working filters and category browsing, so it cannot pass yet, and nav is cheaper once sections exist. Your claim that nothing else fits is wrong: 15 remain, enough for one 10-point item such as category browsing or the size filter. Please propose one.",
+        "position": "COUNTER: Tappable WhatsApp and phone links (15), Store timings (10)",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 25,
+        "text": "I keep contact-links (15) and store-timings (10) and add category-browse (10), which puts Kurtas, Sarees, Shirts and Dupattas tabs on the product grid. That is 35 of 40. Category browsing is the cheapest step toward item 16, and the size and price filters can follow in a later cycle.",
+        "position": "Tappable WhatsApp and phone links (15), Store timings (10), Browse by category (10)",
+        "agree": false
+      },
+      {
+        "n": 3,
+        "who": "priority",
+        "msg": 26,
+        "text": "@Adaptation GRANT: contact-links (15), store-timings (10) and category-browse (10), 35 of 40. Each is priced at its rate-card minimum, and category-browse is the cheapest funded step toward item 16. Note that the 5 left cannot pay for an 8-point fix, so an Audit finding will need a budget decision from Identity.",
+        "position": "grants Adaptation's revision",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "adaptation",
+    "outcome": "Priority granted Adaptation's revision: Tappable WhatsApp and phone links (15), Store timings (10), Browse by category (10) goes to the validator.",
+    "priority_final": [
+      {
+        "id": "contact-links",
+        "name": "Tappable WhatsApp and phone links",
+        "goal_gap": "The WhatsApp order number +91 00000 11111 and shop phone +91 00000 22222 are not shown as tappable links.",
+        "expected_outcome": "A contact block shows both numbers: the WhatsApp number as a wa.me link and the shop phone as a tel link.",
+        "outputs": [
+          "contact block",
+          "wa.me link to 910000011111",
+          "tel link to +910000022222"
+        ],
+        "completion_check": "Page shows +91 00000 11111 as a link to wa.me/910000011111 and +91 00000 22222 as a link to tel:+910000022222.",
+        "dependencies": [
+          "foundation-style"
+        ],
+        "parts": [
+          "form"
+        ],
+        "covers": [
+          2
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 15,
+          "calls": 2,
+          "time_minutes": 10
+        },
+        "envelope": {
+          "money_limit": 15,
+          "model_call_limit": 2,
+          "time_limit_minutes": 10,
+          "retry_limit": 1,
+          "stop_loss": "Stop if either number or link target differs from the charter after one retry."
+        },
+        "estimate": 15,
+        "cost": 15
+      },
+      {
+        "id": "store-timings",
+        "name": "Store timings",
+        "goal_gap": "Opening hours are not shown on the page.",
+        "expected_outcome": "A visible timings block reads 11am to 9pm, Tuesday to Sunday, closed on Monday.",
+        "outputs": [
+          "timings section"
+        ],
+        "completion_check": "Page text contains '11am to 9pm', 'Tuesday to Sunday' and 'Closed on Monday' exactly as given.",
+        "dependencies": [
+          "foundation-style"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          3
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 2,
+          "time_minutes": 8
+        },
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 2,
+          "time_limit_minutes": 8,
+          "retry_limit": 1,
+          "stop_loss": "Stop if the timings text differs from the charter after one retry."
+        },
+        "estimate": 10,
+        "cost": 10
+      }
+    ],
+    "adaptation_final": [
+      {
+        "id": "contact-links",
+        "name": "Tappable WhatsApp and phone links",
+        "goal_gap": "The WhatsApp order number +91 00000 11111 and shop phone +91 00000 22222 are not shown as tappable links.",
+        "expected_outcome": "A contact block shows both numbers: the WhatsApp number as a wa.me link and the shop phone as a tel link.",
+        "outputs": [
+          "contact block",
+          "wa.me link to 910000011111",
+          "tel link to +910000022222"
+        ],
+        "completion_check": "Page shows +91 00000 11111 as a link to wa.me/910000011111 and +91 00000 22222 as a link to tel:+910000022222.",
+        "dependencies": [
+          "foundation-style"
+        ],
+        "parts": [
+          "form"
+        ],
+        "covers": [
+          2
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 15,
+          "calls": 2,
+          "time_minutes": 10
+        },
+        "estimate": 15,
+        "cost": 15
+      },
+      {
+        "id": "store-timings",
+        "name": "Store timings",
+        "goal_gap": "Opening hours are not shown on the page.",
+        "expected_outcome": "A visible timings block reads 11am to 9pm, Tuesday to Sunday, closed on Monday.",
+        "outputs": [
+          "timings section"
+        ],
+        "completion_check": "Page text contains '11am to 9pm', 'Tuesday to Sunday' and 'Closed on Monday' exactly as given.",
+        "dependencies": [
+          "foundation-style"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          3
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 2,
+          "time_minutes": 8
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "category-browse",
+        "name": "Browse by category",
+        "goal_gap": "Visitors cannot browse the 10 products by category.",
+        "expected_outcome": "Category tabs for All, Kurtas, Sarees, Shirts and Dupattas show only the matching product cards, and each card keeps its name, price and WhatsApp order button.",
+        "outputs": [
+          "category tabs",
+          "category filter script"
+        ],
+        "completion_check": "Clicking each of Kurtas, Sarees, Shirts and Dupattas shows exactly 3, 3, 2 and 2 products respectively; All shows 10; no JavaScript errors.",
+        "dependencies": [
+          "product-catalogue",
+          "whatsapp-order-buttons"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          5
+        ],
+        "fixes": [],
+        "revises": "W-2",
+        "estimated_resources": {
+          "money": 10,
+          "calls": 2,
+          "time_minutes": 10
+        },
+        "estimate": 10,
+        "cost": 10
+      }
+    ],
+    "attempts_used": 3,
+    "registered": [
+      "Tappable WhatsApp and phone links",
+      "Store timings"
+    ]
+  },
+  {
+    "id": "C-3",
+    "cycle": 2,
+    "topic": "finding",
+    "between": [
+      "adaptation",
+      "audit"
+    ],
+    "about": "F-missing-5",
+    "subject": "finding F-missing-5",
+    "detail": "{\"id\": \"F-missing-5\", \"item\": 5, \"criterion\": \"Each product has an order button that opens a WhatsApp chat to +91 00000 11111 with the product name in the message.\", \"verdict\": \"BLOCKED_BY_EVIDENCE\", \"note\": \"Audit filed no finding for this item.\"}",
+    "attempts": [
+      {
+        "n": 1,
+        "who": "adaptation",
+        "msg": 58,
+        "text": "@Audit I dispute F-missing-5, F-missing-6 and F-missing-7. Your F-5, F-6 and F-7 already check items 5, 6 and 7 but carry no item number, so code logged them as unchecked. Please re-file them under items 5, 6 and 7, and count the rendered order buttons to lift F-5 to high confidence. No new workflow or spend is needed.",
+        "position": "F-5 (PASS), F-6 (PASS) and F-7 (PASS_WITH_WARNING) already cover items 5, 6 and 7 with evidence, but were filed without item numbers, so code shows them as BLOCKED_BY_EVIDENCE. Re-file them with item numbers 5, 6 and 7. For F-5, count the rendered order buttons (expect 10) instead of reading code only.",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "audit",
+        "msg": 59,
+        "text": "@Adaptation Agreed. F-5, F-6 and F-7 are my checks for items 5, 6 and 7 and I filed them without item numbers, so I will re-file them under those items. F-5 stays PASS at medium confidence until I count the rendered order buttons: it moves to high only if all 10 link to wa.me/910000011111 with the product name in the text, otherwise it is NEEDS_REVISION.",
+        "position": "I accept that F-missing-5, 6 and 7 are a filing error on my side, and I will re-file F-5, F-6 and F-7 under items 5, 6 and 7 with confidence raised only after the button count.",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "adaptation",
+    "outcome": "Finding F-missing-5 withdrawn.",
+    "attempts_used": 2
+  }
+]

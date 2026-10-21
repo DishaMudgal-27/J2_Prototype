@@ -1,0 +1,113 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "wf-shell",
+    "name": "Page shell, anchor nav and warm mobile-first styling",
+    "purpose": "No file exists yet. Need a single HTML document with viewport meta, anchor navigation and the warm, responsive look.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 2,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the file still lacks a viewport meta tag or matching anchor targets after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "index.html with head, nav, hero, footer, section anchors and placeholder style"
+    ],
+    "completion_check": "File is one HTML document with a viewport meta tag, media-query CSS, no build step, and nav links whose href targets match section ids.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "wf-info",
+    "name": "Menu, opening hours and where-to-find-us sections",
+    "purpose": "Visitors cannot see the menu with prices, hours or location.",
+    "cost": 30,
+    "estimate": 30,
+    "envelope": {
+      "money_limit": 30,
+      "model_call_limit": 2,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any weekday, any menu price or the address is missing or unmarked after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "menu section",
+      "hours section",
+      "location section"
+    ],
+    "completion_check": "Menu items each show a price or a visible placeholder marker, all seven weekdays appear in the hours section, and the location section contains 'Indiranagar, Bengaluru', an address marked placeholder and a map link.",
+    "dependencies": [
+      "wf-shell"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "wf-preorder",
+    "name": "Pickup pre-order form with order summary",
+    "purpose": "Visitors cannot pre-order a coffee for pickup.",
+    "cost": 25,
+    "estimate": 25,
+    "envelope": {
+      "money_limit": 25,
+      "model_call_limit": 2,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the summary does not render all required fields on submit after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "pre-order form",
+      "JS that builds the summary and running total on submit"
+    ],
+    "completion_check": "Form has item and quantity inputs, name, phone and pickup time fields; submitting with valid input renders a summary listing items, quantities, name, phone and pickup time; the order destination is visibly marked placeholder.",
+    "dependencies": [
+      "wf-shell",
+      "wf-info"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "wf-story",
+    "name": "Beans-and-farms section and loyalty-card explainer",
+    "purpose": "Visitors cannot learn about the beans and their farms or understand the loyalty card.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 2,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any farm detail is unmarked or the loyalty wording differs from 'buy 9, get the 10th free' after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "beans-and-farms section",
+      "loyalty-card section"
+    ],
+    "completion_check": "Beans section contains farm details all marked placeholder; loyalty section contains the exact text 'buy 9, get the 10th free'.",
+    "dependencies": [
+      "wf-shell"
+    ],
+    "status": "done",
+    "cycle": 1
+  }
+]

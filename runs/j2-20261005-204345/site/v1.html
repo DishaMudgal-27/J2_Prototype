@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paws Haven | Animal Shelter, Mysuru</title>
+<meta name="description" content="Paws Haven animal shelter in Mysuru: adopt a pet, donate, volunteer and read success stories.">
+<style>
+  :root {
+    --ink: #1f2933;
+    --muted: #4a5561;
+    --bg: #fffaf3;
+    --panel: #ffffff;
+    --brand: #b4440f;
+    --brand-dark: #8a3209;
+    --accent: #2f6f5e;
+    --line: #e4d8c8;
+    --ph-bg: #fff3bf;
+    --ph-ink: #5c4400;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 4.5rem; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.55;
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+  }
+  a { color: var(--brand-dark); }
+  :focus-visible { outline: 3px solid #1b5fd1; outline-offset: 2px; }
+  .skip {
+    position: absolute; left: -999px; top: 0;
+    background: #000; color: #fff; padding: .6rem 1rem; z-index: 100;
+  }
+  .skip:focus { left: 0; }
+
+  header.site {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+  }
+  .bar {
+    max-width: 1000px; margin: 0 auto; padding: .5rem 1rem;
+    display: flex; flex-wrap: wrap; align-items: center; gap: .25rem 1rem;
+  }
+  .brand { font-weight: 800; font-size: 1.25rem; color: var(--brand-dark); text-decoration: none; }
+  .brand small { display: block; font-weight: 500; font-size: .75rem; color: var(--muted); }
+  nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .1rem .25rem; }
+  nav a {
+    display: inline-block; padding: .5rem .6rem; border-radius: 6px;
+    text-decoration: none; color: var(--ink); font-weight: 600; font-size: .95rem;
+  }
+  nav a:hover { background: #f6e6d5; }
+
+  main { max-width: 1000px; margin: 0 auto; padding: 0 1rem 2rem; }
+  section { padding: 2rem 0 1rem; }
+  h1, h2, h3 { line-height: 1.2; margin: 0 0 .6rem; }
+  h1 { font-size: 1.9rem; }
+  h2 { font-size: 1.5rem; color: var(--brand-dark); }
+  h3 { font-size: 1.15rem; }
+  p { margin: 0 0 .8rem; }
+
+  .hero {
+    background: linear-gradient(135deg, #fde8d3, #e6f2ec);
+    border-radius: 14px; padding: 1.5rem 1.2rem; margin-top: 1rem;
+  }
+  .btn {
+    display: inline-block; border: 0; cursor: pointer;
+    padding: .7rem 1.1rem; border-radius: 8px;
+    font: inherit; font-weight: 700; text-decoration: none;
+    background: var(--brand); color: #fff; min-height: 44px;
+  }
+  .btn:hover { background: var(--brand-dark); }
+  .btn.alt { background: var(--accent); }
+  .btn.alt:hover { background: #235246; }
+  .btn.ghost { background: #fff; color: var(--brand-dark); border: 2px solid var(--brand); }
+  .btn.ghost:hover { background: #fbeee2; }
+  .hero .btn { margin: .2rem .4rem .2rem 0; }
+
+  .ph {
+    background: var(--ph-bg); color: var(--ph-ink);
+    border: 1px dashed #b38b00; border-radius: 4px; padding: 0 .35rem;
+    font-weight: 600;
+  }
+  .sample-tag {
+    display: inline-block; font-size: .75rem; font-weight: 700;
+    background: var(--ph-bg); color: var(--ph-ink);
+    border: 1px solid #b38b00; border-radius: 999px; padding: .1rem .55rem;
+    margin-bottom: .5rem;
+  }
+  .notice {
+    background: #eef5f2; border-left: 4px solid var(--accent);
+    padding: .6rem .8rem; border-radius: 4px; font-size: .92rem; margin: .8rem 0;
+  }
+
+  .grid { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+  .tile {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 12px; padding: 1rem; display: flex; flex-direction: column;
+  }
+  .pet-photo {
+    height: 120px; border-radius: 8px; background: #f3e9dc;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3.5rem; margin-bottom: .6rem;
+  }
+  .facts { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0 0 .6rem; padding: 0; list-style: none; }
+  .facts li { background: #f3efe8; border-radius: 999px; padding: .15rem .65rem; font-size: .88rem; }
+  .actions { margin-top: auto; display: flex; flex-wrap: wrap; gap: .5rem; }
+
+  .donate-box { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+  .qr {
+    border: 2px dashed #b38b00; background: var(--ph-bg); color: var(--ph-ink);
+    border-radius: 12px; min-height: 200px; max-width: 260px; width: 100%;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    padding: 1rem; font-weight: 700;
+  }
+  table.bank { border-collapse: collapse; width: 100%; background: var(--panel); }
+  table.bank th, table.bank td { text-align: left; padding: .55rem .7rem; border: 1px solid var(--line); vertical-align: top; }
+  table.bank th { width: 40%; background: #f8f1e6; font-weight: 700; }
+
+  form.vol { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 1rem; }
+  .field { margin-bottom: .9rem; }
+  label { display: block; font-weight: 700; margin-bottom: .25rem; }
+  input, select, textarea {
+    width: 100%; font: inherit; color: var(--ink);
+    padding: .6rem .7rem; border: 1.5px solid #8a8f98; border-radius: 8px; background: #fff;
+    min-height: 44px;
+  }
+  textarea { min-height: 90px; resize: vertical; }
+  .hint { font-size: .85rem; color: var(--muted); margin-top: .2rem; }
+  .status {
+    margin-top: .8rem; padding: .7rem .8rem; border-radius: 8px;
+    background: #fff; border: 1px solid var(--line); font-size: .92rem; white-space: pre-wrap;
+  }
+  .status:empty { display: none; }
+
+  blockquote { margin: 0; }
+  .story p { margin-bottom: .5rem; }
+
+  footer {
+    border-top: 1px solid var(--line); background: var(--panel);
+    padding: 1.5rem 1rem; font-size: .92rem;
+  }
+  footer .in { max-width: 1000px; margin: 0 auto; }
+  footer ul { list-style: none; padding: 0; margin: 0 0 .8rem; }
+  footer li { margin-bottom: .3rem; }
+
+  @media (min-width: 600px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .donate-box { grid-template-columns: 260px 1fr; align-items: start; }
+    h1 { font-size: 2.3rem; }
+  }
+  @media (min-width: 900px) {
+    .grid.three { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 400px) {
+    h1 { font-size: 1.6rem; }
+    nav a { padding: .45rem .5rem; font-size: .9rem; }
+    .btn { width: 100%; text-align: center; }
+    .actions .btn { flex: 1 1 100%; }
+    table.bank th, table.bank td { display: block; width: 100%; }
+    table.bank th { border-bottom: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site">
+  <div class="bar">
+    <a class="brand" href="#home">Paws Haven<small>Animal shelter, Mysuru</small></a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#adopt">Adopt</a></li>
+        <li><a href="#donate">Donate</a></li>
+        <li><a href="#volunteer">Volunteer</a></li>
+        <li><a href="#stories">Success Stories</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <section id="home" aria-labelledby="home-h">
+    <div class="hero">
+      <h1 id="home-h">Paws Haven, Mysuru</h1>
+      <p>A shelter for animals in Mysuru, looking for loving homes, kind donors and helping hands.</p>
+      <p>
+        <a class="btn" href="#adopt">Meet our pets</a>
+        <a class="btn alt" href="#donate">Donate</a>
+        <a class="btn ghost" href="#volunteer">Volunteer</a>
+      </p>
+    </div>
+    <div class="notice">
+      Shelter details marked <span class="ph">[PLACEHOLDER]</span> in yellow are not yet supplied and will be replaced by the shelter. Pets and stories shown here are <strong>sample entries</strong>, not real animals or adopters.
+    </div>
+  </section>
+
+  <section id="adopt" aria-labelledby="adopt-h">
+    <h2 id="adopt-h">Adopt</h2>
+    <p>Interested in a pet? Press an inquiry button to open a pre-filled message to the shelter on WhatsApp or by email.</p>
+    <div class="grid">
+      <article class="tile" data-pet="Moti">
+        <span class="sample-tag">Sample entry</span>
+        <div class="pet-photo" role="img" aria-label="Sample photo placeholder: a dog">🐕</div>
+        <h3>Moti</h3>
+        <ul class="facts"><li>Species: Dog</li><li>Age: 2 years</li></ul>
+        <p>Gentle and friendly, Moti enjoys walks and getting along with people. Sample description.</p>
+        <div class="actions">
+          <button type="button" class="btn" data-channel="wa">Ask on WhatsApp</button>
+          <button type="button" class="btn ghost" data-channel="mail">Ask by email</button>
+        </div>
+      </article>
+
+      <article class="tile" data-pet="Chinni">
+        <span class="sample-tag">Sample entry</span>
+        <div class="pet-photo" role="img" aria-label="Sample photo placeholder: a cat">🐈</div>
+        <h3>Chinni</h3>
+        <ul class="facts"><li>Species: Cat</li><li>Age: 1 year</li></ul>
+        <p>Curious and playful, Chinni likes sunny windows and soft blankets. Sample description.</p>
+        <div class="actions">
+          <button type="button" class="btn" data-channel="wa">Ask on WhatsApp</button>
+          <button type="button" class="btn ghost" data-channel="mail">Ask by email</button>
+        </div>
+      </article>
+
+      <article class="tile" data-pet="Bruno">
+        <span class="sample-tag">Sample entry</span>
+        <div class="pet-photo" role="img" aria-label="Sample photo placeholder: a puppy">🐶</div>
+        <h3>Bruno</h3>
+        <ul class="facts"><li>Species: Dog (puppy)</li><li>Age: 4 months</li></ul>
+        <p>Energetic and eager to learn, Bruno needs a family with time for training. Sample description.</p>
+        <div class="actions">
+          <button type="button" class="btn" data-channel="wa">Ask on WhatsApp</button>
+          <button type="button" class="btn ghost" data-channel="mail">Ask by email</button>
+        </div>
+      </article>
+
+      <article class="tile" data-pet="Meenu">
+        <span class="sample-tag">Sample entry</span>
+        <div class="pet-photo" role="img" aria-label="Sample photo placeholder: a kitten">🐱</div>
+        <h3>Meenu</h3>
+        <ul class="facts"><li>Species: Cat (kitten)</li><li>Age: 5 months</li></ul>
+        <p>Shy at first, then very affectionate. Meenu would suit a quiet home. Sample description.</p>
+        <div class="actions">
+          <button type="button" class="btn" data-channel="wa">Ask on WhatsApp</button>
+          <button type="button" class="btn ghost" data-channel="mail">Ask by email</button>
+        </div>
+      </article>
+    </div>
+    <div id="adopt-status" class="status" role="status" aria-live="polite"></div>
+  </section>
+
+  <section id="donate" aria-labelledby="donate-h">
+    <h2 id="donate-h">Donate</h2>
+    <p>You can support the animals by transferring money directly with UPI or a bank transfer. This site does not take payments itself.</p>
+    <div class="donate-box">
+      <div class="qr" role="img" aria-label="Placeholder for the shelter's UPI QR code image">
+        [PLACEHOLDER] UPI QR code image to be supplied by the shelter
+      </div>
+      <div>
+        <h3>UPI</h3>
+        <p>UPI ID: <span class="ph">[PLACEHOLDER: UPI ID]</span></p>
+        <h3>Bank transfer</h3>
+        <table class="bank">
+          <caption class="hint" style="text-align:left;padding-bottom:.3rem">Bank details (all placeholders until supplied by the shelter)</caption>
+          <tbody>
+            <tr><th scope="row">Account name</th><td><span class="ph">[PLACEHOLDER]</span></td></tr>
+            <tr><th scope="row">Account number</th><td><span class="ph">[PLACEHOLDER]</span></td></tr>
+            <tr><th scope="row">Bank and branch</th><td><span class="ph">[PLACEHOLDER]</span></td></tr>
+            <tr><th scope="row">IFSC code</th><td><span class="ph">[PLACEHOLDER]</span></td></tr>
+          </tbody>
+        </table>
+        <p class="hint" style="margin-top:.6rem">After donating, you may message the shelter so they can match your donation. This is optional.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="volunteer" aria-labelledby="vol-h">
+    <h2 id="vol-h">Volunteer</h2>
+    <p>Fill in the form and press the button. A pre-filled message opens in WhatsApp or your email app for you to send to the shelter. Nothing is stored or sent until you send that message yourself.</p>
+    <form class="vol" id="vol-form" novalidate>
+      <div class="field">
+        <label for="v-name">Full name</label>
+        <input id="v-name" name="name" type="text" autocomplete="name" required>
+      </div>
+      <div class="field">
+        <label for="v-phone">Phone number</label>
+        <input id="v-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required>
+      </div>
+      <div class="field">
+        <label for="v-email">Email address</label>
+        <input id="v-email" name="email" type="email" autocomplete="email" required>
+      </div>
+      <div class="field">
+        <label for="v-avail">Availability</label>
+        <select id="v-avail" name="availability" required>
+          <option value="">Choose one</option>
+          <option>Weekday mornings</option>
+          <option>Weekday evenings</option>
+          <option>Weekends</option>
+          <option>Flexible</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="v-note">How would you like to help? (optional)</label>
+        <textarea id="v-note" name="note" placeholder="For example: dog walking, cleaning, transport, events"></textarea>
+      </div>
+      <div class="actions" style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button type="submit" class="btn" data-channel="wa">Send via WhatsApp</button>
+        <button type="submit" class="btn ghost" data-channel="mail">Send by email</button>
+      </div>
+      <div id="vol-status" class="status" role="status" aria-live="polite"></div>
+    </form>
+  </section>
+
+  <section id="stories" aria-labelledby="stories-h">
+    <h2 id="stories-h">Success Stories</h2>
+    <p><span class="sample-tag">Sample entries</span> These are illustrative examples, not real adopters or animals. Real stories will replace them.</p>
+    <div class="grid three">
+      <article class="tile story">
+        <h3>Tara</h3>
+        <p>Sample story: Tara arrived shy and quiet. After a few weeks in a loving home she now greets her family at the door every evening.</p>
+      </article>
+      <article class="tile story">
+        <h3>Simba</h3>
+        <p>Sample story: Simba the cat found a family who gave him a sunny corner and a lot of patience. He now rules the living room.</p>
+      </article>
+      <article class="tile story">
+        <h3>Raja</h3>
+        <p>Sample story: Raja, a senior dog, was adopted by a retired couple who enjoy slow morning walks with him.</p>
+      </article>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="in">
+    <strong>Paws Haven, Mysuru</strong>
+    <ul>
+      <li>Address: <span class="ph">[PLACEHOLDER: shelter address]</span></li>
+      <li>Opening hours: <span class="ph">[PLACEHOLDER: opening hours]</span></li>
+      <li>Phone: <span class="ph">[PLACEHOLDER: shelter phone number]</span></li>
+      <li>WhatsApp: <span class="ph">[PLACEHOLDER: shelter WhatsApp number]</span></li>
+      <li>Email: <span class="ph">[PLACEHOLDER: shelter email address]</span></li>
+    </ul>
+    <p class="hint">This site does not store any personal data.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  // PLACEHOLDERS: replace with the shelter's real details.
+  // WhatsApp number: digits only, with country code (for example 91 followed by the number).
+  var CONFIG = {
+    whatsapp: "91XXXXXXXXXX",
+    email: "shelter-email@example.invalid"
+  };
+
+  function isPlaceholder(v) {
+    return /X{3,}|PLACEHOLDER|example\.invalid/i.test(v);
+  }
+
+  function buildLink(channel, subject, body) {
+    if (channel === "wa") {
+      return "https://wa.me/" + CONFIG.whatsapp + "?text=" + encodeURIComponent(body);
+    }
+    return "mailto:" + CONFIG.email +
+      "?subject=" + encodeURIComponent(subject) +
+      "&body=" + encodeURIComponent(body);
+  }
+
+  // Opens the pre-filled message. If the shelter contact is still a placeholder,
+  // shows the prepared message instead of opening a broken link.
+  function dispatch(channel, subject, body, statusEl) {
+    var url = buildLink(channel, subject, body);
+    var target = channel === "wa" ? CONFIG.whatsapp : CONFIG.email;
+    if (isPlaceholder(target)) {
+      statusEl.textContent =
+        "The shelter's " + (channel === "wa" ? "WhatsApp number" : "email address") +
+        " is still a placeholder, so no message was opened. Prepared message:\n\n" +
+        (channel === "mail" ? "Subject: " + subject + "\n" : "") + body;
+      return;
+    }
+    statusEl.textContent = "Opening your " + (channel === "wa" ? "WhatsApp" : "email app") +
+      " with a pre-filled message. Please press send there.";
+    if (channel === "wa") {
+      window.open(url, "_blank", "noopener");
+    } else {
+      window.location.href = url;
+    }
+  }
+
+  // Adoption inquiries
+  var adoptStatus = document.getElementById("adopt-status");
+  document.querySelectorAll("#adopt [data-pet] button[data-channel]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var pet = btn.closest("[data-pet]").getAttribute("data-pet");
+      var subject = "Adoption inquiry: " + pet;
+      var body = "Hello Paws Haven, I am interested in adopting " + pet +
+        ". Could you please share the next steps? Thank you.";
+      dispatch(btn.getAttribute("data-channel"), subject, body, adoptStatus);
+    });
+  });
+
+  // Volunteer sign-up
+  var form = document.getElementById("vol-form");
+  var volStatus = document.getElementById("vol-status");
+  var channel = "wa";
+  form.querySelectorAll("button[type=submit]").forEach(function (b) {
+    b.addEventListener("click", function () { channel = b.getAttribute("data-channel"); });
+  });
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = form.elements["name"].value.trim();
+    var phone = form.elements["phone"].value.trim();
+    var email = form.elements["email"].value.trim();
+    var avail = form.elements["availability"].value;
+    var note = form.elements["note"].value.trim();
+    if (!name || !phone || !email || !avail) {
+      volStatus.textContent = "Please fill in your name, phone, email and availability.";
+      return;
+    }
+    var body = "Hello Paws Haven, I would like to volunteer.\n" +
+      "Name: " + name + "\n" +
+      "Phone: " + phone + "\n" +
+      "Email: " + email + "\n" +
+      "Availability: " + avail +
+      (note ? "\nHow I can help: " + note : "");
+    dispatch(channel, "Volunteer sign-up: " + name, body, volStatus);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CityCare Hospital, Bengaluru</title>
+<style>
+:root{--ink:#1b2733;--muted:#4a5a68;--brand:#0b5f7a;--brand-dark:#084a60;--bg:#f5f8fa;--card:#fff;--alert:#b3261e;--warn-bg:#fff4d6;--warn-ink:#5c4300;--line:#d5dee5}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans Kannada","Noto Sans Devanagari",sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;font-size:17px}
+a{color:var(--brand)}
+:focus-visible{outline:3px solid #ffbf47;outline-offset:2px}
+.skip{position:absolute;left:-999px;top:0;background:#fff;padding:.5rem 1rem;z-index:100}
+.skip:focus{left:0}
+
+header.site{position:sticky;top:0;z-index:50;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.emergency-bar{background:var(--alert);color:#fff;padding:.5rem 1rem;display:flex;flex-wrap:wrap;gap:.25rem .75rem;align-items:center;justify-content:center;text-align:center;font-weight:600}
+.emergency-bar a{color:#fff}
+.emergency-bar .num{background:#fff;color:var(--alert);padding:.1rem .6rem;border-radius:4px;font-weight:700}
+.tbc{display:inline-block;background:var(--warn-bg);color:var(--warn-ink);border:1px dashed #b38600;border-radius:4px;padding:0 .4rem;font-size:.85em;font-weight:600;white-space:nowrap}
+.emergency-bar .tbc{background:#fff4d6}
+
+.bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.5rem 1rem;max-width:1100px;margin:0 auto}
+.brand{font-size:1.25rem;font-weight:700;color:var(--brand-dark);text-decoration:none}
+.menu-btn{display:none;background:var(--brand);color:#fff;border:0;border-radius:6px;padding:.5rem .9rem;font-size:1rem;cursor:pointer}
+nav ul{list-style:none;margin:0;padding:0;display:flex;gap:.25rem;flex-wrap:wrap}
+nav a{display:block;padding:.5rem .8rem;border-radius:6px;text-decoration:none;color:var(--ink);font-weight:600}
+nav a:hover{background:#e3eef3}
+nav a.cta{background:var(--brand);color:#fff}
+nav a.cta:hover{background:var(--brand-dark)}
+
+main{max-width:1100px;margin:0 auto;padding:0 1rem 3rem}
+section{padding:2rem 0;border-bottom:1px solid var(--line)}
+h1{font-size:2rem;line-height:1.2;margin:.2rem 0 .6rem;color:var(--brand-dark)}
+h2{font-size:1.5rem;margin:0 0 .75rem;color:var(--brand-dark)}
+.lead{font-size:1.1rem;color:var(--muted);max-width:60ch}
+.btns{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1rem}
+.btn{display:inline-block;padding:.7rem 1.2rem;border-radius:8px;font-weight:700;text-decoration:none;border:2px solid var(--brand);color:var(--brand);background:#fff}
+.btn.primary{background:var(--brand);color:#fff}
+.btn.danger{background:var(--alert);border-color:var(--alert);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-top:1rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem}
+.card h3{margin:.1rem 0 .4rem;font-size:1.1rem}
+.notice{background:var(--warn-bg);color:var(--warn-ink);border-left:5px solid #b38600;padding:.7rem 1rem;border-radius:6px;margin:1rem 0}
+.stub{background:#eef3f6;border:1px dashed #8aa0ae;border-radius:8px;padding:1rem;color:var(--muted)}
+.steps{padding-left:1.2rem}
+dl.ph{margin:0}
+dl.ph dt{font-weight:700;margin-top:.6rem}
+dl.ph dd{margin:0}
+
+.doc h3{overflow-wrap:anywhere}
+dl.doc-d{margin:.5rem 0 0}
+dl.doc-d dt{font-weight:700;font-size:.9rem;color:var(--muted);margin-top:.5rem}
+dl.doc-d dd{margin:0;overflow-wrap:anywhere}
+
+form.req{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1.1rem;max-width:640px;margin-top:1rem}
+.field{margin-bottom:1rem}
+.field label{display:block;font-weight:700;margin-bottom:.25rem}
+.field .hint{display:block;font-size:.9rem;color:var(--muted);margin-top:.2rem}
+.field input,.field textarea{width:100%;font:inherit;color:var(--ink);padding:.6rem .7rem;border:1.5px solid #6b7f8d;border-radius:6px;background:#fff}
+.field textarea{min-height:6rem;resize:vertical}
+.req-mark{color:var(--alert);font-weight:700}
+button.submit{font:inherit;font-weight:700;background:var(--brand);color:#fff;border:0;border-radius:8px;padding:.75rem 1.4rem;cursor:pointer}
+button.submit:hover{background:var(--brand-dark)}
+.confirm-line{font-weight:600}
+#formMsg{margin-top:1rem}
+#formMsg .done{background:#e3f4e8;color:#14401f;border-left:5px solid #2e7d46;padding:.8rem 1rem;border-radius:6px}
+
+footer{background:#14323f;color:#e8f0f4;padding:1.5rem 1rem;text-align:center;font-size:.95rem}
+footer a{color:#fff}
+
+@media (max-width:720px){
+  body{font-size:16px}
+  h1{font-size:1.6rem}
+  .menu-btn{display:block}
+  nav{width:100%}
+  nav ul{display:none;flex-direction:column;padding-bottom:.5rem}
+  nav ul.open{display:flex}
+  .bar{flex-wrap:wrap}
+  nav a{padding:.75rem}
+  .emergency-bar{font-size:.95rem}
+  form.req{padding:.9rem}
+  button.submit{width:100%}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+
+<header class="site" id="top">
+  <div class="emergency-bar" role="region" aria-label="Emergency information">
+    <span>Emergency? Call</span>
+    <span class="num">[Emergency number] <span class="tbc">To be confirmed</span></span>
+    <a href="#emergency">What to do in an emergency</a>
+  </div>
+  <div class="bar">
+    <a class="brand" href="#home">CityCare Hospital</a>
+    <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="navList">Menu</button>
+    <nav aria-label="Main">
+      <ul id="navList">
+        <li><a href="#home">Home</a></li>
+        <li><a class="cta" href="#book">Book a Visit</a></li>
+        <li><a href="#emergency">Emergency</a></li>
+        <li><a href="#doctors">Doctors</a></li>
+        <li><a href="#blog">Health Blog</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section id="home">
+    <h1>Caring for you and your family in Bengaluru</h1>
+    <p class="lead">CityCare Hospital helps patients and families find care. You can ask for a visit, find emergency information, meet our doctors and read health advice.</p>
+    <div class="btns">
+      <a class="btn danger" href="#emergency">Emergency information</a>
+      <a class="btn primary" href="#book">Request a visit</a>
+    </div>
+    <div class="notice" role="note">
+      <strong>Draft site.</strong> Emergency numbers, doctor details and other medical facts shown here are placeholders marked <span class="tbc">To be confirmed</span>. They are not final. Do not rely on them yet.
+    </div>
+    <div class="grid">
+      <div class="card"><h3>Request a visit</h3><p>Send us your details. Our staff will confirm by phone or WhatsApp.</p></div>
+      <div class="card"><h3>Emergency</h3><p>Know what to do and who to call. Emergency information is always shown at the top of every page.</p></div>
+      <div class="card"><h3>Our doctors</h3><p>Read about the doctors who may care for you.</p></div>
+      <div class="card"><h3>Health blog</h3><p>Clear, plain advice for everyday health.</p></div>
+    </div>
+  </section>
+
+  <section id="book">
+    <h2>Book a Visit</h2>
+    <p class="lead">Fill in this request form. It is a request, not a confirmed appointment.</p>
+    <p class="confirm-line">Our staff will confirm your visit by phone or WhatsApp. Your visit is not booked until they do.</p>
+    <p>Staff phone and WhatsApp number: [Staff number] <span class="tbc">To be confirmed</span></p>
+    <div class="notice" role="note"><strong>In an emergency, do not use this form.</strong> Use the emergency number at the top of the page.</div>
+    <div class="notice" role="note"><strong>Draft form.</strong> This form is not yet connected to hospital staff, so requests are not delivered. How requests reach staff is <span class="tbc">To be confirmed</span>.</div>
+
+    <form class="req" id="visitForm" novalidate aria-describedby="formMsg">
+      <div class="field">
+        <label for="pname">Patient name <span class="req-mark" aria-hidden="true">*</span></label>
+        <input type="text" id="pname" name="pname" autocomplete="name" required>
+      </div>
+      <div class="field">
+        <label for="phone">Phone number <span class="req-mark" aria-hidden="true">*</span></label>
+        <input type="tel" id="phone" name="phone" inputmode="tel" autocomplete="tel" required aria-describedby="phoneHint">
+        <span class="hint" id="phoneHint">Staff will call or message this number on WhatsApp.</span>
+      </div>
+      <div class="field">
+        <label for="pdate">Preferred date <span class="req-mark" aria-hidden="true">*</span></label>
+        <input type="date" id="pdate" name="pdate" required aria-describedby="dateHint">
+        <span class="hint" id="dateHint">This is only the date you would like. Staff will tell you what is available.</span>
+      </div>
+      <div class="field">
+        <label for="dept">Department or doctor</label>
+        <input type="text" id="dept" name="dept" aria-describedby="deptHint">
+        <span class="hint" id="deptHint">Type a department or doctor name. If you are not sure, write "not sure". The list of departments is <span class="tbc">To be confirmed</span>.</span>
+      </div>
+      <div class="field">
+        <label for="reason">Reason for visit <span class="req-mark" aria-hidden="true">*</span></label>
+        <textarea id="reason" name="reason" required aria-describedby="reasonHint"></textarea>
+        <span class="hint" id="reasonHint">Describe in a few words. Please do not include test results or ID numbers.</span>
+      </div>
+      <p class="hint" style="margin-top:0"><span class="req-mark" aria-hidden="true">*</span> Required</p>
+      <button type="submit" class="submit">Send visit request</button>
+      <div id="formMsg" role="status" aria-live="polite"></div>
+    </form>
+  </section>
+
+  <section id="emergency">
+    <h2>Emergency</h2>
+    <p class="lead">If someone is in danger, call the emergency number straight away. Do not use the visit request form in an emergency.</p>
+    <div class="card">
+      <h3>Emergency number</h3>
+      <p style="font-size:1.4rem;font-weight:700;margin:.2rem 0">[Emergency number] <span class="tbc">To be confirmed</span></p>
+    </div>
+    <div class="grid">
+      <div class="card"><h3>Emergency department</h3><p>[Location and entrance details] <span class="tbc">To be confirmed</span></p></div>
+      <div class="card"><h3>Opening hours</h3><p>[Emergency department hours] <span class="tbc">To be confirmed</span></p></div>
+      <div class="card"><h3>Ambulance</h3><p>[Ambulance number and service area] <span class="tbc">To be confirmed</span></p></div>
+      <div class="card"><h3>Hospital address</h3><p>[Street address, Bengaluru] <span class="tbc">To be confirmed</span></p></div>
+    </div>
+    <h3>While you wait for help</h3>
+    <ol class="steps">
+      <li>Stay calm and keep the person safe and still.</li>
+      <li>Call the emergency number above, once it is confirmed.</li>
+      <li>Say where you are and what has happened.</li>
+      <li>Stay on the line until the operator tells you to hang up.</li>
+    </ol>
+    <div class="notice" role="note">These steps are general and are <strong>not final medical advice</strong>. They are to be reviewed by hospital staff <span class="tbc">To be confirmed</span>.</div>
+  </section>
+
+  <section id="doctors">
+    <h2>Doctors</h2>
+    <p class="lead">These are the profile cards for the doctors who may care for you. The hospital has not yet given us the real details.</p>
+    <div class="notice" role="note">Every name, specialty and qualification below is a placeholder marked <span class="tbc">To be confirmed</span>. They are not real doctor details.</div>
+    <div class="grid">
+      <article class="card doc" aria-labelledby="doc1">
+        <h3 id="doc1">[Doctor name 1] <span class="tbc">To be confirmed</span></h3>
+        <dl class="doc-d">
+          <dt>Specialty</dt>
+          <dd>[Specialty] <span class="tbc">To be confirmed</span></dd>
+          <dt>Qualifications</dt>
+          <dd>[Qualifications] <span class="tbc">To be confirmed</span></dd>
+        </dl>
+      </article>
+      <article class="card doc" aria-labelledby="doc2">
+        <h3 id="doc2">[Doctor name 2] <span class="tbc">To be confirmed</span></h3>
+        <dl class="doc-d">
+          <dt>Specialty</dt>
+          <dd>[Specialty] <span class="tbc">To be confirmed</span></dd>
+          <dt>Qualifications</dt>
+          <dd>[Qualifications] <span class="tbc">To be confirmed</span></dd>
+        </dl>
+      </article>
+      <article class="card doc" aria-labelledby="doc3">
+        <h3 id="doc3">[Doctor name 3] <span class="tbc">To be confirmed</span></h3>
+        <dl class="doc-d">
+          <dt>Specialty</dt>
+          <dd>[Specialty] <span class="tbc">To be confirmed</span></dd>
+          <dt>Qualifications</dt>
+          <dd>[Qualifications] <span class="tbc">To be confirmed</span></dd>
+        </dl>
+      </article>
+      <article class="card doc" aria-labelledby="doc4">
+        <h3 id="doc4">[Doctor name 4] <span class="tbc">To be confirmed</span></h3>
+        <dl class="doc-d">
+          <dt>Specialty</dt>
+          <dd>[Specialty] <span class="tbc">To be confirmed</span></dd>
+          <dt>Qualifications</dt>
+          <dd>[Qualifications] <span class="tbc">To be confirmed</span></dd>
+        </dl>
+      </article>
+    </div>
+  </section>
+
+  <section id="blog">
+    <h2>Health Blog</h2>
+    <div class="stub">Health blog posts are added in a later step.</div>
+  </section>
+
+  <section id="open-items" aria-labelledby="openH">
+    <h2 id="openH">Placeholders still open</h2>
+    <p>These items are not final. Each needs to be confirmed by CityCare Hospital before this site goes live.</p>
+    <dl class="ph">
+      <dt>Emergency</dt>
+      <dd>Emergency phone number <span class="tbc">To be confirmed</span></dd>
+      <dd>Emergency department location and hours <span class="tbc">To be confirmed</span></dd>
+      <dd>Ambulance number and service area <span class="tbc">To be confirmed</span></dd>
+      <dd>Hospital address <span class="tbc">To be confirmed</span></dd>
+      <dd>Emergency first steps, reviewed by staff <span class="tbc">To be confirmed</span></dd>
+      <dt>Book a Visit</dt>
+      <dd>Staff phone and WhatsApp number for confirming requests <span class="tbc">To be confirmed</span></dd>
+      <dd>List of departments and services for the request form <span class="tbc">To be confirmed</span></dd>
+      <dd>How submitted requests are delivered to staff <span class="tbc">To be confirmed</span></dd>
+      <dt>Doctors</dt>
+      <dd>Doctor names <span class="tbc">To be confirmed</span></dd>
+      <dd>Doctor specialties <span class="tbc">To be confirmed</span></dd>
+      <dd>Doctor qualifications <span class="tbc">To be confirmed</span></dd>
+    </dl>
+  </section>
+</main>
+
+<footer>
+  <p>CityCare Hospital, Bengaluru. In an emergency, use the number at the top of this page once confirmed.</p>
+  <p><a href="#top">Back to top</a></p>
+</footer>
+
+<script>
+(function(){
+  var btn=document.getElementById('menuBtn'),list=document.getElementById('navList'),head=document.querySelector('header.site');
+  btn.addEventListener('click',function(){
+    var open=list.classList.toggle('open');
+    btn.setAttribute('aria-expanded',open?'true':'false');
+  });
+  list.addEventListener('click',function(e){
+    if(e.target.tagName==='A'){list.classList.remove('open');btn.setAttribute('aria-expanded','false');}
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&list.classList.contains('open')){list.classList.remove('open');btn.setAttribute('aria-expanded','false');btn.focus();}
+  });
+  function pad(){document.documentElement.style.scrollPaddingTop=(head.offsetHeight+8)+'px';}
+  pad();window.addEventListener('resize',pad);window.addEventListener('load',pad);
+  btn.addEventListener('click',function(){setTimeout(pad,0);});
+
+  /* Book a Visit request form: checks the fields and shows a message only. */
+  var form=document.getElementById('visitForm'),msg=document.getElementById('formMsg'),dateEl=document.getElementById('pdate');
+  var t=new Date(),mm=('0'+(t.getMonth()+1)).slice(-2),dd=('0'+t.getDate()).slice(-2);
+  dateEl.setAttribute('min',t.getFullYear()+'-'+mm+'-'+dd);
+
+  function say(cls,text){
+    msg.innerHTML='';
+    var d=document.createElement('div');
+    d.className=cls;
+    d.textContent=text;
+    if(cls==='err'){d.style.cssText='background:#fdecea;color:#7a1610;border-left:5px solid #b3261e;padding:.8rem 1rem;border-radius:6px';}
+    msg.appendChild(d);
+  }
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var needed=['pname','phone','pdate','reason'],bad=null,i,el;
+    for(i=0;i<needed.length;i++){
+      el=document.getElementById(needed[i]);
+      el.removeAttribute('aria-invalid');
+      if(!el.value.trim()){el.setAttribute('aria-invalid','true');if(!bad){bad=el;}}
+    }
+    var digits=document.getElementById('phone').value.replace(/\D/g,'');
+    if(!bad&&digits.length<8){bad=document.getElementById('phone');bad.setAttribute('aria-invalid','true');}
+    if(bad){
+      say('err','Please fill in the required fields (marked *) with a valid phone number, then send again.');
+      bad.focus();
+      return;
+    }
+    say('done','Request received. Staff will contact you by phone or WhatsApp to confirm. Your visit is not confirmed until they do.');
+    form.reset();
+  });
+})();
+</script>
+</body>
+</html>

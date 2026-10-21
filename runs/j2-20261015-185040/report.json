@@ -1,0 +1,308 @@
+{
+  "metrics": {
+    "outcome": "Done: the site is workable. Every done-when item passes with Audit's evidence and the render check is clean.",
+    "brief": "A one-page website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru. Visitors see the menu with prices, the opening hours and where to find the shop, and they can pre-order a coffee for pickup. Users: coffee lovers and office staff nearby. Problem: people cannot see the menu or order ahead. Must-have: menu with prices, pre-order form, map or address, opening hours. Constraints: one page only, works on phones, no payment. Success: 30 pre-orders per week.",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 1,
+    "ai_calls": 21,
+    "minutes": 7.5,
+    "budget": {
+      "total": 100,
+      "start": 100,
+      "cap": 200,
+      "raises": [],
+      "spent": 70,
+      "rate_card": true
+    },
+    "site_versions": 6,
+    "site_bytes": 14990,
+    "agents": {
+      "identity": {
+        "turns": 4,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 6,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 5,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-1": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-2": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-3": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-4": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-5": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 1,
+      "grants": 1,
+      "counters": 0,
+      "refuses": 0,
+      "refuses_converted_by_code": 0,
+      "parks": 0
+    },
+    "conflicts": {
+      "total": 0,
+      "settled_by_agents": 0,
+      "resolved_by_identity": 0,
+      "asked_requester": 0,
+      "open": 0,
+      "list": []
+    },
+    "requester_questions": {
+      "total": 2,
+      "by_kind": {
+        "info": 2
+      }
+    },
+    "workflows": {
+      "registered": 5,
+      "done": 5,
+      "failed": 0,
+      "held_ever": 1,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "Header, nav and location with map link",
+          "agent_estimate": 20,
+          "charged": 20
+        },
+        {
+          "id": "W-2",
+          "name": "Menu with prices",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-3",
+          "name": "Opening hours and contact details",
+          "agent_estimate": 15,
+          "charged": 15
+        },
+        {
+          "id": "W-4",
+          "name": "Pre-order form",
+          "agent_estimate": 15,
+          "charged": 15
+        },
+        {
+          "id": "W-5",
+          "name": "Mobile setup, overflow guard and footer",
+          "agent_estimate": 10,
+          "charged": 10
+        }
+      ]
+    },
+    "validator_refusals": 5,
+    "role_refusals": 0,
+    "pauses": 2,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 0,
+    "audits": [
+      {
+        "cycle": 1,
+        "version": 6,
+        "all_pass": true,
+        "pass": 7,
+        "warn": 1,
+        "fail": 0,
+        "rubric_fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      }
+    ],
+    "to_be_confirmed": [],
+    "workable": [],
+    "lessons": {
+      "memory": false,
+      "saved": [],
+      "used": []
+    }
+  },
+  "review": {
+    "verdict": "The department delivered a workable 8 of 8 site in one cycle for 70 of 100 budget and 7.5 minutes, but the run tested little: no counters, refusals or conflicts, and one real design flaw (W-1's link check) was caught by code rather than by an agent.",
+    "agents": {
+      "identity": {
+        "score": 4,
+        "note": "Spotted the echoed question and re-asked with an example [5]. Final message to the Requester states the mailto risk once [49]. [9] lists the workflows to propose, which edges into Adaptation's design job."
+      },
+      "adaptation": {
+        "score": 4,
+        "note": "Fixed all five validator errors in one resubmit [16]. Judged the W-1 check wrong and moved it [27], which unblocked the run. But it wrote that bad check, and [27] is addressed to Coordination, which is outside the allowed hand-offs (code did not redirect it; redirects show 0)."
+      },
+      "priority": {
+        "score": 4,
+        "note": "One-hop GRANT for all five with reasons [17]. Prices equal the rate-card minimum and equal the agents' estimates, so there was no real judgment to test. Envelope checks were prompt and correct."
+      },
+      "coordination": {
+        "score": 4,
+        "note": "States its scheduling rule every time and keeps the single write lock. W-5 was HOLD-ed four times [19][29][33][37] for a dependency that ordering already covers. It gave no executability objection on W-1's impossible link check."
+      },
+      "audit": {
+        "score": 4,
+        "note": "Clear, specific warnings (mailto, button font, nav order) [48]. It recommends 'workable', which is Identity's call. Says three warnings while its own tally lists four, and the metrics show warn 1."
+      },
+      "W-1": {
+        "score": 3,
+        "note": "Same check failed twice with the same evidence [22][24]. Its report [25] says the section is unchanged but never states that its completion check failed."
+      },
+      "W-2": {
+        "score": 5,
+        "note": "Seven cards, checks passed first attempt, short accurate report [32]."
+      },
+      "W-3": {
+        "score": 5,
+        "note": "Hours and contact done first attempt, in scope [36]."
+      },
+      "W-4": {
+        "score": 4,
+        "note": "Form has all four fields, empty-field check and pay-at-pickup text [40]. It chose mailto and said so honestly, but did not flag that this does not truly 'send'. Submit button is not in the body font (Audit F-9)."
+      },
+      "W-5": {
+        "score": 4,
+        "note": "Viewport, overflow guard and footer added; the final link check passed on the full page [43]. Did not fix the nav order mismatch Audit later flagged."
+      }
+    },
+    "went_well": [
+      "Same-failure-twice rule worked: code stopped W-1 at attempt 2 and sent it to Adaptation [26], which fixed the check [27] and W-1 passed [28].",
+      "No role violations: role_refusals 0, redirects 0, invalid moves 0 across all agents.",
+      "Facts stayed exact: all seven prices, hours, address, phone and email match the charter, and Audit confirmed 8 of 8 done-when items.",
+      "Identity handled the Requester echo [4] without wasting more than one extra round."
+    ],
+    "problems": [
+      "All five first proposals were rejected for digits in check text [11]-[15]. Adaptation did not know the validator rules; one full resubmit round was lost.",
+      "W-1 was given a link-resolution check that depends on sections W-2 to W-4 write. Two attempts were wasted [22]-[26] and nobody caught it before the run.",
+      "The pre-order form uses mailto [40]. Done-when says it 'sends the order'; Audit passed it with a warning [48]. Orders only arrive if the customer presses send in their email app. How many orders this loses is unverified.",
+      "Audit's warning count disagrees with its own code tally and the metrics [48].",
+      "Thin run: one cycle, 1 proposal, 0 counters, 0 refusals, 0 conflicts, lessons memory off. Priority bargaining, Identity rulings, rework loop and lessons were not exercised."
+    ],
+    "learnings": [
+      "Put the validator's rules (no digits in check text, ids not allowed as element-count targets) into Adaptation's inputs or lessons. Test: rerun the same brief and compare validator_refusals (5 now).",
+      "Add a pre-run check that flags a workflow check pointing at sections owned by another workflow, or allow cross-section checks only in the last workflow. Evidence: [22]-[27].",
+      "Move the mailto decision to the charter step: Identity should ask the Requester one question on whether an email-app form is acceptable, since it affects the 30 orders per week target. Currently it is told after the build [49].",
+      "Remove 'I recommend workable' from Audit or test it. This run cannot show whether Identity would have decided the same without it [48][49].",
+      "Run a harder test next: a tighter budget (for example 60), a brief with a missing fact, and lessons memory on. Without these, Priority, conflicts and Audit rework stay untested.",
+      "Keep the Requester echo [4] as a standing test case for Identity, and fix the Audit warning count so it matches the metrics.",
+      "Count dependency waits separately from real HOLDs in metrics. 'held_ever 1' comes from W-5 simply waiting its turn."
+    ]
+  },
+  "events": [
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "info: 1 question(s) for the Requester",
+      "msg": 3,
+      "cycle": 0,
+      "pause": "info"
+    },
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "info: 1 question(s) for the Requester",
+      "msg": 6,
+      "cycle": 0,
+      "pause": "info"
+    },
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "Header, nav and location with map link: work atom 1: check 5 says 'Nav and location controls are tappable at 360px' but expects 44; work atom 1: check 6 says 'Location controls are tappable at 360px' but expects 44",
+      "msg": 11,
+      "cycle": 1
+    },
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "Menu with prices: work atom 1: check 4 says 'Seven cards use j2-card' but expects 7",
+      "msg": 12,
+      "cycle": 1
+    },
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "Opening hours and contact details: work atom 1: check 6 says 'Contact links are tappable at 360px' but expects 44",
+      "msg": 13,
+      "cycle": 1
+    },
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "Pre-order form: work atom 1: expected output item 9 says 'Form controls are tappable at 360px' but expects 44; work atom 1: expected output item 3 element-count targets ['#po-name', '#po-phone', '#po-items', '#po-time']: only a section id or class name, never a charter fact, an email or a generic string (use facts-present for those)",
+      "msg": 14,
+      "cycle": 1
+    },
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "Mobile setup, overflow guard and footer: work atom 1: expected output item 6 says 'Footer link is tappable at 360px' but expects 44",
+      "msg": 15,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-5: W-1, W-2, W-3 and W-4 must be done first (hero-location, menu, hours-contact, preorder)",
+      "msg": 19,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-5: menu (W-2), hours-contact (W-3) and preorder (W-4) must be done first; hero-location (W-1) is already done",
+      "msg": 29,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-5: hours-contact (W-3) and preorder (W-4) must be done first; hero-location (W-1) and menu (W-2) are already done",
+      "msg": 33,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-5: preorder (W-4) must be done first; hero-location (W-1), menu (W-2) and hours-contact (W-3) are already done",
+      "msg": 37,
+      "cycle": 1
+    }
+  ],
+  "made": "2026-10-15 18:59:17"
+}

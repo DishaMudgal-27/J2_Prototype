@@ -1,0 +1,189 @@
+{
+  "metrics": {
+    "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): Menu items and prices; Opening hours for each day; Street address and map link; Pre-order destination (for example a WhatsApp or phone number) and pickup time rules; Contact phone number; Brew video file or link (short and compressed), and a poster image if wanted; Photos or logo, if any.",
+    "brief": "Brew Lab, Indiranagar, Bengaluru. One-page site with menu and prices, hours, location and pre-order for pickup. Rule: the page must load fast on a phone, speed matters more than visuals. We'd love a full-screen background video of our coffee being brewed.",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 1,
+    "ai_calls": 13,
+    "minutes": 4.0,
+    "budget": {
+      "total": 70,
+      "start": 70,
+      "cap": 140,
+      "raises": [],
+      "spent": 60,
+      "rate_card": true
+    },
+    "site_versions": 3,
+    "site_bytes": 13029,
+    "agents": {
+      "identity": {
+        "turns": 3,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 4,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 3,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "builder": {
+        "turns": 3,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 1,
+      "grants": 1,
+      "counters": 0,
+      "refuses": 0,
+      "refuses_converted_by_code": 0,
+      "parks": 0
+    },
+    "conflicts": {
+      "total": 0,
+      "settled_by_agents": 0,
+      "resolved_by_identity": 0,
+      "asked_requester": 0,
+      "open": 0,
+      "list": []
+    },
+    "requester_questions": {
+      "total": 1,
+      "by_kind": {
+        "charter_drop": 1
+      }
+    },
+    "workflows": {
+      "registered": 3,
+      "done": 3,
+      "failed": 0,
+      "held_ever": 0,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "Single-file mobile page with menu, hours, location",
+          "agent_estimate": 35,
+          "charged": 35
+        },
+        {
+          "id": "W-2",
+          "name": "Pickup pre-order form",
+          "agent_estimate": 15,
+          "charged": 15
+        },
+        {
+          "id": "W-3",
+          "name": "Tap-to-play brew video",
+          "agent_estimate": 10,
+          "charged": 10
+        }
+      ]
+    },
+    "validator_refusals": 0,
+    "role_refusals": 0,
+    "pauses": 1,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 0,
+    "audits": [
+      {
+        "cycle": 1,
+        "version": 3,
+        "all_pass": true,
+        "pass": 10,
+        "warn": 0,
+        "fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      }
+    ],
+    "open_inputs": [
+      "Menu items and prices",
+      "Opening hours for each day",
+      "Street address and map link",
+      "Pre-order destination (for example a WhatsApp or phone number) and pickup time rules",
+      "Contact phone number",
+      "Brew video file or link (short and compressed), and a poster image if wanted",
+      "Photos or logo, if any"
+    ]
+  },
+  "review": {
+    "verdict": "A clean, fast run: all 10 done-when items passed in one cycle (12 AI calls, 4 min, 60 of 70 budget, 13 KB), but it exercised little of the design, and Identity changed what the Requester approved.",
+    "agents": {
+      "identity": {
+        "score": 3,
+        "note": "Paused correctly before work [2], and closed honestly by saying Audit did not run the order path [22]. But the question had two bare options with no consequence or cost, and [2] said keeping the video 'needs a new charter decision'. Identity then made that decision itself in [5], turning the Requester's '1' [4] into tap-to-play. [22] does not say plainly that the full-screen background was not built."
+      },
+      "adaptation": {
+        "score": 4,
+        "note": "One small, costed proposal with a stated trade-off and reserve [7], and no self-grant. Minor slip: it says 'no separate video section' while W3 builds one. It never had to revise, so counter handling is untested."
+      },
+      "priority": {
+        "score": 4,
+        "note": "Granted at rate-card cost with a stop-loss and a 10 reserve [8], then checked each run's envelope separately [11][14][17]. Stayed out of scheduling and strategy. It never had to counter or refuse, so its discipline under pressure is untested."
+      },
+      "coordination": {
+        "score": 5,
+        "note": "Stated the scheduling rule, the single write lock on site/index.html and the tie-break every time [10][13][16]. No scope changes. No holds arose, so the HOLD path is unobserved."
+      },
+      "audit": {
+        "score": 3,
+        "note": "Right hand-off to Identity, and it correctly says only the Requester can close the placeholders [21]. But '10 PASS' has no per-item evidence in chat. The tap handler and order form were read, not run, and only Identity admits it [22]. The '1 external resource' in [20] is never checked against the no-blocking-external rule."
+      },
+      "builder": {
+        "score": 4,
+        "note": "Three builds in order, each handed to Coordination. File is 13 KB against a 60 KB limit, with no src in the HTML and no autoplay [18], and placeholders marked. It did not judge its own result. The task was easy."
+      }
+    },
+    "went_well": [
+      "Zero redirects, invalid moves, validator refusals or role refusals across 15 agent turns.",
+      "The speed rule held: 13 KB, no overflow at 360px or 1280px, no JS errors, no broken links, no autoplay [20].",
+      "No invented facts. Unsupplied items are marked [PLACEHOLDER] and the open inputs are listed [22].",
+      "Budget discipline: 60 of 70 spent, the reserve was untouched, and the cap was never needed."
+    ],
+    "problems": [
+      "The Requester asked for a full-screen background video, chose 'keep' [4], and got tap-to-play. Identity's own text said that needs a new decision [2], and none was asked.",
+      "The question's real choice was three-way (background video, tap-to-play, drop), but it was offered as keep or drop with no consequence or cost per option [2].",
+      "Audit's pass on items 6 and 7 rests on reading code, not running it. Interactive behaviour (tap sets src, order form output) was not tested by Audit.",
+      "'Done' is an easy bar: the done-when accepts placeholders, so the Requester has a page with no real content.",
+      "Only 1 proposal, 0 counters, refusals, holds, conflicts, validator rejections, findings or rework. Most of the design was not tested."
+    ],
+    "learnings": [
+      "Change the charter-drop question: list the compromise as its own option, give consequence, cost and risk for each, and have Identity restate the Requester's answer literally before building [2][4][5].",
+      "Change Audit output: one line per done-when item with the evidence and whether it was run or only read. Add a scripted interaction check (tap play, submit the form) to the code check, and name the external resource it counted [20][21].",
+      "Consider splitting 'build done' from 'ready to go live' in Identity's final verdict. Today 'goal reached' [22] sits beside seven missing inputs.",
+      "Keep: per-run envelope checks, the restated scheduling rule, the pause before work, and the code-counted mechanical check. They produced concrete numbers.",
+      "Test next: a tight budget (for example 40 against this 60 ask) to force COUNTER or REFUSE. Also a planted defect to exercise the Audit rework loop, and a brief where the Requester supplies real facts.",
+      "Test next: three workflows against one on the same brief. All three write one file, so they run serially, at about 3 messages each [10]-[18]. Whether the split earns its cost is unproven, and this is a single run with no variance data."
+    ]
+  },
+  "events": [
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "charter_drop: 1 question(s) for the Requester",
+      "msg": 3,
+      "cycle": 0,
+      "pause": "charter_drop"
+    }
+  ],
+  "made": "2026-10-06 14:07:05"
+}

@@ -1,0 +1,19 @@
+{
+  "statement": "A one-page website for CityCare Hospital that lets patients find care and book a visit",
+  "site_name": "CityCare Hospital",
+  "audience": "Patients and families; people needing emergency help",
+  "standards": [
+    "Calm, trustworthy tone",
+    "First screen fast on a phone"
+  ],
+  "rules": [
+    "Plain HTML/CSS/JS in one file, no build step",
+    "No real patient data"
+  ],
+  "done_when": [
+    "Visitors can request an appointment",
+    "Departments and doctors are listed",
+    "Emergency number visible on every screen",
+    "Layout works on a phone"
+  ]
+}

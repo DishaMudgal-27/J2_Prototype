@@ -1,0 +1,140 @@
+[
+  {
+    "cycle": 1,
+    "version": 4,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The file lists opening hours for all seven days (Monday to Friday 8am to 10pm, Saturday and Sunday 9am to 11pm, no closed days), and JavaScript reads the current day and highlights today's row automatically",
+        "verdict": "PASS",
+        "note": "Seven tr[data-day] rows with Mon-Fri 8am to 10pm and Sat-Sun 9am to 11pm; script compares new Date().getDay() and adds the bl-today class.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The menu shows these items, each with its price in ₹: Espresso 120, Cappuccino 180, Pour-over 220, Cold brew 200, Croissant 150, Banana bread 130, grouped as Coffee, Cold, Food",
+        "verdict": "WITHDRAWN",
+        "note": "forced test failure (J2_FORCE_AUDIT_FAIL=2; Audit's own verdict was PASS: Six li entries with ₹120, ₹180, ₹220, ₹200, ₹150, ₹130 under h3 Coffee, Cold and Food.) (withdrawn in C-1)",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true,
+        "forced_test": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The pre-order form has fields for name, phone, a quantity for each of the six menu items, and pickup time, and a running total in ₹ that updates in the page as quantities change",
+        "verdict": "PASS",
+        "note": "Name, tel, six .bl-order-qty inputs and a time input exist; each qty has an input listener calling updateTotal, which writes the ₹ total to #bl-order-total.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The pickup time field is validated in the code against the opening hours and rejects times outside them",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "validate() rejects mins < open or mins > close using hoursFor(today), so times outside hours are refused; a time equal to closing (10pm or 11pm) is accepted and past times today are not rejected.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "On submit, the form code opens a WhatsApp link to +91 98450 00000 containing the name, phone, items with quantities, pickup time and total, and shows a confirmation message on the page that says payment is at pickup",
+        "verdict": "PASS",
+        "note": "Submit handler builds https://wa.me/919845000000?text= with name, phone, items x qty, pickup time and total, calls window.open, and sets confirmation text ending 'Payment is at pickup.'; the mechanical form run submitted with no errors.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The loyalty section shows exactly 10 stamp circles, the 10th marked FREE, with text saying the 10th stamp gives one free drink of any size",
+        "verdict": "PASS",
+        "note": "ol.bl-stamps has 10 li.bl-stamp, the last has class bl-stamp-free and the text FREE; intro reads 'Your 10th stamp gives one free drink of any size.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "The location section shows the address 100 Feet Road, Indiranagar, Bengaluru 560038 and a link labelled \"Get directions\" to https://maps.google.com/?q=100+Feet+Road+Indiranagar+Bengaluru+560038",
+        "verdict": "PASS",
+        "note": "address element reads '100 Feet Road, Indiranagar, Bengaluru 560038'; a.bl-directions text 'Get directions' has the exact maps.google.com/?q=100+Feet+Road+Indiranagar+Bengaluru+560038 href.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The file has a mobile viewport meta tag and its CSS causes no horizontal overflow at 360px or 1280px width",
+        "verdict": "PASS",
+        "note": "meta viewport width=device-width is present; mechanical check shows overflow_px 0 at both 360 and 1280.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The file has no JavaScript errors, every in-page link points to an existing section id, and it contains no placeholder or to-be-confirmed text",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Mechanical check: js_errors [] and broken_in_page_links []; the phone input has placeholder=\"98450 00000\" (a form hint, not unfinished copy) and the head has a duplicate meta charset, which is harmless.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "mechanical": {
+      "available": true,
+      "bytes": 24783,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://maps.google.com/?q=100+Feet+Road+Indiranagar+Bengaluru+560038",
+        "https://wa.me/919845000000"
+      ],
+      "forms": 1,
+      "scripts": 2,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

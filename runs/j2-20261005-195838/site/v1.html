@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CityCare Hospital, Bengaluru</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#b3261e;--teal:#0b6e75;--ink:#1d2b2e;--bg:#f4f8f8;--line:#cfdcdd;--warn:#fff4d6}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:"Noto Sans","Noto Sans Kannada","Noto Sans Devanagari",system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;font-size:17px}
+  .topbar{position:sticky;top:0;z-index:10;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid var(--line);padding:8px 16px}
+  .brand{font-weight:700;color:var(--teal);font-size:1.1rem}
+  .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .sos{background:var(--red);color:#fff;text-decoration:none;font-weight:700;padding:8px 14px;border-radius:6px}
+  .sos:focus,.btn:focus,select:focus,input:focus,textarea:focus,.lang button:focus{outline:3px solid #f2a900;outline-offset:2px}
+  .lang{display:flex;border:1px solid var(--teal);border-radius:6px;overflow:hidden}
+  .lang button{border:0;background:#fff;color:var(--teal);padding:8px 12px;font:inherit;cursor:pointer}
+  .lang button[aria-pressed="true"]{background:var(--teal);color:#fff;font-weight:700}
+  .draft{background:var(--warn);border-bottom:1px solid #e3c866;padding:8px 16px;font-size:.92rem}
+  .draft p{margin:2px 0}
+  main{max-width:820px;margin:0 auto;padding:16px}
+  section{background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px;margin:18px 0}
+  h1{font-size:1.6rem;margin:.4em 0 .2em;color:var(--teal)}
+  h2{font-size:1.35rem;margin:0 0 .5em}
+  #emergency{border:2px solid var(--red)}
+  #emergency h2{color:var(--red)}
+  .alert{font-weight:700;font-size:1.1rem}
+  dl{margin:12px 0 0}
+  dt{font-weight:600;margin-top:10px}
+  dd{margin:4px 0 0}
+  .ph{display:inline-block;border:2px dashed var(--red);background:#fff1f0;padding:6px 10px;border-radius:6px;font-weight:600}
+  .tag{display:inline-block;background:var(--red);color:#fff;font-size:.72rem;font-weight:700;padding:1px 6px;border-radius:4px;margin-right:6px;vertical-align:middle}
+  .notice{background:#e8f4f5;border-left:5px solid var(--teal);padding:10px 12px;border-radius:4px;font-weight:600}
+  form{margin-top:14px}
+  label{display:block;font-weight:600;margin-top:12px}
+  input,select,textarea{width:100%;font:inherit;padding:9px;border:1px solid #8aa4a6;border-radius:6px;background:#fff}
+  textarea{min-height:90px;resize:vertical}
+  .btn{margin-top:16px;background:var(--teal);color:#fff;border:0;border-radius:6px;padding:11px 20px;font:inherit;font-weight:700;cursor:pointer}
+  #status{margin-top:14px;padding:10px 12px;border-radius:6px;background:var(--warn);border:1px solid #e3c866;display:none}
+  #status.err{background:#fde7e5;border-color:var(--red)}
+  .small{font-size:.88rem;color:#4a5d60}
+  footer{max-width:820px;margin:0 auto;padding:8px 16px 40px}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <span class="brand">CityCare Hospital</span>
+  <div class="actions">
+    <a class="sos" href="#emergency" data-i18n="nav_emergency">Emergency</a>
+    <a href="#visit" data-i18n="nav_visit" style="color:var(--teal);font-weight:600">Request a visit</a>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">English</button>
+      <button type="button" data-lang="kn" aria-pressed="false">ಕನ್ನಡ</button>
+      <button type="button" data-lang="hi" aria-pressed="false">हिन्दी</button>
+    </div>
+  </div>
+</header>
+
+<div class="draft">
+  <p><span class="tag" data-i18n="tag">PLACEHOLDER</span><span data-i18n="draft">Draft site. Items marked as placeholders are not real and must be replaced by the hospital before use.</span></p>
+  <p id="review"><strong data-i18n="review">Kannada and Hindi text: pending native review.</strong></p>
+</div>
+
+<main>
+  <h1 data-i18n="h1">Care for you and your family in Bengaluru</h1>
+
+  <section id="emergency" aria-labelledby="em-h">
+    <h2 id="em-h" data-i18n="em_h">Emergency</h2>
+    <p class="alert" data-i18n="em_alert">If someone is in danger, call the emergency number now. Do not use the form below.</p>
+    <dl>
+      <dt data-i18n="em_num">Emergency number</dt>
+      <dd><span class="ph"><span class="tag" data-i18n="tag">PLACEHOLDER</span><span data-i18n="em_num_v">Not a real number. Hospital to add.</span></span></dd>
+      <dt data-i18n="em_addr">Address</dt>
+      <dd><span class="ph"><span class="tag" data-i18n="tag">PLACEHOLDER</span><span data-i18n="em_addr_v">Hospital address, Bengaluru. Hospital to add.</span></span></dd>
+    </dl>
+  </section>
+
+  <section id="visit" aria-labelledby="v-h">
+    <h2 id="v-h" data-i18n="v_h">Request a visit</h2>
+    <p class="notice" data-i18n="v_notice">This is a request only. Your visit is not confirmed.</p>
+    <p class="small" data-i18n="v_next">The hospital will contact you to confirm a time. Contact details and message service are not set up yet.</p>
+
+    <form id="reqform" novalidate>
+      <label for="f_name" data-i18n="f_name">Name</label>
+      <input id="f_name" name="name" type="text" autocomplete="name" required>
+
+      <label for="f_phone" data-i18n="f_phone">Phone number</label>
+      <input id="f_phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required>
+
+      <label for="f_date" data-i18n="f_date">Preferred date</label>
+      <input id="f_date" name="date" type="date" required>
+
+      <label for="f_dept" data-i18n="f_dept">Department or doctor</label>
+      <select id="f_dept" name="dept" required>
+        <option value="" data-i18n="d_choose">Choose</option>
+        <option value="gen" data-i18n="d_gen">General medicine</option>
+        <option value="ped" data-i18n="d_ped">Children (paediatrics)</option>
+        <option value="gyn" data-i18n="d_gyn">Women's health</option>
+        <option value="ortho" data-i18n="d_ortho">Bones and joints</option>
+        <option value="heart" data-i18n="d_heart">Heart</option>
+        <option value="doc" data-i18n="d_doc">A specific doctor (write the name below)</option>
+        <option value="unsure" data-i18n="d_unsure">Not sure</option>
+      </select>
+      <p class="small"><span class="tag" data-i18n="tag">PLACEHOLDER</span><span data-i18n="d_note">Sample list of departments. Hospital to replace.</span></p>
+
+      <label for="f_reason" data-i18n="f_reason">Reason for visit</label>
+      <textarea id="f_reason" name="reason" required></textarea>
+
+      <button class="btn" type="submit" data-i18n="submit">Submit request</button>
+      <div id="status" role="status" aria-live="polite"></div>
+    </form>
+  </section>
+</main>
+
+<footer class="small">
+  <span class="tag" data-i18n="tag">PLACEHOLDER</span><span data-i18n="foot">Hospital contact details: not added yet.</span>
+</footer>
+
+<script>
+(function(){
+  var T = {
+    en:{
+      nav_emergency:"Emergency", nav_visit:"Request a visit", tag:"PLACEHOLDER",
+      draft:"Draft site. Items marked as placeholders are not real and must be replaced by the hospital before use.",
+      review:"Kannada and Hindi text: pending native review.",
+      h1:"Care for you and your family in Bengaluru",
+      em_h:"Emergency",
+      em_alert:"If someone is in danger, call the emergency number now. Do not use the form below.",
+      em_num:"Emergency number", em_num_v:"Not a real number. Hospital to add.",
+      em_addr:"Address", em_addr_v:"Hospital address, Bengaluru. Hospital to add.",
+      v_h:"Request a visit",
+      v_notice:"This is a request only. Your visit is not confirmed.",
+      v_next:"The hospital will contact you to confirm a time. Contact details and message service are not set up yet.",
+      f_name:"Name", f_phone:"Phone number", f_date:"Preferred date", f_dept:"Department or doctor", f_reason:"Reason for visit",
+      d_choose:"Choose", d_gen:"General medicine", d_ped:"Children (paediatrics)", d_gyn:"Women's health", d_ortho:"Bones and joints", d_heart:"Heart",
+      d_doc:"A specific doctor (write the name below)", d_unsure:"Not sure",
+      d_note:"Sample list of departments. Hospital to replace.",
+      submit:"Submit request",
+      foot:"Hospital contact details: not added yet.",
+      err:"Please fill in every field.",
+      ok:"Checked. Nothing has been sent yet because the message service is not connected (placeholder). This is a request, not a confirmed booking. If it is urgent, see the Emergency section."
+    },
+    kn:{
+      nav_emergency:"ತುರ್ತು ಸೇವೆ", nav_visit:"ಭೇಟಿಗೆ ವಿನಂತಿ", tag:"ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್",
+      draft:"ಇದು ಕರಡು ಸೈಟ್. ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್ ಎಂದು ಗುರುತಿಸಿದ ವಿವರಗಳು ನಿಜವಲ್ಲ. ಬಳಸುವ ಮೊದಲು ಆಸ್ಪತ್ರೆ ಅವನ್ನು ಬದಲಾಯಿಸಬೇಕು.",
+      review:"ಕನ್ನಡ ಪಠ್ಯ: ಸ್ಥಳೀಯ ಭಾಷಾ ಪರಿಶೀಲನೆ ಬಾಕಿ (pending native review).",
+      h1:"ಬೆಂಗಳೂರಿನಲ್ಲಿ ನಿಮಗೂ ನಿಮ್ಮ ಕುಟುಂಬಕ್ಕೂ ಆರೈಕೆ",
+      em_h:"ತುರ್ತು ಸೇವೆ",
+      em_alert:"ಯಾರಾದರೂ ಅಪಾಯದಲ್ಲಿದ್ದರೆ ಈಗಲೇ ತುರ್ತು ಸಂಖ್ಯೆಗೆ ಕರೆ ಮಾಡಿ. ಕೆಳಗಿನ ಫಾರ್ಮ್ ಬಳಸಬೇಡಿ.",
+      em_num:"ತುರ್ತು ಸಂಖ್ಯೆ", em_num_v:"ನಿಜವಾದ ಸಂಖ್ಯೆ ಅಲ್ಲ. ಆಸ್ಪತ್ರೆ ಸೇರಿಸಬೇಕು.",
+      em_addr:"ವಿಳಾಸ", em_addr_v:"ಆಸ್ಪತ್ರೆಯ ವಿಳಾಸ, ಬೆಂಗಳೂರು. ಆಸ್ಪತ್ರೆ ಸೇರಿಸಬೇಕು.",
+      v_h:"ಭೇಟಿಗೆ ವಿನಂತಿ",
+      v_notice:"ಇದು ವಿನಂತಿ ಮಾತ್ರ. ನಿಮ್ಮ ಭೇಟಿ ದೃಢಪಟ್ಟಿಲ್ಲ.",
+      v_next:"ಸಮಯ ದೃಢಪಡಿಸಲು ಆಸ್ಪತ್ರೆ ನಿಮ್ಮನ್ನು ಸಂಪರ್ಕಿಸುತ್ತದೆ. ಸಂಪರ್ಕ ವಿವರಗಳು ಮತ್ತು ಸಂದೇಶ ಸೇವೆ ಇನ್ನೂ ಸಿದ್ಧವಾಗಿಲ್ಲ.",
+      f_name:"ಹೆಸರು", f_phone:"ಫೋನ್ ಸಂಖ್ಯೆ", f_date:"ಬಯಸುವ ದಿನಾಂಕ", f_dept:"ವಿಭಾಗ ಅಥವಾ ವೈದ್ಯರು", f_reason:"ಭೇಟಿಗೆ ಕಾರಣ",
+      d_choose:"ಆಯ್ಕೆ ಮಾಡಿ", d_gen:"ಸಾಮಾನ್ಯ ಔಷಧ", d_ped:"ಮಕ್ಕಳ ವಿಭಾಗ", d_gyn:"ಮಹಿಳೆಯರ ಆರೋಗ್ಯ", d_ortho:"ಮೂಳೆ ಮತ್ತು ಕೀಲು", d_heart:"ಹೃದಯ",
+      d_doc:"ನಿರ್ದಿಷ್ಟ ವೈದ್ಯರು (ಹೆಸರನ್ನು ಕೆಳಗೆ ಬರೆಯಿರಿ)", d_unsure:"ಖಚಿತವಿಲ್ಲ",
+      d_note:"ವಿಭಾಗಗಳ ಮಾದರಿ ಪಟ್ಟಿ. ಆಸ್ಪತ್ರೆ ಬದಲಾಯಿಸಬೇಕು.",
+      submit:"ವಿನಂತಿ ಸಲ್ಲಿಸಿ",
+      foot:"ಆಸ್ಪತ್ರೆಯ ಸಂಪರ್ಕ ವಿವರಗಳು: ಇನ್ನೂ ಸೇರಿಸಿಲ್ಲ.",
+      err:"ದಯವಿಟ್ಟು ಎಲ್ಲಾ ಕ್ಷೇತ್ರಗಳನ್ನು ತುಂಬಿ.",
+      ok:"ಪರಿಶೀಲನೆ ಮುಗಿದಿದೆ. ಸಂದೇಶ ಸೇವೆ ಇನ್ನೂ ಜೋಡಿಸಿಲ್ಲದ ಕಾರಣ ಏನೂ ಕಳುಹಿಸಿಲ್ಲ (ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್). ಇದು ವಿನಂತಿ ಮಾತ್ರ, ದೃಢಪಟ್ಟ ಬುಕಿಂಗ್ ಅಲ್ಲ. ತುರ್ತು ಇದ್ದರೆ ತುರ್ತು ಸೇವೆ ವಿಭಾಗ ನೋಡಿ."
+    },
+    hi:{
+      nav_emergency:"आपातकालीन सेवा", nav_visit:"मुलाकात का अनुरोध", tag:"प्लेसहोल्डर",
+      draft:"यह ड्राफ्ट साइट है। प्लेसहोल्डर लिखी जानकारी असली नहीं है। उपयोग से पहले अस्पताल को इसे बदलना होगा।",
+      review:"हिंदी पाठ: मूल भाषा समीक्षा बाकी (pending native review)।",
+      h1:"बेंगलुरु में आपके और आपके परिवार के लिए देखभाल",
+      em_h:"आपातकालीन सेवा",
+      em_alert:"अगर किसी की जान को खतरा है, तो अभी आपातकालीन नंबर पर कॉल करें। नीचे का फ़ॉर्म इस्तेमाल न करें।",
+      em_num:"आपातकालीन नंबर", em_num_v:"असली नंबर नहीं है। अस्पताल जोड़ेगा।",
+      em_addr:"पता", em_addr_v:"अस्पताल का पता, बेंगलुरु। अस्पताल जोड़ेगा।",
+      v_h:"मुलाकात का अनुरोध",
+      v_notice:"यह सिर्फ़ अनुरोध है। आपकी मुलाकात पक्की नहीं है।",
+      v_next:"समय पक्का करने के लिए अस्पताल आपसे संपर्क करेगा। संपर्क जानकारी और संदेश सेवा अभी तैयार नहीं है।",
+      f_name:"नाम", f_phone:"फ़ोन नंबर", f_date:"पसंदीदा तारीख", f_dept:"विभाग या डॉक्टर", f_reason:"मुलाकात का कारण",
+      d_choose:"चुनें", d_gen:"सामान्य चिकित्सा", d_ped:"बच्चों का विभाग", d_gyn:"महिलाओं का स्वास्थ्य", d_ortho:"हड्डी और जोड़", d_heart:"हृदय",
+      d_doc:"कोई खास डॉक्टर (नाम नीचे लिखें)", d_unsure:"पक्का नहीं पता",
+      d_note:"विभागों की नमूना सूची। अस्पताल बदलेगा।",
+      submit:"अनुरोध जमा करें",
+      foot:"अस्पताल की संपर्क जानकारी: अभी जोड़ी नहीं गई।",
+      err:"कृपया सभी खाने भरें।",
+      ok:"जाँच पूरी हुई। संदेश सेवा अभी जुड़ी नहीं है, इसलिए कुछ भेजा नहीं गया (प्लेसहोल्डर)। यह सिर्फ़ अनुरोध है, पक्की बुकिंग नहीं। अगर जरूरी है, तो आपातकालीन सेवा वाला भाग देखें।"
+    }
+  };
+
+  var lang = "en", lastState = null;
+  var status = document.getElementById("status");
+
+  function setLang(l){
+    lang = l;
+    document.documentElement.lang = l;
+    document.querySelectorAll("[data-i18n]").forEach(function(el){
+      var v = T[l][el.getAttribute("data-i18n")];
+      if (v !== undefined) el.textContent = v;
+    });
+    document.querySelectorAll(".lang button").forEach(function(b){
+      b.setAttribute("aria-pressed", b.getAttribute("data-lang") === l ? "true" : "false");
+    });
+    if (lastState) showStatus(lastState);
+  }
+
+  function showStatus(kind){
+    lastState = kind;
+    status.textContent = T[lang][kind === "err" ? "err" : "ok"];
+    status.className = kind === "err" ? "err" : "";
+    status.style.display = "block";
+  }
+
+  document.querySelectorAll(".lang button").forEach(function(b){
+    b.addEventListener("click", function(){ setLang(b.getAttribute("data-lang")); });
+  });
+
+  var d = document.getElementById("f_date");
+  var t = new Date();
+  d.min = t.getFullYear() + "-" + String(t.getMonth()+1).padStart(2,"0") + "-" + String(t.getDate()).padStart(2,"0");
+
+  document.getElementById("reqform").addEventListener("submit", function(e){
+    e.preventDefault();
+    var ids = ["f_name","f_phone","f_date","f_dept","f_reason"], ok = true, first = null;
+    ids.forEach(function(id){
+      var el = document.getElementById(id);
+      var bad = !el.value.trim();
+      el.setAttribute("aria-invalid", bad ? "true" : "false");
+      if (bad && !first){ first = el; }
+      if (bad) ok = false;
+    });
+    if (!ok){ showStatus("err"); first.focus(); return; }
+    /* No backend yet: nothing is sent. A third-party form service is an open input. */
+    showStatus("ok");
+  });
+
+  setLang("en");
+})();
+</script>
+</body>
+</html>

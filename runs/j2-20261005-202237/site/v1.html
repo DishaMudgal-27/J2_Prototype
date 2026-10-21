@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Specialty coffee, Indiranagar, Bengaluru</title>
+<style>
+  :root { --ink:#2b1d14; --bg:#faf5ee; --card:#fff; --accent:#7a4a2a; --line:#e3d6c6; --warn:#fff1c2; --warnink:#7a5b00; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; color:var(--ink); background:var(--bg); line-height:1.5; }
+  header { background:var(--ink); color:#fff; padding:2.5rem 1rem; text-align:center; }
+  header h1 { margin:0 0 .25rem; font-size:2rem; }
+  header p { margin:0; opacity:.85; }
+  main { max-width:760px; margin:0 auto; padding:1rem; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:1.25rem; margin:1.25rem 0; }
+  h2 { margin-top:0; color:var(--accent); }
+  .tbc { display:inline-block; background:var(--warn); color:var(--warnink); border:1px dashed var(--warnink); border-radius:4px; padding:0 .4rem; font-size:.8rem; font-weight:700; letter-spacing:.03em; vertical-align:middle; }
+  .note { background:#f4ece1; border-left:4px solid var(--accent); padding:.6rem .8rem; border-radius:4px; font-size:.95rem; margin:.75rem 0; }
+  ul.menu { list-style:none; padding:0; margin:0; }
+  ul.menu li { display:flex; justify-content:space-between; gap:1rem; padding:.6rem 0; border-bottom:1px solid var(--line); }
+  ul.menu li:last-child { border-bottom:0; }
+  .row { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.5rem 0; border-bottom:1px solid var(--line); }
+  .row label { flex:1; }
+  input, select { font:inherit; padding:.5rem; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); }
+  input[type=number] { width:4.5rem; text-align:center; }
+  .field { margin:1rem 0; display:flex; flex-direction:column; gap:.3rem; }
+  .field input, .field select { width:100%; }
+  .btn { display:inline-block; background:#1f7a4d; color:#fff; text-decoration:none; padding:.8rem 1.2rem; border-radius:8px; font-weight:700; font-size:1rem; }
+  .btn:focus-visible, input:focus-visible, select:focus-visible { outline:3px solid #1f7a4d; outline-offset:2px; }
+  #msg { margin:.75rem 0 0; font-weight:600; color:#a32020; min-height:1.4rem; }
+  pre { white-space:pre-wrap; background:#f4ece1; padding:.75rem; border-radius:6px; font-size:.9rem; margin:.5rem 0 0; }
+  footer { text-align:center; padding:1.5rem 1rem 2.5rem; font-size:.9rem; opacity:.8; }
+  @media (max-width:480px) { header h1 { font-size:1.6rem; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Brew Lab</h1>
+  <p>Specialty coffee in Indiranagar, Bengaluru</p>
+</header>
+
+<main>
+
+  <section id="menu">
+    <h2>Menu</h2>
+    <p class="note">Drink names here are placeholders and every price is <span class="tbc">TBC</span> until the shop confirms its real menu.</p>
+    <ul class="menu">
+      <li><span>Espresso <span class="tbc">TBC</span></span><span>&#8377; <span class="tbc">TBC</span></span></li>
+      <li><span>Americano <span class="tbc">TBC</span></span><span>&#8377; <span class="tbc">TBC</span></span></li>
+      <li><span>Cappuccino <span class="tbc">TBC</span></span><span>&#8377; <span class="tbc">TBC</span></span></li>
+      <li><span>Latte <span class="tbc">TBC</span></span><span>&#8377; <span class="tbc">TBC</span></span></li>
+      <li><span>Filter coffee <span class="tbc">TBC</span></span><span>&#8377; <span class="tbc">TBC</span></span></li>
+      <li><span>Cold brew <span class="tbc">TBC</span></span><span>&#8377; <span class="tbc">TBC</span></span></li>
+    </ul>
+  </section>
+
+  <section id="preorder">
+    <h2>Pre-order for pickup</h2>
+    <p class="note">
+      <strong>Pay at pickup.</strong> This page takes no payment.<br>
+      <strong>Your order is a request</strong> until staff confirm it on WhatsApp. The pickup slot is a time you ask for, not a promised ready time.
+    </p>
+
+    <form id="orderForm" novalidate onsubmit="return false">
+      <fieldset style="border:0;padding:0;margin:0">
+        <legend style="font-weight:700;margin-bottom:.25rem">1. Choose your drinks</legend>
+        <div class="row"><label for="q1">Espresso</label><input id="q1" type="number" min="0" max="20" value="0" data-item="Espresso" inputmode="numeric"></div>
+        <div class="row"><label for="q2">Americano</label><input id="q2" type="number" min="0" max="20" value="0" data-item="Americano" inputmode="numeric"></div>
+        <div class="row"><label for="q3">Cappuccino</label><input id="q3" type="number" min="0" max="20" value="0" data-item="Cappuccino" inputmode="numeric"></div>
+        <div class="row"><label for="q4">Latte</label><input id="q4" type="number" min="0" max="20" value="0" data-item="Latte" inputmode="numeric"></div>
+        <div class="row"><label for="q5">Filter coffee</label><input id="q5" type="number" min="0" max="20" value="0" data-item="Filter coffee" inputmode="numeric"></div>
+        <div class="row"><label for="q6">Cold brew</label><input id="q6" type="number" min="0" max="20" value="0" data-item="Cold brew" inputmode="numeric"></div>
+      </fieldset>
+
+      <div class="field">
+        <label for="custName"><strong>2. Your name</strong></label>
+        <input id="custName" type="text" maxlength="60" autocomplete="name" placeholder="Name for the order">
+      </div>
+
+      <div class="field">
+        <label for="slot"><strong>3. Requested pickup slot</strong> <span class="tbc">TBC</span> slot times and capacity</label>
+        <select id="slot">
+          <option value="">Choose a slot</option>
+          <option>Slot 1 (time TBC)</option>
+          <option>Slot 2 (time TBC)</option>
+          <option>Slot 3 (time TBC)</option>
+          <option>Slot 4 (time TBC)</option>
+        </select>
+      </div>
+
+      <p><a id="waBtn" class="btn" href="https://wa.me/TBC" target="_blank" rel="noopener">Send pre-order request on WhatsApp</a></p>
+      <p style="margin:.25rem 0 0;font-size:.9rem">Shop WhatsApp number: <span class="tbc">TBC</span></p>
+      <p id="msg" role="alert" aria-live="polite"></p>
+
+      <details>
+        <summary>Preview the message that will be sent</summary>
+        <pre id="preview">Add drinks, your name and a slot to see the message.</pre>
+      </details>
+    </form>
+    <p class="note" style="margin-bottom:0">This page stores nothing. Your order text goes only into the WhatsApp message you choose to send.</p>
+  </section>
+
+  <!-- W-2 adds: opening hours, location, beans and farms, loyalty card -->
+
+</main>
+
+<footer>Brew Lab, Indiranagar, Bengaluru</footer>
+
+<script>
+  // Digits only with country code, no plus sign. Leave empty until the shop supplies it.
+  var WHATSAPP_NUMBER = "";
+
+  var form = document.getElementById("orderForm");
+  var btn = document.getElementById("waBtn");
+  var msg = document.getElementById("msg");
+  var preview = document.getElementById("preview");
+
+  function numberReady() { return /^\d{8,15}$/.test(WHATSAPP_NUMBER); }
+
+  function build() {
+    var qtys = form.querySelectorAll("input[data-item]");
+    var lines = [], total = 0;
+    qtys.forEach(function (el) {
+      var n = parseInt(el.value, 10);
+      if (n > 0) { lines.push("- " + n + " x " + el.getAttribute("data-item")); total += n; }
+    });
+    var name = document.getElementById("custName").value.trim();
+    var slot = document.getElementById("slot").value;
+    var text = "Hi Brew Lab, this is a pre-order request for pickup.\n" +
+      (lines.length ? lines.join("\n") : "- (no items chosen)") + "\n" +
+      "Name: " + (name || "(not entered)") + "\n" +
+      "Requested pickup slot: " + (slot || "(not chosen)") + "\n" +
+      "I will pay at pickup. Please confirm on WhatsApp.";
+    return { text: text, count: total, name: name, slot: slot };
+  }
+
+  function refresh() {
+    var o = build();
+    btn.href = "https://wa.me/" + (numberReady() ? WHATSAPP_NUMBER : "TBC") + "?text=" + encodeURIComponent(o.text);
+    preview.textContent = o.text;
+    return o;
+  }
+
+  form.addEventListener("input", refresh);
+  form.addEventListener("change", refresh);
+
+  btn.addEventListener("click", function (e) {
+    var o = refresh();
+    var problem = "";
+    if (o.count < 1) problem = "Please choose at least one drink.";
+    else if (!o.name) problem = "Please enter your name.";
+    else if (!o.slot) problem = "Please choose a pickup slot.";
+    else if (!numberReady()) problem = "The shop's WhatsApp number is TBC, so the message cannot be sent yet.";
+    if (problem) { e.preventDefault(); msg.textContent = problem; }
+    else { msg.textContent = ""; }
+  });
+
+  refresh();
+</script>
+</body>
+</html>

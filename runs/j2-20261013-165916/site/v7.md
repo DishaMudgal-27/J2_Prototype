@@ -1,0 +1,47 @@
+# LabSlot
+
+## Problem
+
+Lab slot booking is done on paper, and slots get double-booked. When a slot is double-booked, more than one person expects to use the same lab slot at the same time. This affects students, who book lab slots, and lab staff. LabSlot is a web app that works on phones and responds to this problem by replacing paper booking, so that students can book a slot, cancel a slot and see availability themselves.
+
+## Users
+
+LabSlot has two user groups: students and lab staff.
+
+- **Students** are the main users. They use LabSlot on their phones to book a slot, cancel a slot and see availability, so they no longer need paper to reserve lab time.
+- **Lab staff** run the labs and are affected when slots are double-booked on paper. LabSlot is meant to let students book without staff help, and the success measure counts the share of bookings made without it.
+
+## Goals
+
+LabSlot responds to the problem that lab slot booking is done on paper and slots get double-booked. It has two goals.
+
+- **G1**: LabSlot replaces paper booking. Students book a slot, cancel a slot and see availability in LabSlot on their phones, so paper is no longer needed to reserve lab time.
+- **G2**: LabSlot prevents double-booked slots. Once a slot is booked in LabSlot, it shows as unavailable, so two people never hold the same lab slot at the same time.
+
+## Requirements
+
+LabSlot must meet the following requirements. Each one traces to the problem that lab slot booking is done on paper and slots get double-booked, or to a must-have feature.
+
+1. **R1**: Book a slot. A student can book a slot in LabSlot by choosing a lab slot that shows as available. Traces to the must-have feature "book a slot" and to G1.
+2. **R2**: Cancel a slot. A student can cancel a slot they booked, and the slot then shows as available again. Traces to the must-have feature "cancel a slot" and to G1.
+3. **R3**: See availability. A student can see which lab slots are available and which are already booked before choosing one. Traces to the must-have feature "see availability" and to G1.
+4. **R4**: Work on phones. LabSlot must work on phones, so a student can book a slot, cancel a slot and see availability from a phone without using paper. Traces to the constraint that the web app must work on phones.
+5. **R5**: No double-booked slots. Once a slot is booked, LabSlot shows it as unavailable and does not accept a second booking for the same lab slot. Traces to the problem that slots get double-booked and to G2.
+
+## Success metrics
+
+LabSlot has two success metrics, one for each goal. The first measures whether LabSlot replaces paper booking, as stated in the goal G1, by showing how many lab slot bookings students make themselves. The second measures whether LabSlot prevents double-booked slots, as stated in the goal G2.
+
+- **G1**: 80% of bookings are made without staff help. A booking counts as made without staff help when a student books a slot in LabSlot on their own, without lab staff booking it for them.
+- **G2**: The target for double-booked slots is zero. A slot is double-booked when more than one person holds the same lab slot at the same time. LabSlot meets this metric when no lab slot is double-booked.
+
+## Out of scope
+
+LabSlot in this version does only what the Requirements section lists. The following are out of scope and LabSlot will not do them:
+
+- Taking payments or charging fees for lab use.
+- Sending reminders or notifications to students or lab staff.
+- Running a waitlist for slots that are already taken.
+- Providing a native phone app. LabSlot is a web app that works on phones.
+- Producing reports or analytics beyond the success measure that 80% of bookings are made without staff help.
+- Importing or converting existing paper bookings into LabSlot.

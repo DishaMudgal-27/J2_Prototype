@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Cafe in Indiranagar, Bengaluru</title>
+<style>
+  :root { --bg:#faf6f0; --ink:#2b2018; --accent:#6b3f1d; --card:#fff; --line:#e4d9cc; }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; scroll-padding-top:64px; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--ink); line-height:1.55; }
+  header.top { position:sticky; top:0; z-index:10; background:var(--accent); color:#fff; }
+  .bar { max-width:1000px; margin:0 auto; padding:.6rem 1rem; display:flex; flex-wrap:wrap; align-items:center; gap:.4rem 1rem; }
+  .brand { font-weight:700; font-size:1.2rem; letter-spacing:.02em; }
+  nav { display:flex; flex-wrap:wrap; gap:.25rem .9rem; }
+  nav a { color:#fff; text-decoration:none; font-size:.95rem; padding:.2rem 0; }
+  nav a:hover, nav a:focus { text-decoration:underline; }
+  .hero { max-width:1000px; margin:0 auto; padding:2rem 1rem 1rem; }
+  .hero h1 { margin:0 0 .3rem; font-size:1.9rem; }
+  .hero p { margin:.2rem 0; }
+  main { max-width:1000px; margin:0 auto; padding:0 1rem 2rem; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:1.1rem 1rem; margin:1rem 0; }
+  section h2 { margin:0 0 .6rem; font-size:1.4rem; color:var(--accent); }
+  section h3 { margin:1rem 0 .4rem; font-size:1.1rem; }
+  .ph { background:#fff3b0; color:#5a4500; border:1px dashed #b38f00; border-radius:4px; padding:0 .3em; font-weight:600; }
+  ul.menu { list-style:none; margin:0; padding:0; }
+  ul.menu li { display:flex; justify-content:space-between; gap:1rem; padding:.45rem 0; border-bottom:1px solid var(--line); }
+  ul.menu li:last-child { border-bottom:0; }
+  table.hours { width:100%; border-collapse:collapse; }
+  table.hours th, table.hours td { text-align:left; padding:.45rem .3rem; border-bottom:1px solid var(--line); }
+  table.hours th { width:40%; font-weight:600; }
+  .btn { display:inline-block; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:8px; text-decoration:none; margin-top:.5rem; }
+  .btn:hover, .btn:focus { opacity:.9; }
+  .stub { font-size:.95rem; }
+  footer { max-width:1000px; margin:0 auto; padding:1rem; font-size:.9rem; color:#6a5a4c; }
+  .menu-grid { display:grid; grid-template-columns:1fr; gap:1rem; }
+  @media (min-width:700px) {
+    .menu-grid { grid-template-columns:1fr 1fr; }
+    .hero h1 { font-size:2.4rem; }
+  }
+  @media (max-width:480px) {
+    .bar { padding:.5rem .75rem; }
+    nav { gap:.2rem .7rem; }
+    nav a { font-size:.88rem; }
+    .hero { padding:1.2rem .75rem .5rem; }
+    .hero h1 { font-size:1.55rem; }
+    main { padding:0 .6rem 1.5rem; }
+    section { padding:.9rem .75rem; }
+    table.hours th, table.hours td { padding:.4rem .2rem; font-size:.95rem; }
+    ul.menu li { flex-direction:column; gap:.1rem; }
+    .btn { display:block; text-align:center; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="bar">
+    <span class="brand">Brew Lab</span>
+    <nav aria-label="Sections">
+      <a href="#menu">Menu</a>
+      <a href="#hours">Hours</a>
+      <a href="#location">Location</a>
+      <a href="#preorder">Pre-order</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#farms">Farms</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <h1>Brew Lab</h1>
+  <p>A cafe in Indiranagar, Bengaluru.</p>
+  <p><span class="ph">PLACEHOLDER: add tagline, logo and brand colours if any</span></p>
+</div>
+
+<main>
+
+  <section id="menu" aria-labelledby="menu-h">
+    <h2 id="menu-h">Menu</h2>
+    <p><span class="ph">PLACEHOLDER: add real menu categories, items and prices</span></p>
+    <div class="menu-grid">
+      <div>
+        <h3><span class="ph">PLACEHOLDER: category 1 name</span></h3>
+        <ul class="menu">
+          <li><span><span class="ph">PLACEHOLDER: item name</span></span><span class="ph">PLACEHOLDER: price</span></li>
+          <li><span><span class="ph">PLACEHOLDER: item name</span></span><span class="ph">PLACEHOLDER: price</span></li>
+          <li><span><span class="ph">PLACEHOLDER: item name</span></span><span class="ph">PLACEHOLDER: price</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3><span class="ph">PLACEHOLDER: category 2 name</span></h3>
+        <ul class="menu">
+          <li><span><span class="ph">PLACEHOLDER: item name</span></span><span class="ph">PLACEHOLDER: price</span></li>
+          <li><span><span class="ph">PLACEHOLDER: item name</span></span><span class="ph">PLACEHOLDER: price</span></li>
+          <li><span><span class="ph">PLACEHOLDER: item name</span></span><span class="ph">PLACEHOLDER: price</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3><span class="ph">PLACEHOLDER: category 3 name</span></h3>
+        <ul class="menu">
+          <li><span><span class="ph">PLACEHOLDER: item name</span></span><span class="ph">PLACEHOLDER: price</span></li>
+          <li><span><span class="ph">PLACEHOLDER: item name</span></span><span class="ph">PLACEHOLDER: price</span></li>
+          <li><span><span class="ph">PLACEHOLDER: item name</span></span><span class="ph">PLACEHOLDER: price</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="hours" aria-labelledby="hours-h">
+    <h2 id="hours-h">Hours</h2>
+    <p><span class="ph">PLACEHOLDER: add real opening hours for each day</span></p>
+    <table class="hours">
+      <tbody>
+        <tr><th scope="row">Monday</th><td><span class="ph">PLACEHOLDER: opening hours</span></td></tr>
+        <tr><th scope="row">Tuesday</th><td><span class="ph">PLACEHOLDER: opening hours</span></td></tr>
+        <tr><th scope="row">Wednesday</th><td><span class="ph">PLACEHOLDER: opening hours</span></td></tr>
+        <tr><th scope="row">Thursday</th><td><span class="ph">PLACEHOLDER: opening hours</span></td></tr>
+        <tr><th scope="row">Friday</th><td><span class="ph">PLACEHOLDER: opening hours</span></td></tr>
+        <tr><th scope="row">Saturday</th><td><span class="ph">PLACEHOLDER: opening hours</span></td></tr>
+        <tr><th scope="row">Sunday</th><td><span class="ph">PLACEHOLDER: opening hours</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="location" aria-labelledby="location-h">
+    <h2 id="location-h">Location</h2>
+    <p><strong>Brew Lab, Indiranagar, Bengaluru</strong></p>
+    <p>Street address: <span class="ph">PLACEHOLDER: add street address and PIN code</span></p>
+    <p>Phone / WhatsApp: <span class="ph">PLACEHOLDER: add phone or WhatsApp number</span></p>
+    <a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Brew+Lab+Indiranagar+Bengaluru" target="_blank" rel="noopener">Open in Google Maps</a>
+    <p class="stub"><span class="ph">PLACEHOLDER: confirm the map pin points to the exact cafe address</span></p>
+  </section>
+
+  <section id="preorder" aria-labelledby="preorder-h">
+    <h2 id="preorder-h">Pre-order for pickup</h2>
+    <p class="stub"><span class="ph">PLACEHOLDER: pre-order form (items, quantity, name, phone, pickup time) not built yet</span></p>
+    <p class="stub">Pre-orders will be for pickup only.</p>
+  </section>
+
+  <section id="gallery" aria-labelledby="gallery-h">
+    <h2 id="gallery-h">Gallery</h2>
+    <p class="stub"><span class="ph">PLACEHOLDER: cafe photo gallery not built yet</span></p>
+  </section>
+
+  <section id="farms" aria-labelledby="farms-h">
+    <h2 id="farms-h">Our coffee farms</h2>
+    <p class="stub"><span class="ph">PLACEHOLDER: stories for the three coffee farms not built yet</span></p>
+  </section>
+
+</main>
+
+<footer>
+  <p>&copy; Brew Lab, Indiranagar, Bengaluru.</p>
+</footer>
+
+</body>
+</html>

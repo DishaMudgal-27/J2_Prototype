@@ -1,0 +1,153 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "catalogue",
+    "name": "Product catalogue by category",
+    "covers": [
+      2
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The site lists exactly these 10 products with these prices in rupees, grouped under Kurtas, Sarees, Shirts and Dupattas, and visitors can switch between categories: Indigo block-print kurta 1,499; Mustard handloom kurta 1,699; White chikankari kurta 2,199; Ikat handloom saree 3,499; Khadi silk saree 4,999; Cotton jamdani saree 3,999; Khadi cotton shirt 1,299; Linen-blend shirt 1,599; Block-print dupatta 899; Chanderi dupatta 1,099."
+    ],
+    "purpose": "No product listing exists; site v0 has no products.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the section does not show exactly 10 products with the supplied prices after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "catalogue section",
+      "product data array with sizes"
+    ],
+    "completion_check": "Section shows exactly 10 products with the supplied names and prices; category tabs switch the visible group; no sale label or image tags present.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "style guide, usable section",
+    "style_guide": true,
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "filters",
+    "name": "Size and price filters",
+    "covers": [
+      3
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A size filter and a price filter work together with the category choice. Sizes per product: Indigo block-print kurta S to XXL; Mustard handloom kurta S to XL; White chikankari kurta XS to XL; Khadi cotton shirt S to XXL; Linen-blend shirt M to XXL; all sarees and dupattas Free size."
+    ],
+    "purpose": "Visitors cannot narrow products by size or price.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if size XS does not return only White chikankari kurta, or a JS error appears, after one retry."
+    },
+    "charged": true,
+    "calls_used": 0,
+    "retries_used": 0,
+    "outputs": [
+      "filter controls",
+      "filter script"
+    ],
+    "completion_check": "Selecting a category, size and price band together shows only matching products; e.g. size XS shows only White chikankari kurta; sarees and dupattas match Free size; no JS errors.",
+    "dependencies": [
+      "catalogue"
+    ],
+    "status": "registered",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder"
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "whatsapp-order",
+    "name": "WhatsApp order buttons",
+    "covers": [
+      6
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Every product has an order button that opens WhatsApp (wa.me/910000011111) with a ready message naming that product."
+    ],
+    "purpose": "Visitors cannot place an order.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any of the 10 buttons lacks the wa.me/910000011111 link or the product name after one retry."
+    },
+    "charged": true,
+    "calls_used": 0,
+    "retries_used": 0,
+    "outputs": [
+      "order buttons",
+      "message builder script"
+    ],
+    "completion_check": "All 10 buttons have a wa.me/910000011111 link whose text contains that product's name.",
+    "dependencies": [
+      "catalogue"
+    ],
+    "status": "registered",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder"
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "look-and-feel",
+    "name": "Earthy palette, name and viewport",
+    "covers": [
+      1
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The site file shows the name Thread & Loom and Pune, includes a viewport meta tag, and uses an earthy colour palette defined in its CSS."
+    ],
+    "purpose": "Site lacks the Thread & Loom identity, Pune mention, viewport tag and earthy palette.",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 2,
+      "time_limit_minutes": 5,
+      "retry_limit": 1,
+      "stop_loss": "Stop if horizontal overflow remains at 360px or 1280px after one retry."
+    },
+    "charged": true,
+    "calls_used": 0,
+    "retries_used": 0,
+    "outputs": [
+      "header",
+      "CSS palette and type"
+    ],
+    "completion_check": "File contains Thread & Loom, Pune, a viewport meta tag and CSS colour variables; no horizontal overflow at 360px and 1280px.",
+    "dependencies": [],
+    "status": "registered",
+    "cycle": 1,
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder"
+  }
+]

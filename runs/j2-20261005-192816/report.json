@@ -1,0 +1,198 @@
+{
+  "metrics": {
+    "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): Receiving email address for booking requests (placeholder in use).; Hospital address, phone number, directions and emergency desk details (placeholders in use).; Real doctor names, specialties and details to replace the sample profiles.; Real or approved blog content to replace the sample post.; Kannada and Hindi versions: deferred for budget; needs a decision on funding (about 24 units for both) and translated or reviewed text.; No Kannada or Hindi content is required in the file, and no text in the file should claim a placeholder is a verified hospital detail (tracked here, not a done-when item)..",
+    "brief": "A website for CityCare Hospital in Bengaluru: patients book visits, emergency info, plus doctor profiles, a health blog, and Kannada/Hindi versions",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 1,
+    "ai_calls": 19,
+    "minutes": 4.9,
+    "budget": {
+      "total": 60,
+      "spent": 50,
+      "rate_card": true
+    },
+    "site_versions": 5,
+    "site_bytes": 17442,
+    "agents": {
+      "identity": {
+        "turns": 4,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "ceo": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 6,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "builder": {
+        "turns": 5,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 1,
+      "grants": 1,
+      "counters": 0,
+      "refuses": 0,
+      "withdrawals": 0,
+      "conflicts": 0,
+      "ceo_decisions": 0,
+      "resolutions": []
+    },
+    "workflows": {
+      "registered": 5,
+      "done": 5,
+      "failed": 0,
+      "held_ever": 1,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "Create file with emergency section",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-2",
+          "name": "Add booking form with validation and mailto",
+          "agent_estimate": 15,
+          "charged": 15
+        },
+        {
+          "id": "W-3",
+          "name": "Add sample doctor profiles",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-4",
+          "name": "Add one sample health blog post",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-5",
+          "name": "Add responsive styling",
+          "agent_estimate": 5,
+          "charged": 5
+        }
+      ]
+    },
+    "validator_refusals": 0,
+    "role_refusals": 0,
+    "pauses": 0,
+    "limit_failures": 0,
+    "warnings": 0,
+    "audits": [
+      {
+        "cycle": 1,
+        "version": 5,
+        "all_pass": true,
+        "pass": 8,
+        "warn": 1,
+        "fail": 0
+      }
+    ],
+    "open_inputs": [
+      "Receiving email address for booking requests (placeholder in use).",
+      "Hospital address, phone number, directions and emergency desk details (placeholders in use).",
+      "Real doctor names, specialties and details to replace the sample profiles.",
+      "Real or approved blog content to replace the sample post.",
+      "Kannada and Hindi versions: deferred for budget; needs a decision on funding (about 24 units for both) and translated or reviewed text.",
+      "No Kannada or Hindi content is required in the file, and no text in the file should claim a placeholder is a verified hospital detail (tracked here, not a done-when item)."
+    ]
+  },
+  "review": {
+    "verdict": "Clean one-cycle run: five workflows built a 17 KB file for 50 of 60 units and Audit passed 9 of 9 items, but the brief was easy and negotiation, conflict, pause and rework were never exercised.",
+    "agents": {
+      "identity": {
+        "score": 4,
+        "note": "Gave the CEO real options with a recommendation [2], fixed the validator rejection in one turn [6], and declared done with caveats named [25]. It bundled three decisions into one ASK_CEO [2] although the format says one bounded decision. It also ruled on not spending 8 reserve units [25], which is a resource call and belongs to Priority."
+      },
+      "adaptation": {
+        "score": 4,
+        "note": "One clear five-workflow proposal [8] with zero validator errors. The estimates (10, 15, 10, 10, 5) equal the charter's pre-planned costs exactly, so independent estimating is not shown. The proposal fields are not visible in chat, so the evidence is thin."
+      },
+      "priority": {
+        "score": 4,
+        "note": "Granted all five at rate card with one retry, a stop rule and a rule for using the reserve [9]. Stayed in role. It never countered or refused, so its bargaining is untested."
+      },
+      "coordination": {
+        "score": 4,
+        "note": "Stated the scheduling rule every turn and kept one writer on the file [11, 13, 15, 18, 20]. Messages repeat the same rule text and run 3 to 4 sentences, over the 1 to 3 sentence limit."
+      },
+      "audit": {
+        "score": 4,
+        "note": "Read all 9 items directly and said the regex was read, not run, and 360px was not rendered [24]. It reported no mechanical checks, and the '8 units' fix cost is an unlabelled estimate. It also left the spend decision to Identity, not Priority."
+      },
+      "ceo": {
+        "score": 5,
+        "note": "Picked one option per question with a one-line reason and did not redesign the work [3]. It flagged the placeholder email as its own choice."
+      },
+      "builder": {
+        "score": 4,
+        "note": "One workflow per turn with scoped reports ('nothing else changed') [17, 19, 22]. The name regex it wrote in W-2 rejects Devanagari and Kannada names [24]. Its '360px-safe' claim [22] was never checked."
+      }
+    },
+    "went_well": [
+      "Dependency order and the single-writer rule held: 5 of 5 workflows done, 0 failures, 0 redirects, 0 invalid moves.",
+      "Spend matched estimate on every workflow, ending at 50/60 with 10 units unspent.",
+      "HOLD accounting worked: 5 units released at [16] and recharged at [21].",
+      "Audit and Identity both stated what was not verified [24, 25] instead of overclaiming."
+    ],
+    "problems": [
+      "Kannada and Hindi, an explicit brief item, was deferred by the CEO [3] and the Requester was not asked before building. 'Done' is measured against a charter the department narrowed, which is a commercial risk for Bengaluru patients.",
+      "Name validation likely rejects Devanagari and Kannada names [24]. This is unproven because the regex was never run.",
+      "The 360px layout rests on reading CSS only [24]. The department has no way to run JS or render the page.",
+      "The validator moved 'no placeholder claimed as verified' out of done-when [5]. No Audit check now covers the whole file for it, only the emergency and form items.",
+      "The CEO's 'never block done' [3] conflicts with team.md's rule that Identity pauses for Requester-only items. Pauses were 0, so the pause path is untested.",
+      "Negotiation was a rubber stamp: 1 proposal, 0 counters, 0 refusals, 0 conflicts."
+    ],
+    "learnings": [
+      "Design: give Audit a way to run the JS and render at 360px. Both caveats in [24] and [25] came from lacking it.",
+      "Design: route Audit's 'fix costs units' questions through Priority, not Identity, so one function owns resources.",
+      "Design: put a dropped brief item to the Requester, or surface it as a visible decision at the start. Keep one decision per ASK_CEO.",
+      "Design: reconcile the team.md pause rule with the charter's 'no pause' rule before the next run.",
+      "Test system: next run, use a brief whose plan exceeds the budget with no pre-stated costs, so Adaptation must estimate, Priority must counter and the rework loop gets used.",
+      "Test system: counters disagree. Coordination shows 6 turns in metrics but 5 in chat (turn sum 19 vs 18 ai_calls), validator_refusals is 0 though [5] rejected the charter, and event msg ids 14 and 17 sit one below the chat ids of the HOLDs (15, 18). Check the counting before trusting the metrics."
+    ]
+  },
+  "events": [
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-5: wf-doctor-profiles (W-3) and wf-health-blog (W-4) must be done; wf-booking-form (W-2) is already done",
+      "msg": 14,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-5: wf-health-blog (W-4) must be done; wf-booking-form (W-2) and wf-doctor-profiles (W-3) are already done",
+      "msg": 17,
+      "cycle": 1
+    }
+  ],
+  "made": "2026-10-05 19:34:34"
+}

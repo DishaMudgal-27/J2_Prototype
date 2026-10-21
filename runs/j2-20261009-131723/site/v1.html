@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Thread &amp; Loom</title>
+<!-- J2:style head start (owner W-1) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Nunito+Sans:wght@400;600;700&amp;display=swap"><style>:root{--j2-primary:#7A3E22;--j2-secondary:#4A5A32;--j2-accent:#B8742A;--j2-background:#FAF5EC;--j2-surface:#F1E8D8;--j2-text:#2B2118;--j2-muted:#6A5846;--j2-font-heading:'Cormorant Garamond', Georgia, 'Times New Roman', serif;--j2-font-body:'Nunito Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:10px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#7A3E22;color:#FFFFFF;border:2px solid #7A3E22;min-height:44px;padding:10px 22px;font-weight:700;letter-spacing:.02em;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-btn-secondary{display:inline-block;background:transparent;color:#7A3E22;border:2px solid #7A3E22;min-height:44px;padding:10px 22px;font-weight:700;letter-spacing:.02em;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-card{background:#FFFFFF;border:1px solid #E3D6C0;border-radius:10px;box-shadow:0 2px 10px rgba(43,33,24,.07);overflow:hidden}</style>
+<!-- J2:style head end -->
+<!-- J2:W-1 head start (owner W-1) -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#FAF5EC">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- J2:W-1 head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 76px; -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    max-width: 100%;
+    overflow-x: clip;
+    background: var(--j2-background, #FAF5EC);
+    color: var(--j2-text, #2B2118);
+    font-family: var(--j2-font-body, 'Nunito Sans', system-ui, sans-serif);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  img, svg, video, iframe { max-width: 100%; }
+  img { height: auto; }
+  h1, h2, h3, h4 {
+    font-family: var(--j2-font-heading, 'Cormorant Garamond', Georgia, serif);
+    color: var(--j2-text, #2B2118);
+    line-height: 1.2;
+    margin: 0 0 .5em;
+    overflow-wrap: anywhere;
+  }
+  h1 { font-size: clamp(2rem, 7vw, 3.25rem); }
+  h2 { font-size: clamp(1.6rem, 5vw, 2.4rem); }
+  p, li, td, th, a { overflow-wrap: anywhere; }
+  a { color: var(--j2-primary, #7A3E22); }
+  section[id], header[id] { scroll-margin-top: 76px; }
+  :focus-visible { outline: 3px solid var(--j2-accent, #B8742A); outline-offset: 2px; }
+  .j2-container { width: 100%; max-width: 1120px; margin: 0 auto; padding-left: 16px; padding-right: 16px; }
+
+  .tl-header {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--j2-background, #FAF5EC);
+    border-bottom: 1px solid #E3D6C0;
+  }
+  .tl-header-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; min-height: 64px;
+  }
+  .tl-brand {
+    font-family: var(--j2-font-heading, 'Cormorant Garamond', Georgia, serif);
+    font-size: 1.6rem; font-weight: 700; letter-spacing: .01em;
+    color: var(--j2-primary, #7A3E22); text-decoration: none;
+    display: inline-flex; align-items: center; min-height: 44px;
+  }
+  .tl-menu-btn {
+    min-height: 44px; min-width: 44px; padding: 8px 14px;
+    background: transparent; color: var(--j2-primary, #7A3E22);
+    border: 2px solid var(--j2-primary, #7A3E22);
+    border-radius: var(--j2-radius, 10px);
+    font: inherit; font-weight: 700; cursor: pointer;
+  }
+  .tl-nav { display: none; }
+  .tl-nav.tl-open {
+    display: block; position: absolute; left: 0; right: 0; top: 100%;
+    background: var(--j2-background, #FAF5EC);
+    border-bottom: 1px solid #E3D6C0;
+    box-shadow: 0 8px 16px rgba(43,33,24,.08);
+  }
+  .tl-nav ul { list-style: none; margin: 0; padding: 8px 16px 16px; }
+  .tl-nav a {
+    display: flex; align-items: center; min-height: 44px; padding: 6px 4px;
+    color: var(--j2-text, #2B2118); text-decoration: none; font-weight: 600;
+    border-bottom: 1px solid #EADFCB;
+  }
+  .tl-nav a:hover { color: var(--j2-primary, #7A3E22); }
+  .tl-nav a[hidden] { display: none; }
+  .tl-nav li:has(a[hidden]) { display: none; }
+
+  @media (min-width: 900px) {
+    .tl-menu-btn { display: none; }
+    .tl-nav, .tl-nav.tl-open { display: block; position: static; border: 0; box-shadow: none; background: transparent; }
+    .tl-nav ul { display: flex; gap: 4px; padding: 0; flex-wrap: wrap; justify-content: flex-end; }
+    .tl-nav a { border-bottom: 0; padding: 6px 12px; border-radius: var(--j2-radius, 10px); }
+    .tl-nav a:hover { background: var(--j2-surface, #F1E8D8); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+</style>
+
+<header class="tl-header" id="top">
+  <div class="j2-container tl-header-inner">
+    <a class="tl-brand" href="#top">Thread &amp; Loom</a>
+    <button class="tl-menu-btn" id="tl-menu-btn" type="button" aria-expanded="false" aria-controls="tl-nav">Menu</button>
+    <nav class="tl-nav" id="tl-nav" aria-label="Main">
+      <ul>
+        <li><a href="#shop" data-alt="catalogue,products,collection">Shop</a></li>
+        <li><a href="#new-arrivals" data-alt="new,arrivals">New Arrivals</a></li>
+        <li><a href="#lookbook" data-alt="look-book,outfits">Lookbook</a></li>
+        <li><a href="#size-guide" data-alt="sizes,size-chart,sizeguide">Size Guide</a></li>
+        <li><a href="#visit" data-alt="visit-us,contact,location,timings,store">Visit Us</a></li>
+        <li><a href="#policies" data-alt="policy,exchange,delivery,returns">Policies</a></li>
+        <li><a href="#reviews" data-alt="testimonials,customer-reviews">Reviews</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+(function () {
+  function init() {
+    try {
+      var btn = document.getElementById('tl-menu-btn');
+      var nav = document.getElementById('tl-nav');
+      if (!btn || !nav) return;
+
+      var links = nav.querySelectorAll('a[href^="#"]');
+      for (var i = 0; i < links.length; i++) {
+        var a = links[i];
+        var id = a.getAttribute('href').slice(1);
+        if (document.getElementById(id)) continue;
+        var alts = (a.getAttribute('data-alt') || '').split(',');
+        var found = null;
+        for (var j = 0; j < alts.length; j++) {
+          var alt = alts[j].trim();
+          if (alt && document.getElementById(alt)) { found = alt; break; }
+        }
+        if (found) { a.setAttribute('href', '#' + found); }
+        else { a.hidden = true; }
+      }
+
+      function setOpen(open) {
+        nav.classList.toggle('tl-open', open);
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        btn.textContent = open ? 'Close' : 'Menu';
+      }
+      btn.addEventListener('click', function () {
+        setOpen(!nav.classList.contains('tl-open'));
+      });
+      nav.addEventListener('click', function (e) {
+        if (e.target && e.target.closest && e.target.closest('a')) setOpen(false);
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') setOpen(false);
+      });
+    } catch (err) { /* nav stays usable without the toggle */ }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+<!-- J2:W-1 end -->
+</body>
+</html>

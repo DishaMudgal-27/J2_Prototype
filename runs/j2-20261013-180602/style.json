@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#FFC83D",
+    "secondary": "#7C5CFF",
+    "accent": "#22D3EE",
+    "background": "#0F0A2A",
+    "surface": "#1B1445",
+    "text": "#F5F3FF",
+    "muted": "#B8B3D9"
+  },
+  "fonts": {
+    "heading": "'Space Grotesk', 'Segoe UI', system-ui, sans-serif",
+    "body": "'Inter', 'Segoe UI', system-ui, sans-serif",
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "64px"
+  },
+  "radius": "12px",
+  "buttons": {
+    "primary": "background:#FFC83D;color:#0F0A2A;border:2px solid #FFC83D;min-height:48px;padding:12px 20px;font-weight:700;border-radius:12px;cursor:pointer",
+    "secondary": "background:transparent;color:#F5F3FF;border:2px solid #22D3EE;min-height:48px;padding:12px 20px;font-weight:600;border-radius:12px;cursor:pointer"
+  },
+  "card": "background:#1B1445;color:#F5F3FF;border:1px solid #3A2F7A;border-radius:12px;padding:16px",
+  "notes": "Dark violet with a yellow action colour and cyan highlights feels energetic and techy for students, and keeps contrast above WCAG AA on phones."
+}

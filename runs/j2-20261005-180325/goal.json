@@ -1,0 +1,26 @@
+{
+  "statement": "Build a single-file website for CityCare Hospital in Bengaluru where patients can request a visit and find emergency information.",
+  "site_name": "CityCare Hospital",
+  "audience": "Patients and visitors of CityCare Hospital in Bengaluru, including people looking for emergency information.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file; CDN libraries allowed; no build step.",
+    "English only. Kannada may be added later after hospital review of the translation.",
+    "Emergency information is easy to find and clearly marked.",
+    "No invented hospital details: any CityCare phone number or address not supplied by the Requester must show as a clearly labeled 'hospital to confirm' placeholder."
+  ],
+  "rules": [
+    "Booking is a request form only: name, phone, department, preferred date/time. No live slot checking, no stored patient data. The hospital confirms by phone. The site must say that no instant confirmation is given.",
+    "Emergency section shows the public national numbers 112 and 108, plus a labeled 'hospital to confirm' slot for CityCare's own emergency line and address.",
+    "Do not invent CityCare phone numbers, addresses or other facts.",
+    "No backend or hospital scheduling integration, as the one-file, no-build rule does not allow it.",
+    "Any change to booking scope, emergency content or language goes back to Identity."
+  ],
+  "done_when": [
+    "The site is one HTML file that works without a build step.",
+    "The booking request form has name, phone, department and preferred date/time, stores no patient data, and states that the hospital will confirm by phone.",
+    "The emergency section shows 112 and 108 and is easy to find from the first screen.",
+    "The Requester has supplied CityCare's real emergency line and address and they replace the placeholders, or the Requester has explicitly accepted the placeholders.",
+    "The content is in English and contains no invented hospital details.",
+    "Audit has found no material defects."
+  ]
+}

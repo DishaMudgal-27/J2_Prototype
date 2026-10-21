@@ -1,0 +1,997 @@
+{
+  "metrics": {
+    "outcome": "Done with open items: shipped as is after the Requester accepted a document as it is. Still not workable: the product requirements: document rubric D-5 (NEEDS_REVISION): No invented facts: every fact comes from the brief or the Requester's answers, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim not in the brief; necessary condition P4 not met: No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line (not in the charter or the Requester's answers, and not marked Assumption: Give).",
+    "brief": "A one-page website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru. Visitors see the menu with prices, the opening hours and where to find the shop, and they can pre-order a coffee for pickup. Write the design docs first. Users: coffee lovers and office staff nearby. Problem: people cannot see the menu or order ahead. Must-have: menu with prices, pre-order form, map or address, opening hours. Constraints: one page only, works on phones, no payment. Success: 30 pre-orders per week.",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 9,
+    "ai_calls": 115,
+    "minutes": 30.1,
+    "budget": {
+      "total": 500,
+      "start": 500,
+      "cap": 1000,
+      "raises": [],
+      "spent": 500,
+      "rate_card": true
+    },
+    "site_versions": 8,
+    "site_bytes": 16477,
+    "agents": {
+      "identity": {
+        "turns": 15,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 11,
+        "redirects": 0,
+        "invalid_moves": 1
+      },
+      "priority": {
+        "turns": 40,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 31,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 9,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-1": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-2": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-3": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 2
+      },
+      "W-4": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-5": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-6": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-7": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-8": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-9": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-10": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-11": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-12": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-13": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-14": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-15": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-16": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-17": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-18": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-19": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-20": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-21": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-22": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-23": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-24": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-25": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-26": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-27": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-28": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-29": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-30": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-31": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 9,
+      "grants": 9,
+      "counters": 0,
+      "refuses": 0,
+      "refuses_converted_by_code": 0,
+      "parks": 0
+    },
+    "conflicts": {
+      "total": 0,
+      "settled_by_agents": 0,
+      "resolved_by_identity": 0,
+      "asked_requester": 0,
+      "open": 0,
+      "list": []
+    },
+    "requester_questions": {
+      "total": 3,
+      "by_kind": {
+        "limit": 2,
+        "info": 1
+      }
+    },
+    "workflows": {
+      "registered": 31,
+      "done": 31,
+      "failed": 0,
+      "held_ever": 21,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "PRD Problem section",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-2",
+          "name": "PRD Users section",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-3",
+          "name": "PRD Goals section",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-4",
+          "name": "PRD Requirements section",
+          "agent_estimate": 96,
+          "charged": 96
+        },
+        {
+          "id": "W-5",
+          "name": "PRD Success metrics section",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-6",
+          "name": "PRD Out of scope section",
+          "agent_estimate": 20,
+          "charged": 20
+        },
+        {
+          "id": "W-7",
+          "name": "Revise PRD Success metrics section",
+          "agent_estimate": 8,
+          "charged": 8
+        },
+        {
+          "id": "W-8",
+          "name": "Revise PRD Requirements section",
+          "agent_estimate": 8,
+          "charged": 8
+        },
+        {
+          "id": "W-9",
+          "name": "HLD Purpose and scope section",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-10",
+          "name": "HLD Pages section",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-11",
+          "name": "HLD Components section",
+          "agent_estimate": 48,
+          "charged": 48
+        },
+        {
+          "id": "W-12",
+          "name": "HLD Data flow section",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-13",
+          "name": "HLD Hosting and deployment section",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-14",
+          "name": "HLD Risks section",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-15",
+          "name": "Revise HLD Hosting and deployment section",
+          "agent_estimate": 8,
+          "charged": 8
+        },
+        {
+          "id": "W-16",
+          "name": "Revise HLD Components section",
+          "agent_estimate": 8,
+          "charged": 8
+        },
+        {
+          "id": "W-17",
+          "name": "Revise HLD Data flow section",
+          "agent_estimate": 8,
+          "charged": 8
+        },
+        {
+          "id": "W-18",
+          "name": "LLD Pages and sections",
+          "agent_estimate": 48,
+          "charged": 48
+        },
+        {
+          "id": "W-19",
+          "name": "LLD Interactive elements",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-20",
+          "name": "LLD Form fields",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-21",
+          "name": "LLD File structure",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-22",
+          "name": "LLD Responsive and accessibility rules",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-23",
+          "name": "Revise LLD Interactive elements",
+          "agent_estimate": 16,
+          "charged": 16
+        },
+        {
+          "id": "W-24",
+          "name": "Revise LLD Responsive and accessibility rules",
+          "agent_estimate": 16,
+          "charged": 16
+        },
+        {
+          "id": "W-25",
+          "name": "Revise LLD Interactive elements (no colons)",
+          "agent_estimate": 8,
+          "charged": 8
+        },
+        {
+          "id": "W-26",
+          "name": "Site Menu section",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-27",
+          "name": "Site Pre-order section",
+          "agent_estimate": 25,
+          "charged": 25
+        },
+        {
+          "id": "W-28",
+          "name": "Site Shop address section",
+          "agent_estimate": 15,
+          "charged": 15
+        },
+        {
+          "id": "W-29",
+          "name": "Site Opening hours section",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-30",
+          "name": "Site Page layout",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-31",
+          "name": "Revise Page layout hero text",
+          "agent_estimate": 8,
+          "charged": 8
+        }
+      ]
+    },
+    "validator_refusals": 0,
+    "role_refusals": 0,
+    "pauses": 3,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 1,
+    "audits": [
+      {
+        "cycle": 8,
+        "version": 7,
+        "all_pass": false,
+        "pass": 8,
+        "warn": 0,
+        "fail": 0,
+        "rubric_fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      },
+      {
+        "cycle": 9,
+        "version": 8,
+        "all_pass": true,
+        "pass": 8,
+        "warn": 0,
+        "fail": 0,
+        "rubric_fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      }
+    ],
+    "to_be_confirmed": [],
+    "workable": [],
+    "lessons": {
+      "memory": false,
+      "saved": [],
+      "used": []
+    }
+  },
+  "review": {
+    "verdict": "The site (v8) met all eight done-when items, but the department spent exactly 500 of 500, hit the 6-cycle limit, shipped the PRD with the no-invented-facts check (P4) still failing, and sent the Requester a garbled closing message.",
+    "agents": {
+      "identity": {
+        "score": 3,
+        "note": "[221] was a sound, budget-aware ruling that named the blocker (F-9) and kept the fix to one part. But it wrote the exact sentence for Adaptation, which is rewriting a proposal. The Requester-facing close [234] is a pasted rubric fragment ('the evidence quotes each unlabelled claim not in the brief;'). It also said 'finished' while [235] reports open items. The audience_mix flags at [111] and [173] show the same slip before."
+      },
+      "adaptation": {
+        "score": 3,
+        "note": "Correctly judged the S2 check and the '.j2-btn' check were wrong, not the builds ([198], [215]), which saved retries and budget. But it replaced the S2 check with four element counts instead of getting the spec fixed, so coverage is weaker. Two PRD reworks (W-7, W-8) never cleared P4. One invalid move at [142] (no next speaker)."
+      },
+      "priority": {
+        "score": 3,
+        "note": "Stayed in role: envelope checks at [201], [205], [209], [226] and a sensible stop-loss at [223]. But 9 of 9 proposals were granted with no counter, and estimate equals charge on all 31 workflows, so real bargaining never happened. It also let the budget land on exactly 500/500 with no reserve."
+      },
+      "coordination": {
+        "score": 4,
+        "note": "Stated its scheduling rule every time and gave the write lock to one workflow at a time. It flagged the LLD S2 vs charter gap ([200], [208]) without trying to fix it. Hold messages repeat every downstream workflow each time, which is noisy (21 of 31 workflows were held at some point)."
+      },
+      "audit": {
+        "score": 4,
+        "note": "Ran mechanical checks first and filed F-9 as a policy concern rather than a defect, saying no done-when item requires it ([220]). It also logged the S2 mismatch honestly as a warning (F-10) and confirmed the F-9 fix at [232]. Evidence is thin on why P4 failed twice. The PRD cause stayed 'suspected, unconfirmed'."
+      },
+      "W-3": {
+        "score": 2,
+        "note": "Two invalid moves at [21]: an empty 'done.' output was rejected twice."
+      },
+      "W-27": {
+        "score": 3,
+        "note": "Raised the spec conflict clearly and followed the charter ([192], [195]). But its report [196] does not say that its check had failed, which builder.md requires."
+      },
+      "W-30": {
+        "score": 3,
+        "note": "Correctly refused to edit other agents' sections ([213]). But it did not say whether its completion check held."
+      },
+      "W-31": {
+        "score": 5,
+        "note": "Added the one required sentence, changed nothing else, and passed 9 of 9 checks on attempt 1 ([227], [228])."
+      }
+    },
+    "went_well": [
+      "Site v8: no overflow at 360px or 1280px, no JS errors, no broken links, 16 KB, all eight done-when items pass [230], [232].",
+      "The charter had exact facts and testable done-when items. The code-run necessary conditions (N1 to N8) caught the missing 30-per-week figure that Audit's item review alone passed [219].",
+      "The site took five workflows plus one fix. No validator refusals, no role refusals, no open conflicts, only 3 Requester questions.",
+      "Audit kept policy (N5) separate from defects, and Identity kept the last fix to the one part the budget allowed [220], [221]."
+    ],
+    "problems": [
+      "The design docs took 422 of 500 budget (84%, my sum from the workflow charges). The site took 78. The last fix was funded with exactly 8 left, so one more failure could not have been paid for.",
+      "P4 (no invented facts) failed on PRD v6 and v8 and was shipped unmet when the Requester accepted it as is [235].",
+      "LLD S2 invented a quantity field and an item select that the charter does not have. LLD audit passed it anyway (L1 to L6 met). The conflict surfaced only in the site phase [192] and the LLD still disagrees with the built form [232].",
+      "Two auto-generated slice checks were wrong (S2 field spec, '.j2-btn' counted page-wide). They cost failed attempts [193] to [197], [210] to [215].",
+      "N5 forced an internal KPI ('Our goal: 30 pre-orders per week.') onto a public page. Audit said it does not help visitors [220]. It cost one cycle and the last 8 of budget.",
+      "Identity's close [234] is garbled, and the audience_mix flags at [111] and [173] show repeated confusion between agent-facing and Requester-facing text.",
+      "No lessons were saved (memory off) although the same failure types recurred."
+    ],
+    "learnings": [
+      "Add an LLD rubric item 'consistent with the charter field list'. The S2 mismatch [192] to [198] is the evidence. Test whether it catches the quantity field at LLD time.",
+      "Scope slice checks to the owning section, not the whole page ('.j2-btn' found 4 times, expected 1 [210]). This is a fix to the test system.",
+      "Mark charter facts as public or internal so N5 does not force targets onto the page. Test this on the same brief.",
+      "Cap or phase the doc budget and keep a reserve (for example 15%). Docs took 84% here. The brief asked for docs first, so test a lower per-doc price rather than dropping them.",
+      "Priority never countered in 9 grants and estimates matched charges everywhere. Test with underpriced proposals or a tighter budget to see whether it bargains. This run is thin evidence on that.",
+      "Add a code check that Requester-facing Identity text is a full sentence and not a pasted rubric line [234].",
+      "Rerun with lessons memory on. The P4 rework failing twice needs Audit to quote the exact unlabelled claim and the builder to target it. The audit text was not visible here, so the cause is unconfirmed."
+    ]
+  },
+  "events": [
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-2: prd-problem (W-1) not done",
+      "msg": 9,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-3: prd-users (W-2) not done",
+      "msg": 9,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-4: prd-goals (W-3) not done",
+      "msg": 9,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-5: prd-requirements (W-4) not done",
+      "msg": 9,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-6: prd-metrics (W-5) not done",
+      "msg": 9,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-3: prd-users (W-2) not done",
+      "msg": 14,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-4: prd-goals (W-3) not done",
+      "msg": 14,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-5: prd-requirements (W-4) not done",
+      "msg": 14,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-6: prd-metrics (W-5) not done",
+      "msg": 14,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-4: prd-goals (W-3) not done",
+      "msg": 18,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-5: prd-requirements (W-4) not done",
+      "msg": 18,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-6: prd-metrics (W-5) not done",
+      "msg": 18,
+      "cycle": 1
+    },
+    {
+      "agent": "W-3",
+      "type": "invalid_move",
+      "detail": "human_output: it is empty or too short (\"done.\" alone is rejected)",
+      "msg": 21,
+      "cycle": 1
+    },
+    {
+      "agent": "W-3",
+      "type": "invalid_move",
+      "detail": "atom human_output: it is empty or too short (\"done.\" alone is rejected)",
+      "msg": 21,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-5: prd-requirements (W-4) not done",
+      "msg": 22,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-6: prd-metrics (W-5) not done",
+      "msg": 22,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-6: prd-metrics (W-5) not done",
+      "msg": 26,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-7: W-8 (revised prd-requirements) not done",
+      "msg": 41,
+      "cycle": 2
+    },
+    {
+      "agent": "system",
+      "type": "limit",
+      "detail": "The same failure came back twice in a row, so another cycle would likely repeat it.",
+      "msg": 53,
+      "cycle": 2
+    },
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "limit: 1 question(s) for the Requester",
+      "msg": 54,
+      "cycle": 2,
+      "pause": "limit"
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-10: hld-purpose (W-9) not done",
+      "msg": 63,
+      "cycle": 3
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-11: hld-pages (W-10) not done",
+      "msg": 63,
+      "cycle": 3
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-12: hld-components (W-11) not done",
+      "msg": 63,
+      "cycle": 3
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-13: hld-dataflow (W-12) not done",
+      "msg": 63,
+      "cycle": 3
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-14: hld-hosting (W-13) not done",
+      "msg": 63,
+      "cycle": 3
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-11: hld-pages (W-10) not done",
+      "msg": 68,
+      "cycle": 3
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-12: hld-components (W-11) not done",
+      "msg": 68,
+      "cycle": 3
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-13: hld-dataflow (W-12) not done",
+      "msg": 68,
+      "cycle": 3
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-14: hld-hosting (W-13) not done",
+      "msg": 68,
+      "cycle": 3
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-12: hld-components (W-11) not done",
+      "msg": 72,
+      "cycle": 3
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-13: hld-dataflow (W-12) not done",
+      "msg": 72,
+      "cycle": 3
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-14: hld-hosting (W-13) not done",
+      "msg": 72,
+      "cycle": 3
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-13: hld-dataflow (W-12) not done",
+      "msg": 76,
+      "cycle": 3
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-14: hld-hosting (W-13) not done",
+      "msg": 76,
+      "cycle": 3
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-14: hld-hosting (W-13) not done",
+      "msg": 80,
+      "cycle": 3
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-17: hld-components is being revised by W-16, which is not done",
+      "msg": 95,
+      "cycle": 4
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-15: hld-dataflow is being revised by W-17, which is not done",
+      "msg": 95,
+      "cycle": 4
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-15: hld-dataflow is being revised by W-17, which is not done",
+      "msg": 100,
+      "cycle": 4
+    },
+    {
+      "agent": "identity",
+      "type": "audience_mix",
+      "detail": "to_agents reads as user-facing ('@Requester')",
+      "msg": 111,
+      "cycle": 4
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-19: lld-pages (W-18) not done",
+      "msg": 117,
+      "cycle": 5
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-20: lld-interactive (W-19) not done",
+      "msg": 117,
+      "cycle": 5
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-21: lld-fields (W-20) not done",
+      "msg": 117,
+      "cycle": 5
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-22: lld-files (W-21) not done",
+      "msg": 117,
+      "cycle": 5
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-20: lld-interactive (W-19) not done",
+      "msg": 122,
+      "cycle": 5
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-21: lld-fields (W-20) not done",
+      "msg": 122,
+      "cycle": 5
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-22: lld-files (W-21) not done",
+      "msg": 122,
+      "cycle": 5
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-21: lld-fields (W-20) not done",
+      "msg": 126,
+      "cycle": 5
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-22: lld-files (W-21) not done",
+      "msg": 126,
+      "cycle": 5
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-22: lld-files (W-21) not done",
+      "msg": 130,
+      "cycle": 5
+    },
+    {
+      "agent": "adaptation",
+      "type": "invalid_move",
+      "detail": "unusable reply: it names no next speaker (\"next\")",
+      "msg": 142,
+      "cycle": 6
+    },
+    {
+      "agent": "system",
+      "type": "limit",
+      "detail": "The department used its 6 cycles (J2_MAX_CYCLES) and the site isn't workable yet.",
+      "msg": 158,
+      "cycle": 6
+    },
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "limit: 1 question(s) for the Requester",
+      "msg": 159,
+      "cycle": 6,
+      "pause": "limit"
+    },
+    {
+      "agent": "identity",
+      "type": "audience_mix",
+      "detail": "to_agents reads as user-facing ('@Requester')",
+      "msg": 173,
+      "cycle": 7
+    },
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "info: 1 question(s) for the Requester",
+      "msg": 177,
+      "cycle": 7,
+      "pause": "info"
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-27: site-menu (W-26) not done",
+      "msg": 185,
+      "cycle": 8
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-28: site-preorder (W-27) not done",
+      "msg": 185,
+      "cycle": 8
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-29: site-address (W-28) not done",
+      "msg": 185,
+      "cycle": 8
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-30: site-menu, site-preorder, site-address and site-hours (W-26 to W-29) not done",
+      "msg": 185,
+      "cycle": 8
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-28: site-preorder (W-27) not done",
+      "msg": 190,
+      "cycle": 8
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-29: site-address (W-28) not done",
+      "msg": 190,
+      "cycle": 8
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-30: site-menu, site-preorder, site-address and site-hours (W-26 to W-29): W-27, W-28 and W-29 not done",
+      "msg": 190,
+      "cycle": 8
+    },
+    {
+      "agent": "W-27",
+      "type": "spec_conflict",
+      "detail": "S2: The LLD slice lists a quantity field, select, number and time field types and ids such as #pre-order-submit, #pre-order-fields and #pre-order-status. The charter and the Requester's answer say four fields (name, phone, items, pickup time) with no quantity, and the atom allows only the #po-* ids. I followed the charter. Mailto cannot confirm receipt, so there is no separate status element.",
+      "msg": 192,
+      "cycle": 8
+    },
+    {
+      "agent": "system",
+      "type": "warning",
+      "detail": "W-27 says LLD section S2 can't be built as written (The LLD slice lists a quantity field, select, number and time field types and ids such as #pre-order-submit, #pre-order-fields and #pre-order-status. The charter and the Requester's answer say four fields (name, phone, items, pickup time) with no quantity, and the atom allows only the #po-* ids. I followed the charter. Mailto cannot confirm receipt, so there is no separate status element.). The section is revised once, to version 2; the checks now use the revised section.",
+      "msg": 192,
+      "cycle": 8
+    },
+    {
+      "agent": "W-27",
+      "type": "spec_conflict",
+      "detail": "S2: The LLD lists a quantity field (F4) and a select for the item (F3), but the charter and the Requester's answer say four fields with no quantity, and items is a free-text box so a visitor can write quantities such as 2 cappuccinos. I matched the LLD field names and the time type for pickup, and left quantity out.",
+      "msg": 195,
+      "cycle": 8
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-29: site-address (W-28) not done",
+      "msg": 200,
+      "cycle": 8
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-30: site-address (W-28) and site-hours (W-29) not done",
+      "msg": 200,
+      "cycle": 8
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-30: site-hours (W-29) not done",
+      "msg": 204,
+      "cycle": 8
+    }
+  ],
+  "made": "2026-10-16 16:36:30"
+}

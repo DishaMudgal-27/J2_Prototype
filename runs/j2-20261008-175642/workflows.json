@@ -1,0 +1,238 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "theme-header",
+    "name": "Earthy theme, header and viewport base",
+    "covers": [
+      1
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The file shows the name Thread & Loom, Pune, with an earthy, elegant colour scheme."
+    ],
+    "purpose": "The site file has no name, colour scheme or type style.",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 2,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the header text or palette is still missing after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "CSS variables and base styles",
+      "header with name and Pune"
+    ],
+    "completion_check": "The file shows the text 'Thread & Loom' and 'Pune' in the header and uses a warm natural colour palette.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "style guide, usable section and head tags",
+    "style_guide": true,
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "catalog",
+    "name": "Product catalogue by category",
+    "covers": [
+      2
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The file lists all 10 products under four categories, with these exact names and prices: Kurtas: Indigo block-print kurta 1,499; Mustard handloom kurta 1,699; White chikankari kurta 2,199. Sarees: Ikat handloom saree 3,499; Khadi silk saree 4,999; Cotton jamdani saree 3,999. Shirts: Khadi cotton shirt 1,299; Linen-blend shirt 1,599. Dupattas: Block-print dupatta 899; Chanderi dupatta 1,099."
+    ],
+    "purpose": "No products are listed.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any product name or price differs from the charter after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "catalogue section with 10 product cards",
+      "category browsing"
+    ],
+    "completion_check": "The page has 10 product cards with the exact names and prices from done-when item 2 under four categories, and clicking a category tab shows only that category.",
+    "dependencies": [
+      "theme-header"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "filters",
+    "name": "Size and price filters",
+    "covers": [
+      3
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The file has working category browsing and working size and price filters. Sizes: Indigo block-print kurta S-XXL; Mustard handloom kurta S-XL; White chikankari kurta XS-XL; Khadi cotton shirt S-XXL; Linen-blend shirt M-XXL; all sarees and dupattas free size."
+    ],
+    "purpose": "Visitors cannot narrow products by size or price.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the XS or XXL check fails or a JavaScript error appears after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "filter bar",
+      "filter script"
+    ],
+    "completion_check": "Choosing size XS shows only the White chikankari kurta, choosing XXL shows only Indigo block-print kurta, Khadi cotton shirt and Linen-blend shirt, a price cap of 1,500 hides every item above 1,500, and there are no JavaScript errors.",
+    "dependencies": [
+      "catalog"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "size-guide",
+    "name": "Size guide table",
+    "covers": [
+      4
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The file has a size guide table with chest in inches: XS 32, S 34, M 36, L 38, XL 40, XXL 42."
+    ],
+    "purpose": "The file has no size guide or chest measurements (F-4).",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any size or chest value differs from the charter after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "size guide section with table"
+    ],
+    "completion_check": "The file has a table with six rows XS to XXL showing chest 32, 34, 36, 38, 40, 42 inches in that order.",
+    "dependencies": [
+      "theme-header"
+    ],
+    "status": "done",
+    "cycle": 2,
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "store-info",
+    "name": "Address, phone and timings",
+    "covers": [
+      6
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The file shows the address 18 FC Road, Shivajinagar, Pune 411005, shop phone +91 00000 22222, and timings 11am to 9pm Tuesday to Sunday, closed Monday."
+    ],
+    "purpose": "No address, shop phone or timings are in the file (F-6).",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any address, phone or timing text is missing or differs after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "store info section"
+    ],
+    "completion_check": "The file contains '18 FC Road, Shivajinagar, Pune 411005', '+91 00000 22222', '11am to 9pm', 'Tuesday to Sunday' and 'Closed Monday'.",
+    "dependencies": [
+      "theme-header"
+    ],
+    "status": "done",
+    "cycle": 2,
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section",
+    "version": 5
+  },
+  {
+    "id": "W-6",
+    "proposal_id": "returns-policy",
+    "name": "Return and exchange policy",
+    "covers": [
+      7
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The file shows the return and exchange policy: exchange within 7 days if unworn with tags, no returns on sale items."
+    ],
+    "purpose": "No policy text is in the file (F-7).",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any of the three policy phrases is missing after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "policy section"
+    ],
+    "completion_check": "The file contains 'exchange within 7 days', 'unworn with tags' and 'No returns on sale items'.",
+    "dependencies": [
+      "theme-header"
+    ],
+    "status": "done",
+    "cycle": 2,
+    "section": "W-6",
+    "revises": null,
+    "agent": "W-6 Builder",
+    "last_check": "usable section",
+    "version": 6
+  }
+]

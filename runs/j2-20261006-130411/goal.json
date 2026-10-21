@@ -1,0 +1,43 @@
+{
+  "statement": "Build a one-page website for Brew Lab, a cafe in Indiranagar, Bengaluru, that shows the menu, opening hours and location, lets visitors pre-order for pickup, and features a large photo gallery of the cafe and a detailed story section for each of its three coffee farms, at low cost.",
+  "site_name": "Brew Lab",
+  "audience": "Local customers in and around Indiranagar, Bengaluru, who want to check the menu, hours and location and pre-order coffee for pickup, plus coffee lovers interested in where the beans come from. Most will be on mobile.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in a single file, no build step; CDN libraries allowed",
+    "Low cost: no paid services or paid libraries required for the site to work",
+    "Mobile-first, readable and usable on a phone screen",
+    "Gallery images load lazily so the large gallery does not slow the page",
+    "Every image has alt text",
+    "Any content fact not supplied by the Requester is shown as a clearly marked placeholder, never invented"
+  ],
+  "rules": [
+    "One page only, with in-page navigation to each section",
+    "Never invent facts: prices, phone numbers, addresses, hours, farm names or farm details stay as marked placeholders until supplied",
+    "Keep both the large photo gallery and the detailed farm stories; neither may be cut to save space",
+    "Do not add payment collection or any paid service unless the Requester asks for it"
+  ],
+  "done_when": [
+    "The single HTML file contains separate, linked sections for Menu, Hours, Location, Pre-order, Gallery and Farm stories",
+    "The Menu section lists items in categories, with each price shown or marked as a placeholder",
+    "The Hours section lists opening times for every day of the week, or marked placeholders",
+    "The Location section shows the cafe name, an Indiranagar, Bengaluru address (or marked placeholder) and an embedded or linked map",
+    "The Pre-order section has a form where a visitor picks menu items and quantities, enters name, phone number and pickup time, and sees an order summary with a total before submitting",
+    "The Gallery section holds at least 12 image slots with alt text, lazy loading, and a way to view each image larger",
+    "The Farm stories section has three separate entries, one per coffee farm, each with a heading, a multi-paragraph story area, and image slots, with farm names and facts as marked placeholders where unknown",
+    "The page is responsive: it has a viewport meta tag and CSS rules that adapt the layout for narrow screens",
+    "The file needs no build step and loads any external library only from a CDN",
+    "Every unsupplied fact is visibly marked as a placeholder in the page"
+  ],
+  "open_inputs": [
+    "Full menu: items, categories and prices",
+    "Opening hours for each day",
+    "Exact street address and map link or coordinates",
+    "Cafe phone number and, if any, WhatsApp or email for receiving pre-orders",
+    "How pre-orders reach the cafe and whether payment happens online or at pickup",
+    "Pickup time rules, such as minimum lead time and slot length",
+    "Cafe photos for the gallery",
+    "Names, locations and stories of the three coffee farms, plus farm photos",
+    "Logo, brand colours and any tagline"
+  ],
+  "dropped_from_brief": []
+}

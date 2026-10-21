@@ -3925,7 +3925,7 @@ def output_tags():
     closed = sum(a["status"] == "closed" for a in stored)
     failed = sum(a["status"] in ("verify_failed", "abandoned") for a in stored)
     assert f"{closed} closed · {failed} failed · {len(stored) - closed - failed} open" in summ, summ
-    assert f"{snap['spent']} of {snap['budget']} used" in summ and htmllib_unescape(snap["outcome"][:60]) in htmllib_unescape(summ), summ
+    assert f"{snap['spent']} of {snap['budget']} used" in summ and htmllib_unescape(snap["outcome"].replace("done-when", "checklist")[:60]) in htmllib_unescape(summ), summ
     assert "<b>Built:</b> PRD, HLD, LLD, website" in summ, summ
     # a stored run, when present: the document groups are the documents' own workflows
     here = os.path.dirname(os.path.abspath(__file__))
@@ -4635,6 +4635,788 @@ def docs_repeat_failure():
           "a single document ends, wording is about the document, the message's check results are code's and never claim a pass over an unmet condition ok")
 
 
+def send_deeds():
+    """Send deeds, phase 1 (no network): the brief's send words trigger a trailing deed stage; the recipient comes only
+    from J2_TEST_EMAIL / J2_TEST_SLACK_TARGET; dry-run leaves the atom open, mock records one message; the proof check
+    reads the receipt; funding goes through the stage gate; a plain brief is untouched."""
+    import j2_schema as S
+    import j2_send
+    FAKE = {"J2_TEST_EMAIL": "me@example.invalid", "J2_TEST_SLACK_TARGET": "#j2-test",
+            "J2_SMTP_PASSWORD": "pw-should-never-appear", "J2_SLACK_WEBHOOK_URL": "https://hooks.invalid/never-in-a-file"}
+    keep = {k: os.environ.get(k) for k in (*FAKE, "J2_SEND_MODE")}
+
+    def env(mode=None, **kw):
+        for k in keep:
+            os.environ.pop(k, None)
+        os.environ.update({**FAKE, **{k: v for k, v in kw.items() if v is not None}})
+        for k, v in kw.items():
+            if v is None:
+                os.environ.pop(k, None)
+        if mode:
+            os.environ["J2_SEND_MODE"] = mode
+        j2_send.SENT.clear()
+
+    def deed_of(run, kind="send_email"):
+        w = next(w for w in run.past_workflows + run.workflows if w["name"] == j2_send.DEEDS[kind]["label"])
+        return w, w["atoms"][0]
+
+    def run_text(run):
+        return "".join(open(os.path.join(run.dir, f), encoding="utf-8").read() for f in os.listdir(run.dir)
+                       if f.endswith((".json", ".jsonl", ".md")))
+    try:
+        # 1: a send verb near email or slack triggers; a mere mention does not
+        d = j2_send.detect_deeds
+        assert d("Send me an email with the PRD") == ["send_email"] and d("email it to me") == ["send_email"]
+        assert d("send the PRD by email") == ["send_email"] and d("forward it by e-mail") == ["send_email"]
+        assert d("Post it to Slack") == ["send_slack_message"] and d("Slack me the PRD") == ["send_slack_message"]
+        assert d("send an email and post to Slack") == ["send_email", "send_slack_message"]
+        for t in ("", None, BREW_LAB, "a Slack link in the footer", "integrate with Slack", "an email field in the form",
+                  "show our email address", "Slack is where the team chats", "design a logo"):
+            assert d(t) == [], t
+        # 2: the allowlist: everything refused if unset; one recipient; no line breaks; nothing else gets through
+        env(J2_TEST_EMAIL=None, J2_TEST_SLACK_TARGET=None)
+        ok, why = j2_send.allowed("email", "me@example.invalid")
+        assert not ok and "J2_TEST_EMAIL" in why and "example.invalid" not in why, why
+        assert not j2_send.allowed("slack", "#j2-test")[0]
+        env()
+        assert j2_send.allowed("email", "me@example.invalid")[0] and j2_send.allowed("email", " ME@Example.invalid ")[0]
+        assert j2_send.allowed("slack", "#j2-test")[0]
+        for ch, to in (("email", "other@example.invalid"), ("email", "me@example.invalid, other@example.invalid"),
+                       ("email", "me@example.invalid\nBcc: x@example.invalid"), ("email", "me@example.invalid\r"),
+                       ("email", ["me@example.invalid"]), ("email", None), ("email", ""), ("slack", "#general"),
+                       ("slack", "#j2-test #general"), ("slack", "#j2-test\n"), ("fax", "me@example.invalid")):
+            assert not j2_send.allowed(ch, to)[0], (ch, to)
+        env("mock")
+        for msg in ({"channel": "email", "to": "other@example.invalid", "subject": "s", "body": "b"},
+                    {"channel": "slack", "to": "#general", "subject": None, "body": "b"},
+                    {"channel": "email", "to": "me@example.invalid", "subject": "s", "body": "b", "cc": "x@example.invalid"},
+                    {"channel": "email", "to": "me@example.invalid", "subject": "s", "body": "b", "bcc": "x@example.invalid"}):
+            r = j2_send.deliver(msg)
+            assert not r["sent"] and r["refused"] and not j2_send.SENT, (msg, r)
+        # 3: dry-run is the default: nothing is sent, the atom stays open, the proof check does not pass
+        env()
+        run = docs_run("Write a PRD for Campus Notes. Send me an email with it." + CAMPUS, 400)
+        assert run.stages == ["prd", "send_email"] and run.outcome.startswith("Done"), (run.stages, run.outcome)
+        assert "Not sent (dry run)" in run.outcome and not j2_send.SENT
+        w, a = deed_of(run)
+        assert a["status"] == "could not run" and a["results"][0]["pass"] is None and a["results"][0]["evidence"] == "Not sent (dry run)"
+        assert a["human_output"]["text"] == "Not sent (dry run)." and w["status"] == "done" and w["cost"] == 5
+        views = json.load(open(os.path.join(run.dir, "atoms.json")))["atoms"]
+        v = next(v for v in views if v["id"] == a["id"])
+        assert v["status"] == "open" and v["notes"] == "Not sent (dry run)." and v["verification"][0]["met"] is None
+        # the atom shape: verb do, form send, scope external, one deed-send check, edges to the PRD's atoms
+        assert v["output"] == [{"verb": "do", "name": a["results"][0]["check"], "form": "send", "ref": f"{a['id']}:1"}], v["output"]
+        assert v["details"]["scope"] == "external" and v["details"]["mode"] == "dry-run" and v["details"]["sent"] is False
+        assert S.atom_kind(v) == "do" and len(v["verification"]) == 1 and v["verification"][0]["method"].startswith("deed-send")
+        assert {e["atom"] for e in v["depends_on"]} == set(run.docs["prd"]["atoms"]) and v["owner"] == "code"
+        assert all(a["id"] in [u["atom"] for u in x["used_by"]] for x in views if x["id"] in run.docs["prd"]["atoms"])
+        assert not any(a["id"] in x for x in json.load(open(os.path.join(run.dir, "atoms.json")))["warnings"]), "warned about a send"
+        rec = [json.loads(x) for x in open(os.path.join(run.dir, "receipts.jsonl"), encoding="utf-8")]
+        rec = next(r for r in rec if r.get("type") == "deed-send-record")
+        for k in ("atom", "deed", "channel", "mode", "to_masked", "to_hash", "subject", "body_sha256", "body_chars", "artifact",
+                  "artifact_sha256", "sent", "result", "refused", "t", "by"):
+            assert k in rec, k
+        assert rec["mode"] == "dry-run" and rec["sent"] is False and rec["to_masked"] == "m***@example.invalid" and rec["by"] == "code"
+        assert "me@example.invalid" not in run_text(run) and not any(x in run_text(run) for x in
+                                                                    (FAKE["J2_SMTP_PASSWORD"], FAKE["J2_SLACK_WEBHOOK_URL"]))
+        # 4: mock: one message recorded, to the configured target only; the check passes and the atom closes
+        env("mock")
+        run = docs_run("Write a PRD for Campus Notes. Send me an email with it." + CAMPUS, 400)
+        w, a = deed_of(run)
+        assert len(j2_send.SENT) == 1 and j2_send.SENT[0]["to"] == "me@example.invalid" and j2_send.SENT[0]["channel"] == "email"
+        assert "prd.md" in j2_send.SENT[0]["subject"] and "Sections:" in j2_send.SENT[0]["body"]
+        assert a["status"] == "passed" and a["results"][0]["pass"] is True and "mock" in a["results"][0]["evidence"]
+        v = next(v for v in json.load(open(os.path.join(run.dir, "atoms.json")))["atoms"] if v["id"] == a["id"])
+        assert v["status"] == "closed" and v["details"]["mode"] == "mock" and v["details"]["sent"] is True
+        assert "me@example.invalid" not in run_text(run) and FAKE["J2_SMTP_PASSWORD"] not in run_text(run)
+        # the proof check only reads: running it again sends nothing more, and it fails if the document changed
+        c = a["verification"][0]
+        assert j2_send.check(c, run.dir)["pass"] is True and len(j2_send.SENT) == 1
+        with open(os.path.join(run.dir, "prd.md"), "a", encoding="utf-8") as f:
+            f.write("\n## Extra\nchanged\n")
+        assert j2_send.check(c, run.dir)["pass"] is False and "changed" in j2_send.check(c, run.dir)["evidence"]
+        assert j2_send.check({**c, "atom": "W-99.a1"}, run.dir)["pass"] is False      # no receipt
+        env("mock", J2_TEST_EMAIL="someone-else@example.invalid")      # the configured target moved: the receipt no longer matches
+        assert j2_send.check(c, run.dir)["pass"] is False
+        # a Slack send, and both together, in order
+        env("mock")
+        run = docs_run("Write a PRD for Campus Notes. Email it to me and post it to Slack." + CAMPUS, 400)
+        assert run.stages == ["prd", "send_email", "send_slack_message"] and run.outcome.startswith("Done"), run.stages
+        assert [(m["channel"], m["to"]) for m in j2_send.SENT] == [("email", "me@example.invalid"), ("slack", "#j2-test")]
+        assert deed_of(run, "send_slack_message")[1]["status"] == "passed"
+        # target not configured: nothing is sent, the atom is verify_failed, the outcome says so
+        env("mock", J2_TEST_EMAIL=None)
+        run = docs_run("Write a PRD for Campus Notes. Send me an email with it." + CAMPUS, 400)
+        w, a = deed_of(run)
+        assert not j2_send.SENT and a["status"] == "failed" and w["status"] == "failed"
+        assert run.outcome.startswith("Done with open items") and "J2_TEST_EMAIL" in run.outcome, run.outcome
+        v = next(v for v in json.load(open(os.path.join(run.dir, "atoms.json")))["atoms"] if v["id"] == a["id"])
+        assert v["status"] == "verify_failed"
+        # 5: the brief names another recipient: told in plain words, the send still goes only to the configured target
+        env("mock")
+        run = docs_run("Write a PRD for Campus Notes. Send me an email with it, to boss@elsewhere.invalid." + CAMPUS, 400)
+        note = next(m["text"] for m in run.chat if m["who"] == "system" and "different address" in m["text"])
+        assert "Test mode sends only to the configured test address" in note and "boss@elsewhere.invalid" not in note, note
+        assert [m["to"] for m in j2_send.SENT] == ["me@example.invalid"], j2_send.SENT      # never the one in the brief
+        assert not any("different" in m["text"] for m in docs_run("Write a PRD for Campus Notes. Email it to me@example.invalid." + CAMPUS, 400).chat
+                       if m["who"] == "system")
+        # 6: budget: 5 credits each from rates_deed; J2_RATES=0 makes them free; short credits go through the stage gate
+        env()
+        base = docs_run("Write a PRD for Campus Notes." + CAMPUS, 400)
+        with_email = docs_run("Write a PRD for Campus Notes. Send me an email with it." + CAMPUS, 400)
+        assert with_email.spent - base.spent == 5 == json.load(open(os.path.join(j2.J2_DIR, "rates.json")))["rates_deed"]["send_email"]
+        rates_on = j2.RATES_ON
+        j2.RATES_ON = False      # J2_RATES=0: the deed's price is 0 (a whole PRD run needs the rate card, so the price is read directly)
+        try:
+            assert j2.RATES_DEED() == {} and with_email._stage_cost("send_email") == 0 and with_email._stage_cost("send_slack_message") == 0
+        finally:
+            j2.RATES_ON = rates_on
+        assert with_email._stage_cost("send_email") == 5 and with_email._stage_cost("send_slack_message") == 5
+        run = docs_run("Write a PRD for Campus Notes. Send me an email with it." + CAMPUS, 100)
+        assert run.paused and run.paused["kind"] == "limit" and run.stages == ["prd", "send_email"], run.outcome
+        text = stage_question(run)
+        assert "the test email (needs at least 5 work credits; not covered)" in text and "the product requirements (needs at least 98" in text, text
+        say(run, "Option 1")      # add the credits: the PRD and the email are both done
+        assert run.outcome.startswith("Done") and deed_of(run)[0]["cost"] == 5, run.outcome
+        run = docs_run("Write a PRD for Campus Notes. Send me an email with it." + CAMPUS, 100)
+        say(run, "Option 2")      # leave the email out: no send workflow exists
+        assert run.stages == ["prd"] and run.outcome.startswith("Done") and not any(
+            w["name"] == "Send a test email" for w in run.past_workflows + run.workflows)
+        # 10: no send words: no deed stage, nothing recorded; send words with no document: told, and the site is built as before
+        run = docs_run("Write a PRD for Campus Notes." + CAMPUS, 400)
+        assert run.stages == ["prd"] and not run.deed_log and "deed-send-record" not in run_text(run)
+        run = docs_run(BREW_LAB + " Email it to me.", 200)
+        assert not run.stages and run.outcome.startswith("Done") and not j2_send.SENT and "deed-send-record" not in run_text(run)
+        assert any("A send needs a document" in m["text"] for m in run.chat if m["who"] == "system")
+    finally:
+        for k, v in keep.items():
+            os.environ.pop(k, None)
+            if v is not None:
+                os.environ[k] = v
+        j2_send.SENT.clear()
+    print("send deeds: trigger needs a send verb, allowlist refuses anything but the two configured targets, dry-run stays open "
+          "(not sent), mock records one message, proof check only reads the receipt, no secret or full address in any file, "
+          "another recipient in the brief is told and ignored, 5 credits each and free with J2_RATES=0, stage gate funds it, "
+          "plain briefs untouched ok")
+
+
+def artifact_types():
+    """artifacts/types.json mirrors the Python for prd, hld, lld and website, field by field: sections, file names,
+    trigger words, groups, tags, labels, colours, conditions file, builder, rate card, minimum cost and what each reads.
+    The same comparison fails when either side drifts (checked on edited copies)."""
+    import collections
+    import copy
+    import j2_artifacts as A
+    T = A.load_types()
+    ui = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "j2_ui.html"), encoding="utf-8").read()
+    kinds = {k: (tag, label) for k, tag, label in re.findall(r'\["(prd|hld|lld)", "([A-Z]+)", "([^"]+)"\]', ui)}
+    site_tag = re.search(r'\["site", "([^"]+)"\]', ui).group(1)
+    corpus = ["write a PRD", "the HLD", "an LLD please", "product requirements", "high-level design", "low level design",
+              "architecture overview", "detailed design", "design docs", "a modern design", "BRD", "HLDs", "LLDs and PRDs"]
+    run = j2.J2Run()
+
+    def problems(T):
+        by, bad = {t["name"]: t for t in T["types"]}, []
+        chk = lambda ok, what: bad.append(what) if not ok else None
+        types = [t for t in T["types"] if t["kind"] == "type"]
+        chk([t["name"] for t in types] == [*j2.DOC_SET, "website"], "type order")
+        chk(T["site_words"] == j2._SITE_WORDS.pattern, "site words")
+        g = T["groups"]["design-docs"]
+        chk(g["pattern"] == j2._DOC_SET_WORDS.pattern and g["members"] == list(j2.DOC_SET), "design-docs group")
+        for k in j2.DOC_SET:
+            t, o = by[k], j2.OUTPUTS[k]
+            chk(t["workflow"]["sections"] == list(o["sections"]), f"{k} sections")
+            chk(t["file"] == o["file"] and t["export"] == "docx" and bool(o["export"]) and t["form"] == "doc", f"{k} file")
+            chk(t["conditions"] == o["conditions"] and os.path.isfile(os.path.join(j2.CONDITIONS_DIR, t["conditions"])), f"{k} conditions")
+            chk(getattr(j2, t["workflow"]["builder"].split(":", 1)[1], None) is o["builder"], f"{k} builder")
+            chk(t["cost"]["card"] == o["rates"], f"{k} rate card")
+            chk(t["cost"]["parts"] == {"doc_section": len(o["sections"]) - 1, "requirements_section": 1}, f"{k} cost parts")
+            card = A_rates(t["cost"]["card"])
+            chk(sum(card.get(p, 0) * n for p, n in t["cost"]["parts"].items()) == run._stage_cost(k), f"{k} minimum cost")
+            chk(t["triggers"] == [j2._DOC_WORDS[k].pattern], f"{k} trigger words")
+            rx = re.compile("|".join(t["triggers"]), re.I)
+            chk(all(bool(rx.search(x)) == bool(j2._DOC_WORDS[k].search(x)) for x in corpus), f"{k} trigger behaviour")
+            chk(t["groups"] == ["design-docs"] and k in g["members"], f"{k} groups")
+            chk((t["tag"], t["label"]) == (kinds[k][0], kinds[k][1]) and t["label"].lower() == j2.DOC_NAMES[k], f"{k} tag and label")
+            chk(t["color"] == f"--{k}" and f"--{k}:" in ui, f"{k} colour")
+        w, o = by["website"], j2.OUTPUTS["website"]
+        chk(w["file"] == "site/index.html" and w["form"] == "page" and w["triggers"] == [] and w["also_when"] == "site-words", "website file and triggers")
+        chk(w["conditions"] == o["conditions"] and w["workflow"]["builder"] == o["builder"] and w["cost"]["card"] == o["rates"], "website conditions, builder, card")
+        chk(w["cost"]["parts"] == dict(collections.Counter(j2.J2Run.SITE_ESSENTIALS)), "website cost parts")
+        chk(sum(A_rates(w["cost"]["card"]).get(p, 0) * n for p, n in w["cost"]["parts"].items()) == run._stage_cost("website"), "website minimum cost")
+        chk((w["tag"], w["color"]) == (site_tag, "--site") and "--site:" in ui and w["label"] == o["label"], "website tag, colour, label")
+        return bad
+
+    def A_rates(card):
+        return {k: int(v) for k, v in json.load(open(os.path.join(j2.J2_DIR, "rates.json"))).get(card, {}).items()}
+    assert problems(T) == [], problems(T)
+    # drift on either side is caught
+    for path, val in (("types.0.workflow.sections", ["Problem"]), ("types.1.color", "--x"), ("types.2.triggers", ["\\bLLD\\b"]),
+                      ("types.3.cost.parts", {"form": 9}), ("types.0.file", "p.md"), ("types.1.tag", "H"), ("types.3.file", "x.html"),
+                      ("types.2.conditions", "none.json"), ("groups.design-docs.members", ["prd"])):
+        bent, node, keys = copy.deepcopy(T), None, path.split(".")
+        node = bent
+        for kx in keys[:-1]:
+            node = node[int(kx)] if kx.isdigit() else node[kx]
+        node[keys[-1]] = val
+        assert problems(bent), path
+    keep = j2._DOC_WORDS["hld"]
+    j2._DOC_WORDS["hld"] = re.compile(r"\bHLD\b", re.I)
+    try:
+        assert problems(T), "Python trigger words changed and the list did not notice"
+    finally:
+        j2._DOC_WORDS["hld"] = keep
+    keep = j2.OUTPUTS["lld"]["sections"]
+    j2.OUTPUTS["lld"]["sections"] = keep[:-1]
+    try:
+        assert problems(T), "Python sections changed and the list did not notice"
+    finally:
+        j2.OUTPUTS["lld"]["sections"] = keep
+    # records: every record is a kind record, not a deliverable, with a file pattern; a full run keeps the ones a mock run writes
+    recs = [t for t in T["types"] if t["kind"] == "record"]
+    assert [t["name"] for t in recs] == ["screenshots", "atoms", "audits", "receipts", "conditions", "chain", "goal", "workflows",
+                                         "summary", "report", "chat"] and not any(t["deliverable"] for t in recs)
+    # depends_on matches the edges a real chain run records between the documents and the site
+    run = docs_run(DESIGN_BRIEF, 900)
+    owner = {a: k for k, v in json.load(open(os.path.join(run.dir, "documents.json"))).items() for a in v["atoms"]}
+    for w in run._all_wfs():
+        for a in w["atoms"]:
+            owner.setdefault(a["id"], "website")
+    seen = collections.defaultdict(set)
+    for v in json.load(open(os.path.join(run.dir, "atoms.json")))["atoms"]:
+        for e in v["depends_on"]:
+            if owner[e["atom"]] != owner[v["id"]]:
+                seen[owner[v["id"]]].add(owner[e["atom"]])
+    by = {t["name"]: t for t in T["types"]}
+    for k in (*j2.DOC_SET, "website"):
+        assert set(by[k]["depends_on"]) == seen.get(k, set()), (k, by[k]["depends_on"], seen.get(k))
+    rows = A.rows(run.dir)
+    docs = json.load(open(os.path.join(run.dir, "documents.json")))
+    for k in j2.DOC_SET:      # the workflows a row names are the workflows the run recorded for that document
+        assert next(r for r in rows if r["type"] == k)["workflows"] == sorted(docs[k]["workflows"], key=lambda x: int(x[2:])), k
+    for t in recs:
+        if t["name"] != "screenshots":      # a mock run takes no screenshots
+            assert os.path.isfile(os.path.join(run.dir, t["file"])), t["file"]
+    print("artifact types: prd, hld, lld and website match the Python field by field (sections, files, triggers, groups, tags, "
+          "colours, conditions, builder, rates, minimum cost, depends_on); drift on either side fails; 11 record entries ok")
+
+
+def artifacts_tab():
+    """Artifacts: artifacts.json written at the end of a run (additive), the same rows rebuilt from an old folder, the
+    endpoints serve only files the list names, and the tab renders two headings with tags, workflows, dependencies and an
+    Open button per form (document text, website preview, screenshot image, data text)."""
+    import shutil
+    import threading
+    import urllib.error
+    import urllib.request
+    import j2_artifacts as A
+    import j2_server
+    run = docs_run(DESIGN_BRIEF, 900)
+    name = os.path.basename(run.dir)
+    saved = json.load(open(os.path.join(run.dir, "artifacts.json")))
+    assert saved["schema"] == "artifacts/1" and all(set(r) == {"name", "type", "kind", "form", "file", "deliverable", "workflows",
+                                                                "depends_on", "version", "sha256", "time"} for r in saved["rows"])
+    by = {r["type"]: r for r in saved["rows"]}
+    assert [r["type"] for r in saved["rows"] if r["deliverable"]] == ["prd", "hld", "lld", "website"]
+    assert by["prd"]["workflows"][0] == "W-1" and by["lld"]["depends_on"] == ["prd", "hld"] and by["website"]["depends_on"] == ["hld", "lld"]
+    assert by["prd"]["version"] >= 1 and by["website"]["file"] == "site/index.html"
+    assert by["prd"]["sha256"] == hashlib.sha256(open(os.path.join(run.dir, "prd.md"), "rb").read()).hexdigest()
+    now = A.rows(run.dir)      # an old run has no artifacts.json: the scan gives the same rows (the chat log grew after the file was written)
+    assert [r for r in now if r["file"] != "chat.jsonl"] == [r for r in saved["rows"] if r["file"] != "chat.jsonl"]
+    assert {k: v for k, v in next(r for r in now if r["file"] == "chat.jsonl").items() if k not in ("sha256", "time")} == \
+        {k: v for k, v in next(r for r in saved["rows"] if r["file"] == "chat.jsonl").items() if k not in ("sha256", "time")}
+    # a plain website run: artifacts.json lists the site and the records, no documents
+    plain = docs_run(BREW_LAB, 200)
+    prow = json.load(open(os.path.join(plain.dir, "artifacts.json")))["rows"]
+    assert [r["type"] for r in prow if r["deliverable"]] == ["website"] and prow[0]["depends_on"] == [] and prow[0]["workflows"]
+    # an old run: the same folder with no artifacts.json, and a screenshot added by hand
+    old = os.path.join(j2.RUNS_DIR, "j2-20200101-000000")
+    shutil.copytree(run.dir, old)
+    os.remove(os.path.join(old, "artifacts.json"))
+    os.makedirs(os.path.join(old, "site", "shots"), exist_ok=True)
+    open(os.path.join(old, "site", "shots", "v4.png"), "wb").write(b"\x89PNG\r\n\x1a\n" + b"0" * 16)
+    lst = A.listing(old)
+    assert not lst["deliverables"][0]["saved"] and [r["type"] for r in lst["deliverables"]] == ["prd", "hld", "lld", "website"]
+    assert any(r["form"] == "image" and r["file"] == "site/shots/v4.png" and r["open"] == "image" for r in lst["records"])
+    assert not os.path.exists(os.path.join(old, "artifacts.json")), "listing an old run must not write to it"
+    # a real stored run from before artifacts existed, when present (read-only evidence)
+    here = os.path.dirname(os.path.abspath(__file__))
+    real = "j2-20261016-160511"
+    if os.path.isdir(os.path.join(here, "runs", real)):
+        keep_dir, j2.RUNS_DIR = j2.RUNS_DIR, os.path.join(here, "runs")
+        try:
+            assert not os.path.exists(os.path.join(here, "runs", real, "artifacts.json"))
+            got = A.listing(j2.saved_dir(real))
+            assert got["deliverables"] and not got["deliverables"][0]["saved"] and [r["type"] for r in got["deliverables"]][0] == "prd"
+            assert not os.path.exists(os.path.join(here, "runs", real, "artifacts.json"))
+        finally:
+            j2.RUNS_DIR = keep_dir
+    empty = A.listing(None)
+    assert empty == {"deliverables": [], "records": []} and A.rows(os.path.join(run.dir, "nope")) == []
+    # endpoints: live and saved, serving only the files the list names
+    keep, j2_server.RUN = j2_server.RUN, run
+    srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{srv.server_address[1]}"
+    get = lambda path: urllib.request.urlopen(base + path)
+    try:
+        for q in ("", f"?run={name}", "?run=j2-20200101-000000"):
+            got = json.load(get("/api/artifacts" + q))
+            assert [r["type"] for r in got["deliverables"]] == ["prd", "hld", "lld", "website"], q
+            assert {"summary", "atoms", "receipts", "chat"} <= {r["type"] for r in got["records"]}, q
+            row = got["deliverables"][0]
+            assert row["label"] == "Product requirements" and row["tag"] == "PRD" and row["color"] == "--prd" and row["open"] == "text"
+            assert got["deliverables"][3]["open"] == "preview" and got["deliverables"][3]["depends_on_labels"] == ["High-level design", "Low-level design"]
+        r = get("/api/artifact?name=prd.md")
+        assert r.read().decode().startswith("# ") and r.headers["Content-Type"].startswith("text/plain")
+        assert get(f"/api/artifact?name=site/index.html&run={name}").read().decode().lstrip().lower().startswith("<!doctype")
+        assert get("/api/artifact?name=site/shots/v4.png&run=j2-20200101-000000").read()[:4] == b"\x89PNG"
+        assert json.loads(get("/api/artifact?name=atoms.json").read())["schema"] == "atom/1"
+        for bad in ("prd.docx", "../j2.py", "/etc/passwd", "site/v1.html", "hld-v1.md", "site/hld-v1.md", "nothing.json", "", "calls.jsonl",
+                    "artifacts.json", "prd.md/../goal.json"):
+            try:
+                get("/api/artifact?name=" + urllib.request.quote(bad))
+                assert False, f"served {bad!r}"
+            except urllib.error.HTTPError as e:
+                assert e.code == 404, (bad, e.code)
+        try:
+            get("/api/artifact?name=prd.md&run=j2-20990101-000000")
+            assert False
+        except urllib.error.HTTPError as e:
+            assert e.code == 404
+        assert json.load(get("/api/artifacts?run=j2-20990101-000000")) == {"deliverables": [], "records": []}
+        for f in ("documents.json",):      # the Documents tab's own endpoints are untouched
+            assert get("/file/prd.md").read().startswith(b"# ")
+    finally:
+        j2_server.RUN = keep
+        srv.shutdown()
+        shutil.rmtree(old, ignore_errors=True)
+    if not shutil.which("node"):
+        print("artifacts tab render skipped: node not found")
+        return
+    snap = j2.saved_snapshot(name, 0)
+    lst = A.listing(run.dir)
+    html = render_node(snap, docs={"docs": {}, "artifacts": lst})["artifacts"]
+    assert html.index("<h3>Deliverables</h3>") < html.index("<h3>Evidence and records</h3>") and html.count("<h3>") == 2
+    top, rest = html.split("<h3>Evidence and records</h3>")
+    assert top.count('class="artrow"') == 4 and rest.count('class="artrow"') == len(lst["records"])
+    for r in lst["deliverables"]:
+        row = top[top.index(f'data-art="{r["file"]}"'):].split('<div class="artrow"')[0]
+        assert f"<b>{r['label']}</b>" in row and f'style="background:var({r["color"]})">{r["tag"]}</span>' in row and "Open</button>" in row
+        assert (f"made by {j2_ui_idruns(r['workflows'])}" in row) and r["form"] in row
+    assert "depends on nothing in this run" in top.split('data-art="hld.md"')[0] and "depends on Product requirements" in top.split('data-art="hld.md"')[1].split('data-art="lld.md"')[0]
+    assert "depends on High-level design, Low-level design" in top.split('data-art="site/index.html"')[1]
+    assert "Open</button>" in rest and "iframe" not in html and "<img" not in html and "<pre" not in html      # nothing open by default
+    # Open: a document shows readable text, the site a preview frame, a screenshot an image, a data file plain text
+    lst["records"].append({**lst["records"][0], "name": "Screenshot v4", "type": "screenshots", "form": "image", "file": "site/shots/v4.png",
+                           "open": "image", "tag": "Other", "color": "--other"})
+    for f, mode, mark in (("prd.md", "text", '<pre class="arttext">'), ("site/index.html", "preview", '<iframe class="artframe" sandbox=""'),
+                          ("site/shots/v4.png", "image", '<img class="artimg"'), ("atoms.json", "text", '<pre class="arttext">')):
+        out = render_node(snap, docs={"docs": {}, "artifacts": lst, "artopen": f, "arttext": {f: "# Product\n<b>x</b>"}})["artifacts"]
+        assert out.count(mark) == 1 and "Close</button>" in out, (f, mode)
+        if mode == "text":
+            assert "# Product\n&lt;b&gt;x&lt;/b&gt;" in out      # escaped, never run as markup
+        assert f"/api/artifact?name={urllib.request.quote(f, safe='')}" in out or mode == "text"
+    out = render_node(snap, docs={"docs": {}, "artifacts": {"deliverables": [], "records": []}})["artifacts"]
+    assert "Nothing built yet." in out and "Nothing recorded yet." in out
+    # the Documents and Charter tabs still render as before
+    both = render_node(snap, docs={"docs": {k: {"asked": True, "text": open(os.path.join(run.dir, k + ".md"), encoding="utf-8").read()}
+                                            for k in ("prd", "hld", "lld")}})
+    assert 'id="docblock-prd"' in both["docs"] and "Charter" in both["charter"]
+    print("artifacts: artifacts.json written at run end (additive), an old run gets the same rows from its folder, endpoints serve "
+          "only listed files (live, saved, missing run), the tab shows two headings with tag, workflows, dependencies and an Open "
+          "button per form ok")
+
+
+def j2_ui_idruns(ids):
+    """The page's idRuns(): W-1, W-2, W-3, W-5 -> "W-1 to W-3, W-5"."""
+    nums, out, i = sorted(int(x[2:]) for x in ids), [], 0
+    while i < len(nums):
+        j = i
+        while j + 1 < len(nums) and nums[j + 1] == nums[j] + 1:
+            j += 1
+        out += [f"W-{nums[i]} to W-{nums[j]}"] if j - i >= 2 else [f"W-{n}" for n in nums[i:j + 1]]
+        i = j + 1
+    return ", ".join(out)
+
+
+def by_fn(fn, rng, calls):
+    return sum(1 for c in calls if c["fn"] == fn and rng["from"] <= c["id"] <= rng["to"])
+
+
+def map_tab():
+    """Map v1 (map/1): map.json written beside atoms.json (additive, after the summary and again after the report), the
+    same map from a rebuilt folder, an old run, a live run, /api/map, the SVG for every status (never colour alone), the
+    card list for small screens, plain words, and (with Chrome) no sideways scroll at 500px."""
+    import copy
+    import shutil
+    import threading
+    import urllib.error
+    import urllib.request
+    import collections
+    import html as htmllib
+    import j2_map as M
+    import j2_server
+    run = docs_run(DESIGN_BRIEF, 900)
+    name = os.path.basename(run.dir)
+    saved = json.load(open(os.path.join(run.dir, "map.json")))
+    atoms = json.load(open(os.path.join(run.dir, "atoms.json")))["atoms"]
+    assert os.path.exists(os.path.join(run.dir, "atoms.json")) and saved["schema"] == "map/1" and saved["run"] == name and not saved["live"]
+    # golden structure: the Requester, then the work in order with a step between each pair
+    assert [n["id"] for n in saved["nodes"]] == ["person:requester", "fn:identity", "fn:adaptation", "fn:priority", "fn:coordination", "fn:audit", "work:charter", "step:charter>prd", "work:prd", "step:prd>hld",
+        "work:hld", "step:hld>lld", "work:lld", "step:lld>website", "work:website"], [n["id"] for n in saved["nodes"]]
+    assert [(n["kind"], n["row"]) for n in saved["nodes"]] == [("person", "people")] + [("function", "functions")] * 5 + [(k, "work") for k in
+        ("work", "engine", "work", "engine", "work", "engine", "work", "engine", "work")]
+    by = {n["id"]: n for n in saved["nodes"]}
+    assert [by[f"work:{k}"]["status"] for k in ("charter", "prd", "hld", "lld", "website")] == ["filed"] * 5
+    assert [by[f"work:{k}"]["label"] for k in ("prd", "hld", "lld", "website")] == ["Product requirements", "High-level design", "Low-level design", "Website"]
+    assert [by[f"work:{k}"]["tag"] for k in ("prd", "hld", "lld", "website")] == ["PRD", "HLD", "LLD", "Site"]
+    assert [by[f"work:{k}"]["color"] for k in ("prd", "hld", "lld", "website")] == ["--prd", "--hld", "--lld", "--site"]
+    rows = {r["type"]: r for r in json.load(open(os.path.join(run.dir, "artifacts.json")))["rows"]}
+    for k in ("prd", "hld", "lld", "website"):      # versions and files come from artifacts.json, never invented
+        assert by[f"work:{k}"]["version"] == rows[k]["version"] and by[f"work:{k}"]["file"] == rows[k]["file"], k
+    assert by["work:charter"]["version"] is None and by["work:charter"]["file"] == "goal.json"
+    assert [by[f"step:{a}>{b}"]["label"] for a, b in (("charter", "prd"), ("prd", "hld"), ("hld", "lld"), ("lld", "website"))] == ["Write", "Write", "Write", "Build"]
+    for k, step in (("prd", "charter>prd"), ("hld", "prd>hld"), ("lld", "hld>lld"), ("website", "lld>website")):      # counts equal the atoms
+        mine = [a for a in atoms if a["workflow"] in rows[k]["workflows"]]
+        ok = sum(1 for a in mine for x in a["verification"] if x["met"] is True)
+        tot = sum(1 for a in mine for x in a["verification"] if x["met"] is not None)
+        assert by[f"step:{step}"]["detail"] == f"{len(rows[k]['workflows'])} workflows · {ok} of {tot} checks passed", (k, by[f"step:{step}"]["detail"])
+    assert {(e["from"], e["to"], e["basis"]) for e in saved["edges"] if e["kind"] == "handoff"} == {
+        ("work:prd", "work:hld", "recorded"), ("work:prd", "work:lld", "recorded"), ("work:hld", "work:lld", "recorded"),
+        ("work:hld", "work:website", "recorded"), ("work:lld", "work:website", "recorded"), ("work:charter", "work:prd", "declared")}
+    assert sum(1 for e in saved["edges"] if e["kind"] == "step") == 8
+    ck = [x for a in atoms for x in a["verification"] if x["met"] is not None]
+    assert saved["status"] == {"state": "Done", "state_status": "idle", "checks": {"passed": sum(x["met"] is True for x in ck), "run": len(ck)}}
+    assert "version of Charter" in saved["not_recorded"] and "which other function worked on Website (only Audit is recorded)" in saved["not_recorded"] and \
+        any("Knows row" in x for x in saved["not_recorded"]) and not any("Functions row" in x for x in saved["not_recorded"]) and \
+        not any(n["kind"] == "know" for n in saved["nodes"]) and "messages to and from workflow agents (W-n) are not drawn" in saved["not_recorded"]
+    assert [l["key"] for l in saved["legend"] if not l["drawn"]] == []
+    assert saved == M.build(run.dir), "map.json is what the folder builds"
+    # the Functions row, golden: calls, seconds and tokens per function from calls.jsonl; a finished run is never "running"
+    calls = [json.loads(x) for x in open(os.path.join(run.dir, "calls.jsonl"), encoding="utf-8")]
+    chat = [json.loads(x) for x in open(os.path.join(run.dir, "chat.jsonl"), encoding="utf-8")]
+    fnn = [n for n in saved["nodes"] if n["kind"] == "function"]
+    assert [(n["label"], n["tab"], n["color"]) for n in fnn] == [("Identity", "charter", "--identity"), ("Adaptation", "workflows", "--adaptation"),
+        ("Priority", "conflicts", "--priority"), ("Coordination", "timeline", "--coordination"), ("Audit", "audit", "--audit")]
+    for n in fnn:
+        fid, mine = n["id"][3:], [c for c in calls if c["fn"] == n["id"][3:]]
+        said = [m for m in chat if m.get("who") == fid]
+        assert n["calls"] == len(mine) and n["seconds"] == round(sum(c["seconds"] or 0 for c in mine), 1) and n["tokens"] == {
+            "input": sum((c["tokens"] or {}).get("input", 0) for c in mine), "output": sum((c["tokens"] or {}).get("output", 0) for c in mine)}, n["id"]
+        assert n["status"] == "idle" and n["detail"] == "last seen: " + said[-1]["text"][:140], n["id"]
+    assert not any(n["status"] in ("running", "waiting") for n in fnn) and "running" not in json.dumps([n["status"] for n in saved["nodes"] if n["row"] != "work"])
+    ud = [(e["from"], e["to"], e["n"]) for e in saved["edges"] if e["kind"] == "speaks_to" and not e["to"].startswith("work:")]      # speaks to: counts from the chat
+    want = collections.Counter((m["who"], m["next"]) for m in chat if m.get("who") in ("identity", "adaptation", "priority", "coordination", "audit")
+                               and m.get("next") in ("identity", "adaptation", "priority", "coordination", "audit") and m["who"] != m["next"])
+    assert ud[:2] == [("person:requester", "fn:identity", sum(1 for m in chat if m.get("who") == "user")),
+                      ("fn:identity", "person:requester", sum(1 for m in chat if m.get("who") == "identity" and m.get("to_user")))]
+    assert {(a[3:], b[3:]): c for a, b, c in ud[2:]} == dict(want) and all(a.startswith("fn:") for a, _, _ in ud[2:])
+    docs_rec = json.load(open(os.path.join(run.dir, "documents.json")))      # who made each step: only where documents.json has the call range
+    for k, step in (("prd", "charter>prd"), ("hld", "prd>hld"), ("lld", "hld>lld")):
+        rng, st = docs_rec[k]["calls"], next(n for n in saved["nodes"] if n["id"] == f"step:{step}")
+        per = {f: sum(1 for c in calls if c["fn"] == f and rng["from"] <= c["id"] <= rng["to"]) for f in ("identity", "adaptation", "priority", "coordination", "audit")}
+        assert st["made_by"] == {"calls": rng, "functions": {f: n for f, n in per.items() if n}, "basis": "recorded"}, step
+        assert {(e["from"][3:], e["n"], e["label"]) for e in saved["edges"] if e["kind"] == "speaks_to" and e["to"] == f"work:{k}"} == {(f, n, "calls") for f, n in per.items() if n}
+    assert next(n for n in saved["nodes"] if n["id"] == "step:lld>website")["made_by"] is None      # the site: not recorded, never guessed
+    # function to work, golden: recorded data only. Identity to the Charter; each function to a document by its calls in the recorded range;
+    # the site and a deed get only Audit (its audits in stage-*.json); nothing is a "made" edge any more
+    lines = [(e["from"][3:], e["to"][5:], e["n"], e["label"], e["basis"]) for e in saved["edges"] if e["kind"] == "speaks_to" and e["to"].startswith("work:")]
+    stage_web = json.load(open(os.path.join(run.dir, "stage-website.json")))
+    exp = [("identity", "charter", None, "wrote the charter", "recorded")]
+    for k in ("prd", "hld", "lld"):
+        rng = docs_rec[k]["calls"]
+        exp += [(f, k, by_fn(f, rng, calls), "calls", "recorded") for f in ("identity", "adaptation", "priority", "coordination", "audit") if by_fn(f, rng, calls)]
+    exp += [("audit", "website", len(stage_web["audits"]), "audits", "recorded")]
+    assert lines == exp, (lines, exp)
+    assert not any(e["kind"] == "made" for e in saved["edges"]) and not [e for e in saved["edges"] if e["kind"] == "speaks_to" and e["to"].startswith("step:")]
+    assert not [x for x in lines if x[1] == "website" and x[0] != "audit"], "the site gets only the Audit line"
+    for k in ("prd", "hld", "lld"):      # every document with an audit in its stage file has an Audit line
+        assert json.load(open(os.path.join(run.dir, f"stage-{k}.json")))["audits"] and any(x[0] == "audit" and x[1] == k for x in lines)
+    assert by["person:requester"]["detail"] == "1 message from you" and by["person:requester"]["status"] == "idle"
+    # a plain website run has the Charter and the site only; a PRD-only run has no site
+    plain = docs_run(BREW_LAB, 200)
+    assert [n["id"] for n in json.load(open(os.path.join(plain.dir, "map.json")))["nodes"]] == ["person:requester", "fn:identity", "fn:adaptation", "fn:priority", "fn:coordination", "fn:audit", "work:charter", "step:charter>website", "work:website"]
+    # an old run: no artifacts.json, atoms.json or map.json; the same boxes, and the gaps are named
+    old = os.path.join(j2.RUNS_DIR, "j2-20200102-000000")
+    shutil.copytree(run.dir, old)
+    for f in ("artifacts.json", "atoms.json", "map.json"):
+        os.remove(os.path.join(old, f))
+    m_old = M.build(old)
+    assert [(n["id"], n["status"], n["version"]) for n in m_old["nodes"]] == [(n["id"], n["status"], n["version"]) for n in saved["nodes"]]
+    assert "artifacts.json (rows rebuilt from the folder)" in m_old["not_recorded"] and "atoms.json (atoms rebuilt from workflows.json)" in m_old["not_recorded"]
+    assert not any(os.path.exists(os.path.join(old, f)) for f in ("artifacts.json", "atoms.json", "map.json")), "building a map never writes to an old run"
+    os.remove(os.path.join(old, "calls.jsonl"))
+    m2 = M.build(old)
+    assert all(n["calls"] == 0 for n in m2["nodes"] if n["kind"] == "function") and "AI calls per function (calls.jsonl)" in m2["not_recorded"]
+    assert all(n["detail"].startswith("last seen: ") for n in m2["nodes"] if n["kind"] == "function"), "the chat still says what each did"
+    os.remove(os.path.join(old, "chat.jsonl"))
+    m3 = M.build(old)
+    f3 = [n for n in m3["nodes"] if n["kind"] == "function"]
+    assert len(f3) == 5 and all(n["detail"] == "no message recorded" and n["status"] == "idle" for n in f3)
+    assert "what Identity did (chat)" in m3["not_recorded"] and next(n for n in m3["nodes"] if n["id"] == "person:requester")["detail"] == "not recorded"
+    assert not [e for e in m3["edges"] if e["kind"] == "speaks_to" and not e["to"].startswith("work:")] and not [e for e in m3["edges"] if e["kind"] == "made"]
+    # an old run with no call ranges (no documents.json): only the Charter line and Audit's audits are drawn, the rest is listed as not recorded
+    for f in [x for x in os.listdir(old) if x == "documents.json"]:
+        os.remove(os.path.join(old, f))
+    m4 = M.build(old)
+    l4 = [(e["from"][3:], e["to"][5:], e["label"]) for e in m4["edges"] if e["kind"] == "speaks_to" and e["to"].startswith("work:")]
+    assert l4 == [("identity", "charter", "wrote the charter"), ("audit", "prd", "audits"), ("audit", "hld", "audits"), ("audit", "lld", "audits"), ("audit", "website", "audits")], l4
+    for lab in ("Product requirements", "High-level design", "Low-level design", "Website"):
+        assert f"which other function worked on {lab} (only Audit is recorded)" in m4["not_recorded"], lab
+    for f in [x for x in os.listdir(old) if x.startswith("stage-")]:
+        os.remove(os.path.join(old, f))
+    m5 = M.build(old)
+    l5 = [(e["from"][3:], e["to"][5:]) for e in m5["edges"] if e["kind"] == "speaks_to" and e["to"].startswith("work:")]
+    assert l5 == [("identity", "charter"), ("audit", "website")] and "which function worked on Product requirements: not recorded" in m5["not_recorded"], l5      # the site's audits are still in audits.json
+    assert M.build(None)["nodes"] == [] and M.build(os.path.join(run.dir, "nope"))["not_recorded"] == ["run not found"]
+    # statuses: a finished run says "left open", never "running"; fault and not made
+    edit = os.path.join(j2.RUNS_DIR, "j2-20200103-000000")
+    shutil.copytree(run.dir, edit)
+    doc = json.load(open(os.path.join(edit, "atoms.json")))
+    pick = lambda k: next(a for a in doc["atoms"] if a["workflow"] in rows[k]["workflows"])
+    pick("hld")["status"], pick("lld")["status"] = "open", "verify_failed"
+    json.dump(doc, open(os.path.join(edit, "atoms.json"), "w"))
+    json.dump({"schema": "artifacts/1", "rows": [r for r in rows.values() if r["type"] != "website"] + [r for r in json.load(open(os.path.join(edit, "artifacts.json")))["rows"] if r["kind"] == "record"]}, open(os.path.join(edit, "artifacts.json"), "w"))
+    me = M.build(edit)
+    st = {n["id"]: n["status"] for n in me["nodes"]}
+    assert st["work:hld"] == "left_open" and st["work:lld"] == "fault" and st["work:website"] == "not_made" and "running" not in json.dumps(st)      # the summary still lists the site as planned
+    # a live run: open means running now, the pill names who is working, a pending question is waiting on you, planned stages are not made
+    snap = j2.saved_snapshot(name, 0)
+    snap["atoms_v1"] = {a["id"]: a for a in doc["atoms"]}
+    lane = {"id": "identity", "name": "Identity", "status": "working"}
+    live = M.build(edit, {"snapshot": {**snap, "status": "running", "lanes": [lane], "paused": None}, "stages": ["prd", "hld", "lld", "send_email", "website"],
+                          "stage_words": {"send_email": "the test email"}})
+    ls = {n["id"]: n for n in live["nodes"]}
+    assert live["live"] and ls["work:hld"]["status"] == "running" and ls["work:lld"]["status"] == "fault" and live["status"]["state"] == "Identity running"
+    assert ls["work:website"]["status"] == "filed"      # built: a live run reads the folder as it is
+    prd_only = docs_run("Write a PRD for Campus Notes." + CAMPUS, 400)      # planned but not built: hollow, "not started", the deed named from the stage words
+    pl = M.build(prd_only.dir, {"snapshot": {**j2.saved_snapshot(os.path.basename(prd_only.dir), 0), "status": "running", "lanes": [], "paused": None},
+                                "stages": ["prd", "hld", "send_email", "website"], "stage_words": {"send_email": "the test email"}})
+    ps = {n["id"]: n for n in pl["nodes"]}
+    assert [n["id"] for n in pl["nodes"] if n["kind"] == "work"] == ["work:charter", "work:prd", "work:hld", "work:send_email", "work:website"], list(ps)
+    assert all(ps[k]["status"] == "not_made" and ps[k]["detail"] == "not started" and ps[k]["file"] is None for k in ("work:hld", "work:send_email", "work:website"))
+    assert ps["work:send_email"]["label"] == "The test email" and ps["work:hld"]["label"] == "High-level design" and ps["work:prd"]["status"] == "filed"
+    ask = M.build(edit, {"snapshot": {**snap, "status": "waiting", "lanes": [], "paused": {"kind": "limit"}}, "stages": [], "stage_words": {}})
+    assert ask["status"] == {**ask["status"], "state": "Waiting on you", "state_status": "waiting_on_you"} and \
+        {n["id"]: n["status"] for n in ask["nodes"]}["person:requester"] == "waiting_on_you"
+    # live lanes: working = running now, waiting on a function, waiting on you, blocked, idle (last seen)
+    lanes = [{"id": "identity", "name": "Identity", "status": "working", "doing": "writing the charter"},
+             {"id": "adaptation", "name": "Adaptation", "status": "waiting", "on": "Priority", "doing": "proposed three workflows"},
+             {"id": "priority", "name": "Priority", "status": "waiting", "on": "Requester", "doing": "asked a question"},
+             {"id": "coordination", "name": "Coordination", "status": "blocked", "doing": "W-3 is held"},
+             {"id": "audit", "name": "Audit", "status": "idle", "doing": "checked site v2"}]
+    lv = M.build(edit, {"snapshot": {**snap, "status": "running", "lanes": lanes, "paused": None, "call_log": calls, "chat": chat}, "stages": [], "stage_words": {}})
+    f = {n["id"]: n for n in lv["nodes"] if n["kind"] == "function"}
+    assert (f["fn:identity"]["status"], f["fn:identity"]["detail"]) == ("running", "writing the charter") and lv["status"]["state"] == "Identity running"
+    assert (f["fn:adaptation"]["status"], f["fn:adaptation"]["wait_on"]) == ("waiting", "Priority")
+    assert (f["fn:priority"]["status"], f["fn:priority"]["wait_on"]) == ("waiting_on_you", "you")
+    assert (f["fn:coordination"]["status"], f["fn:coordination"]["detail"]) == ("fault", "W-3 is held")
+    assert (f["fn:audit"]["status"], f["fn:audit"]["detail"]) == ("idle", "last seen: checked site v2")
+    assert f["fn:identity"]["calls"] == sum(1 for c in calls if c["fn"] == "identity")
+    pz = M.build(edit, {"snapshot": {**snap, "status": "waiting", "paused": {"kind": "info"}, "call_log": calls, "chat": chat,
+                                     "lanes": [{"id": "identity", "name": "Identity", "status": "waiting", "on": "Requester", "doing": "asked a question"}]},
+                        "stages": [], "stage_words": {}})
+    pf = {n["id"]: n for n in pz["nodes"]}
+    assert pf["fn:identity"]["status"] == "waiting_on_you" and pf["person:requester"]["status"] == "waiting_on_you" and pz["status"]["state"] == "Waiting on you"
+    assert all(pf[f"fn:{x}"]["status"] == "idle" for x in ("adaptation", "priority", "coordination", "audit"))
+    # a saved run that ended on a question: Identity and the Requester say "waiting on you", the rest "last seen"
+    ended = os.path.join(j2.RUNS_DIR, "j2-20200104-000000")
+    shutil.copytree(run.dir, ended)
+    with open(os.path.join(ended, "chat.jsonl"), "a", encoding="utf-8") as fh:
+        fh.write(json.dumps({"id": 9999, "who": "identity", "text": "@Requester Add credits?", "to_user": True, "pause": "limit", "next": "user"}) + "\n")
+    sv = {n["id"]: n for n in M.build(ended)["nodes"]}
+    assert sv["fn:identity"]["status"] == "waiting_on_you" and sv["person:requester"]["status"] == "waiting_on_you" and M.build(ended)["status"]["state"] == "Waiting on you"
+    assert all(sv[f"fn:{x}"]["status"] == "idle" and sv[f"fn:{x}"]["detail"].startswith("last seen: ") for x in ("adaptation", "priority", "coordination", "audit"))
+    shutil.rmtree(ended, ignore_errors=True)
+    # /api/map: live (idle run reads its folder), saved, old, missing
+    keep, j2_server.RUN = j2_server.RUN, run
+    srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{srv.server_address[1]}"
+    get = lambda path: json.load(urllib.request.urlopen(base + path))
+    try:
+        for q in ("", f"?run={name}"):
+            assert get("/api/map" + q) == saved, q
+        assert [n["id"] for n in get("/api/map?run=j2-20200102-000000")["nodes"]] == [n["id"] for n in saved["nodes"]]
+        assert get("/api/map?run=j2-20990101-000000")["nodes"] == [] and get("/api/map?run=../x")["nodes"] == []
+        assert get("/api/artifacts")["deliverables"] and urllib.request.urlopen(base + "/api/artifact?name=goal.json").read()      # the box's Open view
+    finally:
+        j2_server.RUN = keep
+        srv.shutdown()
+        for f in ("j2-20200102-000000", "j2-20200103-000000"):
+            shutil.rmtree(os.path.join(j2.RUNS_DIR, f), ignore_errors=True)
+    if not shutil.which("node"):
+        print("map render skipped: node not found")
+        return
+    # the SVG: every status has its own shape and mark, boxes link to Artifacts, full text in a tooltip, plain words
+    nodes = [{"id": "person:requester", "kind": "person", "row": "people", "label": "You", "status": "waiting_on_you", "version": None, "detail": "2 messages from you", "file": None, "tag": None, "color": "--user", "workflows": []}]
+    for i, (stt, color) in enumerate((("filed", "--prd"), ("running", "--hld"), ("left_open", "--lld"), ("fault", "--site"), ("not_made", "--other"), ("waiting_on_you", "--charter"))):
+        nodes.append({"id": f"work:t{i}", "kind": "work", "row": "work", "label": f"Box {i} with a very long name", "status": stt, "version": i + 1 if i != 5 else None,
+                      "detail": "Every done-when item passes inside its envelope", "file": f"f{i}.md", "tag": "X", "color": color, "workflows": []})
+        if i < 5:
+            nodes.append({"id": f"step:{i}", "kind": "engine", "row": "work", "label": "Write", "status": stt, "version": None, "detail": "3 workflows · 4 of 4 checks passed",
+                          "file": None, "tag": None, "color": None, "workflows": []})
+    edges = [{"from": "work:t0", "to": "work:t3", "kind": "handoff", "label": "x", "n": 1, "basis": "recorded"}, {"from": "work:t1", "to": "work:t5", "kind": "handoff", "label": "x", "n": 1, "basis": "declared"}]
+    fn = lambda k, label, stt, detail, on=None, calls=3: {"id": f"fn:{k}", "kind": "function", "row": "functions", "label": label, "status": stt, "version": None, "tag": None,
+                                                           "color": f"--{k}", "file": None, "workflows": [], "tab": {"identity": "charter", "adaptation": "workflows", "priority": "conflicts", "coordination": "timeline", "audit": "audit"}[k],
+                                                           "wait_on": on, "detail": detail, "calls": calls, "seconds": 12.5, "tokens": {"input": 100, "output": 20}}
+    fnodes = [fn("identity", "Identity", "running", "writing the charter"), fn("adaptation", "Adaptation", "waiting", "proposed workflows", "Priority"),
+              fn("priority", "Priority", "waiting_on_you", "asked a question", "you", 1), fn("coordination", "Coordination", "fault", "W-3 is held"),
+              fn("audit", "Audit", "idle", "last seen: @Identity all criteria pass; done-when items met", None, 0)]
+    spk = lambda a, b, n: {"from": a, "to": b, "kind": "speaks_to", "label": None, "n": n, "basis": "recorded"}
+    few = [spk("person:requester", "fn:identity", 2), spk("fn:identity", "person:requester", 5), spk("fn:identity", "fn:adaptation", 4), spk("fn:adaptation", "fn:priority", 7)]
+    mp = {"schema": "map/1", "status": {"state": "Identity running", "state_status": "running", "checks": {"passed": 3, "run": 4}}, "nodes": nodes, "edges": edges, "legend": saved["legend"], "not_recorded": ["version of Charter"]}
+    mp2 = {**mp, "nodes": [nodes[0], *fnodes, *nodes[1:]], "edges": edges + few}
+    out2 = render_node(snap, docs={"docs": {}, "map": mp2})["map"]
+    svg2 = out2[out2.index("<svg class=\"mapsvg\""):out2.index("</svg>", out2.index("<svg class=\"mapsvg\"")) + 6]
+    fbox = lambda k: svg2.split(f'data-fn="fn:{k}"')[1].split('<a href="#" data-maptab=')[0]
+    assert ">FUNCTIONS</text>" in svg2 and svg2.index(">PEOPLE<") < svg2.index(">FUNCTIONS<") < svg2.index(">WORK<") and svg2.count("data-maptab=") == 5
+    assert fbox("identity").count("<rect") == 2 and ">running now<" in fbox("identity") and "writing the charter" in fbox("identity") and ">3 calls<" in fbox("identity")      # double = running now
+    assert 'stroke="var(--validator)" stroke-width="4"' in fbox("adaptation") and ">?</text>" in fbox("adaptation") and ">waiting on Priority<" in fbox("adaptation")
+    assert 'stroke="var(--validator)" stroke-width="4"' in fbox("priority") and ">waiting on you<" in fbox("priority") and ">1 call<" in fbox("priority")
+    assert 'stroke="var(--bad)" stroke-width="4"' in fbox("coordination") and ">!</text>" in fbox("coordination") and ">blocked<" in fbox("coordination")
+    assert 'stroke="var(--line)"' in fbox("audit") and ">idle<" in fbox("audit") and "last seen: " in fbox("audit") and "@Identity" not in fbox("audit") and not re.search(r"done.when", fbox("audit"))
+    assert "<title>Identity, running now, writing the charter, 3 AI calls, 12.5 s, 100 tokens in, 20 out</title>" in fbox("identity")      # the full text and numbers in a tooltip
+    assert "2 from you · 5 to you" in svg2 and svg2.count('stroke-dasharray="1 3"') >= 3 and "Messages between functions" not in out2      # few lines: drawn, no table
+    assert "Identity speaks to Adaptation: 4 messages" in svg2 and "Adaptation speaks to Priority: 7 messages" in svg2
+    many = [spk("fn:identity", "fn:adaptation", 4), spk("fn:adaptation", "fn:priority", 7), spk("fn:priority", "fn:coordination", 2), spk("fn:coordination", "fn:audit", 9), spk("fn:audit", "fn:identity", 1)]
+    out3 = render_node(snap, docs={"docs": {}, "map": {**mp2, "edges": edges + many}})["map"]
+    svg3 = out3[out3.index("<svg class=\"mapsvg\""):out3.index("</svg>", out3.index("<svg class=\"mapsvg\"")) + 6]
+    assert "<caption>Messages between functions (speaks to)</caption>" in out3 and "speaks to Adaptation: 4" not in svg3 and svg3.count('stroke-dasharray="1 3"') == 0, "too many lines go in a table"
+    assert out3.count("<tr><td>") >= 5 and "<td>Coordination</td><td>Audit</td><td>9</td>" in out3
+    cards2 = out2.split('<div class="mapcards">')[1].split('<div class="maplegend"')[0]      # small screens: the functions stacked as cards
+    assert cards2.count('data-node="fn:') == 5 and cards2.count('class="mapcard st-') == 1 + 5 + 6 and "speaks to Adaptation · 4" in cards2 and "speaks to Priority · 7" in cards2
+    assert "waiting on Priority" in cards2 and "blocked" in cards2 and "speaks to Identity · 2" in cards2 and "Identity speaks to you · 5" in cards2 and "<b>?</b>" in cards2
+    assert 'data-maptab="charter"' in cards2 and not re.search(r"envelope|done.when", out2 + out3, re.I)
+    # function-to-work lines: drawn under the boxes, faint, highlighted per function (hover, click), only on demand when there are many
+    wk = lambda f, t, n, lab="calls": {"from": f, "to": t, "kind": "speaks_to", "label": lab, "n": n, "basis": "recorded"}
+    few_w = [wk("fn:identity", "work:t0", None, "wrote the charter"), wk("fn:identity", "work:t1", 2), wk("fn:audit", "work:t1", 1, "audits"), wk("fn:coordination", "work:t3", 4)]
+    o4 = render_node(snap, docs={"docs": {}, "map": {**mp2, "edges": edges + few + few_w}, "mappin": "fn:identity"})["map"]
+    s4 = o4[o4.index("<svg class=\"mapsvg"):o4.index("</svg>", o4.index("<svg class=\"mapsvg")) + 6]
+    assert re.findall(r'<path class="mapln" data-from="([^"]+)" data-to="([^"]+)"', s4) == [("fn:identity", "work:t0"), ("fn:identity", "work:t1"), ("fn:audit", "work:t1"), ("fn:coordination", "work:t3")]
+    assert s4.startswith('<svg class="mapsvg" data-pin="fn:identity"') and ">wrote it<" in s4 and re.findall(r'class="maplbl" data-from="[^"]+" data-to="[^"]+" x="[^"]+" y="[^"]+">([^<]+)<', s4) == ["wrote it", "2", "1", "4"]
+    for fid in ("identity", "adaptation", "priority", "coordination", "audit"):      # the rules that highlight one function's lines and labels
+        assert f'.mapsvg[data-hover="fn:{fid}"] .mapln[data-from="fn:{fid}"],.mapsvg[data-pin="fn:{fid}"] .mapln[data-from="fn:{fid}"]{{opacity:1;stroke-width:2.2}}' in s4 and \
+            f'.mapsvg[data-pin="fn:{fid}"] .maplbl[data-from="fn:{fid}"]{{opacity:1}}' in s4, fid
+    assert ".mapln{opacity:.2}" in s4 and ".maplbl{opacity:0" in s4 and ".mapsvg.many .mapln{opacity:0}" in s4      # faint by default; hidden when many
+    assert len(re.findall(r'<g class="mapfn"[^>]*aria-pressed="true"', s4)) == 1 and 'data-fn="fn:identity" tabindex="0" role="button" aria-pressed="true"' in s4 and 'data-fn="fn:audit" tabindex="0" role="button" aria-pressed="false"' in s4
+    assert s4.index('class="mapln"') < s4.index('class="mapfn"') < s4.index('data-mapopen=') and s4.rindex('class="mapln"') < s4.index('class="mapfn"'), "lines are drawn under the boxes"
+    ends = [re.search(r'd="M[\d.]+ ([\d.]+) C[^"]* ([\d.]+)"', x).groups() for x in re.findall(r'<path class="mapln"[^>]*>', s4)]
+    assert len({a for a, _ in ends}) == 1 and all(float(b) == float(a) + 90 for a, b in ends), "lines run in the gap between the rows and stop at the top of the box"
+    for tip in ("Identity wrote the Box 0 with a very long name", "Identity made 2 AI calls on Box 1 with a very long name", "Audit audited Box 1 with a very long name 1 time", "Coordination made 4 AI calls on Box 3 with a very long name"):
+        assert f"<title>{tip}</title>" in s4, tip
+    assert 'class="mapsvg many"' not in s4, "four lines are not many"
+    lots = [wk(f"fn:{f}", f"work:t{i}", i + 1) for i in range(5) for f in ("identity", "adaptation", "priority")]      # 15 lines
+    s5 = (lambda o: o[o.index("<svg class=\"mapsvg"):o.index("</svg>", o.index("<svg class=\"mapsvg")) + 6])(render_node(snap, docs={"docs": {}, "map": {**mp2, "edges": edges + lots}})["map"])
+    assert s5.startswith('<svg class="mapsvg many"') and s5.count('class="mapln"') == 15, "more than 12 lines: shown only on hover or click"
+    c4 = o4.split('<div class="mapcards">')[1].split('<div class="maplegend"')[0]      # small screens: no lines, plain sentences
+    assert "mapln" not in c4 and "made with: Identity, " not in c4 and "made with: Identity 2, Audit 1" in c4 and "which function worked on this: not recorded" in c4
+    assert "worked on: Box 0 with a very long name, Box 1 with a very long name 2" in c4 and "worked on: Box 1 with a very long name 1" in c4 and "worked on: Box 3 with a very long name 4" in c4
+    assert not re.search(r"envelope|done.when", o4 + s5, re.I)
+    out = render_node(snap, docs={"docs": {}, "map": mp})["map"]
+    svg = out[out.index("<svg class=\"mapsvg\""):out.index("</svg>", out.index("<svg class=\"mapsvg\"")) + 6]
+    assert out.count("data-mapopen=") >= 6 * 2 and 'data-mapopen="f0.md"' in svg and 'aria-label="Open Box 0 with a very long name"' in svg      # linked in the SVG and in the cards
+    assert "Identity running" in out and "3 of 4 checks passed" in out and 'class="mappill running"' in out and 'class="mappill checks"' in out
+    box = lambda i: svg.split(f'data-mapopen="f{i}.md"')[1].split("</a>")[0]
+    assert 'stroke-dasharray="6 4"' in box(2) and "stroke-dasharray" not in box(0)                       # dashed = left open
+    assert box(1).count("<rect") == 2 and box(0).count("<rect") == 1                                      # double = running now
+    assert 'stroke="var(--bad)" stroke-width="4"' in box(3) and ">!</text>" in box(3)                       # thick red edge plus "!"
+    assert 'fill="none" stroke="var(--line)"' in box(4) and ">!</text>" not in box(4)                      # hollow = not made
+    assert 'stroke="var(--validator)" stroke-width="4"' in box(5) and ">?</text>" in box(5) and "version not recorded" in box(5)
+    assert "color-mix(in srgb, var(--prd) 14%, var(--panel))" in box(0) and "var(--hld)" in box(1) and ">v1<" in box(0) and ">filed<" in box(0)
+    assert ">left open<" in box(2) and ">running now<" in box(1) and ">fault<" in box(3) and ">not made<" in box(4) and ">waiting on you<" in box(5)
+    assert "<title>Box 3 with a very long name, version 4, fault, Every checklist item passes inside its limits</title>" in box(3)      # full text in a tooltip
+    assert not re.search(r"envelope|done.when", out, re.I), "plain words"
+    assert "<circle" in svg and svg.count("<path") >= 2 and 'stroke-dasharray="2 3"' in svg and 'marker-end="url(#maparrow)"' in svg
+    assert 'role="img"' in svg and 'viewBox="0 0' in svg and 'width="' not in svg.split(">")[0], "scales to the screen"
+    # small screens: the same boxes as cards, the work as a top-to-bottom list with "hands off to" lines
+    cards = out.split('<div class="mapcards">')[1].split('<div class="maplegend"')[0]
+    assert cards.count('class="mapcard st-') == 7 and cards.count('class="mapstep"') == 5 and "hands off to Box 3 with a very long name" in cards
+    assert 'class="mapcard st-fault"' in cards and "<b>!</b>" in cards and "<b>?</b>" in cards and "left open" in cards and "running now" in cards
+    ui = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "j2_ui.html"), encoding="utf-8").read()
+    assert "@media (max-width:600px){.mapsvgwrap{display:none}.mapcards{display:block}}" in ui and ".mapcards{display:none}" in ui
+    assert ".mapsvg{width:100%;height:auto" in ui and "st-running{border-style:double" in ui and "st-left_open{border-style:dashed" in ui
+    assert ui.index('data-tab="artifacts"') < ui.index('data-tab="map"') < ui.index('data-tab="style"') and ui.index('data-tab="docs"') < ui.index('data-tab="artifacts"')
+    empty = render_node(snap, docs={"docs": {}, "map": {"nodes": [], "edges": []}})["map"]
+    assert "Nothing to draw yet." in empty
+    real = render_node(snap, docs={"docs": {}, "map": saved})["map"]
+    assert real.count("<g><title>") + real.count("<a href") >= 9 and "Product requirements" in real and "v6" in real and f"Not recorded ({len(saved['not_recorded'])})" in real
+    assert not re.search(r"envelope|done.when", real, re.I)
+    assert real.count('data-maptab=') >= 10 and ">FUNCTIONS</text>" in real and "<caption>Messages between functions (speaks to)</caption>" in real      # six pairs: a table, not crossing lines
+    assert "<caption>Who made each step (calls by function)</caption>" in real and "<td>Low-level design to Website</td><td>not recorded</td>" in real
+    assert "<td>Charter to Product requirements</td><td>%d</td>" % by_fn("identity", docs_rec["prd"]["calls"], calls) in real
+    rc = real.split('<div class="mapcards">')[1].split('<div class="maplegend"')[0]
+    lab = {k: by[f"work:{k}"]["label"] for k in ("prd", "hld", "lld", "website")}
+    mw = lambda k: ", ".join(f"{f.capitalize()} {n}" for f, t, n, lb, _ in lines if t == k)
+    assert f"made with: {mw('prd')}" in rc and f"made with: {mw('lld')}" in rc and "made with: Audit 2" in rc and "made with: Identity<" in rc.replace("</div>", "<")
+    assert rc.count("which other function worked on this: not recorded") == 1 and "worked on: Charter, " + lab["prd"] + " " + str(by_fn("identity", docs_rec["prd"]["calls"], calls)) in rc
+    assert "worked on: " + lab["prd"] + " 1, " + lab["hld"] + " 1, " + lab["lld"] + " 1, " + lab["website"] + " 2" in rc      # Audit
+    assert real.split("<svg")[1].split(">")[0].startswith(' class="mapsvg many"') and real.count('class="mapln"') == len([x for x in lines]), "17 lines: only on hover or click"
+    assert "which function made this step: not recorded" in rc and "made by Identity 2, Adaptation 1, Priority 1, Coordination 6, Audit 1" in rc and rc.count('data-node="fn:') == 5
+    # a browser: no sideways scroll at 500px, cards shown, SVG hidden; the tab sits after Artifacts and the pane reads plain
+    chrome = j2.j2_check.find_chrome()
+    if chrome and BROWSER:
+        import subprocess
+        css = re.search(r"<style>(.*?)</style>", ui, re.S).group(1)
+        page = os.path.join(tempfile.mkdtemp(prefix="j2-map-"), "map.html")
+        open(page, "w", encoding="utf-8").write(f"<html><head><meta name=viewport content='width=device-width'><style>{css}</style></head><body>{real}"
+            "<script>document.body.setAttribute('data-m', [document.documentElement.scrollWidth, innerWidth, getComputedStyle(document.querySelector('.mapsvgwrap')).display, getComputedStyle(document.querySelector('.mapcards')).display, [...document.querySelectorAll('.mapln')].every(x => x.getBoundingClientRect().width === 0)].join('|'))</script></body></html>")
+        for width, want in ((500, "none|block|true"), (1100, "block|none|false")):
+            dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", f"--window-size={width},800", "--virtual-time-budget=2000", "--dump-dom", "file://" + page],
+                                 capture_output=True, text=True, timeout=120).stdout
+            sw, iw, a, b, c = re.search(r'data-m="([^"]+)"', dom).group(1).split("|")
+            assert int(sw) <= int(iw) and f"{a}|{b}|{c}" == want, (width, sw, iw, a, b, c)      # at 500px the function-to-work lines take no space
+    if chrome and BROWSER:      # the real page: hover, click and click again on function boxes highlight and release their lines
+        import subprocess
+        tmp = tempfile.mkdtemp(prefix="j2-maphl-")
+        probe = ("<script>setTimeout(() => { const q = s => [...document.querySelectorAll(s)], op = s => q(s).map(x => getComputedStyle(x).opacity), svg = () => document.querySelector('.mapsvg'), r = {},"
+                 "fire = (el, t) => el.dispatchEvent(new MouseEvent(t, {bubbles: true})), fn = id => document.querySelector('.mapfn[data-fn=\"fn:' + id + '\"]');"
+                 "r.many = svg().classList.contains('many'); r.idle = op('.mapln'); r.idleLbl = op('.maplbl');"
+                 "fire(fn('coordination'), 'mouseover'); r.hoverOwn = op('.mapln[data-from=\"fn:coordination\"]'); r.hoverOther = op('.mapln[data-from=\"fn:identity\"]'); r.lblOwn = op('.maplbl[data-from=\"fn:coordination\"]'); r.lblOther = op('.maplbl[data-from=\"fn:audit\"]');"
+                 "fire(fn('coordination'), 'mouseout'); r.after = op('.mapln[data-from=\"fn:coordination\"]');"
+                 "fire(fn('coordination'), 'click'); r.pin = svg().dataset.pin; r.pinOwn = op('.mapln[data-from=\"fn:coordination\"]'); r.pressed = fn('coordination').getAttribute('aria-pressed'); r.pinOther = op('.mapln[data-from=\"fn:identity\"]');"
+                 "fire(fn('audit'), 'click'); r.repin = svg().dataset.pin; fire(fn('audit'), 'click'); r.unpin = svg().dataset.pin;"
+                 "document.body.setAttribute('data-r', JSON.stringify(r)); }, 4500)</script>")
+        open(os.path.join(tmp, "j2_ui.html"), "w", encoding="utf-8").write(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "j2_ui.html"), encoding="utf-8").read().replace("</body>", probe + "</body>"))
+        keep_here, j2_server.HERE = j2_server.HERE, tmp
+        keep, j2_server.RUN = j2_server.RUN, run
+        srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        try:
+            dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=12000", "--dump-dom",
+                                  f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={name}"], capture_output=True, text=True, timeout=180).stdout
+        finally:
+            j2_server.HERE, j2_server.RUN = keep_here, keep
+            srv.shutdown()
+        got = json.loads(htmllib.unescape(re.search(r'data-r="([^"]*)"', dom).group(1)))
+        assert got["many"] is True and set(got["idle"]) == {"0"} and set(got["idleLbl"]) == {"0"}, got      # 17 lines: nothing drawn until a function is hovered or clicked
+        assert got["hoverOwn"] and set(got["hoverOwn"]) == {"1"} and set(got["hoverOther"]) == {"0"} and set(got["lblOwn"]) == {"1"} and set(got["lblOther"]) == {"0"}, got
+        assert set(got["after"]) == {"0"} and got["pin"] == "fn:coordination" and set(got["pinOwn"]) == {"1"} and got["pressed"] == "true" and set(got["pinOther"]) == {"0"}, got
+        assert got["repin"] == "fn:audit" and got["unpin"] == "", got      # another click moves the highlight; clicking it again releases it
+    if chrome and BROWSER:      # the real page, a saved run: the Map tab is after Artifacts and its pane reads in plain words
+        import subprocess
+        keep, j2_server.RUN = j2_server.RUN, run
+        srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        try:
+            dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=8000", "--dump-dom",
+                                  f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={name}"], capture_output=True, text=True, timeout=120).stdout
+        finally:
+            j2_server.RUN = keep
+            srv.shutdown()
+        pane = dom.split('id="pane-map"')[1].split('id="pane-style"')[0]
+        text = htmllib.unescape(re.sub(r"<[^>]+>", " ", pane))
+        assert "Product requirements" in text and re.search(r"\d+ of \d+ checks passed", text) and "Done" in text, text[:300]
+        assert 'data-mapopen="prd.md"' in pane and 'data-maptab="charter"' in pane and "FUNCTIONS" in pane and not re.search(r"envelope|done.when", text, re.I), "plain words in the Map tab"
+        boxes = [x.split('<a href="#" data-maptab=')[0] for x in pane.split('data-fn="')[1:6]]      # the five function boxes in the page (the legend may say "running now")
+        assert len(boxes) == 5 and all("last seen: " in b and "running now" not in b and ">waiting on" not in b for b in boxes), "a saved run never says running"
+        assert dom.index('data-tab="artifacts"') < dom.index('data-tab="map"')
+    print("map: map.json written beside atoms.json and equal to the folder's build, golden nodes/edges/statuses, counts from the atoms, "
+          "old run rebuilt with its gaps named, left open vs running, fault, not made, waiting on you, /api/map live/saved/old/missing, "
+          "SVG shapes and marks per status, links to Artifacts, tooltips, plain words, cards for small screens ok")
+
+
 def atom_schema():
     """atom/1: the adapter maps a stored run (makes and dos), edges are what each builder's prompt actually held
     (manifest, LLD slice, earlier document), used_by is the exact inverse, warnings never change a run, atoms.json is
@@ -4877,6 +5659,10 @@ if __name__ == "__main__":
         docs_detection()
         docs_chain()
         docs_funding()
+        send_deeds()
+        artifact_types()
+        artifacts_tab()
+        map_tab()
         docs_repeat_failure()
         docs_intake_and_compare()
         plain_unchanged("f6938b2", slim="0")      # J2_SLIM=0 is the old path, prompt for prompt

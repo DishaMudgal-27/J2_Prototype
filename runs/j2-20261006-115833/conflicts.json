@@ -1,0 +1,288 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 1,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 1",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 7,
+        "text": "@Priority Proposal for cycle 1: scaffold and styling, the charter's core sections, a stories section for warmth, and subtle animations.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 8,
+        "text": "@Adaptation Scaffold and core sections: granted. The stories serve no done-when item, refused. Animations cut to 10. I'm keeping the rest in reserve for Audit fixes.",
+        "position": "COUNTER: Scaffold and styling (15), Core sections (45), Animations (10)",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 10,
+        "text": "@Priority The stories are what make a small cafe feel warm and personal. I can shrink them to two (20).",
+        "position": "Scaffold and styling (15), Core sections (45), Animations (10), Stories section (20)",
+        "agree": false
+      },
+      {
+        "n": 3,
+        "who": "priority",
+        "msg": 11,
+        "text": "@Adaptation Still no on the stories. The charter's sections are in; the reserve stays.",
+        "position": "COUNTER: Scaffold and styling (15), Core sections (45), Animations (10)",
+        "agree": false
+      },
+      {
+        "n": 4,
+        "who": "adaptation",
+        "msg": 12,
+        "text": "@Priority Without any content beyond listings the page feels empty. I can't accept zero.",
+        "position": "Scaffold and styling (15), Core sections (45), Animations (10), Stories section (20)",
+        "agree": false
+      }
+    ],
+    "status": "settled",
+    "escalated": true,
+    "attempts_before_escalation": 4,
+    "resolved_by": "identity_after_user",
+    "identity": [
+      {
+        "say": "Clause: done_when has no stories item, and the standards don't settle whether warmth content is worth the fix reserve. The charter can't decide this, so I'm asking the Requester.",
+        "clause": "done_when; standards",
+        "resolved": false,
+        "ruling": null,
+        "after_user": false
+      },
+      {
+        "say": "The Requester chose. Priority's position stands: no stories section, the reserve stays.",
+        "clause": "Requester's decision",
+        "resolved": true,
+        "ruling": "priority",
+        "after_user": true
+      }
+    ],
+    "escalated_to_user": true,
+    "user_question": {
+      "question": "Fund a stories section, or keep the reserve for fixes?",
+      "options": [
+        "Fund the stories section (20 units): warmer page, but only 10 units stay for fixes after Audit",
+        "No stories section: the page has only the charter's sections, and 30 units stay for fixes"
+      ]
+    },
+    "user_answer": "Option 2: skip the stories, keep the reserve for fixes.",
+    "winner": "priority",
+    "outcome": "Priority's position stands: Scaffold and styling (15), Core sections (45), Animations (10) goes to the validator.",
+    "priority_final": [
+      {
+        "name": "Scaffold and styling",
+        "goal_gap": "No site exists",
+        "parts": [
+          "page_section",
+          "styling"
+        ],
+        "outputs": [
+          "index.html"
+        ],
+        "completion_check": "index.html loads",
+        "estimate": 0,
+        "cost": 15,
+        "envelope": {
+          "money_limit": 15,
+          "model_call_limit": 2,
+          "time_limit_minutes": 10,
+          "retry_limit": 1,
+          "stop_loss": "stop if the build fails twice"
+        }
+      },
+      {
+        "name": "Core sections",
+        "goal_gap": "Every done-when section",
+        "parts": [
+          "page_section",
+          "page_section",
+          "page_section",
+          "form"
+        ],
+        "outputs": [
+          "index.html"
+        ],
+        "completion_check": "All done-when sections present",
+        "estimate": 0,
+        "cost": 45,
+        "envelope": {
+          "money_limit": 45,
+          "model_call_limit": 2,
+          "time_limit_minutes": 10,
+          "retry_limit": 1,
+          "stop_loss": "stop if the build fails twice"
+        }
+      },
+      {
+        "name": "Animations",
+        "goal_gap": "Scroll and hover effects",
+        "parts": [
+          "interactive_feature"
+        ],
+        "outputs": [
+          "CSS"
+        ],
+        "completion_check": "Effects run on scroll",
+        "estimate": 0,
+        "cost": 10,
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 2,
+          "time_limit_minutes": 10,
+          "retry_limit": 1,
+          "stop_loss": "stop if the build fails twice"
+        }
+      }
+    ],
+    "adaptation_final": [
+      {
+        "name": "Scaffold and styling",
+        "goal_gap": "No site exists",
+        "parts": [
+          "page_section",
+          "styling"
+        ],
+        "outputs": [
+          "index.html"
+        ],
+        "completion_check": "index.html loads",
+        "estimate": 0,
+        "cost": 15,
+        "envelope": {
+          "money_limit": 15,
+          "model_call_limit": 2,
+          "time_limit_minutes": 10,
+          "retry_limit": 1,
+          "stop_loss": "stop if the build fails twice"
+        }
+      },
+      {
+        "name": "Core sections",
+        "goal_gap": "Every done-when section",
+        "parts": [
+          "page_section",
+          "page_section",
+          "page_section",
+          "form"
+        ],
+        "outputs": [
+          "index.html"
+        ],
+        "completion_check": "All done-when sections present",
+        "estimate": 0,
+        "cost": 45,
+        "envelope": {
+          "money_limit": 45,
+          "model_call_limit": 2,
+          "time_limit_minutes": 10,
+          "retry_limit": 1,
+          "stop_loss": "stop if the build fails twice"
+        }
+      },
+      {
+        "name": "Animations",
+        "goal_gap": "Scroll and hover effects",
+        "parts": [
+          "interactive_feature"
+        ],
+        "outputs": [
+          "CSS"
+        ],
+        "completion_check": "Effects run on scroll",
+        "estimate": 0,
+        "cost": 10,
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 2,
+          "time_limit_minutes": 10,
+          "retry_limit": 1,
+          "stop_loss": "stop if the build fails twice"
+        }
+      },
+      {
+        "name": "Stories section",
+        "goal_gap": "Warm content: the beans, the farms and the people",
+        "parts": [
+          "blog_post",
+          "blog_post"
+        ],
+        "outputs": [
+          "stories section"
+        ],
+        "completion_check": "2 stories",
+        "estimate": 0,
+        "cost": 20
+      }
+    ],
+    "attempts_used": 4,
+    "registered": [
+      "Scaffold and styling",
+      "Core sections",
+      "Animations"
+    ]
+  },
+  {
+    "id": "C-2",
+    "cycle": 2,
+    "topic": "finding",
+    "between": [
+      "adaptation",
+      "audit"
+    ],
+    "about": "F-4",
+    "subject": "finding F-4",
+    "detail": "{\"id\": \"F-4\", \"item\": 4, \"criterion\": \"Layout works on a phone\", \"verdict\": \"NEEDS_REVISION\", \"note\": \"No viewport meta tag, so phones render the page at desktop width\"}",
+    "attempts": [
+      {
+        "n": 1,
+        "who": "adaptation",
+        "msg": 31,
+        "text": "@Audit I disagree with F-4: the layout uses fluid widths and the mechanical check found no overflow at 360px.",
+        "position": "Fluid layout, no overflow at 360px",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "audit",
+        "msg": 32,
+        "text": "@Adaptation The finding stands: without a viewport meta tag, phones render the page at desktop width and shrink it, whatever the CSS does.",
+        "position": "Finding stands: add the viewport meta tag.",
+        "agree": false
+      },
+      {
+        "n": 3,
+        "who": "adaptation",
+        "msg": 33,
+        "text": "@Audit Fair point, I accept that. I'll propose the fix.",
+        "position": "Accepts Audit's position.",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "audit",
+    "outcome": "Finding F-4 stands: Adaptation proposes the rework.",
+    "attempts_used": 3
+  }
+]

@@ -1,0 +1,807 @@
+{
+  "stage": "lld",
+  "goal": {
+    "product_name": "Brew Lab",
+    "users": "Coffee lovers and office staff near the shop in Indiranagar, Bengaluru",
+    "problem": "People cannot see the menu or order ahead.",
+    "features": [
+      "Menu with prices",
+      "Pre-order form for pickup",
+      "Map or address",
+      "Opening hours"
+    ],
+    "user_groups": [
+      {
+        "name": "Coffee lovers",
+        "actions": [
+          "See the menu with prices",
+          "See the opening hours",
+          "Find where the shop is",
+          "Pre-order a coffee for pickup"
+        ]
+      },
+      {
+        "name": "Office staff nearby",
+        "actions": [
+          "See the menu with prices",
+          "See the opening hours",
+          "Find where the shop is",
+          "Pre-order a coffee for pickup"
+        ]
+      }
+    ],
+    "constraints": [
+      "One page only",
+      "Works on phones",
+      "No payment"
+    ],
+    "success_measures": [
+      "30 pre-orders per week"
+    ],
+    "statement": "An LLD for Brew Lab",
+    "site_name": "Brew Lab",
+    "business_type": "lld",
+    "facts": [
+      "Brew Lab"
+    ],
+    "standards": [
+      "Every item traceable to the PRD"
+    ],
+    "rules": [
+      "No invented facts"
+    ],
+    "done_when": [
+      "The Pages and sections section is written for Brew Lab, and names every component (C1, C2, C3, C4, C5) it implements",
+      "The Interactive elements section is written for Brew Lab",
+      "The Form fields section is written for Brew Lab",
+      "The File structure section is written for Brew Lab",
+      "The Responsive and accessibility rules section is written for Brew Lab"
+    ],
+    "to_be_confirmed": [],
+    "dropped_from_brief": [],
+    "visitor_needs": [],
+    "chain": {
+      "prd": {
+        "kind": "prd",
+        "requirements": [
+          {
+            "id": "R1",
+            "text": "The page shows the menu with prices, so coffee lovers and office staff nearby can see each item and what it costs before they visit."
+          },
+          {
+            "id": "R2",
+            "text": "The page has a pre-order form for pickup, so coffee lovers and office staff nearby can pre-order a coffee and collect it at the shop."
+          },
+          {
+            "id": "R3",
+            "text": "The page shows the shop's map or address, so visitors can find where Brew Lab is in Indiranagar, Bengaluru."
+          },
+          {
+            "id": "R4",
+            "text": "The page shows the opening hours, so visitors can check when Brew Lab is open."
+          },
+          {
+            "id": "R5",
+            "text": "The site is one page only: the menu, pre-order form, map or address and opening hours are all on that single page."
+          },
+          {
+            "id": "R6",
+            "text": "The site works on phones: a visitor on a phone can read the menu with prices, the opening hours and the address, and can fill in and send the pre-order form."
+          },
+          {
+            "id": "R7",
+            "text": "The site has no payment: the pre-order form does not ask for or take any online payment."
+          }
+        ]
+      },
+      "hld": {
+        "kind": "hld",
+        "components": [
+          {
+            "id": "C1",
+            "name": "Menu display",
+            "responsibility": "shows each menu item with its price so visitors can see what things cost before they visit",
+            "covers": [
+              "R1",
+              "R5",
+              "R6"
+            ]
+          },
+          {
+            "id": "C2",
+            "name": "Pre-order form",
+            "responsibility": "lets a visitor pre-order a coffee for pickup and collect it at the shop, and asks for no online payment",
+            "covers": [
+              "R2",
+              "R5",
+              "R6",
+              "R7"
+            ]
+          },
+          {
+            "id": "C3",
+            "name": "Shop address",
+            "responsibility": "shows the shop's map or address so visitors can find Brew Lab in Indiranagar, Bengaluru",
+            "covers": [
+              "R3",
+              "R5",
+              "R6"
+            ]
+          },
+          {
+            "id": "C4",
+            "name": "Opening hours",
+            "responsibility": "shows when Brew Lab is open so visitors can check before they come",
+            "covers": [
+              "R4",
+              "R5",
+              "R6"
+            ]
+          },
+          {
+            "id": "C5",
+            "name": "One-page layout",
+            "responsibility": "holds the menu, pre-order form, map or address and opening hours on one page and keeps them readable and usable on a phone",
+            "covers": [
+              "R5",
+              "R6"
+            ]
+          }
+        ]
+      },
+      "prd_ids": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6",
+        "R7"
+      ],
+      "hld_ids": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5"
+      ]
+    },
+    "charter_items": [
+      "The Pages and sections section is written for Brew Lab, and names every component (C1, C2, C3, C4, C5) it implements",
+      "The Interactive elements section is written for Brew Lab",
+      "The Form fields section is written for Brew Lab",
+      "The File structure section is written for Brew Lab",
+      "The Responsive and accessibility rules section is written for Brew Lab"
+    ],
+    "core_items": [
+      "The Pages and sections section is written for Brew Lab, and names every component (C1, C2, C3, C4, C5) it implements",
+      "The Interactive elements section is written for Brew Lab",
+      "The Form fields section is written for Brew Lab",
+      "The File structure section is written for Brew Lab",
+      "The Responsive and accessibility rules section is written for Brew Lab"
+    ],
+    "confirmed_facts": []
+  },
+  "audits": [
+    {
+      "cycle": 5,
+      "version": 5,
+      "results": [
+        {
+          "id": "F-1",
+          "criterion": "The Pages and sections section is written for Brew Lab, and names every component (C1, C2, C3, C4, C5) it implements",
+          "verdict": "PASS",
+          "note": "S1 to S5 each say 'Implements C1' through 'Implements C5', and each has an id such as #menu.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 1,
+          "pass": true
+        },
+        {
+          "id": "F-2",
+          "criterion": "The Interactive elements section is written for Brew Lab",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "E1 to E4 are written, tied to S2 and S5, and no payment is stated, but L2 and L3 fail on this section (see F-6, F-7).",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 2,
+          "pass": true
+        },
+        {
+          "id": "F-3",
+          "criterion": "The Form fields section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "F1 to F5 each give a name, a type, 'required yes' and a validation rule, and 'No payment' is stated; L4 is met.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 3,
+          "pass": true
+        },
+        {
+          "id": "F-4",
+          "criterion": "The File structure section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "Opens with 'One page only', lists each section id top to bottom, and puts the file and stack line under 'Assumption:'.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 4,
+          "pass": true
+        },
+        {
+          "id": "F-5",
+          "criterion": "The Responsive and accessibility rules section is written for Brew Lab",
+          "verdict": "NEEDS_REVISION",
+          "note": "'can be reached with the Tab key' and 'The Tab order follows the order on screen' sit outside any Assumption: line; code names the token 'Tab'.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 5,
+          "pass": false
+        }
+      ],
+      "extra_issues": [
+        {
+          "id": "F-6",
+          "criterion": "Necessary condition L2 (ids unique)",
+          "verdict": "NEEDS_REVISION",
+          "note": "Code: 'repeated: #pre-order-form'. E1 and E2 both use `#pre-order-form` as their selector, and it is also the form id in Form fields.",
+          "severity": "low",
+          "confidence": "medium",
+          "needs_requester_fact": null
+        },
+        {
+          "id": "F-7",
+          "criterion": "Necessary condition L3 (selector, trigger, behaviour)",
+          "verdict": "NEEDS_REVISION",
+          "note": "Code: E1 to E4 'no behaviour'. The text does have 'behaviour:' after 'trigger submit;', so the layout probably does not match what the check reads. Cause not confirmed.",
+          "severity": "medium",
+          "confidence": "medium",
+          "needs_requester_fact": null
+        },
+        {
+          "id": "F-8",
+          "criterion": "Necessary condition L6 (no invented facts)",
+          "verdict": "NEEDS_REVISION",
+          "note": "Code: 'not marked Assumption: Tab'. The two Keyboard use lines quoted in F-5 are the only unlabelled uses of the word.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null
+        }
+      ],
+      "rubric": [
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "criterion": "Every page section has an id and implements at least one component",
+          "verdict": "PASS",
+          "note": "S1 to S5 each have an id (#menu, #pre-order, #shop-address, #opening-hours, #page-layout) and each says 'Implements' one of C1 to C5.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "criterion": "Every interactive element has a selector, a trigger and a behaviour",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "E1 to E4 each give a selector, a trigger and a 'behaviour:', but code L3 reads them as having no behaviour, and E2 says trigger 'change' while its behaviour says 'as the visitor leaves it'.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "criterion": "Every form field has a type, a required flag and a validation rule",
+          "verdict": "PASS",
+          "note": "F1 to F5 each state a type, 'required yes' and a validation rule, for example F4 'a whole number of one or more'.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "criterion": "Consistent with the HLD: every component is built by a section",
+          "verdict": "PASS",
+          "note": "The Coverage line says each of C1 to C5 is built by exactly one section, and L5 is met.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "criterion": "No invented facts: every fact comes from the brief or the Requester's answers or the earlier documents, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim",
+          "verdict": "NEEDS_REVISION",
+          "note": "Unlabelled: 'can be reached with the Tab key and used from the keyboard alone' and 'The Tab order follows the order on screen'.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": false
+        }
+      ],
+      "mechanical": {},
+      "screenshot": null,
+      "all_pass": false,
+      "output": "lld",
+      "conditions": [
+        {
+          "id": "L1",
+          "text": "All five sections are present and not empty",
+          "check": "sections-present",
+          "met": true,
+          "evidence": "all 5 sections present, none empty"
+        },
+        {
+          "id": "L2",
+          "text": "Section, element and field ids are unique, and every section has an id",
+          "check": "lld-ids-unique",
+          "met": false,
+          "evidence": "repeated: #pre-order-form"
+        },
+        {
+          "id": "L3",
+          "text": "Every interactive element has a selector, a trigger and a behaviour",
+          "check": "lld-elements",
+          "met": false,
+          "evidence": "incomplete: E1 (no behaviour); E2 (no behaviour); E3 (no behaviour); E4 (no behaviour)"
+        },
+        {
+          "id": "L4",
+          "text": "Every form field has a name, a type and a required flag",
+          "check": "lld-fields",
+          "met": true,
+          "evidence": "each of the 5 form field(s) has a name, a type and a required flag"
+        },
+        {
+          "id": "L5",
+          "text": "Every HLD component appears in an LLD section",
+          "check": "chain-ids",
+          "met": true,
+          "evidence": "each of C1, C2, C3, C4, C5 appears in Pages and sections"
+        },
+        {
+          "id": "L6",
+          "text": "No invented facts: every number, email and proper name comes from the charter, the Requester's answers or the earlier documents, or sits in an Assumption: line",
+          "check": "no-invented-facts",
+          "met": false,
+          "evidence": "not in the charter or the Requester's answers, and not marked Assumption: Tab",
+          "assumptions": [
+            "the single page file is named index.html.",
+            "the selector names below are design choices, not facts from the brief.",
+            "the message appears in the same section and the form stays on the page.",
+            "this in-page navigation exists to keep the one page easy to move around on a phone.",
+            "the field names, types, required flags and validation rules below are design choices, not facts from the brief. The brief gives no field list.",
+            "the shop needs a name to hand over the order at pickup.",
+            "the shop needs a way to reach the visitor about the order.",
+            "the visitor picks the time they will collect the order.",
+            "no other fields are added, so the form asks only for what a pickup pre-order needs.",
+            "the page is one file named index.html, written in plain HTML, CSS and JavaScript, with the styles and scripts kept inside that file and no build step.",
+            "the sections appear in the order listed above, so the in-page links in #page-nav follow the same order.",
+            "the styles sit in one block and the scripts in one block in the same file, so the page stays one file.",
+            "the page is checked at a phone width of 360px and a desktop width of 1280px, with no horizontal scrolling at either. These two widths come from the department's workable rules, not from the brief. No other breakpoint or size is set here.",
+            "#pre-order-status is marked so that screen readers announce the message when it appears.",
+            "images, if any are added, carry a short text description. The brief lists no images."
+          ]
+        }
+      ],
+      "read": "Read all five LLD sections (Pages and sections about 20 lines, Interactive elements about 10, Form fields about 20, File structure about 25, Responsive and accessibility about 45), the Assumptions to confirm list, the charter done-when items, the HLD component list C1 to C5, and the code results for L1 to L6."
+    },
+    {
+      "cycle": 6,
+      "version": 7,
+      "results": [
+        {
+          "id": "F-1",
+          "criterion": "The Pages and sections section is written for Brew Lab, and names every component (C1, C2, C3, C4, C5) it implements",
+          "verdict": "PASS",
+          "note": "S1 to S5 each carry an id (#menu, #pre-order, #shop-address, #opening-hours, #page-layout) and say 'Implements C1' through 'Implements C5'.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 1,
+          "pass": true
+        },
+        {
+          "id": "F-2",
+          "criterion": "The Interactive elements section is written for Brew Lab",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "E1 to E4 each give a selector, a trigger and a behaviour, and payment is stated as none, but code check L3 flags all four.",
+          "severity": "medium",
+          "confidence": "medium",
+          "needs_requester_fact": null,
+          "item": 2,
+          "pass": true
+        },
+        {
+          "id": "F-3",
+          "criterion": "The Form fields section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "F1 to F5 each give a name, a type, 'required yes' and a validation rule, and 'No payment' is stated; L4 is met.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 3,
+          "pass": true
+        },
+        {
+          "id": "F-4",
+          "criterion": "The File structure section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "It opens with 'One page only', lists each section id top to bottom, and puts the file and stack line under 'Assumption:'.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 4,
+          "pass": true
+        },
+        {
+          "id": "F-5",
+          "criterion": "The Responsive and accessibility rules section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "It states 'Works on phones', labels the 360px and 1280px widths as 'Assumption:', and the word 'Tab' no longer appears; L6 is met.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 5,
+          "pass": true
+        }
+      ],
+      "extra_issues": [
+        {
+          "id": "F-6",
+          "criterion": "Necessary condition L3: every interactive element has a selector, a trigger and a behaviour",
+          "verdict": "NEEDS_REVISION",
+          "note": "Code: E1 (no behaviour); E2 (no trigger, behaviour); E3 (no trigger, behaviour); E4 (no behaviour). The text writes 'trigger: the visitor leaves a field' and 'behaviour: ...' with colons.",
+          "severity": "medium",
+          "confidence": "medium",
+          "needs_requester_fact": null
+        }
+      ],
+      "rubric": [
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "criterion": "Every page section has an id and implements at least one component",
+          "verdict": "PASS",
+          "note": "Each of S1 to S5 has an id and an 'Implements Cn' line.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "criterion": "Every interactive element has a selector, a trigger and a behaviour",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "E1 to E4 each name a selector, trigger and behaviour on the text, but code L3 does not parse the colon forms (see F-6).",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "criterion": "Every form field has a type, a required flag and a validation rule",
+          "verdict": "PASS",
+          "note": "F1 to F5 each state a type, 'required yes' and a validation rule.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "criterion": "Consistent with the HLD: every component is built by a section",
+          "verdict": "PASS",
+          "note": "The coverage line maps C1 to C5 one-to-one onto S1 to S5, and L5 is met.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "criterion": "No invented facts: every fact comes from the brief or the Requester's answers or the earlier documents, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim",
+          "verdict": "PASS",
+          "note": "No unlabelled claim found: the file name, selectors, field list, 360px and 1280px widths and screen reader note are all under 'Assumption:'.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        }
+      ],
+      "mechanical": {},
+      "screenshot": null,
+      "all_pass": false,
+      "output": "lld",
+      "conditions": [
+        {
+          "id": "L1",
+          "text": "All five sections are present and not empty",
+          "check": "sections-present",
+          "met": true,
+          "evidence": "all 5 sections present, none empty"
+        },
+        {
+          "id": "L2",
+          "text": "Section, element and field ids are unique, and every section has an id",
+          "check": "lld-ids-unique",
+          "met": true,
+          "evidence": "14 entry ids and 9 selectors, all unique"
+        },
+        {
+          "id": "L3",
+          "text": "Every interactive element has a selector, a trigger and a behaviour",
+          "check": "lld-elements",
+          "met": false,
+          "evidence": "incomplete: E1 (no behaviour); E2 (no trigger, behaviour); E3 (no trigger, behaviour); E4 (no behaviour)"
+        },
+        {
+          "id": "L4",
+          "text": "Every form field has a name, a type and a required flag",
+          "check": "lld-fields",
+          "met": true,
+          "evidence": "each of the 5 form field(s) has a name, a type and a required flag"
+        },
+        {
+          "id": "L5",
+          "text": "Every HLD component appears in an LLD section",
+          "check": "chain-ids",
+          "met": true,
+          "evidence": "each of C1, C2, C3, C4, C5 appears in Pages and sections"
+        },
+        {
+          "id": "L6",
+          "text": "No invented facts: every number, email and proper name comes from the charter, the Requester's answers or the earlier documents, or sits in an Assumption: line",
+          "check": "no-invented-facts",
+          "met": true,
+          "evidence": "every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+          "assumptions": [
+            "the single page file is named index.html.",
+            "the selector names below are design choices, not facts from the brief.",
+            "the message in E3 appears in the same section and the pre-order form stays on the page.",
+            "the in-page links in E4 exist to keep the one page easy to move around on a phone.",
+            "the field names, types, required flags and validation rules below are design choices, not facts from the brief. The brief gives no field list.",
+            "the shop needs a name to hand over the order at pickup.",
+            "the shop needs a way to reach the visitor about the order.",
+            "the visitor picks the time they will collect the order.",
+            "no other fields are added, so the form asks only for what a pickup pre-order needs.",
+            "the page is one file named index.html, written in plain HTML, CSS and JavaScript, with the styles and scripts kept inside that file and no build step.",
+            "the sections appear in the order listed above, so the in-page links in #page-nav follow the same order.",
+            "the styles sit in one block and the scripts in one block in the same file, so the page stays one file.",
+            "the page is checked at a phone width of 360px and a desktop width of 1280px, with no horizontal scrolling at either. These two widths come from the department's workable rules, not from the brief. No other breakpoint or size is set here.",
+            "#pre-order-status is marked so that screen readers announce the message when it appears.",
+            "images, if any are added, carry a short text description. The brief lists no images."
+          ]
+        }
+      ],
+      "read": "LLD v7 in full: Pages and sections (5 entries S1 to S5, about 20 lines), Interactive elements (4 entries E1 to E4 plus 2 assumptions, about 15 lines), Form fields (5 fields F1 to F5 plus rules, about 20 lines), File structure (about 25 lines), Responsive and accessibility rules (about 45 lines), Assumptions to confirm (15 lines). I also read the L1 to L6 evidence, the rubric and the brief facts."
+    },
+    {
+      "cycle": 7,
+      "version": 8,
+      "results": [
+        {
+          "id": "F-1",
+          "criterion": "The Pages and sections section is written for Brew Lab, and names every component (C1, C2, C3, C4, C5) it implements",
+          "verdict": "PASS",
+          "note": "S1 to S5 each carry an id (#menu, #pre-order, #shop-address, #opening-hours, #page-layout) and say 'Implements C1' through 'Implements C5'.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 1,
+          "pass": true
+        },
+        {
+          "id": "F-2",
+          "criterion": "The Interactive elements section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "E1 to E4 each give 'selector', 'trigger' and 'behaviour' (e.g. 'selector `#page-nav`; trigger click; behaviour each link moves the visitor to...'), and no payment is stated; L2 and L3 are met.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 2,
+          "pass": true
+        },
+        {
+          "id": "F-3",
+          "criterion": "The Form fields section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "F1 to F5 each give a field name, a type, 'required yes' and a validation rule, and 'No payment' is stated; L4 is met.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 3,
+          "pass": true
+        },
+        {
+          "id": "F-4",
+          "criterion": "The File structure section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "Opens with 'One page only', lists S1 to S5 ids top to bottom, and puts the file and stack line under 'Assumption:'.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 4,
+          "pass": true
+        },
+        {
+          "id": "F-5",
+          "criterion": "The Responsive and accessibility rules section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "States 'Works on phones', labels 360px and 1280px as 'Assumption:', and covers phone layout, form, links and keyboard use; the word 'Tab' is gone.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 5,
+          "pass": true
+        }
+      ],
+      "extra_issues": [
+        {
+          "id": "F-6",
+          "criterion": "Consistency between Interactive elements and File structure",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "File structure says `#pre-order-form` holds 'elements E1 and E2', but E1 and E2 use selectors `#pre-order-submit` and `#pre-order-fields`, which File structure never places.",
+          "severity": "low",
+          "confidence": "medium",
+          "needs_requester_fact": null
+        }
+      ],
+      "rubric": [
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "criterion": "Every page section has an id and implements at least one component",
+          "verdict": "PASS",
+          "note": "S1 to S5 each have an id and an 'Implements Cn' line.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "criterion": "Every interactive element has a selector, a trigger and a behaviour",
+          "verdict": "PASS",
+          "note": "E1 to E4 each state selector, trigger and behaviour; L3 met.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "criterion": "Every form field has a type, a required flag and a validation rule",
+          "verdict": "PASS",
+          "note": "F1 to F5 each state a type, 'required yes' and a validation rule.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "criterion": "Consistent with the HLD: every component is built by a section",
+          "verdict": "PASS",
+          "note": "'every component C1 to C5 is built by exactly one section'; L5 met.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "criterion": "No invented facts: every fact comes from the brief or the Requester's answers or the earlier documents, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "Unlabelled design rules, not brief facts: 'A problem is never shown by colour alone', 'Text and prices have enough contrast against the background', 'a failed send moves the visitor to the first field with a problem'. Also, 'the selector names below' in the assumptions list now points the wrong way. Code check L6 is met.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        }
+      ],
+      "mechanical": {},
+      "screenshot": null,
+      "all_pass": true,
+      "output": "lld",
+      "conditions": [
+        {
+          "id": "L1",
+          "text": "All five sections are present and not empty",
+          "check": "sections-present",
+          "met": true,
+          "evidence": "all 5 sections present, none empty"
+        },
+        {
+          "id": "L2",
+          "text": "Section, element and field ids are unique, and every section has an id",
+          "check": "lld-ids-unique",
+          "met": true,
+          "evidence": "14 entry ids and 9 selectors, all unique"
+        },
+        {
+          "id": "L3",
+          "text": "Every interactive element has a selector, a trigger and a behaviour",
+          "check": "lld-elements",
+          "met": true,
+          "evidence": "each of the 4 interactive element(s) has a selector, a trigger and a behaviour"
+        },
+        {
+          "id": "L4",
+          "text": "Every form field has a name, a type and a required flag",
+          "check": "lld-fields",
+          "met": true,
+          "evidence": "each of the 5 form field(s) has a name, a type and a required flag"
+        },
+        {
+          "id": "L5",
+          "text": "Every HLD component appears in an LLD section",
+          "check": "chain-ids",
+          "met": true,
+          "evidence": "each of C1, C2, C3, C4, C5 appears in Pages and sections"
+        },
+        {
+          "id": "L6",
+          "text": "No invented facts: every number, email and proper name comes from the charter, the Requester's answers or the earlier documents, or sits in an Assumption: line",
+          "check": "no-invented-facts",
+          "met": true,
+          "evidence": "every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+          "assumptions": [
+            "the single page file is named index.html.",
+            "the selector names below are design choices, not facts from the brief.",
+            "the message in E3 appears in the same section and the pre-order form stays on the page.",
+            "the in-page links in E4 exist to keep the one page easy to move around on a phone.",
+            "the field names, types, required flags and validation rules below are design choices, not facts from the brief. The brief gives no field list.",
+            "the shop needs a name to hand over the order at pickup.",
+            "the shop needs a way to reach the visitor about the order.",
+            "the visitor picks the time they will collect the order.",
+            "no other fields are added, so the form asks only for what a pickup pre-order needs.",
+            "the page is one file named index.html, written in plain HTML, CSS and JavaScript, with the styles and scripts kept inside that file and no build step.",
+            "the sections appear in the order listed above, so the in-page links in #page-nav follow the same order.",
+            "the styles sit in one block and the scripts in one block in the same file, so the page stays one file.",
+            "the page is checked at a phone width of 360px and a desktop width of 1280px, with no horizontal scrolling at either. These two widths come from the department's workable rules, not from the brief. No other breakpoint or size is set here.",
+            "#pre-order-status is marked so that screen readers announce the message when it appears.",
+            "images, if any are added, carry a short text description. The brief lists no images."
+          ]
+        }
+      ],
+      "read": "Read the full LLD v8: Pages and sections (5 entries S1 to S5, about 20 lines), Interactive elements (E1 to E4 plus 3 assumptions, about 15 lines), Form fields (F1 to F5 plus rules, about 20 lines), File structure (section order and rules, about 20 lines), Responsive and accessibility rules (about 45 lines), and the Assumptions to confirm list (15 lines). Also read the code check evidence for L1 to L6 and the brief facts."
+    }
+  ],
+  "sections": {
+    "W-18": {
+      "owner": "W-18",
+      "head": "",
+      "body": "## Pages and sections\n\nBrew Lab is one page only. Assumption: the single page file is named `index.html`.\n\n- **S1** `#menu` (page index.html): the menu with each item and its price, so visitors see what things cost before they visit. Implements C1. Serves R1, R5, R6.\n- **S2** `#pre-order` (page index.html): the pre-order form for pickup, with no online payment asked for or taken. Implements C2. Serves R2, R5, R6, R7.\n- **S3** `#shop-address` (page index.html): the shop's map or address, so visitors can find Brew Lab in Indiranagar, Bengaluru. Implements C3. Serves R3, R5, R6.\n- **S4** `#opening-hours` (page index.html): the opening hours, so visitors can check when Brew Lab is open before they come. Implements C4. Serves R4, R5, R6.\n- **S5** `#page-layout` (page index.html): the wrapper that holds the menu, pre-order form, shop address and opening hours on the one page, readable and usable on a phone. Implements C5. Serves R5, R6.\n\nCoverage: C1 is built by the menu section, C2 by the pre-order section, C3 by the shop address section, C4 by the opening hours section and C5 by the layout section. Every section id is unique and every component C1 to C5 is built by exactly one section.",
+      "workflow": "LLD Pages and sections"
+    },
+    "W-19": {
+      "owner": "W-25",
+      "head": "",
+      "body": "## Interactive elements\n\nThe Brew Lab page is one page only and works on phones. Every element below sits on `index.html` and belongs to a section from Pages and sections. No payment: no element asks for or takes any payment (R7).\n\nAssumption: the selector names below are design choices, not facts from the brief.\n\n- **E1** in S2: selector `#pre-order-submit`; trigger submit; behaviour the Pre-order form for pickup is sent when every required field is filled in. If a required field is empty or invalid, the form is not sent and the problem is shown beside that field. No payment is asked for or taken.\n- **E2** in S2: selector `#pre-order-fields`; trigger change; behaviour that field is checked when the visitor leaves it, and its message is shown beside it. The fields and their rules are listed under Form fields.\n- **E3** in S2: selector `#pre-order-status`; trigger submit; behaviour a message shows that the pre-order for pickup was received, so the visitor knows it went through.\n- **E4** in S5: selector `#page-nav`; trigger click; behaviour each link moves the visitor to `#menu` (S1), `#pre-order` (S2), `#shop-address` (S3) or `#opening-hours` (S4) on the same page.\n\nAssumption: the message in E3 appears in the same section and the pre-order form stays on the page.\n\nAssumption: the in-page links in E4 exist to keep the one page easy to move around on a phone.",
+      "workflow": "Revise LLD Interactive elements (no colons)"
+    },
+    "W-20": {
+      "owner": "W-20",
+      "head": "",
+      "body": "## Form fields\n\nBrew Lab has one form, the pre-order form for pickup (`#pre-order-form` in S2, page index.html). No payment: the form has no card or other payment field and takes no online payment (R7). Every field below serves R2 and R6, so a visitor on a phone can fill in and send it.\n\nAssumption: the field names, types, required flags and validation rules below are design choices, not facts from the brief. The brief gives no field list.\n\n- **F1** in S2, form `#pre-order-form`: field `customer-name`, type text, required yes, validation: must not be empty. Assumption: the shop needs a name to hand over the order at pickup.\n- **F2** in S2, form `#pre-order-form`: field `customer-phone`, type tel, required yes, validation: must not be empty and must contain digits only. Assumption: the shop needs a way to reach the visitor about the order.\n- **F3** in S2, form `#pre-order-form`: field `coffee-item`, type select, required yes, validation: one option must be chosen, and the options match the items listed in `#menu` (S1).\n- **F4** in S2, form `#pre-order-form`: field `quantity`, type number, required yes, validation: a whole number of one or more.\n- **F5** in S2, form `#pre-order-form`: field `pickup-time`, type time, required yes, validation: must not be empty and must fall within the opening hours shown in `#opening-hours` (S4). Assumption: the visitor picks the time they will collect the order.\n\nRules for all fields:\n- Each field has a visible label, and its validation message appears beside the field, as set out under Interactive elements.\n- A form with any required field empty or invalid is not sent.\n- Assumption: no other fields are added, so the form asks only for what a pickup pre-order needs.",
+      "workflow": "LLD Form fields"
+    },
+    "W-21": {
+      "owner": "W-21",
+      "head": "",
+      "body": "## File structure\n\nOne page only. Brew Lab is a single page: the menu, pre-order form, shop address and opening hours all sit on it, with no second page (R5). Every section id below comes from Pages and sections, and every element id comes from Interactive elements and Form fields.\n\nAssumption: the page is one file named `index.html`, written in plain HTML, CSS and JavaScript, with the styles and scripts kept inside that file and no build step.\n\nWhere each section sits in the page, top to bottom:\n- `#page-layout` (S5, C5): the wrapper that holds every other section. It also holds the in-page links `#page-nav` (E4).\n- `#menu` (S1, C1): the menu with each item and its price.\n- `#pre-order` (S2, C2): the pre-order form for pickup. It holds `#pre-order-form` (fields F1 to F5, elements E1 and E2) and `#pre-order-status` (E3). No payment field is placed here (R7).\n- `#shop-address` (S3, C3): the map or address.\n- `#opening-hours` (S4, C4): the opening hours.\n\nRules for the file:\n- Each section id appears once, and each section sits inside `#page-layout`.\n- The coffee choices in the form field `coffee-item` (F3) are taken from the items in `#menu`, so the menu is written once.\n- The pre-order form points to no other page and asks for no payment.\n- Assumption: the sections appear in the order listed above, so the in-page links in `#page-nav` follow the same order.\n- Assumption: the styles sit in one block and the scripts in one block in the same file, so the page stays one file.",
+      "workflow": "LLD File structure"
+    },
+    "W-22": {
+      "owner": "W-24",
+      "head": "",
+      "body": "## Responsive and accessibility rules\n\nWorks on phones. Every section of the one page (S1 to S5 on `index.html`) must be readable and usable on a phone, so a visitor can read the menu with prices, the opening hours and the address, and can fill in and send the pre-order form (R6). No payment field appears anywhere on the page (R7).\n\nAssumption: the page is checked at a phone width of 360px and a desktop width of 1280px, with no horizontal scrolling at either. These two widths come from the department's workable rules, not from the brief. No other breakpoint or size is set here.\n\nPhone layout:\n- `#page-layout` (S5) shows `#menu` (S1), `#pre-order` (S2), `#shop-address` (S3) and `#opening-hours` (S4) in one column on a phone, in the order set under File structure.\n- No section is wider than the screen. Text wraps and nothing forces the visitor to scroll sideways.\n- The page keeps one page only. No section moves to a second page on a phone.\n\nReadable menu (S1, C1):\n- Each menu item and its price are shown together, so a visitor sees what each item costs without searching.\n- Menu text stays readable on a phone without zooming.\n\nAddress and opening hours (S3, S4):\n- The address in `#shop-address` is plain text, so it can be read and copied on a phone. If a map is shown, it fits inside the screen width.\n- The opening hours in `#opening-hours` are plain text and sit where a visitor can find them without extra taps.\n\nPre-order form (S2, E1, E2, E3, F1 to F5):\n- Each field in the pre-order form sits on its own line and fills the width available on a phone.\n- Every field F1 to F5 has a visible label placed with the field. A placeholder never replaces a label.\n- Field types from Form fields are kept, so a phone offers a suitable input for each one: text for `customer-name`, tel for `customer-phone`, select for `coffee-item`, number for `quantity` and time for `pickup-time`.\n- The submit control for E1 is easy to reach and tap on a phone, and sits after the last field.\n- Validation messages from E2 appear next to the field they belong to, and are written in words. A problem is never shown by colour alone.\n- The confirmation in `#pre-order-status` (E3) is shown in the same section, so the visitor sees it without scrolling away from the form.\n- Assumption: `#pre-order-status` is marked so that screen readers announce the message when it appears.\n\nIn-page links (S5, E4):\n- The links in `#page-nav` are big enough to tap on a phone and have clear text naming `#menu`, `#pre-order`, `#shop-address` and `#opening-hours`.\n\nKeyboard use:\n- Every control (the links in E4, every field F1 to F5 and the submit control in E1) can be reached and used from the keyboard alone.\n- The order of controls follows the order on screen, from `#page-nav` down through S1, S2, S3 and S4.\n- The control that has focus always shows a visible outline.\n- The form can be sent from the keyboard, and a failed send moves the visitor to the first field with a problem.\n\nReading and structure:\n- Each section S1 to S4 has a visible heading that names it, so the page can be understood by headings alone.\n- Text and prices have enough contrast against the background to be read in daylight on a phone.\n- Assumption: images, if any are added, carry a short text description. The brief lists no images.",
+      "workflow": "Revise LLD Responsive and accessibility rules"
+    }
+  }
+}

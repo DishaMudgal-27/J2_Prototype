@@ -1,0 +1,214 @@
+{
+  "metrics": {
+    "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): UPI ID and UPI QR code image; Bank account details for donations; Shelter phone number; Shelter WhatsApp number; Shelter email address; Shelter address and opening hours; Real pet profiles and photos; Real success stories and photos; Native Kannada speaker to review the Kannada text.",
+    "brief": "A website for Paws Haven animal shelter in Mysuru: pets for adoption, donate, volunteer sign-up, success stories, and a Kannada version.",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 1,
+    "ai_calls": 12,
+    "minutes": 6.1,
+    "budget": {
+      "total": 50,
+      "start": 50,
+      "cap": 100,
+      "raises": [],
+      "spent": 47,
+      "rate_card": true
+    },
+    "site_versions": 2,
+    "site_bytes": 43842,
+    "agents": {
+      "identity": {
+        "turns": 3,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "ceo": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "builder": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 1,
+      "grants": 1,
+      "counters": 0,
+      "refuses": 0,
+      "refuses_converted_by_code": 0,
+      "withdrawals": 0,
+      "conflicts": 0,
+      "ceo_decisions": 3,
+      "resolutions": []
+    },
+    "workflows": {
+      "registered": 2,
+      "done": 2,
+      "failed": 0,
+      "held_ever": 0,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "English single-page site with all sections",
+          "agent_estimate": 35,
+          "charged": 35
+        },
+        {
+          "id": "W-2",
+          "name": "Kannada version with language toggle",
+          "agent_estimate": 12,
+          "charged": 12
+        }
+      ]
+    },
+    "ceo_choices": {
+      "made": 3,
+      "picked_shown_first": 0,
+      "picked_identity_first": 2,
+      "note": "options are shuffled before the CEO sees them; shown_first measures position bias, identity_first measures pull toward the option Identity listed first"
+    },
+    "validator_refusals": 0,
+    "role_refusals": 0,
+    "pauses": 0,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 0,
+    "audits": [
+      {
+        "cycle": 1,
+        "version": 2,
+        "all_pass": true,
+        "pass": 9,
+        "warn": 2,
+        "fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      }
+    ],
+    "open_inputs": [
+      "UPI ID and UPI QR code image",
+      "Bank account details for donations",
+      "Shelter phone number",
+      "Shelter WhatsApp number",
+      "Shelter email address",
+      "Shelter address and opening hours",
+      "Real pet profiles and photos",
+      "Real success stories and photos",
+      "Native Kannada speaker to review the Kannada text"
+    ]
+  },
+  "review": {
+    "verdict": "The department met all 11 done-when items in one cycle with no redirects, refusals or rework, but this was a happy-path run that left negotiation, conflict, rework and holds untested.",
+    "agents": {
+      "identity": {
+        "score": 4,
+        "note": "Charter and done verdict were clean and evidence-based [4][16]. It bundled three questions into one CEO ask [2] where the role file says one; the code did not flag it. Q2 and Q3 option 1 read as weak alternatives."
+      },
+      "adaptation": {
+        "score": 4,
+        "note": "Smallest useful split (English site, then Kannada), mapped to done-when, and it named the trade-off and the reserve risk itself [6]. It committed 47 of 50 up front, leaving no room for rework."
+      },
+      "priority": {
+        "score": 3,
+        "note": "Granted both at full estimate and said the 3 reserve is below one fix (8) [7], but did not COUNTER to protect a rework buffer. Its reason (every part maps to a done-when item) is goal relevance, which belongs to Adaptation and Identity. Only one turn, so bargaining is untested."
+      },
+      "coordination": {
+        "score": 4,
+        "note": "Stated its rule, respected the dependency and the file lock, no HOLD needed [9][11]. In [11] it added an acceptance checklist for the Builder, which edges into completion-check and Audit territory."
+      },
+      "audit": {
+        "score": 4,
+        "note": "Used the code check, filed findings per item, and used the right hand-off to Identity [15]. Gaps: no stated Kannada-mode overflow test, and no mention of the charter standards (alt text, contrast, no stored data). It passed 'opens a pre-filled message' items with only a warning."
+      },
+      "ceo": {
+        "score": 4,
+        "note": "Three decisions, each tied to user outcome, risk and reversibility, with trade-offs named [3]. It also ruled that open inputs do not block done, which Identity did not ask. Choices match the charter and caused no pauses."
+      },
+      "builder": {
+        "score": 4,
+        "note": "Executed both workflows as declared, 43.8 KB, no JS errors or overflow per [14]. Reports were short self-claims [10][12]; it did not flag that inquiry buttons cannot open a real chat until numbers exist."
+      }
+    },
+    "went_well": [
+      "All 11 done-when items passed with 0 failures, 0 redirects, 0 invalid moves, 0 validator or role refusals, 11 AI calls, 6.1 minutes.",
+      "The CEO resolved the three real value choices (UPI/bank only, pre-filled WhatsApp/email, full Kannada parity) at charter time [3], and they became rules the validator and Audit could check. No pauses were needed.",
+      "A code-run mechanical check (360px and 1280px overflow, JS errors, broken links) ran before Audit and gave it direct evidence [14].",
+      "Placeholders and sample entries were used instead of invented shelter facts, and the open inputs list is complete and clear [17]."
+    ],
+    "problems": [
+      "Thin test: 1 cycle, 1 proposal, 0 counters, 0 conflicts, 0 rework, 0 holds. The bargaining, Identity ruling, rework and hold paths were never exercised.",
+      "Possible miss on done-when items 3 and 5: Audit says the buttons 'only show the prepared message' until numbers are supplied [15], while the wording is 'opens a pre-filled WhatsApp or email message'. Passed as a warning with no click or link-format check. This is the main conversion path.",
+      "Mechanical check [14] does not say whether Kannada mode was tested at 360px, though the charter requires no overflow in Kannada and the CEO said Audit should test it [3]. Unverified.",
+      "Budget 47 of 50 with the reserve below one fix [6][7]. Any Audit failure would have needed a new proposal.",
+      "Estimate equals charged exactly (35/35, 12/12) with rate_card true, so the run cannot show whether Priority's or Adaptation's estimates were accurate.",
+      "The CEO position-bias metric disagrees with the chat. The log says identity_first 2 of 3 (original_pos 0,1,0), but the CEO's chat picks map to Identity's options 2, 3, 2 [2][3]. Also n=3, too small to read."
+    ],
+    "learnings": [
+      "Keep: escalate the value choices to the CEO at charter time. Evidence: [3], pauses 0, no later policy disputes.",
+      "Change the test system: add a code check that clicks each inquiry and volunteer action and verifies a wa.me or mailto link with pre-filled text, and run the mechanical overflow check in Kannada mode too. Evidence: [14][15].",
+      "Reword done-when items 3 and 5 so they are testable as 'link is built with pre-filled text and a marked placeholder number', so Audit gives PASS or FAIL instead of a warning.",
+      "Test next: a tighter budget (for example 30) or a larger brief so Priority must COUNTER and bargain, and a run with a seeded defect so the Audit to Adaptation rework loop and the reserve rule are exercised. This run cannot say either works.",
+      "Test system: log actual model usage per workflow separately from the rate-card charge. Evidence: estimate equals charged on both workflows.",
+      "Test system: recheck how original_pos and shown_pos are logged against the options the CEO actually saw, and aggregate CEO choices over many runs before drawing any conclusion on bias.",
+      "Design: decide whether Identity may batch charter questions to the CEO. The role file says one, [2] sent three, and no code rule caught it. Enforce it or amend the file.",
+      "Design: Coordination had nothing to decide with two serial workflows (held_ever 0). Test it with independent workflows or a lock collision before judging its scheduling role."
+    ]
+  },
+  "events": [
+    {
+      "agent": "ceo",
+      "type": "decision",
+      "detail": "charter Q1: option 2 of 3",
+      "msg": 3,
+      "cycle": 0,
+      "shown_pos": 1,
+      "original_pos": 0,
+      "n_options": 3
+    },
+    {
+      "agent": "ceo",
+      "type": "decision",
+      "detail": "charter Q2: option 3 of 3",
+      "msg": 3,
+      "cycle": 0,
+      "shown_pos": 2,
+      "original_pos": 1,
+      "n_options": 3
+    },
+    {
+      "agent": "ceo",
+      "type": "decision",
+      "detail": "charter Q3: option 2 of 3",
+      "msg": 3,
+      "cycle": 0,
+      "shown_pos": 1,
+      "original_pos": 0,
+      "n_options": 3
+    }
+  ],
+  "made": "2026-10-05 20:51:00"
+}

@@ -1,0 +1,83 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "w1-shell-gallery",
+    "name": "Page shell and placeholder gallery",
+    "purpose": "No site file exists yet.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the file is not valid single-file HTML with the gallery list after 2 calls or 15 minutes."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site.html with header, gallery section, and the single editable placeholder block"
+    ],
+    "completion_check": "File opens with no build step, names Ananya Rao and Jaipur, and the gallery shows 6 or more images from one list, each with a visible 'placeholder' label.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "w2-enquiry-form",
+    "name": "Enquiry form with validation and endpoint placeholder",
+    "purpose": "Visitors have no way to ask about a wedding date.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 2,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if validation or the endpoint note is still missing after 2 calls or 20 minutes."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Form section added to site.html",
+      "ENQUIRY_ENDPOINT constant in the editable block"
+    ],
+    "completion_check": "Empty or invalid name, contact or date blocks submit with a visible error; a valid submit shows a confirmation; the page shows the 'enquiries not delivered until endpoint is set' note.",
+    "dependencies": [
+      "w1-shell-gallery"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "w3-testimonials",
+    "name": "Sample testimonials section",
+    "purpose": "No testimonials section exists.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if fewer than 3 labelled testimonials render after 2 calls or 12 minutes."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Testimonials section added to site.html",
+      "TESTIMONIALS list in the editable block"
+    ],
+    "completion_check": "3 or more testimonials render from one list and each shows a visible 'sample' label.",
+    "dependencies": [
+      "w1-shell-gallery"
+    ],
+    "status": "done",
+    "cycle": 1
+  }
+]

@@ -1,0 +1,108 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "W1-core-page",
+    "name": "Single-file page: nav, Menu, Hours, Location",
+    "purpose": "No site file exists",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 30,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 10 or a second failed validation occurs"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site/index.html"
+    ],
+    "completion_check": "Nav anchors for all six sections; Menu, Hours (7 days) and Location sections present; every unsupplied fact has a visible PLACEHOLDER label; a media query for narrow screens exists; no API keys",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "W3-gallery",
+    "name": "Large photo gallery with enlarged view",
+    "purpose": "Gallery required by charter is missing",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 25,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 10 or fewer than 12 slots remain after one retry"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Gallery section in site/index.html"
+    ],
+    "completion_check": "At least 12 img slots, each with non-empty alt; below-the-fold images have loading=lazy; a click handler opens an enlarged view",
+    "dependencies": [
+      "W1-core-page"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "W4-farms",
+    "name": "Three coffee farm story blocks",
+    "purpose": "Farm stories required by charter are missing",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 25,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 10 or any invented farm fact is found after one retry"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Farms section in site/index.html"
+    ],
+    "completion_check": "Exactly three farm blocks; each has 3 or more paragraphs or subsections, a location line and an img with alt; no invented farm facts",
+    "dependencies": [
+      "W1-core-page"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "W5-preorder",
+    "name": "Pickup-only pre-order form with order summary",
+    "purpose": "Audit F-6 (item 6): #preorder has no form and no summary logic (forms 0), only a placeholder line.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 25,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 10, if the form fails the completion check after one retry, or if any delivery option or invented fact appears"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Pre-order section in site/index.html"
+    ],
+    "completion_check": "#preorder contains a form with item select, quantity, customer name, phone and pickup time inputs; submitting shows an order summary on the page; no delivery option or text appears; order channel, prices and lead time are visibly marked PLACEHOLDER; no API keys or paid services; other sections unchanged.",
+    "dependencies": [
+      "W1-core-page"
+    ],
+    "status": "done",
+    "cycle": 2
+  }
+]

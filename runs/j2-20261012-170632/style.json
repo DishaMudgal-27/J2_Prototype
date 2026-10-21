@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#FF3D81",
+    "secondary": "#7C4DFF",
+    "accent": "#FFD60A",
+    "background": "#0B0B1E",
+    "surface": "#17173A",
+    "text": "#FFFFFF",
+    "muted": "#B8B8D9"
+  },
+  "fonts": {
+    "heading": "'Space Grotesk', 'Segoe UI', system-ui, sans-serif",
+    "body": "'Inter', 'Segoe UI', system-ui, sans-serif",
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600&display=swap"
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "64px"
+  },
+  "radius": "16px",
+  "buttons": {
+    "primary": "background:#FFD60A;color:#0B0B1E;border:2px solid #FFD60A;font-weight:700;min-height:48px;padding:12px 24px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer",
+    "secondary": "background:transparent;color:#FFFFFF;border:2px solid #FF3D81;font-weight:700;min-height:48px;padding:12px 24px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer"
+  },
+  "card": "background:#17173A;border:1px solid #2C2C5E;border-radius:16px;padding:24px;color:#FFFFFF",
+  "notes": "Dark navy base with hot pink, violet and electric yellow reads as energetic and techy, and gives AA contrast on phone screens."
+}

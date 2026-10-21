@@ -1,0 +1,82 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "w1-core-en",
+    "name": "Core English site: booking and services (with one placeholder dentist card)",
+    "purpose": "No page exists. Booking, services and dentist items are all open.",
+    "cost": 25,
+    "estimate": 25,
+    "envelope": {
+      "money_limit": 25,
+      "model_call_limit": 2,
+      "time_limit_minutes": 25,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the second call is used and the form does not yet build a WhatsApp or mailto link."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "smilecare.html with booking and services sections in English, including one placeholder dentist card"
+    ],
+    "completion_check": "The file opens with no build step and no backend calls. The form submit builds a WhatsApp or mailto link and the booking section says the clinic confirms by phone. Every service shows a starting-from range and a final-cost-after-examination line. At least one dentist card exists, with every unsupplied detail marked as a placeholder.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "w2-emergency-faq",
+    "name": "Emergency contact and patient FAQ section",
+    "purpose": "Emergency contact and FAQ items are open.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the emergency block still lacks a marked placeholder number after the retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Emergency and FAQ section added to smilecare.html"
+    ],
+    "completion_check": "The emergency block is visible without opening a collapsed element. Its phone number and hours are marked placeholders. The FAQ shows at least 1 question with an answer.",
+    "dependencies": [
+      "w1-core-en"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "w3-marathi-toggle",
+    "name": "Marathi translation and language toggle",
+    "purpose": "The language toggle and Marathi parity items are open.",
+    "cost": 22,
+    "estimate": 22,
+    "envelope": {
+      "money_limit": 22,
+      "model_call_limit": 2,
+      "time_limit_minutes": 25,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any dictionary key is still missing a Marathi value after the retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Marathi dictionary and language toggle in smilecare.html"
+    ],
+    "completion_check": "Every dictionary key has both an English and a Marathi value. Toggling changes the text of the booking form, services, dentist card, emergency contact and FAQs. The Marathi view shows the 'pending native review' label.",
+    "dependencies": [
+      "w1-core-en",
+      "w2-emergency-faq"
+    ],
+    "status": "done",
+    "cycle": 1
+  }
+]

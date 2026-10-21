@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityCare Hospital Bengaluru - Emergency & Appointment Booking</title>
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --secondary: #0d9488;
+            --emergency-red: #dc2626;
+            --emergency-bg: #fef2f2;
+            --light-bg: #f8fafc;
+            --dark-text: #1e293b;
+            --gray-border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+        }
+
+        /* Top Emergency Banner */
+        .emergency-banner {
+            background-color: var(--emergency-red);
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 10px rgba(220, 38, 38, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .emergency-banner-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .emergency-badge {
+            background-color: white;
+            color: var(--emergency-red);
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .emergency-phone {
+            font-size: 1.25rem;
+            text-decoration: underline;
+            color: #ffffff;
+        }
+
+        /* Header */
+        header {
+            background-color: white;
+            border-bottom: 1px solid var(--gray-border);
+            padding: 15px 20px;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .logo-text h1 {
+            font-size: 1.4rem;
+            color: var(--primary-dark);
+            line-height: 1.2;
+        }
+
+        .logo-text p {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        nav a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: var(--dark-text);
+            font-weight: 500;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 100%);
+            padding: 40px 20px;
+            border-bottom: 1px solid var(--gray-border);
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .hero-text h2 {
+            font-size: 2.2rem;
+            color: var(--primary-dark);
+            margin-bottom: 15px;
+        }
+
+        .hero-text p {
+            font-size: 1.1rem;
+            color: #475569;
+            margin-bottom: 20px;
+        }
+
+        /* Emergency Card Highlight */
+        .emergency-card {
+            background-color: var(--emergency-bg);
+            border: 2px solid #fca5a5;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .emergency-card h3 {
+            color: var(--emergency-red);
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .emergency-card ul {
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        .emergency-card li {
+            margin-bottom: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Main Section & Booking Form */
+        .main-content {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .section-title h2 {
+            font-size: 1.8rem;
+            color: var(--primary-dark);
+        }
+
+        .section-title p {
+            color: #64748b;
+        }
+
+        /* Booking Container */
+        .booking-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--gray-border);
+            overflow: hidden;
+        }
+
+        .department-tabs {
+            display: flex;
+            background-color: #f1f5f9;
+            border-bottom: 1px solid var(--gray-border);
+        }
+
+        .dept-tab {
+            flex: 1;
+            padding: 18px 15px;
+            text-align: center;
+            background: none;
+            border: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .dept-tab.active {
+            background: white;
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .dept-tab .badge {
+            background-color: #e0f2fe;
+            color: var(--primary-dark);
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            text-transform: uppercase;
+        }
+
+        .booking-body {
+            padding: 30px;
+        }
+
+        .dept-info {
+            background-color: #f8fafc;
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+        }
+
+        .dept-info h4 {
+            color: var(--primary-dark);
+            margin-bottom: 5px;
+        }
+
+        .booking-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .booking-form {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #334155;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 10px 14px;
+            border: 1px solid var(--gray-border);
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+        }
+
+        .btn-submit {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Confirmation Modal / Alert */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .modal-icon {
+            width: 60px;
+            height: 60px;
+            background-color: #dcfce7;
+            color: #16a34a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin: 0 auto 15px;
+        }
+
+        .modal-card h3 {
+            font-size: 1.5rem;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .modal-details {
+            background-color: #f8fafc;
+            border: 1px solid var(--gray-border);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        .btn-close {
+            background-color: #64748b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #0f172a;
+            color: #94a3b8;
+            padding: 30px 20px;
+            margin-top: 60px;
+            font-size: 0.9rem;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer-col h4 {
+            color: white;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Prominent Emergency Helpline Header Banner -->
+    <div class="emergency-banner" id="emergency">
+        <div class="emergency-banner-content">
+            <span class="emergency-badge">🚨 Emergency Priority</span>
+            <span>24/7 CityCare Helpline: <a href="tel:+918049999999" class="emergency-phone">+91 80 4999 9999</a></span>
+            <span>|</span>
+            <span>🚑 Call <strong>108</strong> for immediate ambulance dispatch in Bengaluru</span>
+        </div>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo-group">
+                <div class="logo-icon">+</div>
+                <div class="logo-text">
+                    <h1>CityCare Hospital</h1>
+                    <p>Bengaluru, Karnataka</p>
+                </div>
+            </div>
+            <nav>
+                <a href="#emergency">Emergency Info</a>
+                <a href="#booking">Book Appointment</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-text">
+                <h2>Compassionate Healthcare & Rapid Emergency Response</h2>
+                <p>Providing world-class medical services across Bengaluru. Book doctor visits easily online or connect with our emergency services instantly.</p>
+            </div>
+            <div class="emergency-card">
+                <h3>🚨 Immediate Emergency Assistance</h3>
+                <p>For trauma, acute critical care, or urgent medical transport:</p>
+                <ul>
+                    <li>📞 <strong>Helpline:</strong> <a href="tel:+918049999999" style="color:var(--emergency-red);">+91 80 4999 9999</a></li>
+                    <li>🚑 <strong>Ambulance:</strong> Call <strong>108</strong> directly for rapid ambulance dispatch.</li>
+                    <li>📍 <strong>Emergency Ward:</strong> Open 24/7 at Main Campus, Indiranagar / MG Road, Bengaluru.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Appointment Booking Section -->
+    <main class="main-content" id="booking">
+        <div class="section-title">
+            <h2>Patient Appointment Booking</h2>
+            <p>Select a highlighted specialty below to schedule your visit with our specialist doctors.</p>
+        </div>
+
+        <div class="booking-container">
+            <!-- Department Selection Tabs highlighting General Medicine, Pediatrics, Cardiology -->
+            <div class="department-tabs">
+                <button class="dept-tab active" onclick="selectDepartment('General Medicine', this)">
+                    🩺 General Medicine <span class="badge">Featured</span>
+                </button>
+                <button class="dept-tab" onclick="selectDepartment('Pediatrics', this)">
+                    👶 Pediatrics <span class="badge">Featured</span>
+                </button>
+                <button class="dept-tab" onclick="selectDepartment('Cardiology', this)">
+                    ❤️ Cardiology <span class="badge">Featured</span>
+                </button>
+            </div>
+
+            <div class="booking-body">
+                <div class="dept-info" id="dept-info-box">
+                    <h4 id="dept-title">General Medicine</h4>
+                    <p id="dept-desc">Comprehensive adult health evaluations, preventive care, and treatment for acute/chronic illness by experienced physician specialists.</p>
+                </div>
+
+                <form class="booking-form" id="appointment-form" onsubmit="handleBooking(event)">
+                    <input type="hidden" id="selected-dept" value="General Medicine">
+
+                    <div class="form-group">
+                        <label for="patient-name">Patient Full Name *</label>
+                        <input type="text" id="patient-name" required placeholder="e.g. Ramesh Kumar">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="patient-phone">Phone Number *</label>
+                        <input type="tel" id="patient-phone" required placeholder="+91 98765 43210">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="doctor-select">Select Doctor *</label>
+                        <select id="doctor-select" required>
+                            <!-- Populated dynamically based on department -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="visit-date">Preferred Date *</label>
+                        <input type="date" id="visit-date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="time-slot">Preferred Time Slot *</label>
+                        <select id="time-slot"

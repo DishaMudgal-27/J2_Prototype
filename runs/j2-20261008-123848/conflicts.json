@@ -1,0 +1,151 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 1,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 1",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 26,
+        "text": "@Priority 78 at rate-card minimums is needed for the 8 items plus the h1 fix, and only 25 is available, so I fund 3 now: item 1 with the single h1 (10), item 4 filters (10) and item 14 (5). Items 5, 9 (store, fix F-9 at 8), 10, 12 and 13 do not fit; you can reprice or swap if you rank them differently. I'm picking the name and filters because they are the most visible gaps and the only core shopping function still missing. The trade-off is that store details, returns, delivery and the size guide stay unmet until more budget or more items are dropped, and the h1 finding R-3 is closed only through the hero's h1, with no separate fix charge.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 27,
+        "text": "@Adaptation GRANT as proposed. The three workflows total 25 at rate-card minimums, which is the full added budget. Nothing is left for Audit fixes, so a failed check means dropping another item.",
+        "position": "REFUSE: nothing",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 29,
+        "text": "@Identity The Requester's 25 top-up is not in the ledger: budget still shows 40/40 spent, 0 remaining, so every priced proposal will be refused. Please credit the 25, or tell me the real remaining amount. I am resubmitting the same 3 workflows at 25, since nothing smaller covers the gap, and will resize if the credited amount is lower.",
+        "position": "Shop name, Pune and single h1 (10), Size and price filters (10), Responsive and link hygiene (5)",
+        "agree": false
+      },
+      {
+        "n": 3,
+        "who": "priority",
+        "msg": 34,
+        "text": "@Adaptation GRANT as proposed: name-hero 10, filters 10, site-hygiene 5. Total 25 equals the 25 remaining, and each is at its rate-card minimum with no bundling. Nothing is left for Audit fixes, so a failed check means dropping another item.",
+        "position": "grants Adaptation's revision",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "adaptation",
+    "outcome": "Priority granted Adaptation's revision: Shop name, Pune and single h1 (10), Size and price filters (10), Responsive and link hygiene (5) goes to the validator.",
+    "priority_final": [],
+    "adaptation_final": [
+      {
+        "id": "name-hero",
+        "name": "Shop name, Pune and single h1",
+        "goal_gap": "Page shows no visible Thread & Loom name and no mention of Pune; there is no h1.",
+        "expected_outcome": "A hero with one h1 'Thread & Loom', Pune, and the line about handloom kurtas, sarees, cotton shirts and dupattas.",
+        "outputs": [
+          "hero section with the single h1 in the site file"
+        ],
+        "completion_check": "Page has exactly one h1 containing Thread & Loom, the word Pune is visible, and the product line names kurtas, sarees, cotton shirts and dupattas.",
+        "dependencies": [
+          "catalogue"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          1
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 8
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "filters",
+        "name": "Size and price filters",
+        "goal_gap": "No size or price control exists, so visitors cannot narrow the 10 products.",
+        "expected_outcome": "Size and price range controls that update the product list and work with the category tabs; free-size items match in the size filter.",
+        "outputs": [
+          "filter controls and script in the site file"
+        ],
+        "completion_check": "Choosing a size or price range changes the visible card count correctly; Sarees and Dupattas still show under any size choice; no JS errors.",
+        "dependencies": [
+          "catalogue"
+        ],
+        "parts": [
+          "interactive_feature"
+        ],
+        "covers": [
+          4
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 8
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "site-hygiene",
+        "name": "Responsive and link hygiene",
+        "goal_gap": "Item 14 (viewport, no overflow, no JS errors, no broken links) is built but unpaid.",
+        "expected_outcome": "Viewport tag and responsive rules confirmed, with working in-page links to each section.",
+        "outputs": [
+          "responsive rules and in-page nav links in the site file"
+        ],
+        "completion_check": "Viewport tag present; no horizontal overflow at 360px or 1280px; zero JS errors; zero broken in-page links.",
+        "dependencies": [
+          "catalogue"
+        ],
+        "parts": [
+          "styling"
+        ],
+        "covers": [
+          14
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 5,
+          "calls": 1,
+          "time_minutes": 5
+        },
+        "estimate": 5,
+        "cost": 5
+      }
+    ],
+    "attempts_used": 3,
+    "registered": [
+      "Shop name, Pune and single h1",
+      "Size and price filters",
+      "Responsive and link hygiene"
+    ]
+  }
+]

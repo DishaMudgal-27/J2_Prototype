@@ -1,0 +1,120 @@
+[
+  {
+    "cycle": 1,
+    "version": 2,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page title and header show the name Brew Lab and mention Indiranagar, Bengaluru",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "<title> is 'Brew Lab | Cafe in Indiranagar, Bengaluru'; the hero eyebrow and h1 carry both, but the <header> element holds only the 'Brew Lab' brand link and nav.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "A menu section lists items grouped by category, each with a name and a price in ₹; any price not supplied is visibly marked as a placeholder",
+        "verdict": "PASS",
+        "note": "3 category cards (Hot Coffee, Cold Coffee, Bites), 9 items, each name and '₹ price' wrapped in span.ph, plus a .notice banner; the lede says prices are in rupees.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "An opening hours section states 8am to 10pm for every day of the week",
+        "verdict": "PASS",
+        "note": "table.hours has 7 rows, Monday to Sunday, each reading '8am to 10pm'; the lede and footer repeat it.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "A location section names Indiranagar, Bengaluru and includes a map link or embed; the street address is visibly marked as a placeholder until supplied",
+        "verdict": "PASS",
+        "note": "h2 'Find us in Indiranagar, Bengaluru'; Google Maps link and iframe embed present (both listed in external_resources); street address is span.ph 'Street address to be added'.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A pre-order form lets a visitor choose coffee items and quantities, enter a name and a pickup time, see a running total, and submit",
+        "verdict": "PASS",
+        "note": "6 item rows with stepper and number inputs, #pre-name, #pre-time, output#total updated on click/input/change, submit handler validates and shows a request-only message. The pickup-request wording satisfies the charter rule against claiming confirmation or payment.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The file has a viewport meta tag, its base CSS targets small screens, and it uses min-width media queries for larger screens",
+        "verdict": "PASS",
+        "note": "Viewport meta present; base grids are single-column; only @media (min-width: 640px) and (min-width: 960px) are used, with no max-width queries.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "The layout has no horizontal scrolling at 360px width",
+        "verdict": "PASS",
+        "note": "Mechanical check: phone width 360, overflow_px 0; desktop 1280, overflow_px 0.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The site is a single HTML file with no build step and no local file dependencies",
+        "verdict": "PASS",
+        "note": "24,341 bytes, inline <style> and <script>; the only external resources are two google.com/maps URLs; no local src or href files.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "Every placeholder is visibly marked so it can be told apart from real content",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "span.ph (dashed yellow box, 'PLACEHOLDER:' prefix) covers item names, prices, sample order prices, address, phone, map pin note and pickup rules; the category names (Hot Coffee, Cold Coffee, Bites) are invented but unmarked, though a .notice banner says the menu is a placeholder.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 9,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "mechanical": {
+      "available": true,
+      "bytes": 24341,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://www.google.com/maps/search/?api=1&amp;query=Indiranagar%2C%20Bengaluru",
+        "https://www.google.com/maps?q=Indiranagar%2C%20Bengaluru&amp;output=embed"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

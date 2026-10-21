@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Cafe in Indiranagar, Bengaluru</title>
+<meta name="description" content="Brew Lab, a cafe in Indiranagar, Bengaluru. Opening hours and location.">
+<style>
+  :root{
+    --bg:#faf6f0; --ink:#2a1f18; --muted:#6b5b50; --accent:#7a4a2b; --accent-dark:#5a3219;
+    --card:#ffffff; --line:#e6dccf; --ph-bg:#fff3bf; --ph-ink:#7a5a00; --ph-line:#e0b800;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;font-size:16px}
+  a{color:var(--accent)}
+  .wrap{max-width:960px;margin:0 auto;padding:0 16px}
+
+  /* Header and nav */
+  header.site{position:sticky;top:0;z-index:10;background:var(--accent-dark);color:#fff}
+  header.site .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px}
+  .brand{font-weight:700;font-size:1.15rem;letter-spacing:.02em;color:#fff;text-decoration:none}
+  nav ul{list-style:none;margin:0;padding:0;display:flex;gap:4px;overflow-x:auto}
+  nav a{display:block;padding:14px 10px;color:#f3e7dc;text-decoration:none;font-size:.95rem;white-space:nowrap}
+  nav a:hover,nav a:focus{color:#fff;background:rgba(255,255,255,.12)}
+
+  /* Hero */
+  .hero{background:linear-gradient(160deg,#5a3219,#7a4a2b);color:#fff;padding:48px 0 40px}
+  .hero h1{margin:0 0 8px;font-size:2.2rem;line-height:1.15}
+  .hero p{margin:0 0 20px;font-size:1.05rem;color:#f3e7dc;max-width:36em}
+  .btn{display:inline-block;background:#fff;color:var(--accent-dark);padding:12px 18px;border-radius:8px;font-weight:600;text-decoration:none;margin:0 8px 8px 0;border:0;font:inherit;font-weight:600;cursor:pointer}
+  .btn.alt{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.7)}
+  .btn.solid{background:var(--accent-dark);color:#fff}
+  .btn.line{background:#fff;color:var(--accent-dark);border:1px solid var(--accent)}
+
+  /* Sections */
+  section{padding:36px 0;scroll-margin-top:56px}
+  section h2{margin:0 0 16px;font-size:1.6rem;color:var(--accent-dark)}
+  section h3{margin:0 0 10px;font-size:1.1rem;color:var(--accent-dark)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+
+  /* Placeholder marking */
+  .ph{background:var(--ph-bg);color:var(--ph-ink);border:1px dashed var(--ph-line);border-radius:6px;padding:1px 6px;font-weight:600;font-size:.92em}
+  .ph::before{content:"PLACEHOLDER: ";font-weight:800;letter-spacing:.03em}
+  .ph-note{background:var(--ph-bg);color:var(--ph-ink);border:1px dashed var(--ph-line);border-radius:8px;padding:8px 12px;font-size:.9rem;margin:0 0 14px}
+
+  /* Menu */
+  .menu-grid{display:grid;gap:16px}
+  .menu-list{list-style:none;margin:0;padding:0}
+  .menu-list li{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .menu-list li:last-child{border-bottom:0}
+  .menu-list .price{text-align:right}
+
+  /* Pre-order form */
+  form.preorder fieldset{border:1px solid var(--line);border-radius:12px;background:var(--card);margin:0 0 16px;padding:12px 16px 8px}
+  form.preorder legend{padding:0 6px;font-weight:700;color:var(--accent-dark)}
+  .order-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .order-row:last-child{border-bottom:0}
+  .order-row .label{flex:1 1 180px;min-width:0}
+  .order-row .label small{display:block;margin-top:2px}
+  .qty{display:inline-flex;align-items:center;gap:6px}
+  .qty button{width:40px;height:40px;border-radius:8px;border:1px solid var(--accent);background:#fff;color:var(--accent-dark);font-size:1.2rem;font-weight:700;cursor:pointer}
+  .qty input{width:56px;height:40px;text-align:center;border:1px solid var(--line);border-radius:8px;font:inherit}
+  .fields{display:grid;gap:12px;margin:0 0 16px}
+  .fields label{display:block;font-weight:600}
+  .fields input,.fields textarea{display:block;width:100%;margin-top:4px;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff;color:var(--ink)}
+  .total{font-size:1.15rem;margin:0 0 14px}
+  .total strong{font-size:1.4rem;color:var(--accent-dark)}
+  .actions{display:flex;flex-wrap:wrap;gap:8px}
+  .msg-err{color:#8a1f11;font-weight:600;margin:10px 0 0}
+  #order-result{margin-top:20px}
+  #order-result pre{white-space:pre-wrap;word-break:break-word;background:#f5ebdd;border-radius:8px;padding:12px;margin:0 0 12px;font:inherit;font-size:.95rem}
+
+  /* Hours */
+  table.hours{width:100%;border-collapse:collapse}
+  table.hours th,table.hours td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.hours th{font-weight:600;width:38%}
+  table.hours tr:last-child th,table.hours tr:last-child td{border-bottom:0}
+  table.hours tr.today{background:#f5ebdd}
+  table.hours tr.today th::after{content:" (today)";font-weight:400;color:var(--muted);font-size:.85rem}
+
+  /* Location */
+  .loc-grid{display:grid;gap:16px}
+  .loc-grid dl{margin:0}
+  .loc-grid dt{font-weight:600;margin-top:10px}
+  .loc-grid dt:first-child{margin-top:0}
+  .loc-grid dd{margin:2px 0 0}
+  .map{border:0;width:100%;height:300px;border-radius:12px;background:#e9e1d6}
+
+  footer{background:var(--accent-dark);color:#f3e7dc;padding:24px 0;font-size:.9rem;margin-top:24px}
+  footer .ph{background:rgba(255,243,191,.95)}
+
+  @media (min-width:700px){
+    .hero{padding:72px 0 60px}
+    .hero h1{font-size:3rem}
+    .loc-grid{grid-template-columns:1fr 1.3fr;align-items:start}
+    .menu-grid{grid-template-columns:1fr 1fr 1fr;align-items:start}
+    .fields{grid-template-columns:1fr 1fr}
+    .fields .full{grid-column:1 / -1}
+    .map{height:340px}
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="#top">Brew Lab</a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="#top">Home</a></li>
+        <li><a href="#menu">Menu</a></li>
+        <li><a href="#preorder">Pre-order</a></li>
+        <li><a href="#hours">Hours</a></li>
+        <li><a href="#location">Location</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <h1>Brew Lab</h1>
+      <p>A coffee cafe in Indiranagar, Bengaluru. Check our hours and find us below.</p>
+      <a class="btn" href="#preorder">Pre-order for pickup</a>
+      <a class="btn alt" href="#menu">See the menu</a>
+      <a class="btn alt" href="#hours">Opening hours</a>
+      <a class="btn alt" href="#location">Find the cafe</a>
+    </div>
+  </div>
+
+  <section id="menu" aria-labelledby="menu-h">
+    <div class="wrap">
+      <h2 id="menu-h">Menu</h2>
+      <p class="ph-note">The real menu and prices were not supplied yet. Category names, item names and prices below are placeholders. The sample prices exist only so the pre-order total can be tried out.</p>
+      <noscript><p class="ph-note">This menu needs JavaScript to display.</p></noscript>
+      <div class="menu-grid" id="menu-grid"></div>
+    </div>
+  </section>
+
+  <section id="preorder" aria-labelledby="preorder-h">
+    <div class="wrap">
+      <h2 id="preorder-h">Pre-order for pickup</h2>
+      <p class="ph-note">Pickup time rules (slot length, lead time) were not supplied yet, so any time is accepted for now. Submitting only builds an order summary on this page. Nothing is sent anywhere until a real order destination is set.</p>
+      <form class="preorder" id="preorder-form" aria-describedby="order-help">
+        <p id="order-help" style="margin-top:0">Choose quantities, then add your details.</p>
+        <div id="order-items"></div>
+
+        <div class="fields">
+          <label for="f-name">Name
+            <input id="f-name" name="name" type="text" autocomplete="name" required maxlength="80">
+          </label>
+          <label for="f-phone">Phone
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required pattern="[0-9+ ()\-]{7,16}" title="Digits, spaces, + ( ) and - only, 7 to 16 characters" maxlength="16">
+          </label>
+          <label for="f-time">Pickup time
+            <input id="f-time" name="time" type="time" required>
+          </label>
+          <label for="f-note" class="full">Note (optional)
+            <textarea id="f-note" name="note" rows="2" maxlength="200"></textarea>
+          </label>
+        </div>
+
+        <p class="total" aria-live="polite">Running total: <strong id="total">&#8377;0</strong> <span class="ph">sample prices, not real</span></p>
+        <div class="actions">
+          <button type="submit" class="btn solid">Build order summary</button>
+          <button type="button" class="btn line" id="clear-btn">Clear</button>
+        </div>
+        <p class="msg-err" id="order-err" role="alert" hidden></p>
+      </form>
+
+      <div id="order-result" class="card" hidden tabindex="-1" aria-live="polite">
+        <h3>Order summary</h3>
+        <pre id="summary-text"></pre>
+        <p>Destination: <span class="ph">order destination (WhatsApp number, email or phone) not set, nothing has been sent</span></p>
+        <div class="actions">
+          <button type="button" class="btn line" id="copy-btn">Copy summary</button>
+        </div>
+        <p id="copy-msg" style="margin:8px 0 0;color:var(--muted)" hidden></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="hours" aria-labelledby="hours-h">
+    <div class="wrap">
+      <h2 id="hours-h">Opening hours</h2>
+      <p class="ph-note">Hours were not supplied yet. Every day below is a placeholder until the cafe confirms its real hours.</p>
+      <div class="card">
+        <table class="hours" id="hours-table">
+          <tbody>
+            <tr data-day="1"><th scope="row">Monday</th><td><span class="ph">opening hours</span></td></tr>
+            <tr data-day="2"><th scope="row">Tuesday</th><td><span class="ph">opening hours</span></td></tr>
+            <tr data-day="3"><th scope="row">Wednesday</th><td><span class="ph">opening hours</span></td></tr>
+            <tr data-day="4"><th scope="row">Thursday</th><td><span class="ph">opening hours</span></td></tr>
+            <tr data-day="5"><th scope="row">Friday</th><td><span class="ph">opening hours</span></td></tr>
+            <tr data-day="6"><th scope="row">Saturday</th><td><span class="ph">opening hours</span></td></tr>
+            <tr data-day="0"><th scope="row">Sunday</th><td><span class="ph">opening hours</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="location" aria-labelledby="loc-h">
+    <div class="wrap">
+      <h2 id="loc-h">Location</h2>
+      <p class="ph-note">Street address and exact map pin were not supplied yet. The map below shows the Indiranagar area only, not the cafe's exact spot.</p>
+      <div class="loc-grid">
+        <div class="card">
+          <dl>
+            <dt>Area</dt>
+            <dd>Indiranagar, Bengaluru</dd>
+            <dt>Street address</dt>
+            <dd><span class="ph">street address, landmark and PIN code</span></dd>
+            <dt>Phone</dt>
+            <dd><span class="ph">cafe phone number</span></dd>
+            <dt>Directions</dt>
+            <dd><a href="https://www.google.com/maps/search/?api=1&amp;query=Indiranagar%2C+Bengaluru" target="_blank" rel="noopener">Open Indiranagar, Bengaluru in Maps</a> <span class="ph">swap for the exact cafe pin link</span></dd>
+          </dl>
+        </div>
+        <iframe class="map" title="Map of Indiranagar, Bengaluru (area view, cafe pin is a placeholder)" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=Indiranagar%2C%20Bengaluru&amp;output=embed"></iframe>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <strong>Brew Lab</strong>, Indiranagar, Bengaluru.
+    Contact: <span class="ph">phone, WhatsApp or email</span>
+  </div>
+</footer>
+
+<script>
+  // Highlight today's row in the hours table (local device day).
+  (function(){
+    var d = String(new Date().getDay());
+    var row = document.querySelector('#hours-table tr[data-day="' + d + '"]');
+    if (row) row.classList.add('today');
+  })();
+
+  // Menu and pre-order. All names and prices are PLACEHOLDERS (price is a sample number
+  // used only to exercise the total). Replace this array with the real menu.
+  (function(){
+    var MENU = [
+      {cat:"category 1 name", items:[
+        {id:"a1", name:"item A1 name", price:100},
+        {id:"a2", name:"item A2 name", price:120}
+      ]},
+      {cat:"category 2 name", items:[
+        {id:"b1", name:"item B1 name", price:150},
+        {id:"b2", name:"item B2 name", price:180}
+      ]},
+      {cat:"category 3 name", items:[
+        {id:"c1", name:"item C1 name", price:200},
+        {id:"c2", name:"item C2 name", price:90}
+      ]}
+    ];
+    var MAX_QTY = 20;
+
+    function money(n){ return '\u20B9' + n.toLocaleString('en-IN'); }
+    function el(tag, cls, html){
+      var e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (html != null) e.innerHTML = html;
+      return e;
+    }
+
+    // Menu display, grouped by category
+    var grid = document.getElementById('menu-grid');
+    MENU.forEach(function(c){
+      var card = el('div', 'card');
+      card.appendChild(el('h3', null, '<span class="ph">' + c.cat + '</span>'));
+      var ul = el('ul', 'menu-list');
+      c.items.forEach(function(it){
+        ul.appendChild(el('li', null,
+          '<span><span class="ph">' + it.name + '</span></span>' +
+          '<span class="price"><span class="ph">sample ' + money(it.price) + '</span></span>'));
+      });
+      card.appendChild(ul);
+      grid.appendChild(card);
+    });
+
+    // Order form rows, grouped by category
+    var box = document.getElementById('order-items');
+    MENU.forEach(function(c){
+      var fs = el('fieldset');
+      fs.appendChild(el('legend', null, '<span class="ph">' + c.cat + '</span>'));
+      c.items.forEach(function(it){
+        var row = el('div', 'order-row');
+        row.appendChild(el('div', 'label',
+          '<span class="ph">' + it.name + '</span><small><span class="ph">sample ' + money(it.price) + '</span></small>'));
+        var q = el('div', 'qty');
+        q.innerHTML =
+          '<button type="button" data-act="dec" data-id="' + it.id + '" aria-label="Decrease quantity of ' + it.name + ' (placeholder item)">&minus;</button>' +
+          '<input type="number" inputmode="numeric" min="0" max="' + MAX_QTY + '" step="1" value="0" data-id="' + it.id + '" aria-label="Quantity of ' + it.name + ' (placeholder item)">' +
+          '<button type="button" data-act="inc" data-id="' + it.id + '" aria-label="Increase quantity of ' + it.name + ' (placeholder item)">+</button>';
+        row.appendChild(q);
+        fs.appendChild(row);
+      });
+      box.appendChild(fs);
+    });
+
+    var form = document.getElementById('preorder-form');
+    var totalEl = document.getElementById('total');
+    var errEl = document.getElementById('order-err');
+    var result = document.getElementById('order-result');
+    var summaryEl = document.getElementById('summary-text');
+    var copyMsg = document.getElementById('copy-msg');
+
+    function find(id){
+      for (var i = 0; i < MENU.length; i++)
+        for (var j = 0; j < MENU[i].items.length; j++)
+          if (MENU[i].items[j].id === id) return MENU[i].items[j];
+      return null;
+    }
+    function inputFor(id){ return box.querySelector('input[data-id="' + id + '"]'); }
+    function qtyOf(id){
+      var v = parseInt(inputFor(id).value, 10);
+      if (isNaN(v) || v < 0) v = 0;
+      if (v > MAX_QTY) v = MAX_QTY;
+      return v;
+    }
+    function lines(){
+      var out = [];
+      MENU.forEach(function(c){ c.items.forEach(function(it){
+        var q = qtyOf(it.id);
+        if (q > 0) out.push({item:it, qty:q, sub:q * it.price});
+      });});
+      return out;
+    }
+    function total(){
+      return lines().reduce(function(s, l){ return s + l.sub; }, 0);
+    }
+    function refresh(){ totalEl.textContent = money(total()); errEl.hidden = true; }
+
+    box.addEventListener('click', function(e){
+      var b = e.target.closest('button[data-act]');
+      if (!b) return;
+      var inp = inputFor(b.getAttribute('data-id'));
+      var v = qtyOf(b.getAttribute('data-id')) + (b.getAttribute('data-act') === 'inc' ? 1 : -1);
+      inp.value = Math.max(0, Math.min(MAX_QTY, v));
+      refresh();
+    });
+    box.addEventListener('input', function(e){
+      if (e.target.matches('input[data-id]')) refresh();
+    });
+    box.addEventListener('change', function(e){
+      if (e.target.matches('input[data-id]')) {
+        e.target.value = qtyOf(e.target.getAttribute('data-id'));
+        refresh();
+      }
+    });
+
+    document.getElementById('clear-btn').addEventListener('click', function(){
+      form.reset();
+      result.hidden = true;
+      copyMsg.hidden = true;
+      refresh();
+    });
+    form.addEventListener('reset', function(){ setTimeout(refresh, 0); });
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault(); // no network call: summary is built locally only
+      var ls = lines();
+      if (!ls.length){
+        errEl.textContent = 'Please choose at least one item.';
+        errEl.hidden = false;
+        return;
+      }
+      var f = form.elements;
+      var txt = 'Brew Lab pickup pre-order (DRAFT, sample prices, not a real order)\n' +
+        'Name: ' + f.name.value.trim() + '\n' +
+        'Phone: ' + f.phone.value.trim() + '\n' +
+        'Pickup time: ' + f.time.value + '\n' +
+        (f.note.value.trim() ? 'Note: ' + f.note.value.trim() + '\n' : '') +
+        'Items:\n' +
+        ls.map(function(l){
+          return '- ' + l.qty + ' x ' + l.item.name + ' [placeholder] @ ' + money(l.item.price) + ' = ' + money(l.sub);
+        }).join('\n') +
+        '\nTotal: ' + money(total()) + ' (PLACEHOLDER sample prices)';
+      summaryEl.textContent = txt;
+      copyMsg.hidden = true;
+      result.hidden = false;
+      result.scrollIntoView({behavior:'smooth', block:'start'});
+      result.focus({preventScroll:true});
+    });
+
+    document.getElementById('copy-btn').addEventListener('click', function(){
+      function say(m){ copyMsg.textContent = m; copyMsg.hidden = false; }
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(summaryEl.textContent).then(
+          function(){ say('Summary copied.'); },
+          function(){ say('Could not copy. Select the text above and copy it by hand.'); });
+      } else {
+        say('Copy is not available here. Select the text above and copy it by hand.');
+      }
+    });
+
+    refresh();
+  })();
+</script>
+</body>
+</html>

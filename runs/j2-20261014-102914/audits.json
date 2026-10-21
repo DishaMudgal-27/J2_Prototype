@@ -1,0 +1,1312 @@
+[
+  {
+    "cycle": 1,
+    "version": 15,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The site shows the name Riverside Run 2027, Pune, race day Sunday 14 February 2027, and expo day Saturday 13 February 2027 (10am to 6pm) at Riverside Grounds, 5 River Road, Pune 411001",
+        "verdict": "PASS",
+        "note": "Hero shows 'Riverside Run 2027', 'City running event in Pune', 'Sunday 14 February 2027', 'Saturday 13 February 2027, 10am to 6pm', 'Riverside Grounds, 5 River Road, Pune 411001'; visible in screenshot.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "A race comparison shows 5K (7:30am, Rs 300, min age 12, 1 hour cutoff), 10K (6:45am, Rs 500, min age 16, 2 hour cutoff) and Half Marathon (6:00am, Rs 800, min age 18, 3 hours 30 minutes cutoff)",
+        "verdict": "PASS",
+        "note": "3 .race-card elements list start, fee, 'minimum age 12/16/18' and 'cutoff 1 hour / 2 hours / 3 hours 30 minutes' exactly as supplied.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "A fee calculator takes race, number of runners (1 to 10) and number of T-shirts (Rs 250 each) and shows the total, applying 10% off race fees only up to 31 December 2026",
+        "verdict": "PASS",
+        "note": "Code: runners input min 1 max 10; shirts x Rs 250; discount = 10% of race fees only while Date.now() < 2027-01-01 IST; today 2026-10-14 so discount applies. T-shirt line is outside the discount.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "A registration form has name, email, phone, date of birth, race dropdown, T-shirt yes/no, T-shirt size (shown only when yes), emergency contact name and phone, and guardian name (required only when the runner is under 18), and is set to send to run@example.com",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "form#register-form action=mailto:run@example.com; all fields present; size wrapper hidden until T-shirt=Yes; guardian required when DOB under 18 (checked against today, not race day). Form 2 correctly refused empty submit (Date of birth invalid). Size list S to XXL was not supplied (see F-16).",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": "the T-shirt sizes on offer",
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The schedule shows Expo day (10am bib collection opens, 4pm route briefing, 6pm expo closes) and Race day (5:00am gates open, 6:00am Half Marathon, 6:45am 10K, 7:30am 5K, 10:00am prize ceremony)",
+        "verdict": "PASS",
+        "note": "Two .schedule-day lists: 10am, 4pm, 6pm; 5:00am, 6:00am Half Marathon, 6:45am 10K, 7:30am 5K, 10:00am prize ceremony. No added times.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A route section for each race shows a map placeholder and its water stations (5K at 2.5 km; 10K at 2.5, 5 and 7.5 km; Half Marathon every 3 km)",
+        "verdict": "PASS",
+        "note": "3 .route-card, 3 .map-placeholder; water stations '2.5 km', '2.5, 5 and 7.5 km', 'every 3 km'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "An FAQ section answers: changing race (yes, until 31 January 2027 by email), parking (free at Gate 2), refunds (no), bib collection (at the expo on 13 February), bag drop (near the start line), pacers (10K and Half Marathon)",
+        "verdict": "PASS",
+        "note": "6 .faq-item buttons with answers: 31 January 2027 by email, free at Gate 2, no refunds, expo on 13 February, near the start line, 10K and Half Marathon.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "A sponsors section lists Gold: Meridian Bank; Silver: Trailhead Sports and Aqua Pure; Community: Pune Runners Club",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "3 .sponsor-tier with Meridian Bank; Trailhead Sports, Aqua Pure; Pune Runners Club. Badges 'Top tier', 'Second tier', 'Supporters' were not supplied.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "A separate volunteer form has name, email, preferred role (Water station, Registration desk, Route marshal) and availability (Saturday, Sunday, both), and is set to send to volunteers@example.com",
+        "verdict": "PASS",
+        "note": "form#volunteer-form action=mailto:volunteers@example.com with name, email, three roles, Saturday/Sunday/Both; form 3 submitted OK in mechanical check.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "A countdown shows the time left until race day, 14 February 2027",
+        "verdict": "PASS",
+        "note": "#countdown-timer targets 2027-02-14T00:00 IST; screenshot shows 122 days 13 h 17 min 09 s, consistent with today's date.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": true
+      },
+      {
+        "id": "F-11",
+        "criterion": "A menu stays on screen while scrolling and highlights the section currently in view",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "nav#site-nav is position fixed with 10 .nav-link and IntersectionObserver setting is-active. #gallery is not in the menu, so no link highlights while it is in view.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 11,
+        "pass": true
+      },
+      {
+        "id": "F-12",
+        "criterion": "A high-contrast toggle changes colours across the whole page and can be switched back",
+        "verdict": "PASS",
+        "note": "button#contrast-toggle toggles body.hc-mode with per-section overrides for every section; second click removes the class. Not exercised visually in HC state.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 12,
+        "pass": true
+      },
+      {
+        "id": "F-13",
+        "criterion": "The layout works on phones, with no horizontal overflow at 360px and 1280px, and photo placeholders are used where images would go",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Overflow 0px at 360 and 1280; 3 .photo-placeholder; 0 small tap targets. Screenshot at 360px: fixed 'High contrast Off' button overlaps the Minutes and Seconds labels of the countdown.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 13,
+        "pass": true
+      },
+      {
+        "id": "F-14",
+        "criterion": "Contact details run@example.com and WhatsApp +91 00000 44444 are shown on the site",
+        "verdict": "PASS",
+        "note": "#contact has mailto:run@example.com and https://wa.me/910000044444 labelled '+91 00000 44444'; wa.me link well formed per N4.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 14,
+        "pass": true
+      },
+      {
+        "id": "F-15",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "PASS",
+        "note": "Mechanical: js_errors [], overflow 0 at both widths, broken_in_page_links []. Note body has overflow-x:hidden which could mask real overflow.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 15,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-16",
+        "criterion": "Rule: use only facts the Requester supplied (N6)",
+        "verdict": "NEEDS_REVISION",
+        "note": "N6 failed ('not in charter: 0', likely derived 'Rs 0' or '00' defaults, unconfirmed). Confirmed invented: T-shirt sizes S/M/L/XL/XXL (W-5 admitted it) and sponsor badges 'Top tier', 'Second tier', 'Supporters'.",
+        "severity": "medium",
+        "confidence": "medium",
+        "needs_requester_fact": "the T-shirt sizes on offer"
+      },
+      {
+        "id": "F-17",
+        "criterion": "Every form has a destination (N7)",
+        "verdict": "NEEDS_REVISION",
+        "note": "form#fee-form has no action or mailto; it is a calculator, not a submission form, and has an 'Update total' submit only to satisfy an earlier check.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-18",
+        "criterion": "Nav reaches every section; hero has one obvious main action (N8)",
+        "verdict": "NEEDS_REVISION",
+        "note": "Nav has no link to #gallery (countdown is aliased to Home, #contrast-section is a toggle). Hero CTA static href is '#countdown' and only a script changes it to '#register'.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-19",
+        "criterion": "Layout quality on phone",
+        "verdict": "NEEDS_REVISION",
+        "note": "Screenshot 360px: fixed contrast button covers 'MINUTES' and 'SECONDS' labels and part of the tiles.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-20",
+        "criterion": "Page hygiene",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Two <title> tags in head (W-1 style block and W-1 head block); file is 79,507 bytes against the ~60 KB single-page guidance.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "Screenshot and measurements: only Inter and Barlow Condensed; navy, blue and orange palette; j2-card and j2-btn used throughout.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "191 text elements checked at both widths, 0 below WCAG AA.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "1 h1, 0 skipped heading levels; hero title dominates on both screenshots.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Orange 'Register now' stands out, but its static href is #countdown and the contrast button competes on the first screen.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Menu scrolls sideways at 360px with only about 4 links visible, and #gallery has no menu link.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "small_tap_targets count 0 at the 44px minimum on phone.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "0 img elements; placeholders use role=img with aria-label.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 79507,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap",
+        "https://wa.me/910000044444"
+      ],
+      "forms": 3,
+      "scripts": 7,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        },
+        {
+          "index": 2,
+          "has_submit": true,
+          "submitted": false,
+          "invalid": [
+            "Date of birth"
+          ],
+          "errors_during": [],
+          "ok": true
+        },
+        {
+          "index": 3,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 191,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Barlow Condensed"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 12
+          },
+          "first_screen_actions": [
+            "Register now",
+            "Home",
+            "High contrast\n    Off"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 191,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Barlow Condensed"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 12
+          },
+          "first_screen_actions": [
+            "Register now",
+            "Home",
+            "High contrast\n    Off"
+          ]
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v15.png",
+    "all_pass": false,
+    "conditions": [
+      {
+        "id": "N1",
+        "text": "The page opens (it parses, tags balanced)",
+        "check": "page-parses",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "text": "No JavaScript errors on load",
+        "check": "no-js-errors",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "text": "No horizontal overflow at 360px and 1280px",
+        "check": "no-overflow",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "text": "Every in-page link resolves; WhatsApp (wa.me) and tel: links are well formed",
+        "check": "links-well-formed",
+        "met": true,
+        "evidence": "all 13 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "text": "Every charter fact appears exactly, and nothing is \"to be confirmed\"",
+        "check": [
+          "facts-present-all",
+          "nothing-to-be-confirmed"
+        ],
+        "met": true,
+        "evidence": "all 1 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "text": "No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers",
+        "check": "no-invented-facts",
+        "met": false,
+        "evidence": "not in the charter or the Requester's answers: 0"
+      },
+      {
+        "id": "N7",
+        "text": "Every form has a submit control and a destination (action or mailto)",
+        "check": "forms-have-destination",
+        "met": false,
+        "evidence": "form 1 has no destination (action or mailto)"
+      },
+      {
+        "id": "N8",
+        "text": "A nav reaches every section, and the hero has one obvious main action",
+        "check": "nav-and-main-action",
+        "met": false,
+        "evidence": "the nav doesn't reach #countdown, #contrast-section, #gallery"
+      }
+    ]
+  },
+  {
+    "cycle": 1,
+    "version": 21,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The site shows the name Riverside Run 2027, Pune, race day Sunday 14 February 2027, and expo day Saturday 13 February 2027 (10am to 6pm) at Riverside Grounds, 5 River Road, Pune 411001",
+        "verdict": "PASS",
+        "note": "Screenshot and #home markup show Riverside Run 2027, Pune, Sunday 14 February 2027, Saturday 13 February 2027 10am to 6pm, Riverside Grounds, 5 River Road, Pune 411001.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "A race comparison shows 5K (7:30am, Rs 300, min age 12, 1 hour cutoff), 10K (6:45am, Rs 500, min age 16, 2 hour cutoff) and Half Marathon (6:00am, Rs 800, min age 18, 3 hours 30 minutes cutoff)",
+        "verdict": "PASS",
+        "note": "3 .race-card elements with 7:30am/6:45am/6:00am, Rs 300/500/800, minimum age 12/16/18, cutoff 1 hour/2 hours/3 hours 30 minutes.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "A fee calculator takes race, number of runners (1 to 10) and number of T-shirts (Rs 250 each) and shows the total, applying 10% off race fees only up to 31 December 2026",
+        "verdict": "PASS",
+        "note": "Code: runners min 1 max 10, shirts x Rs 250, discount = 10% of raceFees only while Date.now() < 2027-01-01 IST. Default 5K gives Rs 300 - Rs 30 = Rs 270, correct.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "A registration form has name, email, phone, date of birth, race dropdown, T-shirt yes/no, T-shirt size (shown only when yes), emergency contact name and phone, and guardian name (required only when the runner is under 18), and is set to send to run@example.com",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "form#register-form action=mailto:run@example.com, all fields present, size wrapper hidden until Yes with options S, M, L, XL only. Guardian is required by age as of today, not race day, which the brief leaves open. Mechanical check refused an empty submit.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The schedule shows Expo day (10am bib collection opens, 4pm route briefing, 6pm expo closes) and Race day (5:00am gates open, 6:00am Half Marathon, 6:45am 10K, 7:30am 5K, 10:00am prize ceremony)",
+        "verdict": "PASS",
+        "note": "Two .schedule-day lists: 10am, 4pm, 6pm; 5:00am, 6:00am Half Marathon, 6:45am 10K, 7:30am 5K, 10:00am prize ceremony. No added times.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A route section for each race shows a map placeholder and its water stations (5K at 2.5 km; 10K at 2.5, 5 and 7.5 km; Half Marathon every 3 km)",
+        "verdict": "PASS",
+        "note": "3 .route-card, 3 .map-placeholder, water stations 2.5 km; 2.5, 5 and 7.5 km; every 3 km.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "An FAQ section answers: changing race (yes, until 31 January 2027 by email), parking (free at Gate 2), refunds (no), bib collection (at the expo on 13 February), bag drop (near the start line), pacers (10K and Half Marathon)",
+        "verdict": "PASS",
+        "note": "6 .faq-item with button controls and answers matching the brief (31 January 2027 by email, Gate 2, no refunds, expo 13 February, near the start line, 10K and Half Marathon).",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "A sponsors section lists Gold: Meridian Bank; Silver: Trailhead Sports and Aqua Pure; Community: Pune Runners Club",
+        "verdict": "PASS",
+        "note": "3 .sponsor-tier: Gold Meridian Bank; Silver Trailhead Sports, Aqua Pure; Community Pune Runners Club. Unsupplied badges are gone.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "A separate volunteer form has name, email, preferred role (Water station, Registration desk, Route marshal) and availability (Saturday, Sunday, both), and is set to send to volunteers@example.com",
+        "verdict": "PASS",
+        "note": "form#volunteer-form action=mailto:volunteers@example.com with name, email, 3 roles, Saturday/Sunday/Both; mechanical form 2 submitted OK.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "A countdown shows the time left until race day, 14 February 2027",
+        "verdict": "PASS",
+        "note": "#countdown-timer targets 2027-02-14T00:00+05:30; screenshot shows 122 days 13 h 04 min 07 s, consistent with 2026-10-14.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": true
+      },
+      {
+        "id": "F-11",
+        "criterion": "A menu stays on screen while scrolling and highlights the section currently in view",
+        "verdict": "PASS",
+        "note": "nav#site-nav is position fixed with 11 .nav-link including #gallery. The IntersectionObserver sets is-active, and the countdown is aliased to Home. N8 met.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 11,
+        "pass": true
+      },
+      {
+        "id": "F-12",
+        "criterion": "A high-contrast toggle changes colours across the whole page and can be switched back",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "button#contrast-toggle toggles body.hc-mode, with hc-mode overrides in every section block. I did not see the high-contrast state rendered, only the code.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 12,
+        "pass": true
+      },
+      {
+        "id": "F-13",
+        "criterion": "The layout works on phones, with no horizontal overflow at 360px and 1280px, and photo placeholders are used where images would go",
+        "verdict": "PASS",
+        "note": "Overflow 0px at 360 and 1280, 3 .photo-placeholder, 0 small tap targets. The contrast bar is now in flow and covers nothing in the screenshot.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 13,
+        "pass": true
+      },
+      {
+        "id": "F-14",
+        "criterion": "Contact details run@example.com and WhatsApp +91 00000 44444 are shown on the site",
+        "verdict": "PASS",
+        "note": "#contact has mailto:run@example.com and https://wa.me/910000044444 labelled +91 00000 44444; N4 met.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 14,
+        "pass": true
+      },
+      {
+        "id": "F-15",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "PASS",
+        "note": "Mechanical check: js_errors [], overflow 0 at both widths, broken_in_page_links []. body has overflow-x:hidden, which could mask overflow, but the measured overflow is 0.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 15,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-21",
+        "criterion": "N6 No invented content",
+        "verdict": "NEEDS_REVISION",
+        "note": "N6 flags '270', the default total in #fee-total. It is Rs 300 minus 10% computed from supplied facts, so it is likely a false positive from the checker. It is still a failing necessary condition, so the page is not workable. The rendered default may also be what the checker reads, so a markup-only fix may not clear it.",
+        "severity": "high",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-22",
+        "criterion": "Layout quality on phone",
+        "verdict": "NEEDS_REVISION",
+        "note": "Screenshot at 360px: countdown label 'SECONDS' wraps as 'SECOND / S' inside its box.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-23",
+        "criterion": "Page hygiene",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Two <title> elements in head (W-1 and style blocks). File is 79,353 bytes against the roughly 60 KB single-page rule. This is the parked F-20.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "Fonts are Inter and Barlow Condensed only; palette, j2-btn and j2-card styles are used consistently in the screenshot and CSS.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "Contrast check covered 188 elements at both widths with 0 low.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "1 h1, 0 skipped heading levels; the hero title dominates the screenshot.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "'Register now' is the single hero action, but the orange High contrast pill above it is the first action in the measured list and competes for attention.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "11 menu links scroll sideways at 360px; the screenshot shows 'SC' clipped, so later sections like Volunteer and Contact are off-screen until scrolled.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "small_tap_targets count 0 at a 44px minimum on phone.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "0 images and 0 without alt; placeholders carry role=img with aria-label.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 79353,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap",
+        "https://wa.me/910000044444"
+      ],
+      "forms": 2,
+      "scripts": 7,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "design": {
+        "desktop": {
+          "contrast": {
+            "checked": 188,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Barlow Condensed"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 13
+          },
+          "first_screen_actions": [
+            "High contrast\n    Off",
+            "Register now",
+            "Home"
+          ]
+        },
+        "phone": {
+          "contrast": {
+            "checked": 188,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Barlow Condensed"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 13
+          },
+          "first_screen_actions": [
+            "High contrast\n    Off",
+            "Register now",
+            "Home"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        }
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": false,
+          "invalid": [
+            "Date of birth"
+          ],
+          "errors_during": [],
+          "ok": true
+        },
+        {
+          "index": 2,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v21.png",
+    "all_pass": false,
+    "conditions": [
+      {
+        "id": "N1",
+        "text": "The page opens (it parses, tags balanced)",
+        "check": "page-parses",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "text": "No JavaScript errors on load",
+        "check": "no-js-errors",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "text": "No horizontal overflow at 360px and 1280px",
+        "check": "no-overflow",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "text": "Every in-page link resolves; WhatsApp (wa.me) and tel: links are well formed",
+        "check": "links-well-formed",
+        "met": true,
+        "evidence": "all 14 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "text": "Every charter fact appears exactly, and nothing is \"to be confirmed\"",
+        "check": [
+          "facts-present-all",
+          "nothing-to-be-confirmed"
+        ],
+        "met": true,
+        "evidence": "all 1 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "text": "No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers",
+        "check": "no-invented-facts",
+        "met": false,
+        "evidence": "not in the charter or the Requester's answers: 270"
+      },
+      {
+        "id": "N7",
+        "text": "Every form has a submit control and a destination (action or mailto)",
+        "check": "forms-have-destination",
+        "met": true,
+        "evidence": "2 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "text": "A nav reaches every section, and the hero has one obvious main action",
+        "check": "nav-and-main-action",
+        "met": true,
+        "evidence": "the nav reaches all 10 section(s); the hero has 1 main action(s)"
+      }
+    ]
+  },
+  {
+    "cycle": 2,
+    "version": 23,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The site shows the name Riverside Run 2027, Pune, race day Sunday 14 February 2027, and expo day Saturday 13 February 2027 (10am to 6pm) at Riverside Grounds, 5 River Road, Pune 411001",
+        "verdict": "PASS",
+        "note": "Screenshot and #home markup show Riverside Run 2027, Pune, Sunday 14 February 2027, Saturday 13 February 2027 10am to 6pm, Riverside Grounds, 5 River Road, Pune 411001.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "A race comparison shows 5K (7:30am, Rs 300, min age 12, 1 hour cutoff), 10K (6:45am, Rs 500, min age 16, 2 hour cutoff) and Half Marathon (6:00am, Rs 800, min age 18, 3 hours 30 minutes cutoff)",
+        "verdict": "PASS",
+        "note": "3 .race-card elements show 7:30am/6:45am/6:00am, Rs 300/500/800, minimum age 12/16/18, cutoff 1 hour/2 hours/3 hours 30 minutes.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "A fee calculator takes race, number of runners (1 to 10) and number of T-shirts (Rs 250 each) and shows the total, applying 10% off race fees only up to 31 December 2026",
+        "verdict": "PASS",
+        "note": "Code: runners min 1 max 10, shirts x Rs 250, discount is 10% of raceFees only while Date.now() < 2027-01-01 IST. #fee-total shows the prompt until a race is chosen (N6 now met).",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "A registration form has name, email, phone, date of birth, race dropdown, T-shirt yes/no, T-shirt size (shown only when yes), emergency contact name and phone, and guardian name (required only when the runner is under 18), and is set to send to run@example.com",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "form#register-form action=mailto:run@example.com, all fields present, size wrapper hidden until Yes with S, M, L, XL only. Guardian is required by age as of today, not race day. The brief does not say which date applies.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The schedule shows Expo day (10am bib collection opens, 4pm route briefing, 6pm expo closes) and Race day (5:00am gates open, 6:00am Half Marathon, 6:45am 10K, 7:30am 5K, 10:00am prize ceremony)",
+        "verdict": "PASS",
+        "note": "Two .schedule-day lists: 10am, 4pm, 6pm; 5:00am, 6:00am Half Marathon, 6:45am 10K, 7:30am 5K, 10:00am prize ceremony. No added times.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A route section for each race shows a map placeholder and its water stations (5K at 2.5 km; 10K at 2.5, 5 and 7.5 km; Half Marathon every 3 km)",
+        "verdict": "PASS",
+        "note": "3 .route-card, 3 .map-placeholder; water stations 2.5 km; 2.5, 5 and 7.5 km; every 3 km.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "An FAQ section answers: changing race (yes, until 31 January 2027 by email), parking (free at Gate 2), refunds (no), bib collection (at the expo on 13 February), bag drop (near the start line), pacers (10K and Half Marathon)",
+        "verdict": "PASS",
+        "note": "6 .faq-item with button controls and answers matching the brief; the script collapses them and the markup keeps them visible without JS.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "A sponsors section lists Gold: Meridian Bank; Silver: Trailhead Sports and Aqua Pure; Community: Pune Runners Club",
+        "verdict": "PASS",
+        "note": "3 .sponsor-tier: Gold Meridian Bank; Silver Trailhead Sports, Aqua Pure; Community Pune Runners Club. No extra badges.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "A separate volunteer form has name, email, preferred role (Water station, Registration desk, Route marshal) and availability (Saturday, Sunday, both), and is set to send to volunteers@example.com",
+        "verdict": "PASS",
+        "note": "form#volunteer-form action=mailto:volunteers@example.com with name, email, 3 roles, Saturday/Sunday/Both; mechanical form 2 submitted OK.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "A countdown shows the time left until race day, 14 February 2027",
+        "verdict": "PASS",
+        "note": "#countdown-timer targets 2027-02-14T00:00+05:30; screenshot shows 122 days 12 h 58 min 26 s, consistent with 2026-10-14. Labels, including SECONDS, sit on one line at 360px.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": true
+      },
+      {
+        "id": "F-11",
+        "criterion": "A menu stays on screen while scrolling and highlights the section currently in view",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "nav#site-nav is position fixed with 11 .nav-link and an IntersectionObserver setting is-active; countdown aliases to Home. The Gallery link sits before Volunteer and Contact in the menu, but #gallery is last on the page. Highlight follows page order, so it still works.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 11,
+        "pass": true
+      },
+      {
+        "id": "F-12",
+        "criterion": "A high-contrast toggle changes colours across the whole page and can be switched back",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "button#contrast-toggle toggles body.hc-mode, with hc-mode overrides in every section block. The HC state was not rendered in the screenshot, so this is a code reading only.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 12,
+        "pass": true
+      },
+      {
+        "id": "F-13",
+        "criterion": "The layout works on phones, with no horizontal overflow at 360px and 1280px, and photo placeholders are used where images would go",
+        "verdict": "PASS",
+        "note": "Overflow 0px at 360 and 1280, 3 .photo-placeholder, 0 small tap targets. The contrast bar is in flow and covers nothing in the screenshot.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 13,
+        "pass": true
+      },
+      {
+        "id": "F-14",
+        "criterion": "Contact details run@example.com and WhatsApp +91 00000 44444 are shown on the site",
+        "verdict": "PASS",
+        "note": "#contact has mailto:run@example.com and https://wa.me/910000044444 labelled +91 00000 44444; N4 met.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 14,
+        "pass": true
+      },
+      {
+        "id": "F-15",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "PASS",
+        "note": "Mechanical check: js_errors [], overflow 0 at both widths, broken_in_page_links []. body has overflow-x:hidden, which could mask overflow, but the measured overflow is 0.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 15,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-16",
+        "criterion": "Page hygiene: single-file size",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Mechanical check: 80,531 bytes, over the ~60 KB single-page guideline. Only one <title> remains in the head.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "Screenshot shows Barlow Condensed headings, Inter body, navy/orange palette, pill j2-btn and white cards with orange offset shadow, matching the style guide.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "Measurements: 182 text elements checked at both widths, 0 low-contrast.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "1 h1, 0 skipped heading levels; the screenshot shows the title dominant.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "One .j2-hero-cta 'Register now' to #register, orange and prominent in the screenshot at both widths.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "At 360px the menu shows about 4 links (Home, Races, Fees, Register, SC...) and the rest need horizontal scrolling; the menu auto-centres the active link.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "small_tap_targets count 0 at 44px minimum on phone.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "0 img elements, images_without_alt []; placeholders use role=img with aria-label.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 80531,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap",
+        "https://wa.me/910000044444"
+      ],
+      "forms": 2,
+      "scripts": 7,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "design": {
+        "desktop": {
+          "contrast": {
+            "checked": 182,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Barlow Condensed"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 13
+          },
+          "first_screen_actions": [
+            "High contrast\n    Off",
+            "Register now",
+            "Home"
+          ]
+        },
+        "phone": {
+          "contrast": {
+            "checked": 182,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Barlow Condensed"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 13
+          },
+          "first_screen_actions": [
+            "High contrast\n    Off",
+            "Register now",
+            "Home"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        }
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": false,
+          "invalid": [
+            "Date of birth"
+          ],
+          "errors_during": [],
+          "ok": true
+        },
+        {
+          "index": 2,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v23.png",
+    "all_pass": true,
+    "conditions": [
+      {
+        "id": "N1",
+        "text": "The page opens (it parses, tags balanced)",
+        "check": "page-parses",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "text": "No JavaScript errors on load",
+        "check": "no-js-errors",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "text": "No horizontal overflow at 360px and 1280px",
+        "check": "no-overflow",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "text": "Every in-page link resolves; WhatsApp (wa.me) and tel: links are well formed",
+        "check": "links-well-formed",
+        "met": true,
+        "evidence": "all 14 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "text": "Every charter fact appears exactly, and nothing is \"to be confirmed\"",
+        "check": [
+          "facts-present-all",
+          "nothing-to-be-confirmed"
+        ],
+        "met": true,
+        "evidence": "all 1 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "text": "No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers",
+        "check": "no-invented-facts",
+        "met": true,
+        "evidence": "every number, phone and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "N7",
+        "text": "Every form has a submit control and a destination (action or mailto)",
+        "check": "forms-have-destination",
+        "met": true,
+        "evidence": "2 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "text": "A nav reaches every section, and the hero has one obvious main action",
+        "check": "nav-and-main-action",
+        "met": true,
+        "evidence": "the nav reaches all 10 section(s); the hero has 1 main action(s)"
+      }
+    ]
+  }
+]

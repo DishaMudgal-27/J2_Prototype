@@ -1,0 +1,101 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "shop",
+    "name": "Shop: categories, filters, new arrivals, size guide, WhatsApp ordering",
+    "purpose": "The site has no product list, filtering, size guide, new arrivals or ordering.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 4,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the filter script still throws a JavaScript error or the product count is not 10 after one retry, and report to Coordination."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Shop section with anchor ids for products, new arrivals and size guide",
+      "Category and size/price filter script",
+      "WhatsApp order links"
+    ],
+    "completion_check": "Exactly 10 products show with the given names, prices and sizes; each category shows only its products; size and price filters change the list correctly; each product has a photo spot and a wa.me order link for 00000 11111 containing the product name; New Arrivals shows exactly 3 named items; size guide has 6 rows with the given values; no JavaScript errors.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "style guide, usable section",
+    "style_guide": true,
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "frame-and-info",
+    "name": "Page frame, look and store information",
+    "purpose": "The site has no name, menu, Pune mention, look, lookbook, store details, policy, delivery note or reviews.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 4,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any menu link points to a missing section or 360px overflow remains after one retry, and report to Coordination."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Header, menu, intro and footer",
+      "Site-wide earthy styling and viewport setting",
+      "Lookbook, store info, policy, delivery and reviews sections"
+    ],
+    "completion_check": "Page shows Thread & Loom and Pune; every menu link lands on an existing section; the lookbook has 3 outfits using only the 10 listed products, each with a photo spot; timings, address, phone, map link, policy, delivery note and 3 reviews match the Requester's text exactly; viewport meta present; no horizontal scroll at 360px and 1280px.",
+    "dependencies": [
+      "shop"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section and head tags",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "brand-tap-target",
+    "name": "Header brand link tap area",
+    "purpose": "The header brand link .tl2-brand measures 160x26px at 360px, below the 44x44px minimum (R-6, F-14).",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the .tl2-brand link is still under 44x44px at 360px, or any overflow, broken menu link or JavaScript error appears, after one retry, and report to Coordination."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "CSS rule on .tl2-brand: display:inline-flex; align-items:center; min-height:44px; min-width:44px, with padding adjusted so the visual position stays the same"
+    ],
+    "completion_check": "At 360px the .tl2-brand link measures at least 44x44px; no horizontal overflow at 360px or 1280px; every menu link still lands on an existing section; no JavaScript errors.",
+    "dependencies": [
+      "frame-and-info"
+    ],
+    "status": "done",
+    "cycle": 2,
+    "section": "W-2",
+    "revises": "W-2",
+    "agent": "W-3 Builder",
+    "last_check": "usable section and head tags",
+    "version": 3
+  }
+]

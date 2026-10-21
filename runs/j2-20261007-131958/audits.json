@@ -1,0 +1,126 @@
+[
+  {
+    "cycle": 1,
+    "version": 5,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The hours section lists Monday to Friday 8am to 10pm and Saturday and Sunday 9am to 11pm, and JavaScript highlights today's row automatically from the visitor's current day.",
+        "verdict": "PASS",
+        "note": "Seven rows with the correct times; script matches new Date().getDay() to data-day and adds bl-today; js_errors is empty. The highlight was not observed in a browser, only read in the code.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The menu shows every item with a ₹ price: Coffee: Espresso 120, Cappuccino 180, Pour-over 220; Cold: Cold brew 200; Food: Croissant 150, Banana bread 130.",
+        "verdict": "PASS",
+        "note": "Menu markup lists Espresso ₹120, Cappuccino ₹180, Pour-over ₹220, Cold brew ₹200, Croissant ₹150, Banana bread ₹130 under Coffee, Cold and Food.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The pre-order form lists the same six items with quantity inputs and shows a running total in ₹ that updates as quantities change.",
+        "verdict": "PASS",
+        "note": "Six number inputs with data-price matching the menu; the input and change listeners call update(), which writes '₹'+total to the output element.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "Submitting the pre-order form opens a WhatsApp message to +91 98450 00000 containing the chosen items and the total, and the page states pay at pickup and pickup within 15 minutes of ordering.",
+        "verdict": "PASS",
+        "note": "PHONE='919845000000'; the submit handler builds a wa.me URL with the items, total and name; the page shows 'Pay at pickup.' and 'Pickup within 15 minutes of ordering.'; the mechanical form submit ran with no errors.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The loyalty section shows 10 stamp circles, with the 10th circle marked FREE.",
+        "verdict": "PASS",
+        "note": "The ol has 10 li.bl-stamp elements; the 10th has class bl-stamp-free and the text FREE; the border-radius is 50%.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The location section shows the address 100 Feet Road, Indiranagar, Bengaluru 560038 and a \"Get directions\" link to https://maps.google.com/?q=100+Feet+Road+Indiranagar+Bengaluru+560038.",
+        "verdict": "PASS",
+        "note": "The address element reads '100 Feet Road, Indiranagar, Bengaluru 560038'; the link labelled 'Get directions' has href https://maps.google.com/?q=100+Feet+Road+Indiranagar+Bengaluru+560038.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "At 360px and 1280px wide the page has no horizontal overflow, and loading and using the page throws no JavaScript errors.",
+        "verdict": "PASS",
+        "note": "Mechanical check: phone overflow_px 0, desktop overflow_px 0, js_errors [], form submit ok with no errors, broken_in_page_links [].",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-8",
+        "criterion": "Standard: valid single-file HTML",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The head contains two <title> tags and two <meta charset> tags (the shell stub plus the W-1 head block); browsers use the first title, 'Brew Lab'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 19632,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://maps.google.com/?q=100+Feet+Road+Indiranagar+Bengaluru+560038"
+      ],
+      "forms": 1,
+      "scripts": 2,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

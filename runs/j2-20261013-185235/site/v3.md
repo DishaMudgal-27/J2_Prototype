@@ -1,0 +1,5 @@
+# LabSlot
+
+## Problem
+
+LabSlot is a phone-friendly web app where students book lab slots. Today, booking is done on paper, and slots get double-booked. Students and lab staff are both affected by this problem. LabSlot is intended to replace paper booking and avoid double-booked slots. The rest of this document describes how LabSlot addresses the problem.

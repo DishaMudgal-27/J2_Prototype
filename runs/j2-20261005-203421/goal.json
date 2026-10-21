@@ -1,0 +1,31 @@
+{
+  "statement": "Build a single-file portfolio website for Ananya Rao, a wedding photographer in Jaipur, with a photo gallery, packages and prices, testimonials, and an enquiry form for wedding dates. Facts only the Requester can supply appear as visibly marked placeholders in one editable block.",
+  "site_name": "Ananya Rao, Wedding Photographer, Jaipur",
+  "audience": "Couples and families looking to hire a wedding photographer in Jaipur.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file; CDN libraries are allowed; no build step.",
+    "Every placeholder (image, price, testimonial, form endpoint) is visibly labelled on the page and held in one editable list or constant."
+  ],
+  "rules": [
+    "Sample prices must show the label 'sample, replace before launch'.",
+    "Each sample testimonial must carry a visible 'sample' label so it cannot pass as a real review.",
+    "Placeholder gallery images must be visibly labelled as placeholders.",
+    "The form delivery endpoint is a single clearly marked placeholder, flagged on the page as a launch blocker.",
+    "Do not invent facts about Ananya (contact details, accounts, awards, client names) beyond the brief."
+  ],
+  "done_when": [
+    "The site is one HTML file with inline CSS and JavaScript, needs no build step, and names Ananya Rao and Jaipur.",
+    "A gallery section renders multiple images from one editable list, and each image is visibly labelled as a placeholder.",
+    "A testimonials section renders from one editable list, and each testimonial carries a visible 'sample' label.",
+    "An enquiry form has a wedding date field, a name field and a contact field, validates them before submit, and shows a confirmation message after a valid submit.",
+    "The form's delivery endpoint is one named placeholder constant, and the page shows a visible note that enquiries are not delivered until it is set."
+  ],
+  "open_inputs": [
+    "Form delivery endpoint (for example an email or form-service address) so enquiries reach Ananya; launch blocker.",
+    "Real rate card: package names, inclusions and prices.",
+    "Real photos for the gallery.",
+    "Real client testimonials and quotes.",
+    "A packages and prices section renders multiple packages from one editable list, and each price carries the visible label 'sample, replace before launch'."
+  ],
+  "dropped_from_brief": []
+}

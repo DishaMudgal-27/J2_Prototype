@@ -1,0 +1,54 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "build_citycare_website",
+    "name": "Build Single-Page Website",
+    "purpose": "No website exists yet for CityCare Hospital Bengaluru. We need a single-file website with an intuitive booking flow for General Medicine, Pediatrics, and Cardiology, and prominent emergency details.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 5,
+      "time_limit_minutes": 20,
+      "retry_limit": 2,
+      "stop_loss": "Exceeding money limit or failing to produce a single-file valid HTML output."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "index.html"
+    ],
+    "completion_check": "The index.html file is generated, runs locally in a browser without errors, prominently displays '+91 80 4999 9999' and 'call 108', and provides a booking mechanism highlighting General Medicine, Pediatrics, and Cardiology.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "W-2",
+    "name": "Repair and Complete Single-Page Website",
+    "purpose": "The website code was truncated at the booking form select tag, leaving the HTML unclosed and missing the JavaScript layer for booking functionality.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 3,
+      "time_limit_minutes": 15,
+      "retry_limit": 2,
+      "stop_loss": "Exceeding money limit or failing to produce a complete valid HTML output."
+    },
+    "charged": true,
+    "calls_used": 0,
+    "retries_used": 0,
+    "outputs": [
+      "index.html"
+    ],
+    "completion_check": "Verify the index.html file is well-formed, closes all tags, runs in a browser without truncation, and features a functional booking flow for General Medicine, Pediatrics, and Cardiology alongside the prominent emergency contacts.",
+    "dependencies": [
+      "W-1"
+    ],
+    "status": "registered",
+    "cycle": 2
+  }
+]

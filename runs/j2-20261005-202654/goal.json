@@ -1,0 +1,36 @@
+{
+  "statement": "Build a single-file website for SmileCare Dental Clinic in Pune that lets patients request appointments, see services with starting-from prices, read dentist profiles, find the emergency dental contact, read patient FAQs, and switch to a Marathi version.",
+  "site_name": "SmileCare Dental Clinic",
+  "audience": "Patients and prospective patients of the clinic in Pune, reading in English or Marathi.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file; CDN libraries allowed; no build step and no backend.",
+    "Every section is available in both English and Marathi with full parity.",
+    "Any price, phone number, dentist detail or emergency hour not yet supplied is shown as a visibly marked placeholder, never as a plausible real value.",
+    "Prices are never presented as exact or final."
+  ],
+  "rules": [
+    "Booking is a request form that opens a pre-filled WhatsApp message or email to the clinic; the page states that the clinic will confirm by phone and does not imply an instant confirmation.",
+    "Prices are shown as 'starting from' ranges with a line that the final cost is confirmed after examination.",
+    "The Marathi version is drafted by the department and labelled 'pending native review'.",
+    "Facts only the clinic holds are tracked as open inputs and shown as marked placeholders; they do not block done.",
+    "No data is stored or sent anywhere other than the patient's own WhatsApp or email app."
+  ],
+  "done_when": [
+    "The site is one HTML file with inline or CDN-linked CSS and JavaScript, needs no build step, and contains no backend calls.",
+    "A booking section contains a request form whose submit opens a pre-filled WhatsApp message or email addressed to the clinic, and the section states that the clinic will confirm the appointment by phone.",
+    "A services section lists each service with a 'starting from' price range and a line stating that the final cost is confirmed after examination.",
+    "A dentist profiles section shows at least one profile, and every detail not supplied is a visibly marked placeholder.",
+    "An emergency dental contact is visible on the page, and the phone number and hours, if not supplied, are visibly marked placeholders.",
+    "A patient FAQ section is present with at least one question and answer.",
+    "A language toggle switches every section, including the booking form, services, dentist profiles, emergency contact and FAQs, between English and Marathi, and the Marathi view shows a 'pending native review' label.",
+    "Every price, phone number, WhatsApp number, email address, dentist detail and emergency hour not yet supplied appears as a visibly marked placeholder in both languages."
+  ],
+  "open_inputs": [
+    "Real 'starting from' price ranges for each service",
+    "Real dentist names, qualifications and profile details",
+    "Clinic phone number, WhatsApp number and email address for booking requests",
+    "Emergency contact number and emergency hours",
+    "Review of the Marathi text by the Requester or a named Marathi speaker"
+  ],
+  "dropped_from_brief": []
+}

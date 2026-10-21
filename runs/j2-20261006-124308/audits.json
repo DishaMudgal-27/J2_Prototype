@@ -1,0 +1,118 @@
+[
+  {
+    "cycle": 1,
+    "version": 3,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page title and header show the name Brew Lab",
+        "verdict": "PASS",
+        "note": "<title>Brew Lab | Cafe in Indiranagar, Bengaluru</title>; header brand link reads 'Brew Lab'; h1 'Brew Lab'.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "A menu section lists drinks, each with a price, and any price or item not supplied is a visibly marked placeholder",
+        "verdict": "PASS",
+        "note": "MENU has 5 entries with null name and price; each renders as a '.placeholder' span ('[Drink name n]', '[Price]') plus a menu-note. No invented prices or items.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The page states opening hours as 8am to 10pm, every day",
+        "verdict": "PASS",
+        "note": "'.hours-big' reads '8am to 10pm', 'Open every day'; all 7 day rows read '8am to 10pm'; the footer repeats it.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "A location section names Indiranagar, Bengaluru and includes a map or map link, with the street address marked as a placeholder if not supplied",
+        "verdict": "PASS",
+        "note": "Section 'Find us' says 'Indiranagar, Bengaluru'; the Google Maps search link is present; '[Street address to be added]' and '[Phone number to be added]' are marked placeholders. The map box is a labelled placeholder, not a real pin.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A pre-order form lets a visitor choose menu items and quantities, enter a name and phone number, and pick a pickup time between 8am and 10pm, and shows an order summary on submit",
+        "verdict": "PASS",
+        "note": "Code read, not a run submit: qty steppers are built from BREWLAB_MENU; name, tel and time inputs (min 08:00, max 22:00) exist; validate() rejects mins < 480 or > 1320; showSummary() renders items, name, phone and time. The mechanical check found no JS errors.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The file has a viewport meta tag and mobile-first CSS (base styles for small screens, min-width media queries for larger ones)",
+        "verdict": "PASS",
+        "note": "Viewport meta present; base rules are unscoped; the only media queries are (min-width: 600px) and (min-width: 860px).",
+        "severity": "low",
+        "confidence": "high",
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "The CSS defines a warm colour palette and the layout has no fixed widths that force horizontal scrolling at 375px",
+        "verdict": "PASS",
+        "note": ":root defines cream, sand, espresso, caramel and terracotta. Mechanical check: overflow 0px at 360px and 1280px. No fixed widths over 360px (stepper input 3.2rem).",
+        "severity": "low",
+        "confidence": "high",
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The site is one HTML file with inline CSS and JavaScript and needs no build step",
+        "verdict": "PASS",
+        "note": "One file of 25,526 bytes with 1 style block and 1 script. The only external reference is the Google Maps anchor href, not a loaded resource.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 8,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-9",
+        "criterion": "Charter open_inputs: order destination, real menu, address, phone",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The summary says '[Order delivery to the cafe to be added]... not been sent to Brew Lab yet'. A visitor cannot place a real order until the Requester supplies a delivery channel and the real menu.",
+        "severity": "medium",
+        "confidence": "high"
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 25526,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://www.google.com/maps/search/?api=1&amp;query=Indiranagar%2C+Bengaluru"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

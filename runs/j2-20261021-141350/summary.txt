@@ -1,0 +1,10 @@
+Messages 1-206
+- Brief: Brew Lab single-page site (name, address as text, no map, 7 menu items in ₹, hours 7am–10pm daily, pre-order form emailing hello@brewlab.example, pickup at shop, no online payment, phone-friendly). Requester answers: success = 20 pre-orders/week within first month; no shop phone number shown.
+- PRD: six sections written; Audit found invented payment sentence and missing G1–G3 measurement windows; both fixed (W-7, W-8). PRD v8 workable, exported prd.docx.
+- Budget: Requester raised 500→560 (option 1), then 560→810 (added 250). Currently 652/810 used.
+- HLD: six sections written. Audit H5 flagged unlabelled terms (Header, Single-file, One-file, Requester); fixed over two rounds (W-15–W-18). HLD v11 workable, exported hld.docx.
+- LLD: five sections written. Audit L6 flagged unlabelled 360px/1280px widths in Responsive rules. Requester chose option 2: accepted as is, not reworked. lld.docx exported.
+- Website: Requester chose to keep going; seven workflows W-24–W-30 funded (110 credits, 158 left for fixes). W-24 (shop name), W-25 (address), W-26 (menu), W-27 (hours) done and passed checks.
+- Conflict, W-28 (pre-order form): LLD S5 names ids #pre-order-form/#pre-order-submit, but workflow checks require #order-form/#order-submit. Builder used the workflow's ids; section revised once to v2.
+- W-28 failed the same check twice: items field built as type text, spec says multi. Escalated after attempts; Adaptation ruled the build wrong (not the check) and proposed a multi-select or checkboxes for #order-items, fundable from 158 credits.
+- Open: W-28 fix pending via Audit and Adaptation; W-29 (pickup note) and W-30 (layout/polish, runs last) not yet built; no site checks passed overall yet.

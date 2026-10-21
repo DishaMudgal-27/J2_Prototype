@@ -1,0 +1,185 @@
+{
+  "metrics": {
+    "outcome": "Paused: the charter drops items from the brief, and only the Requester can agree to that.",
+    "brief": "build a sudokou game on vercel app",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 0,
+    "ai_calls": 4,
+    "minutes": 0.6,
+    "budget": {
+      "total": 100,
+      "start": 100,
+      "cap": 200,
+      "raises": [],
+      "spent": 0,
+      "rate_card": true
+    },
+    "site_versions": 0,
+    "site_bytes": 0,
+    "agents": {
+      "identity": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "ceo": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 0,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 0,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 0,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "builder": {
+        "turns": 0,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 0,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 0,
+      "grants": 0,
+      "counters": 0,
+      "refuses": 0,
+      "refuses_converted_by_code": 0,
+      "withdrawals": 0,
+      "conflicts": 0,
+      "ceo_decisions": 3,
+      "resolutions": []
+    },
+    "workflows": {
+      "registered": 0,
+      "done": 0,
+      "failed": 0,
+      "held_ever": 0,
+      "estimate_vs_charged": []
+    },
+    "ceo_choices": {
+      "made": 3,
+      "picked_shown_first": 2,
+      "picked_identity_first": 2,
+      "note": "options are shuffled before the CEO sees them; shown_first measures position bias, identity_first measures pull toward the option Identity listed first"
+    },
+    "validator_refusals": 0,
+    "role_refusals": 0,
+    "pauses": 1,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 0,
+    "audits": [],
+    "open_inputs": [
+      "Live Vercel URL of the deployed game (shown on the site as a marked placeholder until the Requester deploys it)."
+    ]
+  },
+  "review": {
+    "verdict": "The department set a clear charter in 3 AI calls and 0.6 minutes, then correctly paused for the Requester, but it stopped at cycle 0, so Adaptation, Priority, Coordination, Builder and Audit were never exercised.",
+    "agents": {
+      "identity": {
+        "score": 3,
+        "note": "Charter is concrete: 13 observable done-when items, and the open Vercel URL is a labelled placeholder [4]. But [2] bundles three questions into one ASK_CEO when the role says one bounded decision. [4] also hands work to @Adaptation while stating that Requester approval is needed first."
+      },
+      "adaptation": {
+        "score": 3,
+        "note": "No turns (0). Not scorable. 3 is a placeholder, not a judgement."
+      },
+      "priority": {
+        "score": 3,
+        "note": "No turns (0). Not scorable. 3 is a placeholder."
+      },
+      "coordination": {
+        "score": 3,
+        "note": "No turns (0). Not scorable. 3 is a placeholder."
+      },
+      "audit": {
+        "score": 3,
+        "note": "No turns (0), no audits. Not scorable. 3 is a placeholder."
+      },
+      "ceo": {
+        "score": 4,
+        "note": "Chose one option per question, gave a one-line reason and named the accepted risk [3]. Did not touch done-when. Q2 picked the last-shown option, so it was not just taking the first one. Weak point: it said the brief was silent on all three, yet Q3 concerns the brief's explicit 'on Vercel' wording."
+      },
+      "builder": {
+        "score": 3,
+        "note": "No turns (0), site_bytes 0. Not scorable. 3 is a placeholder."
+      }
+    },
+    "went_well": [
+      "Typo in the brief ('sudokou') was handled without fuss; the charter site name is 'Sudoku' [2].",
+      "Charter scope is tight: the rules cap work at the CEO's three decisions and forbid persistence or extra features without a new Identity ruling.",
+      "Dropping live publishing was surfaced, not hidden. The charter lists it in dropped_from_brief and the validator paused the run [5][6].",
+      "Spend was 0 of 100 and there were 0 redirects and 0 invalid moves, so hand-off rules were not strained (thin evidence, 3 agent turns)."
+    ],
+    "problems": [
+      "Identity asked three questions in one message, against the 'one decision-ready question' rule [2].",
+      "The CEO decided to drop an explicit brief item (live Vercel deploy) [3]. That is the Requester's call, so the pause was always going to follow. Identity could have asked the Requester directly, which is cheaper.",
+      "[4] tells Adaptation to propose workflows, then [5] and [6] pause the run. The hand-off was wasted and slightly confusing.",
+      "[6] says 'Site v0 is in the preview' but site_bytes is 0, so there is nothing to preview.",
+      "[5] has a doubled period and asks an open 'keep or drop' question, not a decision-ready A/B."
+    ],
+    "learnings": [
+      "Test the post-pause path next. Add a scripted Requester reply (accept the drop) so the run reaches Adaptation, Priority, Builder and Audit. Without it, no workflow design is tested (cycles 0, proposals 0).",
+      "Run the dropped-from-brief check before Identity hands off, or have Identity word the hand-off as 'on hold until the Requester answers'. Evidence: [4] versus [5][6].",
+      "Ask Identity to put explicit-brief trade-offs to the Requester, and keep the CEO for value trade-offs. Evidence: Q3 [2][3] led straight to the pause.",
+      "Do not read the CEO bias metrics yet. 3 decisions: 2 picked the first-shown option and 2 picked Identity's first option. That is too few to conclude anything.",
+      "Fix the preview note and message text: do not announce a site version when site_bytes is 0."
+    ]
+  },
+  "events": [
+    {
+      "agent": "ceo",
+      "type": "decision",
+      "detail": "charter Q1: option 1 of 3",
+      "msg": 3,
+      "cycle": 0,
+      "shown_pos": 0,
+      "original_pos": 0,
+      "n_options": 3
+    },
+    {
+      "agent": "ceo",
+      "type": "decision",
+      "detail": "charter Q2: option 3 of 3",
+      "msg": 3,
+      "cycle": 0,
+      "shown_pos": 2,
+      "original_pos": 1,
+      "n_options": 3
+    },
+    {
+      "agent": "ceo",
+      "type": "decision",
+      "detail": "charter Q3: option 1 of 3",
+      "msg": 3,
+      "cycle": 0,
+      "shown_pos": 0,
+      "original_pos": 0,
+      "n_options": 3
+    },
+    {
+      "agent": "validator",
+      "type": "pause",
+      "detail": "charter drops brief items: Publishing the game live on Vercel is not part of the charter. The department makes no outward-facing action and holds no Vercel credentials, so it delivers the single index.html plus deploy steps for the Requester to run. The Requester must agree to this before work starts.",
+      "msg": 6,
+      "cycle": 0
+    }
+  ],
+  "made": "2026-10-06 11:07:25"
+}

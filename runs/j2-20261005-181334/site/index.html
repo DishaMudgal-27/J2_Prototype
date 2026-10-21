@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CityCare Hospital, Bengaluru</title>
+<style>
+  :root{
+    --ink:#14222e; --muted:#44586a; --bg:#f5f8fa; --card:#ffffff;
+    --brand:#0b6e75; --brand-dark:#084f55; --emerg:#b3001b; --emerg-bg:#fff1f2;
+    --warn-bg:#fff6d6; --warn-ink:#5c4400; --line:#cfd9e0;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+  a{color:var(--brand-dark)}
+  :focus-visible{outline:3px solid #1a5fd0;outline-offset:2px}
+  .wrap{max-width:960px;margin:0 auto;padding:0 18px}
+
+  .demo{background:var(--warn-bg);color:var(--warn-ink);border-bottom:2px solid #e0b800;font-size:15px;padding:8px 0}
+  .demo strong{text-transform:uppercase;letter-spacing:.04em}
+
+  .sos{background:var(--emerg);color:#fff;padding:10px 0}
+  .sos .wrap{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:space-between}
+  .sos p{margin:0;font-weight:700}
+  .sos a{color:#fff;font-weight:800;font-size:1.15rem;text-decoration:none;border:2px solid #fff;border-radius:8px;padding:4px 12px;display:inline-block}
+  .sos a:hover{background:#fff;color:var(--emerg)}
+
+  header.site{background:var(--card);border-bottom:1px solid var(--line)}
+  header.site .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding-top:14px;padding-bottom:14px}
+  .logo{font-size:1.5rem;font-weight:800;color:var(--brand-dark);margin:0}
+  .logo span{color:var(--ink);font-weight:500;font-size:1rem;display:block}
+  nav a{margin-right:16px;font-weight:600;text-decoration:none}
+  nav a:hover{text-decoration:underline}
+
+  .hero{padding:34px 0 10px}
+  .hero h1{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.15;margin:0 0 10px}
+  .hero p{color:var(--muted);max-width:640px;margin:0 0 16px}
+  .btn{display:inline-block;background:var(--brand);color:#fff;border:0;border-radius:8px;padding:12px 20px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
+  .btn:hover{background:var(--brand-dark)}
+  .btn.alt{background:#fff;color:var(--brand-dark);border:2px solid var(--brand)}
+  .btn.alt:hover{background:#e8f4f5}
+
+  section{padding:26px 0}
+  h2{font-size:1.5rem;margin:0 0 12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+
+  #emergency .card{border:3px solid var(--emerg);background:var(--emerg-bg)}
+  .numbers{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:12px 0 16px}
+  .num{background:#fff;border:2px solid var(--emerg);border-radius:12px;padding:14px;text-align:center}
+  .num .big{display:block;font-size:3rem;font-weight:900;color:var(--emerg);line-height:1.1;text-decoration:none}
+  .num .label{font-weight:700}
+  .num .sub{color:var(--muted);font-size:.95rem}
+  .callnow{display:inline-block;margin-top:8px;background:var(--emerg);color:#fff;border-radius:8px;padding:8px 16px;font-weight:700;text-decoration:none}
+  .callnow:hover{background:#85001a}
+
+  dl.facts{margin:0;display:grid;grid-template-columns:max-content 1fr;gap:10px 16px}
+  dl.facts dt{font-weight:700}
+  dl.facts dd{margin:0}
+  .ph{background:var(--warn-bg);color:var(--warn-ink);border:1px dashed #b38f00;border-radius:6px;padding:1px 8px;font-weight:600;display:inline-block}
+  .ph::before{content:"PLACEHOLDER: ";font-size:.75em;letter-spacing:.04em}
+  @media (max-width:520px){dl.facts{grid-template-columns:1fr}dl.facts dt{margin-top:6px}}
+
+  form .row{margin-bottom:16px}
+  label{display:block;font-weight:700;margin-bottom:4px}
+  .hint{font-weight:400;color:var(--muted);font-size:.9rem}
+  input,select{width:100%;font:inherit;padding:11px 12px;border:2px solid #7a8d9b;border-radius:8px;background:#fff;color:var(--ink)}
+  input:invalid:not(:placeholder-shown){border-color:var(--emerg)}
+  .err{color:var(--emerg);font-weight:600;font-size:.95rem;min-height:1.2em;margin:4px 0 0}
+  .privacy{background:#eef5f7;border-left:5px solid var(--brand);border-radius:6px;padding:12px 14px;margin:0 0 18px;font-size:.96rem}
+  .privacy h3{margin:0 0 4px;font-size:1rem}
+  .banner{background:var(--warn-bg);color:var(--warn-ink);border:2px solid #e0b800;border-radius:8px;padding:10px 14px;margin:0 0 16px;font-size:.96rem}
+  #confirm{display:none;background:#e9f7ee;border:2px solid #1c7c43;border-radius:12px;padding:20px}
+  #confirm h3{margin:0 0 8px;color:#12592f}
+  #confirm:focus{outline:3px solid #1a5fd0}
+
+  footer{border-top:1px solid var(--line);background:#fff;padding:20px 0;color:var(--muted);font-size:.95rem;margin-top:20px}
+  .sr{position:absolute;left:-9999px}
+  .sr:focus{left:8px;top:8px;background:#fff;padding:8px;z-index:10}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<a class="sr" href="#main">Skip to main content</a>
+
+<div class="demo" role="note">
+  <div class="wrap"><strong>Demo site.</strong> This page is a demonstration. Hospital details below are placeholders, and the form does not send or save anything.</div>
+</div>
+
+<div class="sos" role="region" aria-label="Emergency numbers">
+  <div class="wrap">
+    <p>In an emergency, call now:</p>
+    <span>
+      <a href="tel:112" aria-label="Call 112, general emergency">112 General</a>
+      <a href="tel:108" aria-label="Call 108, ambulance">108 Ambulance</a>
+    </span>
+  </div>
+</div>
+
+<header class="site">
+  <div class="wrap">
+    <p class="logo">CityCare Hospital <span>Bengaluru</span></p>
+    <nav aria-label="Main">
+      <a href="#emergency">Emergency</a>
+      <a href="#visit">Request a visit</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <div class="hero">
+      <h1>Care when you need it, in Bengaluru.</h1>
+      <p>Request a visit with CityCare Hospital in a minute, or find emergency numbers right away.</p>
+      <a class="btn" href="#visit">Request a visit</a>
+      <a class="btn alt" href="#emergency">Emergency information</a>
+    </div>
+
+    <section id="emergency" aria-labelledby="em-h">
+      <div class="card">
+        <h2 id="em-h">Emergency information</h2>
+        <p><strong>If someone is in danger, call first. Do not fill in a form.</strong></p>
+        <div class="numbers">
+          <div class="num">
+            <span class="label">General emergency</span>
+            <a class="big" href="tel:112">112</a>
+            <span class="sub">India's single emergency number</span><br>
+            <a class="callnow" href="tel:112">Call 112</a>
+          </div>
+          <div class="num">
+            <span class="label">Ambulance</span>
+            <a class="big" href="tel:108">108</a>
+            <span class="sub">Public ambulance service</span><br>
+            <a class="callnow" href="tel:108">Call 108</a>
+          </div>
+        </div>
+        <h3>CityCare Emergency Department</h3>
+        <dl class="facts">
+          <dt>Emergency phone</dt>
+          <dd><span class="ph">[CityCare ER phone, to be confirmed]</span></dd>
+          <dt>ER hours</dt>
+          <dd><span class="ph">[ER hours, to be confirmed]</span></dd>
+          <dt>ER entrance</dt>
+          <dd><span class="ph">[Address and entrance, to be confirmed]</span></dd>
+        </dl>
+      </div>
+    </section>
+
+    <section id="visit" aria-labelledby="visit-h">
+      <div class="card">
+        <h2 id="visit-h">Request a visit</h2>
+        <div class="banner"><strong>Demo form.</strong> It needs a real backend and consent handling before it can take live requests. Nothing you type here leaves this page.</div>
+
+        <form id="visitForm" novalidate>
+          <div class="privacy" id="privacy">
+            <h3>Privacy notice</h3>
+            We ask only for your name, phone, department and preferred time. Please do not enter symptoms or medical history. In this demo, nothing you enter is saved or sent anywhere, and it is cleared when you close or reload the page.
+          </div>
+
+          <div class="row">
+            <label for="name">Full name</label>
+            <input id="name" name="name" type="text" autocomplete="name" required maxlength="100" aria-describedby="name-err">
+            <p class="err" id="name-err" aria-live="polite"></p>
+          </div>
+
+          <div class="row">
+            <label for="phone">Phone number <span class="hint">(the hospital will call this number)</span></label>
+            <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required maxlength="20" placeholder="e.g. 98450 00000" aria-describedby="phone-err">
+            <p class="err" id="phone-err" aria-live="polite"></p>
+          </div>
+
+          <div class="row">
+            <label for="dept">Department <span class="hint">(sample list, to be confirmed by CityCare)</span></label>
+            <select id="dept" name="dept" required aria-describedby="dept-err">
+              <option value="">Select a department</option>
+              <option>General Medicine</option>
+              <option>Pediatrics</option>
+              <option>Gynecology and Obstetrics</option>
+              <option>Orthopedics</option>
+              <option>Cardiology</option>
+              <option>Dermatology</option>
+              <option>ENT</option>
+              <option>Not sure, please advise</option>
+            </select>
+            <p class="err" id="dept-err" aria-live="polite"></p>
+          </div>
+
+          <div class="row">
+            <label for="when">Preferred date and time <span class="hint">(a preference, not a booking)</span></label>
+            <input id="when" name="when" type="datetime-local" required aria-describedby="when-err">
+            <p class="err" id="when-err" aria-live="polite"></p>
+          </div>
+
+          <button class="btn" type="submit">Request a visit</button>
+        </form>
+
+        <div id="confirm" role="status" tabindex="-1">
+          <h3>Request received (demo)</h3>
+          <p>The hospital will call you to confirm. This is a request only. <strong>No appointment is held or booked</strong> until the hospital confirms with you by phone.</p>
+          <p>If this is an emergency, call <a href="tel:112">112</a> or <a href="tel:108">108</a> now.</p>
+          <button class="btn alt" type="button" id="again">Make another request</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" aria-labelledby="ct-h">
+      <div class="card">
+        <h2 id="ct-h">Contact CityCare Hospital</h2>
+        <dl class="facts">
+          <dt>Address</dt>
+          <dd><span class="ph">[Hospital address, Bengaluru, to be confirmed]</span></dd>
+          <dt>Main phone</dt>
+          <dd><span class="ph">[Main phone number, to be confirmed]</span></dd>
+          <dt>Outpatient hours</dt>
+          <dd><span class="ph">[OPD hours, to be confirmed]</span></dd>
+        </dl>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    CityCare Hospital, Bengaluru. Demo site: all hospital-specific details are placeholders until confirmed by the hospital. This site does not give medical advice.
+  </div>
+</footer>
+
+<script>
+(function () {
+  var form = document.getElementById('visitForm');
+  var confirmBox = document.getElementById('confirm');
+  var again = document.getElementById('again');
+  var when = document.getElementById('when');
+
+  // Earliest selectable time is now (local time).
+  function setMin() {
+    var d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    when.min = d.toISOString().slice(0, 16);
+  }
+  setMin();
+
+  function setErr(id, msg) {
+    document.getElementById(id + '-err').textContent = msg;
+  }
+
+  function validate() {
+    var ok = true;
+    var name = document.getElementById('name').value.trim();
+    var phone = document.getElementById('phone').value.trim();
+    var dept = document.getElementById('dept').value;
+    var w = when.value;
+
+    setErr('name', ''); setErr('phone', ''); setErr('dept', ''); setErr('when', '');
+
+    if (name.length < 2) { setErr('name', 'Please enter your name.'); ok = false; }
+
+    var digits = phone.replace(/\D/g, '');
+    if (!/^[0-9+\-()\s]+$/.test(phone) || digits.length < 10 || digits.length > 13) {
+      setErr('phone', 'Please enter a valid phone number (10 digits).'); ok = false;
+    }
+    if (!dept) { setErr('dept', 'Please choose a department.'); ok = false; }
+    if (!w) {
+      setErr('when', 'Please choose a preferred date and time.'); ok = false;
+    } else if (when.min && w < when.min) {
+      setErr('when', 'Please choose a time that is not in the past.'); ok = false;
+    }
+    return ok;
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!validate()) {
+      var first = form.querySelector('.err:not(:empty)');
+      if (first) { first.previousElementSibling.focus(); }
+      return;
+    }
+    // Demo only: entered values are cleared and never leave this page.
+    form.reset();
+    form.style.display = 'none';
+    confirmBox.style.display = 'block';
+    confirmBox.focus();
+  });
+
+  again.addEventListener('click', function () {
+    confirmBox.style.display = 'none';
+    form.style.display = 'block';
+    setMin();
+    document.getElementById('name').focus();
+  });
+})();
+</script>
+</body>
+</html>

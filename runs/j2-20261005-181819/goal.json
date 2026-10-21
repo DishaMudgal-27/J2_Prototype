@@ -1,0 +1,39 @@
+{
+  "statement": "Build a single-file website for CityCare Hospital in Bengaluru where patients can request a visit, find emergency information, browse doctor profiles and read a health blog, in English, Kannada and Hindi.",
+  "site_name": "CityCare Hospital, Bengaluru",
+  "audience": "Patients and families of CityCare Hospital in Bengaluru who read English, Kannada or Hindi.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file, no build step; CDN libraries allowed.",
+    "Never invent credentials, phone numbers, addresses or doctor details; unknown facts appear as clearly marked placeholders.",
+    "No patient data is stored or sent to any vendor or backend.",
+    "Emergency text stays short and numeric so it is hard to mistranslate."
+  ],
+  "rules": [
+    "Booking is a request form that opens a WhatsApp or phone callback; the hospital confirms the slot by phone. No live slots.",
+    "No third-party form service, no fetch/XHR of form data, no browser storage of patient details.",
+    "Kannada and Hindi versions are machine-translated and every translated view is labelled 'pending native review'.",
+    "On the emergency page, the English text is shown beside the Kannada or Hindi text.",
+    "A fake emergency number is a patient-safety risk: only placeholders may stand in for it."
+  ],
+  "done_when": [
+    "The site is one HTML file with inline CSS and JS, and needs no build step.",
+    "The file contains Home, Book a Visit, Emergency, Doctors and Health Blog sections, each reachable from a visible navigation menu.",
+    "The booking form collects visit-request fields and on submit opens a WhatsApp or tel: link; the file contains no form action, fetch or XHR to an external service and no localStorage, sessionStorage or cookie writes of form data.",
+    "The booking section states in plain text that the hospital confirms the slot by phone and that live slots are not offered.",
+    "The Emergency section shows the emergency number and address as visibly marked placeholders in a short, numeric layout.",
+    "The Doctors section contains profile cards whose names, specialties and credentials are all visibly marked as placeholders, with no invented real-looking details.",
+    "The Health Blog section lists posts whose content is visibly marked as placeholder, with no invented medical claims presented as hospital advice.",
+    "A language switch offers English, Kannada and Hindi, and every section has Kannada and Hindi text.",
+    "Every Kannada and Hindi view displays a 'pending native review' label.",
+    "The Emergency section shows the English text beside the Kannada and Hindi text.",
+    "Every placeholder uses one consistent visible marker, and no phone number or address appears in the file without that marker, except the tel:/WhatsApp targets, which are also marked placeholders."
+  ],
+  "open_inputs": [
+    "Real emergency phone number (Requester only).",
+    "Real hospital address and map location (Requester only).",
+    "Real WhatsApp and callback phone number for booking requests (Requester only).",
+    "Real doctor list: names, specialties, credentials and photos (Requester only).",
+    "Real health blog posts or topics approved for publication (Requester only).",
+    "Native-speaker review of the Kannada and Hindi translations (outside source)."
+  ]
+}

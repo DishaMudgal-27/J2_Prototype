@@ -1,0 +1,54 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "wf-site-shell-gallery-about",
+    "name": "Site shell, hero CTA, gallery and about",
+    "purpose": "No site file exists. Needs a light editorial page with a top inquiry CTA, a gallery of at least six labeled placeholder slots, and an about section marked as sample copy.",
+    "cost": 35,
+    "estimate": 35,
+    "envelope": {
+      "money_limit": 35,
+      "model_call_limit": 5,
+      "time_limit_minutes": 25,
+      "retry_limit": 1,
+      "stop_loss": "Stop and report to Adaptation if spend reaches 35 or 5 model calls are used before the completion_check passes."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site/index.html (single file, inline CSS and JS, no build step)"
+    ],
+    "completion_check": "File exists as one HTML file with no build step and only CDN external links; page background is light with no dark or full-bleed theme; hero contains a visible link with href=#inquiry; gallery has at least 6 slots each visibly labeled PLACEHOLDER; about text is visibly marked SAMPLE COPY; brand name is marked as a placeholder; file contains no prices, packages or testimonials.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "wf-inquiry-contact",
+    "name": "Inquiry form and contact details",
+    "purpose": "The inquiry path is missing: no inquiry section, form or visible contact details, and the form target is undefined.",
+    "cost": 35,
+    "estimate": 35,
+    "envelope": {
+      "money_limit": 35,
+      "model_call_limit": 5,
+      "time_limit_minutes": 25,
+      "retry_limit": 1,
+      "stop_loss": "Stop and report to Adaptation if spend reaches 35 or 5 model calls are used before the completion_check passes, or if W1 has not produced the file."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site/index.html (updated with inquiry section, form and contact details)"
+    ],
+    "completion_check": "File has an element with id=inquiry containing a form with name, email and message fields and a submit button; the form action or mailto target is visibly marked PLACEHOLDER near the form; a contact email is visible and marked as a placeholder; the hero CTA link resolves to the inquiry id; file still contains no prices, packages or testimonials.",
+    "dependencies": [
+      "wf-site-shell-gallery-about"
+    ],
+    "status": "done",
+    "cycle": 1
+  }
+]

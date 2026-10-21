@@ -1,0 +1,295 @@
+{
+  "run": "20261007-151441",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "force_audit_fail": 2,
+  "test_lessons": false,
+  "model": "sonnet",
+  "mock": false,
+  "brief": "Brew Lab, Indiranagar, Bengaluru. One-page site. Must-haves, each one will be checked: today's opening hours are highlighted automatically; the pre-order form shows a running total in rupees; the loyalty section shows 10 stamp circles with the 10th marked FREE; every menu item shows a price; the location section has a \"Get directions\" link; the page works at 360px wide.",
+  "change_requests": [],
+  "status": "done",
+  "outcome": "Done: the site is workable. Every done-when item passes with Audit's evidence and the render check is clean.",
+  "budget": {
+    "start": 80,
+    "granted": 80,
+    "used": 80,
+    "raises": []
+  },
+  "ai_calls": 25,
+  "cycles": 2,
+  "questions_to_user": [
+    {
+      "kind": "info",
+      "asked": [
+        "What are the opening hours for each day of the week, including any closed days?",
+        "List every menu item with its price in rupees, grouped by category if you have them. Should the pre-order form offer all of these items?",
+        "What is the full street address of Brew Lab, or a Google Maps link, to use for the \"Get directions\" link?",
+        "What should the pre-order form do on submit, and what details should it collect?"
+      ],
+      "answer": "1. Hours: Monday to Friday 8am to 10pm, Saturday and Sunday 9am to 11pm. No closed days.\n\n2. Menu (prices in ₹):\nCoffee: Espresso 120, Cappuccino 180, Pour-over 220\nCold: Cold brew 200\nFood: Croissant 150, Banana bread 130\nOption 1: yes, all menu items can be pre-ordered.\n\n3. Address: 100 Feet Road, Indiranagar, Bengaluru 560038.\nGoogle Maps link: https://maps.google.com/?q=100+Feet+Road+Indiranagar+Bengaluru+560038\n\n4. Option 2: name, phone and pickup time (within opening hours), then open WhatsApp +91 98450 00000 with the order. Show a running total in ₹. Pay at pickup.\nThe 10th loyalty stamp gives one free drink of any size."
+    }
+  ],
+  "conflicts": [
+    {
+      "id": "C-1",
+      "pair": [
+        "adaptation",
+        "priority"
+      ],
+      "topic": "proposal",
+      "subject": "what to fund in cycle 2",
+      "attempts": 3,
+      "escalated": false,
+      "resolved_by": "agents",
+      "repriced": false,
+      "user_question": null,
+      "user_answer": null,
+      "outcome": "Priority granted Adaptation's revision: Menu price visibility fix (5) goes to the validator."
+    }
+  ],
+  "validator_rejections": [],
+  "holds": [],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 5,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-11",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "version": 6,
+      "all_pass": true,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-11",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    }
+  ],
+  "site_versions": 6,
+  "workable": [],
+  "to_be_confirmed": [],
+  "dropped_by_requester": [],
+  "workflow_agents": [
+    {
+      "id": "W-1",
+      "agent": "W-1 Builder",
+      "section": "W-1",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-2",
+      "agent": "W-2 Builder",
+      "section": "W-2",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-3",
+      "agent": "W-3 Builder",
+      "section": "W-3",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-4",
+      "agent": "W-4 Builder",
+      "section": "W-4",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-5",
+      "agent": "W-5 Builder",
+      "section": "W-5",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-6",
+      "agent": "W-6 Builder",
+      "section": "W-2",
+      "revises": "W-2",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    }
+  ],
+  "limits_hit": [],
+  "lessons": {
+    "memory": true,
+    "saved": [
+      "L-20261007-151441-1"
+    ],
+    "used": []
+  },
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The opening hours section lists Monday to Friday 8am to 10pm and Saturday and Sunday 9am to 11pm, with no closed days, and JavaScript highlights today's row automatically based on the current day.",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "The menu shows all six items, each with its price in ₹: Espresso 120, Cappuccino 180, Pour-over 220, Cold brew 200, Croissant 150, Banana bread 130, grouped as Coffee, Cold and Food.",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "The pre-order form offers all six menu items with a quantity control for each, and shows a running total in ₹ that updates as quantities change.",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "The pre-order form collects name, phone and pickup time, and rejects a pickup time outside that day's opening hours.",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "On valid submit, the form opens WhatsApp for +91 98450 00000 with a message containing the name, phone, pickup time, items ordered and the total in ₹, and the form states that payment is at pickup.",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "The loyalty section shows exactly 10 stamp circles, with the 10th marked FREE, and text stating the 10th stamp gives one free drink of any size.",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "The location section shows the address 100 Feet Road, Indiranagar, Bengaluru 560038 and a link labelled \"Get directions\" pointing to https://maps.google.com/?q=100+Feet+Road+Indiranagar+Bengaluru+560038.",
+      "pass": true
+    },
+    {
+      "item": 8,
+      "criterion": "At 360px and 1280px viewport widths the page has no horizontal overflow, and all content and the form remain usable.",
+      "pass": true
+    },
+    {
+      "item": 9,
+      "criterion": "The page runs with no JavaScript errors and has no broken in-page links.",
+      "pass": true
+    }
+  ],
+  "route_check_violations": []
+}

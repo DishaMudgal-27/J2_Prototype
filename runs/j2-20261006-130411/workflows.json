@@ -1,0 +1,28 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "w1-core-menu-preorder",
+    "name": "Page shell, Menu and Pre-order form",
+    "purpose": "No HTML file exists. The page has no Menu section and no pre-order form.",
+    "cost": 30,
+    "estimate": 30,
+    "envelope": {
+      "money_limit": 30,
+      "model_call_limit": 3,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 30 or the file still fails the completion_check after one retry; do not start W2 to W4 work inside this run."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "index.html with nav, Menu section and Pre-order section",
+      "mobile-first CSS and viewport meta tag"
+    ],
+    "completion_check": "File has linked Menu and Pre-order sections; menu items sit in categories with each price shown or marked placeholder; the form takes items, quantities, name, phone and pickup time and shows a summary with total before submit; viewport meta and a narrow-screen media query are present; no payment collection.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  }
+]

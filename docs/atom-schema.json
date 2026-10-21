@@ -167,7 +167,7 @@
     },
     "details": {
       "type": "object",
-      "description": "type-specific; website: selectors, ids, anchor, elements; deeds: scope self|external"
+      "description": "type-specific; website: selectors, ids, anchor, elements; deeds: scope self|external; sends also channel, mode (dry-run|mock), sent"
     }
   },
   "definitions": {

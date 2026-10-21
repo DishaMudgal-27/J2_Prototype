@@ -1,0 +1,100 @@
+[
+  {
+    "cycle": 1,
+    "version": 1,
+    "results": [
+      {
+        "criterion": "The site is one HTML file that works without a build step.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The file has inline <style> and <script>, no external src or href to libraries, and no build tooling. Check (a) holds.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The booking request form has name, phone, department and preferred date/time, stores no patient data, and states that the hospital will confirm by phone.",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "The form has exactly the fields pname, pphone, pdept and pwhen. The JS has no fetch, XHR, localStorage or cookie use. The notice says 'There is no instant confirmation. The hospital will confirm by phone'. Warning: the submit button says 'Prepare my visit request' and only shows a summary on the page, so the literal criterion is met but no request reaches the hospital.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "The emergency section shows 112 and 108 and is easy to find from the first screen.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "A red emergency bar is the first element in the body, with tel: links for 112 and 108, and an Emergency nav link plus a #emergency section. By the code and CSS it should fit within 390x844 and 1280x800 without scrolling, but I did not render it.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The Requester has supplied CityCare's real emergency line and address and they replace the placeholders, or the Requester has explicitly accepted the placeholders.",
+        "verdict": "BLOCKED_BY_EVIDENCE",
+        "pass": false,
+        "note": "The emergency line and address still show 'Hospital to confirm' placeholders, as do the footer address, the department list and the request-delivery note. The chat shows no Requester message supplying or accepting them.",
+        "severity": "high"
+      },
+      {
+        "criterion": "The content is in English and contains no invented hospital details.",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "All visible text is English. The only numbers are 112 and 108, and there is no street address. The department list (General Medicine, Pediatrics, Obstetrics and Gynecology, Orthopedics, Cardiology) is invented but is labeled 'Hospital to confirm: department list' and described as a general sample.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Audit has found no material defects.",
+        "verdict": "POLICY_CONCERN",
+        "pass": false,
+        "note": "Material defect: the hero says 'Our team will contact you to confirm', but the form sends nothing, as the result note says ('this page does not send your details anywhere'). The fallback 'please call the hospital' has no number, because the emergency line is a placeholder. The Builder flagged this gap, and the rules forbid a backend. Consequence: patients may believe a request was made when none was. Any fix, such as a mailto link, a third-party form service or a clear 'call to book' flow, changes booking scope and goes to Identity. The hero copy can be corrected separately.",
+        "severity": "high"
+      }
+    ],
+    "all_pass": false
+  },
+  {
+    "cycle": 2,
+    "version": 2,
+    "results": [
+      {
+        "criterion": "The site is one HTML file that works without a build step.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "One document with inline <style> and <script>. No external src or href to libraries, and no build tooling.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The booking request form has name, phone, department and preferred date/time, stores no patient data, and states that the hospital will confirm by phone.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The form has exactly pname, pphone, pdept and pwhen. The JS has no fetch, XHR, localStorage, cookie writes, mailto or third-party form action. The notice says 'There is no instant confirmation' and 'the hospital will confirm by phone'. 'Nothing is sent from this page. You must call the hospital' sits directly above the form.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The emergency section shows 112 and 108 and is easy to find from the first screen.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The red emergency bar is the first element in <body>, with tel: links for 112 and 108. There is also an Emergency nav link and a #emergency section. By the code and CSS it fits within 1280x800 and 390x844 without scrolling, but I did not render it.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The Requester has supplied CityCare's real emergency line and address and they replace the placeholders, or the Requester has explicitly accepted the placeholders.",
+        "verdict": "BLOCKED_BY_EVIDENCE",
+        "pass": false,
+        "note": "The emergency line, address (Emergency section and footer) and booking phone still show 'Hospital to confirm' placeholders. The chat has no Requester message after the original brief [1] that supplies or accepts them. The checklist is only in the file's header comment, not in the chat.",
+        "severity": "high"
+      },
+      {
+        "criterion": "The content is in English and contains no invented hospital details.",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "All visible text is English. The only phone numbers are 112 and 108, and there is no street address. The department options are sample content, labeled 'Hospital to confirm: department list' and described as 'a general sample'.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Audit has found no material defects.",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "The cycle 1 defect is resolved. 'Our team will contact you' is gone and the hero says 'This page does not send anything to the hospital'. Residual: the 'call the hospital' instruction points to a placeholder booking number, so no working booking path exists until the Requester supplies it. Whether the hospital wants requests delivered is a booking-scope question for Identity. Viewport behavior is unverified because I did not render the page.",
+        "severity": "medium"
+      }
+    ],
+    "all_pass": false
+  }
+]

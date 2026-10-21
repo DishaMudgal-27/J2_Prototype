@@ -1,0 +1,222 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "site-header-nav",
+    "name": "Header and navigation",
+    "purpose": "Page has no Brew Lab name, Bengaluru cafe line or navigation.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 4,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the section is still missing its name, cafe line or any nav target after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "header section",
+      "nav links to #menu, #timings, #location, #gallery, #stories"
+    ],
+    "completion_check": "Header shows 'Brew Lab' and 'cafe' and 'Bengaluru'; each nav link's target id exists on the page.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "usable section",
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "menu-section",
+    "name": "Menu section",
+    "purpose": "No menu on the page.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 4,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the item list or any price differs from the six supplied after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "menu section"
+    ],
+    "completion_check": "Section #menu lists exactly Espresso ₹120, Cappuccino ₹180, Cold brew ₹200, Pour-over ₹220, Croissant ₹150, Banana bread ₹130 and nothing else.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "timings-section",
+    "name": "Timings section",
+    "purpose": "No opening hours on the page.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 4,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the hours text is missing or names a closed day after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "timings section"
+    ],
+    "completion_check": "Section #timings contains '8am to 10pm', 'every day' and no closed day.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "location-section",
+    "name": "Location and phone section",
+    "purpose": "No address or phone on the page.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 4,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the address or tel link is wrong, or an invented link appears, after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "location section",
+      "tel link"
+    ],
+    "completion_check": "Section #location shows '100 Feet Road, Indiranagar, Bengaluru 560038' and an anchor with href tel:+918040002468 showing +91 80 4000 2468.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "gallery-section",
+    "name": "Gallery with empty photo spots",
+    "purpose": "No gallery on the page.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 4,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if fewer than 4 labelled empty spots or any img element exists after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "gallery section"
+    ],
+    "completion_check": "Section #gallery has at least 4 labelled empty spots and contains no img elements.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section",
+    "version": 5
+  },
+  {
+    "id": "W-6",
+    "proposal_id": "stories-section",
+    "name": "Coffee stories section",
+    "purpose": "No sourcing stories on the page.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 4,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the story count is not three or any fact beyond the supplied ones appears after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "stories section"
+    ],
+    "completion_check": "Section #stories has exactly three stories: Ratnagiri Estate (Chikmagalur, shade-grown), Kerehaklu (Chikmagalur, grown alongside pepper and cardamom), Baarbara Estate (Coorg, only ripe cherries hand-picked), with no added facts.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-6",
+    "revises": null,
+    "agent": "W-6 Builder",
+    "last_check": "usable section",
+    "version": 6
+  },
+  {
+    "id": "W-7",
+    "proposal_id": "site-styling",
+    "name": "Warm responsive styling",
+    "purpose": "Page has no viewport setting or layout rules for 360px and 1280px.",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 4,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if horizontal overflow remains at 360px or 1280px after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "viewport meta",
+      "style block"
+    ],
+    "completion_check": "Viewport meta is present; at 360px and 1280px scrollWidth equals clientWidth; no JavaScript errors.",
+    "dependencies": [
+      "site-header-nav",
+      "menu-section",
+      "timings-section",
+      "location-section",
+      "gallery-section",
+      "stories-section"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-7",
+    "revises": null,
+    "agent": "W-7 Builder",
+    "last_check": "usable section and head tags",
+    "version": 7
+  }
+]

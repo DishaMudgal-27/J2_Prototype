@@ -1,0 +1,62 @@
+{
+  "statement": "Build a single-file, mobile-first website for Spark 2026, the tech fest at Northfield College of Engineering, 22 University Road, Pune 411007, on 14 to 16 February 2027. Students can see the schedule by day, browse events by category, register for an event, see sponsors, find the venue and message the organisers on WhatsApp.",
+  "site_name": "Spark 2026",
+  "audience": "College students who want to find events, check times and prices, and register on their phones",
+  "standards": [
+    "Energetic, modern look with bold colours and clear type",
+    "Works well on phones first, then desktop",
+    "Only facts supplied by the Requester; nothing invented",
+    "Photo areas are clearly marked placeholders",
+    "Plain HTML, CSS and JavaScript in one file"
+  ],
+  "rules": [
+    "Never show a room, sponsor logo, price or time that was not supplied",
+    "Prices appear as Rs amounts or Free exactly as given",
+    "Registration details go to spark2026@example.com",
+    "Day 1, 2, 3 are 14, 15, 16 February 2027"
+  ],
+  "done_when": [
+    "The page shows the name Spark 2026, Northfield College of Engineering, Pune, and the dates 14 to 16 February 2027 near the top",
+    "A day-by-day schedule has Day 1, Day 2 and Day 3 with their dates, listing each event with its start and end time: Day 1 Code Sprint 10am-1pm, Line Follower 2pm-5pm, AI in Daily Life 5:30pm-6:30pm; Day 2 Bug Hunt 11am-1pm, Poster Jam 2pm-4pm; Day 3 Drone Dash 10am-1pm, UI Duel 2pm-5pm, Startup Stories 5:30pm-6:30pm",
+    "Events can be browsed by category (Coding, Robotics, Design, Talks) with a way to filter, and each of the 8 events shows name, category, day, time and price (Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, Poster Jam free, UI Duel Rs 100, AI in Daily Life free, Startup Stories free)",
+    "A registration form has name, email, college and an event dropdown listing all 8 events, requires the fields before sending, and submitting sends the details by email to spark2026@example.com",
+    "A sponsors section names Nimbus Cloud, Orbit Labs and Pixel Press as text, with no logos",
+    "A venue section shows the address 22 University Road, Pune 411007 and a map or map link for it",
+    "A WhatsApp button links to wa.me/910000033333 and the email spark2026@example.com is shown as a contact",
+    "The layout has a mobile viewport setting, no horizontal overflow at 360px and 1280px widths, and a navigation that works on a phone",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+    "The look is energetic and modern: a bold colour palette set once and reused, large headings, and photo areas labelled as placeholders"
+  ],
+  "business_type": "college tech fest",
+  "visitor_needs": [
+    "See the schedule day by day",
+    "Browse events by category",
+    "Register for an event with a form",
+    "See the sponsors",
+    "Find the venue",
+    "Contact the organisers on WhatsApp"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [],
+  "charter_items": [
+    "The page shows the name Spark 2026, Northfield College of Engineering, Pune, and the dates 14 to 16 February 2027 near the top",
+    "A day-by-day schedule has Day 1, Day 2 and Day 3 with their dates, listing each event with its start and end time: Day 1 Code Sprint 10am-1pm, Line Follower 2pm-5pm, AI in Daily Life 5:30pm-6:30pm; Day 2 Bug Hunt 11am-1pm, Poster Jam 2pm-4pm; Day 3 Drone Dash 10am-1pm, UI Duel 2pm-5pm, Startup Stories 5:30pm-6:30pm",
+    "Events can be browsed by category (Coding, Robotics, Design, Talks) with a way to filter, and each of the 8 events shows name, category, day, time and price (Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, Poster Jam free, UI Duel Rs 100, AI in Daily Life free, Startup Stories free)",
+    "A registration form has name, email, college and an event dropdown listing all 8 events, requires the fields before sending, and submitting sends the details by email to spark2026@example.com",
+    "A sponsors section names Nimbus Cloud, Orbit Labs and Pixel Press as text, with no logos",
+    "A venue section shows the address 22 University Road, Pune 411007 and a map or map link for it",
+    "A WhatsApp button links to wa.me/910000033333 and the email spark2026@example.com is shown as a contact",
+    "The layout has a mobile viewport setting, no horizontal overflow at 360px and 1280px widths, and a navigation that works on a phone",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+    "The look is energetic and modern: a bold colour palette set once and reused, large headings, and photo areas labelled as placeholders"
+  ],
+  "core_items": [
+    "The page shows the name Spark 2026, Northfield College of Engineering, Pune, and the dates 14 to 16 February 2027 near the top",
+    "A day-by-day schedule has Day 1, Day 2 and Day 3 with their dates, listing each event with its start and end time: Day 1 Code Sprint 10am-1pm, Line Follower 2pm-5pm, AI in Daily Life 5:30pm-6:30pm; Day 2 Bug Hunt 11am-1pm, Poster Jam 2pm-4pm; Day 3 Drone Dash 10am-1pm, UI Duel 2pm-5pm, Startup Stories 5:30pm-6:30pm",
+    "Events can be browsed by category (Coding, Robotics, Design, Talks) with a way to filter, and each of the 8 events shows name, category, day, time and price (Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, Poster Jam free, UI Duel Rs 100, AI in Daily Life free, Startup Stories free)",
+    "A registration form has name, email, college and an event dropdown listing all 8 events, requires the fields before sending, and submitting sends the details by email to spark2026@example.com",
+    "A venue section shows the address 22 University Road, Pune 411007 and a map or map link for it",
+    "A WhatsApp button links to wa.me/910000033333 and the email spark2026@example.com is shown as a contact",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ]
+}

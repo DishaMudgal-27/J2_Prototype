@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brew Lab</title>
+<!-- J2:style head start (owner W-24) -->
+<style>:root{--j2-primary:#4a2e1a;--j2-secondary:#f1e4d3;--j2-accent:#b4531f;--j2-background:#fbf6ef;--j2-surface:#ffffff;--j2-text:#2a1d14;--j2-muted:#6b5a4c;--j2-font-heading:Georgia, 'Times New Roman', serif;--j2-font-body:system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:12px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#4a2e1a;color:#ffffff;border:2px solid #4a2e1a;min-height:48px;padding:12px 24px;font-weight:600;font-size:1rem;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-btn-secondary{display:inline-block;background:transparent;color:#4a2e1a;border:2px solid #4a2e1a;min-height:48px;padding:12px 24px;font-weight:600;font-size:1rem;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-card{background:#ffffff;border:1px solid #e3d3bf;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(74,46,26,0.08)}</style>
+<!-- J2:style head end -->
+</head>
+<body>
+<!-- J2:W-24 start (owner W-24) -->
+<section id="shop-name" aria-labelledby="shop-name-title" style="background:var(--j2-secondary,#f1e4d3);padding:48px 16px;text-align:center;box-sizing:border-box;max-width:100%;overflow-wrap:anywhere;">
+  <div style="max-width:720px;margin:0 auto;">
+    <p style="margin:0 0 8px;color:var(--j2-muted,#6b5a4c);font-family:var(--j2-font-body,system-ui,sans-serif);font-size:1rem;letter-spacing:0.08em;text-transform:uppercase;">Specialty coffee shop</p>
+    <h1 id="shop-name-title" style="margin:0 0 16px;color:var(--j2-primary,#4a2e1a);font-family:var(--j2-font-heading,Georgia,serif);font-size:clamp(2.5rem,10vw,4rem);line-height:1.1;">Brew Lab</h1>
+    <p style="margin:0 auto 24px;max-width:36ch;color:var(--j2-text,#2a1d14);font-family:var(--j2-font-body,system-ui,sans-serif);font-size:1.125rem;line-height:1.5;">See the menu with prices, check the opening hours and order ahead to collect at the shop.</p>
+    <a id="hero-order" class="j2-btn" href="#pre-order">Pre-order for pickup</a>
+  </div>
+</section>
+<!-- J2:W-24 end -->
+<!-- J2:W-25 start (owner W-25) -->
+<section id="address" aria-labelledby="address-title">
+  <style>
+    #address {
+      padding: var(--j2-section, 64px) 16px;
+      background: var(--j2-background, #fbf6ef);
+      color: var(--j2-text, #2a1d14);
+    }
+    #address .address-inner {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    #address h2 {
+      font-family: var(--j2-font-heading, Georgia, 'Times New Roman', serif);
+      color: var(--j2-primary, #4a2e1a);
+      font-size: 1.75rem;
+      line-height: 1.25;
+      margin: 0 0 16px;
+      overflow-wrap: anywhere;
+    }
+    #address address {
+      font-style: normal;
+      font-family: var(--j2-font-body, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif);
+      font-size: 1.125rem;
+      line-height: 1.6;
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+  </style>
+  <div class="address-inner">
+    <div class="j2-card">
+      <h2 id="address-title">Address</h2>
+      <address id="address-text">12, 100 Feet Road, Indiranagar, Bengaluru 560038</address>
+    </div>
+  </div>
+</section>
+<!-- J2:W-25 end -->
+<!-- J2:W-26 start (owner W-26) -->
+<section id="menu" aria-labelledby="menu-title">
+  <style>
+    #menu { padding: var(--j2-section-space, 64px) 16px; background: var(--j2-background, #fbf6ef); color: var(--j2-text, #2a1d14); }
+    #menu .menu-inner { max-width: 720px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+    #menu #menu-title { font-family: var(--j2-font-heading, Georgia, 'Times New Roman', serif); color: var(--j2-primary, #4a2e1a); font-size: 1.75rem; line-height: 1.25; margin: 0 0 8px; overflow-wrap: anywhere; }
+    #menu .menu-note { color: var(--j2-muted, #6b5a4c); margin: 0 0 24px; font-family: var(--j2-font-body, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif); }
+    #menu .menu-list { list-style: none; margin: 0; padding: 8px 24px; box-sizing: border-box; }
+    #menu .menu-item { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; min-height: 48px; padding: 12px 0; border-bottom: 1px solid #e3d3bf; font-family: var(--j2-font-body, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif); font-size: 1.05rem; box-sizing: border-box; }
+    #menu .menu-item:last-child { border-bottom: 0; }
+    #menu .menu-item .menu-name { min-width: 0; overflow-wrap: anywhere; }
+    #menu .menu-item .menu-price { flex: 0 0 auto; font-weight: 700; color: var(--j2-accent, #b4531f); font-variant-numeric: tabular-nums; }
+    @media (max-width: 480px) {
+      #menu { padding-left: 12px; padding-right: 12px; }
+      #menu .menu-list { padding: 8px 16px; }
+      #menu #menu-title { font-size: 1.5rem; }
+    }
+  </style>
+  <div class="menu-inner">
+    <h2 id="menu-title">Menu</h2>
+    <p class="menu-note">All prices are in rupees.</p>
+    <ul class="menu-list j2-card">
+      <li class="menu-item"><span class="menu-name">Filter coffee</span> <span class="menu-price">90</span></li>
+      <li class="menu-item"><span class="menu-name">Cappuccino</span> <span class="menu-price">160</span></li>
+      <li class="menu-item"><span class="menu-name">Latte</span> <span class="menu-price">180</span></li>
+      <li class="menu-item"><span class="menu-name">Cold brew</span> <span class="menu-price">200</span></li>
+      <li class="menu-item"><span class="menu-name">Masala chai</span> <span class="menu-price">80</span></li>
+      <li class="menu-item"><span class="menu-name">Almond croissant</span> <span class="menu-price">140</span></li>
+      <li class="menu-item"><span class="menu-name">Banana bread slice</span> <span class="menu-price">120</span></li>
+    </ul>
+  </div>
+</section>
+<!-- J2:W-26 end -->
+<!-- J2:W-27 start (owner W-27) -->
+<section id="opening-hours" aria-labelledby="opening-hours-title">
+  <style>
+    #opening-hours {
+      padding: var(--j2-section, 64px) 16px;
+      background: var(--j2-background);
+      box-sizing: border-box;
+    }
+    #opening-hours .hours-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+    #opening-hours .hours-card {
+      text-align: center;
+      box-sizing: border-box;
+      max-width: 100%;
+    }
+    #opening-hours #opening-hours-title {
+      font-family: var(--j2-font-heading);
+      color: var(--j2-primary);
+      margin: 0 0 16px;
+      font-size: 1.75rem;
+      line-height: 1.25;
+      overflow-wrap: break-word;
+    }
+    #opening-hours #opening-hours-text {
+      font-family: var(--j2-font-body);
+      color: var(--j2-text);
+      font-size: 1.25rem;
+      font-weight: 600;
+      line-height: 1.5;
+      margin: 0;
+      overflow-wrap: break-word;
+    }
+  </style>
+  <div class="hours-inner">
+    <div class="hours-card j2-card">
+      <h2 id="opening-hours-title">Opening hours</h2>
+      <p id="opening-hours-text">7 am to 10 pm, every day</p>
+    </div>
+  </div>
+</section>
+<!-- J2:W-27 end -->
+<!-- J2:W-28 start (owner W-28) -->
+<section id="pre-order" aria-labelledby="pre-order-title">
+  <style>
+    #pre-order { padding: var(--j2-section, 64px) 16px; max-width: 100%; box-sizing: border-box; }
+    #pre-order .order-inner { max-width: 640px; margin: 0 auto; min-width: 0; }
+    #pre-order h2 { font-family: var(--j2-font-heading); color: var(--j2-primary); margin: 0 0 8px; font-size: 1.75rem; overflow-wrap: anywhere; }
+    #pre-order .order-intro { color: var(--j2-muted); margin: 0 0 24px; overflow-wrap: anywhere; }
+    #pre-order .order-card { box-sizing: border-box; width: 100%; }
+    #pre-order .order-field { display: block; margin: 0 0 16px; min-width: 0; }
+    #pre-order .order-field label { display: block; font-weight: 600; color: var(--j2-text); margin-bottom: 8px; }
+    #pre-order .order-field .order-hint { display: block; font-weight: 400; color: var(--j2-muted); font-size: 0.9rem; margin-top: 2px; }
+    #pre-order .order-field input,
+    #pre-order .order-field select {
+      display: block; box-sizing: border-box; width: 100%; max-width: 100%; min-height: 48px;
+      padding: 12px 16px; font: inherit; font-family: var(--j2-font-body); font-size: 1rem;
+      color: var(--j2-text); background: var(--j2-surface, #ffffff);
+      border: 2px solid var(--j2-primary); border-radius: var(--j2-radius, 12px);
+    }
+    #pre-order .order-field select[multiple] { padding: 4px; min-height: 192px; }
+    #pre-order .order-field select[multiple] option { min-height: 44px; padding: 10px 12px; display: flex; align-items: center; }
+    #pre-order .order-field input:focus,
+    #pre-order .order-field select:focus { outline: 3px solid var(--j2-accent); outline-offset: 2px; }
+    #pre-order .order-field.order-invalid input,
+    #pre-order .order-field.order-invalid select { border-color: var(--j2-accent); }
+    #pre-order .order-error { display: none; color: var(--j2-accent); font-weight: 600; margin-top: 8px; font-size: 0.95rem; }
+    #pre-order .order-field.order-invalid .order-error { display: block; }
+    #pre-order #order-submit { width: 100%; max-width: 100%; box-sizing: border-box; }
+    #pre-order .order-status { margin: 16px 0 0; color: var(--j2-text); min-height: 1.5em; overflow-wrap: anywhere; }
+    #pre-order .order-email { margin: 16px 0 0; color: var(--j2-muted); overflow-wrap: anywhere; }
+  </style>
+  <div class="order-inner">
+    <h2 id="pre-order-title">Pre-order</h2>
+    <p class="order-intro">Fill in the form and your order is sent by email to hello@brewlab.example.</p>
+    <div class="j2-card order-card">
+      <form id="order-form" action="mailto:hello@brewlab.example" method="post" enctype="text/plain" novalidate>
+        <div class="order-field" id="order-name-field">
+          <label for="order-name">Name</label>
+          <input type="text" id="order-name" name="name" autocomplete="name" required>
+          <span class="order-error" id="order-name-error">Please enter your name.</span>
+        </div>
+        <div class="order-field" id="order-phone-field">
+          <label for="order-phone">Phone <span class="order-hint">Your own phone number</span></label>
+          <input type="tel" id="order-phone" name="phone" autocomplete="tel" inputmode="tel" required>
+          <span class="order-error" id="order-phone-error">Please enter your phone number.</span>
+        </div>
+        <div class="order-field" id="order-items-field">
+          <label for="order-items">Items <span class="order-hint">Choose what you want from the menu. To pick more than one, hold Ctrl or Cmd, or tap each item.</span></label>
+          <select id="order-items" name="items" multiple size="4" required>
+            <option value="Filter coffee">Filter coffee</option>
+            <option value="Cappuccino">Cappuccino</option>
+            <option value="Latte">Latte</option>
+            <option value="Cold brew">Cold brew</option>
+            <option value="Masala chai">Masala chai</option>
+            <option value="Almond croissant">Almond croissant</option>
+            <option value="Banana bread slice">Banana bread slice</option>
+          </select>
+          <span class="order-error" id="order-items-error">Please choose at least one item.</span>
+        </div>
+        <div class="order-field" id="order-time-field">
+          <label for="order-time">Pickup time</label>
+          <input type="time" id="order-time" name="pickup time" required>
+          <span class="order-error" id="order-time-error">Please choose a pickup time.</span>
+        </div>
+        <button type="submit" id="order-submit" class="j2-btn">Send pre-order</button>
+        <p class="order-status" id="order-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+    <p class="order-email">Orders go to hello@brewlab.example.</p>
+  </div>
+  <script>
+    (function () {
+      var form = document.getElementById('order-form');
+      if (!form) { return; }
+      var status = document.getElementById('order-status');
+      var ids = ['order-name', 'order-phone', 'order-items', 'order-time'];
+      form.addEventListener('submit', function (event) {
+        var firstBad = null;
+        for (var i = 0; i < ids.length; i++) {
+          var input = document.getElementById(ids[i]);
+          var wrap = document.getElementById(ids[i] + '-field');
+          if (!input || !wrap) { continue; }
+          var value = String(input.value || '').replace(/^\s+|\s+$/g, '');
+          if (value === '') {
+            wrap.classList.add('order-invalid');
+            if (!firstBad) { firstBad = input; }
+          } else {
+            wrap.classList.remove('order-invalid');
+          }
+        }
+        if (firstBad) {
+          event.preventDefault();
+          if (status) { status.textContent = 'Please fill in every field before sending.'; }
+          if (firstBad.focus) { firstBad.focus(); }
+          return;
+        }
+        if (status) { status.textContent = 'Opening your email app to send the order to hello@brewlab.example.'; }
+      });
+    })();
+  </script>
+</section>
+<!-- J2:W-28 end -->
+</body>
+</html>

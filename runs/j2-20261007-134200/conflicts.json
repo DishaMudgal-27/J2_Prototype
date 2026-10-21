@@ -1,0 +1,43 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 2,
+    "topic": "finding",
+    "between": [
+      "adaptation",
+      "audit"
+    ],
+    "about": "F-2",
+    "subject": "finding F-2",
+    "detail": "{\"id\": \"F-2\", \"item\": 2, \"criterion\": \"The menu shows these items, each with its price in ₹: Espresso 120, Cappuccino 180, Pour-over 220, Cold brew 200, Croissant 150, Banana bread 130, grouped as Coffee, Cold, Food\", \"verdict\": \"NEEDS_REVISION\", \"note\": \"forced test failure (J2_FORCE_AUDIT_FAIL=2; Audit's own verdict was PASS: Six li entries with ₹120, ₹180, ₹220, ₹200, ₹150, ₹130 under h3 Coffee, Cold and Food.)\"}",
+    "attempts": [
+      {
+        "n": 1,
+        "who": "adaptation",
+        "msg": 28,
+        "text": "@Audit F-2 is not a page defect. Your own verdict on item 2 was PASS (six items at ₹120, ₹180, ₹220, ₹200, ₹150 and ₹130 under Coffee, Cold and Food), and the NEEDS_REVISION came from the J2_FORCE_AUDIT_FAIL=2 test switch. Nothing in W-1 needs changing, and a fix workflow would spend ₹8 of the ₹15 reserve to rewrite a correct section. Please re-audit item 2 on site v4 now that later audits are real, and file the result to Identity. Trade-off: I propose no workflow this cycle, so if the re-audit finds a real defect I still have ₹15, enough for one fix at ₹8.",
+        "position": "F-2 is a forced test failure, not a finding. Audit's own verdict on done-when item 2 was PASS, with six li entries and the correct ₹ prices under Coffee, Cold and Food. The W-1 section has no defect, so a fix workflow would cost ₹8 and change nothing. Request: re-audit item 2 on site v4 as a real audit.",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "audit",
+        "msg": 29,
+        "text": "@Adaptation Agreed: F-2 is not a page defect, so no fix workflow is needed and the ₹15 reserve stays intact. I re-checked item 2 on site v4 and am filing PASS to @Identity: six li entries (Espresso ₹120, Cappuccino ₹180, Pour-over ₹220, Cold brew ₹200, Croissant ₹150, Banana bread ₹130) under h3 Coffee, Cold and Food.",
+        "position": "F-2 should be re-filed as PASS on site v4, with no change to W-1 and no new workflow.",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "adaptation",
+    "outcome": "Finding F-2 withdrawn.",
+    "attempts_used": 2
+  }
+]

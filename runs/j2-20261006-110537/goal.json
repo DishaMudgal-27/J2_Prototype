@@ -1,0 +1,38 @@
+{
+  "statement": "Build a playable Sudoku game as one static HTML file (HTML, CSS and JavaScript, no build step) that generates unique-solution puzzles in the browser at Easy, Medium and Hard, with pencil notes, undo, hint, check and a timer. The file includes step-by-step steps for deploying it to the user's own Vercel account.",
+  "site_name": "Sudoku",
+  "audience": "People who want to play Sudoku in a web browser, on desktop or mobile.",
+  "standards": [
+    "Single index.html file with inline CSS and JavaScript; CDN libraries allowed; no build step.",
+    "Every generated puzzle has exactly one solution, enforced by a solver inside the file.",
+    "No browser storage: no saved games or saved times.",
+    "Playable on desktop and mobile screen widths.",
+    "Open inputs appear on the site as clearly marked placeholders."
+  ],
+  "rules": [
+    "Scope is limited to the CEO's decisions: browser-generated puzzles at three difficulties; pencil notes, undo, hint, check and timer; deploy steps for Vercel.",
+    "No outward-facing action, including publishing to Vercel, is taken by the department.",
+    "Do not add persistence or features beyond the chosen scope without a new Identity ruling."
+  ],
+  "done_when": [
+    "The file is a single HTML document with inline CSS and JavaScript and needs no build step.",
+    "The page shows a 9x9 grid and lets the player select a cell and enter or clear a number 1 to 9.",
+    "The page has a New Game control with Easy, Medium and Hard options, and puzzles are generated in the browser by code in the file.",
+    "The file contains a solver that counts solutions, and the generator only accepts a puzzle when the solver finds exactly one solution.",
+    "Entries that duplicate a number in the same row, column or 3x3 box are visibly highlighted.",
+    "Pencil-note mode lets the player toggle small candidate numbers in a cell, and entering a number updates or clears that cell's notes consistently.",
+    "An Undo control reverses the player's last moves, including note changes, one step at a time.",
+    "A Hint control fills one correct cell, and a Check control marks entries that differ from the solution.",
+    "A running timer is visible during play and stops when the puzzle is completed.",
+    "A completion message appears when the grid is fully and correctly filled.",
+    "The file contains no use of localStorage, sessionStorage, cookies or IndexedDB.",
+    "The page contains a deployment section with numbered steps for publishing the file to the user's own Vercel account, and a marked placeholder for the live URL.",
+    "The layout stays usable at a 360px-wide screen and on a desktop screen."
+  ],
+  "open_inputs": [
+    "Live Vercel URL of the deployed game (shown on the site as a marked placeholder until the Requester deploys it)."
+  ],
+  "dropped_from_brief": [
+    "Publishing the game live on Vercel is not part of the charter. The department makes no outward-facing action and holds no Vercel credentials, so it delivers the single index.html plus deploy steps for the Requester to run. The Requester must agree to this before work starts."
+  ]
+}

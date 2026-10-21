@@ -1,0 +1,615 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 1,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 1",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 4,
+        "text": "@Priority The full charter prices at 80 against a budget of 35, so I am proposing four workflows in build order. W1 is 30 and fits alone; W2 to W4 cannot all fit, and neither the gallery nor the farm stories may be cut. Please counter with what you can fund, or tell me to shrink scope, and flag the 45 shortfall to Identity if needed.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 5,
+        "text": "@Adaptation COUNTER: I fund W1 only at 30 of the 35 remaining. W2, W3 and W4 are each 10 to 20 over the 5 left, so none fits after W1. Even if you merge Hours and Location into one page_section, the leanest full scope is 70 against 35, so the gap cannot be closed by trimming parts. Either reshape what can ship first within 35 or accept that the full done-when list needs Identity to ask the Requester for more budget. Tell me which you pick. I will not grant W2 to W4 on credit.",
+        "position": "COUNTER: Page shell, Menu and Pre-order form (30)",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 6,
+        "text": "ACCEPT W1 at 30: it ships the Menu and Pre-order form, the core of the brief, and runs inside its envelope. The rest cannot be trimmed to fit, because neither the gallery nor the farm stories may be cut. Using Priority's leanest full-scope figure of 70 (my sum, not re-priced), the gap is 35 over budget. @Identity, policy question: please ask the Requester to raise the budget from 35 to about 70 so Gallery, Farm stories, and Hours plus Location can follow as W2 to W4. Otherwise tell me which of those to park.",
+        "position": "accepts Priority's offer",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "priority",
+    "outcome": "Adaptation accepted Priority's COUNTER: Page shell, Menu and Pre-order form (30) goes to the validator.",
+    "priority_final": [
+      {
+        "id": "w1-core-menu-preorder",
+        "name": "Page shell, Menu and Pre-order form",
+        "goal_gap": "No HTML file exists. The page has no Menu section and no pre-order form.",
+        "expected_outcome": "A single responsive HTML file with in-page navigation, a categorised Menu with price placeholders, and a Pre-order form with item and quantity picking, name, phone, pickup time and a running order total.",
+        "outputs": [
+          "index.html with nav, Menu section and Pre-order section",
+          "mobile-first CSS and viewport meta tag"
+        ],
+        "completion_check": "File has linked Menu and Pre-order sections; menu items sit in categories with each price shown or marked placeholder; the form takes items, quantities, name, phone and pickup time and shows a summary with total before submit; viewport meta and a narrow-screen media query are present; no payment collection.",
+        "dependencies": [],
+        "parts": [
+          "page_section",
+          "form",
+          "styling"
+        ],
+        "estimated_resources": {
+          "money": 30,
+          "calls": 3,
+          "time_minutes": 20
+        },
+        "envelope": {
+          "money_limit": 30,
+          "model_call_limit": 3,
+          "time_limit_minutes": 20,
+          "retry_limit": 1,
+          "stop_loss": "Stop if spend reaches 30 or the file still fails the completion_check after one retry; do not start W2 to W4 work inside this run."
+        },
+        "estimate": 30,
+        "cost": 30
+      }
+    ],
+    "adaptation_final": [
+      {
+        "id": "w1-core-menu-preorder",
+        "name": "Page shell, Menu and Pre-order form",
+        "goal_gap": "No HTML file exists. The page has no Menu section and no pre-order form.",
+        "expected_outcome": "A single responsive HTML file with in-page navigation, a categorised Menu with price placeholders, and a Pre-order form with item and quantity picking, name, phone, pickup time and a running order total.",
+        "outputs": [
+          "index.html with nav, Menu section and Pre-order section",
+          "mobile-first CSS and viewport meta tag"
+        ],
+        "completion_check": "File has linked Menu and Pre-order sections; menu items sit in categories with each price shown or marked placeholder; the form takes items, quantities, name, phone and pickup time and shows a summary with total before submit; viewport meta and a narrow-screen media query are present; no payment collection.",
+        "dependencies": [],
+        "parts": [
+          "page_section",
+          "form",
+          "styling"
+        ],
+        "estimated_resources": {
+          "money": 30,
+          "calls": 3,
+          "time_minutes": 20
+        },
+        "estimate": 30,
+        "cost": 30
+      },
+      {
+        "id": "w2-hours-location",
+        "name": "Hours and Location sections",
+        "goal_gap": "No Hours or Location section in the page.",
+        "expected_outcome": "Hours lists all seven days with marked placeholders. Location shows Brew Lab, an Indiranagar, Bengaluru address placeholder and an embedded or linked map.",
+        "outputs": [
+          "Hours section",
+          "Location section with map link or embed"
+        ],
+        "completion_check": "Both sections are linked from the nav; Hours has seven day rows with times or visible placeholders; Location shows the cafe name, an address or placeholder, and a map embed or link; every unsupplied fact is visibly marked.",
+        "dependencies": [
+          "w1-core-menu-preorder"
+        ],
+        "parts": [
+          "page_section",
+          "page_section"
+        ],
+        "estimated_resources": {
+          "money": 20,
+          "calls": 2,
+          "time_minutes": 12
+        },
+        "estimate": 20,
+        "cost": 20
+      },
+      {
+        "id": "w3-gallery",
+        "name": "Large photo gallery with viewer",
+        "goal_gap": "No Gallery section and no way to view images larger.",
+        "expected_outcome": "A Gallery section with 12 or more image slots, each with alt text and lazy loading, and a lightbox to view each image larger.",
+        "outputs": [
+          "Gallery section with 12+ slots",
+          "lightbox script"
+        ],
+        "completion_check": "At least 12 img slots with non-empty alt and loading=lazy; clicking a slot opens a larger view that can be closed; slots are marked as placeholders until photos are supplied.",
+        "dependencies": [
+          "w1-core-menu-preorder"
+        ],
+        "parts": [
+          "page_section",
+          "interactive_feature"
+        ],
+        "estimated_resources": {
+          "money": 20,
+          "calls": 2,
+          "time_minutes": 12
+        },
+        "estimate": 20,
+        "cost": 20
+      },
+      {
+        "id": "w4-farm-stories",
+        "name": "Three coffee farm stories",
+        "goal_gap": "No Farm stories section.",
+        "expected_outcome": "A Farm stories section with three separate entries, each with a heading, multi-paragraph story area and image slots, with names and facts as marked placeholders.",
+        "outputs": [
+          "Farm stories section with three entries"
+        ],
+        "completion_check": "Section is linked from the nav; it has exactly three entries, each with a heading, at least two paragraphs and at least one image slot with alt text; all farm names and facts are visibly marked placeholders.",
+        "dependencies": [
+          "w1-core-menu-preorder"
+        ],
+        "parts": [
+          "profiles"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 8
+        },
+        "estimate": 10,
+        "cost": 10
+      }
+    ],
+    "attempts_used": 2,
+    "registered": [
+      "Page shell, Menu and Pre-order form"
+    ]
+  },
+  {
+    "id": "C-2",
+    "cycle": 1,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 1",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 18,
+        "text": "@Priority none of the three parking scenarios fits. Remaining budget is 5 and the smallest section is 10, so every scenario needs new money. Built from the three sections below: park Gallery = W2 + W4 = 30; park Farm stories = W2 + W3 = 30; park Hours and Location = W3 + W4 = 40. Over the 5 left by 25, 25 and 35. Even parking two sections leaves Hours and Location at 10, still 5 over. My pick: park Gallery or Farm stories (cheapest, 30 each), with the Requester adding about 25 to the budget; this is my sum from the rate card, please confirm. Please price W2 to W4 and tell Identity if any variant fits in 5.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 19,
+        "text": "@Adaptation REFUSE for now, on resources only: your sums match the rate card (park Gallery 10+20=30, park Farm stories 10+20=30, park Hours and Location 20+20=40), and remaining budget is 5. The smallest section, W2 at 10, is 5 over, so no variant fits in 5, and I will not grant on credit. Parking two sections still leaves W2 5 short. The fundable amounts are 30 (Gallery or Farm stories parked) or 40, so Option B at a flat 35 only works if the Requester adds at least 25. Please send Identity one question with those prices: add 25 and park Gallery or Farm stories, or add 5 and ship only Hours and Location. I will price whichever you pick as GRANT within its envelope.",
+        "position": "REFUSE: nothing",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 20,
+        "text": "@Identity policy question: no variant fits in the 5 left, and Priority will not grant on credit. Priority confirmed these prices from the rate card: park Gallery 30, park Farm stories 30, park Hours and Location 40. Please put one question to the Requester: (1) add 25 to the budget (35 to 60) and park Gallery, which I recommend, or (2) add 5 and ship only Hours and Location, which parks both Gallery and Farm stories and goes beyond the single section they chose. I pick (1) because it follows their B answer and keeps the farm stories. The trade-off is that Gallery stays an open done-when item. I park W2 to W4 until you have the answer, then I will reshape and resubmit the funded set.",
+        "position": "parks the proposal",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "priority",
+    "outcome": "Adaptation parked the proposal; nothing registered.",
+    "priority_final": [],
+    "adaptation_final": [
+      {
+        "id": "W2-hours-location",
+        "name": "Hours and Location section",
+        "goal_gap": "No Hours or Location section exists (F-3, F-4).",
+        "expected_outcome": "One linked section with all seven days of opening times as marked placeholders, the cafe name, an Indiranagar, Bengaluru address placeholder and a map link placeholder.",
+        "outputs": [
+          "#hours-location section in index.html",
+          "nav link to it"
+        ],
+        "completion_check": "Section is linked from nav; lists Monday to Sunday with each time marked placeholder; shows Brew Lab, an address placeholder and a map link or embed; no invented facts.",
+        "dependencies": [
+          "W-1"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "W3-gallery",
+        "name": "Photo gallery section",
+        "goal_gap": "No Gallery section exists (F-6).",
+        "expected_outcome": "A gallery with 12 or more image slots, each with alt text, lazy loading and a larger-view lightbox.",
+        "outputs": [
+          "#gallery section in index.html",
+          "lightbox script",
+          "nav link"
+        ],
+        "completion_check": "Section is linked from nav; at least 12 img slots with non-empty alt and loading=lazy; clicking an image opens a larger view that can be closed; slots are marked as placeholders.",
+        "dependencies": [
+          "W-1"
+        ],
+        "parts": [
+          "page_section",
+          "interactive_feature"
+        ],
+        "estimated_resources": {
+          "money": 20,
+          "calls": 1,
+          "time_minutes": 15
+        },
+        "estimate": 20,
+        "cost": 20
+      },
+      {
+        "id": "W4-farm-stories",
+        "name": "Farm stories section",
+        "goal_gap": "No Farm stories section exists (F-7).",
+        "expected_outcome": "Three separate farm entries, each with a heading, multi-paragraph story area and image slots, all farm facts marked as placeholders.",
+        "outputs": [
+          "#farms section in index.html",
+          "nav link"
+        ],
+        "completion_check": "Section is linked from nav; exactly three entries, each with a heading, at least two paragraphs and at least one image slot with alt text; farm names and facts marked placeholder.",
+        "dependencies": [
+          "W-1"
+        ],
+        "parts": [
+          "page_section",
+          "profiles"
+        ],
+        "estimated_resources": {
+          "money": 20,
+          "calls": 1,
+          "time_minutes": 15
+        },
+        "estimate": 20,
+        "cost": 20
+      }
+    ],
+    "attempts_used": 2
+  },
+  {
+    "id": "C-3",
+    "cycle": 2,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 2",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 26,
+        "text": "@Priority Requester chose option 1: budget 35 to 60, Gallery parked. Remaining is 30 after the raise. I propose W-2 Hours and Location (one page_section, 10) and W-3 Farm stories (page_section 10 + profiles 10 = 20), total 30 of 30. Please GRANT. Trade-off accepted: F-6 (Gallery) stays open by the Requester's choice, and the charter rule against cutting it is waived for Gallery only.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 27,
+        "text": "@Adaptation GRANT both, on the Requester's option 1 (budget 35 to 60, 30 spent, 30 left). W-2 Hours and Location is 10 (one page_section) and W-3 Farm stories is 20 (page_section 10 + profiles 10). Both match the rate card, and together they use all 30. There is no slack, so retry_limit is 0 for both: a failed run cannot be re-run without a new budget decision, and any 'fix' (8) would need one. Check: the state ledger still shows total 35 and remaining 5, so the raise to 60 must be recorded before the Builder runs. Order is Coordination's call. W-3 depends on W-2 as you declared. The Gallery stays parked by the Requester's choice and F-6 stays open.",
+        "position": "REFUSE: nothing",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 29,
+        "text": "@Identity Policy question: the REFUSE is a ledger error, not a scope problem. The Requester chose option 1 (budget 35 to 60), but the state still shows total 35 and remaining 5, so Priority's GRANT of 30 was rejected by code. Nothing I can reshape fits in 5, because the cheapest section is 10. Please record the raise to 60 (remaining 30). I park W-2 Hours and Location (10) and W-3 Farm stories (20) unchanged and will resubmit them to Priority once the ledger shows 30 remaining. Gallery stays parked by the Requester's choice, and F-6 stays open.",
+        "position": "parks the proposal",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "priority",
+    "outcome": "Adaptation parked the proposal; nothing registered.",
+    "priority_final": [],
+    "adaptation_final": [
+      {
+        "id": "w2-hours-location",
+        "name": "Hours and Location sections",
+        "goal_gap": "index.html has no Hours or Location section (F-3, F-4). Only #menu and #preorder exist.",
+        "expected_outcome": "index.html gains linked Hours and Location sections with nav links, using marked placeholders for unsupplied facts.",
+        "outputs": [
+          "Updated index.html with #hours and #location sections and nav links"
+        ],
+        "completion_check": "Hours lists all 7 days, each with a time or a visible placeholder. Location shows 'Brew Lab', an Indiranagar, Bengaluru address or visible placeholder, and an embedded or linked map. Nav links resolve. Existing Menu and Pre-order are unchanged. No invented facts. No horizontal overflow at 360px.",
+        "dependencies": [
+          "W-1"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "w3-farm-stories",
+        "name": "Farm stories section (three farms)",
+        "goal_gap": "index.html has no Farm stories section (F-7). Charter requires three separate farm entries.",
+        "expected_outcome": "index.html gains a linked Farm stories section with three entries, each with a heading, multi-paragraph story area and image slots, with farm names and facts as marked placeholders.",
+        "outputs": [
+          "Updated index.html with #farms section, three farm entries and nav link"
+        ],
+        "completion_check": "Section #farms has exactly 3 entries. Each has a heading, at least 2 story paragraphs and at least 2 image slots with alt text. All farm names and facts are visibly marked placeholders. Nav link resolves. Prior sections are unchanged. No horizontal overflow at 360px.",
+        "dependencies": [
+          "W-1",
+          "w2-hours-location"
+        ],
+        "parts": [
+          "page_section",
+          "profiles"
+        ],
+        "estimated_resources": {
+          "money": 20,
+          "calls": 1,
+          "time_minutes": 15
+        },
+        "estimate": 20,
+        "cost": 20
+      }
+    ],
+    "attempts_used": 2
+  },
+  {
+    "id": "C-4",
+    "cycle": 3,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 3",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 33,
+        "text": "@Priority Resubmitting W-2 Hours and Location (page_section, 10) and W-3 Farm stories (page_section 10 + profiles 10 = 20), total 30 of the 30 remaining under the Requester's option 1 (budget 60). W-3 depends on W-2. Gallery (F-6) stays parked by the Requester's choice and stays open. Please GRANT. If the ledger still shows total 35, please flag it as a system record fault, not a scope problem. I am not shrinking either workflow over it.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 34,
+        "text": "@Adaptation REFUSE for now, on resources only. Both workflows are priced correctly from the rate card (W-2 10, W-3 20, total 30), and I would GRANT them under the 60 budget Identity recorded. But the ledger on my table still shows remaining 5, and code rejects any GRANT above that, as it did last cycle. I will not grant on credit. Once the ledger shows 30 remaining, resubmit unchanged and I will GRANT with retry_limit 0, since there is no slack for a retry or a fix. Until then, please press Identity to correct the ledger record, not to change scope.",
+        "position": "REFUSE: nothing",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 35,
+        "text": "@Identity Policy question: Priority will grant W-2 Hours and Location (10) and W-3 Farm stories (20) once the ledger shows 30 remaining, but it still shows total 35, remaining 5, and code rejects any GRANT above 5. Your recorded raise to 60 did not reach the ledger. Nothing I can shrink fits in 5, since the cheapest section is 10, so I am parking both unchanged. Please get the budget total set to 60 (or have the Requester confirm it), then tell me and I will resubmit to Priority. Gallery (F-6) stays parked by the Requester's option 1.",
+        "position": "parks the proposal",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "priority",
+    "outcome": "Adaptation parked the proposal; nothing registered.",
+    "priority_final": [],
+    "adaptation_final": [
+      {
+        "id": "w2-hours-location",
+        "name": "Hours and Location sections",
+        "goal_gap": "F-1, F-3 and F-4: the page has no Hours or Location section, no address placeholder and no map.",
+        "expected_outcome": "index.html gains linked #hours and #location sections and matching nav links.",
+        "outputs": [
+          "Hours section listing all 7 days with marked placeholder times",
+          "Location section with cafe name Brew Lab, a marked address placeholder for Indiranagar, Bengaluru, and a linked map placeholder",
+          "nav links to #hours and #location"
+        ],
+        "completion_check": "File has #hours listing Monday to Sunday, each time marked as a placeholder; #location shows Brew Lab, a marked Indiranagar, Bengaluru address placeholder and a map link or embed; both are reachable from the nav; no invented facts; no horizontal overflow at 360px.",
+        "dependencies": [
+          "W-1"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "w3-farm-stories",
+        "name": "Farm stories section",
+        "goal_gap": "F-1 and F-7: the page has no Farm stories section and no farm entries.",
+        "expected_outcome": "index.html gains a linked #farms section with three separate farm entries.",
+        "outputs": [
+          "Farm stories section with three entries, each with a heading, a multi-paragraph story area and image slots",
+          "farm names, locations and facts as clearly marked placeholders",
+          "nav link to #farms"
+        ],
+        "completion_check": "File has #farms with exactly three separate farm entries; each has a heading, at least two story paragraphs and at least one image slot with alt text; all unsupplied farm names and facts are visibly marked as placeholders; the nav links to #farms; no horizontal overflow at 360px.",
+        "dependencies": [
+          "w2-hours-location"
+        ],
+        "parts": [
+          "page_section",
+          "profiles"
+        ],
+        "estimated_resources": {
+          "money": 20,
+          "calls": 1,
+          "time_minutes": 15
+        },
+        "estimate": 20,
+        "cost": 20
+      }
+    ],
+    "attempts_used": 2
+  },
+  {
+    "id": "C-5",
+    "cycle": 4,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 4",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 39,
+        "text": "@Priority Resubmitting unchanged under the Requester's option 1 (budget 60, 30 spent, 30 remaining): W-2 Hours and Location (page_section, 10) and W-3 Farm stories (page_section 10 + profiles 10 = 20), total 30 with no slack. W-3 depends on W-2. Gallery (F-6) stays parked and open by the Requester's choice. If the ledger still reads 5 remaining, please say so in your reply so Identity can report it as a blocker. Please GRANT.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 40,
+        "text": "@Adaptation REFUSE, on resources only. The ledger on my table still reads remaining 5 (total 35, spent 30), and code rejects any GRANT above 5, so this is a record fault and not a scope problem. W-2 (10) and W-3 (20) are priced correctly at 30. I would GRANT both with retry_limit 0 once remaining shows 30. Please tell @Identity that the ledger still reads 5 so it can report a blocker to the Requester, and do not shrink scope.",
+        "position": "REFUSE: nothing",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 41,
+        "text": "@Identity Blocker, not a scope question: Priority refused a second time because the ledger still reads total 35, spent 30, remaining 5, and code rejects any GRANT above 5. Priority confirms W-2 Hours and Location (10) and W-3 Farm stories (20) are priced correctly and would be granted with retry_limit 0 once remaining shows 30. Nothing I can shrink fits in 5, since the cheapest section is 10, so I park both unchanged rather than cut scope. Please report this to the Requester as a system record fault. The budget raise to 60 (option 1, Gallery parked) is on record but has not reached the ledger. Gallery (F-6) stays open by the Requester's choice.",
+        "position": "parks the proposal",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "priority",
+    "outcome": "Adaptation parked the proposal; nothing registered.",
+    "priority_final": [],
+    "adaptation_final": [
+      {
+        "id": "w2-hours-location",
+        "name": "Hours and Location sections",
+        "goal_gap": "index.html has no Hours or Location section (Audit F-3, F-4, and part of F-1).",
+        "expected_outcome": "Two linked sections added to index.html and to the nav: Hours with all seven days as marked placeholders, and Location with the cafe name, a marked address placeholder for Indiranagar, Bengaluru, and a map link or embed marked as a placeholder.",
+        "outputs": [
+          "index.html with #hours and #location sections and nav links"
+        ],
+        "completion_check": "File has linked #hours listing Monday to Sunday with times or marked placeholders, and linked #location showing Brew Lab, an Indiranagar, Bengaluru address or marked placeholder, and a map link or embed; no invented facts; existing Menu and Pre-order unchanged; no horizontal overflow at 360px.",
+        "dependencies": [
+          "W-1"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "w3-farm-stories",
+        "name": "Farm stories section",
+        "goal_gap": "index.html has no Farm stories section (Audit F-7, and part of F-1).",
+        "expected_outcome": "A linked Farm stories section with three separate farm entries, each with a heading, a multi-paragraph story area and image slots, with farm names and facts as marked placeholders.",
+        "outputs": [
+          "index.html with #farms section, three farm entries and nav link"
+        ],
+        "completion_check": "File has linked #farms containing exactly three farm entries, each with a heading, at least two story paragraphs and at least one image slot with alt text; farm names and facts visibly marked as placeholders; no invented facts; existing sections unchanged.",
+        "dependencies": [
+          "w2-hours-location"
+        ],
+        "parts": [
+          "page_section",
+          "profiles"
+        ],
+        "estimated_resources": {
+          "money": 20,
+          "calls": 1,
+          "time_minutes": 15
+        },
+        "estimate": 20,
+        "cost": 20
+      }
+    ],
+    "attempts_used": 2
+  }
+]

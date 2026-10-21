@@ -1,0 +1,874 @@
+[
+  {
+    "cycle": 2,
+    "version": 19,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the name CodeSprint Pune 2027, the venue Lakeside Tech Hall, 12 Lake Road, Pune 411002, and the dates Saturday 6 March 2027 and Sunday 7 March 2027",
+        "verdict": "PASS",
+        "note": "Screenshot and source show CodeSprint Pune 2027, Saturday 6 March 2027, Sunday 7 March 2027 and Lakeside Tech Hall, 12 Lake Road, Pune 411002 in #hero.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The page shows the contact details code@example.com and WhatsApp +91 00000 55555",
+        "verdict": "PASS",
+        "note": "#contact has two .contact-link links: mailto:code@example.com and wa.me/910000055555 showing +91 00000 55555; both visible in the screenshot.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "A track comparison shows Web Track, AI Track and Hardware Track with team size, build time and first prize for each",
+        "verdict": "PASS",
+        "note": "#tracks has 3 .track-card cards with correct team size, build time and first prize for Web, AI and Hardware (source read).",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The page shows entry fees (Student Rs 400, Professional Rs 800), the optional meal pass at Rs 200 each, and the early-bird 10% off entry fees only up to 15 February 2027",
+        "verdict": "PASS",
+        "note": "#fees shows Student Rs 400, Professional Rs 800, Meal pass Rs 200 each (optional), and 10% off entry fees only, not meal passes, up to 15 February 2027.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A fee calculator takes ticket type (Student or Professional), number of participants (1 to 4) and number of meal passes, and shows the total with the early-bird discount applied to entry fees only",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Code: total = p*fee - (early ? p*fee/10 : 0) + meals*200; W-5 behaviour checks passed for 2*400*0.9+200 and 3*800+2*200. A registration date field not in the brief was added; it defaults to today.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A registration form has team name, lead name, lead email, lead phone, track dropdown, ticket type, college name (shown and required only for Student), number of participants (1 to 4), meal passes yes/no and dietary preference (Vegetarian or Non-vegetarian, shown only if meal passes is yes), and sends to register@example.com",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Source: form action mailto:register@example.com, college required only for Student, diet shown only for meals=yes; mechanical check shows the empty submit blocked with college_name invalid. W-6's own #register count check failed 3 of 3 (see F-16).",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "A separate mentor form has name, email, area of expertise (Web, AI, Hardware) and availability (Saturday, Sunday or both), and sends to mentors@example.com",
+        "verdict": "PASS",
+        "note": "#mentor-form has name, email, area (Web, AI, Hardware), availability (Saturday, Sunday, Both), mailto:mentors@example.com; empty submit shows #mentor-error; mechanical form 2 ok.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The schedule lists Day one and Day two with every time and event given in the brief",
+        "verdict": "PASS",
+        "note": "#schedule has 4 Day one and 3 Day two sched-item entries matching the brief exactly.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The prizes section shows the first prize for each of the three tracks",
+        "verdict": "PASS",
+        "note": "#prizes has 3 .prize-item entries: Rs 50000, Rs 75000, Rs 60000 under the right tracks.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "An FAQ section answers all six questions given in the brief",
+        "verdict": "PASS",
+        "note": "#faq has 6 details.faq-item entries with the brief's questions and answers, word for word.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": true
+      },
+      {
+        "id": "F-11",
+        "criterion": "A sponsors section shows Gold, Silver and Community tiers with the named sponsors and logo placeholders, and photo placeholders are present",
+        "verdict": "NEEDS_REVISION",
+        "note": "4 .sponsor-logo and 3 .photo-placeholder present, but N5 reports the exact facts 'Gold: Northwind Cloud', 'Silver: Bytecraft Labs, Circuit House' and 'Community: Pune Coders Club' missing. The tier and names are split across separate elements.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 11,
+        "pass": false
+      },
+      {
+        "id": "F-12",
+        "criterion": "A countdown to the start of the hackathon on 6 March 2027 is shown and updates live",
+        "verdict": "PASS",
+        "note": "Target 2027-03-06T10:00:00+05:30, setInterval 1000ms, four .cd-unit; W-12 check 'seconds tick live' passed.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 12,
+        "pass": true
+      },
+      {
+        "id": "F-13",
+        "criterion": "A menu stays on screen while scrolling and highlights the section currently in view",
+        "verdict": "PASS",
+        "note": "#site-nav is position:fixed with 12 .nav-link links; the active class is set by scroll position; FAQ and Sponsors active checks passed on attempt 2; N8 met.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 13,
+        "pass": true
+      },
+      {
+        "id": "F-14",
+        "criterion": "A high-contrast mode toggle changes the colours of the whole page and can be switched back",
+        "verdict": "PASS",
+        "note": "The toggle flips body.hc; CSS forces black or yellow on body, every section[id], nav, forms and buttons; W-14 checks showed body and #tracks colours change. The toggle reads the previous state back on click.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 14,
+        "pass": true
+      },
+      {
+        "id": "F-15",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "PASS",
+        "note": "Mechanical: js_errors [], phone and desktop overflow_px 0, broken_in_page_links [].",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 15,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-16",
+        "criterion": "Valid, unambiguous ids (W-6 completion check; item 15 link integrity)",
+        "verdict": "NEEDS_REVISION",
+        "note": "Source has <span id=\"register\" data-hero-placeholder hidden> in #hero and <section id=\"register\">. W-6's check found 2 matches on all 3 attempts. Two scripts remove the span at runtime, but the duplicate id remains in the file.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-17",
+        "criterion": "No invented content (N6)",
+        "verdict": "NEEDS_REVISION",
+        "note": "N6 fails on one number, '0'. The only candidates are the calculator defaults (calc-meals value 0, 'Rs 0', total 0), which are not facts from the brief. The source does not show which instance the checker flagged.",
+        "severity": "low",
+        "confidence": "low",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-18",
+        "criterion": "Standards: works well on phones (fixed toggle placement)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "#contrast-bar is fixed at bottom-right (z-index 1100). In the screenshot it overlaps the Contact card at 1280px and the Contact heading area at 360px, and it can sit over form buttons while scrolling.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "Screenshot shows Space Grotesk headings, Inter body, indigo and orange palette, and bordered cards with orange offset shadow, as in the style guide.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "Measured 169 elements at both widths with low_count 0. High-contrast mode was not measured.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "h1 count 1, skipped_levels 0 at both widths.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "One .hero-cta 'Register your team' is visible on the first screen at 360px and 1280px.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "All 12 sections are reachable from the sideways-scrolling nav on phones. Section and nav order is odd: Contact sits right after the hero and Countdown comes last.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "small_tap_targets count 0, min 44px at 360px.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "images 0, images_without_alt []; placeholders are divs with visible labels.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 55294,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Space+Grotesk:wght@500;700&amp;display=swap",
+        "https://wa.me/910000055555"
+      ],
+      "forms": 2,
+      "scripts": 7,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "design": {
+        "desktop": {
+          "contrast": {
+            "checked": 169,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 15
+          },
+          "first_screen_actions": [
+            "Register your team",
+            "code@example.com",
+            "WhatsApp +91 00000 55555",
+            "High contrast: off",
+            "Home"
+          ]
+        },
+        "phone": {
+          "contrast": {
+            "checked": 169,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 15
+          },
+          "first_screen_actions": [
+            "Register your team",
+            "High contrast: off",
+            "Home"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        }
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [
+            "college_name"
+          ],
+          "errors_during": [],
+          "ok": true
+        },
+        {
+          "index": 2,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v19.png",
+    "all_pass": false,
+    "conditions": [
+      {
+        "id": "N1",
+        "text": "The page opens (it parses, tags balanced)",
+        "check": "page-parses",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "text": "No JavaScript errors on load",
+        "check": "no-js-errors",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "text": "No horizontal overflow at 360px and 1280px",
+        "check": "no-overflow",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "text": "Every in-page link resolves; WhatsApp (wa.me) and tel: links are well formed",
+        "check": "links-well-formed",
+        "met": true,
+        "evidence": "all 16 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "text": "Every charter fact appears exactly, and nothing is \"to be confirmed\"",
+        "check": [
+          "facts-present-all",
+          "nothing-to-be-confirmed"
+        ],
+        "met": false,
+        "evidence": "missing: ['Gold: Northwind Cloud', 'Silver: Bytecraft Labs, Circuit House', 'Community: Pune Coders Club']; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "text": "No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers",
+        "check": "no-invented-facts",
+        "met": false,
+        "evidence": "not in the charter or the Requester's answers: 0"
+      },
+      {
+        "id": "N7",
+        "text": "Every form has a submit control and a destination (action or mailto)",
+        "check": "forms-have-destination",
+        "met": true,
+        "evidence": "2 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "text": "A nav reaches every section, and the hero has one obvious main action",
+        "check": "nav-and-main-action",
+        "met": true,
+        "evidence": "the nav reaches all 11 section(s); the hero has 1 main action(s)"
+      }
+    ]
+  },
+  {
+    "cycle": 3,
+    "version": 23,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the name CodeSprint Pune 2027, the venue Lakeside Tech Hall, 12 Lake Road, Pune 411002, and the dates Saturday 6 March 2027 and Sunday 7 March 2027",
+        "verdict": "PASS",
+        "note": "#hero has h1 CodeSprint Pune 2027, Saturday 6 March 2027, Sunday 7 March 2027 and Lakeside Tech Hall, 12 Lake Road, Pune 411002; visible in the screenshot.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The page shows the contact details code@example.com and WhatsApp +91 00000 55555",
+        "verdict": "PASS",
+        "note": "#contact has mailto:code@example.com and wa.me/910000055555 showing WhatsApp +91 00000 55555; N4 met.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "A track comparison shows Web Track, AI Track and Hardware Track with team size, build time and first prize for each",
+        "verdict": "PASS",
+        "note": "#tracks has 3 .track-card cards; team size, build time and first prize match the brief for Web, AI and Hardware.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The page shows entry fees (Student Rs 400, Professional Rs 800), the optional meal pass at Rs 200 each, and the early-bird 10% off entry fees only up to 15 February 2027",
+        "verdict": "PASS",
+        "note": "#fees shows Student Rs 400, Professional Rs 800, Meal pass Rs 200 each (Optional), and 10% off entry fees only, not meal passes, up to 15 February 2027.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A fee calculator takes ticket type (Student or Professional), number of participants (1 to 4) and number of meal passes, and shows the total with the early-bird discount applied to entry fees only",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Code: total = entry - entry/10 (if date <= 2027-02-15) + meals*200; W-18 behaviour checks passed for both cases. A registration date field, not in the brief, defaults to today.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A registration form has team name, lead name, lead email, lead phone, track dropdown, ticket type, college name (shown and required only for Student), number of participants (1 to 4), meal passes yes/no and dietary preference (Vegetarian or Non-vegetarian, shown only if meal passes is yes), and sends to register@example.com",
+        "verdict": "PASS",
+        "note": "#reg-form action mailto:register@example.com; college shown and required only for Student; diet shown only for meals=yes; empty submit blocked (college_name invalid); exactly one #register in source.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "A separate mentor form has name, email, area of expertise (Web, AI, Hardware) and availability (Saturday, Sunday or both), and sends to mentors@example.com",
+        "verdict": "PASS",
+        "note": "#mentor-form has name, email, area (Web, AI, Hardware), availability (Saturday, Sunday, Both), mailto:mentors@example.com; empty submit shows #mentor-error.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The schedule lists Day one and Day two with every time and event given in the brief",
+        "verdict": "PASS",
+        "note": "#schedule has 4 Day one and 3 Day two .sched-item entries with the exact times and events.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The prizes section shows the first prize for each of the three tracks",
+        "verdict": "PASS",
+        "note": "#prizes has 3 .prize-item entries: Web Rs 50000, AI Rs 75000, Hardware Rs 60000.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "An FAQ section answers all six questions given in the brief",
+        "verdict": "PASS",
+        "note": "#faq has 6 details.faq-item entries with the brief's questions and answers word for word.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": true
+      },
+      {
+        "id": "F-11",
+        "criterion": "A sponsors section shows Gold, Silver and Community tiers with the named sponsors and logo placeholders, and photo placeholders are present",
+        "verdict": "PASS",
+        "note": "3 p.tier-line elements hold the exact tier lines; 4 .sponsor-logo and 3 .photo-placeholder are labelled placeholders; N5 met (all 34 facts).",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 11,
+        "pass": true
+      },
+      {
+        "id": "F-12",
+        "criterion": "A countdown to the start of the hackathon on 6 March 2027 is shown and updates live",
+        "verdict": "PASS",
+        "note": "Target 2027-03-06T10:00:00+05:30, setInterval 1000ms, four .cd-unit; the seconds-tick check passed.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 12,
+        "pass": true
+      },
+      {
+        "id": "F-13",
+        "criterion": "A menu stays on screen while scrolling and highlights the section currently in view",
+        "verdict": "PASS",
+        "note": "#site-nav is position:fixed with 12 .nav-link links; active class set by scroll-position polling; FAQ and Sponsors active checks passed.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 13,
+        "pass": true
+      },
+      {
+        "id": "F-14",
+        "criterion": "A high-contrast mode toggle changes the colours of the whole page and can be switched back",
+        "verdict": "PASS",
+        "note": "Toggle flips body.hc; CSS covers body, every section[id], nav, forms, buttons and the strip; body and #tracks colour-change checks passed. Contrast ratios in hc mode were not measured.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 14,
+        "pass": true
+      },
+      {
+        "id": "F-15",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "PASS",
+        "note": "Mechanical: js_errors [], overflow_px 0 at 360 and 1280, broken_in_page_links [].",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 15,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-16",
+        "criterion": "Valid markup: one #register",
+        "verdict": "PASS",
+        "note": "W-17 check shows 1 element matches #register; hidden placeholder span and its removal script are gone from #hero.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-17",
+        "criterion": "No invented content (N6)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "N6 met. The calculator script avoids a literal 0 with MEAL-MEAL and NONE, and has a redundant ternary; it works but is harder to maintain.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-18",
+        "criterion": "Standards: toggle must not cover content",
+        "verdict": "PASS",
+        "note": "#contrast-bar is position:static, moved above #hero; the screenshot shows it below the nav, and the contact card and form buttons are uncovered.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "Screenshot shows Space Grotesk and Inter, indigo, orange and navy palette, and bordered cards with orange shadow per the style guide.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "Contrast measurement checked 166 elements at both widths, low_count 0.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "One h1, skipped_levels 0; the screenshot shows the title as the dominant element.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "Screenshot shows the large indigo 'Register your team' button as the single hero action.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "12 nav links scroll sideways; at 360px only about 4 are visible ('Ca' cut off). Order follows page order, but Contact is second and Countdown is last.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "small_tap_targets count 0 at min 44px.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "0 images on the page, so none lack alt text.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 55392,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Space+Grotesk:wght@500;700&amp;display=swap",
+        "https://wa.me/910000055555"
+      ],
+      "forms": 2,
+      "scripts": 6,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [
+            "college_name"
+          ],
+          "errors_during": [],
+          "ok": true
+        },
+        {
+          "index": 2,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 166,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 15
+          },
+          "first_screen_actions": [
+            "High contrast: off",
+            "Register your team",
+            "Home"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 166,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 15
+          },
+          "first_screen_actions": [
+            "High contrast: off",
+            "Register your team",
+            "code@example.com",
+            "WhatsApp +91 00000 55555",
+            "Home"
+          ]
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v23.png",
+    "all_pass": true,
+    "conditions": [
+      {
+        "id": "N1",
+        "text": "The page opens (it parses, tags balanced)",
+        "check": "page-parses",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "text": "No JavaScript errors on load",
+        "check": "no-js-errors",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "text": "No horizontal overflow at 360px and 1280px",
+        "check": "no-overflow",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "text": "Every in-page link resolves; WhatsApp (wa.me) and tel: links are well formed",
+        "check": "links-well-formed",
+        "met": true,
+        "evidence": "all 16 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "text": "Every charter fact appears exactly, and nothing is \"to be confirmed\"",
+        "check": [
+          "facts-present-all",
+          "nothing-to-be-confirmed"
+        ],
+        "met": true,
+        "evidence": "all 34 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "text": "No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers",
+        "check": "no-invented-facts",
+        "met": true,
+        "evidence": "every number, phone and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "N7",
+        "text": "Every form has a submit control and a destination (action or mailto)",
+        "check": "forms-have-destination",
+        "met": true,
+        "evidence": "2 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "text": "A nav reaches every section, and the hero has one obvious main action",
+        "check": "nav-and-main-action",
+        "met": true,
+        "evidence": "the nav reaches all 11 section(s); the hero has 1 main action(s)"
+      }
+    ]
+  }
+]

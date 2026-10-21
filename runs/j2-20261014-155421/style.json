@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#0A3D8F",
+    "secondary": "#0B1F3A",
+    "accent": "#F25C05",
+    "background": "#F5F7FA",
+    "surface": "#FFFFFF",
+    "text": "#0B1220",
+    "muted": "#4A5568"
+  },
+  "fonts": {
+    "heading": "'Barlow Condensed', 'Arial Narrow', Impact, sans-serif",
+    "body": "'Inter', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif",
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "64px"
+  },
+  "radius": "12px",
+  "buttons": {
+    "primary": "background:#F25C05;color:#0B1220;border:2px solid #F25C05;font-weight:700;text-transform:uppercase;letter-spacing:.04em;min-height:44px;padding:12px 24px",
+    "secondary": "background:transparent;color:#0A3D8F;border:2px solid #0A3D8F;font-weight:700;text-transform:uppercase;letter-spacing:.04em;min-height:44px;padding:12px 24px"
+  },
+  "card": "background:#FFFFFF;border:1px solid #D5DCE6;border-top:4px solid #F25C05;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(11,31,58,.08)",
+  "notes": "Race-bib blue and orange with a bold condensed heading font feel sporty; dark text on orange and white on blue both pass WCAG AA."
+}

@@ -1,0 +1,61 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "wf-site-v1",
+    "name": "Build CityCare single-file site v1",
+    "purpose": "No site exists (site_versions = 0). Done-when items for the single file, booking request form, emergency section, English-only content and no invented details are all unmet.",
+    "cost": 20,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 4,
+      "time_limit_minutes": 30,
+      "retry_limit": 1,
+      "stop_loss": "Halt if spend reaches 20, or if completion checks (a) to (f) still fail after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "index.html (single file, inline CSS and JS, CDN optional)",
+      "list of every 'hospital to confirm' placeholder in the file, for the Requester"
+    ],
+    "completion_check": "Pass only if all hold: (a) exactly one HTML file opens in a browser with no build step; (b) 112 and 108 are visible without scrolling at 1280x800 and 390x844 viewports; (c) the form has exactly the four fields, and the JS contains no fetch, XHR, localStorage or cookie writes; (d) the text 'no instant confirmation' and 'hospital will confirm by phone' appear near the form; (e) text search finds no phone number other than 112, 108 and labeled placeholders, and no street address; (f) all visible text is English.",
+    "dependencies": [
+      "charter recorded",
+      "Requester supplies real emergency line and address (needed for done, not for this run)"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "wf-copy-fix-v2",
+    "name": "Truthful booking copy fix for CityCare site v2",
+    "purpose": "Hero copy promises hospital contact that the form cannot deliver, and the call fallback shows no number. Patients may believe a request was made when none was.",
+    "cost": 8,
+    "estimate": 6,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 3,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Halt if spend reaches 8, or if completion checks (a) to (g) still fail after one retry; report to Priority."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "index.html v2 (single file, copy changes only, no new JS behavior)",
+      "Requester checklist: emergency line, address, booking phone number, how the hospital wants requests to reach it, accept or supply placeholders",
+      "updated list of every 'hospital to confirm' placeholder in the file"
+    ],
+    "completion_check": "Pass only if all hold: (a) no 'will contact you', 'we will call you' or wording implying the hospital receives the form; (b) near the form, the page states nothing is sent and the patient must call the hospital; (c) a labeled 'hospital to confirm' booking phone placeholder sits next to that instruction; (d) JS has no fetch, XHR, localStorage, cookie writes, mailto or third-party form action; (e) the form has exactly the four fields and 'no instant confirmation' is still present; (f) no phone number other than 112, 108 and labeled placeholders, and all visible text is English; (g) the Requester checklist is returned with all five items.",
+    "dependencies": [
+      "W-1 output index.html v1",
+      "Identity ruling: copy-only fix, no delivery path"
+    ],
+    "status": "done",
+    "cycle": 2
+  }
+]

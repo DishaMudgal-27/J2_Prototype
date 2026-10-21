@@ -3,8 +3,8 @@
 Paste this into a new chat, or point Claude at this file (docs/j2-handoff.md in the agent-studio folder).
 
 ## Goal
-Disha (intern, Testlify) is testing **J2**, a multi-agent flow designed by her manager (diagram: docs/j2-flow.jpg),
-using a prototype that builds a cafe website. The output is a findings report for the manager, focused on
+The developer (intern, Testlify) is testing **J2**, a multi-agent flow designed by the project owner (diagram: docs/j2-flow.jpg),
+using a prototype that builds a cafe website. The output is a findings report for the project owner, focused on
 **how conflicts are resolved** and **budget**. Findings are about the J2 concept, not prototype bugs.
 
 Two Claude Docs are already started (outlines only, finish after all tests):
@@ -13,7 +13,7 @@ Two Claude Docs are already started (outlines only, finish after all tests):
 
 Label every finding as one of: **J2 works** / **J2 needs improving** (concept gap) / **prototype bug** (appendix only).
 
-## Rules agreed with the manager / head
+## Rules agreed with the project owner / head
 - Agents: Identity, Adaptation, Priority, Coordination, Audit (official md files in agents/j2/, do not edit), plus Builder.
   Validator (J2.e) is plain code, no AI call: "the final check before anything is built".
 - No CEO (head confirmed). Official md files still mention a CEO; team.md says Identity asks the user instead.

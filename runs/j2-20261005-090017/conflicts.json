@@ -1,0 +1,81 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 1,
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "proposed": [
+      {
+        "name": "Choose stack and scaffold",
+        "purpose": "Plain HTML/CSS skeleton, no build step",
+        "cost": 15,
+        "outputs": [
+          "index.html"
+        ]
+      },
+      {
+        "name": "Core sections",
+        "purpose": "Hero, departments, doctors, appointment form, contact",
+        "cost": 45,
+        "outputs": [
+          "index.html"
+        ]
+      },
+      {
+        "name": "Patient blog",
+        "purpose": "5 health articles for trust and search",
+        "cost": 30,
+        "outputs": [
+          "blog section"
+        ]
+      },
+      {
+        "name": "Animations",
+        "purpose": "Scroll and hover effects",
+        "cost": 20,
+        "outputs": [
+          "CSS"
+        ]
+      }
+    ],
+    "decided": [
+      {
+        "name": "Choose stack and scaffold",
+        "purpose": "Plain HTML/CSS skeleton, no build step",
+        "cost": 15,
+        "outputs": [
+          "index.html"
+        ]
+      },
+      {
+        "name": "Core sections",
+        "purpose": "Hero, departments, doctors, appointment form, contact",
+        "cost": 45,
+        "outputs": [
+          "index.html"
+        ]
+      },
+      {
+        "name": "Health tips strip",
+        "purpose": "3 short tips for trust",
+        "cost": 10,
+        "outputs": [
+          "index.html"
+        ]
+      },
+      {
+        "name": "Animations",
+        "purpose": "Scroll and hover effects",
+        "cost": 10,
+        "outputs": [
+          "CSS"
+        ]
+      }
+    ],
+    "adaptation_gets": "Some content beyond listings",
+    "priority_gets": "20-unit reserve kept",
+    "decided_by": "identity"
+  }
+]

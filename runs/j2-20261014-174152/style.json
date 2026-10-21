@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#4F2BD9",
+    "secondary": "#0B1F3A",
+    "accent": "#FF6B2C",
+    "background": "#F7F7FB",
+    "surface": "#FFFFFF",
+    "text": "#14122B",
+    "muted": "#55526E"
+  },
+  "fonts": {
+    "heading": "'Space Grotesk', system-ui, sans-serif",
+    "body": "'Inter', system-ui, sans-serif",
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Grotesk:wght@600;700&display=swap"
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "64px"
+  },
+  "radius": "12px",
+  "buttons": {
+    "primary": "background:#4F2BD9;color:#FFFFFF;border:2px solid #4F2BD9;min-height:48px;padding:12px 24px;border-radius:12px;font-weight:700;font-size:1rem;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer",
+    "secondary": "background:transparent;color:#4F2BD9;border:2px solid #4F2BD9;min-height:48px;padding:12px 24px;border-radius:12px;font-weight:700;font-size:1rem;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer"
+  },
+  "card": "background:#FFFFFF;color:#14122B;border:1px solid #DAD6F0;border-radius:12px;padding:24px;box-shadow:0 4px 16px rgba(20,18,43,0.08)",
+  "notes": "Deep indigo and navy with a hot orange accent feel energetic for a hackathon, while dark text on light surfaces and 48px buttons keep it clear on phones."
+}

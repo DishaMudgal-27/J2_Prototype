@@ -1,0 +1,272 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 1,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 1",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 4,
+        "text": "@Priority Four workflows cover the full charter scope for 60 against a 50 budget; rate-card minimum is 60 because hours and location share one section part. Cheapest cut if Priority must: none keeps done-when intact, so I ask for a counter rather than dropping the gallery or farms. Order: W1, W2, then W3 and W4.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 5,
+        "text": "@Adaptation COUNTER: all four workflows stay, total 50 against a 50 budget. Two cuts of 5 each: (1) drop the separate styling part from W1, since the baseline CSS and the breakpoints come with the page sections; (2) cost W2 as one interactive_feature, because a browser-only order builder with no submit or backend is not a form. If you think W2 is a true form, say why, and the fallback is to park W4 (farms) until budget frees up. Trade-off: zero reserve, so retry_limit is 0 and there is no money for a fix (8). Nothing may exceed its envelope.",
+        "position": "COUNTER: Page shell, nav, menu, hours and location (20), Pickup pre-order builder (10), Large photo gallery (10), Three farm stories (10)",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 6,
+        "text": "@Priority ACCEPT at 50 of 50. W2 is a browser-only order builder with no submit, so one interactive_feature is a fair cost, and baseline CSS and breakpoints ship inside W1's sections. Risk accepted: no reserve and retry_limit 0, so any failed check means parking that item, not fixing it. Order: W1, then W2, W3, W4.",
+        "position": "accepts Priority's offer",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "priority",
+    "outcome": "Adaptation accepted Priority's COUNTER: Page shell, nav, menu, hours and location (20), Pickup pre-order builder (10), Large photo gallery (10), Three farm stories (10) goes to the validator.",
+    "priority_final": [
+      {
+        "id": "w1-shell-menu-visit",
+        "name": "Page shell, nav, menu, hours and location",
+        "goal_gap": "No page exists: no nav, menu, hours or location sections.",
+        "expected_outcome": "Single HTML file with viewport meta, responsive CSS breakpoints, anchor nav, a menu section with categories and placeholder prices, and hours and location sections (separate anchors) with marked placeholders and a directions link placeholder.",
+        "outputs": [
+          "site/index.html (shell, nav, menu, hours, location)"
+        ],
+        "completion_check": "File has viewport meta, at least one @media breakpoint, nav links to #menu #hours #location #preorder #gallery #farms, menu with at least 2 categories, hours and location sections present, every unknown value visibly marked as placeholder.",
+        "dependencies": [],
+        "parts": [
+          "page_section",
+          "page_section"
+        ],
+        "estimated_resources": {
+          "money": 20,
+          "calls": 3,
+          "time_minutes": 15
+        },
+        "envelope": {
+          "money_limit": 20,
+          "model_call_limit": 3,
+          "time_limit_minutes": 15,
+          "retry_limit": 0,
+          "stop_loss": "Stop if the file lacks viewport meta or any #menu, #hours or #location anchor after the first pass, or if calls exceed 3."
+        },
+        "estimate": 20,
+        "cost": 20
+      },
+      {
+        "id": "w2-preorder",
+        "name": "Pickup pre-order builder",
+        "goal_gap": "Visitors cannot build an order or get a summary to send.",
+        "expected_outcome": "Browser-only pre-order section: pick items and quantities from the menu, choose pickup time, see running total or item list, and generate an order summary for a send channel placeholder (WhatsApp or email).",
+        "outputs": [
+          "#preorder section in site/index.html"
+        ],
+        "completion_check": "Item quantities update a visible total or list, a pickup time field exists, a Generate summary button produces text containing items, quantities and pickup time, and send channel and time rules are marked placeholders.",
+        "dependencies": [
+          "w1-shell-menu-visit"
+        ],
+        "parts": [
+          "interactive_feature"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 2,
+          "time_minutes": 12
+        },
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 2,
+          "time_limit_minutes": 12,
+          "retry_limit": 0,
+          "stop_loss": "Stop if the summary does not contain items, quantities and pickup time after the first pass, or if calls exceed 2."
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "w3-gallery",
+        "name": "Large photo gallery",
+        "goal_gap": "No gallery section.",
+        "expected_outcome": "Responsive gallery grid with 12 image slots, each with alt text, loading=lazy and a visible Photo placeholder label.",
+        "outputs": [
+          "#gallery section in site/index.html"
+        ],
+        "completion_check": "Count of gallery img or slot elements is at least 12; each has non-empty alt and loading=lazy; each is visibly marked as placeholder.",
+        "dependencies": [
+          "w1-shell-menu-visit"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 8
+        },
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 1,
+          "time_limit_minutes": 8,
+          "retry_limit": 0,
+          "stop_loss": "Stop if fewer than 12 slots or any slot lacks alt text or loading=lazy after the first pass."
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "w4-farms",
+        "name": "Three farm stories",
+        "goal_gap": "No farm stories section.",
+        "expected_outcome": "Three separate farm entries, each with name, location, story text and photo slot, all as marked placeholders until facts are supplied.",
+        "outputs": [
+          "#farms section in site/index.html"
+        ],
+        "completion_check": "Exactly 3 farm entries, each containing name, location, story and photo slot elements; all values visibly marked placeholder; no invented farm facts.",
+        "dependencies": [
+          "w1-shell-menu-visit"
+        ],
+        "parts": [
+          "profiles"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 8
+        },
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 1,
+          "time_limit_minutes": 8,
+          "retry_limit": 0,
+          "stop_loss": "Stop if there are not exactly 3 entries, or any farm fact appears that is not a marked placeholder."
+        },
+        "estimate": 10,
+        "cost": 10
+      }
+    ],
+    "adaptation_final": [
+      {
+        "id": "w1-shell-menu-visit",
+        "name": "Page shell, nav, menu, hours and location",
+        "goal_gap": "No page exists: no nav, menu, hours or location sections.",
+        "expected_outcome": "Single HTML file with viewport meta, responsive CSS breakpoints, anchor nav, a menu section with categories and placeholder prices, and hours and location sections (separate anchors) with marked placeholders and a directions link placeholder.",
+        "outputs": [
+          "site/index.html (shell, nav, menu, hours, location)"
+        ],
+        "completion_check": "File has viewport meta, at least one @media breakpoint, nav links to #menu #hours #location #preorder #gallery #farms, menu with at least 2 categories, hours and location sections present, every unknown value visibly marked as placeholder.",
+        "dependencies": [],
+        "parts": [
+          "styling",
+          "page_section",
+          "page_section"
+        ],
+        "estimated_resources": {
+          "money": 25,
+          "calls": 3,
+          "time_minutes": 15
+        },
+        "estimate": 25,
+        "cost": 25
+      },
+      {
+        "id": "w2-preorder",
+        "name": "Pickup pre-order form",
+        "goal_gap": "Visitors cannot build an order or get a summary to send.",
+        "expected_outcome": "Browser-only pre-order section: pick items and quantities from the menu, choose pickup time, see running total or item list, and generate an order summary for a send channel placeholder (WhatsApp or email).",
+        "outputs": [
+          "#preorder section in site/index.html"
+        ],
+        "completion_check": "Item quantities update a visible total or list, a pickup time field exists, a Generate summary button produces text containing items, quantities and pickup time, and send channel and time rules are marked placeholders.",
+        "dependencies": [
+          "w1-shell-menu-visit"
+        ],
+        "parts": [
+          "form"
+        ],
+        "estimated_resources": {
+          "money": 15,
+          "calls": 2,
+          "time_minutes": 12
+        },
+        "estimate": 15,
+        "cost": 15
+      },
+      {
+        "id": "w3-gallery",
+        "name": "Large photo gallery",
+        "goal_gap": "No gallery section.",
+        "expected_outcome": "Responsive gallery grid with 12 image slots, each with alt text, loading=lazy and a visible Photo placeholder label.",
+        "outputs": [
+          "#gallery section in site/index.html"
+        ],
+        "completion_check": "Count of gallery img or slot elements is at least 12; each has non-empty alt and loading=lazy; each is visibly marked as placeholder.",
+        "dependencies": [
+          "w1-shell-menu-visit"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 8
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "w4-farms",
+        "name": "Three farm stories",
+        "goal_gap": "No farm stories section.",
+        "expected_outcome": "Three separate farm entries, each with name, location, story text and photo slot, all as marked placeholders until facts are supplied.",
+        "outputs": [
+          "#farms section in site/index.html"
+        ],
+        "completion_check": "Exactly 3 farm entries, each containing name, location, story and photo slot elements; all values visibly marked placeholder; no invented farm facts.",
+        "dependencies": [
+          "w1-shell-menu-visit"
+        ],
+        "parts": [
+          "profiles"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 8
+        },
+        "estimate": 10,
+        "cost": 10
+      }
+    ],
+    "attempts_used": 2,
+    "registered": [
+      "Page shell, nav, menu, hours and location",
+      "Pickup pre-order builder",
+      "Large photo gallery",
+      "Three farm stories"
+    ]
+  }
+]

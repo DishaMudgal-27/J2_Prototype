@@ -1,0 +1,217 @@
+{
+  "metrics": {
+    "outcome": "Out of budget: 0 of 60 units left, less than the cheapest rate-card part (5), so no new workflow can be funded.",
+    "brief": "A one-page website for Brew Lab in Indiranagar, Bengaluru: menu with prices, opening hours, location, pre-order for pickup. Also add online payments, a blog with 5 articles, an Instagram feed, a photo gallery and lots of animations. Warm and modern, mobile-first.",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 1,
+    "ai_calls": 10,
+    "minutes": 3.6,
+    "budget": {
+      "total": 60,
+      "start": 60,
+      "cap": 120,
+      "raises": [],
+      "spent": 60,
+      "rate_card": true
+    },
+    "site_versions": 2,
+    "site_bytes": 23562,
+    "agents": {
+      "identity": {
+        "turns": 2,
+        "redirects": 1,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 3,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "builder": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 1,
+      "grants": 1,
+      "counters": 0,
+      "refuses": 0,
+      "refuses_converted_by_code": 0,
+      "parks": 0
+    },
+    "conflicts": {
+      "total": 0,
+      "settled_by_agents": 0,
+      "resolved_by_identity": 0,
+      "asked_requester": 0,
+      "open": 0,
+      "list": []
+    },
+    "requester_questions": {
+      "total": 0,
+      "by_kind": {}
+    },
+    "workflows": {
+      "registered": 2,
+      "done": 2,
+      "failed": 0,
+      "held_ever": 1,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "Core page: nav, menu, hours, location",
+          "agent_estimate": 35,
+          "charged": 35
+        },
+        {
+          "id": "W-2",
+          "name": "Pre-order for pickup with payment step",
+          "agent_estimate": 25,
+          "charged": 25
+        }
+      ]
+    },
+    "validator_refusals": 0,
+    "role_refusals": 0,
+    "pauses": 0,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 0,
+    "audits": [
+      {
+        "cycle": 1,
+        "version": 2,
+        "all_pass": false,
+        "pass": 6,
+        "warn": 2,
+        "fail": 4,
+        "mechanical": [
+          "phone overflow 34px",
+          "desktop overflow 21px"
+        ],
+        "mechanical_ran": true
+      }
+    ],
+    "open_inputs": [
+      "Menu items and prices",
+      "Opening hours for each day",
+      "Full street address and map location",
+      "Pickup time rules and slot length",
+      "Payment provider choice and its public key (or payment link)",
+      "Phone number and contact email",
+      "Instagram handle",
+      "Real photos for the gallery and hero",
+      "Blog topics, or real article text for the 5 articles",
+      "Brand colours, logo and any brand voice notes"
+    ]
+  },
+  "review": {
+    "verdict": "The department built an honest, in-scope core (6 of 12 done-when items pass, 2 pass with warnings, 4 fail per Audit [16]) with no conflicts, but it spent the whole 60 on two workflows, left no fix reserve, and ended with a phone-overflowing page and no route to more budget.",
+    "agents": {
+      "identity": {
+        "score": 3,
+        "note": "Strong start: [2] kept the full brief, set placeholders and flagged front-end-only payment. But it never ruled on cuts, although Adaptation said it would need to [4]. At [17] it correctly said 'not done', yet it did not ask Audit for the text of F-13/F-14 (a POLICY_CONCERN). Its message opens with @Adaptation but is written to the Requester, and its option list is not visible in the chat, so the evidence on what 'A' was is thin."
+      },
+      "adaptation": {
+        "score": 3,
+        "note": "Priced the full charter at 150 against 60 and said so plainly [4]. It then chose W-1 and W-2 at 35 and 25, which spends everything and leaves no room for the 8-unit fix Priority mentioned [5]. It gave no option that kept a reserve and made no request for a budget raise. It had one turn only, so it was not tested on audit rework."
+      },
+      "priority": {
+        "score": 4,
+        "note": "Priced at rate-card cost, stated the opportunity cost and the missing fix reserve [5], and checked each envelope correctly [9][12]. It stayed out of strategy. It said budget changes must come from Identity, but Identity's role file forbids increasing an envelope, so the route it named does not exist."
+      },
+      "coordination": {
+        "score": 4,
+        "note": "Correct dependency hold on W-2 with the exact missing condition and a stated rule [7], and it released the hold cleanly once W-1 was done [11]. It repeated budget warnings that belong to Priority, a small drift. Only two workflows existed, so scheduling was barely tested."
+      },
+      "audit": {
+        "score": 4,
+        "note": "Mechanical checks came first, and it named the failed items and the 34px and 21px overflow [16]. It routed to Identity, which is correct with no budget. The message is long, and the text of F-13 and F-14 never reached the chat, so Identity could not rule on a policy concern."
+      },
+      "builder": {
+        "score": 3,
+        "note": "Stayed inside each workflow's scope and reported honestly, including that W-1 had no pre-order [10][13]. The shipped v2 overflows horizontally at 360px and 1280px [15], which breaks the mobile-first standard. The Builder is told not to judge its own result, but nothing told it to avoid overflow."
+      }
+    },
+    "went_well": [
+      "No validator refusals, no role refusals, no invalid moves, no stuck turns. Only 9 AI calls and 3.6 minutes were used.",
+      "Estimates matched charges exactly (35/35 and 25/25), so the rate card was reliable in this run.",
+      "Missing facts became marked placeholders and nothing was invented [2][10]; Audit confirmed items 1-6 and 11 hold [16].",
+      "The code mechanical check [15] found real layout defects that no agent had seen. This is the most useful part of the test system here.",
+      "Audit ran independently and did not try to fix the work [16]."
+    ],
+    "problems": [
+      "Scope was 150 against a budget of 60. Cuts happened by running out of money, not by an Identity ruling, so blog, Instagram, gallery and animations were dropped without a recorded decision [4][17].",
+      "Zero fix reserve. The overflow defect cannot be repaired because the fix costs 8 and 0 remain [5][19].",
+      "Nobody asked for more budget. The run had a cap of 120 and no raises. Priority pointed to Identity [5], Identity cannot raise envelopes, and the Requester was never asked.",
+      "Identity's hand-off to the Requester was redirected to Adaptation [17][18], although team.md allows Identity to Requester. The run then ended at [19] with no decision put to the Requester.",
+      "Audit's chat message gave only a tally for F-13 and F-14 [16]. Identity said it had not seen them [17], so a POLICY_CONCERN went unruled.",
+      "Audit ran only after all money was spent, so the overflow was found when nothing could be done about it [14][15]."
+    ],
+    "learnings": [
+      "Test next with budget at or near 150, or a run where the raise path is forced. Right now no one owns 'ask the Requester for more budget'. Evidence: cap 120, raises empty, [5] and [17]. Decide whether Identity or Priority asks, via Identity.",
+      "Make scope cuts an Identity ruling at J2.d (before any build), recorded in the charter's dropped_from_brief, which is empty here. Evidence: [4] asked for a ruling and none came.",
+      "Require a reserve (about 8, the fix price in [5]) in Priority's grants, or have Priority COUNTER when a plan leaves 0. Keep this as a test: does the reserve actually get used for a fix?",
+      "Run the code mechanical check after each build, not only when the queue is empty. W-1 would have shown any overflow while 25 units remained. The extra cost is code only, but this is a hypothesis, not measured.",
+      "Add 'no horizontal overflow at 360px and 1280px' to the Builder's file or the charter standards. Evidence: [15]. Whether the cause is W-1 or W-2 is not known from this log.",
+      "Test system: check the Identity to Requester redirect at [18] against team.md, and pass the full text of every Audit finding into the chat or into Identity's context.",
+      "Evidence is thin: one cycle, one proposal, no counters, refusals, conflicts or Requester questions. Negotiation, Identity conflict handling and rework were not exercised, so do not draw conclusions about them."
+    ]
+  },
+  "events": [
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-2: W-1 must be done, so brewlab.html exists with the page shell. W-2 adds the pre-order section to that file.",
+      "msg": 7,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "mechanical",
+      "detail": "phone overflow 34px",
+      "msg": 15,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "mechanical",
+      "detail": "desktop overflow 21px",
+      "msg": 15,
+      "cycle": 1
+    },
+    {
+      "agent": "identity",
+      "type": "redirect",
+      "detail": "picked Requester (you), routed to Adaptation",
+      "msg": 17,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "out_of_budget",
+      "detail": "0 left, cheapest part 5",
+      "msg": 19,
+      "cycle": 1
+    }
+  ],
+  "made": "2026-10-06 15:56:52"
+}

@@ -1,0 +1,208 @@
+{
+  "metrics": {
+    "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): Menu items and prices; Street address and map location; Phone number or other contact; Where pre-orders should go (for example WhatsApp, email or an ordering service) and whether payment is taken online; Pickup rules (earliest slot, lead time); Logo, photos and brand colours if any; Language (English only assumed unless told otherwise).",
+    "brief": "A website for my cafe.",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 2,
+    "ai_calls": 21,
+    "minutes": 84.1,
+    "budget": {
+      "total": 100,
+      "start": 100,
+      "cap": 200,
+      "raises": [],
+      "spent": 70,
+      "rate_card": true
+    },
+    "site_versions": 2,
+    "site_bytes": 24341,
+    "agents": {
+      "identity": {
+        "turns": 8,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 5,
+        "redirects": 1,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 3,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "builder": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 1,
+      "grants": 1,
+      "counters": 0,
+      "refuses": 0,
+      "refuses_converted_by_code": 0,
+      "parks": 0
+    },
+    "conflicts": {
+      "total": 0,
+      "settled_by_agents": 0,
+      "resolved_by_identity": 0,
+      "asked_requester": 0,
+      "open": 0,
+      "list": []
+    },
+    "requester_questions": {
+      "total": 2,
+      "by_kind": {
+        "info": 2
+      }
+    },
+    "workflows": {
+      "registered": 2,
+      "done": 2,
+      "failed": 0,
+      "held_ever": 1,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "Brew Lab page shell: header, menu, hours, location, styling",
+          "agent_estimate": 45,
+          "charged": 45
+        },
+        {
+          "id": "W-2",
+          "name": "Pre-order form with running total",
+          "agent_estimate": 25,
+          "charged": 25
+        }
+      ]
+    },
+    "validator_refusals": 0,
+    "role_refusals": 0,
+    "pauses": 2,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 0,
+    "audits": [
+      {
+        "cycle": 1,
+        "version": 2,
+        "all_pass": true,
+        "pass": 7,
+        "warn": 2,
+        "fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      }
+    ],
+    "open_inputs": [
+      "Menu items and prices",
+      "Street address and map location",
+      "Phone number or other contact",
+      "Where pre-orders should go (for example WhatsApp, email or an ordering service) and whether payment is taken online",
+      "Pickup rules (earliest slot, lead time)",
+      "Logo, photos and brand colours if any",
+      "Language (English only assumed unless told otherwise)"
+    ]
+  },
+  "review": {
+    "verdict": "The department built a working one-file Brew Lab site in two clean runs for 70 of 100 budget, then spent about 8 of its 21 turns on a Vercel question that changed nothing.",
+    "agents": {
+      "identity": {
+        "score": 4,
+        "note": "Handled the thin brief well: two pauses, then a charter with 9 checkable items and placeholder rules [2][5][8]. It declared done in [23] while admitting Indiranagar is not in the header bar, and it ruled on the same out-of-scope point three times [27][29][31]. In [31] it answered a policy question that [30] never stated."
+      },
+      "adaptation": {
+        "score": 3,
+        "note": "Good first proposal: two workflows, costed, with a stated reserve [10]. Raising Vercel as a policy question to Identity was the right route [26]. It then announced a stand-down four times [26][28][30][32], promised 'one policy question' in [30] without asking it, and triggered a code redirect at [32]."
+      },
+      "priority": {
+        "score": 4,
+        "note": "Priced both workflows against the rate card and kept a 30 reserve with a named stop-loss [11]. Envelope checks were short and correct [15][18]. In [11] it said which workflow runs first, which is Coordination's job under the role file. Minor, as Coordination reached the same order [13]."
+      },
+      "coordination": {
+        "score": 5,
+        "note": "Stated its scheduling rule, held W-2 with the exact missing condition and the file lock, and released it once W-1 passed [13][17]. It stayed within its role."
+      },
+      "audit": {
+        "score": 4,
+        "note": "Used the code mechanical check (360px and 1280px overflow, JS errors, links) plus a per-item verdict [21][22]. It passed item 1 with a warning although the item literally says 'header' and Indiranagar sits in the hero. It ran once only, and its report does not cite evidence for the 'pickup request, not confirmed' rule."
+      },
+      "builder": {
+        "score": 4,
+        "note": "Two in-scope runs, 24 KB against the 60 KB limit, no JS errors, no overflow [16][19][21]. It put Indiranagar in the hero, not the header, so item 1 was only partly met."
+      }
+    },
+    "went_well": [
+      "Thin brief to a valid charter in 3 Requester messages, with two info pauses and no wasted build [3][6][9].",
+      "Hold and dependency handling worked: W-2 was held until W-1 passed, then released, and the 25 was refunded and re-charged at run time [13][14][17].",
+      "Both workflows were completed with 0 failures, 0 validator refusals and 0 role refusals (metrics).",
+      "Code-run mechanical check gave real evidence, not agent opinion [21].",
+      "The no-fabrication rule held: Identity [23] and Audit [22] report unknowns as marked placeholders, and the pre-order is labelled a pickup request. This is as reported by the agents; I did not see the file."
+    ],
+    "problems": [
+      "Done-when item 1 asks for Indiranagar in the header. Audit logged a warning [22] and Identity declared done anyway [23]. 30 of budget was in reserve and one fix costs 8, so a fix was affordable.",
+      "Post-done Vercel exchange: [25] to [36] is 11 messages. Adaptation had 4 turns and Identity 4 turns (counted from the chat) that produced no work and no site change.",
+      "[30] says 'One policy question' and never asks it. [31] then answers an unstated question.",
+      "Done was declared with all 7 open inputs still empty, so 'goal reached' means a placeholder skeleton. This is allowed by the charter, but the Requester cannot publish it.",
+      "Priority said which workflow runs first [11], which belongs to Coordination."
+    ],
+    "learnings": [
+      "Test gap: counters 0, refuses 0, conflicts 0, validator refusals 0, audit failures 0. A 100 budget against a 70 estimate created no tension, so negotiation, conflict resolution and rework paths are untested. Next run: use a tighter budget (for example 60) or a brief that forces a trade-off.",
+      "Test gap: the estimate equalled the charge for both workflows (45 and 25), because the rate card sets the price. This run gives no evidence on whether agents estimate well.",
+      "Design: after done, a Requester question reached Adaptation first and cost 4 Identity-Adaptation round trips. Route post-done Requester questions to Identity first, and let Identity answer directly when the charter already decides. Evidence: [26] to [32] and the redirect at [32].",
+      "Design: allow Adaptation a 'no proposal' reply that goes back to Identity once, so a stand-down is a single message. Evidence: four stand-down messages and one code redirect.",
+      "Test system: add literal-string checks for each done-when item to the code check (for example 'Indiranagar' inside the header element). That would have turned the item 1 warning into a code-counted fail instead of an Audit judgement call.",
+      "Design: decide whether 'done' with unfilled open inputs should end the run or send one decision-ready request for them. Today it ends [24][36]. Test both on the same brief and compare how usable the output is.",
+      "Keep: the thin-brief start, the info pause, the Coordination HOLD with a named condition, and the code mechanical check.",
+      "Evidence is thin on Audit quality (one audit, all pass) and on site content (I did not see the HTML), so the Builder and Audit scores rest on their own reports and the code check."
+    ]
+  },
+  "events": [
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "info: 4 question(s) for the Requester",
+      "msg": 3,
+      "cycle": 0,
+      "pause": "info"
+    },
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "info: 3 question(s) for the Requester",
+      "msg": 6,
+      "cycle": 0,
+      "pause": "info"
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-2: W-1 (W1-site-shell) must be done and pass its completion check, which also releases the lock on site/index.html",
+      "msg": 13,
+      "cycle": 1
+    },
+    {
+      "agent": "adaptation",
+      "type": "redirect",
+      "detail": "picked Identity, routed to Priority",
+      "msg": 32,
+      "cycle": 2
+    }
+  ],
+  "made": "2026-10-07 12:27:13"
+}

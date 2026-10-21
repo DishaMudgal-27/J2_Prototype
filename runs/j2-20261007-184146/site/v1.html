@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Thread &amp; Loom</title>
+<!-- J2:style head start (owner W-1) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Nunito+Sans:wght@400;600;700&amp;display=swap"><style>:root{--j2-primary:#7A3E22;--j2-secondary:#4F5B3A;--j2-accent:#C58B2B;--j2-background:#FAF5EC;--j2-surface:#F1E6D3;--j2-text:#2E2A25;--j2-muted:#6B6256;--j2-font-heading:'Cormorant Garamond', Georgia, serif;--j2-font-body:'Nunito Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:12px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#7A3E22;color:#FFFFFF;border:2px solid #7A3E22;min-height:44px;padding:10px 22px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-btn-secondary{display:inline-block;background:transparent;color:#7A3E22;border:2px solid #7A3E22;min-height:44px;padding:10px 22px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-card{background:#FFFFFF;border:1px solid #E3D6BF;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(46,42,37,0.08)}</style>
+<!-- J2:style head end -->
+<!-- J2:W-1 head start (owner W-1) -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Thread & Loom, a handloom clothing boutique at 18 FC Road, Shivajinagar, Pune. Handloom kurtas, sarees, cotton shirts and dupattas.">
+<meta name="theme-color" content="#7A3E22">
+<title>Thread & Loom | Handloom clothing boutique, Pune</title>
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;max-width:100%;overflow-x:clip}
+body{margin:0;max-width:100%;overflow-x:clip;background:var(--j2-background,#FAF5EC);color:var(--j2-text,#2E2A25);font-family:var(--j2-font-body,'Nunito Sans',system-ui,sans-serif);line-height:1.6;font-size:16px}
+img,svg,video,iframe,table{max-width:100%}
+h1,h2,h3,h4{font-family:var(--j2-font-heading,'Cormorant Garamond',Georgia,serif);line-height:1.15;overflow-wrap:break-word}
+p,li,a,td,th{overflow-wrap:break-word}
+section[id]{scroll-margin-top:76px}
+a{color:var(--j2-primary,#7A3E22)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--j2-accent,#C58B2B);outline-offset:2px}
+</style>
+<!-- J2:W-1 head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<style>
+.tl-header{position:sticky;top:0;z-index:50;background:var(--j2-background,#FAF5EC);border-bottom:1px solid #E3D6BF}
+.tl-header-inner{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:1200px;margin:0 auto;padding:6px 16px;min-height:60px;position:relative}
+.tl-brand{font-family:var(--j2-font-heading,'Cormorant Garamond',Georgia,serif);font-size:1.6rem;font-weight:700;color:var(--j2-primary,#7A3E22);text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
+.tl-toggle{min-height:44px;min-width:44px;padding:0 14px;background:transparent;border:2px solid var(--j2-primary,#7A3E22);color:var(--j2-primary,#7A3E22);border-radius:var(--j2-radius,12px);font:inherit;font-weight:700;cursor:pointer}
+.tl-nav{display:none;position:absolute;left:0;right:0;top:100%;background:var(--j2-background,#FAF5EC);border-bottom:1px solid #E3D6BF;box-shadow:0 8px 16px rgba(46,42,37,0.08)}
+.tl-nav.tl-open{display:block}
+.tl-nav ul{list-style:none;margin:0;padding:8px 16px 16px}
+.tl-nav a{display:flex;align-items:center;min-height:44px;padding:0 4px;color:var(--j2-text,#2E2A25);text-decoration:none;font-weight:600;border-bottom:1px solid #EADFCB}
+.tl-nav a:hover{color:var(--j2-primary,#7A3E22)}
+.tl-hero{background-color:var(--j2-surface,#F1E6D3);background-image:repeating-linear-gradient(90deg,rgba(122,62,34,0.06) 0 2px,transparent 2px 14px),repeating-linear-gradient(0deg,rgba(79,91,58,0.05) 0 2px,transparent 2px 14px);border-bottom:1px solid #E3D6BF}
+.tl-hero-inner{max-width:1200px;margin:0 auto;padding:56px 20px 64px}
+.tl-eyebrow{margin:0 0 8px;color:var(--j2-secondary,#4F5B3A);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.85rem}
+.tl-hero h1{margin:0 0 16px;font-size:clamp(2.4rem,9vw,4.2rem);color:var(--j2-primary,#7A3E22)}
+.tl-lead{margin:0 0 24px;max-width:36rem;font-size:1.1rem}
+.tl-actions{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:28px}
+.tl-facts{list-style:none;margin:0;padding:0;display:grid;gap:6px;color:var(--j2-text,#2E2A25);font-size:.98rem}
+.tl-facts strong{color:var(--j2-secondary,#4F5B3A)}
+.tl-footer{background:var(--j2-secondary,#4F5B3A);color:#FFFFFF;padding:32px 20px}
+.tl-footer-inner{max-width:1200px;margin:0 auto;display:grid;gap:8px}
+.tl-footer p{margin:0}
+.tl-footer .tl-fname{font-family:var(--j2-font-heading,'Cormorant Garamond',Georgia,serif);font-size:1.5rem;font-weight:700}
+.tl-footer a{color:#FFFFFF}
+@media (min-width:900px){
+.tl-toggle{display:none}
+.tl-nav{display:block;position:static;background:transparent;border:0;box-shadow:none}
+.tl-nav ul{display:flex;gap:18px;padding:0}
+.tl-nav a{border:0;font-size:.93rem;padding:0 2px}
+.tl-hero-inner{padding:88px 24px 96px}
+}
+</style>
+
+<header class="tl-header" id="top">
+  <div class="tl-header-inner">
+    <a class="tl-brand" href="#home">Thread &amp; Loom</a>
+    <button class="tl-toggle" id="tl-toggle" type="button" aria-expanded="false" aria-controls="tl-nav">Menu</button>
+    <nav class="tl-nav" id="tl-nav" aria-label="Main">
+      <ul>
+        <li><a href="#shop">Shop</a></li>
+        <li><a href="#new-arrivals">New arrivals</a></li>
+        <li><a href="#lookbook">Lookbook</a></li>
+        <li><a href="#size-guide">Size guide</a></li>
+        <li><a href="#store">Visit us</a></li>
+        <li><a href="#orders-returns">Orders &amp; returns</a></li>
+        <li><a href="#reviews">Reviews</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<section class="tl-hero" id="home" aria-label="Welcome">
+  <div class="tl-hero-inner">
+    <p class="tl-eyebrow">Handloom boutique, Pune</p>
+    <h1>Thread &amp; Loom</h1>
+    <p class="tl-lead">Handloom kurtas, sarees, cotton shirts and dupattas. Browse the collection and order on WhatsApp.</p>
+    <div class="tl-actions">
+      <a class="j2-btn" href="#shop">Shop the collection</a>
+      <a class="j2-btn j2-btn-secondary" href="https://wa.me/918822033445" target="_blank" rel="noopener">Order on WhatsApp</a>
+    </div>
+    <ul class="tl-facts">
+      <li><strong>Visit:</strong> 18 FC Road, Shivajinagar, Pune 411005</li>
+      <li><strong>Open:</strong> Tuesday to Sunday, 11am to 9pm. Closed on Monday.</li>
+    </ul>
+  </div>
+</section>
+
+<footer class="tl-footer" id="site-footer">
+  <div class="tl-footer-inner">
+    <p class="tl-fname">Thread &amp; Loom</p>
+    <p>18 FC Road, Shivajinagar, Pune 411005</p>
+    <p>Tuesday to Sunday, 11am to 9pm. Closed on Monday.</p>
+    <p>Instagram: <a href="https://www.instagram.com/threadandloom.pune" target="_blank" rel="noopener">@threadandloom.pune</a></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var toggle = document.getElementById('tl-toggle');
+  var nav = document.getElementById('tl-nav');
+  if (toggle && nav) {
+    toggle.addEventListener('click', function () {
+      var open = nav.classList.toggle('tl-open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    nav.addEventListener('click', function (e) {
+      if (e.target && e.target.tagName === 'A') {
+        nav.classList.remove('tl-open');
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+  var footer = document.getElementById('site-footer');
+  function moveFooter() {
+    if (footer && document.body && footer.parentNode) { document.body.appendChild(footer); }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', moveFooter);
+  } else {
+    moveFooter();
+  }
+  window.addEventListener('load', moveFooter);
+})();
+</script>
+<!-- J2:W-1 end -->
+</body>
+</html>

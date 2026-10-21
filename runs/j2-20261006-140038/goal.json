@@ -1,0 +1,39 @@
+{
+  "statement": "Build a one-page, mobile-first website for Brew Lab, Indiranagar, Bengaluru, showing the menu with prices, opening hours, location, a pre-order for pickup, and a video of coffee being brewed that loads only when a visitor taps it.",
+  "site_name": "Brew Lab",
+  "audience": "Local coffee drinkers in and around Indiranagar, Bengaluru, mostly on phones, who want to check the menu, hours and location, watch the brew, and order ahead for pickup.",
+  "standards": [
+    "Fast on a phone: speed matters more than visuals.",
+    "Plain HTML, CSS and JavaScript in one file, no build step.",
+    "Readable and usable on a small screen without zooming.",
+    "Any fact not supplied by the Requester appears as a clearly marked placeholder, never invented."
+  ],
+  "rules": [
+    "Speed outranks visuals wherever the two conflict.",
+    "Nothing heavy loads on first view: no autoplay media, no large assets, no video data fetched until a visitor taps play.",
+    "The brew video is kept in scope only as a tap-to-play element (full-screen on play is allowed), because an autoplaying full-screen background would break the speed rule.",
+    "No invented prices, hours, address, phone numbers, photos or video files."
+  ],
+  "done_when": [
+    "The site is a single HTML file with inline CSS and JS, with no build step; any CDN library is optional and not needed for first render.",
+    "The file contains a viewport meta tag and a layout that adapts to phone widths.",
+    "The file has a menu section listing items with a price shown for every item (real or marked placeholder).",
+    "The file has an hours section covering the days of the week (real or marked placeholder).",
+    "The file has a location section naming Indiranagar, Bengaluru, with an address and a map or directions link (real or marked placeholder).",
+    "The file has a pre-order for pickup section where a visitor can pick items, enter a name and a pickup time, and send the order to a stated destination (real or marked placeholder).",
+    "The file has a brew video section with a play control and a video element that has preload=\"none\", no autoplay attribute, and no source URL set until the play control is tapped; the video source is a marked placeholder.",
+    "The file loads no video and starts no autoplay media on page load.",
+    "Any images are lazy-loaded and sized; no external fonts or scripts block first render.",
+    "Every placeholder is visibly marked as a placeholder in the page text."
+  ],
+  "open_inputs": [
+    "Menu items and prices",
+    "Opening hours for each day",
+    "Street address and map link",
+    "Pre-order destination (for example a WhatsApp or phone number) and pickup time rules",
+    "Contact phone number",
+    "Brew video file or link (short and compressed), and a poster image if wanted",
+    "Photos or logo, if any"
+  ],
+  "dropped_from_brief": []
+}

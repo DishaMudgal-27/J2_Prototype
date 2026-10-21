@@ -1,0 +1,153 @@
+{
+  "run": "20261006-154229",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "model": "sonnet",
+  "mock": false,
+  "brief": "Brew Lab, Indiranagar, Bengaluru. One-page site: menu with prices, hours, location, pre-order. The farm section should show a map of our three farms, but we'll send the farm coordinates next week. Don't use any photos, but it must still feel warm.",
+  "change_requests": [],
+  "status": "done",
+  "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): Menu items and their prices; Opening hours; Street address and phone number; Where pre-orders are sent (phone, WhatsApp, email or other); Coordinates and names of the three farms (promised next week).",
+  "budget": {
+    "start": 100,
+    "granted": 100,
+    "used": 85,
+    "raises": []
+  },
+  "ai_calls": 14,
+  "cycles": 1,
+  "questions_to_user": [],
+  "conflicts": [],
+  "validator_rejections": [],
+  "holds": [],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 4,
+      "all_pass": true,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-11",
+          "item": 11,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    }
+  ],
+  "site_versions": 4,
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The file is a single HTML file with inline CSS and JavaScript, and needs no build step.",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "The page shows the name Brew Lab and Indiranagar, Bengaluru.",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "A menu section lists items with a price slot for each; any price not supplied is marked as a placeholder.",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "An hours section is present; any hours not supplied are marked as a placeholder.",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "A location section names Indiranagar, Bengaluru and includes a marked placeholder for the street address.",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "A pre-order section has a form with fields for name, item, quantity and pickup time, and a marked placeholder for where orders are sent.",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "A farm section contains a map container with three farm entries in one labelled data block, each marked as awaiting coordinates, and no invented coordinates.",
+      "pass": true
+    },
+    {
+      "item": 8,
+      "criterion": "The file contains no img elements and no photo file or photo URL references.",
+      "pass": true
+    },
+    {
+      "item": 9,
+      "criterion": "A warm palette is defined (for example as CSS variables) and used across the page, with at least one non-photo decorative element such as SVG or CSS art.",
+      "pass": true
+    },
+    {
+      "item": 10,
+      "criterion": "The page includes a viewport meta tag and a responsive layout rule for narrow screens.",
+      "pass": true
+    },
+    {
+      "item": 11,
+      "criterion": "Every placeholder is visibly marked on the page and listed in a single comment block in the file.",
+      "pass": true
+    }
+  ],
+  "route_check_violations": [
+    {
+      "agent": "builder",
+      "detail": "picked no one, routed to Coordination",
+      "msg": 12,
+      "cycle": 1
+    }
+  ]
+}

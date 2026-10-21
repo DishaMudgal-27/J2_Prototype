@@ -1,0 +1,461 @@
+{
+  "run": "20261015-185040",
+  "output_type": "website",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "sections": [
+    "style",
+    "W-1",
+    "W-2",
+    "W-3",
+    "W-4",
+    "W-5"
+  ],
+  "conditions": {
+    "met": 8,
+    "total": 8,
+    "warnings": 0,
+    "list": [
+      {
+        "id": "N1",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "met": true,
+        "evidence": "all 8 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "met": true,
+        "evidence": "all 14 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "met": true,
+        "evidence": "every number, phone and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "N7",
+        "met": true,
+        "evidence": "1 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "met": true,
+        "evidence": "the nav reaches all 5 section(s); the hero has 1 main action(s)"
+      }
+    ]
+  },
+  "necessary_conditions": {
+    "met": 8,
+    "total": 8,
+    "warnings": 0,
+    "list": [
+      {
+        "id": "N1",
+        "text": "The page opens (it parses, tags balanced)",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "text": "No JavaScript errors on load",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "text": "No horizontal overflow at 360px and 1280px",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "text": "Every in-page link resolves; WhatsApp (wa.me) and tel: links are well formed",
+        "met": true,
+        "evidence": "all 8 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "text": "Every charter fact appears exactly, and nothing is \"to be confirmed\"",
+        "met": true,
+        "evidence": "all 14 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "text": "No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers",
+        "met": true,
+        "evidence": "every number, phone and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "N7",
+        "text": "Every form has a submit control and a destination (action or mailto)",
+        "met": true,
+        "evidence": "1 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "text": "A nav reaches every section, and the hero has one obvious main action",
+        "met": true,
+        "evidence": "the nav reaches all 5 section(s); the hero has 1 main action(s)"
+      }
+    ]
+  },
+  "force_audit_fail": null,
+  "test_lessons": false,
+  "model": "sonnet",
+  "mock": false,
+  "brief": "A one-page website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru. Visitors see the menu with prices, the opening hours and where to find the shop, and they can pre-order a coffee for pickup. Users: coffee lovers and office staff nearby. Problem: people cannot see the menu or order ahead. Must-have: menu with prices, pre-order form, map or address, opening hours. Constraints: one page only, works on phones, no payment. Success: 30 pre-orders per week.",
+  "change_requests": [],
+  "status": "done",
+  "outcome": "Done: the site is workable. Every done-when item passes with Audit's evidence and the render check is clean.",
+  "budget": {
+    "start": 100,
+    "granted": 100,
+    "used": 70,
+    "raises": []
+  },
+  "ai_calls": 20,
+  "cycles": 1,
+  "links": {
+    "identity->requester": 3,
+    "identity->adaptation": 1,
+    "validator->adaptation": 1,
+    "adaptation->priority": 1,
+    "validator->coordination": 1,
+    "coordination->priority": 5,
+    "priority->W": 5,
+    "W->coordination": 5,
+    "adaptation->coordination": 1,
+    "audit->identity": 1
+  },
+  "verification": {
+    "passed": 5,
+    "failed": 0,
+    "escalated": 0,
+    "could_not_run": 0,
+    "checks_run": 37
+  },
+  "identity_to_requester_decisions": 0,
+  "identity_to_requester_facts": 2,
+  "priority_rulings": {
+    "grant": 1,
+    "counter": 0,
+    "refuse": 0
+  },
+  "questions_to_user": [
+    {
+      "kind": "info",
+      "asked": [
+        "Please send these: What items do you sell, and what is the price of each one (in rupees); Which days and what times is the shop open; What is the full street address of the shop in Indiranagar? Do you also want a phone number or email shown; When someone pre-orders, how should their order reach you."
+      ],
+      "answer": "@Requester To build the page I need a few real details from you. Please send them as exact as you want them shown. Please send these: What items do you sell, and what is the price of each one (in rupees); Which days and what times is the shop open; What is the full street address of the shop in Indiranagar? Do you also want a phone number or email shown; When someone pre-orders, how should their order reach you."
+    },
+    {
+      "kind": "info",
+      "asked": [
+        "Please send these: What drinks and food do you sell, and what is the price of each in rupees? For example: Cappuccino, 180; Which days is the shop open, and from what time to what time each day; What is the full street address of the shop in Indiranagar? Do you also want a phone number or email shown on the page? If yes, please type it; When someone pre-orders, how should their order reach you."
+      ],
+      "answer": "Items and prices (rupees): Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120.\nOpen: Monday to Saturday 7:30 am to 9:00 pm, Sunday 8:30 am to 6:00 pm.\nAddress: 12, 100 Feet Road, Indiranagar, Bengaluru 560038.\nContact: show phone +91 98450 12345 and email hello@brewlab.example.\nPre-orders: the customer enters name, phone, items and pickup time, and the order is emailed to hello@brewlab.example. No online payment, they pay at pickup."
+    }
+  ],
+  "conflicts": [],
+  "validator_rejections": [
+    {
+      "cycle": 1,
+      "workflow": "Header, nav and location with map link",
+      "reason": "work atom 1: check 5 says 'Nav and location controls are tappable at 360px' but expects 44; work atom 1: check 6 says 'Location controls are tappable at 360px' but expects 44"
+    },
+    {
+      "cycle": 1,
+      "workflow": "Menu with prices",
+      "reason": "work atom 1: check 4 says 'Seven cards use j2-card' but expects 7"
+    },
+    {
+      "cycle": 1,
+      "workflow": "Opening hours and contact details",
+      "reason": "work atom 1: check 6 says 'Contact links are tappable at 360px' but expects 44"
+    },
+    {
+      "cycle": 1,
+      "workflow": "Pre-order form",
+      "reason": "work atom 1: expected output item 9 says 'Form controls are tappable at 360px' but expects 44; work atom 1: expected output item 3 element-count targets ['#po-name', '#po-phone', '#po-items', '#po-time']: only a section id or class name, never a charter fact, an email or a generic string (use facts-present for those)"
+    },
+    {
+      "cycle": 1,
+      "workflow": "Mobile setup, overflow guard and footer",
+      "reason": "work atom 1: expected output item 6 says 'Footer link is tappable at 360px' but expects 44"
+    }
+  ],
+  "holds": [
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-5: W-1, W-2, W-3 and W-4 must be done first (hero-location, menu, hours-contact, preorder)"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-5: menu (W-2), hours-contact (W-3) and preorder (W-4) must be done first; hero-location (W-1) is already done"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-5: hours-contact (W-3) and preorder (W-4) must be done first; hero-location (W-1) and menu (W-2) are already done"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-5: preorder (W-4) must be done first; hero-location (W-1), menu (W-2) and hours-contact (W-3) are already done"
+    }
+  ],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 6,
+      "all_pass": true,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-1",
+          "item": "R-1",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "R-2",
+          "item": "R-2",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-3",
+          "item": "R-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-4",
+          "item": "R-4",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-5",
+          "item": "R-5",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-6",
+          "item": "R-6",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-7",
+          "item": "R-7",
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-10",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    }
+  ],
+  "site_versions": 6,
+  "workable": [],
+  "to_be_confirmed": [],
+  "dropped_by_requester": [],
+  "workflow_agents": [
+    {
+      "id": "W-1",
+      "agent": "W-1 Builder",
+      "section": "W-1",
+      "revises": null,
+      "status": "done",
+      "calls": 2,
+      "retries": 0
+    },
+    {
+      "id": "W-2",
+      "agent": "W-2 Builder",
+      "section": "W-2",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-3",
+      "agent": "W-3 Builder",
+      "section": "W-3",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-4",
+      "agent": "W-4 Builder",
+      "section": "W-4",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-5",
+      "agent": "W-5 Builder",
+      "section": "W-5",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    }
+  ],
+  "limits_hit": [],
+  "lessons": {
+    "memory": false,
+    "saved": [],
+    "used": []
+  },
+  "playbooks": {
+    "saved": null,
+    "used": []
+  },
+  "business_type": "coffee shop",
+  "style_guide": true,
+  "rubric": [
+    {
+      "id": "R-1",
+      "pass": true,
+      "verdict": "PASS_WITH_WARNING"
+    },
+    {
+      "id": "R-2",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-3",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-4",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-5",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-6",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-7",
+      "pass": true,
+      "verdict": "PASS"
+    }
+  ],
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "The menu lists all seven items with their prices in rupees: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "The opening hours show Monday to Saturday 7:30 am to 9:00 pm and Sunday 8:30 am to 6:00 pm",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "The phone +91 98450 12345 and the email hello@brewlab.example are shown",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "A pre-order form has name, phone, items and pickup time fields, sends the order to hello@brewlab.example, works when submitted, and states that payment is at pickup with no payment fields",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "A map or map link for the shop location is on the page next to the address",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "The file is a single page with a mobile viewport setting and has no horizontal overflow at 360px and 1280px",
+      "pass": true
+    },
+    {
+      "item": 8,
+      "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+      "pass": true
+    }
+  ],
+  "route_check_violations": []
+}

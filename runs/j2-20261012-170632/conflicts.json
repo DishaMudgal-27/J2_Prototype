@@ -1,0 +1,1110 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 1,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 1",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 8,
+        "text": "@Priority Seven workflows for the core items: hero, schedule, fees, form, venue, contact and base styling. They total 70 on the rate card against 40 left, so it won't all fit. Items 3, 6 and 10 are left out. I did not drop any of the protected items myself; please counter with the order you want them funded in.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 9,
+        "text": "@Adaptation COUNTER: I fund 40 of 70. Funded: hero (10), schedule (10), register (15), styles (5). Cut for now: fees (10), venue (10), contact (10), which need 30 more. Rationale: registration is the visitors' main action and cannot be cheaper, and the schedule feeds it. Hero is the only place the name and dates appear, and styles is the only place the 360px/1280px and link checks are guaranteed. The three cut items are independent sections and can be added later without rework. Please park them and change the styles nav so it links only to #hero, #schedule and #register, otherwise it breaks the in-page link rule. Your cost per item matches the rate-card minimums, so I have no complaint about the pricing.",
+        "position": "COUNTER: Hero and event identity (10), Day by day schedule (10), Registration form (15), Base styling and page health (5)",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 10,
+        "text": "@Priority Accepted. I fund hero, schedule, register and styles for 40, and park fees, venue and contact (30 more). The styles nav already links only to #hero, #schedule and #register, so the in-page link rule holds. Trade-off: after this cycle items 3, 6, 7, 8 and 10 are still open, and the site is not workable until they are funded in a later cycle.",
+        "position": "accepts Priority's offer",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "priority",
+    "outcome": "Adaptation accepted Priority's COUNTER: Hero and event identity (10), Day by day schedule (10), Registration form (15), Base styling and page health (5) goes to the validator.",
+    "priority_final": [
+      {
+        "id": "hero",
+        "name": "Hero and event identity",
+        "goal_gap": "Page has no name, college or dates",
+        "expected_outcome": "Hero section showing the fest name, college, city and dates",
+        "outputs": [
+          "section #hero"
+        ],
+        "completion_check": "Hero contains the name, college and dates",
+        "dependencies": [],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          1
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "A hero section shows Spark 2026, Northfield College of Engineering, Pune and the dates.",
+            "constraints": [
+              "Single file, plain HTML/CSS/JS",
+              "No invented facts"
+            ],
+            "context": [
+              "charter item 1"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-hero",
+              "steps": "Create section id hero with class hero-banner containing the h1, college line, dates and a class img-placeholder block."
+            },
+            "verification": [
+              {
+                "text": "Name, college and dates appear",
+                "type": "facts-present",
+                "target": [
+                  "Spark 2026",
+                  "Northfield College of Engineering",
+                  "14 to 16 February 2027"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Hero section exists once",
+                "type": "element-count",
+                "target": "#hero",
+                "expect": 1
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 3,
+          "time_limit_minutes": 10,
+          "retry_limit": 1,
+          "stop_loss": "Stop if the same verification fails twice in a row"
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "schedule",
+        "name": "Day by day schedule",
+        "goal_gap": "No schedule",
+        "expected_outcome": "Schedule section with three day cards listing all 8 events and times",
+        "outputs": [
+          "section #schedule"
+        ],
+        "completion_check": "3 day cards and all times present",
+        "dependencies": [],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          2
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "A schedule section shows Day 1, Day 2 and Day 3 with each event and its time, and no room or hall.",
+            "constraints": [
+              "No room or hall shown",
+              "Day 1 is 14 Feb, Day 2 is 15 Feb, Day 3 is 16 Feb 2027"
+            ],
+            "context": [
+              "charter item 2"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-schedule",
+              "steps": "Create section id schedule with three elements of class day-card, each listing events with times."
+            },
+            "verification": [
+              {
+                "text": "Three day cards",
+                "type": "element-count",
+                "target": ".day-card",
+                "expect": 3
+              },
+              {
+                "text": "All events and times appear",
+                "type": "facts-present",
+                "target": [
+                  "Code Sprint",
+                  "10am to 1pm",
+                  "Line Follower",
+                  "2pm to 5pm",
+                  "AI in Daily Life",
+                  "5:30pm to 6:30pm",
+                  "Bug Hunt",
+                  "11am to 1pm",
+                  "Poster Jam",
+                  "2pm to 4pm",
+                  "Drone Dash",
+                  "UI Duel",
+                  "Startup Stories"
+                ],
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 3,
+          "time_limit_minutes": 10,
+          "retry_limit": 1,
+          "stop_loss": "Stop if the same verification fails twice in a row"
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "register",
+        "name": "Registration form",
+        "goal_gap": "No way to register",
+        "expected_outcome": "Form with name, email, college and an 8-event dropdown that sends to spark2026@example.com",
+        "outputs": [
+          "section #register"
+        ],
+        "completion_check": "Form has submit, 8 options, and targets the email",
+        "dependencies": [],
+        "parts": [
+          "form"
+        ],
+        "covers": [
+          5
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 15,
+          "calls": 4,
+          "time_minutes": 15
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "A registration form asks for name, email, college and an event, and submitting sends the details to spark2026@example.com.",
+            "constraints": [
+              "Dropdown lists all 8 events",
+              "Must have a working submit button"
+            ],
+            "context": [
+              "charter item 5"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-register",
+              "steps": "Create section id register with form id reg-form (fields name, email, college, select) and 8 option elements of class event-option; submit opens a mailto to the address."
+            },
+            "verification": [
+              {
+                "text": "Form has submit",
+                "type": "named-test",
+                "target": "form-has-submit",
+                "expect": true
+              },
+              {
+                "text": "One form",
+                "type": "element-count",
+                "target": "#reg-form",
+                "expect": 1
+              },
+              {
+                "text": "Eight event options",
+                "type": "element-count",
+                "target": ".event-option",
+                "expect": 8
+              },
+              {
+                "text": "Email present",
+                "type": "facts-present",
+                "target": [
+                  "spark2026@example.com"
+                ],
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 15,
+          "model_call_limit": 4,
+          "time_limit_minutes": 15,
+          "retry_limit": 1,
+          "stop_loss": "Stop if the same verification fails twice in a row"
+        },
+        "estimate": 15,
+        "cost": 15
+      },
+      {
+        "id": "styles",
+        "name": "Base styling and page health",
+        "goal_gap": "No consistent look, no overflow or error guarantee",
+        "expected_outcome": "One bold mobile-first style block, no overflow, no JS errors, valid in-page links",
+        "outputs": [
+          "style block #site-style"
+        ],
+        "completion_check": "Page parses and in-page links resolve",
+        "dependencies": [
+          "hero",
+          "schedule",
+          "register"
+        ],
+        "parts": [
+          "styling"
+        ],
+        "covers": [
+          9
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 5,
+          "calls": 2,
+          "time_minutes": 8
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The page uses one bold colour scheme, has no horizontal overflow at 360px and 1280px, no JS errors and a nav whose links all point to existing sections.",
+            "constraints": [
+              "Mobile first",
+              "No overflow at 360px and 1280px",
+              "Nav links only to #hero, #schedule and #register"
+            ],
+            "context": [
+              "charter item 9",
+              "sections hero, schedule, register"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-styles",
+              "steps": "Create style element id site-style with CSS variables and responsive rules, and nav class site-nav linking only to hero, schedule and register."
+            },
+            "verification": [
+              {
+                "text": "Page parses",
+                "type": "named-test",
+                "target": "page-parses",
+                "expect": true
+              },
+              {
+                "text": "In-page links resolve",
+                "type": "named-test",
+                "target": "links-resolve",
+                "expect": true
+              },
+              {
+                "text": "One style block",
+                "type": "element-count",
+                "target": "#site-style",
+                "expect": 1
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 5,
+          "model_call_limit": 2,
+          "time_limit_minutes": 8,
+          "retry_limit": 1,
+          "stop_loss": "Stop if the same verification fails twice in a row"
+        },
+        "estimate": 5,
+        "cost": 5
+      }
+    ],
+    "adaptation_final": [
+      {
+        "id": "hero",
+        "name": "Hero and event identity",
+        "goal_gap": "Page has no name, college or dates",
+        "expected_outcome": "Hero section showing the fest name, college, city and dates",
+        "outputs": [
+          "section #hero"
+        ],
+        "completion_check": "Hero contains the name, college and dates",
+        "dependencies": [],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          1
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "A hero section shows Spark 2026, Northfield College of Engineering, Pune and the dates.",
+            "constraints": [
+              "Single file, plain HTML/CSS/JS",
+              "No invented facts"
+            ],
+            "context": [
+              "charter item 1"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-hero",
+              "steps": "Create section id hero with class hero-banner containing the h1, college line, dates and a class img-placeholder block."
+            },
+            "verification": [
+              {
+                "text": "Name, college and dates appear",
+                "type": "facts-present",
+                "target": [
+                  "Spark 2026",
+                  "Northfield College of Engineering",
+                  "14 to 16 February 2027"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Hero section exists once",
+                "type": "element-count",
+                "target": "#hero",
+                "expect": 1
+              }
+            ]
+          }
+        ],
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "schedule",
+        "name": "Day by day schedule",
+        "goal_gap": "No schedule",
+        "expected_outcome": "Schedule section with three day cards listing all 8 events and times",
+        "outputs": [
+          "section #schedule"
+        ],
+        "completion_check": "3 day cards and all times present",
+        "dependencies": [],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          2
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "A schedule section shows Day 1, Day 2 and Day 3 with each event and its time, and no room or hall.",
+            "constraints": [
+              "No room or hall shown",
+              "Day 1 is 14 Feb, Day 2 is 15 Feb, Day 3 is 16 Feb 2027"
+            ],
+            "context": [
+              "charter item 2"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-schedule",
+              "steps": "Create section id schedule with three elements of class day-card, each listing events with times."
+            },
+            "verification": [
+              {
+                "text": "Three day cards",
+                "type": "element-count",
+                "target": ".day-card",
+                "expect": 3
+              },
+              {
+                "text": "All events and times appear",
+                "type": "facts-present",
+                "target": [
+                  "Code Sprint",
+                  "10am to 1pm",
+                  "Line Follower",
+                  "2pm to 5pm",
+                  "AI in Daily Life",
+                  "5:30pm to 6:30pm",
+                  "Bug Hunt",
+                  "11am to 1pm",
+                  "Poster Jam",
+                  "2pm to 4pm",
+                  "Drone Dash",
+                  "UI Duel",
+                  "Startup Stories"
+                ],
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "fees",
+        "name": "Event fees",
+        "goal_gap": "Fees not shown",
+        "expected_outcome": "Section listing each of the 8 events with its fee",
+        "outputs": [
+          "section #fees"
+        ],
+        "completion_check": "8 fee rows with correct fees",
+        "dependencies": [],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          4
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "A fees section lists all 8 events with their fee or free.",
+            "constraints": [
+              "Fees exactly as supplied"
+            ],
+            "context": [
+              "charter item 4"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-fees",
+              "steps": "Create section id fees with 8 elements of class fee-row, each with event name and fee."
+            },
+            "verification": [
+              {
+                "text": "Eight fee rows",
+                "type": "element-count",
+                "target": ".fee-row",
+                "expect": 8
+              },
+              {
+                "text": "Fees present",
+                "type": "facts-present",
+                "target": [
+                  "Rs 100",
+                  "Rs 50",
+                  "Rs 150",
+                  "Rs 200",
+                  "free"
+                ],
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "register",
+        "name": "Registration form",
+        "goal_gap": "No way to register",
+        "expected_outcome": "Form with name, email, college and an 8-event dropdown that sends to spark2026@example.com",
+        "outputs": [
+          "section #register"
+        ],
+        "completion_check": "Form has submit, 8 options, and targets the email",
+        "dependencies": [],
+        "parts": [
+          "form"
+        ],
+        "covers": [
+          5
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 15,
+          "calls": 4,
+          "time_minutes": 15
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "A registration form asks for name, email, college and an event, and submitting sends the details to spark2026@example.com.",
+            "constraints": [
+              "Dropdown lists all 8 events",
+              "Must have a working submit button"
+            ],
+            "context": [
+              "charter item 5"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-register",
+              "steps": "Create section id register with form id reg-form (fields name, email, college, select) and 8 option elements of class event-option; submit opens a mailto to the address."
+            },
+            "verification": [
+              {
+                "text": "Form has submit",
+                "type": "named-test",
+                "target": "form-has-submit",
+                "expect": true
+              },
+              {
+                "text": "One form",
+                "type": "element-count",
+                "target": "#reg-form",
+                "expect": 1
+              },
+              {
+                "text": "Eight event options",
+                "type": "element-count",
+                "target": ".event-option",
+                "expect": 8
+              },
+              {
+                "text": "Email present",
+                "type": "facts-present",
+                "target": [
+                  "spark2026@example.com"
+                ],
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "estimate": 15,
+        "cost": 15
+      },
+      {
+        "id": "venue",
+        "name": "Venue and map link",
+        "goal_gap": "No venue",
+        "expected_outcome": "Venue section with the address and a map link",
+        "outputs": [
+          "section #venue"
+        ],
+        "completion_check": "Address present and map link resolves",
+        "dependencies": [],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          7
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "A venue section shows the address and a link that opens it in a map.",
+            "constraints": [
+              "No invented landmarks"
+            ],
+            "context": [
+              "charter item 7"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-venue",
+              "steps": "Create section id venue with class map-link anchor to a maps search URL for the address."
+            },
+            "verification": [
+              {
+                "text": "Address appears",
+                "type": "facts-present",
+                "target": [
+                  "22 University Road, Pune 411007",
+                  "Northfield College of Engineering"
+                ],
+                "expect": true
+              },
+              {
+                "text": "One map link",
+                "type": "element-count",
+                "target": ".map-link",
+                "expect": 1
+              }
+            ]
+          }
+        ],
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "contact",
+        "name": "WhatsApp and email contact",
+        "goal_gap": "No way to contact organisers",
+        "expected_outcome": "Contact section with WhatsApp link and email",
+        "outputs": [
+          "section #contact"
+        ],
+        "completion_check": "WhatsApp link and email present",
+        "dependencies": [],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          8
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "A contact section has a WhatsApp link to +91 00000 33333 and shows spark2026@example.com.",
+            "constraints": [
+              "No other contact details"
+            ],
+            "context": [
+              "charter item 8"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-contact",
+              "steps": "Create section id contact with class wa-link anchor to wa.me for the number and the visible email."
+            },
+            "verification": [
+              {
+                "text": "Number and email appear",
+                "type": "facts-present",
+                "target": [
+                  "+91 00000 33333",
+                  "spark2026@example.com"
+                ],
+                "expect": true
+              },
+              {
+                "text": "One WhatsApp link",
+                "type": "element-count",
+                "target": ".wa-link",
+                "expect": 1
+              }
+            ]
+          }
+        ],
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "styles",
+        "name": "Base styling and page health",
+        "goal_gap": "No consistent look, no overflow or error guarantee",
+        "expected_outcome": "One bold mobile-first style block, no overflow, no JS errors, valid in-page links",
+        "outputs": [
+          "style block #site-style"
+        ],
+        "completion_check": "Page parses and in-page links resolve",
+        "dependencies": [
+          "hero",
+          "schedule",
+          "fees",
+          "register",
+          "venue",
+          "contact"
+        ],
+        "parts": [
+          "styling"
+        ],
+        "covers": [
+          9
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 5,
+          "calls": 2,
+          "time_minutes": 8
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The page uses one bold colour scheme, has no horizontal overflow at 360px and 1280px, no JS errors and a nav whose links all point to existing sections.",
+            "constraints": [
+              "Mobile first",
+              "No overflow at 360px and 1280px",
+              "Every nav link targets an existing id"
+            ],
+            "context": [
+              "charter item 9",
+              "sections hero, schedule, fees, register, venue, contact"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-styles",
+              "steps": "Create style element id site-style with CSS variables and responsive rules, and nav class site-nav linking to each section id."
+            },
+            "verification": [
+              {
+                "text": "Page parses",
+                "type": "named-test",
+                "target": "page-parses",
+                "expect": true
+              },
+              {
+                "text": "In-page links resolve",
+                "type": "named-test",
+                "target": "links-resolve",
+                "expect": true
+              },
+              {
+                "text": "One style block",
+                "type": "element-count",
+                "target": "#site-style",
+                "expect": 1
+              }
+            ]
+          }
+        ],
+        "estimate": 5,
+        "cost": 5
+      }
+    ],
+    "attempts_used": 2,
+    "registered": [
+      "Hero and event identity",
+      "Day by day schedule",
+      "Registration form",
+      "Base styling and page health"
+    ]
+  },
+  {
+    "id": "C-2",
+    "cycle": 2,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 2",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 68,
+        "text": "@Priority Two fixes, fees first. Fees go on the schedule (W-2) only, since it lists all 8 events and covers item 4; the category cards and dropdown stay untouched to hold cost. The nav brand fix (W-4) keeps the links as they are. Trade-off: the fees show in one place, not on the category cards.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 69,
+        "text": "@Adaptation COUNTER: I fund the fees fix (8 of the 10 left) and cut the nav tap target fix (8), which does not fit. Fees close a done-when item (4) that Audit marks missing. The tap target is a design finding, not a done-when item. Prices match the rate card (one 'fix' part each), so I have no pricing objection. Shortfall for the nav fix is 6 credits (8 needed, 2 left after fees). Please relay that to @Identity so the Requester can add credits or accept R-6 as it stands. Keep the fee tags inside #schedule only, and leave the nav and times untouched.",
+        "position": "COUNTER: Event fees on schedule (8)",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 70,
+        "text": "@Priority Accepted: the fees fix goes ahead at 8, inside #schedule only, with nav and times untouched. The nav brand tap target (R-6) stays unfunded, with a shortfall of 6 credits (8 needed, 2 left). @Identity should put that to the Requester: add credits or accept R-6 as it stands. Trade-off: fees appear on the schedule only, not on the category cards or dropdown.",
+        "position": "accepts Priority's offer",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "priority",
+    "outcome": "Adaptation accepted Priority's COUNTER: Event fees on schedule (8) goes to the validator.",
+    "priority_final": [
+      {
+        "id": "fees",
+        "name": "Event fees on schedule",
+        "goal_gap": "No event shows its fee (F-4)",
+        "expected_outcome": "Each of the 8 events in the schedule shows its fee from the charter",
+        "outputs": [
+          "fee tags inside section W-2"
+        ],
+        "completion_check": "8 fee tags, with all fee amounts and 'free' present",
+        "dependencies": [],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-4"
+        ],
+        "revises": "W-2",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 2,
+          "time_minutes": 8
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "Each of the 8 events in the schedule shows its fee: Rs 100, Rs 50, Rs 150, Rs 200, Rs 100, and free for the three free events.",
+            "constraints": [
+              "No room or hall shown",
+              "No invented fees or facts",
+              "Do not change the nav, times or event names",
+              "Use the existing style guide"
+            ],
+            "context": [
+              "charter item 4",
+              "section W-2"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-2 Builder",
+              "steps": "Inside section schedule, add one span of class fee-tag to each of the 8 events in the .day-card elements: Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, UI Duel Rs 100, Poster Jam free, AI in Daily Life free, Startup Stories free."
+            },
+            "verification": [
+              {
+                "text": "Eight fee tags",
+                "type": "element-count",
+                "target": ".fee-tag",
+                "expect": 8
+              },
+              {
+                "text": "Fee amounts and free appear",
+                "type": "facts-present",
+                "target": [
+                  "Rs 100",
+                  "Rs 50",
+                  "Rs 150",
+                  "Rs 200",
+                  "free"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Three day cards remain",
+                "type": "element-count",
+                "target": ".day-card",
+                "expect": 3
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 8,
+          "model_call_limit": 2,
+          "time_limit_minutes": 8,
+          "retry_limit": 1,
+          "stop_loss": "Stop if the same verification fails twice in a row"
+        },
+        "estimate": 8,
+        "cost": 8
+      }
+    ],
+    "adaptation_final": [
+      {
+        "id": "fees",
+        "name": "Event fees on schedule",
+        "goal_gap": "No event shows its fee (F-4)",
+        "expected_outcome": "Each of the 8 events in the schedule shows its fee from the charter",
+        "outputs": [
+          "fee tags inside section W-2"
+        ],
+        "completion_check": "8 fee tags, with all fee amounts and 'free' present",
+        "dependencies": [],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-4"
+        ],
+        "revises": "W-2",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 2,
+          "time_minutes": 8
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "Each of the 8 events in the schedule shows its fee: Rs 100, Rs 50, Rs 150, Rs 200, Rs 100, and free for the three free events.",
+            "constraints": [
+              "No room or hall shown",
+              "No invented fees or facts",
+              "Do not change the nav, times or event names",
+              "Use the existing style guide"
+            ],
+            "context": [
+              "charter item 4",
+              "section W-2"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-2 Builder",
+              "steps": "Inside section schedule, add one span of class fee-tag to each of the 8 events in the .day-card elements: Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, UI Duel Rs 100, Poster Jam free, AI in Daily Life free, Startup Stories free."
+            },
+            "verification": [
+              {
+                "text": "Eight fee tags",
+                "type": "element-count",
+                "target": ".fee-tag",
+                "expect": 8
+              },
+              {
+                "text": "Fee amounts and free appear",
+                "type": "facts-present",
+                "target": [
+                  "Rs 100",
+                  "Rs 50",
+                  "Rs 150",
+                  "Rs 200",
+                  "free"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Three day cards remain",
+                "type": "element-count",
+                "target": ".day-card",
+                "expect": 3
+              }
+            ]
+          }
+        ],
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "navtap",
+        "name": "Nav brand tap target",
+        "goal_gap": "Nav brand 'Spark 2026' is 101x28px at 360px, under 44x44px (R-6)",
+        "expected_outcome": "Nav brand link is at least 44x44px at 360px",
+        "outputs": [
+          "updated rules in style block #site-style"
+        ],
+        "completion_check": "Nav brand has one element, links still resolve",
+        "dependencies": [],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "R-6"
+        ],
+        "revises": "W-4",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 2,
+          "time_minutes": 8
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The Spark 2026 brand link in the nav is at least 44x44px at 360px and the nav links are unchanged.",
+            "constraints": [
+              "Nav links only to #hero, #schedule and #register",
+              "No horizontal overflow at 360px and 1280px",
+              "Do not change other sections"
+            ],
+            "context": [
+              "design rubric R-6",
+              "section W-4"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-4 Builder",
+              "steps": "Add class nav-brand to the Spark 2026 brand link in .site-nav and set min-height 44px, min-width 44px, display inline-flex, align-items center in style block site-style."
+            },
+            "verification": [
+              {
+                "text": "One nav brand link",
+                "type": "element-count",
+                "target": ".nav-brand",
+                "expect": 1
+              },
+              {
+                "text": "Brand name still shown",
+                "type": "facts-present",
+                "target": [
+                  "Spark 2026"
+                ],
+                "expect": true
+              },
+              {
+                "text": "In-page links resolve",
+                "type": "named-test",
+                "target": "links-resolve",
+                "expect": true
+              },
+              {
+                "text": "Page parses",
+                "type": "named-test",
+                "target": "page-parses",
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "estimate": 8,
+        "cost": 8
+      }
+    ],
+    "attempts_used": 2,
+    "registered": [
+      "Event fees on schedule"
+    ]
+  }
+]

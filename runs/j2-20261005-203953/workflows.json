@@ -1,0 +1,54 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "wf-page-core",
+    "name": "Build single-file event page with placeholder sections",
+    "purpose": "No page exists. Needs one HTML file titled and headed 'Bengaluru JS Meetup', stating the event is in November, with Schedule, Speakers, Sponsors, RSVP and Code of Conduct sections.",
+    "cost": 35,
+    "estimate": 35,
+    "envelope": {
+      "money_limit": 35,
+      "model_call_limit": 2,
+      "time_limit_minutes": 30,
+      "retry_limit": 0,
+      "stop_loss": "Stop if spend reaches 35 or the completion_check still fails after one build call; report the failing items to Coordination."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "index.html"
+    ],
+    "completion_check": "File has 'Bengaluru JS Meetup' in the title and h1, and 'November' in the text. It has Schedule, Speakers, Sponsors, RSVP and Code of Conduct sections. Every schedule slot, talk and speaker entry reads 'To be announced'. There is no form or input element. The RSVP control is marked placeholder. There are no personal names, times, exact dates, sponsor names or image src values.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "wf-venue-map",
+    "name": "Add Venue section and Leaflet OpenStreetMap map",
+    "purpose": "The page has no Venue section and no map.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 15,
+      "retry_limit": 0,
+      "stop_loss": "Stop if spend reaches 10 or wf-page-core has not passed its completion_check; report to Coordination."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "index.html (updated)"
+    ],
+    "completion_check": "File loads Leaflet from a CDN with OpenStreetMap tile URLs and creates a map centred on Bengaluru with no marker call. The Venue section has the address text 'To be announced' and the note 'venue to be announced'. There is no Google Maps embed or API key.",
+    "dependencies": [
+      "wf-page-core"
+    ],
+    "status": "done",
+    "cycle": 1
+  }
+]

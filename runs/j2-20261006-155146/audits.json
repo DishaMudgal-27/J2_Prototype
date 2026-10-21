@@ -1,0 +1,167 @@
+[
+  {
+    "cycle": 1,
+    "version": 2,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The site is one HTML file with inline or CDN CSS and JS, one page with section anchors and a nav linking to them",
+        "verdict": "PASS",
+        "note": "Single file with 2 scripts and 1 form; nav links #menu, #preorder, #hours, #location; mechanical check reports 0 broken in-page links.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "A menu section lists items grouped by category, each with a ₹ price or a marked price placeholder",
+        "verdict": "PASS",
+        "note": "3 category cards (Hot coffee, Cold drinks, Food and bakes), 3 items each, every price rendered as ₹ plus a .ph [PLACEHOLDER: price].",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "An opening hours section shows hours for every day of the week, real or marked placeholder",
+        "verdict": "PASS",
+        "note": "Table has rows Monday to Sunday, each with [PLACEHOLDER: hours].",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "A location section names Indiranagar, Bengaluru and has an address (or marked placeholder) and a map link or embed",
+        "verdict": "PASS",
+        "note": "Address block reads 'Indiranagar, Bengaluru' with [PLACEHOLDER: full street address]; Google Maps search link to Indiranagar Bengaluru is present and flagged as a general search.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A pre-order for pickup form lets the visitor choose items and quantities, enter name, phone and pickup time, and shows a running total",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "9 quantity rows with +/- buttons, name, tel and time inputs, live #total; JS errors: none. Total uses SAMPLE_PRICE=100 per item because real prices are unknown; this is disclosed in an on-page note.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The pre-order flow includes an online payment step using a CDN checkout or payment link, with a marked placeholder key and no secrets",
+        "verdict": "PASS",
+        "note": "Loads https://checkout.razorpay.com/v1/checkout.js; PAYMENT_PUBLIC_KEY = '[PLACEHOLDER: public payment key]'; code blocks checkout while the key is a placeholder; no secret-like strings in the file.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "A blog section contains 5 articles, each with a title and body text, labelled as placeholder content where facts are unknown",
+        "verdict": "NEEDS_REVISION",
+        "note": "No blog section, no #blog anchor and no article elements in the file. W-1 and W-2 did not cover it and no workflow is registered for it.",
+        "severity": "high",
+        "confidence": "high",
+        "item": 7,
+        "pass": false
+      },
+      {
+        "id": "F-8",
+        "criterion": "An Instagram feed section is present, with a marked placeholder handle and a grid of posts or an embed",
+        "verdict": "NEEDS_REVISION",
+        "note": "No Instagram section, handle or grid anywhere in the file; the word Instagram does not appear.",
+        "severity": "high",
+        "confidence": "high",
+        "item": 8,
+        "pass": false
+      },
+      {
+        "id": "F-9",
+        "criterion": "A photo gallery section has at least 6 images, marked as placeholders where real photos are missing",
+        "verdict": "NEEDS_REVISION",
+        "note": "No gallery section and no img elements in the file.",
+        "severity": "high",
+        "confidence": "high",
+        "item": 9,
+        "pass": false
+      },
+      {
+        "id": "F-10",
+        "criterion": "Animations are present: scroll-reveal on sections, hover or press effects on buttons and cards, and a hero entrance, with a prefers-reduced-motion rule",
+        "verdict": "NEEDS_REVISION",
+        "note": "Only the prefers-reduced-motion rule exists. There are no @keyframes, no transition declarations, no IntersectionObserver or scroll-reveal, no hero entrance; hover states are instant colour swaps.",
+        "severity": "high",
+        "confidence": "high",
+        "item": 10,
+        "pass": false
+      },
+      {
+        "id": "F-11",
+        "criterion": "The file has a viewport meta tag and CSS written mobile-first with min-width media queries",
+        "verdict": "PASS",
+        "note": "Viewport meta present; base styles are single-column and the only layout queries are (min-width:600px) and (min-width:900px).",
+        "severity": "low",
+        "confidence": "high",
+        "item": 11,
+        "pass": true
+      },
+      {
+        "id": "F-12",
+        "criterion": "Every missing business fact appears on the page as a visibly marked placeholder",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "All facts in existing sections (menu, hours, address, phone, email, pickup rules, payment key and provider, tagline) use .ph markers. The Instagram handle, photos and blog topics are not on the page because those sections are missing (F-7 to F-9).",
+        "severity": "medium",
+        "confidence": "medium",
+        "item": 12,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-13",
+        "criterion": "Standards: mobile-first and usable on phones; no horizontal overflow",
+        "verdict": "NEEDS_REVISION",
+        "note": "Mechanical check: phone 360px overflows by 34px, desktop 1280px overflows by 21px. The cause is not identifiable from the code alone.",
+        "severity": "medium",
+        "confidence": "high"
+      },
+      {
+        "id": "F-14",
+        "criterion": "Charter feasibility: budget against open done-when items",
+        "verdict": "POLICY_CONCERN",
+        "note": "Budget 60/60 spent. Rate card puts the blog at 50 for 5 posts, with Instagram, gallery and animations also unfunded, and the overflow fix at 8. Four of 12 done-when items cannot close without a budget change or a scope cut.",
+        "severity": "high",
+        "confidence": "high"
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 23562,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://checkout.razorpay.com/v1/checkout.js",
+        "https://www.google.com/maps/search/?api=1&amp;query=Indiranagar+Bengaluru"
+      ],
+      "forms": 1,
+      "scripts": 2,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 21
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 34
+      },
+      "js_errors": []
+    },
+    "all_pass": false
+  }
+]

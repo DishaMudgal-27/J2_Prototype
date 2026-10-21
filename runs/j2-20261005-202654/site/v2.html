@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SmileCare Dental Clinic, Pune</title>
+<style>
+  :root { --teal:#0d7c80; --teal-dark:#095c5f; --bg:#f6fafa; --ink:#1c2b2d; --line:#d5e3e3; --ph-bg:#fff3b0; --ph-ink:#6b5300; --alert:#b3261e; --alert-bg:#fdeceb; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color:var(--ink); background:var(--bg); line-height:1.55; }
+  header { background:#fff; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:5; }
+  .bar { max-width:960px; margin:0 auto; padding:12px 16px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; }
+  .brand { font-weight:700; font-size:1.2rem; color:var(--teal-dark); }
+  nav a { margin-left:14px; color:var(--ink); text-decoration:none; font-size:.95rem; }
+  nav a:hover { color:var(--teal); text-decoration:underline; }
+  main { max-width:960px; margin:0 auto; padding:0 16px 40px; }
+  .hero { padding:36px 0 12px; }
+  .hero h1 { margin:0 0 8px; font-size:1.9rem; color:var(--teal-dark); }
+  .hero p { margin:0; max-width:620px; }
+  section { margin-top:32px; }
+  h2 { font-size:1.4rem; margin:0 0 12px; color:var(--teal-dark); }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:18px; }
+  .ph { background:var(--ph-bg); color:var(--ph-ink); border:1px dashed #c9a400; border-radius:4px; padding:0 5px; font-size:.9em; white-space:normal; }
+  form { display:grid; gap:12px; grid-template-columns:1fr 1fr; }
+  .full { grid-column:1 / -1; }
+  label { display:block; font-weight:600; font-size:.92rem; margin-bottom:4px; }
+  input, select, textarea { width:100%; padding:9px 10px; border:1px solid #b7caca; border-radius:6px; font:inherit; background:#fff; }
+  input:focus, select:focus, textarea:focus, button:focus-visible { outline:2px solid var(--teal); outline-offset:1px; }
+  .actions { display:flex; flex-wrap:wrap; gap:10px; }
+  button { font:inherit; font-weight:600; padding:10px 18px; border:0; border-radius:6px; cursor:pointer; background:var(--teal); color:#fff; }
+  button.alt { background:#fff; color:var(--teal-dark); border:1px solid var(--teal); }
+  button:hover { filter:brightness(.93); }
+  .notice { background:#eaf5f5; border-left:4px solid var(--teal); padding:10px 14px; border-radius:4px; font-size:.95rem; }
+  #formStatus { min-height:1.4em; font-weight:600; color:var(--teal-dark); }
+  .grid { display:grid; gap:14px; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); }
+  .svc h3 { margin:0 0 4px; font-size:1.05rem; }
+  .svc p { margin:0 0 8px; font-size:.93rem; }
+  .price { font-weight:600; }
+  .fine { font-size:.9rem; margin-top:14px; }
+  .dentist { display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; }
+  .avatar { width:84px; height:84px; border-radius:50%; background:#d9ecec; display:flex; align-items:center; justify-content:center; font-size:.7rem; text-align:center; color:var(--ph-ink); border:1px dashed #c9a400; }
+  .dentist dl { margin:0; }
+  .dentist dt { font-weight:600; font-size:.9rem; margin-top:6px; }
+  .dentist dd { margin:0; }
+  .emergency { border:2px solid var(--alert); background:var(--alert-bg); }
+  .emergency h2 { color:var(--alert); }
+  .emergency dl { margin:0 0 12px; display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; align-items:baseline; }
+  .emergency dt { font-weight:700; }
+  .emergency dd { margin:0; font-size:1.05rem; }
+  .emergency p { margin:0 0 8px; }
+  .emergency p:last-child { margin-bottom:0; }
+  .faq { display:grid; gap:12px; }
+  .faq .card { padding:14px 18px; }
+  .faq h3 { margin:0 0 4px; font-size:1.02rem; color:var(--teal-dark); }
+  .faq p { margin:0; font-size:.95rem; }
+  footer { border-top:1px solid var(--line); background:#fff; padding:18px 16px; text-align:center; font-size:.9rem; }
+  @media (max-width:600px) { form { grid-template-columns:1fr; } nav a { margin:0 10px 0 0; } .emergency dl { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <span class="brand">SmileCare Dental Clinic</span>
+    <nav aria-label="Main">
+      <a href="#emergency">Emergency</a>
+      <a href="#book">Book</a>
+      <a href="#services">Services</a>
+      <a href="#dentists">Our dentists</a>
+      <a href="#faq">FAQs</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>Gentle dental care in Pune</h1>
+    <p>Request an appointment online, see what our treatments start from, and meet the dentists who will look after you.</p>
+  </div>
+
+  <section id="emergency" aria-labelledby="emg-h">
+    <div class="card emergency">
+      <h2 id="emg-h">Dental emergency contact</h2>
+      <dl>
+        <dt>Emergency phone</dt>
+        <dd><span class="ph">[placeholder: emergency number not yet supplied]</span></dd>
+        <dt>Emergency hours</dt>
+        <dd><span class="ph">[placeholder: emergency hours not yet supplied]</span></dd>
+      </dl>
+      <p>Call this number for severe tooth pain, a knocked-out tooth, a broken tooth, or swelling in the mouth or face. Do not use the appointment form for emergencies, because the form is a request and is not answered instantly.</p>
+      <p><strong>If you have trouble breathing or swallowing, or bleeding that will not stop, go to the nearest hospital emergency department right away.</strong></p>
+    </div>
+  </section>
+
+  <section id="book" aria-labelledby="book-h">
+    <h2 id="book-h">Request an appointment</h2>
+    <div class="card">
+      <p class="notice">This is a request, not a confirmed booking. After you send it, the clinic will confirm your appointment by phone.</p>
+      <form id="bookForm" novalidate>
+        <div>
+          <label for="name">Full name</label>
+          <input id="name" name="name" type="text" autocomplete="name" required>
+        </div>
+        <div>
+          <label for="phone">Your phone number</label>
+          <input id="phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required>
+        </div>
+        <div>
+          <label for="service">Service</label>
+          <select id="service" name="service">
+            <option>Check-up and consultation</option>
+            <option>Scaling and polishing</option>
+            <option>Tooth-coloured filling</option>
+            <option>Root canal treatment</option>
+            <option>Crown or cap</option>
+            <option>Teeth whitening</option>
+            <option>Braces or clear aligners</option>
+            <option>Tooth extraction</option>
+            <option>Not sure yet</option>
+          </select>
+        </div>
+        <div>
+          <label for="date">Preferred date</label>
+          <input id="date" name="date" type="date">
+        </div>
+        <div>
+          <label for="time">Preferred time</label>
+          <select id="time" name="time">
+            <option>Morning</option>
+            <option>Afternoon</option>
+            <option>Evening</option>
+          </select>
+        </div>
+        <div>
+          <label for="visit">Visit type</label>
+          <select id="visit" name="visit">
+            <option>First visit</option>
+            <option>Returning patient</option>
+          </select>
+        </div>
+        <div class="full">
+          <label for="notes">Anything we should know (optional)</label>
+          <textarea id="notes" name="notes" rows="3"></textarea>
+        </div>
+        <div class="full actions">
+          <button type="submit" value="whatsapp">Send request on WhatsApp</button>
+          <button type="submit" class="alt" value="email">Send request by email</button>
+        </div>
+        <div class="full" id="formStatus" role="status" aria-live="polite"></div>
+      </form>
+      <p class="fine">
+        Clinic WhatsApp number: <span class="ph">[placeholder: number not yet supplied]</span>
+        &nbsp;Clinic email: <span class="ph">[placeholder: email not yet supplied]</span>
+        &nbsp;Clinic phone: <span class="ph">[placeholder: number not yet supplied]</span><br>
+        Until the clinic's number or email is added, your app will ask you to choose the recipient. Nothing you type here is stored or sent by this page; it only opens your own WhatsApp or email app.
+      </p>
+    </div>
+  </section>
+
+  <section id="services" aria-labelledby="svc-h">
+    <h2 id="svc-h">Services and starting prices</h2>
+    <div class="grid">
+      <div class="card svc">
+        <h3>Check-up and consultation</h3>
+        <p>Examination, advice and a treatment plan.</p>
+        <div class="price">Starting from <span class="ph">[placeholder: price range not yet supplied]</span></div>
+      </div>
+      <div class="card svc">
+        <h3>Scaling and polishing</h3>
+        <p>Removes plaque and tartar to keep gums healthy.</p>
+        <div class="price">Starting from <span class="ph">[placeholder: price range not yet supplied]</span></div>
+      </div>
+      <div class="card svc">
+        <h3>Tooth-coloured filling</h3>
+        <p>Repairs cavities and chipped teeth.</p>
+        <div class="price">Starting from <span class="ph">[placeholder: price range not yet supplied]</span></div>
+      </div>
+      <div class="card svc">
+        <h3>Root canal treatment</h3>
+        <p>Saves a badly decayed or infected tooth.</p>
+        <div class="price">Starting from <span class="ph">[placeholder: price range not yet supplied]</span></div>
+      </div>
+      <div class="card svc">
+        <h3>Crown or cap</h3>
+        <p>Protects and restores a weak or damaged tooth.</p>
+        <div class="price">Starting from <span class="ph">[placeholder: price range not yet supplied]</span></div>
+      </div>
+      <div class="card svc">
+        <h3>Teeth whitening</h3>
+        <p>Brightens stained or yellowed teeth.</p>
+        <div class="price">Starting from <span class="ph">[placeholder: price range not yet supplied]</span></div>
+      </div>
+      <div class="card svc">
+        <h3>Braces or clear aligners</h3>
+        <p>Straightens teeth and corrects the bite.</p>
+        <div class="price">Starting from <span class="ph">[placeholder: price range not yet supplied]</span></div>
+      </div>
+      <div class="card svc">
+        <h3>Tooth extraction</h3>
+        <p>Removal of a tooth that cannot be saved.</p>
+        <div class="price">Starting from <span class="ph">[placeholder: price range not yet supplied]</span></div>
+      </div>
+    </div>
+    <p class="notice fine">These are starting prices only. The final cost is confirmed after examination.</p>
+  </section>
+
+  <section id="dentists" aria-labelledby="den-h">
+    <h2 id="den-h">Our dentists</h2>
+    <div class="card dentist">
+      <div class="avatar" aria-label="Photo placeholder">[placeholder: photo]</div>
+      <dl>
+        <dt>Name</dt>
+        <dd><span class="ph">[placeholder: dentist name not yet supplied]</span></dd>
+        <dt>Qualifications</dt>
+        <dd><span class="ph">[placeholder: qualifications not yet supplied]</span></dd>
+        <dt>Specialty</dt>
+        <dd><span class="ph">[placeholder: specialty not yet supplied]</span></dd>
+        <dt>Experience</dt>
+        <dd><span class="ph">[placeholder: years of experience not yet supplied]</span></dd>
+        <dt>About</dt>
+        <dd><span class="ph">[placeholder: short profile not yet supplied]</span></dd>
+      </dl>
+    </div>
+  </section>
+
+  <section id="faq" aria-labelledby="faq-h">
+    <h2 id="faq-h">Patient FAQs</h2>
+    <div class="faq">
+      <div class="card">
+        <h3>How do I book an appointment?</h3>
+        <p>Fill in the request form on this page and send it on WhatsApp or by email. The clinic will confirm your appointment by phone. The form is a request and does not guarantee a slot until the clinic calls you.</p>
+      </div>
+      <div class="card">
+        <h3>Are the prices on this page final?</h3>
+        <p>No. Prices are starting prices only. The final cost depends on your teeth and the treatment you need, and it is confirmed after examination.</p>
+      </div>
+      <div class="card">
+        <h3>What should I do in a dental emergency?</h3>
+        <p>Use the emergency contact at the top of this page and call, rather than sending the appointment form. For trouble breathing or swallowing, or bleeding that will not stop, go to the nearest hospital emergency department.</p>
+      </div>
+      <div class="card">
+        <h3>What should I do if a tooth is knocked out?</h3>
+        <p>Pick it up by the crown (the white part), not the root. Do not scrub it. Keep it moist, for example in milk, and call the emergency number straight away, because a quick visit gives the best chance of saving the tooth.</p>
+      </div>
+      <div class="card">
+        <h3>What should I bring to my first visit?</h3>
+        <p>Bring a list of any medicines you take, details of any medical conditions or allergies, and any earlier dental X-rays or reports you have.</p>
+      </div>
+      <div class="card">
+        <h3>Can I change or cancel my appointment?</h3>
+        <p>Yes. Call the clinic as early as you can and they will help you pick a new time. <span class="ph">[placeholder: clinic phone number not yet supplied]</span></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  SmileCare Dental Clinic, Pune. Address: <span class="ph">[placeholder: address not yet supplied]</span>
+</footer>
+
+<script>
+(function () {
+  // Clinic contact details. Empty until the clinic supplies them (open input).
+  // WhatsApp: digits only with country code, e.g. "91XXXXXXXXXX". Email: a normal address.
+  var CLINIC_WHATSAPP = "";
+  var CLINIC_EMAIL = "";
+
+  var form = document.getElementById("bookForm");
+  var status = document.getElementById("formStatus");
+
+  function val(id) { return (document.getElementById(id).value || "").trim(); }
+
+  function buildMessage() {
+    var lines = [
+      "Appointment request for SmileCare Dental Clinic, Pune",
+      "Name: " + val("name"),
+      "Phone: " + val("phone"),
+      "Service: " + val("service"),
+      "Preferred date: " + (val("date") || "Not specified"),
+      "Preferred time: " + val("time"),
+      "Visit type: " + val("visit")
+    ];
+    if (val("notes")) lines.push("Notes: " + val("notes"));
+    lines.push("Please confirm this appointment by phone.");
+    return lines.join("\n");
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = document.getElementById("name");
+    var phone = document.getElementById("phone");
+    var digits = phone.value.replace(/\D/g, "");
+
+    if (!name.value.trim()) { status.textContent = "Please enter your name."; name.focus(); return; }
+    if (digits.length < 10) { status.textContent = "Please enter a valid phone number so the clinic can call you."; phone.focus(); return; }
+
+    var channel = (e.submitter && e.submitter.value) || "whatsapp";
+    var text = buildMessage();
+
+    if (channel === "email") {
+      var subject = "Appointment request from " + name.value.trim();
+      window.location.href = "mailto:" + encodeURIComponent(CLINIC_EMAIL).replace(/%40/g, "@") +
+        "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(text);
+      status.textContent = "Your email is ready. Please press send in your email app. The clinic will confirm your appointment by phone.";
+    } else {
+      var base = CLINIC_WHATSAPP ? "https://wa.me/" + CLINIC_WHATSAPP : "https://wa.me/";
+      window.open(base + "?text=" + encodeURIComponent(text), "_blank", "noopener");
+      status.textContent = "Your WhatsApp message is ready. Please press send in WhatsApp. The clinic will confirm your appointment by phone.";
+    }
+  });
+})();
+</script>
+</body>
+</html>

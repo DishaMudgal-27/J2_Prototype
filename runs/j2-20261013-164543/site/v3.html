@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spark 2026</title>
+<!-- J2:style head start (owner W-1) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&amp;family=Space+Grotesk:wght@700&amp;display=swap"><style>:root{--j2-primary:#FFD23F;--j2-secondary:#6B46FF;--j2-accent:#FF4D8D;--j2-background:#120D2E;--j2-surface:#1E1747;--j2-text:#FFFFFF;--j2-muted:#C9C3E8;--j2-font-heading:'Space Grotesk', 'Segoe UI', Arial, sans-serif;--j2-font-body:'Inter', 'Segoe UI', Arial, sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:16px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 28px;background:#FFD23F;color:#120D2E;border:2px solid #FFD23F;border-radius:999px;font-weight:800;text-decoration:none;cursor:pointer}.j2-btn-secondary{display:inline-block;display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 28px;background:transparent;color:#FFFFFF;border:2px solid #FFD23F;border-radius:999px;font-weight:800;text-decoration:none;cursor:pointer}.j2-card{background:#1E1747;color:#FFFFFF;border:1px solid #3A2F7A;border-radius:16px;padding:20px}</style>
+<!-- J2:style head end -->
+<!-- J2:W-1 head start (owner W-1) -->
+<style>
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--j2-background);color:var(--j2-text);font-family:var(--j2-font-body)}
+section[id]{scroll-margin-top:72px}
+*,*::before,*::after{box-sizing:border-box}
+img,svg{max-width:100%}
+</style>
+<!-- J2:W-1 head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<style>
+#site-nav{position:sticky;top:0;z-index:50;background:var(--j2-background);border-bottom:2px solid var(--j2-secondary)}
+#site-nav .w1-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:1200px;margin:0 auto;padding:8px 16px}
+#site-nav .w1-brand{display:inline-flex;align-items:center;min-height:48px;font-family:var(--j2-font-heading);font-size:1.5rem;font-weight:700;color:var(--j2-primary);text-decoration:none}
+#site-nav .nav-toggle{min-width:48px;min-height:48px;padding:0 16px;background:var(--j2-secondary);color:#fff;border:0;border-radius:999px;font:inherit;font-weight:800;cursor:pointer}
+#site-nav .w1-menu{display:none;list-style:none;margin:0;padding:8px 16px 16px;max-width:1200px;margin:0 auto}
+#site-nav .w1-menu.is-open{display:block}
+#site-nav .w1-menu a{display:flex;align-items:center;min-height:48px;padding:0 8px;color:var(--j2-text);font-weight:600;text-decoration:none;border-bottom:1px solid var(--j2-surface)}
+#site-nav .w1-menu a:hover,#site-nav .w1-menu a:focus-visible{color:var(--j2-primary)}
+#hero.w1-hero{position:relative;overflow:hidden;padding:48px 20px 64px;background:radial-gradient(circle at 90% 0%,var(--j2-secondary),transparent 55%),radial-gradient(circle at 0% 100%,var(--j2-accent),transparent 45%),var(--j2-background)}
+#hero .w1-inner{position:relative;display:grid;gap:32px;max-width:1200px;margin:0 auto}
+#hero .w1-eyebrow{margin:0 0 12px;color:var(--j2-primary);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:.9rem}
+#hero h1{margin:0 0 16px;font-family:var(--j2-font-heading);font-size:clamp(2.75rem,13vw,6.5rem);line-height:1;color:var(--j2-text);overflow-wrap:anywhere}
+#hero .w1-college{margin:0 0 8px;font-size:clamp(1.15rem,4.5vw,1.75rem);font-weight:800;color:var(--j2-text)}
+#hero .w1-dates{display:inline-block;margin:0 0 28px;padding:8px 16px;background:var(--j2-accent);color:#120D2E;border-radius:var(--j2-radius);font-size:clamp(1.05rem,4vw,1.5rem);font-weight:800}
+#hero .hero-cta{max-width:100%}
+#hero .photo-placeholder{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:4/3;padding:16px;text-align:center;background:var(--j2-surface);color:var(--j2-muted);border:3px dashed var(--j2-primary);border-radius:var(--j2-radius);font-weight:600;overflow-wrap:anywhere}
+@media (min-width:900px){
+#site-nav .nav-toggle{display:none}
+#site-nav .w1-bar{padding-right:0}
+#site-nav{display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+#site-nav .w1-menu,#site-nav .w1-menu.is-open{display:flex;gap:4px;padding:0;margin:0}
+#site-nav .w1-menu a{border-bottom:0;padding:0 12px;border-radius:999px}
+#hero.w1-hero{padding:96px 32px}
+#hero .w1-inner{grid-template-columns:1.2fr 1fr;align-items:center;gap:48px}
+}
+</style>
+<nav id="site-nav" aria-label="Main">
+  <div class="w1-bar">
+    <a class="w1-brand" href="#hero">Spark 2026</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="w1-menu">Menu</button>
+  </div>
+  <ul class="w1-menu" id="w1-menu">
+    <li><a href="#schedule">Schedule</a></li>
+    <li><a href="#events">Events</a></li>
+    <li><a href="#register">Register</a></li>
+    <li><a href="#sponsors">Sponsors</a></li>
+    <li><a href="#venue">Venue</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+<section id="hero" class="w1-hero">
+  <div class="w1-inner">
+    <div class="w1-copy">
+      <p class="w1-eyebrow">College tech fest</p>
+      <h1>Spark 2026</h1>
+      <p class="w1-college">Northfield College of Engineering, Pune</p>
+      <p class="w1-dates">14 to 16 February 2027</p>
+      <div><a class="j2-btn hero-cta" href="#register">Register now</a></div>
+    </div>
+    <div class="photo-placeholder" role="img" aria-label="Photo placeholder">Photo placeholder: fest photo goes here</div>
+  </div>
+</section>
+<script>
+(function(){
+  var nav=document.getElementById('site-nav');
+  if(!nav)return;
+  var btn=nav.querySelector('.nav-toggle');
+  var menu=document.getElementById('w1-menu');
+  if(!btn||!menu)return;
+  function setOpen(open){
+    menu.classList.toggle('is-open',open);
+    btn.setAttribute('aria-expanded',open?'true':'false');
+    btn.textContent=open?'Close':'Menu';
+  }
+  btn.addEventListener('click',function(){setOpen(!menu.classList.contains('is-open'));});
+  menu.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('a'))setOpen(false);});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')setOpen(false);});
+})();
+</script>
+<!-- J2:W-1 end -->
+<!-- J2:W-2 start (owner W-2) -->
+<style>
+#schedule.w2-schedule{padding:var(--j2-section) 20px;background:var(--j2-background)}
+#schedule .w2-inner{max-width:1200px;margin:0 auto}
+#schedule h2{margin:0 0 8px;font-family:var(--j2-font-heading);font-size:clamp(2rem,8vw,3.5rem);line-height:1.05;color:var(--j2-text);overflow-wrap:anywhere}
+#schedule .w2-intro{margin:0 0 32px;color:var(--j2-muted);font-size:1.05rem}
+#schedule .w2-days{display:grid;grid-template-columns:minmax(0,1fr);gap:32px}
+#schedule .schedule-day{min-width:0}
+#schedule .schedule-day h3{margin:0 0 8px;font-family:var(--j2-font-heading);font-size:clamp(1.5rem,6vw,2rem);color:var(--j2-primary)}
+#schedule .day-date{display:inline-block;margin:0 0 16px;padding:6px 14px;background:var(--j2-accent);color:var(--j2-background);border-radius:var(--j2-radius);font-weight:800;font-size:1rem}
+#schedule .w2-list{display:grid;gap:16px}
+#schedule .schedule-item{border-left:6px solid var(--j2-secondary);min-width:0}
+#schedule .schedule-item h4{margin:0 0 8px;font-size:1.25rem;color:var(--j2-text);overflow-wrap:anywhere}
+#schedule .sch-time{display:block;margin:0;color:var(--j2-primary);font-weight:800;font-size:1.1rem}
+@media (min-width:900px){
+#schedule.w2-schedule{padding:96px 32px}
+#schedule .w2-days{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+}
+</style>
+<section id="schedule" class="w2-schedule" aria-labelledby="schedule-title">
+  <div class="w2-inner">
+    <h2 id="schedule-title">Schedule</h2>
+    <p class="w2-intro">Three days, 14 to 16 February 2027. Pick your day and plan your slots.</p>
+    <div class="w2-days">
+      <div class="schedule-day">
+        <h3>Day 1</h3>
+        <span class="day-date">14 February 2027</span>
+        <div class="w2-list">
+          <div class="schedule-item j2-card">
+            <h4>Code Sprint</h4>
+            <p class="sch-time">10am-1pm</p>
+          </div>
+          <div class="schedule-item j2-card">
+            <h4>Line Follower</h4>
+            <p class="sch-time">2pm-5pm</p>
+          </div>
+          <div class="schedule-item j2-card">
+            <h4>AI in Daily Life</h4>
+            <p class="sch-time">5:30pm-6:30pm</p>
+          </div>
+        </div>
+      </div>
+      <div class="schedule-day">
+        <h3>Day 2</h3>
+        <span class="day-date">15 February 2027</span>
+        <div class="w2-list">
+          <div class="schedule-item j2-card">
+            <h4>Bug Hunt</h4>
+            <p class="sch-time">11am-1pm</p>
+          </div>
+          <div class="schedule-item j2-card">
+            <h4>Poster Jam</h4>
+            <p class="sch-time">2pm-4pm</p>
+          </div>
+        </div>
+      </div>
+      <div class="schedule-day">
+        <h3>Day 3</h3>
+        <span class="day-date">16 February 2027</span>
+        <div class="w2-list">
+          <div class="schedule-item j2-card">
+            <h4>Drone Dash</h4>
+            <p class="sch-time">10am-1pm</p>
+          </div>
+          <div class="schedule-item j2-card">
+            <h4>UI Duel</h4>
+            <p class="sch-time">2pm-5pm</p>
+          </div>
+          <div class="schedule-item j2-card">
+            <h4>Startup Stories</h4>
+            <p class="sch-time">5:30pm-6:30pm</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- J2:W-2 end -->
+<!-- J2:W-3 start (owner W-3) -->
+<style>
+#events.w3-events{padding:var(--j2-section) 20px;background:var(--j2-surface)}
+#events .w3-inner{max-width:1200px;margin:0 auto}
+#events h2{margin:0 0 8px;font-family:var(--j2-font-heading);font-size:clamp(2rem,8vw,3.5rem);line-height:1.05;color:var(--j2-text);overflow-wrap:anywhere}
+#events .w3-intro{margin:0 0 24px;color:var(--j2-muted);font-size:1.05rem}
+#events .filter-bar{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 16px}
+#events .filter-btn{font:inherit;font-weight:800;padding:0 20px;min-width:48px}
+#events .filter-btn:not(.is-active){background:transparent;color:var(--j2-text)}
+#events .filter-btn.is-active{background:var(--j2-primary);color:var(--j2-background)}
+#events .filter-btn:focus-visible{outline:3px solid var(--j2-accent);outline-offset:2px}
+#events .w3-count{margin:0 0 24px;color:var(--j2-muted);font-size:.95rem}
+#events .event-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+#events .event-card{display:block;min-width:0;background:var(--j2-background);border-top:6px solid var(--j2-secondary)}
+#events .event-card[hidden]{display:none}
+#events .event-card h3{margin:12px 0 12px;font-size:1.4rem;line-height:1.15;color:var(--j2-text);overflow-wrap:anywhere}
+#events .ev-cat{display:inline-block;padding:4px 12px;background:var(--j2-accent);color:var(--j2-background);border-radius:var(--j2-radius);font-weight:800;font-size:.9rem}
+#events .ev-meta{display:flex;flex-wrap:wrap;gap:4px 16px;margin:0 0 16px;color:var(--j2-muted);font-weight:600}
+#events .ev-price{margin:0;color:var(--j2-primary);font-family:var(--j2-font-heading);font-size:1.75rem;font-weight:700}
+@media (min-width:600px){
+#events .event-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (min-width:900px){
+#events.w3-events{padding:96px 32px}
+#events .event-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}
+}
+</style>
+<section id="events" class="w3-events" aria-labelledby="events-title">
+  <div class="w3-inner">
+    <h2 id="events-title">Events</h2>
+    <p class="w3-intro">Eight events across four categories. Pick a category to narrow the list.</p>
+    <div class="filter-bar" role="group" aria-label="Filter events by category">
+      <button type="button" class="filter-btn j2-btn is-active" data-filter="all" aria-pressed="true">All</button>
+      <button type="button" class="filter-btn j2-btn" data-filter="Coding" aria-pressed="false">Coding</button>
+      <button type="button" class="filter-btn j2-btn" data-filter="Robotics" aria-pressed="false">Robotics</button>
+      <button type="button" class="filter-btn j2-btn" data-filter="Design" aria-pressed="false">Design</button>
+      <button type="button" class="filter-btn j2-btn" data-filter="Talks" aria-pressed="false">Talks</button>
+    </div>
+    <p class="w3-count" id="events-count" aria-live="polite">Showing 8 events</p>
+    <div class="event-grid">
+      <article class="event-card j2-card" data-category="Coding">
+        <span class="ev-cat">Coding</span>
+        <h3>Code Sprint</h3>
+        <p class="ev-meta"><span>Day 1</span><span>10am-1pm</span></p>
+        <p class="ev-price">Rs 100</p>
+      </article>
+      <article class="event-card j2-card" data-category="Coding">
+        <span class="ev-cat">Coding</span>
+        <h3>Bug Hunt</h3>
+        <p class="ev-meta"><span>Day 2</span><span>11am-1pm</span></p>
+        <p class="ev-price">Rs 50</p>
+      </article>
+      <article class="event-card j2-card" data-category="Robotics">
+        <span class="ev-cat">Robotics</span>
+        <h3>Line Follower</h3>
+        <p class="ev-meta"><span>Day 1</span><span>2pm-5pm</span></p>
+        <p class="ev-price">Rs 150</p>
+      </article>
+      <article class="event-card j2-card" data-category="Robotics">
+        <span class="ev-cat">Robotics</span>
+        <h3>Drone Dash</h3>
+        <p class="ev-meta"><span>Day 3</span><span>10am-1pm</span></p>
+        <p class="ev-price">Rs 200</p>
+      </article>
+      <article class="event-card j2-card" data-category="Design">
+        <span class="ev-cat">Design</span>
+        <h3>Poster Jam</h3>
+        <p class="ev-meta"><span>Day 2</span><span>2pm-4pm</span></p>
+        <p class="ev-price">Free</p>
+      </article>
+      <article class="event-card j2-card" data-category="Design">
+        <span class="ev-cat">Design</span>
+        <h3>UI Duel</h3>
+        <p class="ev-meta"><span>Day 3</span><span>2pm-5pm</span></p>
+        <p class="ev-price">Rs 100</p>
+      </article>
+      <article class="event-card j2-card" data-category="Talks">
+        <span class="ev-cat">Talks</span>
+        <h3>AI in Daily Life</h3>
+        <p class="ev-meta"><span>Day 1</span><span>5:30pm-6:30pm</span></p>
+        <p class="ev-price">Free</p>
+      </article>
+      <article class="event-card j2-card" data-category="Talks">
+        <span class="ev-cat">Talks</span>
+        <h3>Startup Stories</h3>
+        <p class="ev-meta"><span>Day 3</span><span>5:30pm-6:30pm</span></p>
+        <p class="ev-price">Free</p>
+      </article>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  var root=document.getElementById('events');
+  if(!root)return;
+  var buttons=root.querySelectorAll('.filter-btn');
+  var cards=root.querySelectorAll('.event-card');
+  var count=document.getElementById('events-count');
+  function apply(filter){
+    var shown=0;
+    for(var i=0;i<cards.length;i++){
+      var match=filter==='all'||cards[i].getAttribute('data-category')===filter;
+      if(match){cards[i].removeAttribute('hidden');shown++;}
+      else{cards[i].setAttribute('hidden','');}
+    }
+    for(var j=0;j<buttons.length;j++){
+      var on=buttons[j].getAttribute('data-filter')===filter;
+      buttons[j].classList.toggle('is-active',on);
+      buttons[j].setAttribute('aria-pressed',on?'true':'false');
+    }
+    if(count)count.textContent='Showing '+shown+(shown===1?' event':' events');
+  }
+  for(var k=0;k<buttons.length;k++){
+    buttons[k].addEventListener('click',function(){apply(this.getAttribute('data-filter'));});
+  }
+})();
+</script>
+<!-- J2:W-3 end -->
+</body>
+</html>

@@ -1,0 +1,73 @@
+{
+  "statement": "Build a one-page, phone-friendly website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru, where visitors see the menu with prices, the opening hours and the shop address, and can pre-order a coffee for pickup without paying online.",
+  "site_name": "Brew Lab",
+  "audience": "Coffee lovers and office staff near the shop in Indiranagar, Bengaluru",
+  "standards": [
+    "One page only",
+    "Works on phones and on desktop",
+    "No payment taken on the site",
+    "Plain HTML, CSS and JavaScript in one file, no build step"
+  ],
+  "rules": [
+    "Show only facts given by the Requester, copied exactly",
+    "Show the written address only, no embedded map",
+    "Pre-orders are sent by email to hello@brewlab.example",
+    "No payment on the site; customers pay at pickup"
+  ],
+  "done_when": [
+    "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map",
+    "The page shows the menu with all seven items and their prices: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+    "The page shows the opening hours: Monday to Saturday 7:30 am to 9:00 pm, Sunday 8:30 am to 6:00 pm, with no closed days",
+    "The page shows the phone +91 98450 12345 and the email hello@brewlab.example",
+    "The page has a pre-order form with the fields name, phone, items and pickup time, and it sends the order to hello@brewlab.example",
+    "The page states that there is no online payment and customers pay at pickup, and has no payment field",
+    "The site is a single page that works on phones: no horizontal overflow at 360px and 1280px, and no broken in-page link",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ],
+  "business_type": "coffee shop",
+  "visitor_needs": [
+    "See the menu with prices",
+    "See the opening hours",
+    "Find the shop address",
+    "Pre-order a coffee for pickup",
+    "Contact the shop by phone or email"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [],
+  "facts": [
+    "Brew Lab",
+    "Indiranagar, Bengaluru",
+    "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+    "Filter coffee 90",
+    "Cappuccino 160",
+    "Latte 180",
+    "Cold brew 200",
+    "Masala chai 80",
+    "Almond croissant 140",
+    "Banana bread slice 120",
+    "Monday to Saturday 7:30 am to 9:00 pm",
+    "Sunday 8:30 am to 6:00 pm",
+    "+91 98450 12345",
+    "hello@brewlab.example",
+    "30 pre-orders per week"
+  ],
+  "charter_items": [
+    "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map",
+    "The page shows the menu with all seven items and their prices: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+    "The page shows the opening hours: Monday to Saturday 7:30 am to 9:00 pm, Sunday 8:30 am to 6:00 pm, with no closed days",
+    "The page shows the phone +91 98450 12345 and the email hello@brewlab.example",
+    "The page has a pre-order form with the fields name, phone, items and pickup time, and it sends the order to hello@brewlab.example",
+    "The page states that there is no online payment and customers pay at pickup, and has no payment field",
+    "The site is a single page that works on phones: no horizontal overflow at 360px and 1280px, and no broken in-page link",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ],
+  "core_items": [
+    "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map",
+    "The page shows the menu with all seven items and their prices: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+    "The page shows the opening hours: Monday to Saturday 7:30 am to 9:00 pm, Sunday 8:30 am to 6:00 pm, with no closed days",
+    "The page shows the phone +91 98450 12345 and the email hello@brewlab.example",
+    "The page has a pre-order form with the fields name, phone, items and pickup time, and it sends the order to hello@brewlab.example",
+    "The page states that there is no online payment and customers pay at pickup, and has no payment field",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ]
+}

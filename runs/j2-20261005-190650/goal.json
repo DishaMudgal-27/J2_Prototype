@@ -1,0 +1,41 @@
+{
+  "statement": "Build a one-page website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru, whose main job is to get a phone visitor to a pre-order for pickup in as few taps as possible. The page also shows the menu with prices, opening hours and location, with a compact beans and farms section and a compact loyalty-card explainer (buy 9, get the 10th free) below the order flow.",
+  "site_name": "Brew Lab",
+  "audience": "Phone visitors in and around Indiranagar, Bengaluru who want to see the menu and pre-order a coffee for pickup.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file, no build step; CDN libraries are allowed.",
+    "Mobile-first and usable on a phone.",
+    "Warm and modern look, delivered through visual design rather than long story sections.",
+    "No invented facts: anything only the shop owner knows appears as a visibly marked placeholder."
+  ],
+  "rules": [
+    "Pre-order has no server and no payment: the form builds a pre-filled order message and opens WhatsApp, with email as fallback, and payment is at pickup.",
+    "The order flow comes before the beans and farms and loyalty sections.",
+    "Do not invent farm names or sourcing claims.",
+    "Menu items and prices, opening hours, address, WhatsApp number and farm details are marked placeholders on the page.",
+    "The beans and farms section and the loyalty explainer stay compact; the accepted trade-off is less room for brand story."
+  ],
+  "done_when": [
+    "The site is a single HTML file with its CSS and JavaScript inline, needing no build step.",
+    "The file has a viewport meta tag and responsive CSS, and the main buttons and form controls are at least 44px tall.",
+    "A visible Pre-order button or link in the header or first section scrolls to or opens the order form.",
+    "In the file's source order, the order form and menu come before the beans and farms section and the loyalty section.",
+    "The menu lists each item with a price shown in rupees.",
+    "The page has an opening hours section and a location section naming Indiranagar, Bengaluru.",
+    "The order form lets the visitor pick items from the menu, enter a name and a pickup time, and states that payment is at pickup.",
+    "The form's JavaScript builds a pre-filled order message and opens a WhatsApp link (wa.me) with a mailto link as fallback, and the page has no payment fields and no on-screen text claiming the order was placed.",
+    "A beans and farms section exists and contains no farm name or sourcing claim that is not marked as a placeholder.",
+    "A loyalty-card section states: buy 9, get the 10th free.",
+    "Every placeholder value (menu items and prices, hours, address, WhatsApp number, email, farm details) carries a visible on-page placeholder marker, and the file contains no unmarked invented facts.",
+    "CSS variables define a warm colour palette that the page uses for backgrounds, text and buttons."
+  ],
+  "open_inputs": [
+    "Menu items and prices",
+    "Opening hours",
+    "Street address and map location",
+    "Shop WhatsApp number for orders",
+    "Shop email address for the fallback",
+    "Farm names and sourcing details for the beans and farms section",
+    "Pickup time rules (for example, minimum lead time)"
+  ]
+}

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "wf-site-shell",
+    "name": "Build single-file page shell, menu, hours, location, beans and loyalty",
+    "purpose": "No site file exists. Needs viewport meta, responsive CSS, warm CSS-variable palette, header Pre-order link, menu with rupee prices, hours, Indiranagar location, compact beans/farms and loyalty sections.",
+    "cost": 25,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 25,
+      "model_call_limit": 4,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 25 or 4 calls are used without a file that has the viewport meta tag, :root variables and the #order anchor. Report to Coordination instead of retrying again."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "brewlab/index.html (shell, styles, static sections, placeholder markers)"
+    ],
+    "completion_check": "File has a viewport meta tag, :root CSS variables used for background, text and buttons, a header link to #order, menu items with a rupee sign, hours and location sections naming Indiranagar, Bengaluru, and a loyalty section containing 'buy 9, get the 10th free'. Beans and farms and loyalty come after the order and menu anchors. Every price, hour, address and farm detail carries a visible placeholder marker.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "wf-order-form",
+    "name": "Add pre-order form with WhatsApp and email fallback",
+    "purpose": "Page has no way to pick items, enter a name and pickup time, or send an order. Done-when needs a form that opens wa.me with a mailto fallback and states that payment is at pickup.",
+    "cost": 20,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 3,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 20 or 3 calls are used without a form that has the wa.me and mailto: logic. Do not edit the shell sections beyond inserting the form and its script."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "brewlab/index.html (updated with order form and JS)"
+    ],
+    "completion_check": "File contains a form with item selection, a name input and a pickup time input, each at least 44px tall. The text 'payment at pickup' is present. The JS references wa.me and mailto:. There are no card or payment inputs and no 'order placed' or 'confirmed' text. The WhatsApp number, email and pickup rules are marked placeholders. The form precedes the beans and loyalty sections in source order.",
+    "dependencies": [
+      "wf-site-shell"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "wf-visiting-hours",
+    "name": "Add visiting hours section",
+    "purpose": "Requester asked for a visiting hours section. The page has only an opening hours table in #hours and no section framed as visiting hours.",
+    "cost": 12,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 12,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 12 or 3 calls are used without a section id='visiting-hours' placed after #hours and before #beans. Report to Coordination instead of retrying again."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "brewlab/index.html (updated with a visiting hours section, and a nav link if the header has a nav)"
+    ],
+    "completion_check": "File contains <section id='visiting-hours'> with a heading containing 'Visiting hours'. It sits after #hours and before #beans and #loyalty in source order. Every time value inside it has a visible 'Placeholder' marker, and it contains no unmarked invented times or claims. The order form, menu, beans and loyalty sections are unchanged. There are no payment fields and no 'order placed' text. Its CSS uses the existing :root variables.",
+    "dependencies": [
+      "wf-site-shell",
+      "wf-order-form"
+    ],
+    "status": "done",
+    "cycle": 2
+  }
+]

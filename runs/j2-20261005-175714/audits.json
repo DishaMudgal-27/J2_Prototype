@@ -1,0 +1,30 @@
+[
+  {
+    "cycle": 1,
+    "version": 1,
+    "results": [
+      {
+        "criterion": "The booking system clearly features General Medicine, Pediatrics, and Cardiology.",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "Although tabs for General Medicine, Pediatrics, and Cardiology are declared, the truncation of the file prevents the full interface and functionality from rendering.",
+        "severity": "high"
+      },
+      {
+        "criterion": "The emergency helpline '+91 80 4999 9999' and 'call 108' instructions are highly visible on load.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The emergency banner and hero emergency card prominently display the '+91 80 4999 9999' helpline and the 'call 108' instructions.",
+        "severity": "low"
+      },
+      {
+        "criterion": "All features run correctly within a single plain HTML/CSS/JS file.",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "The file is cut off at '<select id=\"time-slot\"'. The page is broken, unclosed, and contains no JavaScript execution environment.",
+        "severity": "critical"
+      }
+    ],
+    "all_pass": false
+  }
+]

@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#9D2B5B",
+    "secondary": "#2F5D46",
+    "accent": "#F6C9D3",
+    "background": "#FFF8F5",
+    "surface": "#FFFFFF",
+    "text": "#2B2024",
+    "muted": "#66555B"
+  },
+  "fonts": {
+    "heading": "'Playfair Display', Georgia, serif",
+    "body": "'Nunito Sans', system-ui, -apple-system, 'Segoe UI', sans-serif",
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap"
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "64px"
+  },
+  "radius": "12px",
+  "buttons": {
+    "primary": "display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 24px;background:#9D2B5B;color:#FFFFFF;border:2px solid #9D2B5B;border-radius:999px;font-weight:700;font-size:1rem;text-decoration:none;cursor:pointer;",
+    "secondary": "display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 24px;background:transparent;color:#9D2B5B;border:2px solid #9D2B5B;border-radius:999px;font-weight:700;font-size:1rem;text-decoration:none;cursor:pointer;"
+  },
+  "card": "background:#FFFFFF;border:1px solid #F0DDE2;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(157,43,91,0.08);",
+  "notes": "Rose and leaf green on warm cream feel floral and local, and all text pairs pass WCAG AA with 48px-tall tap targets for phone users."
+}

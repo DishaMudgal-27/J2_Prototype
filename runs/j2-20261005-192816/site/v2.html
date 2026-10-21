@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CityCare Hospital, Bengaluru</title>
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; margin: 0; line-height: 1.5; color: #1a1a1a; }
+  header { padding: 16px 20px; border-bottom: 1px solid #ccc; }
+  header h1 { margin: 0; font-size: 1.5rem; }
+  header p { margin: 4px 0 0; }
+  main { padding: 16px 20px; max-width: 900px; margin: 0 auto; }
+  .placeholder { background: #fff3b0; border: 1px dashed #8a6d00; padding: 1px 6px; font-style: italic; }
+  section { margin-bottom: 32px; }
+  form .field { margin-bottom: 14px; }
+  form label { display: block; font-weight: bold; margin-bottom: 4px; }
+  form input, form select, form textarea { width: 100%; max-width: 420px; padding: 8px; font-size: 1rem; box-sizing: border-box; }
+  form input.invalid, form select.invalid { border: 2px solid #b00020; }
+  .error { color: #b00020; font-size: 0.9rem; margin: 4px 0 0; min-height: 1em; }
+  .notice { border: 1px solid #8a6d00; background: #fffbe6; padding: 10px 12px; margin: 12px 0; }
+  button { padding: 10px 18px; font-size: 1rem; cursor: pointer; }
+  #booking-confirmation { border: 1px solid #2e7d32; background: #edf7ee; padding: 12px 14px; margin-top: 16px; }
+  #booking-confirmation[hidden] { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>CityCare Hospital</h1>
+  <p>Bengaluru</p>
+</header>
+
+<main>
+  <section id="emergency" aria-labelledby="emergency-heading">
+    <h2 id="emergency-heading">Emergency information</h2>
+    <p><strong>In an emergency, call 108 or 112 now. Do not wait for a reply from this website.</strong></p>
+
+    <div class="numbers">
+      <p><strong>Ambulance:</strong> <a href="tel:108">108</a> (national ambulance number)</p>
+      <p><strong>Emergency:</strong> <a href="tel:112">112</a> (national emergency number)</p>
+    </div>
+
+    <h3>CityCare Hospital emergency details</h3>
+    <p>The details below have not been supplied by the hospital yet. Yellow marked text is a placeholder, not a real hospital fact.</p>
+    <ul>
+      <li><strong>Hospital address:</strong> <span class="placeholder">To be confirmed by CityCare</span></li>
+      <li><strong>Hospital phone:</strong> <span class="placeholder">To be confirmed by CityCare</span></li>
+      <li><strong>Directions:</strong> <span class="placeholder">To be confirmed by CityCare</span></li>
+      <li><strong>Emergency desk:</strong> <span class="placeholder">To be confirmed by CityCare</span></li>
+    </ul>
+  </section>
+
+  <section id="booking" aria-labelledby="booking-heading">
+    <h2 id="booking-heading">Request a visit</h2>
+    <p>This form is for non-urgent visits only. For an emergency, call 108 or 112.</p>
+    <div class="notice">
+      <strong>How this works:</strong> your request is sent by email to the hospital. It is <strong>not a confirmed appointment</strong> until the hospital replies to you.
+      The receiving address is a placeholder: <span class="placeholder">bookings-placeholder@example.com (to be confirmed by CityCare)</span>.
+    </div>
+
+    <form id="booking-form" novalidate>
+      <div class="field">
+        <label for="bf-name">Full name *</label>
+        <input type="text" id="bf-name" name="name" autocomplete="name" required aria-describedby="err-name">
+        <p class="error" id="err-name" aria-live="polite"></p>
+      </div>
+      <div class="field">
+        <label for="bf-phone">Phone number *</label>
+        <input type="tel" id="bf-phone" name="phone" autocomplete="tel" inputmode="tel" placeholder="e.g. 98450 12345" required aria-describedby="err-phone">
+        <p class="error" id="err-phone" aria-live="polite"></p>
+      </div>
+      <div class="field">
+        <label for="bf-email">Email address *</label>
+        <input type="email" id="bf-email" name="email" autocomplete="email" required aria-describedby="err-email">
+        <p class="error" id="err-email" aria-live="polite"></p>
+      </div>
+      <div class="field">
+        <label for="bf-date">Preferred visit date *</label>
+        <input type="date" id="bf-date" name="date" required aria-describedby="err-date">
+        <p class="error" id="err-date" aria-live="polite"></p>
+      </div>
+      <div class="field">
+        <label for="bf-dept">Department (optional)</label>
+        <select id="bf-dept" name="dept">
+          <option value="">Not sure / no preference</option>
+          <option>General medicine</option>
+          <option>Cardiology</option>
+          <option>Paediatrics</option>
+          <option>Orthopaedics</option>
+          <option>Gynaecology</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="bf-reason">Reason for visit (optional)</label>
+        <textarea id="bf-reason" name="reason" rows="3" maxlength="500"></textarea>
+      </div>
+      <button type="submit">Send request by email</button>
+    </form>
+
+    <div id="booking-confirmation" role="status" aria-live="polite" hidden>
+      <h3>Your email request is ready</h3>
+      <p>Your email program should open with the request filled in. Press send there to finish.
+        If nothing opens, <a id="mailto-fallback" href="#">use this email link</a>.</p>
+      <p><strong>This is not a confirmed appointment.</strong> The request is sent by email, and your visit is only confirmed once the hospital replies to you.</p>
+      <p>For questions, call the hospital on <span class="placeholder">To be confirmed by CityCare</span> (phone number not yet supplied by the hospital).</p>
+      <p>In an emergency, call 108 or 112.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  var RECIPIENT = "bookings-placeholder@example.com"; // PLACEHOLDER: replace with the hospital's real address
+  var form = document.getElementById("booking-form");
+  var box = document.getElementById("booking-confirmation");
+  var fallback = document.getElementById("mailto-fallback");
+  var dateInput = document.getElementById("bf-date");
+
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function todayStr() {
+    var d = new Date();
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  }
+  dateInput.min = todayStr();
+
+  function setError(id, msg) {
+    var input = document.getElementById("bf-" + id);
+    document.getElementById("err-" + id).textContent = msg;
+    if (msg) { input.classList.add("invalid"); input.setAttribute("aria-invalid", "true"); }
+    else { input.classList.remove("invalid"); input.removeAttribute("aria-invalid"); }
+  }
+
+  function validate() {
+    var name = form.name.value.trim();
+    var phone = form.phone.value.replace(/[\s-]/g, "");
+    var email = form.email.value.trim();
+    var date = form.date.value;
+    var ok = true, firstBad = null;
+
+    function fail(id, msg) { setError(id, msg); if (!firstBad) firstBad = id; ok = false; }
+
+    if (!name) fail("name", "Please enter your full name.");
+    else if (!/^\p{L}[\p{L} .'\-]{1,79}$/u.test(name)) fail("name", "Please enter a valid name using letters only (2 to 80 characters).");
+    else setError("name", "");
+
+    if (!phone) fail("phone", "Please enter your phone number.");
+    else if (!/^(\+91|91|0)?[6-9]\d{9}$/.test(phone)) fail("phone", "Enter a valid 10 digit Indian mobile number, for example 9845012345.");
+    else setError("phone", "");
+
+    if (!email) fail("email", "Please enter your email address.");
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) fail("email", "Enter a valid email address, for example name@example.com.");
+    else setError("email", "");
+
+    if (!date) fail("date", "Please choose a preferred visit date.");
+    else if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || isNaN(new Date(date).getTime())) fail("date", "Please enter a valid date.");
+    else if (date < todayStr()) fail("date", "The date cannot be in the past.");
+    else setError("date", "");
+
+    if (firstBad) document.getElementById("bf-" + firstBad).focus();
+    return ok;
+  }
+
+  ["name", "phone", "email", "date"].forEach(function (id) {
+    document.getElementById("bf-" + id).addEventListener("input", function () {
+      if (this.classList.contains("invalid")) setError(id, "");
+    });
+  });
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    box.hidden = true;
+    if (!validate()) return;
+
+    var nl = "\r\n";
+    var subject = "Visit request from " + form.name.value.trim();
+    var body =
+      "Visit request (not a confirmed appointment until the hospital replies)" + nl + nl +
+      "Name: " + form.name.value.trim() + nl +
+      "Phone: " + form.phone.value.trim() + nl +
+      "Email: " + form.email.value.trim() + nl +
+      "Preferred date: " + form.date.value + nl +
+      "Department: " + (form.dept.value || "No preference") + nl +
+      "Reason: " + (form.reason.value.trim() || "Not given");
+    var href = "mailto:" + RECIPIENT +
+      "?subject=" + encodeURIComponent(subject) +
+      "&body=" + encodeURIComponent(body);
+
+    fallback.setAttribute("href", href);
+    box.hidden = false;
+    box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    window.location.href = href;
+  });
+})();
+</script>
+</body>
+</html>

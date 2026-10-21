@@ -1,0 +1,23 @@
+{
+  "statement": "A one-page website for Little Fig where visitors find what they need and come in",
+  "site_name": "Little Fig",
+  "audience": "Local customers, mostly on phones",
+  "standards": [
+    "Warm, modern feel",
+    "Fast first screen on a phone"
+  ],
+  "rules": [
+    "Plain HTML/CSS/JS in one file",
+    "No real customer data"
+  ],
+  "done_when": [
+    "The menu with prices is shown",
+    "Opening hours are listed",
+    "The address and a map link are shown",
+    "Layout works on a phone"
+  ],
+  "open_inputs": [
+    "Real prices, hours, address and photos"
+  ],
+  "dropped_from_brief": []
+}

@@ -1,0 +1,129 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "w-menu",
+    "name": "Menu section",
+    "purpose": "Site has no menu; the six items and prices are not shown.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 4,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the section still shows a wrong or missing item or price, or overflows at 360px, after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "menu section in site file with page shell, viewport meta tag and base mobile-first CSS"
+    ],
+    "completion_check": "Section lists exactly the six items under Coffee, Cold and Food, each with the stated ₹ price, and has no horizontal overflow at 360px and 1280px.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "usable section and head tags",
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "w-visit",
+    "name": "Hours and location section",
+    "purpose": "No opening hours, today highlight, address or directions link.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 6,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if today's row is not highlighted or a console error remains after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "visit section with hours table, today-highlight script, address and directions link"
+    ],
+    "completion_check": "Seven rows (Mon-Fri 8am-10pm, Sat-Sun 9am-11pm); the row matching the current day gets a highlight class on load; address reads 100 Feet Road, Indiranagar, Bengaluru 560038; link labelled 'Get directions' points to https://maps.google.com/?q=100+Feet+Road+Indiranagar+Bengaluru+560038; no console errors.",
+    "dependencies": [
+      "w-menu"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "w-order",
+    "name": "Pre-order form",
+    "purpose": "Visitors cannot pre-order or see a running total.",
+    "cost": 25,
+    "estimate": 25,
+    "envelope": {
+      "money_limit": 25,
+      "model_call_limit": 8,
+      "time_limit_minutes": 18,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the total, the pickup-time rejection or the WhatsApp link still fails after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "order section with form and script for total, validation, WhatsApp link and confirmation"
+    ],
+    "completion_check": "Changing any quantity updates the ₹ total on the page; a pickup time outside that day's hours is rejected; submit opens a wa.me link to +91 98450 00000 containing name, phone, items with quantities, pickup time and total, and shows a confirmation saying payment is at pickup; no console errors.",
+    "dependencies": [
+      "w-menu",
+      "w-visit"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "w-loyalty",
+    "name": "Loyalty section",
+    "purpose": "No loyalty scheme shown.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 4,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the circle count is not exactly 10 or the section overflows at 360px after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "loyalty section with 10 stamp circles"
+    ],
+    "completion_check": "Exactly 10 stamp circles; the 10th shows FREE; text states the 10th stamp gives one free drink of any size; circles wrap without horizontal overflow at 360px.",
+    "dependencies": [
+      "w-menu"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  }
+]

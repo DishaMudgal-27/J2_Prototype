@@ -1,0 +1,808 @@
+{
+  "stage": "website",
+  "goal": {
+    "statement": "Build a one-page, phone-friendly website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru, where visitors see the menu with prices, the opening hours and the shop address, and can pre-order a coffee for pickup without paying online.",
+    "site_name": "Brew Lab",
+    "audience": "Coffee lovers and office staff near the shop in Indiranagar, Bengaluru",
+    "standards": [
+      "One page only",
+      "Works on phones and on desktop",
+      "No payment taken on the site",
+      "Plain HTML, CSS and JavaScript in one file, no build step"
+    ],
+    "rules": [
+      "Show only facts given by the Requester, copied exactly",
+      "Show the written address only, no embedded map",
+      "Pre-orders are sent by email to hello@brewlab.example",
+      "No payment on the site; customers pay at pickup"
+    ],
+    "done_when": [
+      "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map",
+      "The page shows the menu with all seven items and their prices: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+      "The page shows the opening hours: Monday to Saturday 7:30 am to 9:00 pm, Sunday 8:30 am to 6:00 pm, with no closed days",
+      "The page shows the phone +91 98450 12345 and the email hello@brewlab.example",
+      "The page has a pre-order form with the fields name, phone, items and pickup time, and it sends the order to hello@brewlab.example",
+      "The page states that there is no online payment and customers pay at pickup, and has no payment field",
+      "The site is a single page that works on phones: no horizontal overflow at 360px and 1280px, and no broken in-page link",
+      "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+    ],
+    "business_type": "coffee shop",
+    "visitor_needs": [
+      "See the menu with prices",
+      "See the opening hours",
+      "Find the shop address",
+      "Pre-order a coffee for pickup",
+      "Contact the shop by phone or email"
+    ],
+    "to_be_confirmed": [],
+    "dropped_from_brief": [],
+    "facts": [
+      "Brew Lab",
+      "Indiranagar, Bengaluru",
+      "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+      "Filter coffee 90",
+      "Cappuccino 160",
+      "Latte 180",
+      "Cold brew 200",
+      "Masala chai 80",
+      "Almond croissant 140",
+      "Banana bread slice 120",
+      "Monday to Saturday 7:30 am to 9:00 pm",
+      "Sunday 8:30 am to 6:00 pm",
+      "+91 98450 12345",
+      "hello@brewlab.example",
+      "30 pre-orders per week"
+    ],
+    "charter_items": [
+      "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map",
+      "The page shows the menu with all seven items and their prices: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+      "The page shows the opening hours: Monday to Saturday 7:30 am to 9:00 pm, Sunday 8:30 am to 6:00 pm, with no closed days",
+      "The page shows the phone +91 98450 12345 and the email hello@brewlab.example",
+      "The page has a pre-order form with the fields name, phone, items and pickup time, and it sends the order to hello@brewlab.example",
+      "The page states that there is no online payment and customers pay at pickup, and has no payment field",
+      "The site is a single page that works on phones: no horizontal overflow at 360px and 1280px, and no broken in-page link",
+      "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+    ],
+    "core_items": [
+      "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map",
+      "The page shows the menu with all seven items and their prices: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+      "The page shows the opening hours: Monday to Saturday 7:30 am to 9:00 pm, Sunday 8:30 am to 6:00 pm, with no closed days",
+      "The page shows the phone +91 98450 12345 and the email hello@brewlab.example",
+      "The page has a pre-order form with the fields name, phone, items and pickup time, and it sends the order to hello@brewlab.example",
+      "The page states that there is no online payment and customers pay at pickup, and has no payment field",
+      "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+    ]
+  },
+  "audits": [
+    {
+      "cycle": 8,
+      "version": 7,
+      "results": [
+        {
+          "id": "F-1",
+          "criterion": "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map",
+          "verdict": "PASS",
+          "note": "#shop-address has 'Brew Lab' and '12, 100 Feet Road, Indiranagar, Bengaluru 560038' in an address element; no iframe or map; external_resources is empty.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 1,
+          "pass": true
+        },
+        {
+          "id": "F-2",
+          "criterion": "The page shows the menu with all seven items and their prices: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+          "verdict": "PASS",
+          "note": "#menu has seven .menu-item li elements, and all seven item-and-price strings match the charter exactly.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 2,
+          "pass": true
+        },
+        {
+          "id": "F-3",
+          "criterion": "The page shows the opening hours: Monday to Saturday 7:30 am to 9:00 pm, Sunday 8:30 am to 6:00 pm, with no closed days",
+          "verdict": "PASS",
+          "note": "#opening-hours has 'Monday to Saturday 7:30 am to 9:00 pm', 'Sunday 8:30 am to 6:00 pm' and 'No closed days'.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 3,
+          "pass": true
+        },
+        {
+          "id": "F-4",
+          "criterion": "The page shows the phone +91 98450 12345 and the email hello@brewlab.example",
+          "verdict": "PASS",
+          "note": "#shop-address shows '+91 98450 12345' and a mailto link with text hello@brewlab.example.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 4,
+          "pass": true
+        },
+        {
+          "id": "F-5",
+          "criterion": "The page has a pre-order form with the fields name, phone, items and pickup time, and it sends the order to hello@brewlab.example",
+          "verdict": "PASS",
+          "note": "#pre-order-form action is mailto:hello@brewlab.example, with #po-name, #po-phone, #po-items, #po-time and a submit button; the code submit test passed and an empty submit shows #po-error. It opens the visitor's email app, so receipt cannot be confirmed.",
+          "severity": "low",
+          "confidence": "medium",
+          "needs_requester_fact": null,
+          "item": 5,
+          "pass": true
+        },
+        {
+          "id": "F-6",
+          "criterion": "The page states that there is no online payment and customers pay at pickup, and has no payment field",
+          "verdict": "PASS",
+          "note": "#no-payment-note reads 'No payment, customers pay at pickup. Nothing is charged on this site.' The form has four fields and no payment input.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 6,
+          "pass": true
+        },
+        {
+          "id": "F-7",
+          "criterion": "The site is a single page that works on phones: no horizontal overflow at 360px and 1280px, and no broken in-page link",
+          "verdict": "PASS",
+          "note": "Mechanical check: overflow_px 0 at 360 and 1280, broken_in_page_links empty, one HTML file, N4 met.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 7,
+          "pass": true
+        },
+        {
+          "id": "F-8",
+          "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+          "verdict": "PASS",
+          "note": "Mechanical check: js_errors empty, overflow 0 at both widths, all 5 in-page links resolve (N2, N3, N4 met).",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 8,
+          "pass": true
+        }
+      ],
+      "extra_issues": [
+        {
+          "id": "F-9",
+          "criterion": "Necessary condition N5: every charter fact appears (missing '30 pre-orders per week')",
+          "verdict": "POLICY_CONCERN",
+          "note": "Code reports missing: ['30 pre-orders per week']. It is the success metric and appears in no done-when item. Putting an internal target on a public page would not help visitors.",
+          "severity": "medium",
+          "confidence": "high",
+          "needs_requester_fact": null
+        },
+        {
+          "id": "F-10",
+          "criterion": "LLD S2 consistency with the built form",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "LLD comparison: S2 mismatch (coffee-item is a text area, spec says select; no quantity field). The charter and the Requester's answer say four fields, so the page follows the charter.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null
+        }
+      ],
+      "rubric": [
+        {
+          "id": "R-1",
+          "item": "R-1",
+          "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+          "verdict": "PASS",
+          "note": "Screenshot shows the same brown palette, Georgia headings and card and button styles at both widths; fonts measured: system-ui, Georgia.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "R-2",
+          "item": "R-2",
+          "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+          "verdict": "PASS",
+          "note": "Contrast: 39 elements checked, 0 low at phone and desktop.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "R-3",
+          "item": "R-3",
+          "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+          "verdict": "PASS",
+          "note": "One h1 and 0 skipped heading levels at both widths; the screenshot shows the title dominant.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "R-4",
+          "item": "R-4",
+          "criterion": "One obvious main action: a visitor can tell at once what to do next",
+          "verdict": "PASS",
+          "note": "First-screen actions: only 'Pre-order for pickup', shown as a prominent button in the screenshot.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "R-5",
+          "item": "R-5",
+          "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+          "verdict": "PASS",
+          "note": "One nav with 5 in-page links reaching all 4 sections; the nav is visible on the 360px screenshot.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "R-6",
+          "item": "R-6",
+          "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+          "verdict": "PASS",
+          "note": "Small tap targets: 0 under 44px on phone.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "R-7",
+          "item": "R-7",
+          "criterion": "Images have alt text",
+          "verdict": "PASS",
+          "note": "0 images on the page, so none lack alt text.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        }
+      ],
+      "mechanical": {
+        "available": true,
+        "bytes": 16261,
+        "broken_in_page_links": [],
+        "external_resources": [],
+        "forms": 1,
+        "scripts": 2,
+        "phone": {
+          "width": 360,
+          "overflow_px": 0
+        },
+        "form_results": [
+          {
+            "index": 1,
+            "has_submit": true,
+            "submitted": true,
+            "invalid": [],
+            "errors_during": [],
+            "ok": true
+          }
+        ],
+        "design": {
+          "phone": {
+            "contrast": {
+              "checked": 39,
+              "low_count": 0,
+              "low": []
+            },
+            "headings": {
+              "h1": 1,
+              "skipped_levels": 0
+            },
+            "images_without_alt": [],
+            "images": 0,
+            "fonts": [
+              "system-ui",
+              "Georgia"
+            ],
+            "nav": {
+              "nav_elements": 1,
+              "in_page_links": 5
+            },
+            "first_screen_actions": [
+              "Pre-order for pickup"
+            ],
+            "small_tap_targets": {
+              "min_px": 44,
+              "count": 0,
+              "examples": []
+            }
+          },
+          "desktop": {
+            "contrast": {
+              "checked": 39,
+              "low_count": 0,
+              "low": []
+            },
+            "headings": {
+              "h1": 1,
+              "skipped_levels": 0
+            },
+            "images_without_alt": [],
+            "images": 0,
+            "fonts": [
+              "system-ui",
+              "Georgia"
+            ],
+            "nav": {
+              "nav_elements": 1,
+              "in_page_links": 5
+            },
+            "first_screen_actions": [
+              "Pre-order for pickup"
+            ]
+          }
+        },
+        "desktop": {
+          "width": 1280,
+          "overflow_px": 0
+        },
+        "js_errors": []
+      },
+      "screenshot": "site/shots/v7.png",
+      "all_pass": false,
+      "conditions": [
+        {
+          "id": "N1",
+          "text": "The page opens (it parses, tags balanced)",
+          "check": "page-parses",
+          "met": true,
+          "evidence": "page parses, tags balanced"
+        },
+        {
+          "id": "N2",
+          "text": "No JavaScript errors on load",
+          "check": "no-js-errors",
+          "met": true,
+          "evidence": "no JS errors on load"
+        },
+        {
+          "id": "N3",
+          "text": "No horizontal overflow at 360px and 1280px",
+          "check": "no-overflow",
+          "met": true,
+          "evidence": "no horizontal overflow at 360px and 1280px"
+        },
+        {
+          "id": "N4",
+          "text": "Every in-page link resolves; WhatsApp (wa.me) and tel: links are well formed",
+          "check": "links-well-formed",
+          "met": true,
+          "evidence": "all 5 in-page, tel: and wa.me link(s) resolve and are well formed"
+        },
+        {
+          "id": "N5",
+          "text": "Every charter fact appears exactly, and nothing is \"to be confirmed\"",
+          "check": [
+            "facts-present-all",
+            "nothing-to-be-confirmed"
+          ],
+          "met": false,
+          "evidence": "missing: ['30 pre-orders per week']; nothing to be confirmed"
+        },
+        {
+          "id": "N6",
+          "text": "No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers",
+          "check": "no-invented-facts",
+          "met": true,
+          "evidence": "every number, phone and email comes from the charter or the Requester's answers"
+        },
+        {
+          "id": "N7",
+          "text": "Every form has a submit control and a destination (action or mailto)",
+          "check": "forms-have-destination",
+          "met": true,
+          "evidence": "1 form(s), each with a submit control and a destination"
+        },
+        {
+          "id": "N8",
+          "text": "A nav reaches every section, and the hero has one obvious main action",
+          "check": "nav-and-main-action",
+          "met": true,
+          "evidence": "the nav reaches all 4 section(s); the hero has 1 main action(s)"
+        }
+      ],
+      "lld": {
+        "matches": [
+          "S1",
+          "S3",
+          "S4",
+          "S5"
+        ],
+        "mismatches": [
+          {
+            "section": "S2",
+            "evidence": "F3 field coffee-item is type text, the spec says select; F4 field quantity isn't in #pre-order-form"
+          }
+        ],
+        "dropped": []
+      }
+    },
+    {
+      "cycle": 9,
+      "version": 8,
+      "results": [
+        {
+          "id": "F-1",
+          "criterion": "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map",
+          "verdict": "PASS",
+          "note": "#shop-address has 'Brew Lab' and '12, 100 Feet Road, Indiranagar, Bengaluru 560038' in an address element; no iframe; external_resources is empty.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 1,
+          "pass": true
+        },
+        {
+          "id": "F-2",
+          "criterion": "The page shows the menu with all seven items and their prices: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+          "verdict": "PASS",
+          "note": "#menu has seven .menu-item li elements, and all seven item-and-price strings match the charter exactly.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 2,
+          "pass": true
+        },
+        {
+          "id": "F-3",
+          "criterion": "The page shows the opening hours: Monday to Saturday 7:30 am to 9:00 pm, Sunday 8:30 am to 6:00 pm, with no closed days",
+          "verdict": "PASS",
+          "note": "#opening-hours has 'Monday to Saturday 7:30 am to 9:00 pm', 'Sunday 8:30 am to 6:00 pm' and 'No closed days'.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 3,
+          "pass": true
+        },
+        {
+          "id": "F-4",
+          "criterion": "The page shows the phone +91 98450 12345 and the email hello@brewlab.example",
+          "verdict": "PASS",
+          "note": "#shop-address shows '+91 98450 12345' and a mailto link with text hello@brewlab.example.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 4,
+          "pass": true
+        },
+        {
+          "id": "F-5",
+          "criterion": "The page has a pre-order form with the fields name, phone, items and pickup time, and it sends the order to hello@brewlab.example",
+          "verdict": "PASS",
+          "note": "#pre-order-form action is mailto:hello@brewlab.example with #po-name, #po-phone, #po-items, #po-time and a submit button; the mechanical submit test passed (ok true) and an empty submit shows #po-error. Mailto opens the visitor's email app, so receipt cannot be confirmed.",
+          "severity": "low",
+          "confidence": "medium",
+          "needs_requester_fact": null,
+          "item": 5,
+          "pass": true
+        },
+        {
+          "id": "F-6",
+          "criterion": "The page states that there is no online payment and customers pay at pickup, and has no payment field",
+          "verdict": "PASS",
+          "note": "#no-payment-note reads 'No payment, customers pay at pickup. Nothing is charged on this site.' The form has four inputs and no payment field.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 6,
+          "pass": true
+        },
+        {
+          "id": "F-7",
+          "criterion": "The site is a single page that works on phones: no horizontal overflow at 360px and 1280px, and no broken in-page link",
+          "verdict": "PASS",
+          "note": "Mechanical check: overflow_px 0 at 360 and 1280, broken_in_page_links empty, one HTML file, N4 met.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 7,
+          "pass": true
+        },
+        {
+          "id": "F-8",
+          "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+          "verdict": "PASS",
+          "note": "Mechanical check: js_errors empty, overflow 0 at both widths, all 5 in-page links resolve (N2, N3, N4 met).",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 8,
+          "pass": true
+        }
+      ],
+      "extra_issues": [
+        {
+          "id": "F-9",
+          "criterion": "Necessary condition N5 (every charter fact appears)",
+          "verdict": "PASS",
+          "note": "Hero has 'Our goal: 30 pre-orders per week.'; code reports all 15 brief facts present and N5 met on v8.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null
+        },
+        {
+          "id": "F-10",
+          "criterion": "LLD S2 consistency with the built form",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "LLD comparison: S2 mismatch (coffee-item is text, spec says select; no quantity field). The build follows the charter and the Requester's four fields; S1, S3, S4 and S5 match.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null
+        }
+      ],
+      "rubric": [
+        {
+          "id": "R-1",
+          "item": "R-1",
+          "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+          "verdict": "PASS",
+          "note": "Screenshot shows the espresso brown and cream palette, Georgia headings, system-ui body and the same card and button style; measured fonts are system-ui and Georgia only.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "R-2",
+          "item": "R-2",
+          "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+          "verdict": "PASS",
+          "note": "Contrast check covered 40 elements at both widths with low_count 0.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "R-3",
+          "item": "R-3",
+          "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+          "verdict": "PASS",
+          "note": "One h1 and 0 skipped heading levels; the screenshot shows Brew Lab as the largest heading.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "R-4",
+          "item": "R-4",
+          "criterion": "One obvious main action: a visitor can tell at once what to do next",
+          "verdict": "PASS",
+          "note": "first_screen_actions lists only 'Pre-order for pickup', a dark button visible on both screenshots.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "R-5",
+          "item": "R-5",
+          "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+          "verdict": "PASS",
+          "note": "One nav with four section links plus the hero link (5 in-page links, all resolve); on the 360px screenshot the nav wraps and stays reachable.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "R-6",
+          "item": "R-6",
+          "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+          "verdict": "PASS",
+          "note": "small_tap_targets count 0 at a 44px minimum on phone.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "R-7",
+          "item": "R-7",
+          "criterion": "Images have alt text",
+          "verdict": "PASS",
+          "note": "The page has 0 images, so images_without_alt is empty.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        }
+      ],
+      "mechanical": {
+        "available": true,
+        "bytes": 16477,
+        "broken_in_page_links": [],
+        "external_resources": [],
+        "forms": 1,
+        "scripts": 2,
+        "phone": {
+          "width": 360,
+          "overflow_px": 0
+        },
+        "form_results": [
+          {
+            "index": 1,
+            "has_submit": true,
+            "submitted": true,
+            "invalid": [],
+            "errors_during": [],
+            "ok": true
+          }
+        ],
+        "design": {
+          "phone": {
+            "contrast": {
+              "checked": 40,
+              "low_count": 0,
+              "low": []
+            },
+            "headings": {
+              "h1": 1,
+              "skipped_levels": 0
+            },
+            "images_without_alt": [],
+            "images": 0,
+            "fonts": [
+              "system-ui",
+              "Georgia"
+            ],
+            "nav": {
+              "nav_elements": 1,
+              "in_page_links": 5
+            },
+            "first_screen_actions": [
+              "Pre-order for pickup"
+            ],
+            "small_tap_targets": {
+              "min_px": 44,
+              "count": 0,
+              "examples": []
+            }
+          },
+          "desktop": {
+            "contrast": {
+              "checked": 40,
+              "low_count": 0,
+              "low": []
+            },
+            "headings": {
+              "h1": 1,
+              "skipped_levels": 0
+            },
+            "images_without_alt": [],
+            "images": 0,
+            "fonts": [
+              "system-ui",
+              "Georgia"
+            ],
+            "nav": {
+              "nav_elements": 1,
+              "in_page_links": 5
+            },
+            "first_screen_actions": [
+              "Pre-order for pickup"
+            ]
+          }
+        },
+        "desktop": {
+          "width": 1280,
+          "overflow_px": 0
+        },
+        "js_errors": []
+      },
+      "screenshot": "site/shots/v8.png",
+      "all_pass": true,
+      "conditions": [
+        {
+          "id": "N1",
+          "text": "The page opens (it parses, tags balanced)",
+          "check": "page-parses",
+          "met": true,
+          "evidence": "page parses, tags balanced"
+        },
+        {
+          "id": "N2",
+          "text": "No JavaScript errors on load",
+          "check": "no-js-errors",
+          "met": true,
+          "evidence": "no JS errors on load"
+        },
+        {
+          "id": "N3",
+          "text": "No horizontal overflow at 360px and 1280px",
+          "check": "no-overflow",
+          "met": true,
+          "evidence": "no horizontal overflow at 360px and 1280px"
+        },
+        {
+          "id": "N4",
+          "text": "Every in-page link resolves; WhatsApp (wa.me) and tel: links are well formed",
+          "check": "links-well-formed",
+          "met": true,
+          "evidence": "all 5 in-page, tel: and wa.me link(s) resolve and are well formed"
+        },
+        {
+          "id": "N5",
+          "text": "Every charter fact appears exactly, and nothing is \"to be confirmed\"",
+          "check": [
+            "facts-present-all",
+            "nothing-to-be-confirmed"
+          ],
+          "met": true,
+          "evidence": "all 15 brief fact(s) appear; nothing to be confirmed"
+        },
+        {
+          "id": "N6",
+          "text": "No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers",
+          "check": "no-invented-facts",
+          "met": true,
+          "evidence": "every number, phone and email comes from the charter or the Requester's answers"
+        },
+        {
+          "id": "N7",
+          "text": "Every form has a submit control and a destination (action or mailto)",
+          "check": "forms-have-destination",
+          "met": true,
+          "evidence": "1 form(s), each with a submit control and a destination"
+        },
+        {
+          "id": "N8",
+          "text": "A nav reaches every section, and the hero has one obvious main action",
+          "check": "nav-and-main-action",
+          "met": true,
+          "evidence": "the nav reaches all 4 section(s); the hero has 1 main action(s)"
+        }
+      ],
+      "lld": {
+        "matches": [
+          "S1",
+          "S3",
+          "S4",
+          "S5"
+        ],
+        "mismatches": [
+          {
+            "section": "S2",
+            "evidence": "F3 field coffee-item is type text, the spec says select; F4 field quantity isn't in #pre-order-form"
+          }
+        ],
+        "dropped": []
+      }
+    }
+  ],
+  "sections": {
+    "style": {
+      "owner": "W-26",
+      "head": "<style>:root{--j2-primary:#3E2415;--j2-secondary:#7A4B2A;--j2-accent:#9A5216;--j2-background:#FBF6EF;--j2-surface:#FFFFFF;--j2-text:#2B1B12;--j2-muted:#6B5646;--j2-font-heading:Georgia, 'Times New Roman', serif;--j2-font-body:system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:12px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#3E2415;color:#FFFFFF;border:2px solid #3E2415;min-height:48px;padding:12px 24px;font-weight:600;}.j2-btn-secondary{display:inline-block;background:transparent;color:#3E2415;border:2px solid #3E2415;min-height:48px;padding:12px 24px;font-weight:600;}.j2-card{background:#FFFFFF;border:1px solid #E6D8C8;box-shadow:0 2px 8px rgba(62,36,21,0.08);padding:24px;}</style>",
+      "body": "",
+      "workflow": "Style guide"
+    },
+    "W-26": {
+      "owner": "W-26",
+      "head": "",
+      "body": "<section id=\"menu\" aria-labelledby=\"menu-heading\">\n  <style>\n    #menu { padding: 64px 16px; background: var(--j2-background, #FBF6EF); color: var(--j2-text, #2B1B12); }\n    #menu .menu-wrap { max-width: 640px; margin: 0 auto; box-sizing: border-box; }\n    #menu h2 { font-family: var(--j2-font-heading, Georgia, serif); color: var(--j2-primary, #3E2415); font-size: 2rem; line-height: 1.2; margin: 0 0 8px; overflow-wrap: anywhere; }\n    #menu .menu-note { color: var(--j2-muted, #6B5646); margin: 0 0 24px; }\n    #menu .menu-list { list-style: none; margin: 0; padding: 0; }\n    #menu .menu-item { font-family: var(--j2-font-body, system-ui, sans-serif); font-size: 1.125rem; padding: 16px 0; border-bottom: 1px solid #E6D8C8; overflow-wrap: anywhere; }\n    #menu .menu-item:last-child { border-bottom: 0; }\n    @media (max-width: 400px) { #menu { padding: 48px 16px; } #menu h2 { font-size: 1.625rem; } }\n  </style>\n  <div class=\"menu-wrap j2-card\">\n    <h2 id=\"menu-heading\">Menu</h2>\n    <p class=\"menu-note\">Prices in rupees.</p>\n    <ul class=\"menu-list\">\n      <li class=\"menu-item\">Filter coffee 90</li>\n      <li class=\"menu-item\">Cappuccino 160</li>\n      <li class=\"menu-item\">Latte 180</li>\n      <li class=\"menu-item\">Cold brew 200</li>\n      <li class=\"menu-item\">Masala chai 80</li>\n      <li class=\"menu-item\">Almond croissant 140</li>\n      <li class=\"menu-item\">Banana bread slice 120</li>\n    </ul>\n  </div>\n</section>",
+      "workflow": "Site Menu section"
+    },
+    "W-27": {
+      "owner": "W-27",
+      "head": "",
+      "body": "<section id=\"pre-order\" aria-labelledby=\"pre-order-heading\">\n  <style>\n    #pre-order { padding: var(--j2-section, 64px) 16px; box-sizing: border-box; scroll-margin-top: 16px; }\n    #pre-order *, #pre-order *::before, #pre-order *::after { box-sizing: border-box; }\n    #pre-order .po-wrap { width: 100%; max-width: 640px; margin: 0 auto; }\n    #pre-order h2 { font-family: var(--j2-font-heading, Georgia, 'Times New Roman', serif); color: var(--j2-primary, #3E2415); margin: 0 0 8px; overflow-wrap: anywhere; }\n    #pre-order .po-intro { color: var(--j2-text, #2B1B12); margin: 0 0 16px; overflow-wrap: anywhere; }\n    #pre-order .po-card { max-width: 100%; }\n    #pre-order .po-row { display: block; margin: 0 0 16px; }\n    #pre-order label { display: block; font-weight: 600; color: var(--j2-text, #2B1B12); margin: 0 0 8px; }\n    #pre-order .po-hint { display: block; font-weight: 400; color: var(--j2-muted, #6B5646); font-size: 0.9rem; margin-top: 4px; }\n    #pre-order .po-field { display: block; width: 100%; max-width: 100%; min-height: 48px; padding: 12px; font: inherit; color: var(--j2-text, #2B1B12); background: var(--j2-surface, #FFFFFF); border: 2px solid var(--j2-secondary, #7A4B2A); border-radius: var(--j2-radius, 12px); }\n    #pre-order textarea.po-field { min-height: 112px; resize: vertical; }\n    #pre-order .po-field:focus { outline: 3px solid var(--j2-accent, #9A5216); outline-offset: 2px; }\n    #pre-order .po-field[aria-invalid=\"true\"] { border-color: var(--j2-accent, #9A5216); }\n    #pre-order #po-submit { min-height: 48px; min-width: 48px; width: 100%; cursor: pointer; font: inherit; font-weight: 600; border-radius: var(--j2-radius, 12px); }\n    #pre-order #po-error { margin: 0 0 16px; padding: 12px; color: var(--j2-text, #2B1B12); background: var(--j2-background, #FBF6EF); border: 2px solid var(--j2-accent, #9A5216); border-radius: var(--j2-radius, 12px); overflow-wrap: anywhere; }\n    #pre-order #po-error[hidden] { display: none; }\n    #pre-order #no-payment-note { margin: 16px 0 0; font-weight: 600; color: var(--j2-primary, #3E2415); overflow-wrap: anywhere; }\n  </style>\n  <div class=\"po-wrap\">\n    <h2 id=\"pre-order-heading\">Pre-order for pickup</h2>\n    <p class=\"po-intro\">Tell us what you would like and when you will collect it. Your email app will open with the order ready to send to the shop.</p>\n    <div class=\"j2-card po-card\">\n      <form id=\"pre-order-form\" action=\"mailto:hello@brewlab.example\" method=\"post\" enctype=\"text/plain\" novalidate>\n        <div id=\"po-error\" role=\"alert\" hidden>Please fill in every field before sending your pre-order.</div>\n        <div class=\"po-row\">\n          <label for=\"po-name\">Name</label>\n          <input class=\"po-field\" type=\"text\" id=\"po-name\" name=\"customer-name\" autocomplete=\"name\" required>\n        </div>\n        <div class=\"po-row\">\n          <label for=\"po-phone\">Phone</label>\n          <input class=\"po-field\" type=\"tel\" id=\"po-phone\" name=\"customer-phone\" autocomplete=\"tel\" inputmode=\"tel\" required>\n        </div>\n        <div class=\"po-row\">\n          <label for=\"po-items\">Items<span class=\"po-hint\">List what you want from the menu, for example Cappuccino and Almond croissant.</span></label>\n          <textarea class=\"po-field\" id=\"po-items\" name=\"coffee-item\" rows=\"3\" required></textarea>\n        </div>\n        <div class=\"po-row\">\n          <label for=\"po-time\">Pickup time<span class=\"po-hint\">Choose the time you will collect, within opening hours.</span></label>\n          <input class=\"po-field\" type=\"time\" id=\"po-time\" name=\"pickup-time\" required>\n        </div>\n        <button type=\"submit\" id=\"po-submit\" class=\"j2-btn\">Send pre-order</button>\n      </form>\n      <p id=\"no-payment-note\">No payment, customers pay at pickup. Nothing is charged on this site.</p>\n    </div>\n  </div>\n  <script>\n    (function () {\n      var form = document.getElementById('pre-order-form');\n      var errorBox = document.getElementById('po-error');\n      if (!form || !errorBox) { return; }\n      var ids = ['po-name', 'po-phone', 'po-items', 'po-time'];\n      var fields = [];\n      ids.forEach(function (id) {\n        var el = document.getElementById(id);\n        if (el) { fields.push(el); }\n      });\n\n      function isEmpty(el) {\n        return String(el.value || '').replace(/\\s+/g, '') === '';\n      }\n\n      function refresh() {\n        var missing = [];\n        fields.forEach(function (el) {\n          var bad = isEmpty(el);\n          el.setAttribute('aria-invalid', bad ? 'true' : 'false');\n          if (bad) {\n            var lab = form.querySelector('label[for=\"' + el.id + '\"]');\n            var text = lab ? (lab.childNodes[0] ? lab.childNodes[0].textContent : lab.textContent) : el.name;\n            missing.push(String(text).trim());\n          }\n        });\n        return missing;\n      }\n\n      form.addEventListener('submit', function (e) {\n        var missing = refresh();\n        if (missing.length > 0) {\n          e.preventDefault();\n          errorBox.textContent = 'Please fill in: ' + missing.join(', ') + '.';\n          errorBox.hidden = false;\n          for (var i = 0; i < fields.length; i++) {\n            if (isEmpty(fields[i])) { try { fields[i].focus(); } catch (err) {} break; }\n          }\n        } else {\n          errorBox.hidden = true;\n        }\n      });\n\n      fields.forEach(function (el) {\n        el.addEventListener('change', function () {\n          var bad = isEmpty(el);\n          el.setAttribute('aria-invalid', bad ? 'true' : 'false');\n          if (!errorBox.hidden && refresh().length === 0) { errorBox.hidden = true; }\n        });\n      });\n    })();\n  </script>\n</section>",
+      "workflow": "Site Pre-order section"
+    },
+    "W-28": {
+      "owner": "W-28",
+      "head": "",
+      "body": "<section id=\"shop-address\" aria-label=\"Shop address and contact\">\n  <style>\n    #shop-address {\n      padding: var(--j2-section, 64px) 16px;\n      background: var(--j2-background, #FBF6EF);\n      color: var(--j2-text, #2B1B12);\n      font-family: var(--j2-font-body, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif);\n      box-sizing: border-box;\n    }\n    #shop-address *, #shop-address *::before, #shop-address *::after { box-sizing: border-box; }\n    #shop-address > .j2-card {\n      max-width: 640px;\n      margin: 0 auto;\n      border-radius: var(--j2-radius, 12px);\n      overflow-wrap: anywhere;\n    }\n    #shop-address h2 {\n      margin: 0 0 8px;\n      font-family: var(--j2-font-heading, Georgia, 'Times New Roman', serif);\n      color: var(--j2-primary, #3E2415);\n      font-size: 1.75rem;\n      line-height: 1.2;\n    }\n    #shop-address h3 {\n      margin: 0 0 16px;\n      font-family: var(--j2-font-heading, Georgia, 'Times New Roman', serif);\n      color: var(--j2-secondary, #7A4B2A);\n      font-size: 1.125rem;\n      font-weight: 400;\n    }\n    #shop-address dl { margin: 0; }\n    #shop-address dt {\n      margin: 16px 0 4px;\n      color: var(--j2-muted, #6B5646);\n      font-size: 0.875rem;\n      font-weight: 600;\n      text-transform: uppercase;\n      letter-spacing: 0.04em;\n    }\n    #shop-address dt:first-child { margin-top: 0; }\n    #shop-address dd {\n      margin: 0;\n      font-size: 1.0625rem;\n      line-height: 1.5;\n    }\n    #shop-address address { font-style: normal; }\n    #shop-address .contact-email {\n      display: inline-flex;\n      align-items: center;\n      min-height: 48px;\n      min-width: 48px;\n      color: var(--j2-primary, #3E2415);\n      font-weight: 600;\n      text-decoration: underline;\n      text-underline-offset: 3px;\n    }\n    #shop-address .contact-email:focus-visible {\n      outline: 3px solid var(--j2-accent, #9A5216);\n      outline-offset: 2px;\n    }\n    @media (min-width: 768px) {\n      #shop-address h2 { font-size: 2rem; }\n    }\n  </style>\n  <div class=\"j2-card\">\n    <h2>Find us</h2>\n    <h3>Brew Lab</h3>\n    <dl>\n      <dt>Address</dt>\n      <dd><address>12, 100 Feet Road, Indiranagar, Bengaluru 560038</address></dd>\n      <dt>Phone</dt>\n      <dd>+91 98450 12345</dd>\n      <dt>Email</dt>\n      <dd><a class=\"contact-email\" href=\"mailto:hello@brewlab.example\">hello@brewlab.example</a></dd>\n    </dl>\n  </div>\n</section>",
+      "workflow": "Site Shop address section"
+    },
+    "W-29": {
+      "owner": "W-29",
+      "head": "",
+      "body": "<section id=\"opening-hours\" aria-labelledby=\"opening-hours-heading\">\n  <style>\n    #opening-hours {\n      box-sizing: border-box;\n      width: 100%;\n      padding: 64px 16px;\n    }\n    #opening-hours .oh-wrap {\n      box-sizing: border-box;\n      max-width: 720px;\n      margin: 0 auto;\n    }\n    #opening-hours .oh-card {\n      box-sizing: border-box;\n      max-width: 100%;\n      border-radius: var(--j2-radius, 12px);\n      overflow-wrap: anywhere;\n    }\n    #opening-hours #opening-hours-heading {\n      margin: 0 0 16px;\n      font-family: var(--j2-font-heading);\n      color: var(--j2-primary);\n      line-height: 1.2;\n    }\n    #opening-hours .oh-list {\n      list-style: none;\n      margin: 0;\n      padding: 0;\n    }\n    #opening-hours .oh-list li {\n      margin: 0;\n      padding: 12px 0;\n      font-family: var(--j2-font-body);\n      color: var(--j2-text);\n      font-size: 1.125rem;\n      line-height: 1.4;\n      border-bottom: 1px solid #E6D8C8;\n    }\n    #opening-hours .oh-list li:last-child {\n      border-bottom: 0;\n    }\n    #opening-hours .oh-note {\n      margin: 16px 0 0;\n      font-family: var(--j2-font-body);\n      color: var(--j2-secondary);\n      font-weight: 600;\n      line-height: 1.4;\n    }\n  </style>\n  <div class=\"oh-wrap\">\n    <div class=\"j2-card oh-card\">\n      <h2 id=\"opening-hours-heading\">Opening hours</h2>\n      <ul class=\"oh-list\">\n        <li>Monday to Saturday 7:30 am to 9:00 pm</li>\n        <li>Sunday 8:30 am to 6:00 pm</li>\n      </ul>\n      <p class=\"oh-note\">No closed days</p>\n    </div>\n  </div>\n</section>",
+      "workflow": "Site Opening hours section"
+    },
+    "W-30": {
+      "owner": "W-31",
+      "head": "",
+      "body": "<style>\n  *, *::before, *::after { box-sizing: border-box; }\n  html { scroll-behavior: smooth; }\n  body {\n    margin: 0;\n    background: var(--j2-background, #FBF6EF);\n    color: var(--j2-text, #2B1B12);\n    font-family: var(--j2-font-body, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif);\n    line-height: 1.5;\n    overflow-wrap: break-word;\n  }\n  img, svg, video, iframe { max-width: 100%; height: auto; }\n  h1, h2, h3, p, li, a, dd, dt { overflow-wrap: break-word; }\n  #menu, #pre-order, #shop-address, #opening-hours { scroll-margin-top: 16px; }\n\n  #page-layout { width: 100%; }\n  #page-layout .pl-bar {\n    background: var(--j2-primary, #3E2415);\n    color: #FFFFFF;\n  }\n  #page-layout .pl-bar-inner {\n    max-width: 1100px;\n    margin: 0 auto;\n    padding: 8px 16px;\n    display: flex;\n    flex-wrap: wrap;\n    align-items: center;\n    justify-content: space-between;\n    gap: 8px 24px;\n  }\n  #page-layout .pl-brand {\n    font-family: var(--j2-font-heading, Georgia, 'Times New Roman', serif);\n    font-size: 1.5rem;\n    font-weight: 700;\n    color: #FFFFFF;\n    margin: 0;\n  }\n  #page-layout #page-nav {\n    list-style: none;\n    margin: 0;\n    padding: 0;\n    display: flex;\n    flex-wrap: wrap;\n    gap: 8px;\n  }\n  #page-layout .nav-link {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    min-height: 44px;\n    min-width: 44px;\n    padding: 8px 16px;\n    color: #FFFFFF;\n    text-decoration: none;\n    font-weight: 600;\n    border-radius: var(--j2-radius, 12px);\n  }\n  #page-layout .nav-link:hover { background: var(--j2-secondary, #7A4B2A); }\n  #page-layout .nav-link:focus-visible { outline: 3px solid #FFFFFF; outline-offset: 2px; }\n\n  #hero {\n    max-width: 1100px;\n    margin: 0 auto;\n    padding: 48px 16px;\n  }\n  #hero .hero-title {\n    font-family: var(--j2-font-heading, Georgia, 'Times New Roman', serif);\n    color: var(--j2-primary, #3E2415);\n    font-size: clamp(2rem, 8vw, 3rem);\n    line-height: 1.15;\n    margin: 0 0 16px;\n  }\n  #hero .hero-text {\n    color: var(--j2-text, #2B1B12);\n    font-size: 1.125rem;\n    max-width: 36rem;\n    margin: 0 0 16px;\n  }\n  #hero .hero-goal {\n    color: var(--j2-secondary, #7A4B2A);\n    font-weight: 600;\n    font-size: 1rem;\n    max-width: 36rem;\n    margin: 0 0 24px;\n  }\n  #hero .hero-cta {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    min-height: 48px;\n    min-width: 48px;\n    text-decoration: none;\n    border-radius: var(--j2-radius, 12px);\n  }\n  #hero .hero-cta:focus-visible { outline: 3px solid var(--j2-accent, #9A5216); outline-offset: 3px; }\n\n  @media (max-width: 480px) {\n    #page-layout .pl-bar-inner { flex-direction: column; align-items: flex-start; }\n    #hero { padding: 32px 16px; }\n    #hero .hero-cta { width: 100%; }\n  }\n  @media (prefers-reduced-motion: reduce) {\n    html { scroll-behavior: auto; }\n  }\n</style>\n<header id=\"page-layout\">\n  <div class=\"pl-bar\">\n    <div class=\"pl-bar-inner\">\n      <p class=\"pl-brand\">Brew Lab</p>\n      <nav id=\"site-nav\" aria-label=\"Page sections\">\n        <ul id=\"page-nav\">\n          <li><a class=\"nav-link\" href=\"#menu\">Menu</a></li>\n          <li><a class=\"nav-link\" href=\"#pre-order\">Pre-order</a></li>\n          <li><a class=\"nav-link\" href=\"#shop-address\">Find us</a></li>\n          <li><a class=\"nav-link\" href=\"#opening-hours\">Opening hours</a></li>\n        </ul>\n      </nav>\n    </div>\n  </div>\n  <div id=\"hero\">\n    <h1 class=\"hero-title\">Brew Lab</h1>\n    <p class=\"hero-text\">Specialty coffee in Indiranagar, Bengaluru. Pre-order a coffee for pickup.</p>\n    <p class=\"hero-goal\">Our goal: 30 pre-orders per week.</p>\n    <a class=\"j2-btn hero-cta\" href=\"#pre-order\">Pre-order for pickup</a>\n  </div>\n</header>\n<script>\n  (function () {\n    try {\n      var layout = document.getElementById('page-layout');\n      if (layout && layout.parentNode && document.body.firstElementChild !== layout) {\n        document.body.insertBefore(layout, document.body.firstChild);\n      }\n    } catch (e) { /* layout stays where it is */ }\n  })();\n</script>",
+      "workflow": "Revise Page layout hero text"
+    }
+  }
+}

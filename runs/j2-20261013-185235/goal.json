@@ -1,0 +1,87 @@
+{
+  "statement": "Write a PRD for LabSlot, a phone-friendly web app where students book lab slots, replacing paper booking that causes double-booked slots.",
+  "product_name": "LabSlot",
+  "users": "Students and lab staff",
+  "problem": "Lab slot booking is done on paper, and slots get double-booked.",
+  "features": [
+    "Book a slot",
+    "Cancel a slot",
+    "See availability"
+  ],
+  "user_groups": [
+    {
+      "name": "Students",
+      "actions": [
+        "Book a slot",
+        "Cancel a slot",
+        "See availability"
+      ]
+    },
+    {
+      "name": "Lab staff",
+      "actions": [
+        "View all bookings",
+        "Cancel a booking for a student"
+      ]
+    }
+  ],
+  "constraints": [
+    "The app must work on phones"
+  ],
+  "success_measures": [
+    "80% of bookings are made without staff help, counted per term"
+  ],
+  "facts": [
+    "LabSlot",
+    "80% of bookings are made without staff help",
+    "per term",
+    "book a slot",
+    "cancel a slot",
+    "see availability",
+    "students",
+    "lab staff",
+    "view all bookings",
+    "cancel a booking for a student",
+    "booking is done on paper",
+    "slots get double-booked",
+    "it must work on phones"
+  ],
+  "standards": [
+    "Document rubric for PRDs"
+  ],
+  "rules": [
+    "Use only facts from the brief and the Requester's answers",
+    "Do not invent facts"
+  ],
+  "done_when": [
+    "Problem section states that booking is done on paper and slots get double-booked",
+    "Users section names both students and lab staff and lists what each group does in LabSlot",
+    "Goals section states the goal of replacing paper booking and avoiding double-booked slots",
+    "Requirements section lists book a slot, cancel a slot and see availability for students, and view all bookings and cancel a booking for a student for lab staff",
+    "Requirements section states that LabSlot must work on phones",
+    "Success metrics section states that 80% of bookings are made without staff help, counted per term",
+    "Out of scope section lists what LabSlot does not cover, without adding features beyond the must-have list",
+    "The product name LabSlot is used consistently throughout the document"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [],
+  "site_name": "LabSlot",
+  "business_type": "prd",
+  "charter_items": [
+    "Problem section states that booking is done on paper and slots get double-booked",
+    "Users section names both students and lab staff and lists what each group does in LabSlot",
+    "Goals section states the goal of replacing paper booking and avoiding double-booked slots",
+    "Requirements section lists book a slot, cancel a slot and see availability for students, and view all bookings and cancel a booking for a student for lab staff",
+    "Requirements section states that LabSlot must work on phones",
+    "Success metrics section states that 80% of bookings are made without staff help, counted per term",
+    "Out of scope section lists what LabSlot does not cover, without adding features beyond the must-have list",
+    "The product name LabSlot is used consistently throughout the document"
+  ],
+  "core_items": [
+    "Problem section states that booking is done on paper and slots get double-booked",
+    "Requirements section lists book a slot, cancel a slot and see availability for students, and view all bookings and cancel a booking for a student for lab staff",
+    "Requirements section states that LabSlot must work on phones",
+    "Success metrics section states that 80% of bookings are made without staff help, counted per term"
+  ],
+  "confirmed_facts": []
+}

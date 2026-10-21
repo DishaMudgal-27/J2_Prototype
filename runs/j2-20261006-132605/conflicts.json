@@ -1,0 +1,345 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 1,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 1",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 4,
+        "text": "@Priority Full charter scope prices at 50 against a budget of 35, so I can't fund it all. Priority order: W1 core page (15), W2 pre-order (15), W3 gallery (10), W4 farms (10). If you counter, I would cut W2's form first and keep the gallery and farms together, since the charter bars trading one for the other. Gap is 15 and I'd rather you rule on it than I guess.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 5,
+        "text": "@Adaptation COUNTER: I fund W1, W3 and W4 at 35, the full budget. The gallery and farms stay together per the charter rule. W2 (15) is unfunded because no combination of all four fits. Dropping W1 styling saves only 5, and a cheaper interactive_feature for W2 (10) still leaves the total at 40. Trade-off: the pre-order done-when item cannot close inside 35, so either you propose a pre-order inside what is left (nothing), or this goes to Identity as a budget question for the Requester (+15). Reply with your position.",
+        "position": "COUNTER: Single-file page: nav, Menu, Hours, Location (15), Large photo gallery with enlarged view (10), Three coffee farm story blocks (10)",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 6,
+        "text": "@Priority I can't accept: the offer leaves the pre-order done-when item open. I revise to the cheapest honest set: drop the styling part (responsive CSS stays inside W1's page_section) and build pre-order as one interactive_feature (client-side item/quantity/name/phone/pickup-time picker with an order summary, no delivery). Total is 40, 5 over budget, and I found no way to reach 35 with all four. Gallery and farms stay together. Trade-off: plainer visual polish. If you can't fund 40, please send the 5 gap to Identity as a Requester budget question, since it is smaller than the 15 first stated.",
+        "position": "Single-file page: nav, Menu, Hours, Location (10), Pickup pre-order builder with order summary (10), Large photo gallery with enlarged view (10), Three coffee farm story blocks (10)",
+        "agree": false
+      },
+      {
+        "n": 3,
+        "who": "priority",
+        "msg": 7,
+        "text": "@Adaptation COUNTER: I can't grant 40 against a 35 budget, and every part is priced at 10, so no trim reaches 35 with all four. I fund W1, W3 and W4 at 30 (earlier I said 35; at current prices it is 30), leaving 5 unspent. Gallery and farms stay together per the charter. W2 (10) is unfunded and the pre-order done-when item stays open. Your 5 gap is a Requester budget question for Identity, since pre-order needs 10 and only 5 remains. Reply with your position; if you still can't accept, exchange 4 goes to Identity with both positions.",
+        "position": "COUNTER: Single-file page: nav, Menu, Hours, Location (10), Large photo gallery with enlarged view (10), Three coffee farm story blocks (10)",
+        "agree": false
+      },
+      {
+        "n": 4,
+        "who": "adaptation",
+        "msg": 8,
+        "text": "@Identity I accept Priority's offer of W1, W3 and W4 at 30 of 35, so the build can start. Gallery and farms stay together per the charter. The pre-order done-when item stays open: W2 as one interactive_feature costs 10 and only 5 remains, so the gap is 5. I found no honest way to price it at 5. Styling is the only 5 part and it does not build a form. Policy question for the Requester: can the budget go from 35 to 40 to fund pre-order? If not, pre-order is parked and the charter's pre-order item cannot close.",
+        "position": "accepts Priority's offer",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "priority",
+    "outcome": "Adaptation accepted Priority's COUNTER: Single-file page: nav, Menu, Hours, Location (10), Large photo gallery with enlarged view (10), Three coffee farm story blocks (10) goes to the validator.",
+    "priority_final": [
+      {
+        "id": "W1-core-page",
+        "name": "Single-file page: nav, Menu, Hours, Location",
+        "goal_gap": "No site file exists",
+        "expected_outcome": "One HTML file with nav to Menu, Hours, Location, Pre-order, Gallery and Farms; menu by category, 7-day hours, Indiranagar location with map link; unsupplied facts marked PLACEHOLDER; responsive CSS for phones",
+        "outputs": [
+          "site/index.html"
+        ],
+        "completion_check": "Nav anchors for all six sections; Menu, Hours (7 days) and Location sections present; every unsupplied fact has a visible PLACEHOLDER label; a media query for narrow screens exists; no API keys",
+        "dependencies": [],
+        "parts": [
+          "page_section"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 20
+        },
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 2,
+          "time_limit_minutes": 30,
+          "retry_limit": 1,
+          "stop_loss": "Stop if spend reaches 10 or a second failed validation occurs"
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "W3-gallery",
+        "name": "Large photo gallery with enlarged view",
+        "goal_gap": "Gallery required by charter is missing",
+        "expected_outcome": "Grid of at least 12 image slots, each with alt text, lazy-loaded below the fold, marked PLACEHOLDER photo; click opens an enlarged view",
+        "outputs": [
+          "Gallery section in site/index.html"
+        ],
+        "completion_check": "At least 12 img slots, each with non-empty alt; below-the-fold images have loading=lazy; a click handler opens an enlarged view",
+        "dependencies": [
+          "W1-core-page"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 15
+        },
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 2,
+          "time_limit_minutes": 25,
+          "retry_limit": 1,
+          "stop_loss": "Stop if spend reaches 10 or fewer than 12 slots remain after one retry"
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "W4-farms",
+        "name": "Three coffee farm story blocks",
+        "goal_gap": "Farm stories required by charter are missing",
+        "expected_outcome": "Three separate farm blocks, each with name and location (or PLACEHOLDER), a story in at least three labelled subsections marked PLACEHOLDER, and an image slot with alt text",
+        "outputs": [
+          "Farms section in site/index.html"
+        ],
+        "completion_check": "Exactly three farm blocks; each has 3 or more paragraphs or subsections, a location line and an img with alt; no invented farm facts",
+        "dependencies": [
+          "W1-core-page"
+        ],
+        "parts": [
+          "profiles"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 15
+        },
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 2,
+          "time_limit_minutes": 25,
+          "retry_limit": 1,
+          "stop_loss": "Stop if spend reaches 10 or any invented farm fact is found after one retry"
+        },
+        "estimate": 10,
+        "cost": 10
+      }
+    ],
+    "adaptation_final": [
+      {
+        "id": "W1-core-page",
+        "name": "Single-file page: nav, Menu, Hours, Location",
+        "goal_gap": "No site file exists",
+        "expected_outcome": "One HTML file with nav to Menu, Hours, Location, Pre-order, Gallery and Farms; menu by category, 7-day hours, Indiranagar location with map link; unsupplied facts marked PLACEHOLDER; responsive CSS for phones",
+        "outputs": [
+          "site/index.html"
+        ],
+        "completion_check": "Nav anchors for all six sections; Menu, Hours (7 days) and Location sections present; every unsupplied fact has a visible PLACEHOLDER label; a media query for narrow screens exists; no API keys",
+        "dependencies": [],
+        "parts": [
+          "page_section"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 20
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "W2-preorder",
+        "name": "Pickup pre-order builder with order summary",
+        "goal_gap": "Pre-order for pickup required by charter is missing",
+        "expected_outcome": "Pre-order section with item selection, quantity, customer name, phone and pickup time, producing an on-page order summary; pickup only; the channel that delivers orders to the cafe is a marked PLACEHOLDER",
+        "outputs": [
+          "Pre-order section in site/index.html"
+        ],
+        "completion_check": "Fields for item, quantity, name, phone and pickup time exist; submitting renders an order summary; no delivery option appears; no paid service or API key",
+        "dependencies": [
+          "W1-core-page"
+        ],
+        "parts": [
+          "interactive_feature"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 15
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "W3-gallery",
+        "name": "Large photo gallery with enlarged view",
+        "goal_gap": "Gallery required by charter is missing",
+        "expected_outcome": "Grid of at least 12 image slots, each with alt text, lazy-loaded below the fold, marked PLACEHOLDER photo; click opens an enlarged view",
+        "outputs": [
+          "Gallery section in site/index.html"
+        ],
+        "completion_check": "At least 12 img slots, each with non-empty alt; below-the-fold images have loading=lazy; a click handler opens an enlarged view",
+        "dependencies": [
+          "W1-core-page"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 15
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "W4-farms",
+        "name": "Three coffee farm story blocks",
+        "goal_gap": "Farm stories required by charter are missing",
+        "expected_outcome": "Three separate farm blocks, each with name and location (or PLACEHOLDER), a story in at least three labelled subsections marked PLACEHOLDER, and an image slot with alt text",
+        "outputs": [
+          "Farms section in site/index.html"
+        ],
+        "completion_check": "Exactly three farm blocks; each has 3 or more paragraphs or subsections, a location line and an img with alt; no invented farm facts",
+        "dependencies": [
+          "W1-core-page"
+        ],
+        "parts": [
+          "profiles"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 15
+        },
+        "estimate": 10,
+        "cost": 10
+      }
+    ],
+    "attempts_used": 4,
+    "registered": [
+      "Single-file page: nav, Menu, Hours, Location",
+      "Large photo gallery with enlarged view",
+      "Three coffee farm story blocks"
+    ]
+  },
+  {
+    "id": "C-2",
+    "cycle": 1,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 1",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 26,
+        "text": "@Priority One workflow, W5-preorder, for the Pre-order section only. It is a client-side pickup form (item, quantity, name, phone, pickup time) that builds an order summary. It is priced as one interactive_feature at 10, which fits the 10 remaining of 40. I did not price it as a form part (15) because that would exceed the budget. Trade-off: the summary is shown on the page, so orders do not reach the cafe until the Requester supplies an order channel. That channel, the item prices and the lead time stay as marked PLACEHOLDERs.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 27,
+        "text": "@Adaptation GRANT: W5-preorder is funded at 10, one interactive_feature at the rate-card price. It fits the 10 remaining once the Requester-authorised raise to 40 is recorded (the state still shows a total of 35 with 5 left, so that figure needs updating). Scope is the #preorder section only. Trade-off I accept: orders show on the page and do not reach the cafe until the Requester supplies an order channel, which stays a marked PLACEHOLDER along with prices and lead time. Envelope: money 10, 2 model calls, 25 min, 1 retry. Stop loss: stop if spend reaches 10, if the form still fails the completion check after one retry, or if any delivery option or invented fact appears. No further exchanges needed.",
+        "position": "REFUSE: nothing",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 29,
+        "text": "@Identity Priority's GRANT of 10 was refused by code only because the budget still reads 35 with 5 left. The Requester chose A on the raise to 40, but that is not recorded in the budget state. I can't build pre-order for 5: the only 5 part is styling, which builds no form. I am resubmitting W5-preorder unchanged at 10 (one interactive_feature, pickup only, no delivery). Please record the Requester-authorised budget of 40 (10 remaining), then send it back to Priority. If the budget can't be updated, I'll park pre-order and item 6 stays open.",
+        "position": "Pickup-only pre-order form with order summary (10)",
+        "agree": false
+      },
+      {
+        "n": 3,
+        "who": "priority",
+        "msg": 37,
+        "text": "@Adaptation REFUSE: W5-preorder costs 10 (one interactive_feature) and the recorded budget leaves 5. I can't grant above what is remaining, and no part under 10 builds a form, since styling (5) builds none. This is a resource refusal only. I would GRANT the same envelope at once (money 10, 2 calls, 25 min, 1 retry) if the budget of 40 is recorded. The Requester's 'A' did not match the numbered options (1 or 2), so code applied no change. Please tell Identity to ask for 'Option 1' or 'Option 2' by number. Position: refuse at 5, grant at 40. If you cannot reshape it, send both positions to Identity.",
+        "position": "REFUSE: nothing",
+        "agree": false
+      },
+      {
+        "n": 4,
+        "who": "adaptation",
+        "msg": 38,
+        "text": "@Identity I can't reshape pre-order to fit 5. Styling is the only 5 part and it builds no form, so any 5 version would not close item 6. I park W5-preorder at this exchange 4 of 4. Final positions: Priority refuses at 5 and grants at 40; I need 10 and the recorded budget leaves 5. Code applied no raise because the Requester's 'A' did not match the numbered options. Please re-ask with 'Option 1' (raise 35 to 40, build pickup-only pre-order) or 'Option 2' (keep 35, park pre-order). On Option 1, I resubmit W5-preorder unchanged at 10 and Priority has said it will grant. On Option 2, item 6 stays open and the Pre-order section ships as a marked placeholder.",
+        "position": "parks the proposal",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "priority",
+    "outcome": "Adaptation parked the proposal; nothing registered.",
+    "priority_final": [],
+    "adaptation_final": [
+      {
+        "id": "W5-preorder",
+        "name": "Pickup-only pre-order form with order summary",
+        "goal_gap": "Done-when item 6 fails: #preorder has no form (forms 0) and no order summary.",
+        "expected_outcome": "Pre-order section has client-side item selection, quantity, name, phone and pickup time inputs, and shows an order summary. No delivery option. Order channel, prices and lead time stay marked PLACEHOLDERs.",
+        "outputs": [
+          "Pre-order section in site/index.html"
+        ],
+        "completion_check": "#preorder contains a form with item, quantity, name, phone and pickup-time fields; submit renders an order summary; no delivery option; unsupplied facts marked PLACEHOLDER; other five sections unchanged; no API keys",
+        "dependencies": [
+          "W1-core-page"
+        ],
+        "parts": [
+          "interactive_feature"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 2,
+          "time_minutes": 25
+        },
+        "estimate": 10,
+        "cost": 10
+      }
+    ],
+    "attempts_used": 4
+  }
+]

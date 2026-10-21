@@ -1,0 +1,1109 @@
+[
+  {
+    "cycle": 1,
+    "version": 4,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the name Spark 2026, Northfield College of Engineering, Pune, and the dates 14 to 16 February 2027",
+        "verdict": "PASS",
+        "note": "#hero has h1 'Spark 2026', 'Northfield College of Engineering, Pune' and '14 to 16 February 2027'; the screenshot shows all three.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The schedule shows three days. Day 1 (14 Feb): Code Sprint 10am to 1pm, Line Follower 2pm to 5pm, AI in Daily Life 5:30pm to 6:30pm. Day 2 (15 Feb): Bug Hunt 11am to 1pm, Poster Jam 2pm to 4pm. Day 3 (16 Feb): Drone Dash 10am to 1pm, UI Duel 2pm to 5pm, Startup Stories 5:30pm to 6:30pm",
+        "verdict": "PASS",
+        "note": "#schedule has 3 .day-card elements. Day 1 is 14 Feb with 3 events, Day 2 is 15 Feb with 2, Day 3 is 16 Feb with 3. All times match the charter and no room or hall is shown.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "Events can be browsed by category (Coding, Robotics, Design, Talks), with each of the 8 events listed under its own category",
+        "verdict": "NEEDS_REVISION",
+        "note": "No category section or filter in the HTML. Categories appear only as the words 'coding, robotics, design and talks' in the hero tagline.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": false
+      },
+      {
+        "id": "F-4",
+        "criterion": "Each event shows its fee: Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, UI Duel Rs 100, Poster Jam free, AI in Daily Life free, Startup Stories free",
+        "verdict": "NEEDS_REVISION",
+        "note": "No fee text (Rs 100, Rs 50, Rs 150, Rs 200, free) anywhere in the page. The schedule and the dropdown show names and times only.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": false
+      },
+      {
+        "id": "F-5",
+        "criterion": "A registration form asks for name, email, college and an event dropdown listing all 8 events, and submitting it sends the details to spark2026@example.com",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "#reg-form has the 4 required fields, 8 .event-option elements and a submit button. The mechanical check submitted it with no errors, and the JS builds a mailto: to the address. Warning: this opens the visitor's email app rather than sending directly, so a registration is lost if they never press send. The page tells them this.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A sponsors section lists Nimbus Cloud, Orbit Labs and Pixel Press as text names",
+        "verdict": "NEEDS_REVISION",
+        "note": "None of the three sponsor names appear in the page source, and there is no sponsors section.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": false
+      },
+      {
+        "id": "F-7",
+        "criterion": "A venue section shows the address 22 University Road, Pune 411007, Northfield College of Engineering, with a link to open it in a map",
+        "verdict": "NEEDS_REVISION",
+        "note": "No venue section. '22 University Road, Pune 411007' and any map link are absent.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": false
+      },
+      {
+        "id": "F-8",
+        "criterion": "A WhatsApp link opens a chat with +91 00000 33333, and the email spark2026@example.com is shown",
+        "verdict": "NEEDS_REVISION",
+        "note": "No wa.me or WhatsApp link in the page. The email appears only in the registration note, not in a contact section.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": false
+      },
+      {
+        "id": "F-9",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "PASS",
+        "note": "Mechanical check: js_errors [], overflow_px 0 at 360 and at 1280, broken_in_page_links [], form submit ok.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "The page uses one consistent bold colour scheme and image placeholders where photos would go",
+        "verdict": "UNPAID",
+        "note": "Built on the page, but no workflow covers item 10, so nobody paid for it. Register a workflow that covers it at its rate-card minimum (styling, 5). (Audit's own note: All sections use the same --j2 palette variables (navy, pink, violet, yellow). The hero has a dashed .img-placeholder with role=img and an aria-label. Medium confidence because only the first screen was seen. Only one placeholder exists, which is enough for now but sections added later should include their own.)",
+        "severity": "medium",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": false
+      }
+    ],
+    "extra_issues": [],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "The screenshot shows the same Space Grotesk and Inter fonts, the pink, violet and yellow palette, and pill buttons matching the style guide at both widths.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "Measured contrast: 45 elements checked at 360px and at 1280px, 0 low.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "1 h1 and 0 skipped heading levels at both widths. In the screenshot the title and yellow dates stand out.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "The yellow 'Register now' button is the most prominent control on the first screen at both widths, and the nav has a yellow Register button.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The nav has 6 in-page links and every existing section is reachable on a phone. It only links Schedule and Register, so it will need updating as the missing sections are added.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "NEEDS_REVISION",
+        "note": "Measured by code: 1 tap target(s) under 44x44px at 360px, e.g. a \"Spark 2026\" 101x28",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "0 img elements and 0 without alt. The hero placeholder has role=img and aria-label 'Photo placeholder: Spark 2026 hero image'.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 20997,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&amp;family=Inter:wght@400;600&amp;display=swap"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 45,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 6
+          },
+          "first_screen_actions": [
+            "Register now",
+            "Register"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 1,
+            "examples": [
+              "a \"Spark 2026\" 101x28"
+            ]
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 45,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 6
+          },
+          "first_screen_actions": [
+            "Register now",
+            "Register"
+          ]
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v4.png",
+    "all_pass": false
+  },
+  {
+    "cycle": 1,
+    "version": 7,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the name Spark 2026, Northfield College of Engineering, Pune, and the dates 14 to 16 February 2027",
+        "verdict": "PASS",
+        "note": "#hero h1 'Spark 2026', 'Northfield College of Engineering, Pune' and '14 to 16 February 2027' in source and screenshot.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The schedule shows three days. Day 1 (14 Feb): Code Sprint 10am to 1pm, Line Follower 2pm to 5pm, AI in Daily Life 5:30pm to 6:30pm. Day 2 (15 Feb): Bug Hunt 11am to 1pm, Poster Jam 2pm to 4pm. Day 3 (16 Feb): Drone Dash 10am to 1pm, UI Duel 2pm to 5pm, Startup Stories 5:30pm to 6:30pm",
+        "verdict": "PASS",
+        "note": "3 .day-card elements; all 8 events and times match the charter; no room or hall.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "Events can be browsed by category (Coding, Robotics, Design, Talks), with each of the 8 events listed under its own category",
+        "verdict": "PASS",
+        "note": "#categories has 4 .category-group (Coding, Robotics, Design, Talks) holding 8 .event-card, each under the correct category.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "Each event shows its fee: Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, UI Duel Rs 100, Poster Jam free, AI in Daily Life free, Startup Stories free",
+        "verdict": "NEEDS_REVISION",
+        "note": "No 'Rs' or 'free' fee text anywhere in the source. Schedule, category cards and dropdown show names and times only. The validator rejected the fee workflow because it was priced as a page_section, not a fix.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": false
+      },
+      {
+        "id": "F-5",
+        "criterion": "A registration form asks for name, email, college and an event dropdown listing all 8 events, and submitting it sends the details to spark2026@example.com",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "#reg-form has name, email, college and select with 8 .event-option; mechanical submit ok, no errors; JS builds a mailto: to spark2026@example.com. Warning: the registration is lost if the visitor never presses send in their email app. The page tells them this.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A sponsors section lists Nimbus Cloud, Orbit Labs and Pixel Press as text names",
+        "verdict": "NEEDS_REVISION",
+        "note": "Nimbus Cloud, Orbit Labs and Pixel Press do not appear in the source, and there is no sponsors section.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": false
+      },
+      {
+        "id": "F-7",
+        "criterion": "A venue section shows the address 22 University Road, Pune 411007, Northfield College of Engineering, with a link to open it in a map",
+        "verdict": "PASS",
+        "note": "#venue shows '22 University Road, Pune 411007' and the college name, with one .map-link to a Google Maps search URL for that address.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "A WhatsApp link opens a chat with +91 00000 33333, and the email spark2026@example.com is shown",
+        "verdict": "PASS",
+        "note": "#contact has .whatsapp-link to https://wa.me/910000033333, text '+91 00000 33333' and spark2026@example.com.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "PASS",
+        "note": "Mechanical check: js_errors [], overflow_px 0 at 360 and 1280, broken_in_page_links [].",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "The page uses one consistent bold colour scheme and image placeholders where photos would go",
+        "verdict": "UNPAID",
+        "note": "Built on the page, but no workflow covers item 10, so nobody paid for it. Register a workflow that covers it at its rate-card minimum (styling, 5). (Audit's own note: All sections use the --j2 palette variables; dashed .img-placeholder blocks with role=img and aria-label in hero, categories, venue and contact. The sponsors section, when built, should include its own.)",
+        "severity": "medium",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": false
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-11",
+        "criterion": "Tap targets at least 44x44px on phones (R-6)",
+        "verdict": "NEEDS_REVISION",
+        "note": "Mechanical check at 360px: a 'Spark 2026' (.site-nav-brand) measures 101x28px.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-12",
+        "criterion": "Navigation reaches every section (R-5)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Nav links only to #hero, #schedule and #register. #categories, #venue and #contact are reachable only by scrolling.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "Screenshot and source use the style guide fonts (Space Grotesk, Inter), palette, .j2-btn buttons and .j2-card cards in every section.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "Contrast measured on 86 elements at both widths, 0 low.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "1 h1, 0 skipped heading levels; the hero title and dates stand out on the screenshot.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "Yellow 'Register now' button in the hero and 'Register' in the nav are the first-screen actions.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Nav has 3 links (brand, Schedule, Register); categories, venue and contact are not in the nav.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "NEEDS_REVISION",
+        "note": "Measured by code: 1 tap target(s) under 44x44px at 360px, e.g. a \"Spark 2026\" 101x28",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "0 img elements and 0 images without alt; the placeholder divs carry role=img with aria-label.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 35114,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&amp;family=Inter:wght@400;600&amp;display=swap",
+        "https://wa.me/910000033333",
+        "https://www.google.com/maps/search/?api=1&amp;query=Northfield%20College%20of%20Engineering%2C%2022%20University%20Road%2C%20Pune%20411007"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 86,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 7
+          },
+          "first_screen_actions": [
+            "Register now",
+            "Register"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 1,
+            "examples": [
+              "a \"Spark 2026\" 101x28"
+            ]
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 86,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 7
+          },
+          "first_screen_actions": [
+            "Register now",
+            "Register"
+          ]
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v7.png",
+    "all_pass": false
+  },
+  {
+    "cycle": 1,
+    "version": 7,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the name Spark 2026, Northfield College of Engineering, Pune, and the dates 14 to 16 February 2027",
+        "verdict": "PASS",
+        "note": "#hero h1 'Spark 2026', 'Northfield College of Engineering, Pune' and '14 to 16 February 2027' in source and screenshot.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The schedule shows three days. Day 1 (14 Feb): Code Sprint 10am to 1pm, Line Follower 2pm to 5pm, AI in Daily Life 5:30pm to 6:30pm. Day 2 (15 Feb): Bug Hunt 11am to 1pm, Poster Jam 2pm to 4pm. Day 3 (16 Feb): Drone Dash 10am to 1pm, UI Duel 2pm to 5pm, Startup Stories 5:30pm to 6:30pm",
+        "verdict": "PASS",
+        "note": "3 .day-card elements (14, 15, 16 Feb 2027); all 8 events and times match the charter; no room or hall shown.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "Events can be browsed by category (Coding, Robotics, Design, Talks), with each of the 8 events listed under its own category",
+        "verdict": "PASS",
+        "note": "#categories has 4 .category-group (Coding, Robotics, Design, Talks) holding 8 .event-card, each under the correct category.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "Each event shows its fee: Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, UI Duel Rs 100, Poster Jam free, AI in Daily Life free, Startup Stories free",
+        "verdict": "NEEDS_REVISION",
+        "note": "No 'Rs' or 'free' fee text in the source; schedule, category cards and dropdown show names and times only.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": false
+      },
+      {
+        "id": "F-5",
+        "criterion": "A registration form asks for name, email, college and an event dropdown listing all 8 events, and submitting it sends the details to spark2026@example.com",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "#reg-form has name, email, college, select with 8 .event-option; mechanical submit ok with no errors; JS builds a mailto: to spark2026@example.com. Warning: registration is lost if the visitor never presses send in their email app; the page says so.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A venue section shows the address 22 University Road, Pune 411007, Northfield College of Engineering, with a link to open it in a map",
+        "verdict": "PASS",
+        "note": "#venue shows '22 University Road, Pune 411007' and the college name, with one .map-link to a Google Maps search URL.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "A WhatsApp link opens a chat with +91 00000 33333, and the email spark2026@example.com is shown",
+        "verdict": "PASS",
+        "note": "#contact has .whatsapp-link to https://wa.me/910000033333, text '+91 00000 33333' and spark2026@example.com.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "PASS",
+        "note": "Mechanical check: js_errors [], overflow_px 0 at 360 and 1280, broken_in_page_links [].",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "Only Inter and Space Grotesk used; palette, j2-btn and j2-card styles are the same on every section.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "Contrast check: 86 elements checked at both widths, 0 low.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "1 h1, 0 skipped heading levels; the 'Spark 2026' title dominates the first screen.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "Yellow 'Register now' is the single filled button on the first screen, with a matching 'Register' in the nav.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Nav links only to #schedule and #register; #categories, #venue and #contact are reachable only by scrolling or in-section buttons.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "NEEDS_REVISION",
+        "note": "Measured by code: 1 tap target(s) under 44x44px at 360px, e.g. a \"Spark 2026\" 101x28",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "0 img elements, so none lack alt; the 4 photo placeholders use role=img with aria-label.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 35114,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&amp;family=Inter:wght@400;600&amp;display=swap",
+        "https://wa.me/910000033333",
+        "https://www.google.com/maps/search/?api=1&amp;query=Northfield%20College%20of%20Engineering%2C%2022%20University%20Road%2C%20Pune%20411007"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 86,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 7
+          },
+          "first_screen_actions": [
+            "Register now",
+            "Register"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 1,
+            "examples": [
+              "a \"Spark 2026\" 101x28"
+            ]
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 86,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 7
+          },
+          "first_screen_actions": [
+            "Register now",
+            "Register"
+          ]
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v7.png",
+    "all_pass": false
+  },
+  {
+    "cycle": 2,
+    "version": 8,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the name Spark 2026, Northfield College of Engineering, Pune, and the dates 14 to 16 February 2027",
+        "verdict": "PASS",
+        "note": "#hero h1 'Spark 2026', 'Northfield College of Engineering, Pune' and '14 to 16 February 2027' in source and screenshot.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The schedule shows three days. Day 1 (14 Feb): Code Sprint 10am to 1pm, Line Follower 2pm to 5pm, AI in Daily Life 5:30pm to 6:30pm. Day 2 (15 Feb): Bug Hunt 11am to 1pm, Poster Jam 2pm to 4pm. Day 3 (16 Feb): Drone Dash 10am to 1pm, UI Duel 2pm to 5pm, Startup Stories 5:30pm to 6:30pm",
+        "verdict": "PASS",
+        "note": "3 .day-card (14, 15, 16 Feb 2027); Day 1 has 3 events, Day 2 has 2, Day 3 has 3; all times match the charter; no room or hall.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "Events can be browsed by category (Coding, Robotics, Design, Talks), with each of the 8 events listed under its own category",
+        "verdict": "PASS",
+        "note": "#categories has 4 .category-group (Coding, Robotics, Design, Talks) holding 8 .event-card, each under its correct category.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "Each event shows its fee: Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, UI Duel Rs 100, Poster Jam free, AI in Daily Life free, Startup Stories free",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "8 .fee-tag in #schedule match the charter: Code Sprint Rs 100, Line Follower Rs 150, AI in Daily Life free, Bug Hunt Rs 50, Poster Jam free, Drone Dash Rs 200, UI Duel Rs 100, Startup Stories free. Warning: the category cards and the dropdown show no fees.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A registration form asks for name, email, college and an event dropdown listing all 8 events, and submitting it sends the details to spark2026@example.com",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "#reg-form has name, email, college and a select with 8 .event-option; the mechanical submit was ok with no errors; JS builds a mailto: to spark2026@example.com. Warning: the registration is lost if the visitor never presses send in their email app. The page says so.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A venue section shows the address 22 University Road, Pune 411007, Northfield College of Engineering, with a link to open it in a map",
+        "verdict": "PASS",
+        "note": "#venue shows '22 University Road, Pune 411007' and the college name, with one .map-link to a Google Maps search URL for that address.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "A WhatsApp link opens a chat with +91 00000 33333, and the email spark2026@example.com is shown",
+        "verdict": "PASS",
+        "note": ".whatsapp-link points to https://wa.me/910000033333; '+91 00000 33333' and spark2026@example.com are in #contact.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "PASS",
+        "note": "Mechanical check: js_errors [], overflow_px 0 at 360 and 1280, broken_in_page_links [].",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-9",
+        "criterion": "Rubric R-6: tap targets at least 44x44px",
+        "verdict": "NEEDS_REVISION",
+        "note": "Code measured 1 tap target under 44x44px at 360px: a 'Spark 2026' 101x28 (.site-nav-brand has no min-height).",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "Every section uses the --j2 palette, Space Grotesk and Inter, and the j2-btn and j2-card styles; the screenshot is consistent.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "94 text elements checked at both widths, 0 low-contrast.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "1 h1, 0 skipped heading levels; the hero title is the dominant element in the screenshot.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "The yellow 'Register now' is the clear primary action on the first screen at both widths.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The nav has only Schedule and Register; categories, venue and contact are reachable only by scrolling (7 in-page links in total).",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "NEEDS_REVISION",
+        "note": "Measured by code: 1 tap target(s) under 44x44px at 360px, e.g. a \"Spark 2026\" 101x28",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "0 img elements; all 4 placeholders are div role=img with a descriptive aria-label.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 36689,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&amp;family=Inter:wght@400;600&amp;display=swap",
+        "https://wa.me/910000033333",
+        "https://www.google.com/maps/search/?api=1&amp;query=Northfield%20College%20of%20Engineering%2C%2022%20University%20Road%2C%20Pune%20411007"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 94,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 7
+          },
+          "first_screen_actions": [
+            "Register now",
+            "Register"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 1,
+            "examples": [
+              "a \"Spark 2026\" 101x28"
+            ]
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 94,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 7
+          },
+          "first_screen_actions": [
+            "Register now",
+            "Register"
+          ]
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v8.png",
+    "all_pass": false
+  }
+]

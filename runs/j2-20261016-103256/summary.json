@@ -1,0 +1,579 @@
+{
+  "run": "20261016-103256",
+  "output_type": "prd",
+  "j2_fixes": 0,
+  "design_documents": {
+    "requested": [
+      "prd",
+      "hld",
+      "lld"
+    ],
+    "stages": [
+      "prd",
+      "hld",
+      "lld",
+      "website"
+    ],
+    "files": {},
+    "chain": [
+      {
+        "requirement": null,
+        "component": null,
+        "lld_section": null,
+        "atoms": []
+      }
+    ],
+    "lld_revisions": [],
+    "lld_compare": null
+  },
+  "provider": "claude-cli",
+  "sections": [
+    {
+      "heading": "Problem",
+      "words": 61
+    },
+    {
+      "heading": "Users",
+      "words": 101
+    },
+    {
+      "heading": "Goals",
+      "words": 75
+    },
+    {
+      "heading": "Requirements",
+      "words": 379
+    },
+    {
+      "heading": "Success metrics",
+      "words": 106
+    },
+    {
+      "heading": "Out of scope",
+      "words": 61
+    },
+    {
+      "heading": "Assumptions to confirm",
+      "words": 18
+    }
+  ],
+  "conditions": {
+    "met": 6,
+    "total": 8,
+    "warnings": 1,
+    "list": [
+      {
+        "id": "P1",
+        "met": true,
+        "evidence": "all 6 sections present, none empty"
+      },
+      {
+        "id": "P2",
+        "met": true,
+        "evidence": "R1 to R11, unique and in order"
+      },
+      {
+        "id": "P3",
+        "met": true,
+        "evidence": "all 17 brief fact(s) appear"
+      },
+      {
+        "id": "P4",
+        "met": false,
+        "evidence": "not in the charter or the Requester's answers, and not marked Assumption: This"
+      },
+      {
+        "id": "P5",
+        "met": true,
+        "evidence": "nothing to be confirmed"
+      },
+      {
+        "id": "P6",
+        "met": true,
+        "evidence": "each of G1, G2, G3 has a Success metrics entry"
+      },
+      {
+        "id": "P7",
+        "met": true,
+        "evidence": "each of the 2 user group(s) has a requirement or a \"no actions\" statement"
+      },
+      {
+        "id": "P8",
+        "met": false,
+        "evidence": "no measurement window: G2 | The opening hours (Monday to Saturday 7:30 am to 9:00 p"
+      }
+    ]
+  },
+  "necessary_conditions": {
+    "met": 6,
+    "total": 8,
+    "warnings": 1,
+    "list": [
+      {
+        "id": "P1",
+        "text": "All six sections are present and not empty",
+        "met": true,
+        "evidence": "all 6 sections present, none empty"
+      },
+      {
+        "id": "P2",
+        "text": "Requirement ids are unique and sequential (R1, R2, ...)",
+        "met": true,
+        "evidence": "R1 to R11, unique and in order"
+      },
+      {
+        "id": "P3",
+        "text": "Every brief fact appears exactly",
+        "met": true,
+        "evidence": "all 17 brief fact(s) appear"
+      },
+      {
+        "id": "P4",
+        "text": "No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+        "met": false,
+        "evidence": "not in the charter or the Requester's answers, and not marked Assumption: This",
+        "assumptions": [
+          "a pre-order is counted each time the pre-order form sends an order to hello@brewlab.example."
+        ]
+      },
+      {
+        "id": "P5",
+        "text": "Nothing is \"to be confirmed\"",
+        "met": true,
+        "evidence": "nothing to be confirmed"
+      },
+      {
+        "id": "P6",
+        "text": "Every goal has a matching success metric",
+        "met": true,
+        "evidence": "each of G1, G2, G3 has a Success metrics entry"
+      },
+      {
+        "id": "P7",
+        "text": "Every user group named in the charter appears in Requirements or in a \"no actions in this version\" statement",
+        "met": true,
+        "evidence": "each of the 2 user group(s) has a requirement or a \"no actions\" statement"
+      },
+      {
+        "id": "P8",
+        "text": "Each numeric success metric states its measurement window, or says \"measurement window not set\"",
+        "met": false,
+        "evidence": "no measurement window: G2 | The opening hours (Monday to Saturday 7:30 am to 9:00 p",
+        "severity": "warn"
+      }
+    ]
+  },
+  "export": {
+    "file": "prd.docx",
+    "written": true,
+    "note": null
+  },
+  "force_audit_fail": null,
+  "test_lessons": false,
+  "model": "sonnet",
+  "mock": false,
+  "brief": "A one-page website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru. Visitors see the menu with prices, the opening hours and where to find the shop, and they can pre-order a coffee for pickup. Users: coffee lovers and office staff nearby. Problem: people cannot see the menu or order ahead. Must-have: menu with prices, pre-order form, map or address, opening hours. Constraints: one page only, works on phones, no payment. Success: 30 pre-orders per week.\nItems and prices (rupees): Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120.\nOpen: Monday to Saturday 7:30 am to 9:00 pm, Sunday 8:30 am to 6:00 pm.\nAddress: 12, 100 Feet Road, Indiranagar, Bengaluru 560038.\nContact: show phone +91 98450 12345 and email hello@brewlab.example.\nPre-orders: the customer enters name, phone, items and pickup time, and the order is emailed to hello@brewlab.example. No online payment, they pay at pickup.\nWrite the design docs first.",
+  "change_requests": [],
+  "status": "done_with_open_items",
+  "outcome": "Done with open items: shipped as is on the Requester's decision (The same failure came back twice in a row, so another cycle would likely repeat it.). Still not workable: document rubric D-5 (NEEDS_REVISION): No invented facts: every fact comes from the brief or the Requester's answers, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim not in the brief; necessary condition P4 not met: No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line (not in the charter or the Requester's answers, and not marked Assumption: This).",
+  "budget": {
+    "start": 300,
+    "granted": 300,
+    "used": 133,
+    "raises": []
+  },
+  "ai_calls": 24,
+  "cycles": 2,
+  "links": {
+    "identity->adaptation": 2,
+    "validator->adaptation": 1,
+    "adaptation->priority": 2,
+    "validator->coordination": 2,
+    "coordination->priority": 7,
+    "priority->W": 7,
+    "W->coordination": 7,
+    "audit->identity": 2,
+    "identity->requester": 2
+  },
+  "verification": {
+    "passed": 7,
+    "failed": 0,
+    "escalated": 0,
+    "could_not_run": 0,
+    "checks_run": 27
+  },
+  "identity_to_requester_decisions": 1,
+  "identity_to_requester_facts": 0,
+  "priority_rulings": {
+    "grant": 2,
+    "counter": 0,
+    "refuse": 0
+  },
+  "questions_to_user": [
+    {
+      "kind": "limit",
+      "asked": [
+        "The same problem came back twice. Keep going or finish as it is?"
+      ],
+      "answer": "option 2",
+      "decision": "ship",
+      "named": [],
+      "dropped": []
+    }
+  ],
+  "conflicts": [],
+  "validator_rejections": [],
+  "holds": [],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 6,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "PASS"
+        },
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "verdict": "PASS"
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-11",
+          "item": null,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-12",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "version": 7,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "PASS"
+        },
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "verdict": "PASS"
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-11",
+          "item": null,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-12",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    }
+  ],
+  "site_versions": 7,
+  "workable": [
+    "document rubric D-5 (NEEDS_REVISION): No invented facts: every fact comes from the brief or the Requester's answers, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim not in the brief",
+    "necessary condition P4 not met: No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line (not in the charter or the Requester's answers, and not marked Assumption: This)"
+  ],
+  "to_be_confirmed": [],
+  "dropped_by_requester": [],
+  "workflow_agents": [
+    {
+      "id": "W-1",
+      "agent": "W-1 Builder",
+      "section": "W-1",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-2",
+      "agent": "W-2 Builder",
+      "section": "W-2",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-3",
+      "agent": "W-3 Builder",
+      "section": "W-3",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-4",
+      "agent": "W-4 Builder",
+      "section": "W-4",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-5",
+      "agent": "W-5 Builder",
+      "section": "W-5",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-6",
+      "agent": "W-6 Builder",
+      "section": "W-6",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-7",
+      "agent": "W-7 Builder",
+      "section": "W-5",
+      "revises": "W-5",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    }
+  ],
+  "limits_hit": [
+    "The same failure came back twice in a row, so another cycle would likely repeat it."
+  ],
+  "lessons": {
+    "memory": false,
+    "saved": [],
+    "used": []
+  },
+  "playbooks": {
+    "saved": null,
+    "used": []
+  },
+  "business_type": "prd",
+  "style_guide": false,
+  "rubric": [
+    {
+      "id": "D-1",
+      "pass": true,
+      "verdict": "PASS_WITH_WARNING"
+    },
+    {
+      "id": "D-2",
+      "pass": true,
+      "verdict": "PASS_WITH_WARNING"
+    },
+    {
+      "id": "D-3",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "D-4",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "D-5",
+      "pass": false,
+      "verdict": "NEEDS_REVISION"
+    }
+  ],
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "Problem section states that people cannot see the menu or order ahead at Brew Lab",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "Users section names coffee lovers and office staff nearby and what each does: see the menu, hours and location, and pre-order for pickup",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "Goals section states that visitors can see the menu, opening hours and location and pre-order a coffee for pickup",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "Requirements section lists the menu with all seven items and their rupee prices exactly as given",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "Requirements section lists the pre-order form with the fields name, phone, items and pickup time, and says the order is emailed to hello@brewlab.example",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "Requirements section lists the opening hours for Monday to Saturday and Sunday exactly as given",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "Requirements section lists the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as the map or address, and the phone +91 98450 12345 and email hello@brewlab.example as contact details",
+      "pass": true
+    },
+    {
+      "item": 8,
+      "criterion": "Requirements section states the constraints: one page only, works on phones, no online payment (pay at pickup)",
+      "pass": true
+    },
+    {
+      "item": 9,
+      "criterion": "Success metrics section states 30 pre-orders per week",
+      "pass": true
+    },
+    {
+      "item": 10,
+      "criterion": "Out of scope section lists online payment and any additional pages",
+      "pass": true
+    }
+  ],
+  "route_check_violations": []
+}

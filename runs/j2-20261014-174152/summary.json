@@ -1,0 +1,666 @@
+{
+  "run": "20261014-174152",
+  "output_type": "website",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "sections": [
+    "style",
+    "W-1",
+    "W-2",
+    "W-3",
+    "W-4",
+    "W-5",
+    "W-6",
+    "W-7",
+    "W-8",
+    "W-9",
+    "W-10",
+    "W-11"
+  ],
+  "conditions": {
+    "met": 7,
+    "total": 8,
+    "warnings": 0,
+    "list": [
+      {
+        "id": "N1",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "met": true,
+        "evidence": "all 19 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "met": true,
+        "evidence": "all 34 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "met": false,
+        "evidence": "not in the charter or the Requester's answers: 0"
+      },
+      {
+        "id": "N7",
+        "met": true,
+        "evidence": "2 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "met": true,
+        "evidence": "the nav reaches all 9 section(s); the hero has 1 main action(s)"
+      }
+    ]
+  },
+  "necessary_conditions": {
+    "met": 7,
+    "total": 8,
+    "warnings": 0,
+    "list": [
+      {
+        "id": "N1",
+        "text": "The page opens (it parses, tags balanced)",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "text": "No JavaScript errors on load",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "text": "No horizontal overflow at 360px and 1280px",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "text": "Every in-page link resolves; WhatsApp (wa.me) and tel: links are well formed",
+        "met": true,
+        "evidence": "all 19 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "text": "Every charter fact appears exactly, and nothing is \"to be confirmed\"",
+        "met": true,
+        "evidence": "all 34 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "text": "No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers",
+        "met": false,
+        "evidence": "not in the charter or the Requester's answers: 0"
+      },
+      {
+        "id": "N7",
+        "text": "Every form has a submit control and a destination (action or mailto)",
+        "met": true,
+        "evidence": "2 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "text": "A nav reaches every section, and the hero has one obvious main action",
+        "met": true,
+        "evidence": "the nav reaches all 9 section(s); the hero has 1 main action(s)"
+      }
+    ]
+  },
+  "force_audit_fail": null,
+  "test_lessons": false,
+  "model": "sonnet",
+  "mock": false,
+  "brief": "Make a website for CodeSprint Pune 2027, a two-day student and professional hackathon in Pune. Participants should be able to compare the three tracks, work out what they will pay with a fee calculator, register their team with a form, see the day-one and day-two schedule, see the prizes for each track, read FAQs, and see sponsors by tier. Mentors should be able to sign up with a separate form. Add a countdown to the start of the hackathon, a menu that stays on screen and shows which section you are in, and a high-contrast mode that works across the whole page. It should feel energetic and clear and work well on phones.\nDay one: Saturday 6 March 2027. Day two: Sunday 7 March 2027. Venue: Lakeside Tech Hall, 12 Lake Road, Pune 411002. Tracks: Web Track (team size 1 to 4, build time 24 hours, first prize Rs 50000); AI Track (team size 2 to 4, build time 24 hours, first prize Rs 75000); Hardware Track (team size 2 to 4, build time 30 hours, first prize Rs 60000). Entry fee per participant: Student Rs 400, Professional Rs 800. Meal pass: Rs 200 each, optional. Early-bird: 10% off entry fees only (not meal passes) for registrations up to 15 February 2027. Fee calculator: choose ticket type (Student or Professional), number of participants (1 to 4) and number of meal passes; show the total. Registration form: team name, lead name, lead email, lead phone, track (dropdown), ticket type (Student or Professional), college name (only shown if ticket type is Student, and required only then), number of participants (1 to 4), meal passes yes/no, dietary preference (Vegetarian or Non-vegetarian, only shown if meal passes is yes); sends to register@example.com. Mentor form: name, email, area of expertise (Web, AI, Hardware), available Saturday / Sunday / both; sends to mentors@example.com. Schedule: Day one 9:00am check-in opens, 10:00am opening and kickoff, 1:00pm lunch, 8:00pm mentor round. Day two 10:00am final submissions close, 11:00am demos begin, 3:00pm prize ceremony. FAQs: Can I change my track? Yes, until 20 February 2027 by email. Is there parking? Yes, free at the north gate. Are refunds available? No. Do I need my own laptop? Yes. Is there Wi-Fi? Yes, at the hall. Can I join without a team? Yes, we will match you with a team on day one. Sponsors: Gold: Northwind Cloud; Silver: Bytecraft Labs, Circuit House; Community: Pune Coders Club. Contact: code@example.com, WhatsApp +91 00000 55555. No photos yet, use placeholders for photos and sponsor logos.",
+  "change_requests": [],
+  "status": "crashed",
+  "outcome": "Crashed: RuntimeError: claude -p failed (exit 1): You've hit your individual spend limit · run /usage-credits to ask your admin for a higher limit · your session limit resets 8:30pm (Asia/Calcutta)",
+  "budget": {
+    "start": 200,
+    "granted": 200,
+    "used": 169,
+    "raises": []
+  },
+  "ai_calls": 43,
+  "cycles": 3,
+  "links": {
+    "identity->adaptation": 3,
+    "validator->adaptation": 1,
+    "adaptation->priority": 3,
+    "validator->coordination": 3,
+    "coordination->priority": 12,
+    "priority->W": 12,
+    "W->coordination": 12,
+    "adaptation->coordination": 1,
+    "audit->identity": 2
+  },
+  "verification": {
+    "passed": 12,
+    "failed": 0,
+    "escalated": 0,
+    "could_not_run": 0,
+    "checks_run": 95
+  },
+  "identity_to_requester_decisions": 0,
+  "identity_to_requester_facts": 0,
+  "priority_rulings": {
+    "grant": 3,
+    "counter": 0,
+    "refuse": 0
+  },
+  "questions_to_user": [],
+  "conflicts": [],
+  "validator_rejections": [
+    {
+      "cycle": 1,
+      "workflow": "Team registration form",
+      "reason": "work atom 1: expected output item 6 behavior step 'set #reg-college ': set takes a selector and a value"
+    },
+    {
+      "cycle": 1,
+      "workflow": "High-contrast mode",
+      "reason": "work atom 1: expected output item 2 behavior step 4 targets '#schedule', which the atom's how or constraints doesn't tell the builder to create"
+    }
+  ],
+  "holds": [],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 15,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-11",
+          "item": 11,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-12",
+          "item": 12,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-13",
+          "item": 13,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-14",
+          "item": 14,
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-1",
+          "item": "R-1",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-2",
+          "item": "R-2",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-3",
+          "item": "R-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-4",
+          "item": "R-4",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-5",
+          "item": "R-5",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-6",
+          "item": "R-6",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-7",
+          "item": "R-7",
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-15",
+          "item": null,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-16",
+          "item": null,
+          "verdict": "NEEDS_REVISION"
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "version": 16,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-11",
+          "item": 11,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-12",
+          "item": 12,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-13",
+          "item": 13,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-14",
+          "item": 14,
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-1",
+          "item": "R-1",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "R-2",
+          "item": "R-2",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-3",
+          "item": "R-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-4",
+          "item": "R-4",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-5",
+          "item": "R-5",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-6",
+          "item": "R-6",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-7",
+          "item": "R-7",
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-15",
+          "item": null,
+          "verdict": "NEEDS_REVISION"
+        }
+      ]
+    }
+  ],
+  "site_versions": 16,
+  "workable": [
+    "necessary condition N6 not met: No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers (not in the charter or the Requester's answers: 0)"
+  ],
+  "to_be_confirmed": [],
+  "dropped_by_requester": [],
+  "workflow_agents": [
+    {
+      "id": "W-1",
+      "agent": "W-1 Builder",
+      "section": "W-1",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-2",
+      "agent": "W-2 Builder",
+      "section": "W-2",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-3",
+      "agent": "W-3 Builder",
+      "section": "W-3",
+      "revises": null,
+      "status": "done",
+      "calls": 2,
+      "retries": 1
+    },
+    {
+      "id": "W-4",
+      "agent": "W-4 Builder",
+      "section": "W-4",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-5",
+      "agent": "W-5 Builder",
+      "section": "W-5",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-6",
+      "agent": "W-6 Builder",
+      "section": "W-6",
+      "revises": null,
+      "status": "done",
+      "calls": 3,
+      "retries": 0
+    },
+    {
+      "id": "W-7",
+      "agent": "W-7 Builder",
+      "section": "W-7",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-8",
+      "agent": "W-8 Builder",
+      "section": "W-8",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-9",
+      "agent": "W-9 Builder",
+      "section": "W-9",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-10",
+      "agent": "W-10 Builder",
+      "section": "W-10",
+      "revises": null,
+      "status": "done",
+      "calls": 3,
+      "retries": 0
+    },
+    {
+      "id": "W-11",
+      "agent": "W-11 Builder",
+      "section": "W-11",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-12",
+      "agent": "W-12 Builder",
+      "section": "W-3",
+      "revises": "W-3",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-13",
+      "agent": "W-13 Builder",
+      "section": "W-3",
+      "revises": "W-3",
+      "status": "registered",
+      "calls": 0,
+      "retries": 0
+    }
+  ],
+  "limits_hit": [],
+  "lessons": {
+    "memory": false,
+    "saved": [],
+    "used": []
+  },
+  "playbooks": {
+    "saved": null,
+    "used": []
+  },
+  "business_type": "hackathon event",
+  "style_guide": true,
+  "rubric": [
+    {
+      "id": "R-1",
+      "pass": true,
+      "verdict": "PASS_WITH_WARNING"
+    },
+    {
+      "id": "R-2",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-3",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-4",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-5",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-6",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-7",
+      "pass": true,
+      "verdict": "PASS"
+    }
+  ],
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The site shows the name CodeSprint Pune 2027, that it is a two-day hackathon in Pune, Saturday 6 March 2027, Sunday 7 March 2027 and the venue Lakeside Tech Hall, 12 Lake Road, Pune 411002",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "A track comparison shows Web Track, AI Track and Hardware Track with team size, build time and first prize for each",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "A fee calculator takes ticket type (Student or Professional), number of participants (1 to 4) and number of meal passes, and shows the total using Student Rs 400, Professional Rs 800, meal pass Rs 200, with 10% early-bird off entry fees only for registrations up to 15 February 2027",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "A registration form has team name, lead name, lead email, lead phone, track dropdown, ticket type, college name (Student only, required only then), number of participants (1 to 4), meal passes yes/no and dietary preference (only if meals yes), and sends to register@example.com",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "A separate mentor form has name, email, area of expertise (Web, AI, Hardware) and availability (Saturday, Sunday or both), and sends to mentors@example.com",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "A schedule shows day one and day two with every listed time and event",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "A prizes section shows the first prize for each of the three tracks",
+      "pass": true
+    },
+    {
+      "item": 8,
+      "criterion": "An FAQ section answers the six listed questions",
+      "pass": true
+    },
+    {
+      "item": 9,
+      "criterion": "A sponsors section shows Gold, Silver and Community tiers with the listed sponsors and logo placeholders",
+      "pass": true
+    },
+    {
+      "item": 10,
+      "criterion": "Contact shows code@example.com and WhatsApp +91 00000 55555",
+      "pass": true
+    },
+    {
+      "item": 11,
+      "criterion": "A countdown counts down to the start of the hackathon",
+      "pass": true
+    },
+    {
+      "item": 12,
+      "criterion": "A menu stays on screen and highlights the section the visitor is in",
+      "pass": true
+    },
+    {
+      "item": 13,
+      "criterion": "A high-contrast mode toggle changes the whole page",
+      "pass": true
+    },
+    {
+      "item": 14,
+      "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+      "pass": true
+    }
+  ],
+  "route_check_violations": []
+}

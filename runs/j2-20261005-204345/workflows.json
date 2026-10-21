@@ -1,0 +1,54 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "w1-english-site",
+    "name": "English single-page site with all sections",
+    "purpose": "No site file exists. None of the nav, Adopt, Donate, Volunteer or Success Stories content exists.",
+    "cost": 35,
+    "estimate": 35,
+    "envelope": {
+      "money_limit": 35,
+      "model_call_limit": 4,
+      "time_limit_minutes": 40,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the file lacks any of the 5 nav anchors or the volunteer form after 4 model calls or 40 minutes, and report to Coordination; no extra money is released."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "paws-haven.html (English)"
+    ],
+    "completion_check": "File has the viewport tag, the 5 nav anchors, at least 3 sample pets each with name/species/age/description and a wa.me or mailto inquiry button, a Donate block with placeholders and no payment script or card input, a volunteer form with labelled name/phone/email/availability fields whose submit builds a wa.me or mailto link, no external form action and no storage code, and at least 3 stories each with a pet name and text.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "w2-kannada-toggle",
+    "name": "Kannada version with language toggle",
+    "purpose": "The site is English-only, with no toggle, Kannada text, Kannada font or review notice.",
+    "cost": 12,
+    "estimate": 12,
+    "envelope": {
+      "money_limit": 12,
+      "model_call_limit": 3,
+      "time_limit_minutes": 30,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any visible string still lacks a Kannada version after 3 model calls or 30 minutes, and report to Coordination; no extra money is released."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "paws-haven.html (bilingual)"
+    ],
+    "completion_check": "Toggle is reachable by keyboard, every text element has an English and a Kannada string, a Kannada-capable font is loaded, html lang changes to kn and back to en on toggle, and the pending-review notice is visible in both modes.",
+    "dependencies": [
+      "w1-english-site"
+    ],
+    "status": "done",
+    "cycle": 1
+  }
+]

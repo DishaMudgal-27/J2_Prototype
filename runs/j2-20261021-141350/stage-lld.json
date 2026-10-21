@@ -1,0 +1,481 @@
+{
+  "stage": "lld",
+  "goal": {
+    "product_name": "Brew Lab",
+    "users": "Coffee lovers and office staff near the shop in Indiranagar, Bengaluru",
+    "problem": "Today customers cannot see the menu or order ahead.",
+    "features": [
+      "Shop name and address shown as text, with no embedded map",
+      "Menu of seven items with prices in rupees",
+      "Opening hours, 7 am to 10 pm, every day",
+      "Pre-order form with the fields name, phone, items and pickup time, sending the order to hello@brewlab.example",
+      "Pickup at the shop, with no online payment",
+      "Works on phones"
+    ],
+    "user_groups": [
+      {
+        "name": "Coffee lovers",
+        "actions": [
+          "Look at the menu with prices",
+          "Check the opening hours",
+          "Find the address",
+          "Place a pre-order for pickup"
+        ]
+      },
+      {
+        "name": "Office staff nearby",
+        "actions": [
+          "Place a quick pre-order on their phone",
+          "Pick the order up on the way to work"
+        ]
+      }
+    ],
+    "constraints": [
+      "The page must work on phones",
+      "The address is shown as text with no embedded map",
+      "No online payment is taken",
+      "Customers collect the order at the shop",
+      "The page does not show a phone number for the shop",
+      "The website is plain HTML, CSS and JavaScript in one file"
+    ],
+    "success_measures": [
+      "20 pre-orders a week within the first month"
+    ],
+    "statement": "An LLD for Brew Lab",
+    "site_name": "Brew Lab",
+    "business_type": "lld",
+    "facts": [
+      "Brew Lab"
+    ],
+    "standards": [
+      "Every item traceable to the PRD"
+    ],
+    "rules": [
+      "No invented facts"
+    ],
+    "done_when": [
+      "The Pages and sections section is written for Brew Lab, and names every component (C1, C2, C3, C4, C5, C6, C7, C8, C9) it implements",
+      "The Interactive elements section is written for Brew Lab",
+      "The Form fields section is written for Brew Lab",
+      "The File structure section is written for Brew Lab",
+      "The Responsive and accessibility rules section is written for Brew Lab"
+    ],
+    "to_be_confirmed": [],
+    "dropped_from_brief": [],
+    "visitor_needs": [],
+    "chain": {
+      "prd": {
+        "kind": "prd",
+        "requirements": [
+          {
+            "id": "R1",
+            "text": "The page shows the shop name Brew Lab as text."
+          },
+          {
+            "id": "R2",
+            "text": "The page shows the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, so coffee lovers can find the shop."
+          },
+          {
+            "id": "R3",
+            "text": "The page does not contain an embedded map. The address is text only."
+          },
+          {
+            "id": "R4",
+            "text": "The page shows a menu of seven items with prices in rupees, exactly as follows: Filter coffee 90 rupees, Cappuccino 160 rupees, Latte 180 rupees, Cold brew 200 rupees, Masala chai 80 rupees, Almond croissant 140 rupees, Banana bread slice 120 rupees."
+          },
+          {
+            "id": "R5",
+            "text": "The menu shows each item next to its price, so a customer can see what each item costs without placing an order."
+          },
+          {
+            "id": "R6",
+            "text": "The page shows the opening hours as 7 am to 10 pm, every day."
+          },
+          {
+            "id": "R7",
+            "text": "The page has a pre-order form with these fields: name, phone, items and pickup time."
+          },
+          {
+            "id": "R8",
+            "text": "When a customer submits the pre-order form, the order is sent to hello@brewlab.example."
+          },
+          {
+            "id": "R9",
+            "text": "The page states that customers collect the order at the shop, so coffee lovers and office staff nearby know the order is picked up in person."
+          },
+          {
+            "id": "R10",
+            "text": "The page takes no online payment. The pre-order form has no payment fields."
+          },
+          {
+            "id": "R11",
+            "text": "The page works on phones. A customer, including office staff nearby, can read the menu, the opening hours and the address, and fill in and submit the pre-order form, on a phone screen."
+          },
+          {
+            "id": "R12",
+            "text": "The page does not show a phone number for the shop. The form field called phone is for the customer's own number only."
+          },
+          {
+            "id": "R13",
+            "text": "The website is plain HTML, CSS and JavaScript in one file."
+          }
+        ]
+      },
+      "hld": {
+        "kind": "hld",
+        "components": [
+          {
+            "id": "C1",
+            "name": "Shop name",
+            "responsibility": "shows the shop name Brew Lab as text at the top of the page",
+            "covers": [
+              "R1"
+            ]
+          },
+          {
+            "id": "C2",
+            "name": "Address block",
+            "responsibility": "shows the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text only, with no embedded map and no phone number for the shop",
+            "covers": [
+              "R2",
+              "R3",
+              "R12"
+            ]
+          },
+          {
+            "id": "C3",
+            "name": "Menu list",
+            "responsibility": "shows the seven items, each next to its price in rupees, so a customer can see the cost without ordering: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+            "covers": [
+              "R4",
+              "R5"
+            ]
+          },
+          {
+            "id": "C4",
+            "name": "Opening hours",
+            "responsibility": "shows the hours as 7 am to 10 pm, every day",
+            "covers": [
+              "R6"
+            ]
+          },
+          {
+            "id": "C5",
+            "name": "Pre-order form",
+            "responsibility": "collects the fields name, phone, items and pickup time. It has no payment fields, and the phone field is for the customer's own number only",
+            "covers": [
+              "R7",
+              "R10",
+              "R12"
+            ]
+          },
+          {
+            "id": "C6",
+            "name": "Order sender",
+            "responsibility": "when the customer submits the pre-order form, sends the order to hello@brewlab.example",
+            "covers": [
+              "R8"
+            ]
+          },
+          {
+            "id": "C7",
+            "name": "Pickup note",
+            "responsibility": "states that customers collect the order at the shop and that no online payment is taken",
+            "covers": [
+              "R9",
+              "R10"
+            ]
+          },
+          {
+            "id": "C8",
+            "name": "Phone layout",
+            "responsibility": "makes the layout fit a phone screen, so a customer, including office staff nearby, can read the menu, the opening hours and the address, and fill in and submit the pre-order form",
+            "covers": [
+              "R11"
+            ]
+          },
+          {
+            "id": "C9",
+            "name": "Plain HTML, CSS and JavaScript in one file",
+            "responsibility": "delivers the whole page as plain HTML, CSS and JavaScript in one file",
+            "covers": [
+              "R13"
+            ]
+          }
+        ]
+      },
+      "prd_ids": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6",
+        "R7",
+        "R8",
+        "R9",
+        "R10",
+        "R11",
+        "R12",
+        "R13"
+      ],
+      "hld_ids": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "C6",
+        "C7",
+        "C8",
+        "C9"
+      ]
+    },
+    "requester_answers": [
+      "1. We will know the page is working if it gets 20 pre-orders a week within the first month.\n2. Coffee lovers look at the menu with prices, check the opening hours, find the address, and place a pre-order for pickup.\n3. Office staff nearby place a quick pre-order on their phone and pick it up on the way to work.\n4. No, the page does not need to show a phone number for the shop."
+    ],
+    "charter_items": [
+      "The Pages and sections section is written for Brew Lab, and names every component (C1, C2, C3, C4, C5, C6, C7, C8, C9) it implements",
+      "The Interactive elements section is written for Brew Lab",
+      "The Form fields section is written for Brew Lab",
+      "The File structure section is written for Brew Lab",
+      "The Responsive and accessibility rules section is written for Brew Lab"
+    ],
+    "core_items": [
+      "The Pages and sections section is written for Brew Lab, and names every component (C1, C2, C3, C4, C5, C6, C7, C8, C9) it implements",
+      "The Interactive elements section is written for Brew Lab",
+      "The Form fields section is written for Brew Lab",
+      "The File structure section is written for Brew Lab",
+      "The Responsive and accessibility rules section is written for Brew Lab"
+    ],
+    "confirmed_facts": []
+  },
+  "audits": [
+    {
+      "cycle": 6,
+      "version": 6,
+      "results": [
+        {
+          "id": "F-1",
+          "criterion": "The Pages and sections section is written for Brew Lab, and names every component (C1, C2, C3, C4, C5, C6, C7, C8, C9) it implements",
+          "verdict": "PASS",
+          "note": "S1 to S7 each have an id and say 'Implements C1' to 'C8, C9'; the components list names C1 to C9 with the building section; L5 met.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 1,
+          "pass": true
+        },
+        {
+          "id": "F-2",
+          "criterion": "The Interactive elements section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "E1 '#pre-order-submit trigger click' and E2 '#pre-order-form trigger submit' send the order to hello@brewlab.example.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 2,
+          "pass": true
+        },
+        {
+          "id": "F-3",
+          "criterion": "The Form fields section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "F1 to F4 cover name, phone, items and pickup time, each with type, required yes and validation; no payment fields.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 3,
+          "pass": true
+        },
+        {
+          "id": "F-4",
+          "criterion": "The File structure section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "'Plain HTML, CSS and JavaScript in one file' with index.html holding HTML, CSS and JS parts; no map, payment or shop phone.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 4,
+          "pass": true
+        },
+        {
+          "id": "F-5",
+          "criterion": "The Responsive and accessibility rules section is written for Brew Lab",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "Covers phones, one column, labels, keyboard; but 'no horizontal overflow at 360px and at 1280px' uses widths not in the brief and not labelled Assumption.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 5,
+          "pass": true
+        }
+      ],
+      "extra_issues": [
+        {
+          "id": "F-6",
+          "criterion": "No invented facts (code check L6)",
+          "verdict": "NEEDS_REVISION",
+          "note": "L6 not met: the numbers 360 and 1280 in 'Width limits' are not in the brief and not on an Assumption line.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null
+        }
+      ],
+      "rubric": [
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "criterion": "Every page section has an id and implements at least one component",
+          "verdict": "PASS",
+          "note": "S1 to S7 each have an id such as #shop-name and say 'Implements C1' through 'C8, C9'.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "criterion": "Every interactive element has a selector, a trigger and a behaviour",
+          "verdict": "PASS",
+          "note": "E1 and E2 each give a selector (#pre-order-submit, #pre-order-form), a trigger (click, submit) and a behaviour.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "criterion": "Every form field has a type, a required flag and a validation rule",
+          "verdict": "PASS",
+          "note": "F1 to F4 each give type (text, tel, multi-line text, time), 'required yes' and a validation rule.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "criterion": "Consistent with the HLD: every component is built by a section",
+          "verdict": "PASS",
+          "note": "The components list shows C1 to C9, each 'built by' S1 to S7.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "criterion": "No invented facts: every fact comes from the brief or the Requester's answers or the earlier documents, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim",
+          "verdict": "NEEDS_REVISION",
+          "note": "Unlabelled claims: 'no horizontal overflow at 360px and at 1280px' in Responsive rules (Width limits). Other design choices are labelled Assumption.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": false
+        }
+      ],
+      "mechanical": {},
+      "screenshot": null,
+      "all_pass": false,
+      "output": "lld",
+      "conditions": [
+        {
+          "id": "L1",
+          "text": "All five sections are present and not empty",
+          "check": "sections-present",
+          "met": true,
+          "evidence": "all 5 sections present, none empty"
+        },
+        {
+          "id": "L2",
+          "text": "Section, element and field ids are unique, and every section has an id",
+          "check": "lld-ids-unique",
+          "met": true,
+          "evidence": "13 entry ids and 9 selectors, all unique"
+        },
+        {
+          "id": "L3",
+          "text": "Every interactive element has a selector, a trigger and a behaviour",
+          "check": "lld-elements",
+          "met": true,
+          "evidence": "each of the 2 interactive element(s) has a selector, a trigger and a behaviour"
+        },
+        {
+          "id": "L4",
+          "text": "Every form field has a name, a type and a required flag",
+          "check": "lld-fields",
+          "met": true,
+          "evidence": "each of the 4 form field(s) has a name, a type and a required flag"
+        },
+        {
+          "id": "L5",
+          "text": "Every HLD component appears in an LLD section",
+          "check": "chain-ids",
+          "met": true,
+          "evidence": "each of C1, C2, C3, C4, C5, C6, C7, C8, C9 appears in Pages and sections"
+        },
+        {
+          "id": "L6",
+          "text": "No invented facts: every number, email and proper name comes from the charter, the Requester's answers or the earlier documents, or sits in an Assumption: line",
+          "check": "no-invented-facts",
+          "met": false,
+          "evidence": "not in the charter or the Requester's answers, and not marked Assumption: 1280, 360",
+          "assumptions": [
+            "the page file name index.html and the section ids in this list are design choices made here. They are not in the brief.",
+            "the order of S1 to S6 on the page follows the order of this list.",
+            "the form id #pre-order-form and the button id #pre-order-submit are design choices made here. They are not in the brief.",
+            "if a required field is empty, the form is not sent and the empty field is pointed out to the customer.",
+            "after the order is sent, the page tells the customer that the order was sent and will be collected at the shop.",
+            "the order is sent from the page's own JavaScript, by opening the customer's email app with the order details addressed to hello@brewlab.example. The brief does not say how the order is sent.",
+            "all four fields are required. The brief lists the four fields but does not say whether each is required. This matches the Interactive elements section, where an empty field stops the form from being sent.",
+            "the field name is written name, phone, items and pickup-time in the HTML name attributes, and the inputs have the ids #order-name, #order-phone, #order-items and #order-pickup-time. These are design choices made here and are not in the brief.",
+            "the phone field accepts digits, spaces, + and -, and the page does not check the number against any country format. The brief gives no phone format rule.",
+            "the items field is a free-text box, not a list of choices. The brief does not say how items are picked.",
+            "the pickup time input is limited to the opening hours, 7 am to 10 pm, so the customer can only choose a time when the shop is open. The brief does not say how pickup time is checked.",
+            "each field has a visible label with the same wording as the field name, and a missing or wrong value is pointed out next to that field. The brief does not describe the error messages.",
+            "the file is named index.html, as in the Pages and sections section. The brief does not give a file name.",
+            "the CSS part comes before the page text and the JavaScript part comes after it. The brief does not set the order of the parts.",
+            "the page uses no outside libraries. The brief does not ask for any.",
+            "on a phone screen, the touch targets of #pre-order-submit and the form fields are large enough to tap with a thumb. The brief gives no size.",
+            "the layout changes from one column to a wider layout only when the screen is wider than a phone, and the exact width where it changes is chosen when the page is built. The brief gives no breakpoint.",
+            "the field help and error text next to a field is linked to that field so assistive tools read it. The brief does not describe error messages.",
+            "the page language is set to English for assistive tools. The brief does not state a language."
+          ]
+        }
+      ],
+      "read": "Read the full LLD v6: Pages and sections (~45 lines, S1-S7 and C1-C9 map), Interactive elements (E1, E2, ~10 lines), Form fields (F1-F4, ~15 lines), File structure (~35 lines), Responsive and accessibility rules (~35 lines), and the Assumptions to confirm list (19 items). Also read the L1-L6 code checks and the brief facts."
+    }
+  ],
+  "sections": {
+    "W-19": {
+      "owner": "W-19",
+      "head": "",
+      "body": "## Pages and sections\n\nBrew Lab has one page. It shows the shop name, the address as text, the menu with prices in rupees, the opening hours, the pre-order form and the pickup note. Each part below has its own id, and each component is built by exactly one part.\n\n### Page sections\n\n- **S1** `#shop-name` (page index.html): shows the shop name Brew Lab as text at the top of the page. Implements C1.\n- **S2** `#address` (page index.html): shows the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text only, with no embedded map and no phone number for the shop. Implements C2.\n- **S3** `#menu` (page index.html): shows the seven menu items, each next to its price in rupees, so a customer can see the cost without ordering: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120. Implements C3.\n- **S4** `#opening-hours` (page index.html): shows the opening hours as 7 am to 10 pm, every day. Implements C4.\n- **S5** `#pre-order` (page index.html): holds the pre-order form with the fields name, phone, items and pickup time, with no payment fields. The phone field is for the customer's own number only. When the customer submits the form, the order is sent to hello@brewlab.example. Implements C5, C6.\n- **S6** `#pickup-note` (page index.html): states that customers collect the order at the shop and that no online payment is taken. Implements C7.\n- **S7** `#page` (page index.html): the wrapper around S1 to S6. It is delivered as plain HTML, CSS and JavaScript in one file, and its layout fits a phone screen, so a customer, including office staff nearby, can read the menu, the opening hours and the address, and fill in and submit the pre-order form. Implements C8, C9.\n\n### Components and the section that builds each\n\n- **C1** Shop name: built by S1 `#shop-name`.\n- **C2** Address block: built by S2 `#address`.\n- **C3** Menu list: built by S3 `#menu`.\n- **C4** Opening hours: built by S4 `#opening-hours`.\n- **C5** Pre-order form: built by S5 `#pre-order`.\n- **C6** Order sender: built by S5 `#pre-order`, which sends the order to hello@brewlab.example when the form is submitted.\n- **C7** Pickup note: built by S6 `#pickup-note`.\n- **C8** Phone layout: built by S7 `#page`.\n- **C9** Plain HTML, CSS and JavaScript in one file: built by S7 `#page`.\n\nAssumption: the page file name `index.html` and the section ids in this list are design choices made here. They are not in the brief.\n\nAssumption: the order of S1 to S6 on the page follows the order of this list.",
+      "workflow": "Write LLD Pages and sections"
+    },
+    "W-20": {
+      "owner": "W-20",
+      "head": "",
+      "body": "## Interactive elements\n\nThe page has two interactive elements, and both are in section S5 `#pre-order`. The shop name, address, menu, opening hours and pickup note are plain text and have nothing to click or submit.\n\n- **E1** in S5: `#pre-order-submit` trigger click; behaviour submits the pre-order form `#pre-order-form`, which starts the form submission. The button takes no payment and has no payment step. Implements C5.\n- **E2** in S5: `#pre-order-form` trigger submit; behaviour checks that the fields name, phone, items and pickup time are filled in, then sends the order to hello@brewlab.example with the values the customer typed. The phone value is the customer's own number only, and no shop phone number is shown or used. The order is collected at the shop, and no online payment is taken. Implements C5, C6.\n\nAssumption: the form id `#pre-order-form` and the button id `#pre-order-submit` are design choices made here. They are not in the brief.\n\nAssumption: if a required field is empty, the form is not sent and the empty field is pointed out to the customer.\n\nAssumption: after the order is sent, the page tells the customer that the order was sent and will be collected at the shop.\n\nAssumption: the order is sent from the page's own JavaScript, by opening the customer's email app with the order details addressed to hello@brewlab.example. The brief does not say how the order is sent.",
+      "workflow": "Write LLD Interactive elements"
+    },
+    "W-21": {
+      "owner": "W-21",
+      "head": "",
+      "body": "## Form fields\n\nThe page has one form, the pre-order form `#pre-order-form` in S5 `#pre-order`. It collects four fields: name, phone, items and pickup time. It has no payment fields, because no online payment is taken and customers collect the order at the shop. The phone field is for the customer's own number only. No phone number for the shop is shown or collected anywhere on the form.\n\n- **F1** in S5, form `#pre-order-form`: field `name`, type text, required yes, validation the field is not empty after leading and trailing spaces are removed.\n- **F2** in S5, form `#pre-order-form`: field `phone`, type tel, required yes, validation the field is not empty and holds the customer's own phone number. It is not a shop phone number.\n- **F3** in S5, form `#pre-order-form`: field `items`, type multi-line text, required yes, validation the field is not empty. The customer names what they want from the menu of seven items.\n- **F4** in S5, form `#pre-order-form`: field `pickup time`, type time, required yes, validation a time is chosen.\n\nAssumption: all four fields are required. The brief lists the four fields but does not say whether each is required. This matches the Interactive elements section, where an empty field stops the form from being sent.\n\nAssumption: the field `name` is written `name`, `phone`, `items` and `pickup-time` in the HTML `name` attributes, and the inputs have the ids `#order-name`, `#order-phone`, `#order-items` and `#order-pickup-time`. These are design choices made here and are not in the brief.\n\nAssumption: the phone field accepts digits, spaces, `+` and `-`, and the page does not check the number against any country format. The brief gives no phone format rule.\n\nAssumption: the items field is a free-text box, not a list of choices. The brief does not say how items are picked.\n\nAssumption: the pickup time input is limited to the opening hours, 7 am to 10 pm, so the customer can only choose a time when the shop is open. The brief does not say how pickup time is checked.\n\nAssumption: each field has a visible label with the same wording as the field name, and a missing or wrong value is pointed out next to that field. The brief does not describe the error messages.",
+      "workflow": "Write LLD Form fields"
+    },
+    "W-22": {
+      "owner": "W-22",
+      "head": "",
+      "body": "## File structure\n\nPlain HTML, CSS and JavaScript in one file. The whole Brew Lab page is delivered as that single file. There is no build step, and no second file is needed to show the page.\n\n### The file\n\n- **File** `index.html`: the only file of the website. It holds the HTML, the CSS and the JavaScript. Implements C9.\n- The file has three parts, in this order: the HTML part, the CSS part and the JavaScript part.\n\n### HTML part\n\n- The HTML part holds the page text and the pre-order form.\n- The wrapper `#page` (S7) comes first and contains S1 to S6 in this order:\n  1. S1 `#shop-name`: the shop name Brew Lab. Implements C1.\n  2. S2 `#address`: the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text only, with no embedded map and no shop phone number. Implements C2.\n  3. S3 `#menu`: the seven menu items, each next to its price in rupees. Implements C3.\n  4. S4 `#opening-hours`: 7 am to 10 pm, every day. Implements C4.\n  5. S5 `#pre-order`: the form `#pre-order-form` with the fields name, phone, items and pickup time, and the button `#pre-order-submit`. Implements C5, C6.\n  6. S6 `#pickup-note`: customers collect the order at the shop, and no online payment is taken. Implements C7.\n- S7 `#page` carries the phone layout through the CSS part. Implements C8, C9.\n\n### CSS part\n\n- The CSS part sits in one style block inside `index.html`, before the page text.\n- It holds all the styling for S1 to S7, including the rules that make the layout fit a phone screen. Implements C8.\n- It does not load any separate CSS file.\n\n### JavaScript part\n\n- The JavaScript part sits in one script block inside `index.html`, after the page text.\n- It holds the behaviour of E1 `#pre-order-submit` and E2 `#pre-order-form` in S5: checking the four fields and sending the order to hello@brewlab.example. Implements C5, C6.\n- It does not load any separate JavaScript file.\n\n### Rules for the file\n\n- Everything the page needs is inside `index.html`: no build step, and no other file for the page.\n- Every id in the file is unique, and the ids match the ones used in Pages and sections, Interactive elements and Form fields.\n- The file contains no embedded map, no payment fields and no phone number for the shop.\n\nAssumption: the file is named `index.html`, as in the Pages and sections section. The brief does not give a file name.\n\nAssumption: the CSS part comes before the page text and the JavaScript part comes after it. The brief does not set the order of the parts.\n\nAssumption: the page uses no outside libraries. The brief does not ask for any.",
+      "workflow": "Write LLD File structure"
+    },
+    "W-23": {
+      "owner": "W-23",
+      "head": "",
+      "body": "## Responsive and accessibility rules\n\nWorks on phones. The page is used by coffee lovers and office staff nearby, so a customer can read the menu, the opening hours and the address, and fill in and submit the pre-order form, on a phone screen. These rules are built in the CSS part of `index.html` through the wrapper `#page` (S7). They implement C8 and C9, and they apply to S1 to S6 and the form fields F1 to F4.\n\n### Responsive rules\n\n- **Width limits:** the page has no horizontal overflow at 360px and at 1280px. Nothing in `#page` is wider than the screen, and the customer never has to scroll sideways to read or fill in anything.\n- **One column on phones:** on a phone screen, S1 `#shop-name`, S2 `#address`, S3 `#menu`, S4 `#opening-hours`, S5 `#pre-order` and S6 `#pickup-note` are stacked in one column, in the same order as in Pages and sections.\n- **Fluid sizes:** widths of `#page` and its parts follow the screen width and are not fixed in pixels. Long text, such as the address in `#address`, wraps onto the next line instead of running past the screen edge.\n- **Menu on a phone:** in `#menu`, each of the seven items stays on the same row as its price in rupees, so a customer can see what each item costs without ordering. If a name is long, such as Banana bread slice, the name wraps and the price stays beside it.\n- **Opening hours and address on a phone:** `#opening-hours` (7 am to 10 pm, every day) and `#address` (12, 100 Feet Road, Indiranagar, Bengaluru 560038) are plain text in the normal flow of the page. They are not hidden behind a click and not shown in an image.\n- **Form on a phone:** in `#pre-order-form`, the fields `#order-name`, `#order-phone`, `#order-items` and `#order-pickup-time` and the button `#pre-order-submit` each take the full width of `#page`, one under the other. Each label sits above its field.\n- **No shop phone number and no map:** the phone layout adds no phone number for the shop and no embedded map. The address stays text only.\n- **Plain HTML, CSS and JavaScript in one file:** the responsive rules are written in the style block of `index.html`. No separate CSS file is loaded.\n\n### Accessibility rules\n\n- **Labels:** every form field F1 to F4 has a visible label with the same wording as the field name. Each label is tied to its field, so a screen reader reads the label when the field is reached.\n- **Field help:** `#order-phone` says that it is for the customer's own number. A missing or wrong value is pointed out in text next to that field, not by colour alone.\n- **Keyboard access:** every interactive element, that is `#pre-order-form` and `#pre-order-submit`, can be reached and used with the keyboard alone. The order of the keyboard focus follows the order of the fields on the page, and the focused field or button is clearly visible.\n- **Headings and structure:** each of S1 to S6 has a clear heading or text label, in the page order, so assistive tools can move from one part to the next. The menu items are written as a list, with the price next to each item.\n- **Readable text and contrast:** text and its background have strong contrast, and the menu, prices, opening hours, address and pickup note are in text a customer can read on a small screen without zooming.\n- **Messages:** the message that the order was sent and will be collected at the shop is shown as text on the page, so it can be read by assistive tools.\n- **No payment fields:** the form has no payment fields, so there is nothing to enter other than name, phone, items and pickup time.\n\nAssumption: on a phone screen, the touch targets of `#pre-order-submit` and the form fields are large enough to tap with a thumb. The brief gives no size.\n\nAssumption: the layout changes from one column to a wider layout only when the screen is wider than a phone, and the exact width where it changes is chosen when the page is built. The brief gives no breakpoint.\n\nAssumption: the field help and error text next to a field is linked to that field so assistive tools read it. The brief does not describe error messages.\n\nAssumption: the page language is set to English for assistive tools. The brief does not state a language.",
+      "workflow": "Write LLD Responsive and accessibility rules"
+    }
+  }
+}

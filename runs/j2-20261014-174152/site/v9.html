@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CodeSprint Pune 2027</title>
+<!-- J2:style head start (owner W-1) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Space+Grotesk:wght@600;700&amp;display=swap"><style>:root{--j2-primary:#4F2BD9;--j2-secondary:#0B1F3A;--j2-accent:#FF6B2C;--j2-background:#F7F7FB;--j2-surface:#FFFFFF;--j2-text:#14122B;--j2-muted:#55526E;--j2-font-heading:'Space Grotesk', system-ui, sans-serif;--j2-font-body:'Inter', system-ui, sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:12px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#4F2BD9;color:#FFFFFF;border:2px solid #4F2BD9;min-height:48px;padding:12px 24px;border-radius:12px;font-weight:700;font-size:1rem;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-btn-secondary{display:inline-block;background:transparent;color:#4F2BD9;border:2px solid #4F2BD9;min-height:48px;padding:12px 24px;border-radius:12px;font-weight:700;font-size:1rem;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-card{background:#FFFFFF;color:#14122B;border:1px solid #DAD6F0;border-radius:12px;padding:24px;box-shadow:0 4px 16px rgba(20,18,43,0.08)}</style>
+<!-- J2:style head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<section id="hero" aria-labelledby="hero-title">
+<style>
+#hero{background:var(--j2-secondary,#0B1F3A);color:#fff;padding:96px 16px 48px;scroll-margin-top:64px;overflow:hidden;box-sizing:border-box}
+#hero *{box-sizing:border-box;min-width:0}
+#hero .hero-inner{max-width:1100px;margin:0 auto;display:grid;gap:32px;grid-template-columns:1fr;align-items:center}
+#hero .hero-kicker{display:inline-block;margin:0 0 12px;padding:6px 12px;border-radius:999px;background:var(--j2-accent,#FF6B2C);color:#14122B;font-weight:700;font-size:.875rem}
+#hero h1{margin:0 0 12px;font-family:var(--j2-font-heading,sans-serif);font-size:clamp(2rem,9vw,3.75rem);line-height:1.1;overflow-wrap:anywhere}
+#hero .hero-lead{margin:0 0 8px;font-size:1.125rem;line-height:1.5}
+#hero .hero-meta{list-style:none;margin:16px 0 24px;padding:0;display:grid;gap:8px;font-size:1rem;line-height:1.5}
+#hero .hero-meta li{overflow-wrap:anywhere}
+#hero .hero-meta strong{color:#FFB38F}
+#hero .photo-placeholder{display:flex;align-items:center;justify-content:center;text-align:center;min-height:200px;width:100%;border:2px dashed #FFB38F;border-radius:var(--j2-radius,12px);background:rgba(255,255,255,.08);color:#fff;font-weight:600;padding:16px}
+#hero .cd-wrap{margin-top:24px}
+#hero .cd-label{margin:0 0 8px;font-weight:600;font-size:.9375rem}
+#hero #countdown{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:420px}
+#hero .cd-box{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);border-radius:var(--j2-radius,12px);padding:12px 4px;text-align:center}
+#hero .cd-num{display:block;font-family:var(--j2-font-heading,sans-serif);font-size:clamp(1.5rem,7vw,2.5rem);font-weight:700;line-height:1.1;color:#FFB38F;font-variant-numeric:tabular-nums}
+#hero .cd-unit{display:block;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em}
+@media (min-width:860px){
+#hero{padding:112px 24px 72px}
+#hero .hero-inner{grid-template-columns:1.1fr .9fr;gap:48px}
+#hero .photo-placeholder{min-height:340px}
+}
+</style>
+<div class="hero-inner">
+<div class="hero-text">
+<p class="hero-kicker">Students and professionals welcome</p>
+<h1 id="hero-title">CodeSprint Pune 2027</h1>
+<p class="hero-lead">A two-day hackathon in Pune.</p>
+<ul class="hero-meta">
+<li><strong>Day one:</strong> Saturday 6 March 2027</li>
+<li><strong>Day two:</strong> Sunday 7 March 2027</li>
+<li><strong>Venue:</strong> Lakeside Tech Hall, 12 Lake Road, Pune 411002</li>
+</ul>
+<a class="j2-btn" href="#register">Register your team</a>
+<div class="cd-wrap">
+<p class="cd-label" id="cd-label">Hackathon starts in</p>
+<div id="countdown" role="timer" aria-labelledby="cd-label">
+<div class="cd-box"><span class="cd-num" id="cd-days">00</span><span class="cd-unit">Days</span></div>
+<div class="cd-box"><span class="cd-num" id="cd-hours">00</span><span class="cd-unit">Hours</span></div>
+<div class="cd-box"><span class="cd-num" id="cd-mins">00</span><span class="cd-unit">Mins</span></div>
+<div class="cd-box"><span class="cd-num" id="cd-secs">00</span><span class="cd-unit">Secs</span></div>
+</div>
+</div>
+</div>
+<div class="photo-placeholder" role="img" aria-label="Event photo placeholder">Event photo placeholder</div>
+</div>
+<script>
+(function(){
+var target=new Date('2027-03-06T10:00:00+05:30').getTime();
+var d=document.getElementById('cd-days'),h=document.getElementById('cd-hours'),m=document.getElementById('cd-mins'),s=document.getElementById('cd-secs');
+if(!d||!h||!m||!s){return;}
+function pad(n){return n<10?'0'+n:String(n);}
+function tick(){
+var diff=Math.max(0,target-Date.now());
+var total=Math.floor(diff/1000);
+d.textContent=pad(Math.floor(total/86400));
+h.textContent=pad(Math.floor(total%86400/3600));
+m.textContent=pad(Math.floor(total%3600/60));
+s.textContent=pad(total%60);
+}
+tick();
+setInterval(tick,1000);
+})();
+</script>
+</section>
+<!-- J2:W-1 end -->
+<!-- J2:W-2 start (owner W-2) -->
+<section id="tracks" aria-labelledby="tracks-title">
+<style>
+#tracks{padding:var(--j2-section,64px) 16px;scroll-margin-top:64px;box-sizing:border-box;overflow:hidden}
+#tracks *{box-sizing:border-box;min-width:0}
+#tracks .tracks-inner{max-width:1100px;margin:0 auto}
+#tracks h2{margin:0 0 8px;font-family:var(--j2-font-heading,sans-serif);font-size:clamp(1.75rem,6vw,2.5rem);line-height:1.15;color:var(--j2-secondary,#0B1F3A)}
+#tracks .tracks-intro{margin:0 0 32px;color:var(--j2-muted,#55526E);font-size:1.0625rem;line-height:1.5}
+#tracks .tracks-grid{display:grid;grid-template-columns:1fr;gap:24px;margin:0 0 32px;padding:0;list-style:none}
+#tracks .track-card{border-top:6px solid var(--j2-accent,#FF6B2C);display:flex;flex-direction:column;gap:16px;overflow-wrap:anywhere}
+#tracks .track-card h3{margin:0;font-family:var(--j2-font-heading,sans-serif);font-size:1.5rem;line-height:1.2;color:var(--j2-primary,#4F2BD9)}
+#tracks .track-facts{margin:0;padding:0;list-style:none;display:grid;gap:12px}
+#tracks .track-facts li{display:grid;gap:2px;padding-top:12px;border-top:1px solid #DAD6F0;line-height:1.4}
+#tracks .track-facts li:first-child{border-top:0;padding-top:0}
+#tracks .fact-label{font-size:.8125rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--j2-muted,#55526E)}
+#tracks .fact-value{font-size:1.125rem;font-weight:600;color:var(--j2-text,#14122B)}
+#tracks .fact-prize{font-family:var(--j2-font-heading,sans-serif);font-size:1.75rem;font-weight:700;color:var(--j2-primary,#4F2BD9)}
+#tracks .tracks-action{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+@media (min-width:860px){
+#tracks{padding-left:24px;padding-right:24px}
+#tracks .tracks-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+<div class="tracks-inner">
+<h2 id="tracks-title">Compare the three tracks</h2>
+<p class="tracks-intro">Pick the track that fits your team.</p>
+<ul class="tracks-grid">
+<li class="j2-card track-card">
+<h3>Web Track</h3>
+<ul class="track-facts">
+<li><span class="fact-label">Team size</span><span class="fact-value">team size 1 to 4</span></li>
+<li><span class="fact-label">Build time</span><span class="fact-value">24 hours</span></li>
+<li><span class="fact-label">First prize</span><span class="fact-prize">Rs 50000</span></li>
+</ul>
+</li>
+<li class="j2-card track-card">
+<h3>AI Track</h3>
+<ul class="track-facts">
+<li><span class="fact-label">Team size</span><span class="fact-value">team size 2 to 4</span></li>
+<li><span class="fact-label">Build time</span><span class="fact-value">24 hours</span></li>
+<li><span class="fact-label">First prize</span><span class="fact-prize">Rs 75000</span></li>
+</ul>
+</li>
+<li class="j2-card track-card">
+<h3>Hardware Track</h3>
+<ul class="track-facts">
+<li><span class="fact-label">Team size</span><span class="fact-value">team size 2 to 4</span></li>
+<li><span class="fact-label">Build time</span><span class="fact-value">30 hours</span></li>
+<li><span class="fact-label">First prize</span><span class="fact-prize">Rs 60000</span></li>
+</ul>
+</li>
+</ul>
+<div class="tracks-action">
+<a class="j2-btn-secondary" href="#register">Register your team</a>
+</div>
+</div>
+</section>
+<!-- J2:W-2 end -->
+<!-- J2:W-3 start (owner W-3) -->
+<section id="fees" aria-labelledby="fees-title">
+<style>
+#fees{padding:var(--j2-section,64px) 16px;scroll-margin-top:64px;box-sizing:border-box;overflow:hidden}
+#fees *{box-sizing:border-box;min-width:0}
+#fees .fees-inner{max-width:1100px;margin:0 auto;display:grid;gap:32px;grid-template-columns:1fr;align-items:start}
+#fees h2{margin:0 0 8px;font-family:var(--j2-font-heading,sans-serif);font-size:clamp(1.75rem,6vw,2.5rem);line-height:1.15;color:var(--j2-secondary,#0B1F3A)}
+#fees .fees-intro{margin:0 0 24px;color:var(--j2-muted,#55526E);font-size:1.0625rem;line-height:1.5}
+#fees .fees-rates{margin:0;padding:0;list-style:none;display:grid;gap:12px}
+#fees .fees-rates li{padding:12px 16px;border-left:6px solid var(--j2-accent,#FF6B2C);background:var(--j2-surface,#FFFFFF);border-radius:var(--j2-radius,12px);line-height:1.4;font-weight:600;overflow-wrap:anywhere}
+#fees .calc-card{display:grid;gap:16px;overflow-wrap:anywhere}
+#fees .calc-card h3{margin:0;font-family:var(--j2-font-heading,sans-serif);font-size:1.5rem;color:var(--j2-primary,#4F2BD9)}
+#fees .calc-field{display:grid;gap:6px}
+#fees label{font-weight:600;color:var(--j2-text,#14122B)}
+#fees .calc-hint{font-size:.875rem;color:var(--j2-muted,#55526E);margin:0}
+#fees select,#fees input{width:100%;min-height:48px;padding:10px 12px;font:inherit;font-size:1rem;color:var(--j2-text,#14122B);background:var(--j2-surface,#FFFFFF);border:2px solid var(--j2-primary,#4F2BD9);border-radius:var(--j2-radius,12px)}
+#fees select:focus,#fees input:focus,#fees button:focus{outline:3px solid var(--j2-accent,#FF6B2C);outline-offset:2px}
+#fees .calc-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+#fees .calc-result{display:grid;gap:8px;padding:16px;border:2px solid var(--j2-primary,#4F2BD9);border-radius:var(--j2-radius,12px);background:var(--j2-background,#F7F7FB)}
+#fees .calc-lines{margin:0;padding:0;list-style:none;display:grid;gap:6px;color:var(--j2-text,#14122B)}
+#fees .calc-lines li{display:flex;justify-content:space-between;gap:12px}
+#fees .calc-total-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-top:8px;border-top:1px solid #DAD6F0;font-weight:700}
+#fees .calc-total-wrap{font-family:var(--j2-font-heading,sans-serif);font-size:2rem;color:var(--j2-primary,#4F2BD9);font-variant-numeric:tabular-nums}
+#fees #calc-total{font:inherit;color:inherit}
+#fees .calc-note{margin:0;font-size:.9375rem;color:var(--j2-muted,#55526E);line-height:1.4}
+@media (min-width:860px){
+#fees{padding-left:24px;padding-right:24px}
+#fees .fees-inner{grid-template-columns:.9fr 1.1fr;gap:48px}
+}
+</style>
+<div class="fees-inner">
+<div class="fees-text">
+<h2 id="fees-title">Work out what you will pay</h2>
+<p class="fees-intro">Entry is charged per participant. Meal passes are optional.</p>
+<ul class="fees-rates">
+<li>Student Rs 400 per participant</li>
+<li>Professional Rs 800 per participant</li>
+<li>Meal pass Rs 200 each, optional</li>
+<li>Early-bird: 10% off entry fees only, not meal passes, for registrations up to 15 February 2027</li>
+</ul>
+</div>
+<div class="j2-card calc-card">
+<h3>Fee calculator</h3>
+<form id="calc-form" novalidate>
+<div class="calc-field">
+<label for="calc-ticket">Ticket type</label>
+<select id="calc-ticket" name="ticket">
+<option value="Student">Student</option>
+<option value="Professional">Professional</option>
+</select>
+</div>
+<div class="calc-field" style="margin-top:16px">
+<label for="calc-people">Number of participants (1 to 4)</label>
+<input id="calc-people" name="people" type="number" min="1" max="4" step="1" value="1" inputmode="numeric">
+</div>
+<div class="calc-field" style="margin-top:16px">
+<label for="calc-meals">Number of meal passes (0 to 4)</label>
+<input id="calc-meals" name="meals" type="number" min="0" max="4" step="1" value="0" inputmode="numeric">
+</div>
+<div class="calc-field" style="margin-top:16px">
+<label for="calc-date">Registration date</label>
+<input id="calc-date" name="date" type="date">
+<p class="calc-hint">Early-bird applies on or before 15 February 2027.</p>
+</div>
+<div class="calc-actions" style="margin-top:16px">
+<button type="submit" class="j2-btn" id="calc-submit">Calculate total</button>
+<a class="j2-btn-secondary" href="#register">Register your team</a>
+</div>
+</form>
+<div class="calc-result" role="status" aria-live="polite">
+<ul class="calc-lines">
+<li><span>Entry fees</span><span>Rs <span id="calc-entry">400</span></span></li>
+<li><span>Early-bird discount</span><span>- Rs <span id="calc-discount">0</span></span></li>
+<li><span>Meal passes</span><span>Rs <span id="calc-mealcost">0</span></span></li>
+</ul>
+<div class="calc-total-row"><span>Total</span><span class="calc-total-wrap">Rs <output id="calc-total" for="calc-ticket calc-people calc-meals calc-date">400</output></span></div>
+<p class="calc-note" id="calc-note">Pick your registration date to see if early-bird applies.</p>
+</div>
+</div>
+</div>
+<script>
+(function(){
+var ticket=document.getElementById('calc-ticket'),people=document.getElementById('calc-people'),meals=document.getElementById('calc-meals'),date=document.getElementById('calc-date');
+var form=document.getElementById('calc-form'),total=document.getElementById('calc-total');
+var eEntry=document.getElementById('calc-entry'),eDisc=document.getElementById('calc-discount'),eMeal=document.getElementById('calc-mealcost'),note=document.getElementById('calc-note');
+if(!ticket||!people||!meals||!date||!total){return;}
+function num(el,min,max){
+var n=parseInt(el.value,10);
+if(isNaN(n)){n=min;}
+return Math.min(max,Math.max(min,n));
+}
+function calc(){
+var price=ticket.value==='Professional'?800:400;
+var p=num(people,1,4),m=num(meals,0,4);
+var entry=price*p;
+var early=!!date.value&&date.value<='2027-02-15';
+var disc=early?entry/10:0;
+var mealCost=m*200;
+eEntry.textContent=String(entry);
+eDisc.textContent=String(disc);
+eMeal.textContent=String(mealCost);
+total.textContent=String(entry-disc+mealCost);
+if(!date.value){note.textContent='Pick your registration date to see if early-bird applies. Regular rates are shown.';}
+else if(early){note.textContent='Early-bird applied: 10% off entry fees only. Meal passes are full price.';}
+else{note.textContent='Registered after 15 February 2027, so regular rates apply.';}
+}
+['input','change','keyup'].forEach(function(ev){
+[ticket,people,meals,date].forEach(function(el){el.addEventListener(ev,calc);});
+});
+form.addEventListener('submit',function(e){e.preventDefault();calc();});
+calc();
+})();
+</script>
+</section>
+<!-- J2:W-3 end -->
+<!-- J2:W-4 start (owner W-4) -->
+<section id="register" aria-labelledby="register-title">
+<style>
+#register{padding:var(--j2-section,64px) 16px;scroll-margin-top:64px;box-sizing:border-box;overflow:hidden}
+#register *{box-sizing:border-box;min-width:0}
+#register [hidden]{display:none!important}
+#register .register-inner{max-width:1100px;margin:0 auto;display:grid;gap:32px;grid-template-columns:1fr;align-items:start}
+#register h2{margin:0 0 8px;font-family:var(--j2-font-heading,sans-serif);font-size:clamp(1.75rem,6vw,2.5rem);line-height:1.15;color:var(--j2-secondary,#0B1F3A)}
+#register .register-intro{margin:0 0 16px;color:var(--j2-muted,#55526E);font-size:1.0625rem;line-height:1.5}
+#register .register-steps{margin:0;padding:0;list-style:none;display:grid;gap:12px}
+#register .register-steps li{padding:12px 16px;border-left:6px solid var(--j2-accent,#FF6B2C);background:var(--j2-surface,#FFFFFF);border-radius:var(--j2-radius,12px);line-height:1.4;font-weight:600;overflow-wrap:anywhere}
+#register .reg-card{display:grid;gap:16px;overflow-wrap:anywhere}
+#register .reg-card h3{margin:0;font-family:var(--j2-font-heading,sans-serif);font-size:1.5rem;color:var(--j2-primary,#4F2BD9)}
+#register form{display:grid;gap:16px;grid-template-columns:1fr}
+#register .reg-field{display:grid;gap:6px;align-content:start}
+#register label{font-weight:600;color:var(--j2-text,#14122B)}
+#register .reg-hint{margin:0;font-size:.875rem;color:var(--j2-muted,#55526E);line-height:1.4}
+#register select,#register input{width:100%;min-height:48px;padding:10px 12px;font:inherit;font-size:1rem;color:var(--j2-text,#14122B);background:var(--j2-surface,#FFFFFF);border:2px solid var(--j2-primary,#4F2BD9);border-radius:var(--j2-radius,12px)}
+#register select:focus,#register input:focus,#register button:focus{outline:3px solid var(--j2-accent,#FF6B2C);outline-offset:2px}
+#register .reg-actions{display:grid;gap:12px;align-content:start}
+#register .reg-actions .j2-btn{width:100%}
+#register .reg-note{margin:0;font-size:.9375rem;color:var(--j2-muted,#55526E);line-height:1.4}
+#register .reg-status{margin:0;font-weight:600;color:var(--j2-primary,#4F2BD9);line-height:1.4}
+@media (min-width:860px){
+#register{padding-left:24px;padding-right:24px}
+#register .register-inner{grid-template-columns:.8fr 1.2fr;gap:48px}
+#register form{grid-template-columns:1fr 1fr;column-gap:16px}
+#register .reg-wide{grid-column:1 / -1}
+}
+</style>
+<div class="register-inner">
+<div class="register-text">
+<h2 id="register-title">Register your team</h2>
+<p class="register-intro">Fill in the form and send it to register@example.com. One lead registers the whole team.</p>
+<ul class="register-steps">
+<li>Pick your track and ticket type.</li>
+<li>Tell us how many participants are in your team (1 to 4).</li>
+<li>Add meal passes if you want them.</li>
+</ul>
+</div>
+<div class="j2-card reg-card">
+<h3>Team registration</h3>
+<form id="reg-form" action="mailto:register@example.com" method="post" enctype="text/plain">
+<div class="reg-field">
+<label for="reg-team">Team name</label>
+<input id="reg-team" name="Team name" type="text" required autocomplete="organization">
+</div>
+<div class="reg-field">
+<label for="reg-lead">Lead name</label>
+<input id="reg-lead" name="Lead name" type="text" required autocomplete="name">
+</div>
+<div class="reg-field">
+<label for="reg-email">Lead email</label>
+<input id="reg-email" name="Lead email" type="email" required autocomplete="email" inputmode="email">
+</div>
+<div class="reg-field">
+<label for="reg-phone">Lead phone</label>
+<input id="reg-phone" name="Lead phone" type="tel" required autocomplete="tel" inputmode="tel">
+</div>
+<div class="reg-field">
+<label for="reg-track">Track</label>
+<select id="reg-track" name="Track" required>
+<option value="">Choose a track</option>
+<option value="Web Track">Web Track</option>
+<option value="AI Track">AI Track</option>
+<option value="Hardware Track">Hardware Track</option>
+</select>
+</div>
+<div class="reg-field">
+<label for="reg-ticket">Ticket type</label>
+<select id="reg-ticket" name="Ticket type" required>
+<option value="">Choose a ticket type</option>
+<option value="Student">Student</option>
+<option value="Professional">Professional</option>
+</select>
+</div>
+<div class="reg-field reg-wide" id="reg-college-wrap" hidden>
+<label for="reg-college">College name</label>
+<input id="reg-college" name="College name" type="text" autocomplete="organization" disabled>
+</div>
+<div class="reg-field">
+<label for="reg-people">Number of participants (1 to 4)</label>
+<input id="reg-people" name="Number of participants" type="number" min="1" max="4" step="1" value="1" inputmode="numeric" required>
+<p class="reg-hint" id="reg-people-hint">Web Track allows 1 to 4. AI and Hardware tracks need 2 to 4.</p>
+</div>
+<div class="reg-field">
+<label for="reg-meals">Meal passes</label>
+<select id="reg-meals" name="Meal passes" required>
+<option value="">Choose yes or no</option>
+<option value="Yes">Yes</option>
+<option value="No">No</option>
+</select>
+</div>
+<div class="reg-field reg-wide" id="reg-diet-wrap" hidden>
+<label for="reg-diet">Dietary preference</label>
+<select id="reg-diet" name="Dietary preference" disabled>
+<option value="">Choose a preference</option>
+<option value="Vegetarian">Vegetarian</option>
+<option value="Non-vegetarian">Non-vegetarian</option>
+</select>
+</div>
+<div class="reg-actions reg-wide">
+<button type="submit" class="j2-btn" id="reg-submit">Send registration</button>
+<p class="reg-note">Sending opens your email app with the details addressed to register@example.com.</p>
+<p class="reg-status" id="reg-status" role="status" aria-live="polite"></p>
+</div>
+</form>
+</div>
+</div>
+<script>
+(function(){
+var form=document.getElementById('reg-form');
+var ticket=document.getElementById('reg-ticket'),meals=document.getElementById('reg-meals'),track=document.getElementById('reg-track'),people=document.getElementById('reg-people');
+var collegeWrap=document.getElementById('reg-college-wrap'),college=document.getElementById('reg-college');
+var dietWrap=document.getElementById('reg-diet-wrap'),diet=document.getElementById('reg-diet');
+var status=document.getElementById('reg-status');
+if(!form||!ticket||!meals||!collegeWrap||!college||!dietWrap||!diet){return;}
+function syncCollege(){
+var on=ticket.value==='Student';
+collegeWrap.hidden=!on;
+college.required=on;
+college.disabled=!on;
+if(!on){college.value='';}
+}
+function syncDiet(){
+var on=meals.value==='Yes';
+dietWrap.hidden=!on;
+diet.required=on;
+diet.disabled=!on;
+if(!on){diet.value='';}
+}
+function syncPeople(){
+if(!people||!track){return;}
+var need2=track.value==='AI Track'||track.value==='Hardware Track';
+people.min=need2?'2':'1';
+}
+['change','input'].forEach(function(ev){
+ticket.addEventListener(ev,syncCollege);
+meals.addEventListener(ev,syncDiet);
+if(track){track.addEventListener(ev,syncPeople);}
+});
+form.addEventListener('submit',function(){
+if(status){status.textContent='Opening your email app to send the registration to register@example.com.';}
+});
+syncCollege();
+syncDiet();
+syncPeople();
+})();
+</script>
+</section>
+<!-- J2:W-4 end -->
+<!-- J2:W-5 start (owner W-5) -->
+<section id="mentor" aria-labelledby="mentor-title">
+<style>
+#mentor{padding:var(--j2-section,64px) 16px;scroll-margin-top:64px;box-sizing:border-box;overflow:hidden}
+#mentor *{box-sizing:border-box;min-width:0}
+#mentor .mentor-inner{max-width:1100px;margin:0 auto;display:grid;gap:32px;grid-template-columns:1fr;align-items:start}
+#mentor h2{margin:0 0 8px;font-family:var(--j2-font-heading,sans-serif);font-size:clamp(1.75rem,6vw,2.5rem);line-height:1.15;color:var(--j2-secondary,#0B1F3A)}
+#mentor .mentor-intro{margin:0 0 16px;color:var(--j2-muted,#55526E);font-size:1.0625rem;line-height:1.5;overflow-wrap:anywhere}
+#mentor .mentor-points{margin:0;padding:0;list-style:none;display:grid;gap:12px}
+#mentor .mentor-points li{padding:12px 16px;border-left:6px solid var(--j2-accent,#FF6B2C);background:var(--j2-surface,#FFFFFF);border-radius:var(--j2-radius,12px);line-height:1.4;font-weight:600;overflow-wrap:anywhere}
+#mentor .mentor-card{display:grid;gap:16px;overflow-wrap:anywhere}
+#mentor .mentor-card h3{margin:0;font-family:var(--j2-font-heading,sans-serif);font-size:1.5rem;color:var(--j2-primary,#4F2BD9)}
+#mentor form{display:grid;gap:16px;grid-template-columns:1fr}
+#mentor .mentor-field{display:grid;gap:6px;align-content:start}
+#mentor label{font-weight:600;color:var(--j2-text,#14122B)}
+#mentor select,#mentor input{width:100%;min-height:48px;padding:10px 12px;font:inherit;font-size:1rem;color:var(--j2-text,#14122B);background:var(--j2-surface,#FFFFFF);border:2px solid var(--j2-primary,#4F2BD9);border-radius:var(--j2-radius,12px)}
+#mentor select:focus,#mentor input:focus,#mentor button:focus{outline:3px solid var(--j2-accent,#FF6B2C);outline-offset:2px}
+#mentor .mentor-actions{display:grid;gap:12px;align-content:start}
+#mentor .mentor-actions .j2-btn{width:100%}
+#mentor .mentor-note{margin:0;font-size:.9375rem;color:var(--j2-muted,#55526E);line-height:1.4}
+#mentor .mentor-status{margin:0;font-weight:600;color:var(--j2-primary,#4F2BD9);line-height:1.4}
+@media (min-width:860px){
+#mentor{padding-left:24px;padding-right:24px}
+#mentor .mentor-inner{grid-template-columns:.8fr 1.2fr;gap:48px}
+#mentor form{grid-template-columns:1fr 1fr;column-gap:16px}
+#mentor .mentor-wide{grid-column:1 / -1}
+}
+</style>
+<div class="mentor-inner">
+<div class="mentor-text">
+<h2 id="mentor-title">Sign up as a mentor</h2>
+<p class="mentor-intro">Want to help teams build? Fill in the mentor form and send it to mentors@example.com. This is separate from team registration.</p>
+<ul class="mentor-points">
+<li>Choose your area of expertise: Web, AI or Hardware.</li>
+<li>Tell us if you are free Saturday, Sunday or both days.</li>
+</ul>
+</div>
+<div class="j2-card mentor-card">
+<h3>Mentor sign-up</h3>
+<form id="mentor-form" action="mailto:mentors@example.com" method="post" enctype="text/plain">
+<div class="mentor-field">
+<label for="mentor-name">Name</label>
+<input id="mentor-name" name="Name" type="text" required autocomplete="name">
+</div>
+<div class="mentor-field">
+<label for="mentor-email">Email</label>
+<input id="mentor-email" name="Email" type="email" required autocomplete="email" inputmode="email">
+</div>
+<div class="mentor-field">
+<label for="mentor-area">Area of expertise</label>
+<select id="mentor-area" name="Area of expertise" required>
+<option value="">Choose an area</option>
+<option value="Web">Web</option>
+<option value="AI">AI</option>
+<option value="Hardware">Hardware</option>
+</select>
+</div>
+<div class="mentor-field">
+<label for="mentor-when">Availability</label>
+<select id="mentor-when" name="Availability" required>
+<option value="">Choose your availability</option>
+<option value="Saturday">Saturday</option>
+<option value="Sunday">Sunday</option>
+<option value="Both">Both</option>
+</select>
+</div>
+<div class="mentor-actions mentor-wide">
+<button type="submit" class="j2-btn" id="mentor-submit">Send mentor sign-up</button>
+<p class="mentor-note">Sending opens your email app with the details addressed to mentors@example.com.</p>
+<p class="mentor-status" id="mentor-status" role="status" aria-live="polite"></p>
+</div>
+</form>
+</div>
+</div>
+<script>
+(function(){
+var form=document.getElementById('mentor-form');
+var status=document.getElementById('mentor-status');
+if(!form||!status){return;}
+form.addEventListener('submit',function(){
+status.textContent='Opening your email app to send the mentor sign-up to mentors@example.com.';
+});
+})();
+</script>
+</section>
+<!-- J2:W-5 end -->
+<!-- J2:W-6 start (owner W-6) -->
+<section id="schedule" aria-labelledby="schedule-title">
+<style>
+#schedule{padding:var(--j2-section,64px) 16px;scroll-margin-top:64px;box-sizing:border-box;overflow:hidden}
+#schedule *{box-sizing:border-box;min-width:0}
+#schedule .schedule-inner{max-width:1100px;margin:0 auto}
+#schedule h2{margin:0 0 8px;font-family:var(--j2-font-heading,sans-serif);font-size:clamp(1.75rem,6vw,2.5rem);line-height:1.15;color:var(--j2-secondary,#0B1F3A)}
+#schedule .schedule-intro{margin:0 0 32px;color:var(--j2-muted,#55526E);font-size:1.0625rem;line-height:1.5}
+#schedule .schedule-grid{display:grid;grid-template-columns:1fr;gap:24px;margin:0 0 32px}
+#schedule .sched-card{border-top:6px solid var(--j2-accent,#FF6B2C);overflow-wrap:anywhere}
+#schedule .sched-card h3{margin:0 0 4px;font-family:var(--j2-font-heading,sans-serif);font-size:1.5rem;line-height:1.2;color:var(--j2-primary,#4F2BD9)}
+#schedule .sched-date{margin:0 0 16px;font-weight:600;color:var(--j2-muted,#55526E)}
+#schedule .sched-list{list-style:none;margin:0;padding:0;display:grid;gap:0}
+#schedule .sched-list li{display:grid;grid-template-columns:84px 1fr;gap:12px;align-items:baseline;padding:12px 0;border-top:1px solid #DAD6F0;line-height:1.4}
+#schedule .sched-list li:first-child{border-top:0;padding-top:0}
+#schedule .sched-time{font-family:var(--j2-font-heading,sans-serif);font-size:1.125rem;font-weight:700;color:var(--j2-primary,#4F2BD9);font-variant-numeric:tabular-nums}
+#schedule .sched-event{display:block;font-size:1.0625rem;font-weight:600;color:var(--j2-text,#14122B)}
+#schedule .sched-event::first-letter{text-transform:uppercase}
+#schedule .schedule-action{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+@media (min-width:860px){
+#schedule{padding-left:24px;padding-right:24px}
+#schedule .schedule-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+<div class="schedule-inner">
+<h2 id="schedule-title">Schedule</h2>
+<p class="schedule-intro">Two days, one venue: Lakeside Tech Hall.</p>
+<div class="schedule-grid">
+<div id="day-one" class="j2-card sched-card">
+<h3>Day one</h3>
+<p class="sched-date">Saturday 6 March 2027</p>
+<ul class="sched-list">
+<li><span class="sched-time">9:00am</span><span class="sched-event">check-in opens</span></li>
+<li><span class="sched-time">10:00am</span><span class="sched-event">opening and kickoff</span></li>
+<li><span class="sched-time">1:00pm</span><span class="sched-event">lunch</span></li>
+<li><span class="sched-time">8:00pm</span><span class="sched-event">mentor round</span></li>
+</ul>
+</div>
+<div id="day-two" class="j2-card sched-card">
+<h3>Day two</h3>
+<p class="sched-date">Sunday 7 March 2027</p>
+<ul class="sched-list">
+<li><span class="sched-time">10:00am</span><span class="sched-event">final submissions close</span></li>
+<li><span class="sched-time">11:00am</span><span class="sched-event">demos begin</span></li>
+<li><span class="sched-time">3:00pm</span><span class="sched-event">prize ceremony</span></li>
+</ul>
+</div>
+</div>
+<div class="schedule-action">
+<a class="j2-btn-secondary" href="#register">Register your team</a>
+</div>
+</div>
+</section>
+<!-- J2:W-6 end -->
+<!-- J2:W-7 start (owner W-7) -->
+<section id="prizes" aria-labelledby="prizes-title">
+<style>
+#prizes{padding:var(--j2-section,64px) 16px;scroll-margin-top:64px;box-sizing:border-box;overflow:hidden}
+#prizes *{box-sizing:border-box;min-width:0}
+#prizes .prizes-inner{max-width:1100px;margin:0 auto}
+#prizes h2{margin:0 0 8px;font-family:var(--j2-font-heading,sans-serif);font-size:clamp(1.75rem,6vw,2.5rem);line-height:1.15;color:var(--j2-secondary,#0B1F3A)}
+#prizes .prizes-intro{margin:0 0 32px;color:var(--j2-muted,#55526E);font-size:1.0625rem;line-height:1.5}
+#prizes .prizes-grid{display:grid;grid-template-columns:1fr;gap:24px;margin:0 0 32px;padding:0;list-style:none}
+#prizes .prize-card{border-top:6px solid var(--j2-accent,#FF6B2C);display:flex;flex-direction:column;gap:8px;overflow-wrap:anywhere}
+#prizes .prize-card h3{margin:0;font-family:var(--j2-font-heading,sans-serif);font-size:1.5rem;line-height:1.2;color:var(--j2-primary,#4F2BD9)}
+#prizes .prize-label{font-size:.8125rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--j2-muted,#55526E)}
+#prizes .prize-amount{font-family:var(--j2-font-heading,sans-serif);font-size:2.25rem;font-weight:700;line-height:1.1;color:var(--j2-text,#14122B);font-variant-numeric:tabular-nums}
+#prizes .prizes-action{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+@media (min-width:860px){
+#prizes{padding-left:24px;padding-right:24px}
+#prizes .prizes-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+<div class="prizes-inner">
+<h2 id="prizes-title">Prizes</h2>
+<p class="prizes-intro">Each track has its own first prize. Winners are announced at the prize ceremony on day two, 3:00pm.</p>
+<ul class="prizes-grid">
+<li class="j2-card prize-card">
+<h3>Web Track</h3>
+<span class="prize-label">First prize</span>
+<span class="prize-amount">Rs 50000</span>
+</li>
+<li class="j2-card prize-card">
+<h3>AI Track</h3>
+<span class="prize-label">First prize</span>
+<span class="prize-amount">Rs 75000</span>
+</li>
+<li class="j2-card prize-card">
+<h3>Hardware Track</h3>
+<span class="prize-label">First prize</span>
+<span class="prize-amount">Rs 60000</span>
+</li>
+</ul>
+<div class="prizes-action">
+<a class="j2-btn-secondary" href="#register">Register your team</a>
+</div>
+</div>
+</section>
+<!-- J2:W-7 end -->
+</body>
+</html>

@@ -1,0 +1,148 @@
+[
+  {
+    "cycle": 1,
+    "version": 3,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The menu section lists exactly: Coffee: Espresso ₹120, Cappuccino ₹180, Pour-over ₹220; Cold: Cold brew ₹200; Food: Croissant ₹150, Banana bread ₹130.",
+        "verdict": "PASS",
+        "note": "#menu has Coffee (Espresso ₹120, Cappuccino ₹180, Pour-over ₹220), Cold (Cold brew ₹200), Food (Croissant ₹150, Banana bread ₹130), nothing extra.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The page shows hours as 8am to 10pm every day, the address 100 Feet Road, Indiranagar, Bengaluru 560038, and the phone +91 80 4000 2468.",
+        "verdict": "PASS",
+        "note": "#hours shows '8am to 10pm', 'Open every day'; #location shows '100 Feet Road, Indiranagar, Bengaluru 560038' and tel link text '+91 80 4000 2468'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The pre-order form lets a visitor pick menu items with quantities, enter a name, and submit; submitting opens a WhatsApp message to +91 98450 00000 containing the chosen items, quantities and name.",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "6 quantity inputs plus name; message built with name, 'qty x item' lines and total; URL is wa.me/919845000000; mechanical form submit ok with no errors. Warning: window.open(url,'_blank','noopener') returns null in browsers (standard noopener behaviour, not run here), so the fallback window.location.href = url also fires. The visitor likely gets WhatsApp in a new tab and the current tab navigates away too.",
+        "severity": "medium",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The pre-order form area states that payment is at pickup and that pickup is within 15 minutes of ordering.",
+        "verdict": "PASS",
+        "note": ".bl-po-terms: 'Payment is at pickup.' and 'Pickup is within 15 minutes of ordering.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The gallery section shows 6 drawn images in a large layout, each with alt text.",
+        "verdict": "PASS",
+        "note": "6 figure/img elements with inline SVG drawings and non-empty descriptive alt; first figure spans 2x2 in a 3-column grid at 900px and up.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The farms section has three separate story blocks: Ratnagiri Estate, Chikmagalur (family estate, shade-grown Arabica at 1,400 m, natural-process lots with fruity notes); Kerehaklu, Chikmagalur (fourth-generation farm, replants native forest trees, grows coffee alongside pepper and cardamom); Baarbara Estate, Coorg (small estate, hand-picks only ripe cherries, dries them slowly on raised beds).",
+        "verdict": "PASS",
+        "note": "#farms has 3 article blocks: Ratnagiri Estate (Chikmagalur), Kerehaklu (Chikmagalur), Baarbara Estate (Coorg), with the supplied facts and no added claims.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "The file is one HTML page with sections for menu, hours, location, pre-order, gallery and farms, and every in-page navigation link points to an existing section.",
+        "verdict": "PASS",
+        "note": "ids menu, hours, location, gallery, farms, preorder all exist; mechanical broken_in_page_links is [].",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The file loads with no JavaScript errors and has no horizontal overflow at 360px and 1280px widths.",
+        "verdict": "PASS",
+        "note": "Mechanical check: js_errors [], overflow_px 0 at 360 and 1280, form submit errors [].",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The file uses no paid service, API key or build step.",
+        "verdict": "PASS",
+        "note": "One file, one inline script. The only external reference is a plain Google Maps search link with no key. Other links are wa.me and tel.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-10",
+        "criterion": "Valid document structure",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Two <meta charset> tags in <head> (one from the shell, one from W-1's head block). Harmless, but invalid HTML.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 19325,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://www.google.com/maps/search/?api=1&amp;query=100+Feet+Road+Indiranagar+Bengaluru+560038"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

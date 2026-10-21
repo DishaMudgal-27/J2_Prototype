@@ -1,0 +1,108 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "w1-shell-menu-visit",
+    "name": "Page shell, nav, menu, hours and location",
+    "purpose": "No page exists: no nav, menu, hours or location sections.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 3,
+      "time_limit_minutes": 15,
+      "retry_limit": 0,
+      "stop_loss": "Stop if the file lacks viewport meta or any #menu, #hours or #location anchor after the first pass, or if calls exceed 3."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site/index.html (shell, nav, menu, hours, location)"
+    ],
+    "completion_check": "File has viewport meta, at least one @media breakpoint, nav links to #menu #hours #location #preorder #gallery #farms, menu with at least 2 categories, hours and location sections present, every unknown value visibly marked as placeholder.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "w2-preorder",
+    "name": "Pickup pre-order builder",
+    "purpose": "Visitors cannot build an order or get a summary to send.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 12,
+      "retry_limit": 0,
+      "stop_loss": "Stop if the summary does not contain items, quantities and pickup time after the first pass, or if calls exceed 2."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#preorder section in site/index.html"
+    ],
+    "completion_check": "Item quantities update a visible total or list, a pickup time field exists, a Generate summary button produces text containing items, quantities and pickup time, and send channel and time rules are marked placeholders.",
+    "dependencies": [
+      "w1-shell-menu-visit"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "w3-gallery",
+    "name": "Large photo gallery",
+    "purpose": "No gallery section.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 1,
+      "time_limit_minutes": 8,
+      "retry_limit": 0,
+      "stop_loss": "Stop if fewer than 12 slots or any slot lacks alt text or loading=lazy after the first pass."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#gallery section in site/index.html"
+    ],
+    "completion_check": "Count of gallery img or slot elements is at least 12; each has non-empty alt and loading=lazy; each is visibly marked as placeholder.",
+    "dependencies": [
+      "w1-shell-menu-visit"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "w4-farms",
+    "name": "Three farm stories",
+    "purpose": "No farm stories section.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 1,
+      "time_limit_minutes": 8,
+      "retry_limit": 0,
+      "stop_loss": "Stop if there are not exactly 3 entries, or any farm fact appears that is not a marked placeholder."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#farms section in site/index.html"
+    ],
+    "completion_check": "Exactly 3 farm entries, each containing name, location, story and photo slot elements; all values visibly marked placeholder; no invented farm facts.",
+    "dependencies": [
+      "w1-shell-menu-visit"
+    ],
+    "status": "done",
+    "cycle": 1
+  }
+]

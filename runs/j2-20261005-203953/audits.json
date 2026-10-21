@@ -1,0 +1,131 @@
+[
+  {
+    "cycle": 1,
+    "version": 2,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The deliverable is one HTML file with its CSS and JavaScript inline, any libraries loaded from a CDN, and no build step or local dependencies.",
+        "verdict": "PASS",
+        "note": "One 12,474-byte file with inline <style> and <script>; only external resources are unpkg Leaflet CSS/JS and an OSM copyright link.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The page title and main heading contain 'Bengaluru JS Meetup' and the page text states that the event is in November.",
+        "verdict": "PASS",
+        "note": "<title> and <h1> read 'Bengaluru JS Meetup'; hero eyebrow reads 'Happening in November'.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The file contains a Schedule section whose time slots and talk entries all read 'To be announced', with no sample times or talk titles.",
+        "verdict": "PASS",
+        "note": "Table has 4 rows, all 8 cells are <span class=tba>To be announced</span>; no digits or titles in the section.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The file contains a Speakers section whose entries all read 'To be announced', with no personal names.",
+        "verdict": "PASS",
+        "note": "3 cards, each with name and talk as 'To be announced'; no personal names in the file.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The file contains an RSVP section with a button or link marked as a placeholder, and the file has no form element and no input fields.",
+        "verdict": "PASS",
+        "note": "<a id=rsvp-link aria-disabled=true data-placeholder=true> labelled 'RSVP link: placeholder'; mechanical check forms: 0; no <input> in source.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The file contains a Venue section with a text address reading 'To be announced' and a visible 'venue to be announced' note.",
+        "verdict": "PASS",
+        "note": "Venue box has 'Address: To be announced' and 'Note: venue to be announced'.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "The file loads Leaflet with OpenStreetMap tiles and renders a map centred on Bengaluru with no marker, and contains no Google Maps embed or API key.",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "L.map(...).setView([12.9716, 77.5946], 11) with tile.openstreetmap.org layer, no L.marker call, no Google reference, no JS errors; tile requests do not appear in the mechanical resource list, so tile rendering is not directly observed.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The file contains a Code of Conduct section with a heading and a marked placeholder stating that the text is to be announced.",
+        "verdict": "PASS",
+        "note": "<h2>Code of Conduct</h2> with 'Placeholder: the code of conduct text is To be announced.'",
+        "severity": "low",
+        "confidence": "high",
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The file contains a Sponsors section with logo slots marked 'To be announced', with no sponsor names and no image sources.",
+        "verdict": "PASS",
+        "note": "4 .logo-slot divs each reading 'Sponsor logo: To be announced'; no <img> or src attributes in the file.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "Every missing fact in the file appears as visible 'To be announced' text or a marked placeholder, and the file contains no invented speaker names, talk titles, times, exact dates, venue names or sponsor names.",
+        "verdict": "PASS",
+        "note": "Exact date, venue name, address, speakers, talks, times and sponsors all show 'To be announced'; the only coordinates are the generic Bengaluru centre, not a venue.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 10,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "mechanical": {
+      "available": true,
+      "bytes": 12474,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
+        "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
+        "https://www.openstreetmap.org/copyright"
+      ],
+      "forms": 0,
+      "scripts": 2,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

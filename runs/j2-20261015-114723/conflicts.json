@@ -1,0 +1,1290 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 3,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 3",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 110,
+        "text": "@Priority Five small fixes, 8 each, 40 total of the 45 left: F-11 sponsors, F-16 duplicate #register, F-17 literal 0 in the calculator, F-18 toggle placement, R-5 nav order. The contrast fix now names #tracks in its build steps, which is what the validator rejected. If the flagged 0 is not in the calculator, W-5 will report where it is.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 111,
+        "text": "@Adaptation COUNTER: I fund 4 of the 5 fixes (32 of the 45 left) and cut R-5 (nav order). R-5 is cosmetic and touches W-13, whose active-link checks already failed once. A regression there would cost more than the reorder is worth. Funding all five would leave 5, less than one fix at 8, so any failed fix could not be retried. Funding four leaves 13, enough for one retry. Risk: the literal 0 in F-17 is unverified, so W-5 must report where it actually is. If it is not in the calculator, come back with the real source.",
+        "position": "COUNTER: Sponsor tier lines in exact wording (8), Remove duplicate register placeholder (8), Calculator without literal zero defaults (8), Contrast toggle out of the way (8)",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 112,
+        "text": "@Priority Accepting the counter: four fixes at 8 each, 32 total, leaving 13 for one retry. R-5 (nav order) is dropped for now. F-11, F-16 and F-17 close the three workability problems Identity named, and F-18 is the optional contrast-toggle move. If the literal 0 is not in the calculator, W-5 will report its real location and we come back with that source.",
+        "position": "accepts Priority's offer",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "priority",
+    "outcome": "Adaptation accepted Priority's COUNTER: Sponsor tier lines in exact wording (8), Remove duplicate register placeholder (8), Calculator without literal zero defaults (8), Contrast toggle out of the way (8) goes to the validator.",
+    "priority_final": [
+      {
+        "id": "sponsors_fix",
+        "name": "Sponsor tier lines in exact wording",
+        "goal_gap": "Tier and sponsor names are split across elements, so the exact tier lines are missing (F-11, N5)",
+        "expected_outcome": "Each tier line appears as one text element in the brief's wording",
+        "outputs": [
+          "#sponsors"
+        ],
+        "completion_check": "#sponsors has three .tier-line elements and all three exact tier lines are on the page, with 4 .sponsor-logo and 3 .photo-placeholder",
+        "dependencies": [],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-11"
+        ],
+        "revises": "W-11",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 2,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "Each sponsor tier is shown as one line exactly as 'Gold: Northwind Cloud', 'Silver: Bytecraft Labs, Circuit House' and 'Community: Pune Coders Club'.",
+            "constraints": [
+              "Facts copied exactly",
+              "Keep 4 .sponsor-logo and 3 .photo-placeholder, labelled as placeholders",
+              "No real images"
+            ],
+            "context": [
+              "charter item 11",
+              "section W-11"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-11 Builder",
+              "steps": "In #sponsors add one <p class=\"tier-line\"> per tier holding the full text in a single element: Gold: Northwind Cloud; Silver: Bytecraft Labs, Circuit House; Community: Pune Coders Club. Keep the four <div class=\"sponsor-logo\"> placeholders and the three <div class=\"photo-placeholder\"> boxes."
+            },
+            "expected_output": [
+              {
+                "text": "Sponsors section exists",
+                "kind": "section",
+                "target": "#sponsors"
+              },
+              {
+                "text": "Three tier lines",
+                "kind": "element",
+                "target": ".tier-line",
+                "count": 3
+              },
+              {
+                "text": "Four logo placeholders",
+                "kind": "element",
+                "target": ".sponsor-logo",
+                "count": 4
+              },
+              {
+                "text": "Three photo placeholders",
+                "kind": "element",
+                "target": ".photo-placeholder",
+                "count": 3
+              },
+              {
+                "text": "Exact tier lines shown",
+                "kind": "facts",
+                "target": [
+                  "Gold: Northwind Cloud",
+                  "Silver: Bytecraft Labs, Circuit House",
+                  "Community: Pune Coders Club"
+                ]
+              }
+            ],
+            "verification": [
+              {
+                "text": "Exact tier lines present",
+                "type": "facts-present",
+                "target": [
+                  "Gold: Northwind Cloud",
+                  "Silver: Bytecraft Labs, Circuit House",
+                  "Community: Pune Coders Club"
+                ],
+                "expect": true,
+                "item": 5
+              },
+              {
+                "text": "Tier lines are counted",
+                "type": "element-count",
+                "target": ".tier-line",
+                "expect": 3,
+                "item": 2
+              },
+              {
+                "text": "Logo placeholders are counted",
+                "type": "element-count",
+                "target": ".sponsor-logo",
+                "expect": 4,
+                "item": 3
+              },
+              {
+                "text": "Photo placeholders are counted",
+                "type": "element-count",
+                "target": ".photo-placeholder",
+                "expect": 3,
+                "item": 4
+              },
+              {
+                "text": "Sponsors section exists",
+                "type": "element-count",
+                "target": "#sponsors",
+                "expect": 1,
+                "item": 1
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 8,
+          "model_call_limit": 3,
+          "time_limit_minutes": 15,
+          "retry_limit": 2,
+          "stop_loss": "Stop if the same verification fails twice in a row or spend reaches 8"
+        },
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "hero_dup_fix",
+        "name": "Remove duplicate register placeholder",
+        "goal_gap": "W-1 leaves a hidden duplicate id register in the hero, so #register matches twice (F-16)",
+        "expected_outcome": "The hero CTA points at the one real #register section",
+        "outputs": [
+          "#hero"
+        ],
+        "completion_check": "Exactly one element matches #register, #hero has one .hero-cta and every in-page link resolves",
+        "dependencies": [],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-16"
+        ],
+        "revises": "W-1",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 2,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The hero has no placeholder anchor or removal scripts, and the hero CTA resolves to the real #register section.",
+            "constraints": [
+              "Keep exactly one .hero-cta linking to #register",
+              "The real #register section from W-6 must be the only #register",
+              "Script must not throw if sections are absent"
+            ],
+            "context": [
+              "charter item 1",
+              "section W-1",
+              "section W-6"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-1 Builder",
+              "steps": "In #hero delete the hidden span with id register and the data-hero-placeholder attribute, and delete the two scripts that remove it. Keep <a class=\"hero-cta j2-btn\" href=\"#register\">Register your team</a>, which now resolves to the section #register that W-6 built."
+            },
+            "expected_output": [
+              {
+                "text": "Hero section exists",
+                "kind": "section",
+                "target": "#hero"
+              },
+              {
+                "text": "One main action",
+                "kind": "element",
+                "target": ".hero-cta",
+                "count": 1
+              },
+              {
+                "text": "Only one register target",
+                "kind": "element",
+                "target": "#register",
+                "count": 1
+              },
+              {
+                "text": "Hero facts shown",
+                "kind": "facts",
+                "target": [
+                  "CodeSprint Pune 2027",
+                  "Lakeside Tech Hall, 12 Lake Road, Pune 411002",
+                  "Saturday 6 March 2027",
+                  "Sunday 7 March 2027"
+                ]
+              },
+              {
+                "text": "Links resolve",
+                "kind": "test",
+                "target": "links-resolve"
+              },
+              {
+                "text": "Hero buttons are tappable",
+                "kind": "tap",
+                "target": "#hero"
+              }
+            ],
+            "verification": [
+              {
+                "text": "One register target",
+                "type": "element-count",
+                "target": "#register",
+                "expect": 1,
+                "item": 3
+              },
+              {
+                "text": "One main action",
+                "type": "element-count",
+                "target": ".hero-cta",
+                "expect": 1,
+                "item": 2
+              },
+              {
+                "text": "Hero section exists",
+                "type": "element-count",
+                "target": "#hero",
+                "expect": 1,
+                "item": 1
+              },
+              {
+                "text": "Hero facts present",
+                "type": "facts-present",
+                "target": [
+                  "CodeSprint Pune 2027",
+                  "Lakeside Tech Hall, 12 Lake Road, Pune 411002",
+                  "Saturday 6 March 2027",
+                  "Sunday 7 March 2027"
+                ],
+                "expect": true,
+                "item": 4
+              },
+              {
+                "text": "Links resolve",
+                "type": "named-test",
+                "target": "links-resolve",
+                "expect": true,
+                "item": 5
+              },
+              {
+                "text": "Hero buttons are tappable",
+                "type": "tap-targets",
+                "target": "#hero",
+                "expect": 44,
+                "item": 6
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 8,
+          "model_call_limit": 3,
+          "time_limit_minutes": 15,
+          "retry_limit": 2,
+          "stop_loss": "Stop if the same verification fails twice in a row or spend reaches 8"
+        },
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "calc_zero_fix",
+        "name": "Calculator without literal zero defaults",
+        "goal_gap": "The calculator markup shows a literal 0 that is not a brief fact (F-17, N6)",
+        "expected_outcome": "No literal 0 in the calculator markup or default text; the total is filled in by script",
+        "outputs": [
+          "#calculator"
+        ],
+        "completion_check": "The two calculator behaviour checks still give 2*400*0.9+1*200 and 3*800+2*200, and the calculator has no hard-coded 0",
+        "dependencies": [
+          "fees"
+        ],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-17"
+        ],
+        "revises": "W-5",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 2,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The calculator markup has no literal 0, with an empty meals field and the total written by script, and totals stay correct.",
+            "constraints": [
+              "Discount never applies to meal passes",
+              "Visible labels on all fields",
+              "No literal 0 in markup, including value, min and Rs 0; set limits in script",
+              "If the flagged 0 is elsewhere, report where"
+            ],
+            "context": [
+              "charter item 5",
+              "section W-5"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-5 Builder",
+              "steps": "In #calculator leave #calc-meals empty with a placeholder 'Number of meal passes' and no value or min attribute, treat empty as no passes in the script, and leave #calc-total empty until the script writes it. Remove any 'Rs 0' text. Keep #calc-ticket, #calc-people (1 to 4), #calc-date and #calc-total, and keep the early-bird rule on entry fees only up to 2027-02-15."
+            },
+            "expected_output": [
+              {
+                "text": "Calculator section exists",
+                "kind": "section",
+                "target": "#calculator"
+              },
+              {
+                "text": "Total output exists",
+                "kind": "element",
+                "target": "#calc-total",
+                "count": 1
+              },
+              {
+                "text": "Early-bird total for students",
+                "kind": "behavior",
+                "target": "#calc-total",
+                "steps": [
+                  "set #calc-ticket Student",
+                  "set #calc-people 2",
+                  "set #calc-meals 1",
+                  "set #calc-date 2027-02-10",
+                  "expect-number #calc-total 2*400*0.9+1*200"
+                ]
+              },
+              {
+                "text": "Late total has no discount",
+                "kind": "behavior",
+                "target": "#calc-total",
+                "steps": [
+                  "set #calc-ticket Professional",
+                  "set #calc-people 3",
+                  "set #calc-meals 2",
+                  "set #calc-date 2027-02-16",
+                  "expect-number #calc-total 3*800+2*200"
+                ]
+              },
+              {
+                "text": "Calculator fields are tappable",
+                "kind": "tap",
+                "target": "#calculator"
+              }
+            ],
+            "verification": [
+              {
+                "text": "Calculator section exists",
+                "type": "element-count",
+                "target": "#calculator",
+                "expect": 1,
+                "item": 1
+              },
+              {
+                "text": "Total output exists",
+                "type": "element-count",
+                "target": "#calc-total",
+                "expect": 1,
+                "item": 2
+              },
+              {
+                "text": "Early-bird total for students",
+                "type": "behavior-steps",
+                "target": [
+                  "set #calc-ticket Student",
+                  "set #calc-people 2",
+                  "set #calc-meals 1",
+                  "set #calc-date 2027-02-10",
+                  "expect-number #calc-total 2*400*0.9+1*200"
+                ],
+                "expect": true,
+                "item": 3
+              },
+              {
+                "text": "Late total has no discount",
+                "type": "behavior-steps",
+                "target": [
+                  "set #calc-ticket Professional",
+                  "set #calc-people 3",
+                  "set #calc-meals 2",
+                  "set #calc-date 2027-02-16",
+                  "expect-number #calc-total 3*800+2*200"
+                ],
+                "expect": true,
+                "item": 4
+              },
+              {
+                "text": "Calculator fields are tappable",
+                "type": "tap-targets",
+                "target": "#calculator",
+                "expect": 44,
+                "item": 5
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 8,
+          "model_call_limit": 3,
+          "time_limit_minutes": 15,
+          "retry_limit": 2,
+          "stop_loss": "Stop if the same verification fails twice in a row or spend reaches 8"
+        },
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "contrast_move",
+        "name": "Contrast toggle out of the way",
+        "goal_gap": "The fixed contrast toggle covers the contact card and form buttons (F-18)",
+        "expected_outcome": "The toggle sits in normal page flow and covers nothing, and still switches the whole page",
+        "outputs": [
+          "#contrast-bar"
+        ],
+        "completion_check": "Clicking #contrast-toggle changes the background-color of body and of the existing section #tracks, and the bar is not fixed",
+        "dependencies": [
+          "tracks"
+        ],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-18"
+        ],
+        "revises": "W-14",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 2,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The contrast toggle is in normal page flow, covers no content, and still switches body and every section, including the existing #tracks, between normal and high contrast.",
+            "constraints": [
+              "Not position fixed or sticky over content",
+              "Reversible",
+              "hc styles still cover body and the existing section #tracks, forms, buttons and nav"
+            ],
+            "context": [
+              "charter item 14",
+              "section W-14",
+              "section W-3"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-14 Builder",
+              "steps": "Restyle <div id=\"contrast-bar\"> as a slim strip in normal flow at the top of the page, below the fixed nav with matching top offset, holding button #contrast-toggle (aria-pressed, min 44px tall) that toggles class hc on body. Keep the existing body.hc CSS covering body, the existing section #tracks, all other sections, inputs, selects and buttons."
+            },
+            "expected_output": [
+              {
+                "text": "Contrast bar exists",
+                "kind": "section",
+                "target": "#contrast-bar"
+              },
+              {
+                "text": "Toggle exists",
+                "kind": "element",
+                "target": "#contrast-toggle",
+                "count": 1
+              },
+              {
+                "text": "Toggle changes body colour",
+                "kind": "behavior",
+                "target": "body",
+                "steps": [
+                  "click #contrast-toggle",
+                  "expect-style-changed body background-color"
+                ]
+              },
+              {
+                "text": "Toggle changes tracks colour",
+                "kind": "behavior",
+                "target": "#tracks",
+                "steps": [
+                  "click #contrast-toggle",
+                  "expect-style-changed #tracks background-color"
+                ]
+              },
+              {
+                "text": "Toggle is tappable",
+                "kind": "tap",
+                "target": "#contrast-bar"
+              }
+            ],
+            "verification": [
+              {
+                "text": "Contrast bar exists",
+                "type": "element-count",
+                "target": "#contrast-bar",
+                "expect": 1,
+                "item": 1
+              },
+              {
+                "text": "Toggle exists",
+                "type": "element-count",
+                "target": "#contrast-toggle",
+                "expect": 1,
+                "item": 2
+              },
+              {
+                "text": "Toggle changes body colour",
+                "type": "behavior-steps",
+                "target": [
+                  "click #contrast-toggle",
+                  "expect-style-changed body background-color"
+                ],
+                "expect": true,
+                "item": 3
+              },
+              {
+                "text": "Toggle changes tracks colour",
+                "type": "behavior-steps",
+                "target": [
+                  "click #contrast-toggle",
+                  "expect-style-changed #tracks background-color"
+                ],
+                "expect": true,
+                "item": 4
+              },
+              {
+                "text": "Toggle is tappable",
+                "type": "tap-targets",
+                "target": "#contrast-bar",
+                "expect": 44,
+                "item": 5
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 8,
+          "model_call_limit": 3,
+          "time_limit_minutes": 15,
+          "retry_limit": 2,
+          "stop_loss": "Stop if the same verification fails twice in a row or spend reaches 8"
+        },
+        "estimate": 8,
+        "cost": 8
+      }
+    ],
+    "adaptation_final": [
+      {
+        "id": "sponsors_fix",
+        "name": "Sponsor tier lines in exact wording",
+        "goal_gap": "Tier and sponsor names are split across elements, so the exact tier lines are missing (F-11, N5)",
+        "expected_outcome": "Each tier line appears as one text element in the brief's wording",
+        "outputs": [
+          "#sponsors"
+        ],
+        "completion_check": "#sponsors has three .tier-line elements and all three exact tier lines are on the page, with 4 .sponsor-logo and 3 .photo-placeholder",
+        "dependencies": [],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-11"
+        ],
+        "revises": "W-11",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 2,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "Each sponsor tier is shown as one line exactly as 'Gold: Northwind Cloud', 'Silver: Bytecraft Labs, Circuit House' and 'Community: Pune Coders Club'.",
+            "constraints": [
+              "Facts copied exactly",
+              "Keep 4 .sponsor-logo and 3 .photo-placeholder, labelled as placeholders",
+              "No real images"
+            ],
+            "context": [
+              "charter item 11",
+              "section W-11"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-11 Builder",
+              "steps": "In #sponsors add one <p class=\"tier-line\"> per tier holding the full text in a single element: Gold: Northwind Cloud; Silver: Bytecraft Labs, Circuit House; Community: Pune Coders Club. Keep the four <div class=\"sponsor-logo\"> placeholders and the three <div class=\"photo-placeholder\"> boxes."
+            },
+            "expected_output": [
+              {
+                "text": "Sponsors section exists",
+                "kind": "section",
+                "target": "#sponsors"
+              },
+              {
+                "text": "Three tier lines",
+                "kind": "element",
+                "target": ".tier-line",
+                "count": 3
+              },
+              {
+                "text": "Four logo placeholders",
+                "kind": "element",
+                "target": ".sponsor-logo",
+                "count": 4
+              },
+              {
+                "text": "Three photo placeholders",
+                "kind": "element",
+                "target": ".photo-placeholder",
+                "count": 3
+              },
+              {
+                "text": "Exact tier lines shown",
+                "kind": "facts",
+                "target": [
+                  "Gold: Northwind Cloud",
+                  "Silver: Bytecraft Labs, Circuit House",
+                  "Community: Pune Coders Club"
+                ]
+              }
+            ],
+            "verification": [
+              {
+                "text": "Exact tier lines present",
+                "type": "facts-present",
+                "target": [
+                  "Gold: Northwind Cloud",
+                  "Silver: Bytecraft Labs, Circuit House",
+                  "Community: Pune Coders Club"
+                ],
+                "expect": true,
+                "item": 5
+              },
+              {
+                "text": "Tier lines are counted",
+                "type": "element-count",
+                "target": ".tier-line",
+                "expect": 3,
+                "item": 2
+              },
+              {
+                "text": "Logo placeholders are counted",
+                "type": "element-count",
+                "target": ".sponsor-logo",
+                "expect": 4,
+                "item": 3
+              },
+              {
+                "text": "Photo placeholders are counted",
+                "type": "element-count",
+                "target": ".photo-placeholder",
+                "expect": 3,
+                "item": 4
+              },
+              {
+                "text": "Sponsors section exists",
+                "type": "element-count",
+                "target": "#sponsors",
+                "expect": 1,
+                "item": 1
+              }
+            ]
+          }
+        ],
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "hero_dup_fix",
+        "name": "Remove duplicate register placeholder",
+        "goal_gap": "W-1 leaves a hidden duplicate id register in the hero, so #register matches twice (F-16)",
+        "expected_outcome": "The hero CTA points at the one real #register section",
+        "outputs": [
+          "#hero"
+        ],
+        "completion_check": "Exactly one element matches #register, #hero has one .hero-cta and every in-page link resolves",
+        "dependencies": [],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-16"
+        ],
+        "revises": "W-1",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 2,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The hero has no placeholder anchor or removal scripts, and the hero CTA resolves to the real #register section.",
+            "constraints": [
+              "Keep exactly one .hero-cta linking to #register",
+              "The real #register section from W-6 must be the only #register",
+              "Script must not throw if sections are absent"
+            ],
+            "context": [
+              "charter item 1",
+              "section W-1",
+              "section W-6"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-1 Builder",
+              "steps": "In #hero delete the hidden span with id register and the data-hero-placeholder attribute, and delete the two scripts that remove it. Keep <a class=\"hero-cta j2-btn\" href=\"#register\">Register your team</a>, which now resolves to the section #register that W-6 built."
+            },
+            "expected_output": [
+              {
+                "text": "Hero section exists",
+                "kind": "section",
+                "target": "#hero"
+              },
+              {
+                "text": "One main action",
+                "kind": "element",
+                "target": ".hero-cta",
+                "count": 1
+              },
+              {
+                "text": "Only one register target",
+                "kind": "element",
+                "target": "#register",
+                "count": 1
+              },
+              {
+                "text": "Hero facts shown",
+                "kind": "facts",
+                "target": [
+                  "CodeSprint Pune 2027",
+                  "Lakeside Tech Hall, 12 Lake Road, Pune 411002",
+                  "Saturday 6 March 2027",
+                  "Sunday 7 March 2027"
+                ]
+              },
+              {
+                "text": "Links resolve",
+                "kind": "test",
+                "target": "links-resolve"
+              },
+              {
+                "text": "Hero buttons are tappable",
+                "kind": "tap",
+                "target": "#hero"
+              }
+            ],
+            "verification": [
+              {
+                "text": "One register target",
+                "type": "element-count",
+                "target": "#register",
+                "expect": 1,
+                "item": 3
+              },
+              {
+                "text": "One main action",
+                "type": "element-count",
+                "target": ".hero-cta",
+                "expect": 1,
+                "item": 2
+              },
+              {
+                "text": "Hero section exists",
+                "type": "element-count",
+                "target": "#hero",
+                "expect": 1,
+                "item": 1
+              },
+              {
+                "text": "Hero facts present",
+                "type": "facts-present",
+                "target": [
+                  "CodeSprint Pune 2027",
+                  "Lakeside Tech Hall, 12 Lake Road, Pune 411002",
+                  "Saturday 6 March 2027",
+                  "Sunday 7 March 2027"
+                ],
+                "expect": true,
+                "item": 4
+              },
+              {
+                "text": "Links resolve",
+                "type": "named-test",
+                "target": "links-resolve",
+                "expect": true,
+                "item": 5
+              },
+              {
+                "text": "Hero buttons are tappable",
+                "type": "tap-targets",
+                "target": "#hero",
+                "expect": 44,
+                "item": 6
+              }
+            ]
+          }
+        ],
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "calc_zero_fix",
+        "name": "Calculator without literal zero defaults",
+        "goal_gap": "The calculator markup shows a literal 0 that is not a brief fact (F-17, N6)",
+        "expected_outcome": "No literal 0 in the calculator markup or default text; the total is filled in by script",
+        "outputs": [
+          "#calculator"
+        ],
+        "completion_check": "The two calculator behaviour checks still give 2*400*0.9+1*200 and 3*800+2*200, and the calculator has no hard-coded 0",
+        "dependencies": [
+          "fees"
+        ],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-17"
+        ],
+        "revises": "W-5",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 2,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The calculator markup has no literal 0, with an empty meals field and the total written by script, and totals stay correct.",
+            "constraints": [
+              "Discount never applies to meal passes",
+              "Visible labels on all fields",
+              "No literal 0 in markup, including value, min and Rs 0; set limits in script",
+              "If the flagged 0 is elsewhere, report where"
+            ],
+            "context": [
+              "charter item 5",
+              "section W-5"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-5 Builder",
+              "steps": "In #calculator leave #calc-meals empty with a placeholder 'Number of meal passes' and no value or min attribute, treat empty as no passes in the script, and leave #calc-total empty until the script writes it. Remove any 'Rs 0' text. Keep #calc-ticket, #calc-people (1 to 4), #calc-date and #calc-total, and keep the early-bird rule on entry fees only up to 2027-02-15."
+            },
+            "expected_output": [
+              {
+                "text": "Calculator section exists",
+                "kind": "section",
+                "target": "#calculator"
+              },
+              {
+                "text": "Total output exists",
+                "kind": "element",
+                "target": "#calc-total",
+                "count": 1
+              },
+              {
+                "text": "Early-bird total for students",
+                "kind": "behavior",
+                "target": "#calc-total",
+                "steps": [
+                  "set #calc-ticket Student",
+                  "set #calc-people 2",
+                  "set #calc-meals 1",
+                  "set #calc-date 2027-02-10",
+                  "expect-number #calc-total 2*400*0.9+1*200"
+                ]
+              },
+              {
+                "text": "Late total has no discount",
+                "kind": "behavior",
+                "target": "#calc-total",
+                "steps": [
+                  "set #calc-ticket Professional",
+                  "set #calc-people 3",
+                  "set #calc-meals 2",
+                  "set #calc-date 2027-02-16",
+                  "expect-number #calc-total 3*800+2*200"
+                ]
+              },
+              {
+                "text": "Calculator fields are tappable",
+                "kind": "tap",
+                "target": "#calculator"
+              }
+            ],
+            "verification": [
+              {
+                "text": "Calculator section exists",
+                "type": "element-count",
+                "target": "#calculator",
+                "expect": 1,
+                "item": 1
+              },
+              {
+                "text": "Total output exists",
+                "type": "element-count",
+                "target": "#calc-total",
+                "expect": 1,
+                "item": 2
+              },
+              {
+                "text": "Early-bird total for students",
+                "type": "behavior-steps",
+                "target": [
+                  "set #calc-ticket Student",
+                  "set #calc-people 2",
+                  "set #calc-meals 1",
+                  "set #calc-date 2027-02-10",
+                  "expect-number #calc-total 2*400*0.9+1*200"
+                ],
+                "expect": true,
+                "item": 3
+              },
+              {
+                "text": "Late total has no discount",
+                "type": "behavior-steps",
+                "target": [
+                  "set #calc-ticket Professional",
+                  "set #calc-people 3",
+                  "set #calc-meals 2",
+                  "set #calc-date 2027-02-16",
+                  "expect-number #calc-total 3*800+2*200"
+                ],
+                "expect": true,
+                "item": 4
+              },
+              {
+                "text": "Calculator fields are tappable",
+                "type": "tap-targets",
+                "target": "#calculator",
+                "expect": 44,
+                "item": 5
+              }
+            ]
+          }
+        ],
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "contrast_move",
+        "name": "Contrast toggle out of the way",
+        "goal_gap": "The fixed contrast toggle covers the contact card and form buttons (F-18)",
+        "expected_outcome": "The toggle sits in normal page flow and covers nothing, and still switches the whole page",
+        "outputs": [
+          "#contrast-bar"
+        ],
+        "completion_check": "Clicking #contrast-toggle changes the background-color of body and of the existing section #tracks, and the bar is not fixed",
+        "dependencies": [
+          "tracks"
+        ],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-18"
+        ],
+        "revises": "W-14",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 2,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The contrast toggle is in normal page flow, covers no content, and still switches body and every section, including the existing #tracks, between normal and high contrast.",
+            "constraints": [
+              "Not position fixed or sticky over content",
+              "Reversible",
+              "hc styles still cover body and the existing section #tracks, forms, buttons and nav"
+            ],
+            "context": [
+              "charter item 14",
+              "section W-14",
+              "section W-3"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-14 Builder",
+              "steps": "Restyle <div id=\"contrast-bar\"> as a slim strip in normal flow at the top of the page, below the fixed nav with matching top offset, holding button #contrast-toggle (aria-pressed, min 44px tall) that toggles class hc on body. Keep the existing body.hc CSS covering body, the existing section #tracks, all other sections, inputs, selects and buttons."
+            },
+            "expected_output": [
+              {
+                "text": "Contrast bar exists",
+                "kind": "section",
+                "target": "#contrast-bar"
+              },
+              {
+                "text": "Toggle exists",
+                "kind": "element",
+                "target": "#contrast-toggle",
+                "count": 1
+              },
+              {
+                "text": "Toggle changes body colour",
+                "kind": "behavior",
+                "target": "body",
+                "steps": [
+                  "click #contrast-toggle",
+                  "expect-style-changed body background-color"
+                ]
+              },
+              {
+                "text": "Toggle changes tracks colour",
+                "kind": "behavior",
+                "target": "#tracks",
+                "steps": [
+                  "click #contrast-toggle",
+                  "expect-style-changed #tracks background-color"
+                ]
+              },
+              {
+                "text": "Toggle is tappable",
+                "kind": "tap",
+                "target": "#contrast-bar"
+              }
+            ],
+            "verification": [
+              {
+                "text": "Contrast bar exists",
+                "type": "element-count",
+                "target": "#contrast-bar",
+                "expect": 1,
+                "item": 1
+              },
+              {
+                "text": "Toggle exists",
+                "type": "element-count",
+                "target": "#contrast-toggle",
+                "expect": 1,
+                "item": 2
+              },
+              {
+                "text": "Toggle changes body colour",
+                "type": "behavior-steps",
+                "target": [
+                  "click #contrast-toggle",
+                  "expect-style-changed body background-color"
+                ],
+                "expect": true,
+                "item": 3
+              },
+              {
+                "text": "Toggle changes tracks colour",
+                "type": "behavior-steps",
+                "target": [
+                  "click #contrast-toggle",
+                  "expect-style-changed #tracks background-color"
+                ],
+                "expect": true,
+                "item": 4
+              },
+              {
+                "text": "Toggle is tappable",
+                "type": "tap-targets",
+                "target": "#contrast-bar",
+                "expect": 44,
+                "item": 5
+              }
+            ]
+          }
+        ],
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "nav_order",
+        "name": "Nav links in page order",
+        "goal_gap": "Nav link order does not match the order of sections on the page (R-5)",
+        "expected_outcome": "The 12 nav links follow the page's section order",
+        "outputs": [
+          "#site-nav"
+        ],
+        "completion_check": "#site-nav keeps 12 .nav-link links that all resolve, and the FAQ and Sponsors links still become active",
+        "dependencies": [
+          "hero",
+          "countdown",
+          "tracks",
+          "fees",
+          "calculator",
+          "register",
+          "mentor",
+          "schedule",
+          "prizes",
+          "faq",
+          "sponsors",
+          "contact"
+        ],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "R-5"
+        ],
+        "revises": "W-13",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 2,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The twelve nav links are ordered as their sections appear in the page, and the active highlight still works.",
+            "constraints": [
+              "Same 12 links, ids and hrefs",
+              "Every href matches an existing section id"
+            ],
+            "context": [
+              "charter item 13",
+              "section W-13"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-13 Builder",
+              "steps": "In <nav id=\"site-nav\"> reorder the twelve <a class=\"nav-link\"> links (ids nav-hero, nav-countdown, nav-tracks, nav-fees, nav-calculator, nav-register, nav-mentor, nav-schedule, nav-prizes, nav-faq, nav-sponsors, nav-contact) to match the order of the sections in the page source. Keep the active-class logic unchanged."
+            },
+            "expected_output": [
+              {
+                "text": "Nav exists",
+                "kind": "section",
+                "target": "#site-nav"
+              },
+              {
+                "text": "A link per section",
+                "kind": "element",
+                "target": ".nav-link",
+                "count": 12
+              },
+              {
+                "text": "FAQ link becomes active",
+                "kind": "behavior",
+                "target": "#nav-faq",
+                "steps": [
+                  "scroll-to #faq",
+                  "wait 1",
+                  "expect-class #nav-faq active"
+                ]
+              },
+              {
+                "text": "Sponsors link becomes active",
+                "kind": "behavior",
+                "target": "#nav-sponsors",
+                "steps": [
+                  "scroll-to #sponsors",
+                  "wait 1",
+                  "expect-class #nav-sponsors active"
+                ]
+              },
+              {
+                "text": "Links resolve",
+                "kind": "test",
+                "target": "links-resolve"
+              },
+              {
+                "text": "Nav links are tappable",
+                "kind": "tap",
+                "target": "#site-nav"
+              }
+            ],
+            "verification": [
+              {
+                "text": "Nav exists",
+                "type": "element-count",
+                "target": "#site-nav",
+                "expect": 1,
+                "item": 1
+              },
+              {
+                "text": "Nav links are counted",
+                "type": "element-count",
+                "target": ".nav-link",
+                "expect": 12,
+                "item": 2
+              },
+              {
+                "text": "Links resolve",
+                "type": "named-test",
+                "target": "links-resolve",
+                "expect": true,
+                "item": 5
+              },
+              {
+                "text": "FAQ link becomes active",
+                "type": "behavior-steps",
+                "target": [
+                  "scroll-to #faq",
+                  "wait 1",
+                  "expect-class #nav-faq active"
+                ],
+                "expect": true,
+                "item": 3
+              },
+              {
+                "text": "Sponsors link becomes active",
+                "type": "behavior-steps",
+                "target": [
+                  "scroll-to #sponsors",
+                  "wait 1",
+                  "expect-class #nav-sponsors active"
+                ],
+                "expect": true,
+                "item": 4
+              },
+              {
+                "text": "Nav links are tappable",
+                "type": "tap-targets",
+                "target": "#site-nav",
+                "expect": 44,
+                "item": 6
+              }
+            ]
+          }
+        ],
+        "estimate": 8,
+        "cost": 8
+      }
+    ],
+    "attempts_used": 2,
+    "registered": [
+      "Sponsor tier lines in exact wording",
+      "Remove duplicate register placeholder",
+      "Calculator without literal zero defaults",
+      "Contrast toggle out of the way"
+    ]
+  }
+]

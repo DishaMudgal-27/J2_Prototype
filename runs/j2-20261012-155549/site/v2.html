@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spark 2026</title>
+<!-- J2:style head start (owner W-1) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;700&amp;display=swap"><style>:root{--j2-primary:#FF6B35;--j2-secondary:#7C3AED;--j2-accent:#22D3EE;--j2-background:#0B1020;--j2-surface:#151B33;--j2-text:#F5F7FF;--j2-muted:#A9B1D6;--j2-font-heading:'Space Grotesk', 'Segoe UI', system-ui, sans-serif;--j2-font-body:'Inter', 'Segoe UI', system-ui, sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:16px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#FF6B35;color:#0B1020;min-height:48px;padding:0 28px;font-weight:700;border:2px solid #FF6B35;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-btn-secondary{display:inline-block;background:transparent;color:#22D3EE;min-height:48px;padding:0 28px;font-weight:700;border:2px solid #22D3EE;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-card{background:#151B33;color:#F5F7FF;border:1px solid rgba(169,177,214,0.2);border-radius:16px;padding:24px}</style>
+<!-- J2:style head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<section id="hero" class="hero-w1" aria-labelledby="hero-title">
+  <style>
+    #hero.hero-w1 {
+      position: relative;
+      overflow: hidden;
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 88vh;
+      display: flex;
+      align-items: center;
+      padding: 96px 20px 64px;
+      background:
+        radial-gradient(ellipse 60% 50% at 85% 10%, rgba(124, 58, 237, 0.45), transparent 70%),
+        radial-gradient(ellipse 50% 45% at 10% 90%, rgba(255, 107, 53, 0.30), transparent 70%),
+        var(--j2-background, #0B1020);
+      color: var(--j2-text, #F5F7FF);
+      font-family: var(--j2-font-body, 'Inter', system-ui, sans-serif);
+    }
+    #hero.hero-w1 *, #hero.hero-w1 *::before, #hero.hero-w1 *::after { box-sizing: border-box; }
+    #hero .hero-glow {
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      right: -120px;
+      top: 20%;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, #FF6B35, #7C3AED, #22D3EE, #FF6B35);
+      filter: blur(70px);
+      opacity: 0.35;
+      pointer-events: none;
+      animation: hero-spin 18s linear infinite;
+    }
+    @keyframes hero-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { #hero .hero-glow { animation: none; } }
+    #hero .hero-inner {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    #hero .hero-badge {
+      display: inline-block;
+      margin: 0 0 20px;
+      padding: 8px 16px;
+      border: 1px solid var(--j2-accent, #22D3EE);
+      border-radius: 999px;
+      color: var(--j2-accent, #22D3EE);
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    #hero .hero-title {
+      margin: 0 0 16px;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: clamp(2.75rem, 13vw, 6rem);
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      overflow-wrap: anywhere;
+    }
+    #hero .hero-title span {
+      background: linear-gradient(90deg, #FF6B35, #22D3EE);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    #hero .hero-college {
+      margin: 0 0 8px;
+      font-size: clamp(1.125rem, 4.5vw, 1.75rem);
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    #hero .hero-dates {
+      margin: 0 0 24px;
+      font-size: clamp(1.125rem, 4.5vw, 1.5rem);
+      font-weight: 600;
+      color: var(--j2-primary, #FF6B35);
+    }
+    #hero .hero-tagline {
+      margin: 0 0 28px;
+      max-width: 36rem;
+      color: var(--j2-muted, #A9B1D6);
+      font-size: 1.0625rem;
+      line-height: 1.6;
+    }
+    #hero .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 0 0 32px;
+    }
+    #hero .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    #hero .hero-stats li {
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: rgba(21, 27, 51, 0.85);
+      border: 1px solid rgba(169, 177, 214, 0.25);
+      font-size: 0.9375rem;
+      font-weight: 500;
+    }
+    @media (max-width: 420px) {
+      #hero.hero-w1 { padding: 80px 16px 48px; }
+      #hero .hero-actions .j2-btn,
+      #hero .hero-actions .j2-btn-secondary { width: 100%; }
+    }
+  </style>
+
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <p class="hero-badge">Tech fest</p>
+    <h1 id="hero-title" class="hero-title"><span>Spark 2026</span></h1>
+    <p class="hero-college">Northfield College of Engineering, Pune</p>
+    <p class="hero-dates">14 to 16 February 2027</p>
+    <p class="hero-tagline">Three days of coding, robotics, design and talks. Check the schedule, pick your events and sign up from your phone.</p>
+    <div class="hero-actions">
+      <a class="j2-btn" href="#register">Register now</a>
+      <a class="j2-btn j2-btn-secondary" href="#schedule">See the schedule</a>
+    </div>
+    <ul class="hero-stats">
+      <li>3 days</li>
+      <li>8 events</li>
+      <li>4 categories</li>
+    </ul>
+  </div>
+</section>
+<!-- J2:W-1 end -->
+<!-- J2:W-2 start (owner W-2) -->
+<section id="schedule" class="sched-w2" aria-labelledby="schedule-title">
+  <style>
+    #schedule.sched-w2 {
+      box-sizing: border-box;
+      width: 100%;
+      padding: var(--j2-section, 64px) 20px;
+      background: var(--j2-background, #0B1020);
+      color: var(--j2-text, #F5F7FF);
+      font-family: var(--j2-font-body, 'Inter', system-ui, sans-serif);
+    }
+    #schedule.sched-w2 *, #schedule.sched-w2 *::before, #schedule.sched-w2 *::after { box-sizing: border-box; }
+    #schedule .sched-inner { width: 100%; max-width: 1100px; margin: 0 auto; }
+    #schedule .sched-title {
+      margin: 0 0 8px;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: clamp(2rem, 8vw, 3rem);
+      line-height: 1.1;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+    #schedule .sched-intro {
+      margin: 0 0 32px;
+      max-width: 36rem;
+      color: var(--j2-muted, #A9B1D6);
+      font-size: 1.0625rem;
+      line-height: 1.6;
+    }
+    #schedule .sched-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    #schedule .sched-day { min-width: 0; border-top: 4px solid var(--j2-primary, #FF6B35); }
+    #schedule .sched-day.sched-d2 { border-top-color: var(--j2-secondary, #7C3AED); }
+    #schedule .sched-day.sched-d3 { border-top-color: var(--j2-accent, #22D3EE); }
+    #schedule .sched-day-title {
+      margin: 0 0 16px;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    #schedule .sched-events { margin: 0; padding: 0; list-style: none; }
+    #schedule .sched-row {
+      padding: 14px 0;
+      border-top: 1px solid rgba(169, 177, 214, 0.2);
+    }
+    #schedule .sched-row:first-child { border-top: 0; padding-top: 0; }
+    #schedule .sched-row:last-child { padding-bottom: 0; }
+    #schedule .sched-time {
+      display: block;
+      margin: 0 0 4px;
+      color: var(--j2-accent, #22D3EE);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    #schedule .sched-name {
+      display: block;
+      font-size: 1.125rem;
+      font-weight: 600;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+    @media (min-width: 900px) {
+      #schedule .sched-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+    }
+    @media (max-width: 420px) {
+      #schedule.sched-w2 { padding: 48px 16px; }
+    }
+  </style>
+
+  <div class="sched-inner">
+    <h2 id="schedule-title" class="sched-title">Schedule</h2>
+    <p class="sched-intro">What is on, day by day. Tap through to the events section for prices and categories.</p>
+
+    <ol class="sched-grid">
+      <li class="sched-day sched-d1 j2-card" aria-labelledby="sched-h1">
+        <h3 id="sched-h1" class="sched-day-title">Day 1</h3>
+        <ul class="sched-events">
+          <li class="sched-row"><span class="sched-time">10am-1pm</span><span class="sched-name">Code Sprint</span></li>
+          <li class="sched-row"><span class="sched-time">2pm-5pm</span><span class="sched-name">Line Follower</span></li>
+          <li class="sched-row"><span class="sched-time">5:30pm-6:30pm</span><span class="sched-name">AI in Daily Life</span></li>
+        </ul>
+      </li>
+      <li class="sched-day sched-d2 j2-card" aria-labelledby="sched-h2">
+        <h3 id="sched-h2" class="sched-day-title">Day 2</h3>
+        <ul class="sched-events">
+          <li class="sched-row"><span class="sched-time">11am-1pm</span><span class="sched-name">Bug Hunt</span></li>
+          <li class="sched-row"><span class="sched-time">2pm-4pm</span><span class="sched-name">Poster Jam</span></li>
+        </ul>
+      </li>
+      <li class="sched-day sched-d3 j2-card" aria-labelledby="sched-h3">
+        <h3 id="sched-h3" class="sched-day-title">Day 3</h3>
+        <ul class="sched-events">
+          <li class="sched-row"><span class="sched-time">10am-1pm</span><span class="sched-name">Drone Dash</span></li>
+          <li class="sched-row"><span class="sched-time">2pm-5pm</span><span class="sched-name">UI Duel</span></li>
+          <li class="sched-row"><span class="sched-time">5:30pm-6:30pm</span><span class="sched-name">Startup Stories</span></li>
+        </ul>
+      </li>
+    </ol>
+  </div>
+</section>
+<!-- J2:W-2 end -->
+</body>
+</html>

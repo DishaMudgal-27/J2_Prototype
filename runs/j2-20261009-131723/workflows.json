@@ -1,0 +1,374 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "base-styling",
+    "name": "Page shell and earthy styling",
+    "covers": [
+      14
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, no broken in-page links, and nothing marked to be confirmed"
+    ],
+    "purpose": "No page exists; there is no palette, typography or mobile layout.",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same overflow or JS error fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "page shell",
+      "CSS variables",
+      "nav"
+    ],
+    "completion_check": "No JS errors on load; no horizontal overflow at 360px and 1280px; every nav link targets an existing section id.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "style guide, usable section and head tags",
+    "style_guide": true,
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "visit-us",
+    "name": "Header, contact, location and timings",
+    "covers": [
+      1,
+      2,
+      11
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The site shows the name Thread & Loom and the address 18 FC Road, Shivajinagar, Pune 411005, with a map or directions link",
+      "The site shows the WhatsApp order number +91 00000 11111 and the shop phone +91 00000 22222 as tap-to-use links",
+      "Store timings show 11am to 9pm, Tuesday to Sunday, closed Monday"
+    ],
+    "purpose": "Visitors cannot see the shop name, address, phone numbers or timings.",
+    "cost": 35,
+    "estimate": 35,
+    "envelope": {
+      "money_limit": 35,
+      "model_call_limit": 3,
+      "time_limit_minutes": 15,
+      "retry_limit": 2,
+      "stop_loss": "Stop if a number, address or timing differs from the brief after one retry"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "hero",
+      "contact block",
+      "timings block"
+    ],
+    "completion_check": "Name and address text present; directions, wa.me and tel links present with the right numbers; timings match the brief exactly.",
+    "dependencies": [
+      "base-styling"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "catalogue",
+    "name": "Product catalogue with filters and WhatsApp order",
+    "covers": [
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "fixes": [],
+    "covers_text": [
+      "All 10 products appear with name, category and price: Indigo block-print kurta 1,499; Mustard handloom kurta 1,699; White chikankari kurta 2,199; Ikat handloom saree 3,499; Khadi silk saree 4,999; Cotton jamdani saree 3,999; Khadi cotton shirt 1,299; Linen-blend shirt 1,599; Block-print dupatta 899; Chanderi dupatta 1,099",
+      "Each product has an order button that opens WhatsApp to +91 00000 11111 with a prefilled message naming that product",
+      "Visitors can browse by category: kurtas, sarees, cotton shirts, dupattas (plus an all view)",
+      "A size filter works with these sizes: Indigo block-print kurta S to XXL; Mustard handloom kurta S to XL; White chikankari kurta XS to XL; Khadi cotton shirt S to XXL; Linen-blend shirt M to XXL; sarees and dupattas free size",
+      "A price filter works across the product list and combines with the category and size filters"
+    ],
+    "purpose": "No products, filters or ordering exist.",
+    "cost": 55,
+    "estimate": 55,
+    "envelope": {
+      "money_limit": 55,
+      "model_call_limit": 4,
+      "time_limit_minutes": 20,
+      "retry_limit": 2,
+      "stop_loss": "Stop if filter combinations return wrong subsets twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "product grid",
+      "category tabs",
+      "size filter",
+      "price filter",
+      "order buttons"
+    ],
+    "completion_check": "10 cards with exact prices; each tab shows the right count; size and price filters combine with category and return correct subsets; each order link has the number and its product name; no JS errors.",
+    "dependencies": [
+      "base-styling"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "size-guide",
+    "name": "Size guide",
+    "covers": [
+      8
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A size guide shows chest in inches: XS 32, S 34, M 36, L 38, XL 40, XXL 42"
+    ],
+    "purpose": "Visitors cannot check sizes.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the table still overflows at 360px after one retry"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "size guide table"
+    ],
+    "completion_check": "Table has exactly six rows with the given values and fits at 360px without page overflow.",
+    "dependencies": [
+      "base-styling"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "new-arrivals",
+    "name": "New arrivals",
+    "covers": [
+      9
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A New Arrivals section shows the White chikankari kurta, Ikat handloom saree and Linen-blend shirt"
+    ],
+    "purpose": "No new arrivals view.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 2,
+      "stop_loss": "Stop if any product name or price differs from the catalogue after one retry"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "new arrivals section"
+    ],
+    "completion_check": "Exactly three items shown with the right names and prices; order links name the product.",
+    "dependencies": [
+      "catalogue"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section",
+    "version": 5
+  },
+  {
+    "id": "W-6",
+    "proposal_id": "lookbook",
+    "name": "Lookbook",
+    "covers": [
+      10
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A lookbook section shows 3 styled outfits built from the listed products, with placeholder images"
+    ],
+    "purpose": "No styled outfits shown.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 2,
+      "stop_loss": "Stop if an outfit names a product outside the 10 after one retry"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "lookbook section"
+    ],
+    "completion_check": "Three outfits; every product named is one of the 10; images are labelled as placeholders.",
+    "dependencies": [
+      "catalogue"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-6",
+    "revises": null,
+    "agent": "W-6 Builder",
+    "last_check": "usable section",
+    "version": 6
+  },
+  {
+    "id": "W-7",
+    "proposal_id": "policies-reviews",
+    "name": "Exchange, delivery policy and reviews",
+    "covers": [
+      12,
+      13
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The exchange policy states: exchange within 7 days if unworn with tags, no returns on sale items; delivery info states Pune in 2 days, Rs 79, free above 2,999, pay on delivery",
+      "Three customer reviews appear: \"Beautiful fabric, fits perfectly\" Meera K.; \"Fast delivery and lovely packing\" Arjun S.; \"My go-to for festive kurtas\" Priya D."
+    ],
+    "purpose": "No policy or social proof shown.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 3,
+      "time_limit_minutes": 12,
+      "retry_limit": 2,
+      "stop_loss": "Stop if review wording or policy figures differ from the brief after one retry"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "policy section",
+      "reviews section"
+    ],
+    "completion_check": "Policy and delivery text match the brief; three reviews appear verbatim with the right names.",
+    "dependencies": [
+      "base-styling"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-7",
+    "revises": null,
+    "agent": "W-7 Builder",
+    "last_check": "usable section",
+    "version": 7
+  },
+  {
+    "id": "W-8",
+    "proposal_id": "fix-hero-order",
+    "name": "Move hero ahead of shop",
+    "covers": [],
+    "fixes": [
+      "R-3",
+      "R-4",
+      "F-15"
+    ],
+    "covers_text": [],
+    "purpose": "The shop section precedes the hero in the page order, so the first screen shows 'Shop' and filters instead of the h1 and the Browse/Order actions (R-3, R-4, F-15).",
+    "cost": 24,
+    "estimate": 24,
+    "envelope": {
+      "money_limit": 24,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the hero is still after #shop, or any nav link or overflow check fails, twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "reordered page with hero first"
+    ],
+    "completion_check": "In the page order the h1 hero comes before #shop; the first screen shows the h1 plus the Browse and Order buttons; every nav link still targets an existing id; no JS errors; no overflow at 360px and 1280px.",
+    "dependencies": [
+      "base-styling",
+      "catalogue"
+    ],
+    "status": "done",
+    "cycle": 2,
+    "section": "W-2",
+    "revises": "W-2",
+    "agent": "W-8 Builder",
+    "last_check": "usable section and head tags",
+    "version": 8
+  },
+  {
+    "id": "W-9",
+    "proposal_id": "fix-reset-button",
+    "name": "Style Clear filters button",
+    "covers": [],
+    "fixes": [
+      "F-16"
+    ],
+    "covers_text": [],
+    "purpose": "The .tl-reset buttons lack font:inherit and render in Arial with square corners, unlike the category tabs (F-16).",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 3,
+      "time_limit_minutes": 8,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the font or radius still differs from the tabs after one retry, or if any filter result changes"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "restyled .tl-reset button"
+    ],
+    "completion_check": "Computed font-family of .tl-reset matches the body font; its border-radius equals the category tab radius; filter behaviour is unchanged.",
+    "dependencies": [
+      "catalogue"
+    ],
+    "status": "done",
+    "cycle": 2,
+    "section": "W-3",
+    "revises": "W-3",
+    "agent": "W-9 Builder",
+    "last_check": "usable section",
+    "version": 9
+  }
+]

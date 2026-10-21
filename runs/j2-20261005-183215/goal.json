@@ -1,0 +1,39 @@
+{
+  "statement": "Build a one-file website for CityCare Hospital, Bengaluru, where patients can send a visit request, find emergency information, browse doctor profiles and read a health blog, in English, Kannada and Hindi.",
+  "site_name": "CityCare Hospital",
+  "audience": "Patients and their families in Bengaluru who read English, Kannada or Hindi, often on a phone and sometimes in an urgent situation.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file, no build step, CDN libraries allowed.",
+    "Mobile-first and readable on a small screen, with labeled form fields and sufficient text contrast.",
+    "Emergency information is easy to find at the top of the page and is never hidden behind a menu or a language change.",
+    "Any fact not supplied in the brief is shown as a clearly marked placeholder, never as plausible sample data.",
+    "Health wording is plain and short in all three languages."
+  ],
+  "rules": [
+    "Use only facts from the brief or the Requester. Do not invent phone numbers, addresses, doctor names, credentials, hours or medical claims.",
+    "No backend and no live slot availability. Booking is a visit request that opens a prefilled WhatsApp or email message, and staff confirm each visit by hand.",
+    "Blog posts are labeled general information, not medical advice.",
+    "Kannada and Hindi pages show a visible pending native-speaker review note.",
+    "The site does not store or transmit patient data except through the message the patient chooses to send.",
+    "Missing facts and reviews are tracked as open inputs and do not block done."
+  ],
+  "done_when": [
+    "The site is a single HTML file with its CSS and JavaScript inline or loaded from a CDN, and needs no build step or backend.",
+    "A language switcher offers English, Kannada and Hindi, and every visible section, including emergency and booking, has text in all three.",
+    "The Kannada and Hindi views each show a visible note that the translation is pending native-speaker review.",
+    "An emergency section sits at the top of the page and shows a marked placeholder for the hospital emergency number and address, plus a line telling users to call their local emergency number, in all three languages.",
+    "A visit-request form has name, phone, preferred doctor, date and time fields, and submitting it opens a prefilled WhatsApp or email message to the hospital.",
+    "Near the form, the text states that there is no live slot availability and that staff confirm each visit by hand, in all three languages.",
+    "A doctor profiles section shows cards whose names and credentials are marked placeholders, with no invented doctor data.",
+    "A health blog section lists posts, each labeled as general information, not medical advice, in all three languages.",
+    "The hospital WhatsApp number and email address are clearly named placeholder constants in the script, and no real-looking contact value appears anywhere in the file."
+  ],
+  "open_inputs": [
+    "Hospital emergency number",
+    "Hospital street address and map location",
+    "Hospital WhatsApp number and email address for visit requests",
+    "Doctor names, specialties and credentials, and photos if wanted",
+    "Blog article text, or confirmation of which topics to publish",
+    "Native-speaker review of Kannada and Hindi text, emergency and booking wording first"
+  ]
+}

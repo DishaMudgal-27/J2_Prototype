@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Cafe in Indiranagar, Bengaluru</title>
+<meta name="description" content="Brew Lab is a cafe in Indiranagar, Bengaluru. See the menu, opening hours (8am to 10pm daily), location and request a coffee for pickup.">
+<meta name="theme-color" content="#3b2417">
+<style>
+  :root {
+    --cream: #fbf5ec;
+    --sand: #f1e4d0;
+    --espresso: #3b2417;
+    --roast: #5a3a27;
+    --caramel: #c07a3a;
+    --caramel-dark: #9a5e26;
+    --ph-bg: #fff3c4;
+    --ph-border: #c99700;
+    --ph-text: #6b4f00;
+    --err: #a3261a;
+    --radius: 14px;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--espresso);
+    background: var(--cream);
+    overflow-wrap: anywhere;
+  }
+  h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; line-height: 1.2; margin: 0; }
+  a { color: var(--caramel-dark); }
+  img, iframe, svg { max-width: 100%; }
+
+  /* Placeholder marking: used for every fact the Requester has not supplied */
+  .ph {
+    display: inline-block;
+    background: var(--ph-bg);
+    color: var(--ph-text);
+    border: 1.5px dashed var(--ph-border);
+    border-radius: 6px;
+    padding: 0 6px;
+    font-weight: 600;
+  }
+  .ph::before { content: "PLACEHOLDER: "; font-size: 0.68em; letter-spacing: 0.04em; font-weight: 700; }
+  .notice {
+    background: var(--ph-bg);
+    border: 1.5px dashed var(--ph-border);
+    color: var(--ph-text);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    margin: 0 0 18px;
+  }
+
+  /* Header */
+  header.site-header { background: var(--espresso); color: var(--cream); }
+  .bar {
+    display: flex; flex-direction: column; gap: 10px;
+    padding: 14px 16px;
+    max-width: 1040px; margin: 0 auto;
+  }
+  .brand { font-family: Georgia, serif; font-size: 1.5rem; font-weight: 700; color: var(--cream); text-decoration: none; letter-spacing: 0.01em; }
+  .brand span { color: var(--caramel); }
+  nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; }
+  nav a { color: var(--sand); text-decoration: none; font-size: 0.95rem; padding: 4px 0; display: inline-block; }
+  nav a:hover, nav a:focus { color: #fff; text-decoration: underline; }
+
+  .hero {
+    background: linear-gradient(160deg, var(--roast) 0%, var(--espresso) 70%);
+    color: var(--cream);
+    padding: 36px 16px 44px;
+  }
+  .hero-inner { max-width: 1040px; margin: 0 auto; }
+  .eyebrow { text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.78rem; color: var(--caramel); font-weight: 700; margin: 0 0 8px; }
+  .hero h1 { font-size: 2.1rem; margin-bottom: 12px; }
+  .hero p { margin: 0 0 18px; color: var(--sand); max-width: 34rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; list-style: none; }
+  .chips li { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.22); border-radius: 999px; padding: 6px 14px; font-size: 0.9rem; }
+
+  /* Sections */
+  main { display: block; }
+  section { padding: 36px 16px; }
+  section:nth-of-type(even) { background: var(--sand); }
+  .wrap { max-width: 1040px; margin: 0 auto; }
+  section h2 { font-size: 1.6rem; margin-bottom: 6px; }
+  .lede { margin: 0 0 20px; color: var(--roast); }
+
+  /* Menu */
+  .menu-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  .card { background: #fff; border-radius: var(--radius); padding: 18px 16px; box-shadow: 0 2px 10px rgba(59,36,23,0.08); }
+  .card h3 { font-size: 1.2rem; color: var(--caramel-dark); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid var(--sand); }
+  .items { list-style: none; margin: 0; padding: 0; }
+  .items li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 9px 0; border-bottom: 1px dotted #d9c8b0; }
+  .items li:last-child { border-bottom: 0; }
+  .item-name { flex: 1 1 auto; min-width: 0; }
+  .price { flex: 0 0 auto; font-weight: 700; white-space: nowrap; }
+
+  /* Pre-order */
+  .order-form { background: #fff; border-radius: var(--radius); padding: 18px 16px; box-shadow: 0 2px 10px rgba(59,36,23,0.08); max-width: 640px; }
+  .order-form fieldset { border: 0; margin: 0 0 18px; padding: 0; min-width: 0; }
+  .order-form legend { font-family: Georgia, serif; font-weight: 700; font-size: 1.15rem; color: var(--caramel-dark); padding: 0; margin-bottom: 6px; }
+  .order-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px 12px; padding: 12px 0; }
+  .order-list .item-info { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; min-width: 0; }
+  .order-list .item-price { font-weight: 700; }
+  .qty { display: inline-flex; align-items: center; gap: 4px; }
+  .qty button {
+    width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--caramel-dark);
+    background: #fff; color: var(--caramel-dark); font-size: 1.3rem; line-height: 1; cursor: pointer; padding: 0;
+  }
+  .qty button:hover, .qty button:focus { background: var(--caramel-dark); color: #fff; }
+  .qty input { width: 3rem; text-align: center; }
+  .field { margin: 0 0 16px; }
+  .field label { display: block; font-weight: 700; margin-bottom: 4px; }
+  .field input, .qty input {
+    font: inherit; font-size: 16px; color: var(--espresso);
+    padding: 10px 12px; border: 1.5px solid #cdb89b; border-radius: 10px; background: #fff;
+  }
+  .field input { width: 100%; max-width: 100%; }
+  .hint { font-size: 0.85rem; color: var(--roast); margin: 4px 0 0; }
+  .total-row {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+    border-top: 2px solid var(--sand); padding-top: 14px; margin: 0 0 6px; font-weight: 700; font-size: 1.15rem;
+  }
+  .total-row output { font-size: 1.4rem; color: var(--caramel-dark); }
+  .small { font-size: 0.85rem; color: var(--roast); margin: 0 0 16px; }
+  .pickup-note { font-weight: 700; margin: 0 0 14px; }
+  button.btn { border: 0; font: inherit; font-weight: 700; cursor: pointer; width: 100%; }
+  .result { margin-top: 16px; border-radius: var(--radius); padding: 12px 14px; font-size: 0.95rem; display: none; }
+  .result.show { display: block; }
+  .result.error { background: #fde8e5; border: 1.5px solid var(--err); color: var(--err); }
+  .result.ok { background: #eef6e8; border: 1.5px solid #5d8a3a; color: #2f4a18; }
+  .result p { margin: 0 0 6px; }
+  .result p:last-child { margin-bottom: 0; }
+
+  /* Hours */
+  .hours-box { background: #fff; border-radius: var(--radius); box-shadow: 0 2px 10px rgba(59,36,23,0.08); overflow: hidden; }
+  .hours-head { background: var(--caramel); color: #fff; padding: 12px 16px; font-weight: 700; }
+  table.hours { width: 100%; border-collapse: collapse; }
+  table.hours th, table.hours td { text-align: left; padding: 11px 16px; border-bottom: 1px solid var(--sand); font-weight: 400; }
+  table.hours tr:last-child th, table.hours tr:last-child td { border-bottom: 0; }
+  table.hours th { font-weight: 600; }
+  table.hours td { text-align: right; }
+  table.hours tr.today { background: #fff0dc; }
+  table.hours tr.today th::after { content: " (today)"; color: var(--caramel-dark); font-weight: 700; font-size: 0.85em; }
+
+  /* Location */
+  .loc-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+  .loc-info { background: #fff; border-radius: var(--radius); padding: 18px 16px; box-shadow: 0 2px 10px rgba(59,36,23,0.08); }
+  .loc-info dl { margin: 0 0 16px; }
+  .loc-info dt { font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--caramel-dark); margin-top: 12px; }
+  .loc-info dt:first-child { margin-top: 0; }
+  .loc-info dd { margin: 2px 0 0; }
+  .btn {
+    display: inline-block; background: var(--espresso); color: var(--cream);
+    text-decoration: none; font-weight: 700; padding: 12px 20px; border-radius: 999px;
+  }
+  .btn:hover, .btn:focus { background: var(--caramel-dark); }
+  .map-frame { border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 10px rgba(59,36,23,0.08); background: var(--sand); }
+  .map-frame iframe { display: block; width: 100%; height: 280px; border: 0; }
+  .map-note { font-size: 0.85rem; color: var(--roast); margin: 8px 0 0; }
+
+  footer { background: var(--espresso); color: var(--sand); padding: 24px 16px; text-align: center; font-size: 0.9rem; }
+  footer p { margin: 4px 0; }
+
+  /* Wider screens: layouts added with min-width queries */
+  @media (min-width: 640px) {
+    .bar { flex-direction: row; align-items: center; justify-content: space-between; padding: 16px 24px; }
+    .hero { padding: 56px 24px 64px; }
+    .hero h1 { font-size: 2.8rem; }
+    section { padding: 52px 24px; }
+    section h2 { font-size: 1.9rem; }
+    .menu-grid { grid-template-columns: repeat(2, 1fr); }
+    .card { padding: 22px 22px; }
+    .order-form { padding: 24px 24px; }
+    button.btn { width: auto; min-width: 240px; }
+  }
+  @media (min-width: 960px) {
+    .hero h1 { font-size: 3.4rem; }
+    .menu-grid { grid-template-columns: repeat(3, 1fr); }
+    .loc-grid { grid-template-columns: 1fr 1.3fr; align-items: start; }
+    .map-frame iframe { height: 380px; }
+    .hours-box { max-width: 520px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="#top">Brew <span>Lab</span></a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="#menu">Menu</a></li>
+        <li><a href="#preorder">Pre-order</a></li>
+        <li><a href="#hours">Hours</a></li>
+        <li><a href="#location">Location</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div class="hero" id="top">
+  <div class="hero-inner">
+    <p class="eyebrow">Cafe in Indiranagar, Bengaluru</p>
+    <h1>Brew Lab</h1>
+    <p>Coffee made with care, in the heart of Indiranagar, Bengaluru. Have a look at the menu, check when we are open and find your way to us.</p>
+    <ul class="chips">
+      <li>Open daily, 8am to 10pm</li>
+      <li>Indiranagar, Bengaluru</li>
+    </ul>
+  </div>
+</div>
+
+<main>
+  <section id="menu" aria-labelledby="menu-h">
+    <div class="wrap">
+      <h2 id="menu-h">Menu</h2>
+      <p class="lede">All prices in Indian rupees (₹).</p>
+      <p class="notice"><strong>Placeholder menu.</strong> Item names and prices below are not final. Items and prices marked PLACEHOLDER will be replaced with Brew Lab's real menu.</p>
+
+      <div class="menu-grid">
+        <article class="card">
+          <h3>Hot Coffee</h3>
+          <ul class="items">
+            <li><span class="item-name"><span class="ph">Hot coffee item 1</span></span><span class="price"><span class="ph">₹ price</span></span></li>
+            <li><span class="item-name"><span class="ph">Hot coffee item 2</span></span><span class="price"><span class="ph">₹ price</span></span></li>
+            <li><span class="item-name"><span class="ph">Hot coffee item 3</span></span><span class="price"><span class="ph">₹ price</span></span></li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>Cold Coffee</h3>
+          <ul class="items">
+            <li><span class="item-name"><span class="ph">Cold coffee item 1</span></span><span class="price"><span class="ph">₹ price</span></span></li>
+            <li><span class="item-name"><span class="ph">Cold coffee item 2</span></span><span class="price"><span class="ph">₹ price</span></span></li>
+            <li><span class="item-name"><span class="ph">Cold coffee item 3</span></span><span class="price"><span class="ph">₹ price</span></span></li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>Bites</h3>
+          <ul class="items">
+            <li><span class="item-name"><span class="ph">Food item 1</span></span><span class="price"><span class="ph">₹ price</span></span></li>
+            <li><span class="item-name"><span class="ph">Food item 2</span></span><span class="price"><span class="ph">₹ price</span></span></li>
+            <li><span class="item-name"><span class="ph">Food item 3</span></span><span class="price"><span class="ph">₹ price</span></span></li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="preorder" aria-labelledby="pre-h">
+    <div class="wrap">
+      <h2 id="pre-h">Pre-order coffee for pickup</h2>
+      <p class="lede">Pick your coffee, add your name and a pickup time. Collect it at Brew Lab, Indiranagar.</p>
+      <p class="notice"><strong>Placeholders in use.</strong> Coffee names and prices below are sample values so the total can be tried out. They will be replaced with the real menu. The ordering channel (where requests go) and the pickup rules (earliest slot, lead time) are not set up yet.</p>
+
+      <form id="order-form" class="order-form" novalidate>
+        <p class="pickup-note">This is a pickup request. It is not a confirmed or paid order.</p>
+
+        <fieldset>
+          <legend>1. Choose your coffee</legend>
+          <ul class="items order-list">
+            <li data-name="Hot coffee item 1" data-price="100">
+              <div class="item-info"><span class="ph">Hot coffee item 1</span><span class="item-price"><span class="ph">₹100</span></span></div>
+              <div class="qty">
+                <button type="button" data-step="-1" aria-label="One less Hot coffee item 1">&minus;</button>
+                <input type="number" inputmode="numeric" min="0" max="20" step="1" value="0" aria-label="Quantity of Hot coffee item 1">
+                <button type="button" data-step="1" aria-label="One more Hot coffee item 1">+</button>
+              </div>
+            </li>
+            <li data-name="Hot coffee item 2" data-price="120">
+              <div class="item-info"><span class="ph">Hot coffee item 2</span><span class="item-price"><span class="ph">₹120</span></span></div>
+              <div class="qty">
+                <button type="button" data-step="-1" aria-label="One less Hot coffee item 2">&minus;</button>
+                <input type="number" inputmode="numeric" min="0" max="20" step="1" value="0" aria-label="Quantity of Hot coffee item 2">
+                <button type="button" data-step="1" aria-label="One more Hot coffee item 2">+</button>
+              </div>
+            </li>
+            <li data-name="Hot coffee item 3" data-price="140">
+              <div class="item-info"><span class="ph">Hot coffee item 3</span><span class="item-price"><span class="ph">₹140</span></span></div>
+              <div class="qty">
+                <button type="button" data-step="-1" aria-label="One less Hot coffee item 3">&minus;</button>
+                <input type="number" inputmode="numeric" min="0" max="20" step="1" value="0" aria-label="Quantity of Hot coffee item 3">
+                <button type="button" data-step="1" aria-label="One more Hot coffee item 3">+</button>
+              </div>
+            </li>
+            <li data-name="Cold coffee item 1" data-price="150">
+              <div class="item-info"><span class="ph">Cold coffee item 1</span><span class="item-price"><span class="ph">₹150</span></span></div>
+              <div class="qty">
+                <button type="button" data-step="-1" aria-label="One less Cold coffee item 1">&minus;</button>
+                <input type="number" inputmode="numeric" min="0" max="20" step="1" value="0" aria-label="Quantity of Cold coffee item 1">
+                <button type="button" data-step="1" aria-label="One more Cold coffee item 1">+</button>
+              </div>
+            </li>
+            <li data-name="Cold coffee item 2" data-price="170">
+              <div class="item-info"><span class="ph">Cold coffee item 2</span><span class="item-price"><span class="ph">₹170</span></span></div>
+              <div class="qty">
+                <button type="button" data-step="-1" aria-label="One less Cold coffee item 2">&minus;</button>
+                <input type="number" inputmode="numeric" min="0" max="20" step="1" value="0" aria-label="Quantity of Cold coffee item 2">
+                <button type="button" data-step="1" aria-label="One more Cold coffee item 2">+</button>
+              </div>
+            </li>
+            <li data-name="Cold coffee item 3" data-price="190">
+              <div class="item-info"><span class="ph">Cold coffee item 3</span><span class="item-price"><span class="ph">₹190</span></span></div>
+              <div class="qty">
+                <button type="button" data-step="-1" aria-label="One less Cold coffee item 3">&minus;</button>
+                <input type="number" inputmode="numeric" min="0" max="20" step="1" value="0" aria-label="Quantity of Cold coffee item 3">
+                <button type="button" data-step="1" aria-label="One more Cold coffee item 3">+</button>
+              </div>
+            </li>
+          </ul>
+        </fieldset>
+
+        <div class="field">
+          <label for="pre-name">2. Your name</label>
+          <input id="pre-name" name="name" type="text" autocomplete="name" maxlength="60" required>
+        </div>
+
+        <div class="field">
+          <label for="pre-time">3. Pickup time</label>
+          <input id="pre-time" name="time" type="time" min="08:00" max="22:00" required>
+          <p class="hint">We are open 8am to 10pm every day. <span class="ph">Earliest slot and lead time to be confirmed</span></p>
+        </div>
+
+        <div class="total-row" aria-live="polite">
+          <span>Estimated total</span>
+          <output id="total" for="order-form">₹0</output>
+        </div>
+        <p class="small">Total is calculated from the placeholder prices above and is not a real bill.</p>
+
+        <button type="submit" class="btn">Submit pickup request</button>
+        <div id="result" class="result" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </section>
+
+  <section id="hours" aria-labelledby="hours-h">
+    <div class="wrap">
+      <h2 id="hours-h">Opening hours</h2>
+      <p class="lede">We are open every day of the week, 8am to 10pm.</p>
+      <div class="hours-box">
+        <div class="hours-head">Brew Lab, Indiranagar</div>
+        <table class="hours">
+          <tbody>
+            <tr data-day="1"><th scope="row">Monday</th><td>8am to 10pm</td></tr>
+            <tr data-day="2"><th scope="row">Tuesday</th><td>8am to 10pm</td></tr>
+            <tr data-day="3"><th scope="row">Wednesday</th><td>8am to 10pm</td></tr>
+            <tr data-day="4"><th scope="row">Thursday</th><td>8am to 10pm</td></tr>
+            <tr data-day="5"><th scope="row">Friday</th><td>8am to 10pm</td></tr>
+            <tr data-day="6"><th scope="row">Saturday</th><td>8am to 10pm</td></tr>
+            <tr data-day="0"><th scope="row">Sunday</th><td>8am to 10pm</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="location" aria-labelledby="loc-h">
+    <div class="wrap">
+      <h2 id="loc-h">Find us in Indiranagar, Bengaluru</h2>
+      <p class="lede">Brew Lab is in Indiranagar, Bengaluru.</p>
+      <div class="loc-grid">
+        <div class="loc-info">
+          <dl>
+            <dt>Neighbourhood</dt>
+            <dd>Indiranagar, Bengaluru</dd>
+            <dt>Street address</dt>
+            <dd><span class="ph">Street address to be added</span></dd>
+            <dt>Phone</dt>
+            <dd><span class="ph">Phone number to be added</span></dd>
+            <dt>Hours</dt>
+            <dd>Every day, 8am to 10pm</dd>
+          </dl>
+          <a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Indiranagar%2C%20Bengaluru" target="_blank" rel="noopener">Open in Google Maps</a>
+        </div>
+        <div>
+          <div class="map-frame">
+            <iframe title="Map of Indiranagar, Bengaluru" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+              src="https://www.google.com/maps?q=Indiranagar%2C%20Bengaluru&amp;output=embed"></iframe>
+          </div>
+          <p class="map-note"><span class="ph">Map shows the Indiranagar area only; exact pin to be added with the street address</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p><strong>Brew Lab</strong> &middot; Indiranagar, Bengaluru</p>
+  <p>Open every day, 8am to 10pm</p>
+</footer>
+
+<script>
+  // Highlight today's row in the opening hours table (uses the visitor's device clock).
+  (function () {
+    var today = String(new Date().getDay());
+    var rows = document.querySelectorAll('table.hours tr[data-day]');
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i].getAttribute('data-day') === today) rows[i].className = 'today';
+    }
+  })();
+
+  // Pre-order form: running total and pickup request (no order channel exists yet, nothing is sent).
+  (function () {
+    var form = document.getElementById('order-form');
+    var totalEl = document.getElementById('total');
+    var result = document.getElementById('result');
+    var rows = form.querySelectorAll('.order-list li');
+    var OPEN_MIN = 8 * 60, CLOSE_MIN = 22 * 60, MAX_QTY = 20;
+
+    function rupees(n) { return '\u20B9' + n.toLocaleString('en-IN'); }
+
+    function qtyOf(row) {
+      var input = row.querySelector('input');
+      var q = parseInt(input.value, 10);
+      if (isNaN(q) || q < 0) q = 0;
+      if (q > MAX_QTY) q = MAX_QTY;
+      return q;
+    }
+
+    function updateTotal() {
+      var total = 0;
+      for (var i = 0; i < rows.length; i++) {
+        total += qtyOf(rows[i]) * Number(rows[i].getAttribute('data-price'));
+      }
+      totalEl.textContent = rupees(total);
+      return total;
+    }
+
+    function fmtTime(hhmm) {
+      var p = hhmm.split(':');
+      var h = parseInt(p[0], 10), m = p[1];
+      var suffix = h >= 12 ? 'pm' : 'am';
+      var h12 = h % 12; if (h12 === 0) h12 = 12;
+      return h12 + ':' + m + suffix;
+    }
+
+    function show(kind, lines) {
+      result.className = 'result show ' + kind;
+      result.textContent = '';
+      for (var i = 0; i < lines.length; i++) {
+        var p = document.createElement('p');
+        p.textContent = lines[i];
+        result.appendChild(p);
+      }
+    }
+
+    form.addEventListener('click', function (e) {
+      var btn = e.target.closest ? e.target.closest('button[data-step]') : null;
+      if (!btn) return;
+      var row = btn.closest('li');
+      var input = row.querySelector('input');
+      var next = qtyOf(row) + Number(btn.getAttribute('data-step'));
+      if (next < 0) next = 0;
+      if (next > MAX_QTY) next = MAX_QTY;
+      input.value = next;
+      updateTotal();
+    });
+
+    form.addEventListener('input', function (e) {
+      if (e.target.type === 'number') {
+        var v = parseInt(e.target.value, 10);
+        if (!isNaN(v) && v > MAX_QTY) e.target.value = MAX_QTY;
+        if (!isNaN(v) && v < 0) e.target.value = 0;
+      }
+      updateTotal();
+    });
+
+    form.addEventListener('change', updateTotal);
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var total = updateTotal();
+      var name = form.elements['name'].value.trim();
+      var time = form.elements['time'].value;
+      var errors = [];
+      var lines = [];
+
+      for (var i = 0; i < rows.length; i++) {
+        var q = qtyOf(rows[i]);
+        if (q > 0) lines.push(q + ' x ' + rows[i].getAttribute('data-name'));
+      }
+      if (lines.length === 0) errors.push('Choose at least one coffee.');
+      if (!name) errors.push('Enter your name.');
+      if (!time) {
+        errors.push('Choose a pickup time.');
+      } else {
+        var p = time.split(':');
+        var mins = parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
+        if (mins < OPEN_MIN || mins > CLOSE_MIN) errors.push('Pickup time must be between 8am and 10pm.');
+      }
+
+      if (errors.length) { show('error', errors); return; }
+
+      show('ok', [
+        'Pickup request for ' + name + ' at ' + fmtTime(time) + ': ' + lines.join(', ') + '.',
+        'Estimated total ' + rupees(total) + ' (placeholder prices).',
+        'This is a request only. It has not been sent to Brew Lab, confirmed or paid, because the ordering channel is not set up yet.'
+      ]);
+    });
+
+    updateTotal();
+  })();
+</script>
+</body>
+</html>

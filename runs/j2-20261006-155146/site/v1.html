@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Coffee in Indiranagar, Bengaluru</title>
+<meta name="description" content="Brew Lab, a coffee shop in Indiranagar, Bengaluru. Menu, opening hours and location.">
+<style>
+:root{
+  --cream:#fbf5ec;
+  --paper:#fffdf9;
+  --espresso:#2e1d14;
+  --roast:#6b3f24;
+  --caramel:#b8692f;
+  --line:#e6d7c3;
+  --mark-bg:#fff0c2;
+  --mark-fg:#6a4a00;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:1rem;line-height:1.6;color:var(--espresso);background:var(--cream)}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.2;margin:0 0 .5em}
+h1{font-size:2.2rem}
+h2{font-size:1.7rem}
+h3{font-size:1.15rem;color:var(--roast)}
+p{margin:0 0 1em}
+a{color:var(--roast)}
+.wrap{width:100%;max-width:1040px;margin:0 auto;padding:0 1.25rem}
+section{padding:3rem 0}
+
+/* placeholder marker */
+.ph{background:var(--mark-bg);color:var(--mark-fg);border:1px dashed #c9a227;border-radius:4px;padding:0 .35em;font-weight:600;font-size:.92em}
+
+/* nav */
+header.site{position:sticky;top:0;z-index:10;background:var(--espresso);color:#fff}
+header.site .wrap{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.25rem}
+.brand{font-family:Georgia,serif;font-size:1.3rem;font-weight:700;color:#fff;text-decoration:none;min-height:44px;display:flex;align-items:center}
+nav ul{list-style:none;display:flex;gap:.25rem;margin:0;padding:0}
+nav a{display:flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;padding:0 .8rem;color:#f4e6d3;text-decoration:none;border-radius:6px;font-weight:600}
+nav a:hover,nav a:focus-visible{background:var(--caramel);color:#fff}
+
+/* hero */
+.hero{background:linear-gradient(160deg,var(--roast),var(--espresso));color:#fff;padding:3.5rem 0}
+.hero p{max-width:34rem;color:#f4e6d3;font-size:1.1rem}
+.hero .ph{background:#fff0c2;color:#4a3300}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 1.4rem;background:var(--caramel);color:#fff;text-decoration:none;font-weight:700;border-radius:999px}
+.btn:hover,.btn:focus-visible{background:#9a5322}
+
+/* menu */
+.note{font-size:.9rem;color:#5b4636}
+.cats{display:grid;gap:1.25rem;grid-template-columns:1fr}
+.cat{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:1.25rem}
+.cat ul{list-style:none;margin:0;padding:0}
+.cat li{display:flex;justify-content:space-between;align-items:baseline;gap:.75rem;padding:.6rem 0;border-bottom:1px dashed var(--line)}
+.cat li:last-child{border-bottom:0}
+.price{white-space:nowrap;font-weight:700;color:var(--roast)}
+
+/* hours */
+.hours{width:100%;border-collapse:collapse;background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.hours th,.hours td{text-align:left;padding:.8rem 1rem;border-bottom:1px solid var(--line)}
+.hours tr:last-child th,.hours tr:last-child td{border-bottom:0}
+.hours th{font-weight:700;width:40%}
+
+/* location */
+.loc{display:grid;gap:1.25rem;grid-template-columns:1fr}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:1.25rem}
+address{font-style:normal}
+
+footer{background:var(--espresso);color:#f4e6d3;padding:2rem 0;font-size:.95rem}
+footer a{color:#f4e6d3}
+footer .ph{background:#fff0c2;color:#4a3300}
+
+@media (min-width:600px){
+  h1{font-size:3rem}
+  h2{font-size:2rem}
+  .cats{grid-template-columns:1fr 1fr}
+  .hero{padding:5rem 0}
+}
+@media (min-width:900px){
+  .cats{grid-template-columns:repeat(3,1fr)}
+  .loc{grid-template-columns:1fr 1fr}
+  section{padding:4.5rem 0}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="#top">Brew Lab</a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="#menu">Menu</a></li>
+        <li><a href="#hours">Hours</a></li>
+        <li><a href="#location">Location</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <h1>Brew Lab</h1>
+      <p>Coffee in Indiranagar, Bengaluru. <span class="ph">[PLACEHOLDER: tagline / brand voice]</span></p>
+      <a class="btn" href="#menu">See the menu</a>
+    </div>
+  </div>
+
+  <section id="menu" aria-labelledby="menu-h">
+    <div class="wrap">
+      <h2 id="menu-h">Menu</h2>
+      <p class="note">All prices in Indian rupees (₹). <span class="ph">[PLACEHOLDER: menu items and prices to be confirmed by Brew Lab]</span> Categories below are placeholders too.</p>
+      <div class="cats">
+        <article class="cat">
+          <h3>Hot coffee <span class="ph">[PLACEHOLDER: category]</span></h3>
+          <ul>
+            <li><span class="ph">[PLACEHOLDER: item name]</span><span class="price">₹ <span class="ph">[PLACEHOLDER: price]</span></span></li>
+            <li><span class="ph">[PLACEHOLDER: item name]</span><span class="price">₹ <span class="ph">[PLACEHOLDER: price]</span></span></li>
+            <li><span class="ph">[PLACEHOLDER: item name]</span><span class="price">₹ <span class="ph">[PLACEHOLDER: price]</span></span></li>
+          </ul>
+        </article>
+        <article class="cat">
+          <h3>Cold drinks <span class="ph">[PLACEHOLDER: category]</span></h3>
+          <ul>
+            <li><span class="ph">[PLACEHOLDER: item name]</span><span class="price">₹ <span class="ph">[PLACEHOLDER: price]</span></span></li>
+            <li><span class="ph">[PLACEHOLDER: item name]</span><span class="price">₹ <span class="ph">[PLACEHOLDER: price]</span></span></li>
+            <li><span class="ph">[PLACEHOLDER: item name]</span><span class="price">₹ <span class="ph">[PLACEHOLDER: price]</span></span></li>
+          </ul>
+        </article>
+        <article class="cat">
+          <h3>Food and bakes <span class="ph">[PLACEHOLDER: category]</span></h3>
+          <ul>
+            <li><span class="ph">[PLACEHOLDER: item name]</span><span class="price">₹ <span class="ph">[PLACEHOLDER: price]</span></span></li>
+            <li><span class="ph">[PLACEHOLDER: item name]</span><span class="price">₹ <span class="ph">[PLACEHOLDER: price]</span></span></li>
+            <li><span class="ph">[PLACEHOLDER: item name]</span><span class="price">₹ <span class="ph">[PLACEHOLDER: price]</span></span></li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="hours" aria-labelledby="hours-h" style="background:#f3e8d6">
+    <div class="wrap">
+      <h2 id="hours-h">Opening hours</h2>
+      <p class="note"><span class="ph">[PLACEHOLDER: opening hours for each day to be confirmed by Brew Lab]</span></p>
+      <table class="hours">
+        <caption class="note" style="text-align:left;padding-bottom:.5rem">Weekly opening hours</caption>
+        <tbody>
+          <tr><th scope="row">Monday</th><td><span class="ph">[PLACEHOLDER: hours]</span></td></tr>
+          <tr><th scope="row">Tuesday</th><td><span class="ph">[PLACEHOLDER: hours]</span></td></tr>
+          <tr><th scope="row">Wednesday</th><td><span class="ph">[PLACEHOLDER: hours]</span></td></tr>
+          <tr><th scope="row">Thursday</th><td><span class="ph">[PLACEHOLDER: hours]</span></td></tr>
+          <tr><th scope="row">Friday</th><td><span class="ph">[PLACEHOLDER: hours]</span></td></tr>
+          <tr><th scope="row">Saturday</th><td><span class="ph">[PLACEHOLDER: hours]</span></td></tr>
+          <tr><th scope="row">Sunday</th><td><span class="ph">[PLACEHOLDER: hours]</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="location" aria-labelledby="loc-h">
+    <div class="wrap">
+      <h2 id="loc-h">Find us in Indiranagar</h2>
+      <div class="loc">
+        <div class="card">
+          <h3>Brew Lab</h3>
+          <address>
+            <span class="ph">[PLACEHOLDER: full street address]</span><br>
+            Indiranagar, Bengaluru<br>
+            <span class="ph">[PLACEHOLDER: PIN code]</span>
+          </address>
+          <p style="margin-top:1rem">Phone: <span class="ph">[PLACEHOLDER: phone number]</span><br>
+          Email: <span class="ph">[PLACEHOLDER: contact email]</span></p>
+          <a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Indiranagar+Bengaluru" target="_blank" rel="noopener">Open in Google Maps</a>
+          <p class="note" style="margin-top:.75rem">This link opens a general Indiranagar search. <span class="ph">[PLACEHOLDER: exact map pin for Brew Lab]</span></p>
+        </div>
+        <div class="card">
+          <h3>Getting here</h3>
+          <p><span class="ph">[PLACEHOLDER: landmarks, parking and directions]</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>&copy; Brew Lab, Indiranagar, Bengaluru. Placeholder content is marked and will be replaced with real details.</p>
+  </div>
+</footer>
+
+</body>
+</html>

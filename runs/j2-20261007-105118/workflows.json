@@ -1,0 +1,54 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "W1-site-shell",
+    "name": "Brew Lab page shell: header, menu, hours, location, styling",
+    "purpose": "Site v0 has no Brew Lab content. Title, header, menu, hours and location sections are missing.",
+    "cost": 45,
+    "estimate": 45,
+    "envelope": {
+      "money_limit": 45,
+      "model_call_limit": 2,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 45 or 2 calls are used and the completion check still fails."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site/index.html (single file, no build step, no local dependencies)"
+    ],
+    "completion_check": "File has a viewport meta tag. Title and header contain 'Brew Lab' and 'Indiranagar, Bengaluru'. Menu has 2 or more categories, each item with a name and a ₹ price or a marked placeholder. Hours section reads 8am to 10pm for all 7 days. Location section has a map link or embed and a marked street-address placeholder. Base CSS targets small screens, larger layouts use min-width queries, and there is no horizontal scroll at 360px.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "W2-preorder",
+    "name": "Pre-order form with running total",
+    "purpose": "Visitors cannot pre-order coffee for pickup.",
+    "cost": 25,
+    "estimate": 25,
+    "envelope": {
+      "money_limit": 25,
+      "model_call_limit": 2,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 25 or 2 calls are used and the completion check still fails."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site/index.html (updated with pre-order form and script)"
+    ],
+    "completion_check": "Form has item and quantity inputs, a name field, a pickup time field, a live total in ₹ and a submit button. Changing a quantity updates the total. Visible text says it is a pickup request, not a confirmed or paid order. There is no horizontal scroll at 360px, and the file is still a single file.",
+    "dependencies": [
+      "W1-site-shell"
+    ],
+    "status": "done",
+    "cycle": 1
+  }
+]

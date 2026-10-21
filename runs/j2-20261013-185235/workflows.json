@@ -1,0 +1,554 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "prd-problem",
+    "name": "Problem section",
+    "covers": [
+      1,
+      8
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Problem section states that booking is done on paper and slots get double-booked",
+      "The product name LabSlot is used consistently throughout the document"
+    ],
+    "purpose": "The PRD has no Problem section.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the section fails the same verification twice or spend exceeds 20."
+    },
+    "charged": true,
+    "calls_used": 3,
+    "retries_used": 0,
+    "outputs": [
+      "## Problem"
+    ],
+    "completion_check": "## Problem is present, has at least 40 words, and contains the charter facts for item 1 and the name LabSlot.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-1.a1",
+        "goal": "The PRD has a Problem section stating that booking is done on paper and slots get double-booked, naming the product LabSlot.",
+        "constraints": [
+          "Use only facts from the charter and the Requester's answers",
+          "Write no invented numbers or names",
+          "Always write the product name as LabSlot"
+        ],
+        "context": [
+          "charter items 1 and 8",
+          "section id: problem"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-1 Builder",
+          "steps": "Write the section '## Problem' as the first section of the PRD, under a document title using LabSlot. State that booking is done on paper and that slots get double-booked, and who is affected (students and lab staff)."
+        },
+        "verification": [
+          {
+            "text": "Problem heading exists",
+            "type": "heading-present",
+            "target": "## Problem",
+            "expect": true
+          },
+          {
+            "text": "Problem section has at least 40 words",
+            "type": "section-not-empty",
+            "target": "## Problem",
+            "expect": 40
+          },
+          {
+            "text": "Problem facts and product name appear",
+            "type": "facts-present",
+            "target": [
+              "LabSlot",
+              "booking is done on paper",
+              "slots get double-booked"
+            ],
+            "expect": true
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-1.a1",
+            "check": "Problem heading exists",
+            "type": "heading-present",
+            "target": "## Problem",
+            "expect": true,
+            "actual": false,
+            "pass": false,
+            "evidence": "heading '## Problem' not found in the document",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-13T18:56:59",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Problem section has at least 40 words",
+            "type": "section-not-empty",
+            "target": "## Problem",
+            "expect": 40,
+            "actual": 0,
+            "pass": false,
+            "evidence": "no heading '## Problem'",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-13T18:56:59",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Problem facts and product name appear",
+            "type": "facts-present",
+            "target": [
+              "LabSlot",
+              "booking is done on paper",
+              "slots get double-booked"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 3 fact(s) in the document",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-13T18:56:59",
+            "by": "code"
+          }
+        ],
+        "attempts": 3,
+        "status": "escalated"
+      }
+    ],
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "prd-users",
+    "name": "Users section",
+    "covers": [
+      2
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Users section names both students and lab staff and lists what each group does in LabSlot"
+    ],
+    "purpose": "The PRD does not name the user groups or what each does.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the section fails the same verification twice or spend exceeds 10."
+    },
+    "charged": false,
+    "calls_used": 0,
+    "retries_used": 0,
+    "outputs": [
+      "## Users"
+    ],
+    "completion_check": "## Users is present, has at least 40 words, names both groups and their actions.",
+    "dependencies": [
+      "prd-problem"
+    ],
+    "status": "held",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-2.a1",
+        "goal": "The PRD has a Users section naming students and lab staff and listing what each group does in LabSlot.",
+        "constraints": [
+          "Use only charter facts",
+          "Do not add user groups or actions beyond the charter",
+          "Write LabSlot consistently"
+        ],
+        "context": [
+          "charter item 2",
+          "charter user_groups"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-2 Builder",
+          "steps": "Write the section '## Users' after '## Problem'. List Students (book a slot, cancel a slot, see availability) and Lab staff (view all bookings, cancel a booking for a student)."
+        },
+        "verification": [
+          {
+            "text": "Users heading exists",
+            "type": "heading-present",
+            "target": "## Users",
+            "expect": true
+          },
+          {
+            "text": "Users section has at least 40 words",
+            "type": "section-not-empty",
+            "target": "## Users",
+            "expect": 40
+          },
+          {
+            "text": "Both groups and their actions appear",
+            "type": "facts-present",
+            "target": [
+              "students",
+              "lab staff",
+              "book a slot",
+              "cancel a slot",
+              "see availability",
+              "view all bookings",
+              "cancel a booking for a student"
+            ],
+            "expect": true
+          }
+        ]
+      }
+    ],
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder"
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "prd-goals",
+    "name": "Goals section",
+    "covers": [
+      3
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Goals section states the goal of replacing paper booking and avoiding double-booked slots"
+    ],
+    "purpose": "The PRD states no goals.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the section fails the same verification twice or spend exceeds 10."
+    },
+    "charged": false,
+    "calls_used": 0,
+    "retries_used": 0,
+    "outputs": [
+      "## Goals"
+    ],
+    "completion_check": "## Goals is present, has at least 30 words, and states replacing paper booking and avoiding double-booked slots as G1 and G2.",
+    "dependencies": [
+      "prd-users"
+    ],
+    "status": "held",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-3.a1",
+        "goal": "The PRD has a Goals section with G1 (replace paper booking with LabSlot) and G2 (avoid double-booked slots).",
+        "constraints": [
+          "Number goals G1, G2",
+          "No numbers except those in the charter",
+          "Use only charter facts"
+        ],
+        "context": [
+          "charter item 3",
+          "section id: goals"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-3 Builder",
+          "steps": "Write the section '## Goals' after '## Users'. G1: replace paper booking with LabSlot. G2: avoid double-booked slots."
+        },
+        "verification": [
+          {
+            "text": "Goals heading exists",
+            "type": "heading-present",
+            "target": "## Goals",
+            "expect": true
+          },
+          {
+            "text": "Goals section has at least 30 words",
+            "type": "section-not-empty",
+            "target": "## Goals",
+            "expect": 30
+          },
+          {
+            "text": "Goal facts appear",
+            "type": "facts-present",
+            "target": [
+              "booking is done on paper",
+              "slots get double-booked"
+            ],
+            "expect": true
+          }
+        ]
+      }
+    ],
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder"
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "prd-requirements",
+    "name": "Requirements section",
+    "covers": [
+      4,
+      5
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Requirements section lists book a slot, cancel a slot and see availability for students, and view all bookings and cancel a booking for a student for lab staff",
+      "Requirements section states that LabSlot must work on phones"
+    ],
+    "purpose": "The PRD lists no requirements.",
+    "cost": 30,
+    "estimate": 30,
+    "envelope": {
+      "money_limit": 30,
+      "model_call_limit": 3,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the section fails the same verification twice or spend exceeds 30."
+    },
+    "charged": false,
+    "calls_used": 0,
+    "retries_used": 0,
+    "outputs": [
+      "## Requirements"
+    ],
+    "completion_check": "## Requirements is present, has at least 80 words, has unique sequential R ids, covers both groups and the phone constraint.",
+    "dependencies": [
+      "prd-goals"
+    ],
+    "status": "held",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-4.a1",
+        "goal": "The PRD has a Requirements section with unique sequential ids R1, R2, ... covering students, lab staff and the phone constraint.",
+        "constraints": [
+          "Ids sequential with no duplicates",
+          "Use only charter facts",
+          "No features beyond the must-have list and lab staff actions",
+          "Do not write 'to be confirmed'"
+        ],
+        "context": [
+          "charter items 4 and 5",
+          "charter user_groups and constraints"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-4 Builder",
+          "steps": "Write the section '## Requirements' after '## Goals'. Number R1.. : students can book a slot, cancel a slot, see availability; lab staff can view all bookings and cancel a booking for a student; LabSlot must work on phones. Say each requirement serves G1 or G2."
+        },
+        "verification": [
+          {
+            "text": "Requirements heading exists",
+            "type": "heading-present",
+            "target": "## Requirements",
+            "expect": true
+          },
+          {
+            "text": "Requirements section has at least 80 words",
+            "type": "section-not-empty",
+            "target": "## Requirements",
+            "expect": 80
+          },
+          {
+            "text": "Requirement ids are unique",
+            "type": "ids-unique",
+            "target": "R",
+            "expect": true
+          },
+          {
+            "text": "Requirement facts appear",
+            "type": "facts-present",
+            "target": [
+              "book a slot",
+              "cancel a slot",
+              "see availability",
+              "view all bookings",
+              "cancel a booking for a student",
+              "it must work on phones"
+            ],
+            "expect": true
+          }
+        ]
+      }
+    ],
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder"
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "prd-metrics",
+    "name": "Success metrics section",
+    "covers": [
+      6
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Success metrics section states that 80% of bookings are made without staff help, counted per term"
+    ],
+    "purpose": "The PRD has no success metrics and goals have no matching metric.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the section fails the same verification twice or spend exceeds 10."
+    },
+    "charged": false,
+    "calls_used": 0,
+    "retries_used": 0,
+    "outputs": [
+      "## Success metrics"
+    ],
+    "completion_check": "## Success metrics is present, has at least 40 words, states the 80% metric per term, and each metric names G1 or G2.",
+    "dependencies": [
+      "prd-goals"
+    ],
+    "status": "held",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-5.a1",
+        "goal": "The PRD has a Success metrics section where M1 (measures G1) states that 80% of bookings are made without staff help, counted per term, and M2 (measures G2) covers double-booked slots.",
+        "constraints": [
+          "Invent no numbers; M2 has no numeric target and says 'measurement window not set'",
+          "Each metric names its goal",
+          "Do not write 'to be confirmed'"
+        ],
+        "context": [
+          "charter item 6",
+          "section ids: goals, success-metrics"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-5 Builder",
+          "steps": "Write the section '## Success metrics' after '## Requirements'. M1 (G1): 80% of bookings are made without staff help, counted per term. M2 (G2): count of double-booked slots, measurement window not set."
+        },
+        "verification": [
+          {
+            "text": "Success metrics heading exists",
+            "type": "heading-present",
+            "target": "## Success metrics",
+            "expect": true
+          },
+          {
+            "text": "Success metrics section has at least 40 words",
+            "type": "section-not-empty",
+            "target": "## Success metrics",
+            "expect": 40
+          },
+          {
+            "text": "Metric facts appear",
+            "type": "facts-present",
+            "target": [
+              "80% of bookings are made without staff help",
+              "per term"
+            ],
+            "expect": true
+          }
+        ]
+      }
+    ],
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder"
+  },
+  {
+    "id": "W-6",
+    "proposal_id": "prd-out-of-scope",
+    "name": "Out of scope section",
+    "covers": [
+      7
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Out of scope section lists what LabSlot does not cover, without adding features beyond the must-have list"
+    ],
+    "purpose": "The PRD does not say what LabSlot excludes.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the section fails the same verification twice or spend exceeds 10."
+    },
+    "charged": false,
+    "calls_used": 0,
+    "retries_used": 0,
+    "outputs": [
+      "## Out of scope"
+    ],
+    "completion_check": "## Out of scope is present, has at least 30 words, and introduces no new features.",
+    "dependencies": [
+      "prd-requirements"
+    ],
+    "status": "held",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-6.a1",
+        "goal": "The PRD has an Out of scope section stating that LabSlot covers only the listed requirements and nothing beyond them.",
+        "constraints": [
+          "Add no new features, numbers or names",
+          "Use only charter facts",
+          "Write LabSlot consistently"
+        ],
+        "context": [
+          "charter item 7",
+          "section id: requirements"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-6 Builder",
+          "steps": "Write the section '## Out of scope' as the last section. State that LabSlot does not cover anything beyond the Requirements section, and that no features beyond book a slot, cancel a slot, see availability, view all bookings and cancel a booking for a student are included in this version."
+        },
+        "verification": [
+          {
+            "text": "Out of scope heading exists",
+            "type": "heading-present",
+            "target": "## Out of scope",
+            "expect": true
+          },
+          {
+            "text": "Out of scope section has at least 30 words",
+            "type": "section-not-empty",
+            "target": "## Out of scope",
+            "expect": 30
+          },
+          {
+            "text": "Product name appears",
+            "type": "facts-present",
+            "target": [
+              "LabSlot"
+            ],
+            "expect": true
+          }
+        ]
+      }
+    ],
+    "section": "W-6",
+    "revises": null,
+    "agent": "W-6 Builder"
+  }
+]

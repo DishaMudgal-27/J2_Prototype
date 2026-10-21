@@ -1,0 +1,40 @@
+{
+  "statement": "Build a single-file, dark and modern portfolio website for a frontend developer that helps visitors hire them as a freelancer, with placeholder content for now.",
+  "site_name": "Frontend Developer Portfolio",
+  "audience": "Potential freelance clients looking to hire a frontend developer.",
+  "standards": [
+    "Dark, modern look: dark background with light text and readable contrast",
+    "Works on phones (360px wide) and desktop (1280px wide) with no sideways scrolling",
+    "Plain HTML, CSS and JavaScript in one file, no build step",
+    "No JavaScript errors, and every in-page link points to a section that exists"
+  ],
+  "rules": [
+    "Use clearly marked dummy content for the name, projects, email address and profile links until real ones are supplied",
+    "Contact is by an email link plus profile links only, with no contact form",
+    "Do not invent real personal facts such as a real email address or real profile URLs"
+  ],
+  "done_when": [
+    "The page shows a placeholder developer name as the main heading, with a short line saying they are a frontend developer available for freelance work",
+    "A projects section shows 3 project cards, each with a title and a one-line description",
+    "A contact section has an email link (mailto) and links to GitHub and LinkedIn",
+    "The page has a visible call-to-action button for hiring or working together that links to the contact section",
+    "The page uses a dark background with light text, set in the CSS",
+    "The file has a viewport meta tag and responsive CSS, and no element forces horizontal scrolling at 360px or 1280px",
+    "The file contains no contact form, no JavaScript errors, and every in-page link points to an existing section id"
+  ],
+  "to_be_confirmed": [
+    {
+      "criterion": "The page shows a placeholder developer name as the main heading, with a short line saying they are a frontend developer available for freelance work",
+      "fact": "The real name to show on the site"
+    },
+    {
+      "criterion": "A projects section shows 3 project cards, each with a title and a one-line description",
+      "fact": "The real 2 to 4 projects, each with a title and one-line description"
+    },
+    {
+      "criterion": "A contact section has an email link (mailto) and links to GitHub and LinkedIn",
+      "fact": "The real email address and the real GitHub and LinkedIn links"
+    }
+  ],
+  "dropped_from_brief": []
+}

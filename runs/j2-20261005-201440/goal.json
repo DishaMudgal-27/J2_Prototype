@@ -1,0 +1,36 @@
+{
+  "statement": "Build a single-file HTML, CSS and JavaScript portfolio site for a wedding photographer. Its main job is to turn visitors into inquiries, with the gallery supporting that. The look is light, editorial and minimal. All photos, copy and contact details are clearly labeled, swappable placeholders, so the site is structure complete but not publishable until real content replaces them.",
+  "site_name": "Wedding Photographer Portfolio (placeholder name)",
+  "audience": "Engaged couples looking for a wedding photographer",
+  "standards": [
+    "One file of plain HTML, CSS and JavaScript with no build step; CDN libraries are allowed",
+    "Light, editorial, minimal design where the photos carry the page",
+    "Every placeholder is visibly labeled and easy to find and swap",
+    "No invented facts: no made-up names, prices, testimonials, awards or credentials"
+  ],
+  "rules": [
+    "Inquiry is the primary call to action; the gallery supports it",
+    "Do not publish prices or packages",
+    "The form endpoint or mailto address is a marked placeholder; no real third-party account or address is invented",
+    "Open inputs appear on the site as marked placeholders and never block done"
+  ],
+  "done_when": [
+    "The site is one HTML file with its CSS and JavaScript inline and no build step; any external resource is a CDN link",
+    "The page has a gallery section with at least six image slots, each visibly labeled as a placeholder",
+    "The page has an about section whose copy is visibly marked as sample copy",
+    "The page has a prominent inquiry section with a form containing name, email and message fields and a submit button, and its endpoint or mailto target is marked as a placeholder",
+    "A visible inquiry call to action near the top of the page links to the inquiry section",
+    "Contact details (email) are visible on the page and marked as placeholders",
+    "The CSS sets a light page background and a minimal, photo-led layout, with no dark or full-bleed cinematic theme",
+    "The file contains no prices, packages or invented testimonials",
+    "Every open input is visibly marked as a placeholder where it appears in the file"
+  ],
+  "open_inputs": [
+    "Photographer's name or brand",
+    "Real wedding photos for the gallery",
+    "Real about and bio copy",
+    "Real contact email and phone",
+    "Form submission endpoint (third-party service) or the mailto address to use"
+  ],
+  "dropped_from_brief": []
+}

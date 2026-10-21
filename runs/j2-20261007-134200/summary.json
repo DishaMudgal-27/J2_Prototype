@@ -1,0 +1,209 @@
+{
+  "run": "20261007-134200",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "force_audit_fail": 2,
+  "test_lessons": false,
+  "model": "sonnet",
+  "mock": false,
+  "brief": "Brew Lab, Indiranagar, Bengaluru. One-page site. Must-haves, each one will be checked: today's opening hours are highlighted automatically; the pre-order form shows a running total in rupees; the loyalty section shows 10 stamp circles with the 10th marked FREE; every menu item shows a price; the location section has a \"Get directions\" link; the page works at 360px wide.",
+  "change_requests": [],
+  "status": "done",
+  "outcome": "Done: the site is workable. Every done-when item passes with Audit's evidence and the render check is clean.",
+  "budget": {
+    "start": 80,
+    "granted": 80,
+    "used": 65,
+    "raises": []
+  },
+  "ai_calls": 18,
+  "cycles": 2,
+  "questions_to_user": [
+    {
+      "kind": "info",
+      "asked": [
+        "What are the opening hours for each day of the week (including any closed days)?",
+        "List the menu items with prices in rupees, grouped as you want them shown (for example Coffee, Tea, Food). Which of these can be pre-ordered?",
+        "What is the exact address in Indiranagar, and should \"Get directions\" open a Google Maps link? If you have the link, please share it.",
+        "What should the pre-order form collect and do on submit? For example name, phone, pickup time, then show a confirmation on the page. Also, what does the 10th FREE stamp give (for example a free drink)?"
+      ],
+      "answer": "1. Hours: Monday to Friday 8am to 10pm, Saturday and Sunday 9am to 11pm. No closed days.\n\n2. Menu (prices in ₹):\nCoffee: Espresso 120, Cappuccino 180, Pour-over 220\nCold: Cold brew 200\nFood: Croissant 150, Banana bread 130\nAll items can be pre-ordered.\n\n3. Address: 100 Feet Road, Indiranagar, Bengaluru 560038.\nOption 1: https://maps.google.com/?q=100+Feet+Road+Indiranagar+Bengaluru+560038\n\n4. The form collects name, phone, items with quantities, and pickup time (within opening hours). It shows a running total in rupees. On submit it sends the order to WhatsApp +91 98450 00000 and shows a confirmation on the page. Pay at pickup.\nThe 10th stamp gives one free drink of any size."
+    }
+  ],
+  "conflicts": [
+    {
+      "id": "C-1",
+      "pair": [
+        "adaptation",
+        "audit"
+      ],
+      "topic": "finding",
+      "subject": "finding F-2",
+      "attempts": 2,
+      "escalated": false,
+      "resolved_by": "agents",
+      "repriced": false,
+      "user_question": null,
+      "user_answer": null,
+      "outcome": "Finding F-2 withdrawn."
+    }
+  ],
+  "validator_rejections": [],
+  "holds": [
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-3: W-2 (w-visit) must be done and Audit-ready; W-3 depends on w-menu (done) and w-visit (registered, not yet run)"
+    }
+  ],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 4,
+      "all_pass": true,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "WITHDRAWN"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    }
+  ],
+  "site_versions": 4,
+  "workable": [],
+  "to_be_confirmed": [],
+  "dropped_by_requester": [],
+  "workflow_agents": [
+    {
+      "id": "W-1",
+      "agent": "W-1 Builder",
+      "section": "W-1",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-2",
+      "agent": "W-2 Builder",
+      "section": "W-2",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-3",
+      "agent": "W-3 Builder",
+      "section": "W-3",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-4",
+      "agent": "W-4 Builder",
+      "section": "W-4",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    }
+  ],
+  "limits_hit": [],
+  "lessons": {
+    "memory": true,
+    "saved": [],
+    "used": []
+  },
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The file lists opening hours for all seven days (Monday to Friday 8am to 10pm, Saturday and Sunday 9am to 11pm, no closed days), and JavaScript reads the current day and highlights today's row automatically",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "The menu shows these items, each with its price in ₹: Espresso 120, Cappuccino 180, Pour-over 220, Cold brew 200, Croissant 150, Banana bread 130, grouped as Coffee, Cold, Food",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "The pre-order form has fields for name, phone, a quantity for each of the six menu items, and pickup time, and a running total in ₹ that updates in the page as quantities change",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "The pickup time field is validated in the code against the opening hours and rejects times outside them",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "On submit, the form code opens a WhatsApp link to +91 98450 00000 containing the name, phone, items with quantities, pickup time and total, and shows a confirmation message on the page that says payment is at pickup",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "The loyalty section shows exactly 10 stamp circles, the 10th marked FREE, with text saying the 10th stamp gives one free drink of any size",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "The location section shows the address 100 Feet Road, Indiranagar, Bengaluru 560038 and a link labelled \"Get directions\" to https://maps.google.com/?q=100+Feet+Road+Indiranagar+Bengaluru+560038",
+      "pass": true
+    },
+    {
+      "item": 8,
+      "criterion": "The file has a mobile viewport meta tag and its CSS causes no horizontal overflow at 360px or 1280px width",
+      "pass": true
+    },
+    {
+      "item": 9,
+      "criterion": "The file has no JavaScript errors, every in-page link points to an existing section id, and it contains no placeholder or to-be-confirmed text",
+      "pass": true
+    }
+  ],
+  "route_check_violations": []
+}

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n="meta_title">SmileCare Dental Clinic, Pune</title>
+<style>
+  :root { --teal:#0d7c80; --teal-dark:#095c5f; --bg:#f6fafa; --ink:#1c2b2d; --line:#d5e3e3; --ph-bg:#fff3b0; --ph-ink:#6b5300; --alert:#b3261e; --alert-bg:#fdeceb; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Nirmala UI", "Noto Sans Devanagari", "Mangal", sans-serif; color:var(--ink); background:var(--bg); line-height:1.6; }
+  header { background:#fff; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:5; }
+  .bar { max-width:960px; margin:0 auto; padding:12px 16px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; }
+  .brand { font-weight:700; font-size:1.2rem; color:var(--teal-dark); }
+  .right { display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+  nav a { margin-left:14px; color:var(--ink); text-decoration:none; font-size:.95rem; }
+  nav a:hover { color:var(--teal); text-decoration:underline; }
+  .lang { display:flex; }
+  .lang button { padding:6px 12px; font-size:.9rem; border-radius:0; border:1px solid var(--teal); background:#fff; color:var(--teal-dark); }
+  .lang button:first-child { border-radius:6px 0 0 6px; }
+  .lang button:last-child { border-radius:0 6px 6px 0; border-left:0; }
+  .lang button[aria-pressed="true"] { background:var(--teal); color:#fff; }
+  .review { background:#fff3b0; color:var(--ph-ink); border-bottom:1px solid #c9a400; text-align:center; padding:8px 16px; font-size:.92rem; font-weight:600; }
+  .review[hidden] { display:none; }
+  main { max-width:960px; margin:0 auto; padding:0 16px 40px; }
+  .hero { padding:36px 0 12px; }
+  .hero h1 { margin:0 0 8px; font-size:1.9rem; color:var(--teal-dark); }
+  .hero p { margin:0; max-width:620px; }
+  section { margin-top:32px; }
+  h2 { font-size:1.4rem; margin:0 0 12px; color:var(--teal-dark); }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:18px; }
+  .ph { background:var(--ph-bg); color:var(--ph-ink); border:1px dashed #c9a400; border-radius:4px; padding:0 5px; font-size:.9em; white-space:normal; }
+  form { display:grid; gap:12px; grid-template-columns:1fr 1fr; }
+  .full { grid-column:1 / -1; }
+  label { display:block; font-weight:600; font-size:.92rem; margin-bottom:4px; }
+  input, select, textarea { width:100%; padding:9px 10px; border:1px solid #b7caca; border-radius:6px; font:inherit; background:#fff; }
+  input:focus, select:focus, textarea:focus, button:focus-visible { outline:2px solid var(--teal); outline-offset:1px; }
+  .actions { display:flex; flex-wrap:wrap; gap:10px; }
+  button { font:inherit; font-weight:600; padding:10px 18px; border:0; border-radius:6px; cursor:pointer; background:var(--teal); color:#fff; }
+  button.alt { background:#fff; color:var(--teal-dark); border:1px solid var(--teal); }
+  button:hover { filter:brightness(.93); }
+  .notice { background:#eaf5f5; border-left:4px solid var(--teal); padding:10px 14px; border-radius:4px; font-size:.95rem; }
+  #formStatus { min-height:1.4em; font-weight:600; color:var(--teal-dark); }
+  .grid { display:grid; gap:14px; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); }
+  .svc h3 { margin:0 0 4px; font-size:1.05rem; }
+  .svc p { margin:0 0 8px; font-size:.93rem; }
+  .price { font-weight:600; }
+  .fine { font-size:.9rem; margin-top:14px; }
+  .dentist { display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; }
+  .avatar { width:84px; height:84px; border-radius:50%; background:#d9ecec; display:flex; align-items:center; justify-content:center; font-size:.7rem; text-align:center; color:var(--ph-ink); border:1px dashed #c9a400; }
+  .dentist dl { margin:0; }
+  .dentist dt { font-weight:600; font-size:.9rem; margin-top:6px; }
+  .dentist dd { margin:0; }
+  .emergency { border:2px solid var(--alert); background:var(--alert-bg); }
+  .emergency h2 { color:var(--alert); }
+  .emergency dl { margin:0 0 12px; display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; align-items:baseline; }
+  .emergency dt { font-weight:700; }
+  .emergency dd { margin:0; font-size:1.05rem; }
+  .emergency p { margin:0 0 8px; }
+  .emergency p:last-child { margin-bottom:0; }
+  .faq { display:grid; gap:12px; }
+  .faq .card { padding:14px 18px; }
+  .faq h3 { margin:0 0 4px; font-size:1.02rem; color:var(--teal-dark); }
+  .faq p { margin:0; font-size:.95rem; }
+  footer { border-top:1px solid var(--line); background:#fff; padding:18px 16px; text-align:center; font-size:.9rem; }
+  @media (max-width:600px) { form { grid-template-columns:1fr; } nav a { margin:0 10px 0 0; } .emergency dl { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <span class="brand" data-i18n="brand">SmileCare Dental Clinic</span>
+    <div class="right">
+      <nav data-i18n-aria="aria_nav" aria-label="Main">
+        <a href="#emergency" data-i18n="nav_emergency">Emergency</a>
+        <a href="#book" data-i18n="nav_book">Book</a>
+        <a href="#services" data-i18n="nav_services">Services</a>
+        <a href="#dentists" data-i18n="nav_dentists">Our dentists</a>
+        <a href="#faq" data-i18n="nav_faq">FAQs</a>
+      </nav>
+      <div class="lang" role="group" data-i18n-aria="aria_lang" aria-label="Language">
+        <button type="button" data-lang="en" aria-pressed="true">English</button>
+        <button type="button" data-lang="mr" aria-pressed="false">मराठी</button>
+      </div>
+    </div>
+  </div>
+  <div class="review" id="reviewBanner" role="note" hidden data-i18n="review_banner">Marathi text pending native review.</div>
+</header>
+
+<main>
+  <div class="hero">
+    <h1 data-i18n="hero_h">Gentle dental care in Pune</h1>
+    <p data-i18n="hero_p">Request an appointment online, see what our treatments start from, and meet the dentists who will look after you.</p>
+  </div>
+
+  <section id="emergency" aria-labelledby="emg-h">
+    <div class="card emergency">
+      <h2 id="emg-h" data-i18n="emg_h">Dental emergency contact</h2>
+      <dl>
+        <dt data-i18n="emg_phone_l">Emergency phone</dt>
+        <dd><span class="ph" data-i18n="ph_emg_number">[placeholder: emergency number not yet supplied]</span></dd>
+        <dt data-i18n="emg_hours_l">Emergency hours</dt>
+        <dd><span class="ph" data-i18n="ph_emg_hours">[placeholder: emergency hours not yet supplied]</span></dd>
+      </dl>
+      <p data-i18n="emg_p1">Call this number for severe tooth pain, a knocked-out tooth, a broken tooth, or swelling in the mouth or face. Do not use the appointment form for emergencies, because the form is a request and is not answered instantly.</p>
+      <p><strong data-i18n="emg_p2">If you have trouble breathing or swallowing, or bleeding that will not stop, go to the nearest hospital emergency department right away.</strong></p>
+    </div>
+  </section>
+
+  <section id="book" aria-labelledby="book-h">
+    <h2 id="book-h" data-i18n="book_h">Request an appointment</h2>
+    <div class="card">
+      <p class="notice" data-i18n="book_notice">This is a request, not a confirmed booking. After you send it, the clinic will confirm your appointment by phone.</p>
+      <form id="bookForm" novalidate>
+        <div>
+          <label for="name" data-i18n="f_name">Full name</label>
+          <input id="name" name="name" type="text" autocomplete="name" required>
+        </div>
+        <div>
+          <label for="phone" data-i18n="f_phone">Your phone number</label>
+          <input id="phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required>
+        </div>
+        <div>
+          <label for="service" data-i18n="f_service">Service</label>
+          <select id="service" name="service">
+            <option data-i18n="s1n">Check-up and consultation</option>
+            <option data-i18n="s2n">Scaling and polishing</option>
+            <option data-i18n="s3n">Tooth-coloured filling</option>
+            <option data-i18n="s4n">Root canal treatment</option>
+            <option data-i18n="s5n">Crown or cap</option>
+            <option data-i18n="s6n">Teeth whitening</option>
+            <option data-i18n="s7n">Braces or clear aligners</option>
+            <option data-i18n="s8n">Tooth extraction</option>
+            <option data-i18n="opt_unsure">Not sure yet</option>
+          </select>
+        </div>
+        <div>
+          <label for="date" data-i18n="f_date">Preferred date</label>
+          <input id="date" name="date" type="date">
+        </div>
+        <div>
+          <label for="time" data-i18n="f_time">Preferred time</label>
+          <select id="time" name="time">
+            <option data-i18n="t_morning">Morning</option>
+            <option data-i18n="t_afternoon">Afternoon</option>
+            <option data-i18n="t_evening">Evening</option>
+          </select>
+        </div>
+        <div>
+          <label for="visit" data-i18n="f_visit">Visit type</label>
+          <select id="visit" name="visit">
+            <option data-i18n="v_first">First visit</option>
+            <option data-i18n="v_return">Returning patient</option>
+          </select>
+        </div>
+        <div class="full">
+          <label for="notes" data-i18n="f_notes">Anything we should know (optional)</label>
+          <textarea id="notes" name="notes" rows="3"></textarea>
+        </div>
+        <div class="full actions">
+          <button type="submit" value="whatsapp" data-i18n="btn_wa">Send request on WhatsApp</button>
+          <button type="submit" class="alt" value="email" data-i18n="btn_email">Send request by email</button>
+        </div>
+        <div class="full" id="formStatus" role="status" aria-live="polite"></div>
+      </form>
+      <p class="fine">
+        <span data-i18n="fine_wa_l">Clinic WhatsApp number:</span> <span class="ph" data-i18n="ph_number">[placeholder: number not yet supplied]</span>
+        &nbsp;<span data-i18n="fine_email_l">Clinic email:</span> <span class="ph" data-i18n="ph_email">[placeholder: email not yet supplied]</span>
+        &nbsp;<span data-i18n="fine_phone_l">Clinic phone:</span> <span class="ph" data-i18n="ph_number">[placeholder: number not yet supplied]</span><br>
+        <span data-i18n="fine_tail">Until the clinic's number or email is added, your app will ask you to choose the recipient. Nothing you type here is stored or sent by this page; it only opens your own WhatsApp or email app.</span>
+      </p>
+    </div>
+  </section>
+
+  <section id="services" aria-labelledby="svc-h">
+    <h2 id="svc-h" data-i18n="svc_h">Services and starting prices</h2>
+    <div class="grid">
+      <div class="card svc">
+        <h3 data-i18n="s1n">Check-up and consultation</h3>
+        <p data-i18n="s1d">Examination, advice and a treatment plan.</p>
+        <div class="price"><span data-i18n="price_from">Starting from</span> <span class="ph" data-i18n="ph_price">[placeholder: price range not yet supplied]</span></div>
+      </div>
+      <div class="card svc">
+        <h3 data-i18n="s2n">Scaling and polishing</h3>
+        <p data-i18n="s2d">Removes plaque and tartar to keep gums healthy.</p>
+        <div class="price"><span data-i18n="price_from">Starting from</span> <span class="ph" data-i18n="ph_price">[placeholder: price range not yet supplied]</span></div>
+      </div>
+      <div class="card svc">
+        <h3 data-i18n="s3n">Tooth-coloured filling</h3>
+        <p data-i18n="s3d">Repairs cavities and chipped teeth.</p>
+        <div class="price"><span data-i18n="price_from">Starting from</span> <span class="ph" data-i18n="ph_price">[placeholder: price range not yet supplied]</span></div>
+      </div>
+      <div class="card svc">
+        <h3 data-i18n="s4n">Root canal treatment</h3>
+        <p data-i18n="s4d">Saves a badly decayed or infected tooth.</p>
+        <div class="price"><span data-i18n="price_from">Starting from</span> <span class="ph" data-i18n="ph_price">[placeholder: price range not yet supplied]</span></div>
+      </div>
+      <div class="card svc">
+        <h3 data-i18n="s5n">Crown or cap</h3>
+        <p data-i18n="s5d">Protects and restores a weak or damaged tooth.</p>
+        <div class="price"><span data-i18n="price_from">Starting from</span> <span class="ph" data-i18n="ph_price">[placeholder: price range not yet supplied]</span></div>
+      </div>
+      <div class="card svc">
+        <h3 data-i18n="s6n">Teeth whitening</h3>
+        <p data-i18n="s6d">Brightens stained or yellowed teeth.</p>
+        <div class="price"><span data-i18n="price_from">Starting from</span> <span class="ph" data-i18n="ph_price">[placeholder: price range not yet supplied]</span></div>
+      </div>
+      <div class="card svc">
+        <h3 data-i18n="s7n">Braces or clear aligners</h3>
+        <p data-i18n="s7d">Straightens teeth and corrects the bite.</p>
+        <div class="price"><span data-i18n="price_from">Starting from</span> <span class="ph" data-i18n="ph_price">[placeholder: price range not yet supplied]</span></div>
+      </div>
+      <div class="card svc">
+        <h3 data-i18n="s8n">Tooth extraction</h3>
+        <p data-i18n="s8d">Removal of a tooth that cannot be saved.</p>
+        <div class="price"><span data-i18n="price_from">Starting from</span> <span class="ph" data-i18n="ph_price">[placeholder: price range not yet supplied]</span></div>
+      </div>
+    </div>
+    <p class="notice fine" data-i18n="svc_note">These are starting prices only. The final cost is confirmed after examination.</p>
+  </section>
+
+  <section id="dentists" aria-labelledby="den-h">
+    <h2 id="den-h" data-i18n="den_h">Our dentists</h2>
+    <div class="card dentist">
+      <div class="avatar" data-i18n="ph_photo" data-i18n-aria="aria_photo" aria-label="Photo placeholder">[placeholder: photo]</div>
+      <dl>
+        <dt data-i18n="d_name">Name</dt>
+        <dd><span class="ph" data-i18n="ph_d_name">[placeholder: dentist name not yet supplied]</span></dd>
+        <dt data-i18n="d_qual">Qualifications</dt>
+        <dd><span class="ph" data-i18n="ph_d_qual">[placeholder: qualifications not yet supplied]</span></dd>
+        <dt data-i18n="d_spec">Specialty</dt>
+        <dd><span class="ph" data-i18n="ph_d_spec">[placeholder: specialty not yet supplied]</span></dd>
+        <dt data-i18n="d_exp">Experience</dt>
+        <dd><span class="ph" data-i18n="ph_d_exp">[placeholder: years of experience not yet supplied]</span></dd>
+        <dt data-i18n="d_about">About</dt>
+        <dd><span class="ph" data-i18n="ph_d_about">[placeholder: short profile not yet supplied]</span></dd>
+      </dl>
+    </div>
+  </section>
+
+  <section id="faq" aria-labelledby="faq-h">
+    <h2 id="faq-h" data-i18n="faq_h">Patient FAQs</h2>
+    <div class="faq">
+      <div class="card">
+        <h3 data-i18n="q1">How do I book an appointment?</h3>
+        <p data-i18n="a1">Fill in the request form on this page and send it on WhatsApp or by email. The clinic will confirm your appointment by phone. The form is a request and does not guarantee a slot until the clinic calls you.</p>
+      </div>
+      <div class="card">
+        <h3 data-i18n="q2">Are the prices on this page final?</h3>
+        <p data-i18n="a2">No. Prices are starting prices only. The final cost depends on your teeth and the treatment you need, and it is confirmed after examination.</p>
+      </div>
+      <div class="card">
+        <h3 data-i18n="q3">What should I do in a dental emergency?</h3>
+        <p data-i18n="a3">Use the emergency contact at the top of this page and call, rather than sending the appointment form. For trouble breathing or swallowing, or bleeding that will not stop, go to the nearest hospital emergency department.</p>
+      </div>
+      <div class="card">
+        <h3 data-i18n="q4">What should I do if a tooth is knocked out?</h3>
+        <p data-i18n="a4">Pick it up by the crown (the white part), not the root. Do not scrub it. Keep it moist, for example in milk, and call the emergency number straight away, because a quick visit gives the best chance of saving the tooth.</p>
+      </div>
+      <div class="card">
+        <h3 data-i18n="q5">What should I bring to my first visit?</h3>
+        <p data-i18n="a5">Bring a list of any medicines you take, details of any medical conditions or allergies, and any earlier dental X-rays or reports you have.</p>
+      </div>
+      <div class="card">
+        <h3 data-i18n="q6">Can I change or cancel my appointment?</h3>
+        <p><span data-i18n="a6">Yes. Call the clinic as early as you can and they will help you pick a new time.</span> <span class="ph" data-i18n="ph_clinic_phone">[placeholder: clinic phone number not yet supplied]</span></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span data-i18n="foot_text">SmileCare Dental Clinic, Pune. Address:</span> <span class="ph" data-i18n="ph_address">[placeholder: address not yet supplied]</span>
+</footer>
+
+<script>
+(function () {
+  // Clinic contact details. Empty until the clinic supplies them (open input).
+  // WhatsApp: digits only with country code, e.g. "91XXXXXXXXXX". Email: a normal address.
+  var CLINIC_WHATSAPP = "";
+  var CLINIC_EMAIL = "";
+
+  // One dictionary. Every key must exist in both "en" and "mr" (checked in the console on load).
+  var I18N = {
+    en: {
+      meta_title: "SmileCare Dental Clinic, Pune",
+      brand: "SmileCare Dental Clinic",
+      aria_nav: "Main",
+      aria_lang: "Language",
+      aria_photo: "Photo placeholder",
+      nav_emergency: "Emergency", nav_book: "Book", nav_services: "Services", nav_dentists: "Our dentists", nav_faq: "FAQs",
+      review_banner: "Marathi text pending native review.",
+      hero_h: "Gentle dental care in Pune",
+      hero_p: "Request an appointment online, see what our treatments start from, and meet the dentists who will look after you.",
+      emg_h: "Dental emergency contact",
+      emg_phone_l: "Emergency phone",
+      emg_hours_l: "Emergency hours",
+      ph_emg_number: "[placeholder: emergency number not yet supplied]",
+      ph_emg_hours: "[placeholder: emergency hours not yet supplied]",
+      emg_p1: "Call this number for severe tooth pain, a knocked-out tooth, a broken tooth, or swelling in the mouth or face. Do not use the appointment form for emergencies, because the form is a request and is not answered instantly.",
+      emg_p2: "If you have trouble breathing or swallowing, or bleeding that will not stop, go to the nearest hospital emergency department right away.",
+      book_h: "Request an appointment",
+      book_notice: "This is a request, not a confirmed booking. After you send it, the clinic will confirm your appointment by phone.",
+      f_name: "Full name", f_phone: "Your phone number", f_service: "Service", f_date: "Preferred date",
+      f_time: "Preferred time", f_visit: "Visit type", f_notes: "Anything we should know (optional)",
+      opt_unsure: "Not sure yet",
+      t_morning: "Morning", t_afternoon: "Afternoon", t_evening: "Evening",
+      v_first: "First visit", v_return: "Returning patient",
+      btn_wa: "Send request on WhatsApp", btn_email: "Send request by email",
+      fine_wa_l: "Clinic WhatsApp number:", fine_email_l: "Clinic email:", fine_phone_l: "Clinic phone:",
+      ph_number: "[placeholder: number not yet supplied]",
+      ph_email: "[placeholder: email not yet supplied]",
+      fine_tail: "Until the clinic's number or email is added, your app will ask you to choose the recipient. Nothing you type here is stored or sent by this page; it only opens your own WhatsApp or email app.",
+      svc_h: "Services and starting prices",
+      s1n: "Check-up and consultation", s1d: "Examination, advice and a treatment plan.",
+      s2n: "Scaling and polishing", s2d: "Removes plaque and tartar to keep gums healthy.",
+      s3n: "Tooth-coloured filling", s3d: "Repairs cavities and chipped teeth.",
+      s4n: "Root canal treatment", s4d: "Saves a badly decayed or infected tooth.",
+      s5n: "Crown or cap", s5d: "Protects and restores a weak or damaged tooth.",
+      s6n: "Teeth whitening", s6d: "Brightens stained or yellowed teeth.",
+      s7n: "Braces or clear aligners", s7d: "Straightens teeth and corrects the bite.",
+      s8n: "Tooth extraction", s8d: "Removal of a tooth that cannot be saved.",
+      price_from: "Starting from",
+      ph_price: "[placeholder: price range not yet supplied]",
+      svc_note: "These are starting prices only. The final cost is confirmed after examination.",
+      den_h: "Our dentists",
+      ph_photo: "[placeholder: photo]",
+      d_name: "Name", d_qual: "Qualifications", d_spec: "Specialty", d_exp: "Experience", d_about: "About",
+      ph_d_name: "[placeholder: dentist name not yet supplied]",
+      ph_d_qual: "[placeholder: qualifications not yet supplied]",
+      ph_d_spec: "[placeholder: specialty not yet supplied]",
+      ph_d_exp: "[placeholder: years of experience not yet supplied]",
+      ph_d_about: "[placeholder: short profile not yet supplied]",
+      faq_h: "Patient FAQs",
+      q1: "How do I book an appointment?",
+      a1: "Fill in the request form on this page and send it on WhatsApp or by email. The clinic will confirm your appointment by phone. The form is a request and does not guarantee a slot until the clinic calls you.",
+      q2: "Are the prices on this page final?",
+      a2: "No. Prices are starting prices only. The final cost depends on your teeth and the treatment you need, and it is confirmed after examination.",
+      q3: "What should I do in a dental emergency?",
+      a3: "Use the emergency contact at the top of this page and call, rather than sending the appointment form. For trouble breathing or swallowing, or bleeding that will not stop, go to the nearest hospital emergency department.",
+      q4: "What should I do if a tooth is knocked out?",
+      a4: "Pick it up by the crown (the white part), not the root. Do not scrub it. Keep it moist, for example in milk, and call the emergency number straight away, because a quick visit gives the best chance of saving the tooth.",
+      q5: "What should I bring to my first visit?",
+      a5: "Bring a list of any medicines you take, details of any medical conditions or allergies, and any earlier dental X-rays or reports you have.",
+      q6: "Can I change or cancel my appointment?",
+      a6: "Yes. Call the clinic as early as you can and they will help you pick a new time.",
+      ph_clinic_phone: "[placeholder: clinic phone number not yet supplied]",
+      foot_text: "SmileCare Dental Clinic, Pune. Address:",
+      ph_address: "[placeholder: address not yet supplied]",
+      err_name: "Please enter your name.",
+      err_phone: "Please enter a valid phone number so the clinic can call you.",
+      ok_email: "Your email is ready. Please press send in your email app. The clinic will confirm your appointment by phone.",
+      ok_wa: "Your WhatsApp message is ready. Please press send in WhatsApp. The clinic will confirm your appointment by phone.",
+      msg_title: "Appointment request for SmileCare Dental Clinic, Pune",
+      msg_name: "Name", msg_phone: "Phone", msg_service: "Service", msg_date: "Preferred date",
+      msg_time: "Preferred time", msg_visit: "Visit type", msg_notes: "Notes",
+      msg_unspecified: "Not specified",
+      msg_confirm: "Please confirm this appointment by phone.",
+      mail_subject: "Appointment request from "
+    },
+    mr: {
+      meta_title: "स्माइलकेअर डेंटल क्लिनिक, पुणे",
+      brand: "स्माइलकेअर डेंटल क्लिनिक",
+      aria_nav: "मुख्य मेनू",
+      aria_lang: "भाषा",
+      aria_photo: "फोटोसाठी जागा",
+      nav_emergency: "आणीबाणी", nav_book: "भेट ठरवा", nav_services: "सेवा", nav_dentists: "आमचे दंतवैद्य", nav_faq: "नेहमीचे प्रश्न",
+      review_banner: "मराठी मजकूर: मूळ मराठी भाषकाकडून तपासणी बाकी आहे (pending native review).",
+      hero_h: "पुण्यातील हळुवार दंतसेवा",
+      hero_p: "ऑनलाइन अपॉइंटमेंटची विनंती करा, आमच्या उपचारांच्या किमती किती पासून सुरू होतात ते पाहा आणि तुमची काळजी घेणाऱ्या दंतवैद्यांना भेटा.",
+      emg_h: "दातांची आणीबाणी: संपर्क",
+      emg_phone_l: "आणीबाणी फोन",
+      emg_hours_l: "आणीबाणी वेळ",
+      ph_emg_number: "[प्लेसहोल्डर: आणीबाणी क्रमांक अद्याप मिळालेला नाही]",
+      ph_emg_hours: "[प्लेसहोल्डर: आणीबाणीची वेळ अद्याप मिळालेली नाही]",
+      emg_p1: "तीव्र दातदुखी, दात पडणे, दात तुटणे, किंवा तोंडावर किंवा चेहऱ्यावर सूज असल्यास या क्रमांकावर फोन करा. आणीबाणीसाठी अपॉइंटमेंट फॉर्म वापरू नका, कारण फॉर्म ही फक्त विनंती आहे आणि त्याला लगेच उत्तर मिळत नाही.",
+      emg_p2: "श्वास घेण्यास किंवा गिळण्यास त्रास होत असेल, किंवा रक्तस्राव थांबत नसेल, तर लगेच जवळच्या रुग्णालयाच्या आपत्कालीन विभागात जा.",
+      book_h: "अपॉइंटमेंटची विनंती करा",
+      book_notice: "ही फक्त विनंती आहे, पक्की झालेली बुकिंग नाही. तुम्ही विनंती पाठवल्यानंतर क्लिनिक फोनवरून तुमची अपॉइंटमेंट निश्चित करेल.",
+      f_name: "पूर्ण नाव", f_phone: "तुमचा फोन नंबर", f_service: "सेवा", f_date: "सोयीची तारीख",
+      f_time: "सोयीची वेळ", f_visit: "भेटीचा प्रकार", f_notes: "आम्हाला काही सांगायचे असल्यास (ऐच्छिक)",
+      opt_unsure: "अजून निश्चित नाही",
+      t_morning: "सकाळ", t_afternoon: "दुपार", t_evening: "संध्याकाळ",
+      v_first: "पहिली भेट", v_return: "पुन्हा येणारे रुग्ण",
+      btn_wa: "WhatsApp वर विनंती पाठवा", btn_email: "ईमेलने विनंती पाठवा",
+      fine_wa_l: "क्लिनिकचा WhatsApp क्रमांक:", fine_email_l: "क्लिनिकचा ईमेल:", fine_phone_l: "क्लिनिकचा फोन:",
+      ph_number: "[प्लेसहोल्डर: क्रमांक अद्याप मिळालेला नाही]",
+      ph_email: "[प्लेसहोल्डर: ईमेल अद्याप मिळालेला नाही]",
+      fine_tail: "क्लिनिकचा क्रमांक किंवा ईमेल जोडेपर्यंत तुमचे अॅप प्राप्तकर्ता निवडण्यास सांगेल. तुम्ही येथे लिहिलेली कोणतीही माहिती हे पेज साठवत नाही किंवा पाठवत नाही; ते फक्त तुमचे स्वतःचे WhatsApp किंवा ईमेल अॅप उघडते.",
+      svc_h: "सेवा आणि सुरुवातीच्या किमती",
+      s1n: "तपासणी आणि सल्ला", s1d: "तपासणी, सल्ला आणि उपचार योजना.",
+      s2n: "स्केलिंग आणि पॉलिशिंग", s2d: "हिरड्या निरोगी ठेवण्यासाठी प्लेक आणि टार्टर काढले जातात.",
+      s3n: "दाताच्या रंगाची फिलिंग", s3d: "दातातील कीड आणि चिरलेल्या दातांची दुरुस्ती.",
+      s4n: "रूट कॅनॉल उपचार", s4d: "खूप किडलेला किंवा संसर्ग झालेला दात वाचवला जातो.",
+      s5n: "क्राउन किंवा कॅप", s5d: "कमकुवत किंवा खराब झालेल्या दाताचे संरक्षण आणि पुनर्स्थापना.",
+      s6n: "दात पांढरे करणे", s6d: "डाग पडलेले किंवा पिवळे दात उजळ केले जातात.",
+      s7n: "ब्रेसेस किंवा क्लिअर अलायनर्स", s7d: "दात सरळ करणे आणि चावण्याची रचना सुधारणे.",
+      s8n: "दात काढणे", s8d: "वाचवता न येणारा दात काढणे.",
+      price_from: "सुरुवातीची किंमत:",
+      ph_price: "[प्लेसहोल्डर: किमतीची श्रेणी अद्याप मिळालेली नाही]",
+      svc_note: "ह्या फक्त सुरुवातीच्या किमती आहेत. अंतिम खर्च तपासणीनंतर निश्चित केला जातो.",
+      den_h: "आमचे दंतवैद्य",
+      ph_photo: "[प्लेसहोल्डर: फोटो]",
+      d_name: "नाव", d_qual: "पात्रता", d_spec: "विशेषज्ञता", d_exp: "अनुभव", d_about: "माहिती",
+      ph_d_name: "[प्लेसहोल्डर: दंतवैद्यांचे नाव अद्याप मिळालेले नाही]",
+      ph_d_qual: "[प्लेसहोल्डर: पात्रता अद्याप मिळालेली नाही]",
+      ph_d_spec: "[प्लेसहोल्डर: विशेषज्ञता अद्याप मिळालेली नाही]",
+      ph_d_exp: "[प्लेसहोल्डर: अनुभवाची वर्षे अद्याप मिळालेली नाहीत]",
+      ph_d_about: "[प्लेसहोल्डर: थोडक्यात माहिती अद्याप मिळालेली नाही]",
+      faq_h: "रुग्णांचे नेहमीचे प्रश्न",
+      q1: "अपॉइंटमेंट कशी बुक करायची?",
+      a1: "या पेजवरील विनंती फॉर्म भरा आणि WhatsApp किंवा ईमेलवर पाठवा. क्लिनिक फोनवरून तुमची अपॉइंटमेंट निश्चित करेल. क्लिनिकचा फोन येईपर्यंत फॉर्म ही फक्त विनंती आहे आणि वेळ मिळण्याची हमी नाही.",
+      q2: "या पेजवरील किमती अंतिम आहेत का?",
+      a2: "नाही. या फक्त सुरुवातीच्या किमती आहेत. अंतिम खर्च तुमचे दात आणि गरजेचा उपचार यावर अवलंबून असतो आणि तो तपासणीनंतर निश्चित केला जातो.",
+      q3: "दातांची आणीबाणी असल्यास काय करावे?",
+      a3: "या पेजवरील आणीबाणी संपर्क वापरा आणि अपॉइंटमेंट फॉर्म पाठवण्याऐवजी फोन करा. श्वास घेण्यास किंवा गिळण्यास त्रास होत असेल, किंवा रक्तस्राव थांबत नसेल, तर जवळच्या रुग्णालयाच्या आपत्कालीन विभागात जा.",
+      q4: "दात पडला तर काय करावे?",
+      a4: "दात मुकुटाकडून (पांढऱ्या भागाकडून) उचला, मुळाकडून नाही. तो घासू नका. तो ओलसर ठेवा, उदाहरणार्थ दुधात, आणि लगेच आणीबाणी क्रमांकावर फोन करा, कारण लवकर आल्यास दात वाचण्याची शक्यता जास्त असते.",
+      q5: "पहिल्या भेटीला काय आणावे?",
+      a5: "तुम्ही घेत असलेल्या औषधांची यादी, कोणतेही वैद्यकीय आजार किंवा अॅलर्जी यांची माहिती, आणि पूर्वीचे दातांचे एक्स-रे किंवा रिपोर्ट असल्यास सोबत आणा.",
+      q6: "अपॉइंटमेंट बदलता किंवा रद्द करता येते का?",
+      a6: "हो. शक्य तितक्या लवकर क्लिनिकला फोन करा, ते तुम्हाला नवीन वेळ निवडण्यास मदत करतील.",
+      ph_clinic_phone: "[प्लेसहोल्डर: क्लिनिकचा फोन नंबर अद्याप मिळालेला नाही]",
+      foot_text: "स्माइलकेअर डेंटल क्लिनिक, पुणे. पत्ता:",
+      ph_address: "[प्लेसहोल्डर: पत्ता अद्याप मिळालेला नाही]",
+      err_name: "कृपया तुमचे नाव लिहा.",
+      err_phone: "कृपया योग्य फोन नंबर लिहा, म्हणजे क्लिनिक तुम्हाला फोन करू शकेल.",
+      ok_email: "तुमचा ईमेल तयार आहे. कृपया तुमच्या ईमेल अॅपमध्ये पाठवा दाबा. क्लिनिक फोनवरून तुमची अपॉइंटमेंट निश्चित करेल.",
+      ok_wa: "तुमचा WhatsApp संदेश तयार आहे. कृपया WhatsApp मध्ये पाठवा दाबा. क्लिनिक फोनवरून तुमची अपॉइंटमेंट निश्चित करेल.",
+      msg_title: "स्माइलकेअर डेंटल क्लिनिक, पुणे साठी अपॉइंटमेंट विनंती",
+      msg_name: "नाव", msg_phone: "फोन", msg_service: "सेवा", msg_date: "सोयीची तारीख",
+      msg_time: "सोयीची वेळ", msg_visit: "भेटीचा प्रकार", msg_notes: "टिप्पणी",
+      msg_unspecified: "नमूद नाही",
+      msg_confirm: "कृपया ही अपॉइंटमेंट फोनवरून निश्चित करा.",
+      mail_subject: "अपॉइंटमेंट विनंती: "
+    }
+  };
+
+  var lang = "en";
+  var statusKey = null;
+  var form = document.getElementById("bookForm");
+  var statusEl = document.getElementById("formStatus");
+
+  function t(key) {
+    var d = I18N[lang];
+    if (d && d[key] !== undefined) return d[key];
+    return I18N.en[key] !== undefined ? I18N.en[key] : key;
+  }
+
+  function setStatus(key) {
+    statusKey = key;
+    statusEl.textContent = key ? t(key) : "";
+  }
+
+  function applyLang(next) {
+    lang = next === "mr" ? "mr" : "en";
+    document.documentElement.lang = lang;
+    var nodes = document.querySelectorAll("[data-i18n]");
+    for (var i = 0; i < nodes.length; i++) nodes[i].textContent = t(nodes[i].getAttribute("data-i18n"));
+    var aria = document.querySelectorAll("[data-i18n-aria]");
+    for (var j = 0; j < aria.length; j++) aria[j].setAttribute("aria-label", t(aria[j].getAttribute("data-i18n-aria")));
+    document.title = t("meta_title");
+    document.getElementById("reviewBanner").hidden = lang !== "mr";
+    var btns = document.querySelectorAll(".lang button");
+    for (var k = 0; k < btns.length; k++) btns[k].setAttribute("aria-pressed", btns[k].getAttribute("data-lang") === lang ? "true" : "false");
+    setStatus(statusKey);
+  }
+
+  // Parity check: warns in the console if any key is missing in either language or in the dictionary.
+  (function check() {
+    var k;
+    for (k in I18N.en) if (!(k in I18N.mr) || !I18N.mr[k]) console.warn("Missing Marathi value:", k);
+    for (k in I18N.mr) if (!(k in I18N.en) || !I18N.en[k]) console.warn("Missing English value:", k);
+    var used = document.querySelectorAll("[data-i18n],[data-i18n-aria]");
+    for (var i = 0; i < used.length; i++) {
+      var key = used[i].getAttribute("data-i18n") || used[i].getAttribute("data-i18n-aria");
+      if (!(key in I18N.en)) console.warn("Unknown i18n key in page:", key);
+    }
+  })();
+
+  var toggle = document.querySelectorAll(".lang button");
+  for (var b = 0; b < toggle.length; b++) {
+    toggle[b].addEventListener("click", function () { applyLang(this.getAttribute("data-lang")); });
+  }
+
+  function val(id) { return (document.getElementById(id).value || "").trim(); }
+  function selText(id) {
+    var s = document.getElementById(id);
+    return s.options[s.selectedIndex].textContent;
+  }
+
+  function buildMessage() {
+    var lines = [
+      t("msg_title"),
+      t("msg_name") + ": " + val("name"),
+      t("msg_phone") + ": " + val("phone"),
+      t("msg_service") + ": " + selText("service"),
+      t("msg_date") + ": " + (val("date") || t("msg_unspecified")),
+      t("msg_time") + ": " + selText("time"),
+      t("msg_visit") + ": " + selText("visit")
+    ];
+    if (val("notes")) lines.push(t("msg_notes") + ": " + val("notes"));
+    lines.push(t("msg_confirm"));
+    return lines.join("\n");
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = document.getElementById("name");
+    var phone = document.getElementById("phone");
+    var digits = phone.value.replace(/\D/g, "");
+
+    if (!name.value.trim()) { setStatus("err_name"); name.focus(); return; }
+    if (digits.length < 10) { setStatus("err_phone"); phone.focus(); return; }
+
+    var channel = (e.submitter && e.submitter.value) || "whatsapp";
+    var text = buildMessage();
+
+    if (channel === "email") {
+      var subject = t("mail_subject") + name.value.trim();
+      window.location.href = "mailto:" + encodeURIComponent(CLINIC_EMAIL).replace(/%40/g, "@") +
+        "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(text);
+      setStatus("ok_email");
+    } else {
+      var base = CLINIC_WHATSAPP ? "https://wa.me/" + CLINIC_WHATSAPP : "https://wa.me/";
+      window.open(base + "?text=" + encodeURIComponent(text), "_blank", "noopener");
+      setStatus("ok_wa");
+    }
+  });
+
+  // Open in Marathi with ?lang=mr; otherwise English. Nothing is stored.
+  var wanted = /[?&]lang=mr\b/.test(window.location.search) ? "mr" : "en";
+  applyLang(wanted);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,699 @@
+[
+  {
+    "cycle": 2,
+    "version": 3,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the name Spark 2026, Northfield College of Engineering, Pune, and the dates 14 to 16 February 2027",
+        "verdict": "NEEDS_REVISION",
+        "note": "Body has only #schedule, #events and #register. 'Spark 2026' appears only in <title>. No Northfield, Pune or full date range in the visible page.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": false
+      },
+      {
+        "id": "F-2",
+        "criterion": "A schedule section lets visitors view Day 1, Day 2 and Day 3, each listing its events with the times given: Day 1 Code Sprint 10am-1pm, Line Follower 2pm-5pm, AI in Daily Life 5:30pm-6:30pm; Day 2 Bug Hunt 11am-1pm, Poster Jam 2pm-4pm; Day 3 Drone Dash 10am-1pm, UI Duel 2pm-5pm, Startup Stories 5:30pm-6:30pm",
+        "verdict": "PASS",
+        "note": "3 .j2-daytab and 3 .j2-day panels. All 8 events show the exact times from the charter. Day 1 is shown first.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "An events section lets visitors browse by the categories Coding, Robotics, Design and Talks, and every event shows its fee: Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, Poster Jam free, UI Duel Rs 100, AI in Daily Life free, Startup Stories free",
+        "verdict": "PASS",
+        "note": "5 .j2-filter buttons (All plus 4 categories), 8 .j2-card cards. Fees match the charter: Rs 100, 50, 150, 200, 100 and Free x3.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "A registration form has the fields name, email, college and an event dropdown listing all 8 events, and its submission is directed to spark2026@example.com",
+        "verdict": "PASS",
+        "note": "form action=mailto:spark2026@example.com. 3 labelled inputs, a select with 8 .j2-event-option entries, a submit button. Code ran the form: submitted, no errors.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A sponsors section lists Nimbus Cloud, Orbit Labs and Pixel Press by name, with no logos",
+        "verdict": "NEEDS_REVISION",
+        "note": "No #sponsors section in the page. None of the three sponsor names appear in the markup.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": false
+      },
+      {
+        "id": "F-6",
+        "criterion": "A venue section shows Northfield College of Engineering, 22 University Road, Pune 411007, with a map or a map link for that address",
+        "verdict": "NEEDS_REVISION",
+        "note": "No venue section. '22 University Road' and 'Pune 411007' do not appear in the markup. No map link.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": false
+      },
+      {
+        "id": "F-7",
+        "criterion": "A WhatsApp link opens a chat with +91 00000 33333 and the email spark2026@example.com is shown as contact",
+        "verdict": "NEEDS_REVISION",
+        "note": "No wa.me link anywhere. The email appears only as a note inside #register, not as a contact block.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": false
+      },
+      {
+        "id": "F-8",
+        "criterion": "Photo areas use clearly marked placeholders, and the page uses a bold, consistent, modern colour and type style",
+        "verdict": "UNPAID",
+        "note": "Built on the page, but no workflow covers item 8, so nobody paid for it. Register a workflow that covers it at its rate-card minimum (styling, 5). (Audit's own note: 8 dashed .j2-photo boxes labelled 'Photo placeholder' with aria-labels. Screenshot shows consistent violet, yellow and cyan styling. Fonts measured: Inter and Space Grotesk only.)",
+        "severity": "medium",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": false
+      },
+      {
+        "id": "F-9",
+        "criterion": "The layout has no horizontal overflow at 360px width and at 1280px width, and the navigation and form are usable on a phone-sized screen",
+        "verdict": "NEEDS_REVISION",
+        "note": "Overflow is 0px at both widths and the form is usable. But nav_elements=0 and in_page_links=0, so there is no navigation to use on a phone (N8 NOT MET).",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": false
+      },
+      {
+        "id": "F-10",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "UNPAID",
+        "note": "Built on the page, but no workflow covers item 10, so nobody paid for it. Register a workflow that covers it at its rate-card minimum (styling, 5). (Audit's own note: js_errors=[], overflow 0 at both widths, broken_in_page_links=[]. The pass is empty: there are 0 in-page links at all.)",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": false
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-11",
+        "criterion": "Rule: never invent facts (N6)",
+        "verdict": "NEEDS_REVISION",
+        "note": "N6 NOT MET: '15' is not in the charter. It comes from the 'Day 2 15 Feb' tab label. It is a logical inference from 14 to 16, but the Requester gave only the range.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-12",
+        "criterion": "Hierarchy and main action: one h1 and a hero with one obvious action",
+        "verdict": "NEEDS_REVISION",
+        "note": "headings h1=0. No hero. First-screen actions measured are 'Day 1' and 'All' (the first two controls on the page), not a call to register.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "Screenshot and CSS use the style guide palette, Space Grotesk headings, Inter body, and the same button and card styles throughout.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "71 text elements checked at both widths, 0 low-contrast.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "NEEDS_REVISION",
+        "note": "Measured by code: 0 h1 headings (the page needs exactly one)",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "NEEDS_REVISION",
+        "note": "The first screen shows only the Day tabs and the events filters; no Register button is visible.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "NEEDS_REVISION",
+        "note": "nav_elements=0 and in_page_links=0, so a visitor must scroll to reach sections; N8 is not met.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "small_tap_targets count=0 at the 44px minimum on phone.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "0 img elements, so none lack alt text. The photo placeholders carry role=img with aria-labels.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 20139,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap"
+      ],
+      "forms": 1,
+      "scripts": 2,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 71,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 0,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 0,
+            "in_page_links": 0
+          },
+          "first_screen_actions": [
+            "Day 114 Feb",
+            "All"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 71,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 0,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 0,
+            "in_page_links": 0
+          },
+          "first_screen_actions": [
+            "Day 114 Feb",
+            "All"
+          ]
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v3.png",
+    "all_pass": false,
+    "conditions": [
+      {
+        "id": "N1",
+        "text": "The page opens (it parses, tags balanced)",
+        "check": "page-parses",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "text": "No JavaScript errors on load",
+        "check": "no-js-errors",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "text": "No horizontal overflow at 360px and 1280px",
+        "check": "no-overflow",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "text": "Every in-page link resolves; WhatsApp (wa.me) and tel: links are well formed",
+        "check": "links-well-formed",
+        "met": true,
+        "evidence": "all 0 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "text": "Every charter fact appears exactly, and nothing is \"to be confirmed\"",
+        "check": [
+          "facts-present-all",
+          "nothing-to-be-confirmed"
+        ],
+        "met": true,
+        "evidence": "all 1 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "text": "No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers",
+        "check": "no-invented-facts",
+        "met": false,
+        "evidence": "not in the charter or the Requester's answers: 15"
+      },
+      {
+        "id": "N7",
+        "text": "Every form has a submit control and a destination (action or mailto)",
+        "check": "forms-have-destination",
+        "met": true,
+        "evidence": "1 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "text": "A nav reaches every section, and the hero has one obvious main action",
+        "check": "nav-and-main-action",
+        "met": false,
+        "evidence": "no <nav> on the page"
+      }
+    ]
+  },
+  {
+    "cycle": 2,
+    "version": 7,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the name Spark 2026, Northfield College of Engineering, Pune, and the dates 14 to 16 February 2027",
+        "verdict": "PASS",
+        "note": "#hero has h1 'Spark 2026', 'Northfield College of Engineering, Pune' and '14 to 16 February 2027'; the screenshot shows all three at both widths.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "A schedule section lets visitors view Day 1, Day 2 and Day 3, each listing its events with the times given: Day 1 Code Sprint 10am-1pm, Line Follower 2pm-5pm, AI in Daily Life 5:30pm-6:30pm; Day 2 Bug Hunt 11am-1pm, Poster Jam 2pm-4pm; Day 3 Drone Dash 10am-1pm, UI Duel 2pm-5pm, Startup Stories 5:30pm-6:30pm",
+        "verdict": "PASS",
+        "note": "3 .j2-daytab buttons labelled Day 1, Day 2, Day 3 and 3 .j2-day panels. All 8 events carry the charter times (e.g. Day 2 Bug Hunt 11am-1pm, Poster Jam 2pm-4pm). Invented dates are gone from the tabs.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "An events section lets visitors browse by the categories Coding, Robotics, Design and Talks, and every event shows its fee: Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, Poster Jam free, UI Duel Rs 100, AI in Daily Life free, Startup Stories free",
+        "verdict": "PASS",
+        "note": "5 .j2-filter buttons (All, Coding, Robotics, Design, Talks) and 8 .j2-card cards. Fees match: Rs 100, Rs 50, Rs 150, Rs 200, Rs 100, and Free x3.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "A registration form has the fields name, email, college and an event dropdown listing all 8 events, and its submission is directed to spark2026@example.com",
+        "verdict": "PASS",
+        "note": "form action=mailto:spark2026@example.com. Inputs for name, email and college, plus a select with 8 .j2-event-option entries. Code submitted the form: ok, no invalid fields, no errors.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A sponsors section lists Nimbus Cloud, Orbit Labs and Pixel Press by name, with no logos",
+        "verdict": "PASS",
+        "note": "#sponsors has 3 .j2-sponsor text items (Nimbus Cloud, Orbit Labs, Pixel Press). The mechanical check found 0 images on the page.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A venue section shows Northfield College of Engineering, 22 University Road, Pune 411007, with a map or a map link for that address",
+        "verdict": "PASS",
+        "note": "#venue shows 'Northfield College of Engineering', '22 University Road', 'Pune 411007' and a Google Maps search link built from that address. No invented hall or building name.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "A WhatsApp link opens a chat with +91 00000 33333 and the email spark2026@example.com is shown as contact",
+        "verdict": "PASS",
+        "note": "#contact has a link to https://wa.me/910000033333, the displayed number +91 00000 33333, and a mailto link showing spark2026@example.com. Code reports wa.me links well formed.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "Photo areas use clearly marked placeholders, and the page uses a bold, consistent, modern colour and type style",
+        "verdict": "PASS",
+        "note": "8 dashed .j2-photo boxes labelled 'Photo placeholder'. Fonts measured: Inter and Space Grotesk only. The screenshot shows consistent violet, yellow and cyan styling.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The layout has no horizontal overflow at 360px width and at 1280px width, and the navigation and form are usable on a phone-sized screen",
+        "verdict": "PASS",
+        "note": "overflow_px 0 at both widths. Nav has 1 nav element and 8 in-page links; the screenshot shows a Menu toggle at 360px. Form inputs are 48px tall and the form submits.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "PASS",
+        "note": "js_errors=[], broken_in_page_links=[], overflow 0 at both widths. N4 reports all 9 links resolve, which is a real check now that the page has links.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "Only Inter and Space Grotesk are used. Buttons and cards use the style guide palette and the 12px radius in every section.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "Contrast: 92 elements checked on phone and 97 on desktop, 0 low.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "1 h1 on both widths, 0 skipped heading levels. The screenshot shows 'Spark 2026' as the dominant element.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "The yellow Register button sits directly under the dates in the hero at both widths, and N8 reports 1 main action.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS",
+        "note": "The nav reaches all 6 sections. At 360px it collapses behind a Menu button; at 1280px it shows as a row in the header.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "small_tap_targets count 0 at the 44px minimum on phone.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "0 images without alt. The photo placeholders use role=img with aria-labels.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 33083,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap",
+        "https://wa.me/910000033333",
+        "https://www.google.com/maps/search/?api=1&amp;query=Northfield+College+of+Engineering%2C+22+University+Road%2C+Pune+411007"
+      ],
+      "forms": 1,
+      "scripts": 3,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 92,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 8
+          },
+          "first_screen_actions": [
+            "Day 1",
+            "Register"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 97,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 8
+          },
+          "first_screen_actions": [
+            "Day 1",
+            "Register"
+          ]
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v7.png",
+    "all_pass": true,
+    "conditions": [
+      {
+        "id": "N1",
+        "text": "The page opens (it parses, tags balanced)",
+        "check": "page-parses",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "text": "No JavaScript errors on load",
+        "check": "no-js-errors",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "text": "No horizontal overflow at 360px and 1280px",
+        "check": "no-overflow",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "text": "Every in-page link resolves; WhatsApp (wa.me) and tel: links are well formed",
+        "check": "links-well-formed",
+        "met": true,
+        "evidence": "all 9 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "text": "Every charter fact appears exactly, and nothing is \"to be confirmed\"",
+        "check": [
+          "facts-present-all",
+          "nothing-to-be-confirmed"
+        ],
+        "met": true,
+        "evidence": "all 1 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "text": "No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers",
+        "check": "no-invented-facts",
+        "met": true,
+        "evidence": "every number, phone and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "N7",
+        "text": "Every form has a submit control and a destination (action or mailto)",
+        "check": "forms-have-destination",
+        "met": true,
+        "evidence": "1 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "text": "A nav reaches every section, and the hero has one obvious main action",
+        "check": "nav-and-main-action",
+        "met": true,
+        "evidence": "the nav reaches all 6 section(s); the hero has 1 main action(s)"
+      }
+    ]
+  }
+]

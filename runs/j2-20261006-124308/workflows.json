@@ -1,0 +1,81 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "W1-core-page",
+    "name": "Core page: header, hours, location and warm mobile-first styling",
+    "purpose": "Site v0 has no Brew Lab header, hours, location or styling.",
+    "cost": 35,
+    "estimate": 35,
+    "envelope": {
+      "money_limit": 35,
+      "model_call_limit": 2,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the output is not a single HTML file or the retry also fails the completion check."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "index.html with header, hours and location sections and inline CSS"
+    ],
+    "completion_check": "Title and header read Brew Lab; hours text says 8am to 10pm every day; location names Indiranagar, Bengaluru with a map link and a visible address placeholder; viewport meta present; base CSS is for small screens with min-width media queries; no horizontal scroll at 375px.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "W2-menu",
+    "name": "Menu section with marked placeholders",
+    "purpose": "No menu section exists, and no menu items or prices have been supplied.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any real-looking price or item name appears that the Requester did not supply."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Menu section and menu data array in index.html"
+    ],
+    "completion_check": "The menu section renders at least 4 drink rows, each with a price field, and every unsupplied name or price is visibly marked as a placeholder. No invented real prices appear.",
+    "dependencies": [
+      "W1-core-page"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "W3-preorder",
+    "name": "Pre-order form with order summary",
+    "purpose": "Visitors cannot pre-order coffee for pickup.",
+    "cost": 25,
+    "estimate": 25,
+    "envelope": {
+      "money_limit": 25,
+      "model_call_limit": 2,
+      "time_limit_minutes": 18,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any payment field or network send is added, or the retry still accepts a pickup time outside 8am to 10pm."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Pre-order form and submit handler in index.html"
+    ],
+    "completion_check": "The form has item and quantity inputs fed from the menu data, name and phone fields, and a time input limited to 08:00 to 22:00. Submitting a valid order shows a summary with items, quantities, name, phone and pickup time. A time outside 8am to 10pm is rejected. No payment fields exist.",
+    "dependencies": [
+      "W2-menu"
+    ],
+    "status": "done",
+    "cycle": 1
+  }
+]

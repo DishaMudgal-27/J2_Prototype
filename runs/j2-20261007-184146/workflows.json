@@ -1,0 +1,331 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "scaffold",
+    "name": "Scaffold and styling",
+    "purpose": "No page exists yet: no head, viewport meta, earthy style guide, navigation or footer.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 4,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the page still scrolls horizontally at 360px after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "HTML skeleton",
+      "style guide",
+      "nav with links to shop, new-arrivals, lookbook, size-guide, store, orders-returns, reviews"
+    ],
+    "completion_check": "Page has a viewport meta tag, nav links resolve to the section ids once built, and no horizontal scroll at 360px and 1280px.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "style guide, usable section and head tags",
+    "style_guide": true,
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "shop",
+    "name": "Product catalogue with filters and WhatsApp ordering",
+    "purpose": "Visitors cannot browse, filter or order the 10 products.",
+    "cost": 50,
+    "estimate": 50,
+    "envelope": {
+      "money_limit": 50,
+      "model_call_limit": 8,
+      "time_limit_minutes": 30,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any JS error remains after one retry or if more than 8 model calls are used."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "product grid",
+      "category controls",
+      "size filter",
+      "price filter",
+      "WhatsApp order buttons with size and quantity"
+    ],
+    "completion_check": "All 10 products show exact supplied data; each category tab, size filter and price filter changes the visible products; each order link starts with https://wa.me/918822033445 and its text contains product, size and quantity; no JS errors.",
+    "dependencies": [
+      "scaffold"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "new-arrivals",
+    "name": "New arrivals",
+    "purpose": "No section highlights what is new.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the section lists any product other than the three supplied."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "new arrivals section"
+    ],
+    "completion_check": "Section id new-arrivals exists with exactly those three products, and the nav link points to it.",
+    "dependencies": [
+      "scaffold",
+      "shop"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "lookbook",
+    "name": "Lookbook",
+    "purpose": "No styled outfit ideas are shown.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any outfit names an item not in the catalogue."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "lookbook section with 3 outfits"
+    ],
+    "completion_check": "Exactly 3 outfits; every item named in them matches a product in the catalogue; photo spots are empty; no stand-in images.",
+    "dependencies": [
+      "scaffold",
+      "shop"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "size-guide",
+    "name": "Size guide",
+    "purpose": "Visitors cannot check sizes.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any measurement other than the six supplied chest values appears."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "size guide section"
+    ],
+    "completion_check": "Table shows the six sizes with exactly those chest values and nothing else invented.",
+    "dependencies": [
+      "scaffold"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section",
+    "version": 5
+  },
+  {
+    "id": "W-6",
+    "proposal_id": "store-info",
+    "name": "Store info and directions",
+    "purpose": "Visitors cannot find the shop, timings or contact details.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any detail differs from the supplied address, phone, Instagram or timings."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "store info section",
+      "directions link"
+    ],
+    "completion_check": "All listed details present exactly; Monday closure stated; a maps link containing the address exists.",
+    "dependencies": [
+      "scaffold"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-6",
+    "revises": null,
+    "agent": "W-6 Builder",
+    "last_check": "usable section",
+    "version": 6
+  },
+  {
+    "id": "W-7",
+    "proposal_id": "orders-returns",
+    "name": "Ordering, delivery, returns and exchange",
+    "purpose": "Ordering, delivery and return rules are not stated.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any policy term is added that the Requester did not supply."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "ordering and delivery block",
+      "return and exchange block"
+    ],
+    "completion_check": "Every stated term matches the brief exactly and nothing extra is added.",
+    "dependencies": [
+      "scaffold"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-7",
+    "revises": null,
+    "agent": "W-7 Builder",
+    "last_check": "usable section",
+    "version": 7
+  },
+  {
+    "id": "W-8",
+    "proposal_id": "reviews",
+    "name": "Customer reviews",
+    "purpose": "No social proof is shown.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any review text, name or star rating is added or altered."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "reviews section"
+    ],
+    "completion_check": "Exactly 3 reviews with the exact text and names; no star ratings or extra reviews added.",
+    "dependencies": [
+      "scaffold"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-8",
+    "revises": null,
+    "agent": "W-8 Builder",
+    "last_check": "usable section",
+    "version": 8
+  },
+  {
+    "id": "W-9",
+    "proposal_id": "fix-tap-targets",
+    "name": "Store links tap targets",
+    "purpose": "Audit R-6: the phone and Instagram links in the store section measure 138x22 and 170x22 at 360px, under the 44x44px minimum.",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 3,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if either link is still under 44px tall at 360px after one retry, or if any text or href in the store section changes."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "store section with 44px tap targets on phone and Instagram links"
+    ],
+    "completion_check": "At 360px the phone link and the Instagram link each measure at least 44x44px; link text and hrefs are unchanged; no horizontal overflow at 360px and 1280px; no JS errors; nothing else in the section changes.",
+    "dependencies": [
+      "store-info"
+    ],
+    "status": "done",
+    "cycle": 2,
+    "section": "W-6",
+    "revises": "W-6",
+    "agent": "W-9 Builder",
+    "last_check": "usable section",
+    "version": 9
+  },
+  {
+    "id": "W-10",
+    "proposal_id": "fix-head",
+    "name": "Head cleanup",
+    "purpose": "Audit F-17: the head has two <title> tags and a raw '&' in the meta description.",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 3,
+      "time_limit_minutes": 7,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the head still has more than one <title> after one retry, or if the viewport meta or any nav link changes."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "clean head with a single title and an escaped meta description"
+    ],
+    "completion_check": "Exactly one <title> in the head; no raw '&' in the meta description; viewport meta and nav links are unchanged; no JS errors.",
+    "dependencies": [
+      "scaffold"
+    ],
+    "status": "done",
+    "cycle": 2,
+    "section": "W-1",
+    "revises": "W-1",
+    "agent": "W-10 Builder",
+    "last_check": "usable section and head tags",
+    "version": 10
+  }
+]

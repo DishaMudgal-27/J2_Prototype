@@ -1,0 +1,63 @@
+{
+  "statement": "Build a single-page, phone-friendly website for Thread & Loom, a handloom clothing boutique at 18 FC Road, Shivajinagar, Pune, where visitors can browse and filter products, check sizes and new arrivals, see styled outfits, find the shop and its policies, and place orders on WhatsApp.",
+  "site_name": "Thread & Loom",
+  "audience": "Shoppers in Pune, mostly on phones, looking for handloom kurtas, sarees, cotton shirts and dupattas.",
+  "standards": [
+    "Earthy and elegant look: natural, muted colours and a refined type style",
+    "Designed for phones first, and also works on desktop",
+    "No horizontal scrolling at 360px or 1280px width",
+    "No JavaScript errors; all in-page links go to a real section",
+    "Plain HTML, CSS and JavaScript in one file, no build step",
+    "Prices shown in rupees (₹)"
+  ],
+  "rules": [
+    "Use only the products, prices, sizes, policies, contact details and reviews the Requester supplied; never invent any",
+    "Photos are not available yet, so every product shows an empty photo spot",
+    "Orders go through WhatsApp only, to +91 00000 11111"
+  ],
+  "done_when": [
+    "The products section lists all 10 products with the exact names and prices supplied, grouped as Kurtas (3), Sarees (3), Shirts (2) and Dupattas (2), and category buttons show only the chosen category (plus an All option).",
+    "A size filter (XS, S, M, L, XL, XXL, Free size) and a price filter both work, can be combined, and narrow the list using each product's supplied sizes (Indigo block-print kurta S-XXL, Mustard handloom kurta S-XL, White chikankari kurta XS-XL, Khadi cotton shirt S-XXL, Linen-blend shirt M-XXL, all sarees and dupattas Free size).",
+    "Every product card has an empty photo spot and an order button that opens WhatsApp (wa.me/910000011111) with a message naming that product.",
+    "A size guide table shows chest in inches: XS 32, S 34, M 36, L 38, XL 40, XXL 42.",
+    "A visit section shows the address 18 FC Road, Shivajinagar, Pune 411005, the timings 11am to 9pm Tuesday to Sunday, closed Monday, and the shop phone +91 00000 22222.",
+    "The return and exchange policy states: exchange within 7 days if unworn with tags, and no returns on sale items.",
+    "Delivery information states: across Pune in 2 days, ₹79, free above ₹2,999, pay on delivery or UPI.",
+    "The page has a mobile viewport setting and a navigation that works on a 360px screen, with links to products, new arrivals, size guide, lookbook, visit, policy and reviews."
+  ],
+  "business_type": "clothing boutique",
+  "visitor_needs": [
+    "Browse products by category",
+    "Filter by size and price",
+    "See a size guide",
+    "Check new arrivals",
+    "Order on WhatsApp",
+    "See a lookbook of styled outfits",
+    "Find store timings and location",
+    "Read the return and exchange policy",
+    "Read customer reviews",
+    "Know delivery cost and payment options"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [],
+  "confirmed_facts": [],
+  "dropped_by_requester": [
+    "A New Arrivals section shows exactly: White chikankari kurta, Ikat handloom saree, Linen-blend shirt.",
+    "A Lookbook section shows 3 styled outfit ideas, each built only from named products on the site.",
+    "A reviews section shows these 3 reviews with names: \"Beautiful fabric, fits perfectly\" - Meera K.; \"Fast delivery and lovely packing\" - Arjun S.; \"My go-to for festive kurtas\" - Priya D."
+  ],
+  "dropped_reasons": [
+    {
+      "criterion": "A New Arrivals section shows exactly: White chikankari kurta, Ikat handloom saree, Linen-blend shirt.",
+      "reason": "The Requester chose to leave it out (Out of budget: 0 of 40 units left, less than the cheapest rate-card part, and the site isn't workable yet.): Add 25 more. Leave out the lookbook, new arrivals and reviews."
+    },
+    {
+      "criterion": "A Lookbook section shows 3 styled outfit ideas, each built only from named products on the site.",
+      "reason": "The Requester chose to leave it out (Out of budget: 0 of 40 units left, less than the cheapest rate-card part, and the site isn't workable yet.): Add 25 more. Leave out the lookbook, new arrivals and reviews."
+    },
+    {
+      "criterion": "A reviews section shows these 3 reviews with names: \"Beautiful fabric, fits perfectly\" - Meera K.; \"Fast delivery and lovely packing\" - Arjun S.; \"My go-to for festive kurtas\" - Priya D.",
+      "reason": "The Requester chose to leave it out (Out of budget: 0 of 40 units left, less than the cheapest rate-card part, and the site isn't workable yet.): Add 25 more. Leave out the lookbook, new arrivals and reviews."
+    }
+  ]
+}

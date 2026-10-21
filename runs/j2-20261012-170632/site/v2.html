@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spark 2026</title>
+<!-- J2:style head start (owner W-1) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&amp;family=Inter:wght@400;600&amp;display=swap"><style>:root{--j2-primary:#FF3D81;--j2-secondary:#7C4DFF;--j2-accent:#FFD60A;--j2-background:#0B0B1E;--j2-surface:#17173A;--j2-text:#FFFFFF;--j2-muted:#B8B8D9;--j2-font-heading:'Space Grotesk', 'Segoe UI', system-ui, sans-serif;--j2-font-body:'Inter', 'Segoe UI', system-ui, sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:16px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#FFD60A;color:#0B0B1E;border:2px solid #FFD60A;font-weight:700;min-height:48px;padding:12px 24px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-btn-secondary{display:inline-block;background:transparent;color:#FFFFFF;border:2px solid #FF3D81;font-weight:700;min-height:48px;padding:12px 24px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-card{background:#17173A;border:1px solid #2C2C5E;border-radius:16px;padding:24px;color:#FFFFFF}</style>
+<!-- J2:style head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<section id="hero" class="hero-banner" aria-labelledby="hero-title">
+  <style>
+    #hero.hero-banner {
+      position: relative;
+      overflow: hidden;
+      box-sizing: border-box;
+      width: 100%;
+      padding: 56px 20px 48px;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(255, 61, 129, 0.35), transparent 45%),
+        radial-gradient(circle at 90% 85%, rgba(124, 77, 255, 0.40), transparent 50%),
+        #0B0B1E;
+      color: #FFFFFF;
+      font-family: var(--j2-font-body, 'Inter', system-ui, sans-serif);
+    }
+    #hero .hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+      align-items: center;
+    }
+    #hero .hero-kicker {
+      display: inline-block;
+      margin: 0 0 16px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: #17173A;
+      border: 1px solid #FF3D81;
+      color: #FFD60A;
+      font-weight: 600;
+      font-size: 0.875rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    #hero .hero-title {
+      margin: 0 0 12px;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: clamp(2.75rem, 13vw, 5.5rem);
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #FFFFFF;
+      overflow-wrap: anywhere;
+    }
+    #hero .hero-college {
+      margin: 0 0 8px;
+      font-size: clamp(1.05rem, 4.5vw, 1.5rem);
+      font-weight: 600;
+      color: #FFFFFF;
+    }
+    #hero .hero-dates {
+      margin: 0 0 16px;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: clamp(1.25rem, 5.5vw, 1.9rem);
+      font-weight: 700;
+      color: #FFD60A;
+    }
+    #hero .hero-tagline {
+      margin: 0 0 28px;
+      max-width: 36rem;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #B8B8D9;
+    }
+    #hero .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    #hero .hero-actions a {
+      min-height: 48px;
+    }
+    #hero .img-placeholder {
+      box-sizing: border-box;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 16px;
+      border: 2px dashed #7C4DFF;
+      border-radius: var(--j2-radius, 16px);
+      background: linear-gradient(135deg, #17173A, #231F5C);
+      color: #B8B8D9;
+      font-size: 0.95rem;
+    }
+    @media (min-width: 800px) {
+      #hero.hero-banner { padding: 88px 32px 80px; }
+      #hero .hero-inner { grid-template-columns: 1.1fr 0.9fr; gap: 48px; }
+    }
+  </style>
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <p class="hero-kicker">College tech fest</p>
+      <h1 id="hero-title" class="hero-title">Spark 2026</h1>
+      <p class="hero-college">Northfield College of Engineering, Pune</p>
+      <p class="hero-dates">14 to 16 February 2027</p>
+      <p class="hero-tagline">Three days of coding, robotics, design and talks. See the schedule and register for your events.</p>
+      <div class="hero-actions">
+        <a class="j2-btn" href="#register">Register now</a>
+        <a class="j2-btn j2-btn-secondary" href="#schedule">See the schedule</a>
+      </div>
+    </div>
+    <div class="img-placeholder" role="img" aria-label="Photo placeholder: Spark 2026 hero image">
+      Photo placeholder: Spark 2026 hero image
+    </div>
+  </div>
+</section>
+<!-- J2:W-1 end -->
+<!-- J2:W-2 start (owner W-2) -->
+<section id="schedule" class="schedule-section" aria-labelledby="schedule-title">
+  <style>
+    #schedule.schedule-section {
+      box-sizing: border-box;
+      width: 100%;
+      padding: var(--j2-section) 20px;
+      background: var(--j2-background);
+      color: var(--j2-text);
+      font-family: var(--j2-font-body);
+    }
+    #schedule .schedule-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    #schedule .schedule-head {
+      margin: 0 0 calc(var(--j2-space) * 4);
+    }
+    #schedule .schedule-title {
+      margin: 0 0 var(--j2-space);
+      font-family: var(--j2-font-heading);
+      font-size: clamp(2rem, 8vw, 3rem);
+      line-height: 1.1;
+      font-weight: 700;
+      color: var(--j2-text);
+    }
+    #schedule .schedule-intro {
+      margin: 0;
+      max-width: 36rem;
+      line-height: 1.6;
+      color: var(--j2-muted);
+    }
+    #schedule .schedule-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: calc(var(--j2-space) * 3);
+    }
+    #schedule .day-card {
+      box-sizing: border-box;
+      min-width: 0;
+      border-top: 4px solid var(--j2-primary);
+    }
+    #schedule .day-card.day-two { border-top-color: var(--j2-secondary); }
+    #schedule .day-card.day-three { border-top-color: var(--j2-accent); }
+    #schedule .day-head {
+      margin: 0 0 calc(var(--j2-space) * 2);
+    }
+    #schedule .day-label {
+      margin: 0;
+      font-family: var(--j2-font-heading);
+      font-size: 1.75rem;
+      line-height: 1.1;
+      font-weight: 700;
+      color: var(--j2-text);
+    }
+    #schedule .day-date {
+      margin: 4px 0 0;
+      font-weight: 600;
+      color: var(--j2-accent);
+    }
+    #schedule .event-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: calc(var(--j2-space) * 2);
+    }
+    #schedule .event-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: calc(var(--j2-space) * 2);
+      border-left: 3px solid var(--j2-primary);
+      border-radius: 0 calc(var(--j2-radius) / 2) calc(var(--j2-radius) / 2) 0;
+      background: var(--j2-background);
+      min-width: 0;
+    }
+    #schedule .day-two .event-item { border-left-color: var(--j2-secondary); }
+    #schedule .day-three .event-item { border-left-color: var(--j2-accent); }
+    #schedule .event-time {
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+      color: var(--j2-accent);
+    }
+    #schedule .event-name {
+      margin: 0;
+      font-family: var(--j2-font-heading);
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--j2-text);
+      overflow-wrap: anywhere;
+    }
+    #schedule .schedule-cta {
+      margin: calc(var(--j2-space) * 4) 0 0;
+    }
+    @media (min-width: 900px) {
+      #schedule.schedule-section { padding-left: 32px; padding-right: 32px; }
+      #schedule .schedule-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: calc(var(--j2-space) * 3);
+        align-items: start;
+      }
+    }
+  </style>
+  <div class="schedule-inner">
+    <div class="schedule-head">
+      <h2 id="schedule-title" class="schedule-title">Schedule</h2>
+      <p class="schedule-intro">Three days, eight events. Pick your day and plan your Spark 2026.</p>
+    </div>
+    <div class="schedule-grid">
+      <article class="day-card j2-card day-one" aria-labelledby="day1-label">
+        <div class="day-head">
+          <h3 id="day1-label" class="day-label">Day 1</h3>
+          <p class="day-date">14 February 2027</p>
+        </div>
+        <ul class="event-list">
+          <li class="event-item">
+            <span class="event-time">10am to 1pm</span>
+            <h4 class="event-name">Code Sprint</h4>
+          </li>
+          <li class="event-item">
+            <span class="event-time">2pm to 5pm</span>
+            <h4 class="event-name">Line Follower</h4>
+          </li>
+          <li class="event-item">
+            <span class="event-time">5:30pm to 6:30pm</span>
+            <h4 class="event-name">AI in Daily Life</h4>
+          </li>
+        </ul>
+      </article>
+      <article class="day-card j2-card day-two" aria-labelledby="day2-label">
+        <div class="day-head">
+          <h3 id="day2-label" class="day-label">Day 2</h3>
+          <p class="day-date">15 February 2027</p>
+        </div>
+        <ul class="event-list">
+          <li class="event-item">
+            <span class="event-time">11am to 1pm</span>
+            <h4 class="event-name">Bug Hunt</h4>
+          </li>
+          <li class="event-item">
+            <span class="event-time">2pm to 4pm</span>
+            <h4 class="event-name">Poster Jam</h4>
+          </li>
+        </ul>
+      </article>
+      <article class="day-card j2-card day-three" aria-labelledby="day3-label">
+        <div class="day-head">
+          <h3 id="day3-label" class="day-label">Day 3</h3>
+          <p class="day-date">16 February 2027</p>
+        </div>
+        <ul class="event-list">
+          <li class="event-item">
+            <span class="event-time">10am to 1pm</span>
+            <h4 class="event-name">Drone Dash</h4>
+          </li>
+          <li class="event-item">
+            <span class="event-time">2pm to 5pm</span>
+            <h4 class="event-name">UI Duel</h4>
+          </li>
+          <li class="event-item">
+            <span class="event-time">5:30pm to 6:30pm</span>
+            <h4 class="event-name">Startup Stories</h4>
+          </li>
+        </ul>
+      </article>
+    </div>
+    <p class="schedule-cta">
+      <a class="j2-btn" href="#register">Register for an event</a>
+    </p>
+  </div>
+</section>
+<!-- J2:W-2 end -->
+</body>
+</html>

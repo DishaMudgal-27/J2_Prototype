@@ -1,0 +1,179 @@
+{
+  "run": "20261006-155146",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "model": "sonnet",
+  "mock": false,
+  "brief": "A one-page website for Brew Lab in Indiranagar, Bengaluru: menu with prices, opening hours, location, pre-order for pickup. Also add online payments, a blog with 5 articles, an Instagram feed, a photo gallery and lots of animations. Warm and modern, mobile-first.",
+  "change_requests": [],
+  "status": "out_of_budget",
+  "outcome": "Out of budget: 0 of 60 units left, less than the cheapest rate-card part (5), so no new workflow can be funded.",
+  "budget": {
+    "start": 60,
+    "granted": 60,
+    "used": 60,
+    "raises": []
+  },
+  "ai_calls": 10,
+  "cycles": 1,
+  "questions_to_user": [],
+  "conflicts": [],
+  "validator_rejections": [],
+  "holds": [
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-2: W-1 must be done, so brewlab.html exists with the page shell. W-2 adds the pre-order section to that file."
+    }
+  ],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 2,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-11",
+          "item": 11,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-12",
+          "item": 12,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-13",
+          "item": null,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-14",
+          "item": null,
+          "verdict": "POLICY_CONCERN"
+        }
+      ]
+    }
+  ],
+  "site_versions": 2,
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The site is one HTML file with inline or CDN CSS and JS, one page with section anchors and a nav linking to them",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "A menu section lists items grouped by category, each with a ₹ price or a marked price placeholder",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "An opening hours section shows hours for every day of the week, real or marked placeholder",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "A location section names Indiranagar, Bengaluru and has an address (or marked placeholder) and a map link or embed",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "A pre-order for pickup form lets the visitor choose items and quantities, enter name, phone and pickup time, and shows a running total",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "The pre-order flow includes an online payment step using a CDN checkout or payment link, with a marked placeholder key and no secrets",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "A blog section contains 5 articles, each with a title and body text, labelled as placeholder content where facts are unknown",
+      "pass": false
+    },
+    {
+      "item": 8,
+      "criterion": "An Instagram feed section is present, with a marked placeholder handle and a grid of posts or an embed",
+      "pass": false
+    },
+    {
+      "item": 9,
+      "criterion": "A photo gallery section has at least 6 images, marked as placeholders where real photos are missing",
+      "pass": false
+    },
+    {
+      "item": 10,
+      "criterion": "Animations are present: scroll-reveal on sections, hover or press effects on buttons and cards, and a hero entrance, with a prefers-reduced-motion rule",
+      "pass": false
+    },
+    {
+      "item": 11,
+      "criterion": "The file has a viewport meta tag and CSS written mobile-first with min-width media queries",
+      "pass": true
+    },
+    {
+      "item": 12,
+      "criterion": "Every missing business fact appears on the page as a visibly marked placeholder",
+      "pass": true
+    }
+  ],
+  "route_check_violations": [
+    {
+      "agent": "identity",
+      "detail": "picked Requester (you), routed to Adaptation",
+      "msg": 17,
+      "cycle": 1
+    }
+  ]
+}

@@ -1,0 +1,636 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "hero",
+    "name": "Hero section",
+    "covers": [
+      1
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The page shows the name Spark 2026, Northfield College of Engineering, Pune, and the dates 14 to 16 February 2027."
+    ],
+    "purpose": "Page has no header showing the fest name, college, city and dates.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section #hero"
+    ],
+    "completion_check": "Section #hero contains 'Spark 2026', 'Northfield College of Engineering', 'Pune' and '14 to 16 February 2027'.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-1.a1",
+        "goal": "The hero section states the fest name, college, city and dates exactly as supplied.",
+        "constraints": [
+          "No invented facts",
+          "No horizontal overflow at 360px"
+        ],
+        "context": [
+          "charter item 1"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-hero builder"
+        },
+        "verification": [
+          {
+            "text": "Dates string present in the hero",
+            "type": "grep-count",
+            "target": "14 to 16 February 2027",
+            "expect": 1
+          }
+        ]
+      }
+    ],
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "style guide, usable section",
+    "style_guide": true,
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "schedule",
+    "name": "Day by day schedule",
+    "covers": [
+      2
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A schedule section has Day 1, Day 2 and Day 3, each listing that day's events with start and end time: Day 1 Code Sprint 10am-1pm, Line Follower 2pm-5pm, AI in Daily Life 5:30pm-6:30pm; Day 2 Bug Hunt 11am-1pm, Poster Jam 2pm-4pm; Day 3 Drone Dash 10am-1pm, UI Duel 2pm-5pm, Startup Stories 5:30pm-6:30pm."
+    ],
+    "purpose": "Students cannot see what happens on each day.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 12,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section #schedule"
+    ],
+    "completion_check": "Section #schedule has 3 day blocks and 8 event rows with the exact times from the Requester's list.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-2.a1",
+        "goal": "Day 1, Day 2 and Day 3 each list their events with exact start and end times.",
+        "constraints": [
+          "Times match the Requester's list exactly",
+          "No extra events"
+        ],
+        "context": [
+          "charter item 2"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-schedule builder"
+        },
+        "verification": [
+          {
+            "text": "Three day headings exist",
+            "type": "grep-count",
+            "target": "Day [123]",
+            "expect": 3
+          },
+          {
+            "text": "Schedule section exists",
+            "type": "grep-count",
+            "target": "id=\"schedule\"",
+            "expect": 1
+          }
+        ]
+      }
+    ],
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "events",
+    "name": "Events by category with prices",
+    "covers": [
+      3,
+      4
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Events can be browsed by category (Coding, Robotics, Design, Talks), and each event shows name, day, time and category.",
+      "Each event shows its price: Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, Poster Jam free, UI Duel Rs 100, AI in Daily Life free, Startup Stories free."
+    ],
+    "purpose": "Students cannot browse events by category or see prices.",
+    "cost": 30,
+    "estimate": 30,
+    "envelope": {
+      "money_limit": 30,
+      "model_call_limit": 5,
+      "time_limit_minutes": 20,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section #events"
+    ],
+    "completion_check": "8 event cards exist, each with name, day, time, category and price; clicking a category shows only that category's cards.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-3.a1",
+        "goal": "Eight event cards show name, day, time, category and price and filter by category.",
+        "constraints": [
+          "Prices and categories match the Requester's list exactly",
+          "Poster Jam, AI in Daily Life and Startup Stories show 'Free'",
+          "Filter works on touch"
+        ],
+        "context": [
+          "charter item 3",
+          "charter item 4"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-events builder"
+        },
+        "verification": [
+          {
+            "text": "Eight event cards exist",
+            "type": "grep-count",
+            "target": "class=\"event-card\"",
+            "expect": 8
+          },
+          {
+            "text": "Category filter works",
+            "type": "named-test",
+            "target": "category-filter-test",
+            "expect": true
+          }
+        ]
+      }
+    ],
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "register",
+    "name": "Registration form",
+    "covers": [
+      5
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A registration form has name, email, college and an event dropdown listing all 8 events, requires the fields before submitting, and on submit sends the details to spark2026@example.com and shows a confirmation message."
+    ],
+    "purpose": "Students cannot register for an event.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 4,
+      "time_limit_minutes": 20,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section #register"
+    ],
+    "completion_check": "Empty submit is blocked; a valid submit shows the confirmation message and builds a mailto to spark2026@example.com; dropdown has 8 events.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-4.a1",
+        "goal": "A working registration form validates, sends details to spark2026@example.com and confirms.",
+        "constraints": [
+          "Exactly the four supplied fields",
+          "No JavaScript errors",
+          "No invented endpoint or service"
+        ],
+        "context": [
+          "charter item 5"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-register builder"
+        },
+        "verification": [
+          {
+            "text": "Form has 8 event options",
+            "type": "grep-count",
+            "target": "<option",
+            "expect": 9
+          },
+          {
+            "text": "Form submit and confirmation work",
+            "type": "named-test",
+            "target": "register-form-test",
+            "expect": true
+          }
+        ]
+      }
+    ],
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "venue-contact",
+    "name": "Venue and contact",
+    "covers": [
+      6,
+      7
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A venue section shows Northfield College of Engineering, 22 University Road, Pune 411007, with a link to open it in a map.",
+      "A WhatsApp button links to +91 00000 33333 (wa.me link), and the email spark2026@example.com is shown as a contact."
+    ],
+    "purpose": "Students cannot find the venue or reach the organisers.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 4,
+      "time_limit_minutes": 16,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section #venue",
+      "section #contact"
+    ],
+    "completion_check": "Address 'Northfield College of Engineering, 22 University Road, Pune 411007' is shown with a map link; a wa.me link for +91 00000 33333 and spark2026@example.com are present.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-5.a1",
+        "goal": "Venue address with map link, WhatsApp button and email are present and correct.",
+        "constraints": [
+          "No invented building or ground name",
+          "No pre-filled WhatsApp message",
+          "wa.me number uses digits only"
+        ],
+        "context": [
+          "charter item 6",
+          "charter item 7"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-venue-contact builder"
+        },
+        "verification": [
+          {
+            "text": "wa.me link present",
+            "type": "grep-count",
+            "target": "wa.me/9100000",
+            "expect": 1
+          },
+          {
+            "text": "Email shown",
+            "type": "grep-count",
+            "target": "spark2026@example.com",
+            "expect": 2
+          }
+        ]
+      }
+    ],
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section",
+    "version": 5
+  },
+  {
+    "id": "W-6",
+    "proposal_id": "sponsors",
+    "name": "Sponsors",
+    "covers": [
+      8
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A sponsors section names Nimbus Cloud, Orbit Labs and Pixel Press."
+    ],
+    "purpose": "Sponsors are not shown.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 8,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section #sponsors"
+    ],
+    "completion_check": "All three names appear in #sponsors and no logo images are used.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-6.a1",
+        "goal": "The sponsors section lists the three sponsor names, no logos.",
+        "constraints": [
+          "Names only",
+          "No extra sponsors"
+        ],
+        "context": [
+          "charter item 8"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-sponsors builder"
+        },
+        "verification": [
+          {
+            "text": "Sponsors section exists",
+            "type": "grep-count",
+            "target": "id=\"sponsors\"",
+            "expect": 1
+          }
+        ]
+      }
+    ],
+    "section": "W-6",
+    "revises": null,
+    "agent": "W-6 Builder",
+    "last_check": "usable section",
+    "version": 6
+  },
+  {
+    "id": "W-7",
+    "proposal_id": "gallery",
+    "name": "Photo placeholders",
+    "covers": [
+      9
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Where photos would go, clearly marked placeholders are used."
+    ],
+    "purpose": "No photos exist and nothing marks where they will go.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 8,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section #gallery"
+    ],
+    "completion_check": "At least 3 tiles labelled 'Photo placeholder' exist and no real image files are referenced.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-7.a1",
+        "goal": "Photo spots are shown as clearly marked placeholders.",
+        "constraints": [
+          "No stock or invented photos",
+          "Tiles do not overflow at 360px"
+        ],
+        "context": [
+          "charter item 9"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-gallery builder"
+        },
+        "verification": [
+          {
+            "text": "Placeholder tiles labelled",
+            "type": "grep-count",
+            "target": "Photo placeholder",
+            "expect": 3
+          }
+        ]
+      }
+    ],
+    "section": "W-7",
+    "revises": null,
+    "agent": "W-7 Builder",
+    "last_check": "usable section",
+    "version": 7
+  },
+  {
+    "id": "W-8",
+    "proposal_id": "shell",
+    "name": "Navigation, styling and link integrity",
+    "covers": [
+      10,
+      11
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The layout has no horizontal overflow at 360px and 1280px wide, and navigation is usable on a phone.",
+      "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+    ],
+    "purpose": "No energetic look, no phone navigation, and links and layout are unchecked for errors.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 4,
+      "time_limit_minutes": 15,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site styles",
+      "nav"
+    ],
+    "completion_check": "No horizontal scroll at 360px and 1280px; every href starting with # matches an existing id; zero console errors.",
+    "dependencies": [
+      "hero",
+      "schedule",
+      "events",
+      "register",
+      "venue-contact",
+      "sponsors",
+      "gallery"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-8.a1",
+        "goal": "Site has a phone-friendly nav, an energetic theme, no overflow, no JS errors and no broken in-page links.",
+        "constraints": [
+          "Single file, no build step",
+          "Does not change section content"
+        ],
+        "context": [
+          "charter item 10",
+          "charter item 11"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-shell builder"
+        },
+        "verification": [
+          {
+            "text": "No overflow at 360px and 1280px",
+            "type": "named-test",
+            "target": "no-horizontal-overflow-test",
+            "expect": true
+          },
+          {
+            "text": "All in-page links resolve",
+            "type": "named-test",
+            "target": "anchor-links-test",
+            "expect": true
+          },
+          {
+            "text": "No JavaScript errors on load",
+            "type": "named-test",
+            "target": "no-js-errors-test",
+            "expect": true
+          }
+        ]
+      }
+    ],
+    "section": "W-8",
+    "revises": null,
+    "agent": "W-8 Builder",
+    "last_check": "usable section and head tags",
+    "version": 8
+  },
+  {
+    "id": "W-9",
+    "proposal_id": "nav-brand-tap-target",
+    "name": "Nav brand link tap target fix",
+    "covers": [],
+    "fixes": [
+      "R-6",
+      "F-12"
+    ],
+    "covers_text": [],
+    "purpose": "The nav brand link 'Spark 2026' measures 110x26px at 360px, under the 44x44px minimum (R-6, F-12).",
+    "cost": 16,
+    "estimate": 16,
+    "envelope": {
+      "money_limit": 16,
+      "model_call_limit": 2,
+      "time_limit_minutes": 8,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "nav brand link style in section W-8"
+    ],
+    "completion_check": "Tap-target check at 360px finds 0 targets under 44x44px, overflow is 0px at 360px and 1280px, and JS errors and broken in-page links stay at none.",
+    "dependencies": [
+      "shell"
+    ],
+    "status": "done",
+    "cycle": 2,
+    "atoms": [
+      {
+        "id": "W-9.a1",
+        "goal": "The nav brand link 'Spark 2026' is at least 44px tall and 44px wide at 360px with no overflow at 360px or 1280px.",
+        "constraints": [
+          "Change only the nav brand link style",
+          "Do not alter section content or other nav links",
+          "No horizontal overflow at 360px or 1280px",
+          "Single file, no build step"
+        ],
+        "context": [
+          "section W-8",
+          "charter item 10",
+          "charter item 11"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-8 Builder"
+        },
+        "verification": [
+          {
+            "text": "No tap target under 44x44px at 360px",
+            "type": "named-test",
+            "target": "tap-target-44px-test",
+            "expect": true
+          },
+          {
+            "text": "No horizontal overflow at 360px and 1280px",
+            "type": "named-test",
+            "target": "no-horizontal-overflow-test",
+            "expect": true
+          },
+          {
+            "text": "No JavaScript errors on load",
+            "type": "named-test",
+            "target": "no-js-errors-test",
+            "expect": true
+          }
+        ]
+      }
+    ],
+    "section": "W-8",
+    "revises": "W-8",
+    "agent": "W-9 Builder",
+    "last_check": "usable section and head tags",
+    "version": 9
+  }
+]

@@ -1,0 +1,153 @@
+{
+  "run": "20261006-125414",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "model": "sonnet",
+  "mock": false,
+  "brief": "Brew Lab, Indiranagar, Bengaluru. One-page site with menu, hours, location and pre-order for pickup. We want a big photo gallery of the cafe AND a detailed story section about each of our three coffee farms. Keep costs low.",
+  "change_requests": [],
+  "status": "done",
+  "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): Menu items and prices; Opening hours for each day; Full street address and map link; Cafe phone number and the channel for receiving pre-orders (for example WhatsApp number or email); Pickup time rules (earliest slot, lead time, closing cutoff); Cafe photos for the gallery; Names, locations, stories and photos for the three coffee farms; Logo or brand colours, if any.",
+  "budget": {
+    "start": 50,
+    "granted": 50,
+    "used": 50,
+    "raises": []
+  },
+  "ai_calls": 15,
+  "cycles": 1,
+  "questions_to_user": [],
+  "conflicts": [
+    {
+      "id": "C-1",
+      "pair": [
+        "adaptation",
+        "priority"
+      ],
+      "topic": "proposal",
+      "subject": "what to fund in cycle 1",
+      "attempts": 2,
+      "escalated": false,
+      "resolved_by": "agents",
+      "repriced": false,
+      "user_question": null,
+      "user_answer": null,
+      "outcome": "Adaptation accepted Priority's COUNTER: Page shell, nav, menu, hours and location (20), Pickup pre-order builder (10), Large photo gallery (10), Three farm stories (10) goes to the validator."
+    }
+  ],
+  "validator_rejections": [],
+  "holds": [],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 4,
+      "all_pass": true,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "PASS"
+        }
+      ]
+    }
+  ],
+  "site_versions": 4,
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The file is a single HTML document with inline CSS and JavaScript and no build step.",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "It has a menu section with categories and items, with prices shown as placeholders where unknown.",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "It has an opening hours section.",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "It has a location section for Indiranagar, Bengaluru, with address and map or directions link, using placeholders where unknown.",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "It has a pre-order for pickup section where a visitor can pick menu items and quantities, choose a pickup time, see a running total or item list, and get an order summary to send.",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "It has a photo gallery section with at least 12 image slots, each with alt text, lazy loading and a marked placeholder where no real photo exists.",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "It has a farm stories section with three separate farm entries, each with a name, location, story text, and a photo slot, with placeholders where facts are unknown.",
+      "pass": true
+    },
+    {
+      "item": 8,
+      "criterion": "A navigation bar links to the menu, hours, location, pre-order, gallery and farms sections.",
+      "pass": true
+    },
+    {
+      "item": 9,
+      "criterion": "The layout includes a responsive viewport meta tag and CSS breakpoints for small screens.",
+      "pass": true
+    },
+    {
+      "item": 10,
+      "criterion": "Every placeholder is visibly marked in the page, and no invented phone numbers, prices or farm facts appear.",
+      "pass": true
+    }
+  ],
+  "route_check_violations": []
+}

@@ -1,0 +1,193 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "wf-theme",
+    "name": "Earthy theme and mobile base",
+    "covers": [
+      14
+    ],
+    "fixes": [],
+    "purpose": "Site v0 has no palette, viewport tag or overflow protection.",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 1,
+      "time_limit_minutes": 10,
+      "retry_limit": 0,
+      "stop_loss": "Stop if the single call does not produce the viewport tag and CSS variables; no retry money is available."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "CSS variables block",
+      "viewport meta tag",
+      "overflow-safe base layout"
+    ],
+    "completion_check": "Viewport meta tag present, palette defined as CSS variables, and scrollWidth equals clientWidth at 360px and 1280px.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "style guide, usable section and head tags",
+    "style_guide": true,
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "wf-catalogue",
+    "name": "Header, products and filters",
+    "covers": [
+      1,
+      2,
+      4
+    ],
+    "fixes": [],
+    "purpose": "No header, navigation or product listing exists, and visitors cannot narrow products by size or price.",
+    "cost": 30,
+    "estimate": 30,
+    "envelope": {
+      "money_limit": 30,
+      "model_call_limit": 3,
+      "time_limit_minutes": 30,
+      "retry_limit": 0,
+      "stop_loss": "Stop if the run has used all 3 calls and the 10 products or a working filter are still missing."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "page title and header",
+      "navigation",
+      "product section with 10 cards",
+      "size filter",
+      "price filter"
+    ],
+    "completion_check": "Title and header contain Thread & Loom and Pune. Exactly 10 products at the exact prices. Choosing a size or price range changes the visible cards, and Free size shows the 3 sarees and 2 dupattas. No console errors.",
+    "dependencies": [
+      "wf-theme"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section and head tags",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "wf-visit",
+    "name": "Visit block",
+    "covers": [
+      10
+    ],
+    "fixes": [],
+    "purpose": "Visitors cannot find the shop address, timings or phone.",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 1,
+      "time_limit_minutes": 10,
+      "retry_limit": 0,
+      "stop_loss": "Stop if the address, timings or tel: link are missing after the single call."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "visit section"
+    ],
+    "completion_check": "Section shows the exact address and timings, and the phone is an anchor with a tel: href for +91 00000 22222.",
+    "dependencies": [
+      "wf-theme"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "wf-order-links",
+    "name": "WhatsApp order links",
+    "covers": [
+      7
+    ],
+    "fixes": [
+      "F-7"
+    ],
+    "purpose": "Product cards have no order link; F-7 finds no wa.me link anywhere in the file.",
+    "cost": 23,
+    "estimate": 23,
+    "envelope": {
+      "money_limit": 23,
+      "model_call_limit": 2,
+      "time_limit_minutes": 20,
+      "retry_limit": 0,
+      "stop_loss": "Stop if 2 calls are used and any of the 10 cards lacks a wa.me/910000011111 link containing its product name, or if the run would exceed 23 money."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Order on WhatsApp link on each of the 10 product cards",
+      "URL-encoded pre-filled message per product"
+    ],
+    "completion_check": "10 product cards each contain an a[href^='https://wa.me/910000011111'] whose text param contains that card's exact product name; no JS errors; no horizontal overflow at 360px and 1280px.",
+    "dependencies": [
+      "wf-catalogue"
+    ],
+    "status": "done",
+    "cycle": 2,
+    "section": "W-2",
+    "revises": "W-2",
+    "agent": "W-4 Builder",
+    "last_check": "usable section and head tags",
+    "version": 4
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "wf-size-guide",
+    "name": "Size guide",
+    "covers": [
+      5
+    ],
+    "fixes": [],
+    "purpose": "No #size-guide section exists, so the size-guide nav link is broken and visitors cannot see chest measurements.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if 2 calls are used and #size-guide with all six chest values is still missing, or if spend would exceed 17."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "size-guide section with id size-guide",
+      "chest-in-inches table, six rows"
+    ],
+    "completion_check": "An element with id size-guide contains a table listing XS 32, S 34, M 36, L 38, XL 40, XXL 42; no JS errors; no horizontal overflow at 360px and 1280px.",
+    "dependencies": [
+      "wf-theme"
+    ],
+    "status": "done",
+    "cycle": 2,
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section",
+    "version": 5
+  }
+]

@@ -1,0 +1,40 @@
+{
+  "statement": "Build a single-file HTML, CSS and JavaScript event page for the Bengaluru JS Meetup in November, with schedule, speakers, RSVP, venue and map, code of conduct and sponsor logos. Where a fact is missing, the page shows a clearly marked placeholder instead of invented content.",
+  "site_name": "Bengaluru JS Meetup",
+  "audience": "People who may attend the Bengaluru JS Meetup in November and need its schedule, speakers, RSVP, venue and code of conduct.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file; CDN libraries are allowed; no build step.",
+    "No invented facts: no sample speaker names, talk titles, times, dates, venue, sponsor names or links.",
+    "Every missing fact is shown as visible 'To be announced' text or a clearly marked placeholder.",
+    "No attendee data is collected or processed on the page.",
+    "No third-party map that needs an API key or an account."
+  ],
+  "rules": [
+    "Missing content uses real section structure with 'To be announced' text only (CEO decision 1).",
+    "RSVP is a link-out button to an external page, shown as a marked placeholder until a link is supplied (CEO decision 2).",
+    "The map is an OpenStreetMap map via Leaflet from a CDN, plus a text address. Until the venue is confirmed it shows a Bengaluru city view with no pin and a 'venue to be announced' note (CEO decision 3).",
+    "Missing facts and the RSVP link are tracked as open inputs and do not block done (CEO)."
+  ],
+  "done_when": [
+    "The deliverable is one HTML file with its CSS and JavaScript inline, any libraries loaded from a CDN, and no build step or local dependencies.",
+    "The page title and main heading contain 'Bengaluru JS Meetup' and the page text states that the event is in November.",
+    "The file contains a Schedule section whose time slots and talk entries all read 'To be announced', with no sample times or talk titles.",
+    "The file contains a Speakers section whose entries all read 'To be announced', with no personal names.",
+    "The file contains an RSVP section with a button or link marked as a placeholder, and the file has no form element and no input fields.",
+    "The file contains a Venue section with a text address reading 'To be announced' and a visible 'venue to be announced' note.",
+    "The file loads Leaflet with OpenStreetMap tiles and renders a map centred on Bengaluru with no marker, and contains no Google Maps embed or API key.",
+    "The file contains a Code of Conduct section with a heading and a marked placeholder stating that the text is to be announced.",
+    "The file contains a Sponsors section with logo slots marked 'To be announced', with no sponsor names and no image sources.",
+    "Every missing fact in the file appears as visible 'To be announced' text or a marked placeholder, and the file contains no invented speaker names, talk titles, times, exact dates, venue names or sponsor names."
+  ],
+  "open_inputs": [
+    "Exact event date in November",
+    "Speaker names and talk titles",
+    "Schedule times and session order",
+    "Venue name, full address and exact map coordinates",
+    "Sponsor names and logo files",
+    "External RSVP page link",
+    "Code of conduct text"
+  ],
+  "dropped_from_brief": []
+}

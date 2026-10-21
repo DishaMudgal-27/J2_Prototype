@@ -13,6 +13,8 @@ import webbrowser
 from urllib.parse import parse_qs, urlparse
 
 import j2
+import j2_artifacts
+import j2_map
 import llm
 from j2 import HERE, J2Run, clear_lessons
 
@@ -105,6 +107,25 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 out[k] = {"asked": text is not None or k in made or (not run and k in RUN.docset), "text": text,
                           "workflows": (made.get(k) or {}).get("workflows", [])}
             return self._send(200, json.dumps(out, ensure_ascii=False))
+        if u.path == "/api/map":        # the Map tab: the run's work in order (map/1); a running run is drawn from its live state
+            d = j2.saved_dir(run) if run else RUN.dir
+            live = None
+            if not run and RUN.status == "running" or (not run and RUN.paused):
+                live = {"snapshot": RUN.snapshot(), "stages": list(RUN.stages), "stage_words": j2.J2Run.STAGE_WORDS}
+            return self._send(200, json.dumps(j2_map.build(d if d and os.path.isdir(d) else None, live), ensure_ascii=False))
+        if u.path == "/api/artifacts":  # the Artifacts tab: deliverables, then evidence and records (artifacts/types.json)
+            d = j2.saved_dir(run) if run else RUN.dir
+            return self._send(200, json.dumps(j2_artifacts.listing(d if d and os.path.isdir(d) else None), ensure_ascii=False))
+        if u.path == "/api/artifact":   # one file the run's artifact list names, read-only; nothing else is served
+            d = j2.saved_dir(run) if run else RUN.dir
+            p = j2_artifacts.served(d if d and os.path.isdir(d) else None, q.get("name"))
+            if not p:
+                return self._send(404, "not found", "text/plain")
+            ext = os.path.splitext(p)[1]
+            with open(p, "rb") as f:
+                data = f.read()
+            return self._send(200, data, "image/png") if ext == ".png" else \
+                self._send(200, data, "text/html" if ext == ".html" else "text/plain")
         if u.path == "/api/audits":     # earlier stages' audits, condensed to ids and results, for a revise atom's Fixes line
             d = j2.saved_dir(run) if run else RUN.dir
             d = d if d and os.path.isdir(d) else None                               # a missing run folder: no audits

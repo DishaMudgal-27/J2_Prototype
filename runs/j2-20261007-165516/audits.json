@@ -1,0 +1,118 @@
+[
+  {
+    "cycle": 1,
+    "version": 3,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows a placeholder developer name as the main heading, with a short line saying they are a frontend developer available for freelance work",
+        "verdict": "TO_BE_CONFIRMED",
+        "note": "Waiting on the Requester: The real name to show on the site. (Audit's own note: h1 reads \"[Placeholder Name]\"; .hero-tagline reads \"I'm a frontend developer available for freelance work...\"; a dummy-content badge is shown.)",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": "The real name to show on the site",
+        "item": 1,
+        "pass": false
+      },
+      {
+        "id": "F-2",
+        "criterion": "A projects section shows 3 project cards, each with a title and a one-line description",
+        "verdict": "TO_BE_CONFIRMED",
+        "note": "Waiting on the Requester: The real 2 to 4 projects, each with a title and one-line description. (Audit's own note: section#projects contains exactly 3 article.project-card elements, each with an h3 title and one p sentence; a dummy-content note is shown.)",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": "The real 2 to 4 projects, each with a title and one-line description",
+        "item": 2,
+        "pass": false
+      },
+      {
+        "id": "F-3",
+        "criterion": "A contact section has an email link (mailto) and links to GitHub and LinkedIn",
+        "verdict": "TO_BE_CONFIRMED",
+        "note": "Waiting on the Requester: The real email address and the real GitHub and LinkedIn links. (Audit's own note: section#contact has a[href=\"mailto:hello@example.com\"], github.com/your-username and linkedin.com/in/your-username links; all are clearly placeholders.)",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": "The real email address and the real GitHub and LinkedIn links",
+        "item": 3,
+        "pass": false
+      },
+      {
+        "id": "F-4",
+        "criterion": "The page has a visible call-to-action button for hiring or working together that links to the contact section",
+        "verdict": "PASS",
+        "note": "a.hero-cta href=\"#contact\" with text \"Hire me for your project\" in the hero; section#contact exists; broken_in_page_links is [].",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The page uses a dark background with light text, set in the CSS",
+        "verdict": "PASS",
+        "note": "body uses background var(--bg) #0b0d12 and color var(--text) #e8eaf0; color-scheme is dark.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The file has a viewport meta tag and responsive CSS, and no element forces horizontal scrolling at 360px or 1280px",
+        "verdict": "PASS",
+        "note": "Viewport meta is present; CSS uses clamp(), auto-fit grid and overflow-wrap. Mechanical check: phone overflow_px 0, desktop overflow_px 0.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "The file contains no contact form, no JavaScript errors, and every in-page link points to an existing section id",
+        "verdict": "PASS",
+        "note": "Mechanical check: forms 0, scripts 0, js_errors [], broken_in_page_links []. The only in-page link is #contact, which exists.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-8",
+        "criterion": "Standards: valid single-file HTML",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The file has two <title> tags: one before the W-1 head marker and a duplicate inside it. Browsers use the first, so there is no visible effect.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 7404,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://github.com/your-username",
+        "https://www.linkedin.com/in/your-username"
+      ],
+      "forms": 0,
+      "scripts": 0,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [],
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": false
+  }
+]

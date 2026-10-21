@@ -1,0 +1,2739 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "hero",
+    "name": "Hero with event details and countdown",
+    "covers": [
+      1,
+      11
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The site shows the name Riverside Run 2027, Pune, race day Sunday 14 February 2027, and expo day Saturday 13 February 2027, 10am to 6pm, at Riverside Grounds, 5 River Road, Pune 411001.",
+      "A countdown to race day (14 February 2027) is on the page and updates itself."
+    ],
+    "purpose": "No page header showing the event, dates, venue or race-day countdown.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 6,
+      "time_limit_minutes": 15,
+      "retry_limit": 2,
+      "stop_loss": "Stop after 2 failed validator or Audit checks on the same element, or if spend reaches 20."
+    },
+    "charged": true,
+    "calls_used": 2,
+    "retries_used": 0,
+    "outputs": [
+      "#hero section"
+    ],
+    "completion_check": "Hero shows name, race day, expo day and venue, has four countdown units and one main button.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-1.a1",
+        "goal": "The hero shows Riverside Run 2027, Pune, race day, expo day with time and venue, a self-updating countdown to 14 February 2027, and one main Register action.",
+        "constraints": [
+          "Use only brief facts",
+          "Countdown must not throw errors when race day has passed",
+          "No horizontal overflow at 360px"
+        ],
+        "context": [
+          "charter item 1",
+          "charter item 11",
+          "section #hero"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-1 Builder",
+          "steps": "Build section id hero. Inside it: h1 with Riverside Run 2027, text for Pune, race day Sunday 14 February 2027, expo day Saturday 13 February 2027, 10am to 6pm, at Riverside Grounds, 5 River Road, Pune 411001. Add div id j2-countdown holding exactly four elements with class j2-cd-unit (days, hours, minutes, seconds), each with a number span and a label. Add a script that updates them every second toward 14 February 2027 06:00 IST. Add one main link with classes j2-btn j2-btn-primary pointing to #register, labelled Register now."
+        },
+        "expected_output": [
+          {
+            "text": "Hero section exists",
+            "kind": "section",
+            "target": "#hero",
+            "met": true
+          },
+          {
+            "text": "Four countdown units",
+            "kind": "element",
+            "target": ".j2-cd-unit",
+            "count": 4,
+            "met": true
+          },
+          {
+            "text": "One main hero button",
+            "kind": "element",
+            "target": ".j2-btn-primary",
+            "count": 1,
+            "met": true
+          },
+          {
+            "text": "Event facts shown",
+            "kind": "facts",
+            "target": [
+              "Riverside Run 2027",
+              "Pune",
+              "Sunday 14 February 2027",
+              "Saturday 13 February 2027",
+              "10am to 6pm",
+              "Riverside Grounds, 5 River Road, Pune 411001"
+            ],
+            "met": true
+          },
+          {
+            "text": "Hero buttons are tappable",
+            "kind": "tap",
+            "target": "#hero",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Hero section present",
+            "type": "grep-count",
+            "target": "hero",
+            "expect": 1
+          },
+          {
+            "text": "Four countdown units exist",
+            "type": "element-count",
+            "target": ".j2-cd-unit",
+            "expect": 4,
+            "item": 2
+          },
+          {
+            "text": "Countdown container exists",
+            "type": "element-count",
+            "target": "#j2-countdown",
+            "expect": 1
+          },
+          {
+            "text": "Event facts appear",
+            "type": "facts-present",
+            "target": [
+              "Riverside Run 2027",
+              "Pune",
+              "Sunday 14 February 2027",
+              "Saturday 13 February 2027",
+              "10am to 6pm",
+              "Riverside Grounds, 5 River Road, Pune 411001"
+            ],
+            "expect": true,
+            "item": 4
+          },
+          {
+            "text": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true
+          },
+          {
+            "text": "Hero section exists",
+            "type": "element-count",
+            "target": "#hero",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "One main hero button",
+            "type": "element-count",
+            "target": ".j2-btn-primary",
+            "expect": 1,
+            "item": 3
+          },
+          {
+            "text": "Hero buttons are tappable",
+            "type": "tap-targets",
+            "expect": 44,
+            "item": 5,
+            "target": "#hero"
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-1.a1",
+            "check": "Hero section present",
+            "type": "grep-count",
+            "target": "hero",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "'hero' found 1 time(s) in index.html, expected 1",
+            "attempt": 2,
+            "of": 3,
+            "t": "2026-10-14T16:00:48",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Four countdown units exist",
+            "type": "element-count",
+            "target": ".j2-cd-unit",
+            "expect": 4,
+            "actual": 4,
+            "pass": true,
+            "evidence": "4 element(s) match '.j2-cd-unit', expected 4",
+            "attempt": 2,
+            "of": 3,
+            "t": "2026-10-14T16:00:48",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Countdown container exists",
+            "type": "element-count",
+            "target": "#j2-countdown",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#j2-countdown', expected 1",
+            "attempt": 2,
+            "of": 3,
+            "t": "2026-10-14T16:00:48",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Event facts appear",
+            "type": "facts-present",
+            "target": [
+              "Riverside Run 2027",
+              "Pune",
+              "Sunday 14 February 2027",
+              "Saturday 13 February 2027",
+              "10am to 6pm",
+              "Riverside Grounds, 5 River Road, Pune 411001"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 6 fact(s) on the page",
+            "attempt": 2,
+            "of": 3,
+            "t": "2026-10-14T16:00:48",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true,
+            "actual": {
+              "body": true,
+              "unbalanced": []
+            },
+            "pass": true,
+            "evidence": "page parses, tags balanced",
+            "attempt": 2,
+            "of": 3,
+            "t": "2026-10-14T16:00:48",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Hero section exists",
+            "type": "element-count",
+            "target": "#hero",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#hero', expected 1",
+            "attempt": 2,
+            "of": 3,
+            "t": "2026-10-14T16:00:48",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "One main hero button",
+            "type": "element-count",
+            "target": ".j2-btn-primary",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '.j2-btn-primary', expected 1",
+            "attempt": 2,
+            "of": 3,
+            "t": "2026-10-14T16:00:48",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Hero buttons are tappable",
+            "type": "tap-targets",
+            "target": "#hero",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 1,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 1 tap target(s) in '#hero' at least 44x44px at 360px",
+            "attempt": 2,
+            "of": 3,
+            "t": "2026-10-14T16:00:49",
+            "by": "code"
+          }
+        ],
+        "attempts": 2,
+        "status": "passed"
+      }
+    ],
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "nav-contrast",
+    "name": "Sticky menu and high-contrast mode",
+    "covers": [
+      12,
+      13
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A menu stays on screen while scrolling and highlights the section the visitor is currently in.",
+      "A high-contrast mode toggle changes the colours of the whole page, not only part of it."
+    ],
+    "purpose": "No persistent navigation and no accessibility colour mode.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 6,
+      "time_limit_minutes": 15,
+      "retry_limit": 2,
+      "stop_loss": "Stop after 2 failed link-resolution checks or if spend reaches 20."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#site-nav",
+      "#contrast-toggle"
+    ],
+    "completion_check": "Nav links resolve, toggle exists, and a body class switches all colours.",
+    "dependencies": [
+      "hero",
+      "races-calc",
+      "schedule-routes",
+      "faq-sponsors",
+      "contact",
+      "register",
+      "volunteer"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-2.a1",
+        "goal": "A menu stays fixed on screen, links to every section and highlights the section in view, and a toggle applies high-contrast colours to the whole page.",
+        "constraints": [
+          "Links point only to existing section ids",
+          "Contrast styles use CSS variables so every section changes",
+          "Menu collapses cleanly at 360px without overflow"
+        ],
+        "context": [
+          "charter item 12",
+          "charter item 13",
+          "section #site-nav"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-n Builder",
+          "steps": "Build nav id site-nav, position fixed or sticky, with links of class j2-nav-link to #races, #calculator, #register, #schedule, #routes, #faq, #sponsors, #volunteer, #contact. Add an IntersectionObserver that adds class j2-active to the link of the section in view. Add button id contrast-toggle with class j2-btn that toggles class j2-hc on the body; define j2-hc overrides of the CSS colour variables for background, text, borders, buttons and cards."
+        },
+        "expected_output": [
+          {
+            "text": "Menu exists",
+            "kind": "section",
+            "target": "#site-nav",
+            "met": true
+          },
+          {
+            "text": "Contrast toggle exists",
+            "kind": "element",
+            "target": "#contrast-toggle",
+            "count": 1,
+            "met": true
+          },
+          {
+            "text": "Navigation links resolve",
+            "kind": "test",
+            "target": "links-resolve",
+            "met": true
+          },
+          {
+            "text": "Menu controls are tappable",
+            "kind": "tap",
+            "target": "#site-nav",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Menu present",
+            "type": "element-count",
+            "target": "#site-nav",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "One contrast toggle",
+            "type": "element-count",
+            "target": "#contrast-toggle",
+            "expect": 1,
+            "item": 2
+          },
+          {
+            "text": "In-page links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true,
+            "item": 3
+          },
+          {
+            "text": "Menu controls are tappable",
+            "type": "tap-targets",
+            "expect": 44,
+            "item": 4,
+            "target": "#site-nav"
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-2.a1",
+            "check": "Menu present",
+            "type": "element-count",
+            "target": "#site-nav",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#site-nav', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:08:19",
+            "by": "code"
+          },
+          {
+            "atom": "W-2.a1",
+            "check": "One contrast toggle",
+            "type": "element-count",
+            "target": "#contrast-toggle",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#contrast-toggle', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:08:19",
+            "by": "code"
+          },
+          {
+            "atom": "W-2.a1",
+            "check": "In-page links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true,
+            "actual": [],
+            "pass": true,
+            "evidence": "every in-page link resolves",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:08:19",
+            "by": "code"
+          },
+          {
+            "atom": "W-2.a1",
+            "check": "Menu controls are tappable",
+            "type": "tap-targets",
+            "target": "#site-nav",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 10,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 10 tap target(s) in '#site-nav' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:08:20",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 10
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "races-calc",
+    "name": "Race comparison and fee calculator",
+    "covers": [
+      3,
+      4
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A race comparison shows 5K (start 7:30am, Rs 300, minimum age 12, cutoff 1 hour), 10K (start 6:45am, Rs 500, minimum age 16, cutoff 2 hours) and Half Marathon (start 6:00am, Rs 800, minimum age 18, cutoff 3 hours 30 minutes), and states the T-shirt price of Rs 250 (optional).",
+      "A fee calculator lets the visitor choose a race, 1 to 10 runners and a number of T-shirts, and shows the total. It takes 10% off race fees only (not T-shirts) for registrations up to 31 December 2026, and the code applies the T-shirt price of Rs 250 each."
+    ],
+    "purpose": "Runners cannot compare races or work out their cost.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 8,
+      "time_limit_minutes": 20,
+      "retry_limit": 2,
+      "stop_loss": "Stop after 2 failed checks on the same calculator figure or if spend reaches 20."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#races",
+      "#calculator"
+    ],
+    "completion_check": "Races show all facts and the calculator total uses race fee, 10% early-bird on race fees only, and Rs 250 per T-shirt.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-3.a1",
+        "goal": "The page compares 5K, 10K and Half Marathon with start, fee, minimum age and cutoff plus the optional Rs 250 T-shirt, and a calculator totals the cost.",
+        "constraints": [
+          "Early-bird 10% applies to race fees only, for registrations up to 31 December 2026",
+          "T-shirt is Rs 250 each with no discount",
+          "Runners limited to 1 to 10"
+        ],
+        "context": [
+          "charter item 3",
+          "charter item 4",
+          "section #races",
+          "section #calculator"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-n Builder",
+          "steps": "Build section id races with three cards of class j2-card (5K, 10K, Half Marathon) showing start, fee, minimum age and cutoff exactly as the brief, and a note that the T-shirt is Rs 250 (optional). Build section id calculator with select id calc-race, number input id calc-runners (min 1, max 10), number input id calc-shirts, checkbox id calc-early for early-bird, and output id calc-total. JavaScript: race fee x runners, minus 10% of race fees only if early-bird, plus shirts x 250. Add note: early-bird applies up to 31 December 2026."
+        },
+        "expected_output": [
+          {
+            "text": "Races section",
+            "kind": "section",
+            "target": "#races",
+            "met": true
+          },
+          {
+            "text": "Calculator section",
+            "kind": "section",
+            "target": "#calculator",
+            "met": true
+          },
+          {
+            "text": "Three race cards",
+            "kind": "element",
+            "target": ".j2-card",
+            "count": 3,
+            "met": true
+          },
+          {
+            "text": "Total output",
+            "kind": "element",
+            "target": "#calc-total",
+            "count": 1,
+            "met": true
+          },
+          {
+            "text": "Race and price facts",
+            "kind": "facts",
+            "target": [
+              "5K",
+              "10K",
+              "Half Marathon",
+              "7:30am",
+              "6:45am",
+              "6:00am",
+              "Rs 300",
+              "Rs 500",
+              "Rs 800",
+              "Rs 250",
+              "minimum age 12",
+              "minimum age 16",
+              "minimum age 18",
+              "cutoff 1 hour",
+              "cutoff 2 hours",
+              "3 hours 30 minutes",
+              "10%",
+              "31 December 2026"
+            ],
+            "met": true
+          },
+          {
+            "text": "Calculator fields tappable",
+            "kind": "tap",
+            "target": "#calculator",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Three race cards",
+            "type": "element-count",
+            "target": ".j2-card",
+            "expect": 3,
+            "item": 3
+          },
+          {
+            "text": "Total output present",
+            "type": "element-count",
+            "target": "#calc-total",
+            "expect": 1,
+            "item": 4
+          },
+          {
+            "text": "Race, price and early-bird facts appear",
+            "type": "facts-present",
+            "target": [
+              "5K",
+              "10K",
+              "Half Marathon",
+              "7:30am",
+              "6:45am",
+              "6:00am",
+              "Rs 300",
+              "Rs 500",
+              "Rs 800",
+              "Rs 250",
+              "minimum age 12",
+              "minimum age 16",
+              "minimum age 18",
+              "cutoff 1 hour",
+              "cutoff 2 hours",
+              "3 hours 30 minutes",
+              "10%",
+              "31 December 2026"
+            ],
+            "expect": true,
+            "item": 5
+          },
+          {
+            "text": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true
+          },
+          {
+            "text": "Races section",
+            "type": "element-count",
+            "target": "#races",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "Calculator section",
+            "type": "element-count",
+            "target": "#calculator",
+            "expect": 1,
+            "item": 2
+          },
+          {
+            "text": "Calculator fields tappable",
+            "type": "tap-targets",
+            "expect": 44,
+            "item": 6,
+            "target": "#calculator"
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-3.a1",
+            "check": "Three race cards",
+            "type": "element-count",
+            "target": ".j2-card",
+            "expect": 3,
+            "actual": 3,
+            "pass": true,
+            "evidence": "3 element(s) match '.j2-card', expected 3",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:02:39",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Total output present",
+            "type": "element-count",
+            "target": "#calc-total",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#calc-total', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:02:39",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Race, price and early-bird facts appear",
+            "type": "facts-present",
+            "target": [
+              "5K",
+              "10K",
+              "Half Marathon",
+              "7:30am",
+              "6:45am",
+              "6:00am",
+              "Rs 300",
+              "Rs 500",
+              "Rs 800",
+              "Rs 250",
+              "minimum age 12",
+              "minimum age 16",
+              "minimum age 18",
+              "cutoff 1 hour",
+              "cutoff 2 hours",
+              "3 hours 30 minutes",
+              "10%",
+              "31 December 2026"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 18 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:02:39",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true,
+            "actual": {
+              "body": true,
+              "unbalanced": []
+            },
+            "pass": true,
+            "evidence": "page parses, tags balanced",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:02:39",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Races section",
+            "type": "element-count",
+            "target": "#races",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#races', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:02:39",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Calculator section",
+            "type": "element-count",
+            "target": "#calculator",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#calculator', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:02:39",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Calculator fields tappable",
+            "type": "tap-targets",
+            "target": "#calculator",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 5,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 5 tap target(s) in '#calculator' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:02:40",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 4
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "register",
+    "name": "Registration form",
+    "covers": [
+      5
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A registration form has name, email, phone, date of birth, race dropdown, T-shirt yes/no, T-shirt size (S, M, L, XL, shown only when T-shirt is yes), emergency contact name and phone, and guardian name (required only when the runner is under 18), and is set to send to run@example.com."
+    ],
+    "purpose": "Runners cannot register.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 6,
+      "time_limit_minutes": 15,
+      "retry_limit": 2,
+      "stop_loss": "Stop after 2 failed checks on the conditional size or guardian logic or if spend reaches 15."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#register"
+    ],
+    "completion_check": "Form has all fields, a submit control and a mailto action to run@example.com.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-4.a1",
+        "goal": "A registration form collects all required runner details, shows T-shirt size only when T-shirt is yes, requires guardian name only under 18, and sends to run@example.com.",
+        "constraints": [
+          "Sizes are S, M, L and XL only",
+          "Guardian required only if age from date of birth is under 18 on 14 February 2027",
+          "Form action is mailto:run@example.com"
+        ],
+        "context": [
+          "charter item 5",
+          "section #register"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-n Builder",
+          "steps": "Build section id register with form id reg-form, action mailto:run@example.com, method post, enctype text/plain. Fields: name, email, phone, date of birth, select id reg-race (5K, 10K, Half Marathon), T-shirt yes/no radios, div id reg-size-wrap with size select (S, M, L, XL) hidden unless yes, emergency contact name and phone, input id reg-guardian (required only when DOB gives age under 18). Submit button class j2-btn j2-btn-primary. Labels on all fields."
+        },
+        "expected_output": [
+          {
+            "text": "Register section",
+            "kind": "section",
+            "target": "#register",
+            "met": true
+          },
+          {
+            "text": "One registration form",
+            "kind": "element",
+            "target": "#reg-form",
+            "count": 1,
+            "met": true
+          },
+          {
+            "text": "Conditional size wrapper",
+            "kind": "element",
+            "target": "#reg-size-wrap",
+            "count": 1,
+            "met": true
+          },
+          {
+            "text": "Guardian field",
+            "kind": "element",
+            "target": "#reg-guardian",
+            "count": 1,
+            "met": true
+          },
+          {
+            "text": "Destination shown",
+            "kind": "facts",
+            "target": [
+              "run@example.com"
+            ],
+            "met": true
+          },
+          {
+            "text": "Form has submit",
+            "kind": "test",
+            "target": "form-has-submit",
+            "met": true
+          },
+          {
+            "text": "Form fields tappable",
+            "kind": "tap",
+            "target": "#register",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "One form",
+            "type": "element-count",
+            "target": "#reg-form",
+            "expect": 1,
+            "item": 2
+          },
+          {
+            "text": "Size wrapper present",
+            "type": "element-count",
+            "target": "#reg-size-wrap",
+            "expect": 1,
+            "item": 3
+          },
+          {
+            "text": "Guardian field present",
+            "type": "element-count",
+            "target": "#reg-guardian",
+            "expect": 1,
+            "item": 4
+          },
+          {
+            "text": "Destination email appears",
+            "type": "facts-present",
+            "target": [
+              "run@example.com"
+            ],
+            "expect": true,
+            "item": 5
+          },
+          {
+            "text": "Forms have submit and destination",
+            "type": "named-test",
+            "target": "form-has-submit",
+            "expect": true,
+            "item": 6
+          },
+          {
+            "text": "Register section",
+            "type": "element-count",
+            "target": "#register",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "Form fields tappable",
+            "type": "tap-targets",
+            "expect": 44,
+            "item": 7,
+            "target": "#register"
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-4.a1",
+            "check": "One form",
+            "type": "element-count",
+            "target": "#reg-form",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#reg-form', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:03:34",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Size wrapper present",
+            "type": "element-count",
+            "target": "#reg-size-wrap",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#reg-size-wrap', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:03:34",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Guardian field present",
+            "type": "element-count",
+            "target": "#reg-guardian",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#reg-guardian', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:03:34",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Destination email appears",
+            "type": "facts-present",
+            "target": [
+              "run@example.com"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 1 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:03:34",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Forms have submit and destination",
+            "type": "named-test",
+            "target": "form-has-submit",
+            "expect": true,
+            "actual": [
+              1
+            ],
+            "pass": true,
+            "evidence": "1 form(s), each with a submit control",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:03:34",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Register section",
+            "type": "element-count",
+            "target": "#register",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#register', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:03:34",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Form fields tappable",
+            "type": "tap-targets",
+            "target": "#register",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 11,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 11 tap target(s) in '#register' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:03:35",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 5
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "volunteer",
+    "name": "Volunteer sign-up form",
+    "covers": [
+      6
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A separate volunteer form has name, email, preferred role (Water station, Registration desk, Route marshal) and availability (Saturday, Sunday or both), and is set to send to volunteers@example.com."
+    ],
+    "purpose": "Volunteers have no way to sign up.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 6,
+      "time_limit_minutes": 15,
+      "retry_limit": 2,
+      "stop_loss": "Stop after 2 failed form checks or if spend reaches 15."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#volunteer"
+    ],
+    "completion_check": "Form has name, email, role, availability, submit and a mailto action to volunteers@example.com.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-5.a1",
+        "goal": "A separate volunteer form collects name, email, preferred role and availability and sends to volunteers@example.com.",
+        "constraints": [
+          "Roles are Water station, Registration desk, Route marshal",
+          "Availability is Saturday, Sunday or both",
+          "Form action is mailto:volunteers@example.com"
+        ],
+        "context": [
+          "charter item 6",
+          "section #volunteer"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-n Builder",
+          "steps": "Build section id volunteer with form id vol-form, action mailto:volunteers@example.com, method post, enctype text/plain. Fields: name, email, select id vol-role (Water station, Registration desk, Route marshal), availability select id vol-avail (Saturday, Sunday, Both). Submit button class j2-btn j2-btn-primary. Labels on all fields."
+        },
+        "expected_output": [
+          {
+            "text": "Volunteer section",
+            "kind": "section",
+            "target": "#volunteer",
+            "met": true
+          },
+          {
+            "text": "One volunteer form",
+            "kind": "element",
+            "target": "#vol-form",
+            "count": 1,
+            "met": true
+          },
+          {
+            "text": "Role and destination facts",
+            "kind": "facts",
+            "target": [
+              "Water station",
+              "Registration desk",
+              "Route marshal",
+              "volunteers@example.com"
+            ],
+            "met": true
+          },
+          {
+            "text": "Form has submit",
+            "kind": "test",
+            "target": "form-has-submit",
+            "met": true
+          },
+          {
+            "text": "Form fields tappable",
+            "kind": "tap",
+            "target": "#volunteer",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "One volunteer form",
+            "type": "element-count",
+            "target": "#vol-form",
+            "expect": 1,
+            "item": 2
+          },
+          {
+            "text": "Roles and email appear",
+            "type": "facts-present",
+            "target": [
+              "Water station",
+              "Registration desk",
+              "Route marshal",
+              "volunteers@example.com"
+            ],
+            "expect": true,
+            "item": 3
+          },
+          {
+            "text": "Forms have submit and destination",
+            "type": "named-test",
+            "target": "form-has-submit",
+            "expect": true,
+            "item": 4
+          },
+          {
+            "text": "Volunteer section",
+            "type": "element-count",
+            "target": "#volunteer",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "Form fields tappable",
+            "type": "tap-targets",
+            "expect": 44,
+            "item": 5,
+            "target": "#volunteer"
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-5.a1",
+            "check": "One volunteer form",
+            "type": "element-count",
+            "target": "#vol-form",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#vol-form', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:04:00",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "Roles and email appear",
+            "type": "facts-present",
+            "target": [
+              "Water station",
+              "Registration desk",
+              "Route marshal",
+              "volunteers@example.com"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 4 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:04:00",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "Forms have submit and destination",
+            "type": "named-test",
+            "target": "form-has-submit",
+            "expect": true,
+            "actual": [
+              1,
+              1
+            ],
+            "pass": true,
+            "evidence": "2 form(s), each with a submit control",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:04:00",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "Volunteer section",
+            "type": "element-count",
+            "target": "#volunteer",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#volunteer', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:04:00",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "Form fields tappable",
+            "type": "tap-targets",
+            "target": "#volunteer",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 5,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 5 tap target(s) in '#volunteer' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:04:01",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section",
+    "version": 6
+  },
+  {
+    "id": "W-6",
+    "proposal_id": "schedule-routes",
+    "name": "Schedule, routes and water stations",
+    "covers": [
+      7,
+      8
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A schedule shows Expo day (10am bib collection opens, 4pm route briefing, 6pm expo closes) and Race day (5:00am gates open, 6:00am Half Marathon, 6:45am 10K, 7:30am 5K, 10:00am prize ceremony).",
+      "Each of the three races has a route map placeholder and its water stations: 5K at 2.5 km; 10K at 2.5, 5 and 7.5 km; Half Marathon every 3 km."
+    ],
+    "purpose": "Runners cannot see the timings or route details.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 8,
+      "time_limit_minutes": 18,
+      "retry_limit": 2,
+      "stop_loss": "Stop after 2 failed fact checks on times or water stations or if spend reaches 20."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#schedule",
+      "#routes"
+    ],
+    "completion_check": "Schedule lists all times; three route placeholders each list water stations.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-6.a1",
+        "goal": "The page shows the expo-day and race-day schedule and, for each race, a route map placeholder and its water stations.",
+        "constraints": [
+          "Times exactly as the brief",
+          "Route maps are clearly marked placeholders"
+        ],
+        "context": [
+          "charter item 7",
+          "charter item 8",
+          "section #schedule",
+          "section #routes"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-n Builder",
+          "steps": "Build section id schedule with two lists (Expo day, Race day) of class j2-time-list using the brief's times and labels. Build section id routes with three blocks of class j2-route, each containing a div class j2-route-map labelled as a route map placeholder and its water stations: 5K at 2.5 km; 10K at 2.5, 5 and 7.5 km; Half Marathon every 3 km."
+        },
+        "expected_output": [
+          {
+            "text": "Schedule section",
+            "kind": "section",
+            "target": "#schedule",
+            "met": true
+          },
+          {
+            "text": "Routes section",
+            "kind": "section",
+            "target": "#routes",
+            "met": true
+          },
+          {
+            "text": "Three route map placeholders",
+            "kind": "element",
+            "target": ".j2-route-map",
+            "count": 3,
+            "met": true
+          },
+          {
+            "text": "Schedule and water station facts",
+            "kind": "facts",
+            "target": [
+              "bib collection opens",
+              "4pm route briefing",
+              "6pm expo closes",
+              "5:00am gates open",
+              "10:00am prize ceremony",
+              "2.5, 5 and 7.5 km",
+              "every 3 km"
+            ],
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Three route placeholders",
+            "type": "element-count",
+            "target": ".j2-route-map",
+            "expect": 3,
+            "item": 3
+          },
+          {
+            "text": "Schedule and water station facts appear",
+            "type": "facts-present",
+            "target": [
+              "bib collection opens",
+              "4pm route briefing",
+              "6pm expo closes",
+              "5:00am gates open",
+              "10:00am prize ceremony",
+              "2.5, 5 and 7.5 km",
+              "every 3 km"
+            ],
+            "expect": true,
+            "item": 4
+          },
+          {
+            "text": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true
+          },
+          {
+            "text": "Schedule section",
+            "type": "element-count",
+            "target": "#schedule",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "Routes section",
+            "type": "element-count",
+            "target": "#routes",
+            "expect": 1,
+            "item": 2
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-6.a1",
+            "check": "Three route placeholders",
+            "type": "element-count",
+            "target": ".j2-route-map",
+            "expect": 3,
+            "actual": 3,
+            "pass": true,
+            "evidence": "3 element(s) match '.j2-route-map', expected 3",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:04:32",
+            "by": "code"
+          },
+          {
+            "atom": "W-6.a1",
+            "check": "Schedule and water station facts appear",
+            "type": "facts-present",
+            "target": [
+              "bib collection opens",
+              "4pm route briefing",
+              "6pm expo closes",
+              "5:00am gates open",
+              "10:00am prize ceremony",
+              "2.5, 5 and 7.5 km",
+              "every 3 km"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 7 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:04:32",
+            "by": "code"
+          },
+          {
+            "atom": "W-6.a1",
+            "check": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true,
+            "actual": {
+              "body": true,
+              "unbalanced": []
+            },
+            "pass": true,
+            "evidence": "page parses, tags balanced",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:04:32",
+            "by": "code"
+          },
+          {
+            "atom": "W-6.a1",
+            "check": "Schedule section",
+            "type": "element-count",
+            "target": "#schedule",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#schedule', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:04:32",
+            "by": "code"
+          },
+          {
+            "atom": "W-6.a1",
+            "check": "Routes section",
+            "type": "element-count",
+            "target": "#routes",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#routes', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:04:32",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-6",
+    "revises": null,
+    "agent": "W-6 Builder",
+    "last_check": "usable section",
+    "version": 7
+  },
+  {
+    "id": "W-7",
+    "proposal_id": "faq-sponsors",
+    "name": "FAQs and sponsors by tier",
+    "covers": [
+      9,
+      10
+    ],
+    "fixes": [],
+    "covers_text": [
+      "An FAQ section answers: change my race (yes, until 31 January 2027 by email), parking (yes, free at Gate 2), refunds (no), bib collection (at the expo on 13 February), bag drop (yes, near the start line), pacers (yes, for the 10K and Half Marathon).",
+      "A sponsors section shows tiers: Gold (Meridian Bank), Silver (Trailhead Sports, Aqua Pure), Community (Pune Runners Club), with logo placeholders."
+    ],
+    "purpose": "No answers to common questions and no sponsor recognition.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 8,
+      "time_limit_minutes": 18,
+      "retry_limit": 2,
+      "stop_loss": "Stop after 2 failed count or fact checks or if spend reaches 20."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#faq",
+      "#sponsors"
+    ],
+    "completion_check": "Six FAQ items and three tiers with four logo placeholders.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-7.a1",
+        "goal": "The page answers the six FAQs and shows Gold, Silver and Community sponsors with logo placeholders.",
+        "constraints": [
+          "Answers exactly as the brief",
+          "Logos are clearly marked placeholders"
+        ],
+        "context": [
+          "charter item 9",
+          "charter item 10",
+          "section #faq",
+          "section #sponsors"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-n Builder",
+          "steps": "Build section id faq with six details elements of class j2-faq-item (change race, parking, refunds, bib collection, bag drop, pacers). Build section id sponsors with three blocks of class j2-tier (Gold, Silver, Community), each sponsor with a div class j2-logo-ph marked as a logo placeholder and the sponsor name."
+        },
+        "expected_output": [
+          {
+            "text": "FAQ section",
+            "kind": "section",
+            "target": "#faq",
+            "met": true
+          },
+          {
+            "text": "Sponsors section",
+            "kind": "section",
+            "target": "#sponsors",
+            "met": true
+          },
+          {
+            "text": "Six FAQ items",
+            "kind": "element",
+            "target": ".j2-faq-item",
+            "count": 6,
+            "met": true
+          },
+          {
+            "text": "Three tiers",
+            "kind": "element",
+            "target": ".j2-tier",
+            "count": 3,
+            "met": true
+          },
+          {
+            "text": "Four logo placeholders",
+            "kind": "element",
+            "target": ".j2-logo-ph",
+            "count": 4,
+            "met": true
+          },
+          {
+            "text": "FAQ and sponsor facts",
+            "kind": "facts",
+            "target": [
+              "31 January 2027",
+              "free at Gate 2",
+              "near the start line",
+              "Meridian Bank",
+              "Trailhead Sports",
+              "Aqua Pure",
+              "Pune Runners Club"
+            ],
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Six FAQ items",
+            "type": "element-count",
+            "target": ".j2-faq-item",
+            "expect": 6,
+            "item": 3
+          },
+          {
+            "text": "Three tiers",
+            "type": "element-count",
+            "target": ".j2-tier",
+            "expect": 3,
+            "item": 4
+          },
+          {
+            "text": "Four logo placeholders",
+            "type": "element-count",
+            "target": ".j2-logo-ph",
+            "expect": 4,
+            "item": 5
+          },
+          {
+            "text": "FAQ and sponsor facts appear",
+            "type": "facts-present",
+            "target": [
+              "31 January 2027",
+              "free at Gate 2",
+              "near the start line",
+              "Meridian Bank",
+              "Trailhead Sports",
+              "Aqua Pure",
+              "Pune Runners Club"
+            ],
+            "expect": true,
+            "item": 6
+          },
+          {
+            "text": "FAQ section",
+            "type": "element-count",
+            "target": "#faq",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "Sponsors section",
+            "type": "element-count",
+            "target": "#sponsors",
+            "expect": 1,
+            "item": 2
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-7.a1",
+            "check": "Six FAQ items",
+            "type": "element-count",
+            "target": ".j2-faq-item",
+            "expect": 6,
+            "actual": 6,
+            "pass": true,
+            "evidence": "6 element(s) match '.j2-faq-item', expected 6",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:05:02",
+            "by": "code"
+          },
+          {
+            "atom": "W-7.a1",
+            "check": "Three tiers",
+            "type": "element-count",
+            "target": ".j2-tier",
+            "expect": 3,
+            "actual": 3,
+            "pass": true,
+            "evidence": "3 element(s) match '.j2-tier', expected 3",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:05:02",
+            "by": "code"
+          },
+          {
+            "atom": "W-7.a1",
+            "check": "Four logo placeholders",
+            "type": "element-count",
+            "target": ".j2-logo-ph",
+            "expect": 4,
+            "actual": 4,
+            "pass": true,
+            "evidence": "4 element(s) match '.j2-logo-ph', expected 4",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:05:02",
+            "by": "code"
+          },
+          {
+            "atom": "W-7.a1",
+            "check": "FAQ and sponsor facts appear",
+            "type": "facts-present",
+            "target": [
+              "31 January 2027",
+              "free at Gate 2",
+              "near the start line",
+              "Meridian Bank",
+              "Trailhead Sports",
+              "Aqua Pure",
+              "Pune Runners Club"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 7 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:05:02",
+            "by": "code"
+          },
+          {
+            "atom": "W-7.a1",
+            "check": "FAQ section",
+            "type": "element-count",
+            "target": "#faq",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#faq', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:05:02",
+            "by": "code"
+          },
+          {
+            "atom": "W-7.a1",
+            "check": "Sponsors section",
+            "type": "element-count",
+            "target": "#sponsors",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#sponsors', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:05:02",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-7",
+    "revises": null,
+    "agent": "W-7 Builder",
+    "last_check": "usable section",
+    "version": 8
+  },
+  {
+    "id": "W-8",
+    "proposal_id": "contact",
+    "name": "Contact section",
+    "covers": [
+      2
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The site shows the contact details run@example.com and WhatsApp +91 00000 44444."
+    ],
+    "purpose": "No contact details on the page.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 4,
+      "time_limit_minutes": 10,
+      "retry_limit": 2,
+      "stop_loss": "Stop after 2 failed link checks or if spend reaches 10."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#contact"
+    ],
+    "completion_check": "Email and WhatsApp number appear with well-formed links.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-8.a1",
+        "goal": "The page shows run@example.com and WhatsApp +91 00000 44444 as working links.",
+        "constraints": [
+          "No other contact details",
+          "Links well formed"
+        ],
+        "context": [
+          "charter item 2",
+          "section #contact"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-n Builder",
+          "steps": "Build section id contact with a mailto:run@example.com link and a wa.me link for WhatsApp +91 00000 44444, both with class j2-btn, showing the text as in the brief."
+        },
+        "expected_output": [
+          {
+            "text": "Contact section",
+            "kind": "section",
+            "target": "#contact",
+            "met": true
+          },
+          {
+            "text": "Contact facts",
+            "kind": "facts",
+            "target": [
+              "run@example.com",
+              "WhatsApp +91 00000 44444"
+            ],
+            "met": true
+          },
+          {
+            "text": "Contact links tappable",
+            "kind": "tap",
+            "target": "#contact",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Contact facts appear",
+            "type": "facts-present",
+            "target": [
+              "run@example.com",
+              "WhatsApp +91 00000 44444"
+            ],
+            "expect": true,
+            "item": 2
+          },
+          {
+            "text": "Links well formed",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true
+          },
+          {
+            "text": "Contact section",
+            "type": "element-count",
+            "target": "#contact",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "Contact links tappable",
+            "type": "tap-targets",
+            "expect": 44,
+            "item": 3,
+            "target": "#contact"
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-8.a1",
+            "check": "Contact facts appear",
+            "type": "facts-present",
+            "target": [
+              "run@example.com",
+              "WhatsApp +91 00000 44444"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 2 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:05:26",
+            "by": "code"
+          },
+          {
+            "atom": "W-8.a1",
+            "check": "Links well formed",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true,
+            "actual": [],
+            "pass": true,
+            "evidence": "every in-page link resolves",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:05:26",
+            "by": "code"
+          },
+          {
+            "atom": "W-8.a1",
+            "check": "Contact section",
+            "type": "element-count",
+            "target": "#contact",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#contact', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:05:26",
+            "by": "code"
+          },
+          {
+            "atom": "W-8.a1",
+            "check": "Contact links tappable",
+            "type": "tap-targets",
+            "target": "#contact",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 2,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 2 tap target(s) in '#contact' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:05:28",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-8",
+    "revises": null,
+    "agent": "W-8 Builder",
+    "last_check": "usable section",
+    "version": 9
+  },
+  {
+    "id": "W-9",
+    "proposal_id": "base-style",
+    "name": "Sporty base styling and responsive layout",
+    "covers": [
+      14
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+    ],
+    "purpose": "No shared look and no guard against overflow on phones.",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 4,
+      "time_limit_minutes": 10,
+      "retry_limit": 2,
+      "stop_loss": "Stop after 2 failed page-parse checks or if spend reaches 5."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#j2-base-style"
+    ],
+    "completion_check": "Page parses and the style block exists.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-9.a1",
+        "goal": "A single stylesheet gives a bold, clear sporty look and keeps every section free of horizontal overflow on phones and desktop.",
+        "constraints": [
+          "CSS variables for colours so high-contrast mode works",
+          "No fixed widths wider than the viewport",
+          "No JavaScript errors"
+        ],
+        "context": [
+          "charter item 14"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-n Builder",
+          "steps": "Add a style element with id j2-base-style defining CSS variables, box-sizing border-box, max-width 100% on media, fluid grids, and the classes j2-btn, j2-btn-primary and j2-card with min height 44px for buttons. Ensure text wraps and tables or grids collapse at 360px."
+        },
+        "expected_output": [
+          {
+            "text": "Base style block",
+            "kind": "element",
+            "target": "#j2-base-style",
+            "count": 1,
+            "met": true
+          },
+          {
+            "text": "Page parses",
+            "kind": "test",
+            "target": "page-parses",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "One base style block",
+            "type": "element-count",
+            "target": "#j2-base-style",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true,
+            "item": 2
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-9.a1",
+            "check": "One base style block",
+            "type": "element-count",
+            "target": "#j2-base-style",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#j2-base-style', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T15:59:56",
+            "by": "code"
+          },
+          {
+            "atom": "W-9.a1",
+            "check": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true,
+            "actual": {
+              "body": true,
+              "unbalanced": []
+            },
+            "pass": true,
+            "evidence": "page parses, tags balanced",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T15:59:56",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-9",
+    "revises": null,
+    "agent": "W-9 Builder",
+    "last_check": "style guide, usable section and head tags",
+    "style_guide": true,
+    "version": 1
+  },
+  {
+    "id": "W-10",
+    "proposal_id": "hero-no-zeros",
+    "name": "Hero countdown placeholders without bare zeros",
+    "covers": [],
+    "fixes": [
+      "F-15"
+    ],
+    "covers_text": [],
+    "purpose": "N6 not met: the countdown shows a bare 0 in each unit before the first tick, which the page check reads as an invented number.",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 4,
+      "time_limit_minutes": 10,
+      "retry_limit": 2,
+      "stop_loss": "Stop after 2 failed checks on the same element or if spend reaches 8."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#hero section"
+    ],
+    "completion_check": "Hero keeps its facts, four countdown units and one main button (.j2-main-cta); the word hero still appears once; no bare 0 in the static countdown markup.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 2,
+    "atoms": [
+      {
+        "id": "W-10.a1",
+        "goal": "The hero shows Riverside Run 2027, Pune, race day, expo day with time and venue, a self-updating countdown whose units show '--' until the first tick, and one main Register action.",
+        "constraints": [
+          "Use only brief facts",
+          "No bare 0 in the static countdown markup",
+          "Countdown must not throw errors when race day has passed",
+          "Do not use the word hero anywhere except id=\"hero\"",
+          "No horizontal overflow at 360px"
+        ],
+        "context": [
+          "charter item 1",
+          "charter item 11",
+          "section W-1"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-1 Builder",
+          "steps": "Rewrite only section #hero. Keep h1 Riverside Run 2027, Pune, race day Sunday 14 February 2027, expo day Saturday 13 February 2027, 10am to 6pm, at Riverside Grounds, 5 River Road, Pune 411001. Keep div id j2-countdown with exactly four elements of class j2-cd-unit (days, hours, minutes, seconds); each number span starts with the text '--' instead of 0, and the script replaces it on the first tick toward 14 February 2027 06:00 IST (set '--' again if the date has passed, no errors). Keep one main link with classes j2-btn j2-btn-primary j2-main-cta pointing to #register, labelled Register now. Do not use the word hero in any class, id or comment other than id=\"hero\"."
+        },
+        "expected_output": [
+          {
+            "text": "Hero section exists",
+            "kind": "section",
+            "target": "#hero",
+            "met": true
+          },
+          {
+            "text": "Four countdown units",
+            "kind": "element",
+            "target": ".j2-cd-unit",
+            "count": 4,
+            "met": true
+          },
+          {
+            "text": "One main hero button",
+            "kind": "element",
+            "target": ".j2-main-cta",
+            "count": 1,
+            "met": true
+          },
+          {
+            "text": "Event facts shown",
+            "kind": "facts",
+            "target": [
+              "Riverside Run 2027",
+              "Pune",
+              "Sunday 14 February 2027",
+              "Saturday 13 February 2027",
+              "10am to 6pm",
+              "Riverside Grounds, 5 River Road, Pune 411001"
+            ],
+            "met": true
+          },
+          {
+            "text": "Hero buttons are tappable",
+            "kind": "tap",
+            "target": "#hero",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Hero word appears once",
+            "type": "grep-count",
+            "target": "hero",
+            "expect": 1
+          },
+          {
+            "text": "Hero section exists",
+            "type": "element-count",
+            "target": "#hero",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "Four countdown units exist",
+            "type": "element-count",
+            "target": ".j2-cd-unit",
+            "expect": 4,
+            "item": 2
+          },
+          {
+            "text": "Countdown container exists",
+            "type": "element-count",
+            "target": "#j2-countdown",
+            "expect": 1
+          },
+          {
+            "text": "One main hero button",
+            "type": "element-count",
+            "target": ".j2-main-cta",
+            "expect": 1,
+            "item": 3
+          },
+          {
+            "text": "Event facts appear",
+            "type": "facts-present",
+            "target": [
+              "Riverside Run 2027",
+              "Pune",
+              "Sunday 14 February 2027",
+              "Saturday 13 February 2027",
+              "10am to 6pm",
+              "Riverside Grounds, 5 River Road, Pune 411001"
+            ],
+            "expect": true,
+            "item": 4
+          },
+          {
+            "text": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true
+          },
+          {
+            "text": "Hero buttons are tappable",
+            "type": "tap-targets",
+            "target": "#hero",
+            "expect": 44,
+            "item": 5
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-10.a1",
+            "check": "Hero word appears once",
+            "type": "grep-count",
+            "target": "hero",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "'hero' found 1 time(s) in index.html, expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:10:51",
+            "by": "code"
+          },
+          {
+            "atom": "W-10.a1",
+            "check": "Hero section exists",
+            "type": "element-count",
+            "target": "#hero",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#hero', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:10:51",
+            "by": "code"
+          },
+          {
+            "atom": "W-10.a1",
+            "check": "Four countdown units exist",
+            "type": "element-count",
+            "target": ".j2-cd-unit",
+            "expect": 4,
+            "actual": 4,
+            "pass": true,
+            "evidence": "4 element(s) match '.j2-cd-unit', expected 4",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:10:51",
+            "by": "code"
+          },
+          {
+            "atom": "W-10.a1",
+            "check": "Countdown container exists",
+            "type": "element-count",
+            "target": "#j2-countdown",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#j2-countdown', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:10:51",
+            "by": "code"
+          },
+          {
+            "atom": "W-10.a1",
+            "check": "One main hero button",
+            "type": "element-count",
+            "target": ".j2-main-cta",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '.j2-main-cta', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:10:51",
+            "by": "code"
+          },
+          {
+            "atom": "W-10.a1",
+            "check": "Event facts appear",
+            "type": "facts-present",
+            "target": [
+              "Riverside Run 2027",
+              "Pune",
+              "Sunday 14 February 2027",
+              "Saturday 13 February 2027",
+              "10am to 6pm",
+              "Riverside Grounds, 5 River Road, Pune 411001"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 6 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:10:51",
+            "by": "code"
+          },
+          {
+            "atom": "W-10.a1",
+            "check": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true,
+            "actual": {
+              "body": true,
+              "unbalanced": []
+            },
+            "pass": true,
+            "evidence": "page parses, tags balanced",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:10:51",
+            "by": "code"
+          },
+          {
+            "atom": "W-10.a1",
+            "check": "Hero buttons are tappable",
+            "type": "tap-targets",
+            "target": "#hero",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 1,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 1 tap target(s) in '#hero' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:10:52",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-1",
+    "revises": "W-1",
+    "agent": "W-10 Builder",
+    "last_check": "usable section",
+    "version": 11
+  },
+  {
+    "id": "W-11",
+    "proposal_id": "calc-no-zeros",
+    "name": "Calculator T-shirt box without preset number",
+    "covers": [],
+    "fixes": [
+      "F-15"
+    ],
+    "covers_text": [],
+    "purpose": "N6 not met: the T-shirt box carries a preset 0 (value and min) that the page check reads as an invented number.",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 4,
+      "time_limit_minutes": 10,
+      "retry_limit": 2,
+      "stop_loss": "Stop after 2 failed checks on the calculator total or if spend reaches 8."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#races",
+      "#calculator"
+    ],
+    "completion_check": "Calculator still shows the total with 10% early-bird on race fees only and Rs 250 per T-shirt; #calc-shirts has no preset value.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 2,
+    "atoms": [
+      {
+        "id": "W-11.a1",
+        "goal": "The page compares the three races with the optional Rs 250 T-shirt and the calculator totals the cost with an empty T-shirt box treated as no T-shirts.",
+        "constraints": [
+          "Early-bird 10% applies to race fees only, for registrations up to 31 December 2026",
+          "T-shirt is Rs 250 each with no discount",
+          "Runners limited to 1 to 10",
+          "No preset 0 in any attribute or text in the calculator markup",
+          "Do not change race card content"
+        ],
+        "context": [
+          "charter item 3",
+          "charter item 4",
+          "section W-3"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-3 Builder",
+          "steps": "Keep sections #races (three j2-card cards, unchanged) and #calculator. In #calculator, make number input id calc-shirts have no value attribute and no min attribute and no placeholder number; the script reads an empty or negative value as no T-shirts. Keep select calc-race, number input calc-runners (min 1, max 10), checkbox calc-early and output calc-total. Before a race is chosen, calc-total shows '--' rather than a number. Total stays race fee x runners, minus 10% of race fees only when early-bird is on, plus T-shirts x 250."
+        },
+        "expected_output": [
+          {
+            "text": "Races section",
+            "kind": "section",
+            "target": "#races",
+            "met": true
+          },
+          {
+            "text": "Calculator section",
+            "kind": "section",
+            "target": "#calculator",
+            "met": true
+          },
+          {
+            "text": "Three race cards",
+            "kind": "element",
+            "target": ".j2-card",
+            "count": 3,
+            "met": true
+          },
+          {
+            "text": "Total output",
+            "kind": "element",
+            "target": "#calc-total",
+            "count": 1,
+            "met": true
+          },
+          {
+            "text": "T-shirt box",
+            "kind": "element",
+            "target": "#calc-shirts",
+            "count": 1,
+            "met": true
+          },
+          {
+            "text": "Race and price facts",
+            "kind": "facts",
+            "target": [
+              "5K",
+              "10K",
+              "Half Marathon",
+              "7:30am",
+              "6:45am",
+              "6:00am",
+              "Rs 300",
+              "Rs 500",
+              "Rs 800",
+              "Rs 250",
+              "minimum age 12",
+              "minimum age 16",
+              "minimum age 18",
+              "cutoff 1 hour",
+              "cutoff 2 hours",
+              "3 hours 30 minutes",
+              "10%",
+              "31 December 2026"
+            ],
+            "met": true
+          },
+          {
+            "text": "Calculator fields tappable",
+            "kind": "tap",
+            "target": "#calculator",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Races section",
+            "type": "element-count",
+            "target": "#races",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "Calculator section",
+            "type": "element-count",
+            "target": "#calculator",
+            "expect": 1,
+            "item": 2
+          },
+          {
+            "text": "Three race cards",
+            "type": "element-count",
+            "target": ".j2-card",
+            "expect": 3,
+            "item": 3
+          },
+          {
+            "text": "Total output present",
+            "type": "element-count",
+            "target": "#calc-total",
+            "expect": 1,
+            "item": 4
+          },
+          {
+            "text": "One T-shirt box",
+            "type": "element-count",
+            "target": "#calc-shirts",
+            "expect": 1,
+            "item": 5
+          },
+          {
+            "text": "Race, price and early-bird facts appear",
+            "type": "facts-present",
+            "target": [
+              "5K",
+              "10K",
+              "Half Marathon",
+              "7:30am",
+              "6:45am",
+              "6:00am",
+              "Rs 300",
+              "Rs 500",
+              "Rs 800",
+              "Rs 250",
+              "minimum age 12",
+              "minimum age 16",
+              "minimum age 18",
+              "cutoff 1 hour",
+              "cutoff 2 hours",
+              "3 hours 30 minutes",
+              "10%",
+              "31 December 2026"
+            ],
+            "expect": true,
+            "item": 6
+          },
+          {
+            "text": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true
+          },
+          {
+            "text": "Calculator fields tappable",
+            "type": "tap-targets",
+            "target": "#calculator",
+            "expect": 44,
+            "item": 7
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-11.a1",
+            "check": "Races section",
+            "type": "element-count",
+            "target": "#races",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#races', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:11:32",
+            "by": "code"
+          },
+          {
+            "atom": "W-11.a1",
+            "check": "Calculator section",
+            "type": "element-count",
+            "target": "#calculator",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#calculator', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:11:32",
+            "by": "code"
+          },
+          {
+            "atom": "W-11.a1",
+            "check": "Three race cards",
+            "type": "element-count",
+            "target": ".j2-card",
+            "expect": 3,
+            "actual": 3,
+            "pass": true,
+            "evidence": "3 element(s) match '.j2-card', expected 3",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:11:32",
+            "by": "code"
+          },
+          {
+            "atom": "W-11.a1",
+            "check": "Total output present",
+            "type": "element-count",
+            "target": "#calc-total",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#calc-total', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:11:32",
+            "by": "code"
+          },
+          {
+            "atom": "W-11.a1",
+            "check": "One T-shirt box",
+            "type": "element-count",
+            "target": "#calc-shirts",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#calc-shirts', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:11:32",
+            "by": "code"
+          },
+          {
+            "atom": "W-11.a1",
+            "check": "Race, price and early-bird facts appear",
+            "type": "facts-present",
+            "target": [
+              "5K",
+              "10K",
+              "Half Marathon",
+              "7:30am",
+              "6:45am",
+              "6:00am",
+              "Rs 300",
+              "Rs 500",
+              "Rs 800",
+              "Rs 250",
+              "minimum age 12",
+              "minimum age 16",
+              "minimum age 18",
+              "cutoff 1 hour",
+              "cutoff 2 hours",
+              "3 hours 30 minutes",
+              "10%",
+              "31 December 2026"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 18 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:11:32",
+            "by": "code"
+          },
+          {
+            "atom": "W-11.a1",
+            "check": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true,
+            "actual": {
+              "body": true,
+              "unbalanced": []
+            },
+            "pass": true,
+            "evidence": "page parses, tags balanced",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:11:32",
+            "by": "code"
+          },
+          {
+            "atom": "W-11.a1",
+            "check": "Calculator fields tappable",
+            "type": "tap-targets",
+            "target": "#calculator",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 5,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 5 tap target(s) in '#calculator' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T16:11:33",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-3",
+    "revises": "W-3",
+    "agent": "W-11 Builder",
+    "last_check": "usable section",
+    "version": 12
+  }
+]

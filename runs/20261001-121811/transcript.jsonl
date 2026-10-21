@@ -1,0 +1,14 @@
+{"who": "Engineering", "text": "I need $5,000 or my part of the launch doesn't work. @Sales, you can do more with less.", "stance": "propose", "split": {"Marketing": 2500, "Engineering": 5000, "Sales": 2500}}
+{"who": "Sales", "text": "I need $3,700 or my part of the launch doesn't work. @Engineering, you can do more with less.", "stance": "propose", "split": {"Marketing": 3150, "Engineering": 3150, "Sales": 3700}}
+{"who": "Marketing", "text": "I need $5,400 or my part of the launch doesn't work. @Sales, you can do more with less.", "stance": "propose", "split": {"Marketing": 5400, "Engineering": 2300, "Sales": 2300}}
+{"who": "Sales", "text": "I need $3,100 or my part of the launch doesn't work. @Engineering, you can do more with less.", "stance": "propose", "split": {"Marketing": 3450, "Engineering": 3450, "Sales": 3100}}
+{"who": "Marketing", "text": "I need $4,800 or my part of the launch doesn't work. @Sales, you can do more with less.", "stance": "propose", "split": {"Marketing": 4800, "Engineering": 2600, "Sales": 2600}}
+{"who": "Sales", "text": "I need $2,500 or my part of the launch doesn't work. @Engineering, you can do more with less.", "stance": "propose", "split": {"Marketing": 3750, "Engineering": 3750, "Sales": 2500}}
+{"who": "Engineering", "text": "We keep going in circles. Let's get the CEO to make the call.", "stance": "escalate", "split": null}
+{"who": "system", "text": "Escalated to the CEO. Engineering asked the CEO to step in."}
+{"who": "CEO", "text": "Everyone has a point. I'm splitting it in proportion to need, rounded.\n  Reserve: $500, released on day 30: Sales if 5 deals close\n  Trade: Marketing shares webinar leads with Sales\n  @Marketing: Report results in 30 days.\n  @Engineering: Report results in 30 days.\n  @Sales: Report results in 30 days.", "split": {"Marketing": 4100, "Engineering": 3300, "Sales": 2100}}
+{"who": "Marketing", "text": "This leaves me under my minimum. Can we revisit?", "stance": "object"}
+{"who": "Engineering", "text": "Understood. I'll make it work.\n  Plan: Spend $3,300 on the highest-impact items first.", "stance": "accept"}
+{"who": "Sales", "text": "Understood. I'll make it work.\n  Plan: Spend $2,100 on the highest-impact items first.", "stance": "accept"}
+{"who": "CEO", "text": "Everyone has a point. I'm splitting it in proportion to need, rounded.\n  Reserve: $500, released on day 30: Sales if 5 deals close\n  Trade: Marketing shares webinar leads with Sales\n  @Marketing: Report results in 30 days.\n  @Engineering: Report results in 30 days.\n  @Sales: Report results in 30 days.", "split": {"Marketing": 4100, "Engineering": 3300, "Sales": 2100}}
+{"who": "Marketing", "text": "Understood. I'll make it work.\n  Plan: Spend $4,100 on the highest-impact items first.", "stance": "accept"}

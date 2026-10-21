@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brew Lab</title>
+<!-- J2:W-1 head start (owner W-1) -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Cafe in Indiranagar, Bengaluru</title>
+<meta name="description" content="Brew Lab on 100 Feet Road, Indiranagar, Bengaluru: opening hours, menu, pre-order for pickup, loyalty card and directions.">
+<style>
+:root{--bl-bg:#faf6f0;--bl-ink:#2b1d14;--bl-accent:#8a4b24;--bl-accent-soft:#f3e1cf;--bl-card:#fff;--bl-line:#e6dccf}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bl-bg);color:var(--bl-ink)}
+img,svg,video{max-width:100%;height:auto}
+h1,h2,h3{line-height:1.2;margin:0 0 .5em}
+h2{font-size:1.5rem}
+p{margin:0 0 1em}
+a{color:var(--bl-accent)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--bl-accent);outline-offset:2px}
+button,input,select,textarea{font:inherit;max-width:100%}
+.bl-wrap{width:100%;max-width:960px;margin:0 auto;padding:0 16px}
+.bl-section{padding:32px 0;border-top:1px solid var(--bl-line)}
+.bl-card{background:var(--bl-card);border:1px solid var(--bl-line);border-radius:12px;padding:16px}
+</style>
+<!-- J2:W-1 head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<style>
+#top.bl-hero{background:#2b1d14;color:#fff;padding:40px 0 24px}
+#top .bl-hero-sub{color:#f3e1cf;margin-bottom:16px}
+#top h1{font-size:2.25rem;margin-bottom:.25em}
+#bl-nav{display:flex;flex-wrap:wrap;gap:8px 16px;margin:0;padding:0}
+#bl-nav a{color:#f3e1cf;text-decoration:none;font-weight:600;padding:6px 0;border-bottom:2px solid transparent}
+#bl-nav a:hover{border-bottom-color:#f3e1cf}
+#hours .bl-hours{width:100%;border-collapse:collapse;background:var(--bl-card);border:1px solid var(--bl-line);border-radius:12px;overflow:hidden}
+#hours .bl-hours th,#hours .bl-hours td{padding:12px 14px;border-bottom:1px solid var(--bl-line);text-align:left;font-weight:400}
+#hours .bl-hours tr:last-child th,#hours .bl-hours tr:last-child td{border-bottom:0}
+#hours .bl-hours td{text-align:right;white-space:nowrap}
+#hours .bl-hours tr.today th,#hours .bl-hours tr.today td{background:var(--bl-accent-soft);font-weight:700}
+#hours .bl-hours tr.today th{border-left:4px solid var(--bl-accent)}
+#hours .bl-badge{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;background:var(--bl-accent);color:#fff;font-size:.75rem;font-weight:600;vertical-align:middle}
+@media (min-width:640px){#top h1{font-size:3rem}}
+</style>
+
+<header id="top" class="bl-hero">
+  <div class="bl-wrap">
+    <h1>Brew Lab</h1>
+    <p class="bl-hero-sub">Cafe on 100 Feet Road, Indiranagar, Bengaluru</p>
+    <nav id="bl-nav" aria-label="Page sections"></nav>
+  </div>
+</header>
+
+<main>
+<section id="hours" class="bl-section" aria-labelledby="hours-title">
+  <div class="bl-wrap">
+    <h2 id="hours-title">Opening hours</h2>
+    <p>Open every day. Today is highlighted.</p>
+    <table class="bl-hours">
+      <tbody>
+        <tr data-day="1"><th scope="row">Monday</th><td>8am to 10pm</td></tr>
+        <tr data-day="2"><th scope="row">Tuesday</th><td>8am to 10pm</td></tr>
+        <tr data-day="3"><th scope="row">Wednesday</th><td>8am to 10pm</td></tr>
+        <tr data-day="4"><th scope="row">Thursday</th><td>8am to 10pm</td></tr>
+        <tr data-day="5"><th scope="row">Friday</th><td>8am to 10pm</td></tr>
+        <tr data-day="6"><th scope="row">Saturday</th><td>9am to 11pm</td></tr>
+        <tr data-day="0"><th scope="row">Sunday</th><td>9am to 11pm</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<!-- Other agents' sections follow this one; the page assembler closes <main> after the last section. -->
+
+<script>
+(function () {
+  var NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  var WEEKDAY = { open: '08:00', close: '22:00' };
+  var WEEKEND = { open: '09:00', close: '23:00' };
+
+  function toMin(s) { var p = s.split(':'); return Number(p[0]) * 60 + Number(p[1]); }
+
+  var days = NAMES.map(function (name, i) {
+    var h = (i === 0 || i === 6) ? WEEKEND : WEEKDAY;
+    return { index: i, name: name, open: h.open, close: h.close, openMin: toMin(h.open), closeMin: toMin(h.close) };
+  });
+
+  // Current day (0 = Sunday) and minutes since midnight, in Bengaluru time (Asia/Kolkata).
+  function now() {
+    try {
+      var parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Kolkata', weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false
+      }).formatToParts(new Date());
+      var map = {};
+      parts.forEach(function (p) { map[p.type] = p.value; });
+      var idx = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(map.weekday);
+      if (idx > -1) {
+        return { day: idx, minutes: (Number(map.hour) % 24) * 60 + Number(map.minute) };
+      }
+    } catch (e) { /* fall through to local time */ }
+    var d = new Date();
+    return { day: d.getDay(), minutes: d.getHours() * 60 + d.getMinutes() };
+  }
+
+  // Shared with other sections, e.g. the pre-order form validates pickup time against forDay().
+  window.BrewLab = window.BrewLab || {};
+  window.BrewLab.hours = {
+    days: days,
+    forDay: function (i) { return days[i]; },
+    now: now,
+    today: function () { return days[now().day]; }
+  };
+
+  function highlightToday() {
+    var rows = document.querySelectorAll('#hours .bl-hours tr[data-day]');
+    var today = now().day;
+    Array.prototype.forEach.call(rows, function (row) {
+      var badge = row.querySelector('.bl-badge');
+      if (Number(row.getAttribute('data-day')) === today) {
+        row.classList.add('today');
+        row.setAttribute('aria-current', 'date');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'bl-badge';
+          badge.textContent = 'Today';
+          row.querySelector('th').appendChild(badge);
+        }
+      } else {
+        row.classList.remove('today');
+        row.removeAttribute('aria-current');
+        if (badge) { badge.parentNode.removeChild(badge); }
+      }
+    });
+  }
+
+  // Header nav lists only sections that exist, so no in-page link can be broken.
+  function buildNav() {
+    var nav = document.getElementById('bl-nav');
+    if (!nav) { return; }
+    nav.innerHTML = '';
+    [['hours', 'Hours'], ['menu', 'Menu'], ['preorder', 'Pre-order'], ['loyalty', 'Loyalty'], ['location', 'Location']]
+      .forEach(function (item) {
+        if (document.getElementById(item[0])) {
+          var a = document.createElement('a');
+          a.href = '#' + item[0];
+          a.textContent = item[1];
+          nav.appendChild(a);
+        }
+      });
+  }
+
+  highlightToday();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', buildNav);
+  } else {
+    buildNav();
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) { highlightToday(); }
+  });
+})();
+</script>
+<!-- J2:W-1 end -->
+<!-- J2:W-2 start (owner W-2) -->
+<style>
+#menu .bl-menu-groups{display:grid;grid-template-columns:1fr;gap:16px}
+#menu .bl-menu-group h3{font-size:1.1rem;margin:0 0 .5em;color:var(--bl-accent)}
+#menu .bl-menu-list{list-style:none;margin:0;padding:0}
+#menu .bl-menu-list li{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 12px;padding:10px 0;border-bottom:1px solid var(--bl-line)}
+#menu .bl-menu-list li:last-child{border-bottom:0}
+#menu .bl-item-name{min-width:0;overflow-wrap:anywhere}
+#menu .bl-item-price{font-weight:700;white-space:nowrap}
+@media (min-width:768px){#menu .bl-menu-groups{grid-template-columns:repeat(3,1fr);align-items:start}}
+</style>
+<section id="menu" class="bl-section" aria-labelledby="menu-title">
+  <div class="bl-wrap">
+    <h2 id="menu-title">Menu</h2>
+    <p>All prices in rupees. Pay at pickup.</p>
+    <div class="bl-menu-groups">
+      <div class="bl-card bl-menu-group">
+        <h3>Coffee</h3>
+        <ul class="bl-menu-list">
+          <li data-item="espresso" data-name="Espresso" data-price="120"><span class="bl-item-name">Espresso</span><span class="bl-item-price">₹120</span></li>
+          <li data-item="cappuccino" data-name="Cappuccino" data-price="180"><span class="bl-item-name">Cappuccino</span><span class="bl-item-price">₹180</span></li>
+          <li data-item="pour-over" data-name="Pour-over" data-price="220"><span class="bl-item-name">Pour-over</span><span class="bl-item-price">₹220</span></li>
+        </ul>
+      </div>
+      <div class="bl-card bl-menu-group">
+        <h3>Cold</h3>
+        <ul class="bl-menu-list">
+          <li data-item="cold-brew" data-name="Cold brew" data-price="200"><span class="bl-item-name">Cold brew</span><span class="bl-item-price">₹200</span></li>
+        </ul>
+      </div>
+      <div class="bl-card bl-menu-group">
+        <h3>Food</h3>
+        <ul class="bl-menu-list">
+          <li data-item="croissant" data-name="Croissant" data-price="150"><span class="bl-item-name">Croissant</span><span class="bl-item-price">₹150</span></li>
+          <li data-item="banana-bread" data-name="Banana bread" data-price="130"><span class="bl-item-name">Banana bread</span><span class="bl-item-price">₹130</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <script>
+  (function () {
+    // Shared with the pre-order form (W-3): window.BrewLab.menu.items = [{id, name, price, group}]
+    var items = [];
+    var rows = document.querySelectorAll('#menu li[data-item]');
+    Array.prototype.forEach.call(rows, function (li) {
+      var group = li.closest('.bl-menu-group');
+      var heading = group ? group.querySelector('h3') : null;
+      items.push({
+        id: li.getAttribute('data-item'),
+        name: li.getAttribute('data-name'),
+        price: Number(li.getAttribute('data-price')),
+        group: heading ? heading.textContent : ''
+      });
+    });
+    window.BrewLab = window.BrewLab || {};
+    window.BrewLab.menu = {
+      items: items,
+      byId: function (id) {
+        for (var i = 0; i < items.length; i++) { if (items[i].id === id) { return items[i]; } }
+        return null;
+      }
+    };
+  })();
+  </script>
+</section>
+<!-- J2:W-2 end -->
+</body>
+</html>

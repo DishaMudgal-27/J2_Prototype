@@ -1,0 +1,36 @@
+{
+  "statement": "Build a one-file website for CityCare Hospital in Bengaluru where patients can send a visit request, find emergency information, read doctor profiles and a health blog, and use all of it in English, Kannada and Hindi.",
+  "site_name": "CityCare Hospital",
+  "audience": "Patients and their families in Bengaluru, reading in English, Kannada or Hindi.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file, no build step; CDN libraries allowed.",
+    "Emergency and booking wording is short and plain in every language.",
+    "Every placeholder or unverified item is visibly marked on the page.",
+    "Kannada and Hindi text is a full translation, labelled 'pending native review'."
+  ],
+  "rules": [
+    "The booking form is a visit request. No text may say or imply the visit is confirmed.",
+    "The emergency number must be a visibly marked placeholder, never a realistic-looking phone number.",
+    "Sample doctors and sample articles must be labelled as samples and must not present invented people or medical claims as real.",
+    "Booking and emergency content must not depend on live hospital systems."
+  ],
+  "done_when": [
+    "The site is a single HTML file with its CSS and JavaScript inline or loaded from a CDN, and it needs no build step.",
+    "A language switch offers English, Kannada and Hindi, and every section (booking, emergency, doctors, blog) has text in all three.",
+    "The booking section has a request form (name, phone, preferred date, department or doctor, reason), and visible text in all three languages states it is a request, not a confirmed booking.",
+    "An emergency section is reachable from the top of the page in every language and shows a marked placeholder number, which is not a realistic phone number, and a marked placeholder address.",
+    "A doctor profiles section shows more than one profile, each labelled as a sample, in all three languages.",
+    "A health blog section shows more than one article, each labelled as a sample, in all three languages.",
+    "Kannada and Hindi content carries a visible 'pending native review' label.",
+    "Every placeholder in the file (emergency number, address, contact details, doctors, articles) is visibly marked as a placeholder."
+  ],
+  "open_inputs": [
+    "Real emergency number(s) and hospital address (replace the marked placeholders).",
+    "Hospital contact details for visit-request confirmation messages.",
+    "A third-party form or message service to deliver requests and confirmation messages.",
+    "Real doctor list and profiles.",
+    "Real blog topics and articles, with medical review before publishing.",
+    "Native Kannada and Hindi reviewers to confirm the translations, especially emergency and booking wording."
+  ],
+  "dropped_from_brief": []
+}

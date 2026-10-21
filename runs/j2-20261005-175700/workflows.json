@@ -1,0 +1,129 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": null,
+    "name": "Choose stack and scaffold",
+    "purpose": "No site exists",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "stop if the build fails twice"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "index.html"
+    ],
+    "completion_check": "index.html loads",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": null,
+    "name": "Core sections",
+    "purpose": "Hero, departments, doctors, appointment form, contact",
+    "cost": 45,
+    "estimate": 45,
+    "envelope": {
+      "money_limit": 45,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "stop if the build fails twice"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "index.html"
+    ],
+    "completion_check": "All done-when sections present",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-3",
+    "proposal_id": null,
+    "name": "Animations",
+    "purpose": "Scroll and hover effects",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "stop if the build fails twice"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "CSS"
+    ],
+    "completion_check": "Effects run on scroll",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-4",
+    "proposal_id": null,
+    "name": "Health tips strip",
+    "purpose": "Some trust content",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "stop if the build fails twice"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "index.html"
+    ],
+    "completion_check": "3 tips visible on the home page",
+    "dependencies": [
+      "Core sections"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-5",
+    "proposal_id": null,
+    "name": "Sticky emergency bar",
+    "purpose": "Emergency number visible on every screen",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "stop if the build fails twice"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "index.html"
+    ],
+    "completion_check": "Emergency number visible while scrolling",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 2
+  }
+]

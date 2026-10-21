@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ananya Rao, Wedding Photographer, Jaipur</title>
+<meta name="description" content="Portfolio of Ananya Rao, a wedding photographer based in Jaipur.">
+<style>
+  :root {
+    --ink: #2b2220;
+    --muted: #6f625d;
+    --bg: #fbf7f2;
+    --card: #ffffff;
+    --accent: #9c4a3a;
+    --warn-bg: #fff3cd;
+    --warn-ink: #5c4400;
+    --line: #e7ddd3;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .notice {
+    background: var(--warn-bg);
+    color: var(--warn-ink);
+    font: 14px/1.5 system-ui, sans-serif;
+    padding: 10px 0;
+    border-bottom: 1px solid #ecd48a;
+  }
+  header.site-header { padding: 56px 0 40px; text-align: center; border-bottom: 1px solid var(--line); }
+  header.site-header h1 { margin: 0 0 8px; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: normal; letter-spacing: .02em; }
+  header.site-header p.tagline { margin: 0; color: var(--muted); font-size: 1.1rem; }
+  nav { margin-top: 22px; font: 14px system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+  nav a { color: var(--accent); text-decoration: none; margin: 0 12px; }
+  nav a:hover, nav a:focus { text-decoration: underline; }
+  section { padding: 56px 0; }
+  section h2 { margin: 0 0 6px; font-size: 2rem; font-weight: normal; text-align: center; }
+  section p.lead { margin: 0 auto 32px; text-align: center; color: var(--muted); max-width: 640px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+  figure.tile { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .frame { position: relative; aspect-ratio: 4 / 5; display: flex; align-items: center; justify-content: center; }
+  .frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .frame .ph-art { font: 600 13px system-ui, sans-serif; color: rgba(255,255,255,.9); letter-spacing: .1em; text-transform: uppercase; text-align: center; padding: 0 12px; }
+  .badge {
+    position: absolute; top: 10px; left: 10px;
+    background: var(--warn-bg); color: var(--warn-ink);
+    font: 700 11px system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase;
+    padding: 4px 8px; border-radius: 3px; border: 1px solid #ecd48a;
+  }
+  figcaption { padding: 10px 14px; font: 14px system-ui, sans-serif; color: var(--muted); }
+  footer { border-top: 1px solid var(--line); padding: 28px 0; text-align: center; font: 14px system-ui, sans-serif; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- ======================================================================
+     EDITABLE BLOCK: everything the Requester must supply lives here.
+     Edit these values only. Items marked PLACEHOLDER must be replaced
+     before launch. Later workflows add ENQUIRY_ENDPOINT and TESTIMONIALS here.
+     ====================================================================== -->
+<script>
+const SITE = {
+  name: "Ananya Rao",
+  city: "Jaipur",
+  tagline: "Wedding photography in Jaipur"
+};
+
+// PLACEHOLDER: gallery images. To use a real photo, set `src` to the image URL
+// and set `placeholder: false` (this removes the placeholder label for that image).
+// Leave `src` empty to show a generated placeholder tile.
+const GALLERY = [
+  { src: "", alt: "Placeholder for a ceremony photo",        caption: "Ceremony",         placeholder: true, tint: "#9c4a3a" },
+  { src: "", alt: "Placeholder for a couple portrait",       caption: "Couple portrait",  placeholder: true, tint: "#7a5c3e" },
+  { src: "", alt: "Placeholder for a detail shot",           caption: "Details",          placeholder: true, tint: "#5e6b4f" },
+  { src: "", alt: "Placeholder for a family photo",          caption: "Family",           placeholder: true, tint: "#4f6b78" },
+  { src: "", alt: "Placeholder for a candid moment",         caption: "Candid moments",   placeholder: true, tint: "#7b4f6b" },
+  { src: "", alt: "Placeholder for a venue photo",           caption: "Venue",            placeholder: true, tint: "#a0763a" },
+  { src: "", alt: "Placeholder for a celebration photo",     caption: "Celebration",      placeholder: true, tint: "#5a5f86" },
+  { src: "", alt: "Placeholder for a getting-ready photo",   caption: "Getting ready",    placeholder: true, tint: "#8a4a55" }
+];
+</script>
+<!-- ====================== END EDITABLE BLOCK ====================== -->
+
+<div class="notice">
+  <div class="wrap"><strong>Draft site.</strong> Gallery images below are placeholders and must be replaced with Ananya's real photos before launch.</div>
+</div>
+
+<header class="site-header">
+  <div class="wrap">
+    <h1 id="site-title">Ananya Rao</h1>
+    <p class="tagline" id="site-tagline">Wedding photography in Jaipur</p>
+    <nav aria-label="Main">
+      <a href="#gallery">Gallery</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section id="gallery" aria-labelledby="gallery-h">
+    <div class="wrap">
+      <h2 id="gallery-h">Gallery</h2>
+      <p class="lead" id="gallery-lead">A selection of wedding photography from Jaipur.</p>
+      <div class="grid" id="gallery-grid"></div>
+      <noscript><p class="lead">Please enable JavaScript to view the gallery.</p></noscript>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap"><span id="footer-text"></span></div>
+</footer>
+
+<script>
+(function () {
+  document.title = SITE.name + ", Wedding Photographer, " + SITE.city;
+  document.getElementById("site-title").textContent = SITE.name;
+  document.getElementById("site-tagline").textContent = SITE.tagline;
+  document.getElementById("gallery-lead").textContent = "A selection of wedding photography from " + SITE.city + ".";
+  document.getElementById("footer-text").textContent = SITE.name + ", Wedding Photographer, " + SITE.city;
+
+  var grid = document.getElementById("gallery-grid");
+  GALLERY.forEach(function (item) {
+    var fig = document.createElement("figure");
+    fig.className = "tile";
+
+    var frame = document.createElement("div");
+    frame.className = "frame";
+
+    if (item.src) {
+      var img = document.createElement("img");
+      img.src = item.src;
+      img.alt = item.alt || item.caption || "";
+      img.loading = "lazy";
+      frame.appendChild(img);
+    } else {
+      frame.style.background = "linear-gradient(145deg, " + (item.tint || "#777") + ", #2b2220)";
+      frame.setAttribute("role", "img");
+      frame.setAttribute("aria-label", item.alt || "Placeholder image");
+      var art = document.createElement("span");
+      art.className = "ph-art";
+      art.textContent = "Photo goes here";
+      frame.appendChild(art);
+    }
+
+    if (item.placeholder) {
+      var badge = document.createElement("span");
+      badge.className = "badge";
+      badge.textContent = "Placeholder";
+      frame.appendChild(badge);
+    }
+
+    fig.appendChild(frame);
+
+    var cap = document.createElement("figcaption");
+    cap.textContent = item.caption || "";
+    fig.appendChild(cap);
+
+    grid.appendChild(fig);
+  });
+})();
+</script>
+</body>
+</html>

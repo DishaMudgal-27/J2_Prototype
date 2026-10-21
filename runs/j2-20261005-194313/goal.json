@@ -1,0 +1,43 @@
+{
+  "statement": "Build a single-file website for CityCare Hospital in Bengaluru where patients can request visits, find emergency information, read doctor profiles and a health blog, and use the whole site in English, Kannada and Hindi.",
+  "site_name": "CityCare Hospital",
+  "audience": "Patients and their families in Bengaluru, reading English, Kannada or Hindi, many on phones and some in an urgent situation.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file; CDN libraries allowed; no build step.",
+    "Plain, calm wording a non-specialist can follow; emergency information is the most prominent content on every page.",
+    "Readable and usable on phones and desktops, with keyboard-reachable controls and readable contrast.",
+    "Kannada text is in Kannada script and Hindi text is in Devanagari script, with no machine-looking mixed or untranslated sentences.",
+    "No invented medical facts: every emergency number, doctor name, qualification and specialty not given in the brief appears as a clearly marked placeholder."
+  ],
+  "rules": [
+    "Booking is a request form, not live slot booking. The site promises that staff confirm by phone or WhatsApp and never implies instant confirmation.",
+    "Emergency numbers, doctor names, qualifications and specialties are shipped as clearly marked placeholders and listed as open inputs.",
+    "The site must not be published as live until the placeholder medical facts are confirmed, because wrong emergency information is a patient-safety risk.",
+    "Every page, the blog included, is translated into Kannada and Hindi and flagged as awaiting native-speaker review.",
+    "Anything needing facts or an outside source is a marked placeholder on the site, not a guess."
+  ],
+  "done_when": [
+    "The site is one HTML file with its CSS and JavaScript inline or loaded from a CDN, needing no build step.",
+    "The file contains navigable sections for Home, Book a Visit, Emergency, Doctors and Health Blog, all reachable from a navigation menu.",
+    "The Book a Visit section has a request form with fields for patient name, phone number, preferred date, department or doctor, and reason for visit, and visible text saying staff will confirm by phone or WhatsApp.",
+    "The form text makes no claim of instant or automatic confirmation, and the file has no live slot picker or backend call.",
+    "Emergency information is visible from every view, either in the header or a persistent banner, and includes an emergency number shown as a marked placeholder.",
+    "The Doctors section has several profile cards, each with name, specialty and qualifications, every one shown as a marked placeholder.",
+    "The Health Blog section lists posts, and at least one post opens or expands to its full text.",
+    "A language switch offers English, Kannada and Hindi, and choosing one changes the text of every section, the booking form labels and every blog post, with the page language attribute updated.",
+    "Each language view has complete translations: no section, form label, button or blog post is left in English in the Kannada or Hindi view, apart from proper names and marked placeholders.",
+    "Every placeholder carries the same visible 'to be confirmed' marking in all three languages, and the site shows a visible list of all placeholders still open.",
+    "The site shows a visible notice that the Kannada and Hindi text is awaiting native-speaker review, and a visible notice that placeholder medical facts are not final.",
+    "The file includes a mobile viewport setting and a layout that adapts to narrow screens, so the menu, form and emergency information stay usable."
+  ],
+  "open_inputs": [
+    "Real emergency phone numbers and any emergency-department details (placeholder shown on site).",
+    "Real doctor names, qualifications and specialties (placeholders shown on site).",
+    "Hospital departments or services offered, for the booking form choices.",
+    "The phone number and WhatsApp number staff use to confirm booking requests.",
+    "Hospital address, general contact details and opening hours.",
+    "Native-speaker review of the Kannada and Hindi text.",
+    "Medical accuracy of the health blog posts, which are drafted by us."
+  ],
+  "dropped_from_brief": []
+}

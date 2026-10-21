@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CityCare Hospital, Bengaluru</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Noto+Sans+Kannada:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --muted: #444;
+    --bg: #ffffff;
+    --soft: #f3f6f9;
+    --brand: #0b4f71;
+    --alert: #a80000;
+    --alert-soft: #fff1f1;
+    --note: #fff6d6;
+    --note-border: #8a6d00;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: "Noto Sans", "Noto Sans Kannada", "Noto Sans Devanagari", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: var(--ink);
+    background: var(--bg);
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+  header.site {
+    background: var(--brand);
+    color: #fff;
+    padding: 12px 0;
+  }
+  header.site .wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .brand { font-size: 1.25rem; font-weight: 700; margin: 0; }
+  .brand small { display: block; font-size: 0.875rem; font-weight: 400; }
+  .lang { display: flex; gap: 6px; }
+  .lang button {
+    font: inherit;
+    font-size: 1rem;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 6px 14px;
+    border: 2px solid #fff;
+    background: transparent;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .lang button[aria-pressed="true"] {
+    background: #fff;
+    color: var(--brand);
+    font-weight: 700;
+  }
+  .lang button:focus-visible, a:focus-visible, button:focus-visible,
+  input:focus-visible, select:focus-visible {
+    outline: 3px solid #ffbf00;
+    outline-offset: 2px;
+  }
+  .review-note {
+    background: var(--note);
+    border-bottom: 2px solid var(--note-border);
+    color: #3d3000;
+    padding: 10px 0;
+    font-size: 0.975rem;
+  }
+  .review-note[hidden] { display: none; }
+  section.emergency {
+    background: var(--alert-soft);
+    border: 3px solid var(--alert);
+    border-radius: 10px;
+    margin: 16px 0;
+    padding: 16px;
+  }
+  section.emergency h2 {
+    margin: 0 0 8px;
+    color: var(--alert);
+    font-size: 1.5rem;
+  }
+  .emergency .local {
+    background: var(--alert);
+    color: #fff;
+    font-weight: 700;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 0 0 12px;
+    font-size: 1.1rem;
+  }
+  dl.facts { margin: 0; }
+  dl.facts dt { font-weight: 700; margin-top: 10px; }
+  dl.facts dd { margin: 2px 0 0; }
+  .placeholder {
+    display: inline-block;
+    background: #fff;
+    border: 2px dashed var(--note-border);
+    color: #3d3000;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .draft-note {
+    margin: 12px 0 0;
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+  .intro { padding: 8px 0 8px; }
+  .intro h2, section.block h2 { color: var(--brand); font-size: 1.3rem; margin: 0 0 6px; }
+
+  nav.sections {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 8px 0 8px;
+  }
+  nav.sections a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 6px 14px;
+    border: 2px solid var(--brand);
+    border-radius: 6px;
+    color: var(--brand);
+    font-weight: 700;
+    text-decoration: none;
+    background: #fff;
+  }
+
+  section.block { padding: 20px 0 8px; border-top: 1px solid #d5dde4; margin-top: 16px; }
+
+  .notice {
+    background: var(--note);
+    border: 2px solid var(--note-border);
+    color: #3d3000;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin: 10px 0 14px;
+    font-weight: 700;
+  }
+  form.visit { display: grid; gap: 14px; margin-top: 8px; }
+  form.visit label { display: block; font-weight: 700; margin-bottom: 4px; }
+  form.visit input, form.visit select {
+    width: 100%;
+    min-height: 48px;
+    font: inherit;
+    font-size: 1rem;
+    padding: 8px 10px;
+    border: 2px solid #444;
+    border-radius: 6px;
+    background: #fff;
+    color: var(--ink);
+  }
+  .row2 { display: grid; gap: 14px; grid-template-columns: 1fr; }
+  @media (min-width: 560px) { .row2 { grid-template-columns: 1fr 1fr; } }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .actions button {
+    font: inherit;
+    font-weight: 700;
+    min-height: 48px;
+    padding: 8px 18px;
+    border-radius: 6px;
+    border: 2px solid var(--brand);
+    background: var(--brand);
+    color: #fff;
+    cursor: pointer;
+  }
+  .actions button.alt { background: #fff; color: var(--brand); }
+  .privacy { font-size: 0.95rem; color: var(--muted); margin: 0; }
+  #statusBox {
+    margin-top: 12px;
+    padding: 12px;
+    border: 2px solid var(--brand);
+    border-radius: 8px;
+    background: var(--soft);
+  }
+  #statusBox[hidden] { display: none; }
+  #statusBox p { margin: 0 0 6px; }
+  #statusDraft { font-weight: 700; color: #3d3000; }
+  #statusDraft[hidden] { display: none; }
+
+  .cards { display: grid; gap: 12px; grid-template-columns: 1fr; margin-top: 10px; }
+  @media (min-width: 620px) { .cards { grid-template-columns: repeat(3, 1fr); } }
+  .card {
+    border: 2px solid #b8c4cf;
+    border-radius: 10px;
+    padding: 14px;
+    background: #fff;
+  }
+  .card h3 { margin: 0 0 8px; font-size: 1.1rem; color: var(--ink); }
+  .card .lbl { display: block; font-size: 0.9rem; font-weight: 700; color: var(--muted); margin-top: 8px; }
+  .tag {
+    display: inline-block;
+    background: var(--soft);
+    border: 1px solid #8aa0b3;
+    color: #17384f;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  .posts { display: grid; gap: 12px; margin-top: 10px; }
+  article.post {
+    border-left: 6px solid var(--brand);
+    background: var(--soft);
+    padding: 12px 14px;
+    border-radius: 0 8px 8px 0;
+  }
+  article.post h3 { margin: 6px 0; font-size: 1.1rem; }
+  article.post p { margin: 4px 0; }
+
+  footer.site {
+    background: var(--soft);
+    color: var(--muted);
+    padding: 16px 0;
+    font-size: 0.9rem;
+    margin-top: 24px;
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <p class="brand"><span data-i18n="siteName">CityCare Hospital</span><small data-i18n="city">Bengaluru</small></p>
+    <div class="lang" role="group" aria-label="Language / ಭಾಷೆ / भाषा">
+      <button type="button" data-lang="en" lang="en" aria-pressed="true">English</button>
+      <button type="button" data-lang="kn" lang="kn" aria-pressed="false">ಕನ್ನಡ</button>
+      <button type="button" data-lang="hi" lang="hi" aria-pressed="false">हिन्दी</button>
+    </div>
+  </div>
+</header>
+
+<div class="review-note" id="reviewNote" role="note" hidden>
+  <div class="wrap" data-i18n="reviewNote"></div>
+</div>
+
+<main class="wrap">
+
+  <section class="emergency" id="emergency" aria-labelledby="emergencyTitle">
+    <h2 id="emergencyTitle" data-i18n="emTitle">Emergency</h2>
+    <p class="local" data-i18n="emLocal">In an emergency, call your local emergency number now. Do not wait for a message or a reply to a form.</p>
+    <dl class="facts">
+      <dt data-i18n="emNumberLabel">Hospital emergency number</dt>
+      <dd><span class="placeholder" data-i18n="emNumberPh">[PLACEHOLDER: hospital emergency number, not yet supplied]</span></dd>
+      <dt data-i18n="emAddressLabel">Hospital address and map</dt>
+      <dd><span class="placeholder" data-i18n="emAddressPh">[PLACEHOLDER: street address and map location, not yet supplied]</span></dd>
+    </dl>
+    <p class="draft-note" data-i18n="emDraft">These details will be added once the hospital confirms them.</p>
+  </section>
+
+  <section class="intro" aria-labelledby="introTitle">
+    <h2 id="introTitle" data-i18n="introTitle">Information for patients and families</h2>
+    <p data-i18n="introText">This is the CityCare Hospital website in Bengaluru. You can read it in English, Kannada or Hindi.</p>
+  </section>
+
+  <nav class="sections" id="sectionNav" aria-label="Page sections">
+    <a href="#book" data-i18n="navBook">Request a visit</a>
+    <a href="#doctors" data-i18n="navDoctors">Doctors</a>
+    <a href="#blog" data-i18n="navBlog">Health blog</a>
+  </nav>
+
+  <section class="block" id="book" aria-labelledby="bookTitle">
+    <h2 id="bookTitle" data-i18n="formTitle">Send a visit request</h2>
+    <p data-i18n="formIntro">Fill in your details. This prepares a WhatsApp or email message to the hospital.</p>
+    <p class="notice" role="note" data-i18n="noLive">There is no live slot availability here. This form sends a visit request only. Hospital staff confirm each visit by hand.</p>
+
+    <form class="visit" id="visitForm">
+      <div>
+        <label for="vName" data-i18n="fName">Name</label>
+        <input id="vName" name="name" type="text" autocomplete="name" required>
+      </div>
+      <div>
+        <label for="vPhone" data-i18n="fPhone">Phone number</label>
+        <input id="vPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required>
+      </div>
+      <div>
+        <label for="vDoctor" data-i18n="fDoctor">Preferred doctor</label>
+        <select id="vDoctor" name="doctor" required>
+          <option value="any" data-i18n="doctorAny">No preference</option>
+          <option value="doc1" data-i18n="docOpt1">[PLACEHOLDER: doctor 1]</option>
+          <option value="doc2" data-i18n="docOpt2">[PLACEHOLDER: doctor 2]</option>
+          <option value="doc3" data-i18n="docOpt3">[PLACEHOLDER: doctor 3]</option>
+        </select>
+      </div>
+      <div class="row2">
+        <div>
+          <label for="vDate" data-i18n="fDate">Preferred date</label>
+          <input id="vDate" name="date" type="date" required>
+        </div>
+        <div>
+          <label for="vTime" data-i18n="fTime">Preferred time</label>
+          <input id="vTime" name="time" type="time" required>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="submit" id="btnWa" data-channel="wa" data-i18n="btnWa">Send by WhatsApp</button>
+        <button type="submit" id="btnEmail" class="alt" data-channel="email" data-i18n="btnEmail">Send by email</button>
+      </div>
+      <p class="privacy" data-i18n="privacy">This site does not save your details. They leave only in the WhatsApp or email message that you choose to send.</p>
+    </form>
+
+    <div id="statusBox" role="status" aria-live="polite" hidden>
+      <p data-i18n="statusOpen">Opening your message. Please press send there. Staff will confirm the visit by hand.</p>
+      <p id="statusDraft" data-i18n="statusDraft" hidden>Draft: hospital contact details are not set yet, so this message cannot reach the hospital.</p>
+      <a id="againLink" href="#" data-i18n="linkAgain">Open the message again</a>
+    </div>
+  </section>
+
+  <section class="block" id="doctors" aria-labelledby="docTitle">
+    <h2 id="docTitle" data-i18n="docTitle">Our doctors</h2>
+    <p data-i18n="docIntro">Doctor details will be added once the hospital supplies them.</p>
+    <div class="cards">
+      <article class="card">
+        <span class="tag" data-i18n="docTag">Placeholder card</span>
+        <h3 class="placeholder" data-i18n="docNamePh">[PLACEHOLDER: doctor name]</h3>
+        <span class="lbl" data-i18n="docLabelSpec">Specialty</span>
+        <span class="placeholder" data-i18n="docSpecPh">[PLACEHOLDER: specialty]</span>
+        <span class="lbl" data-i18n="docLabelCred">Credentials</span>
+        <span class="placeholder" data-i18n="docCredPh">[PLACEHOLDER: credentials]</span>
+      </article>
+      <article class="card">
+        <span class="tag" data-i18n="docTag">Placeholder card</span>
+        <h3 class="placeholder" data-i18n="docNamePh">[PLACEHOLDER: doctor name]</h3>
+        <span class="lbl" data-i18n="docLabelSpec">Specialty</span>
+        <span class="placeholder" data-i18n="docSpecPh">[PLACEHOLDER: specialty]</span>
+        <span class="lbl" data-i18n="docLabelCred">Credentials</span>
+        <span class="placeholder" data-i18n="docCredPh">[PLACEHOLDER: credentials]</span>
+      </article>
+      <article class="card">
+        <span class="tag" data-i18n="docTag">Placeholder card</span>
+        <h3 class="placeholder" data-i18n="docNamePh">[PLACEHOLDER: doctor name]</h3>
+        <span class="lbl" data-i18n="docLabelSpec">Specialty</span>
+        <span class="placeholder" data-i18n="docSpecPh">[PLACEHOLDER: specialty]</span>
+        <span class="lbl" data-i18n="docLabelCred">Credentials</span>
+        <span class="placeholder" data-i18n="docCredPh">[PLACEHOLDER: credentials]</span>
+      </article>
+    </div>
+  </section>
+
+  <section class="block" id="blog" aria-labelledby="blogTitle">
+    <h2 id="blogTitle" data-i18n="blogTitle">Health blog</h2>
+    <p data-i18n="blogIntro">Article text will be added once the hospital supplies it.</p>
+    <div class="posts">
+      <article class="post">
+        <span class="tag" data-i18n="blogLabel">General information, not medical advice.</span>
+        <h3 class="placeholder" data-i18n="postTitlePh">[PLACEHOLDER: article title]</h3>
+        <p><span class="placeholder" data-i18n="postBodyPh">[PLACEHOLDER: article text, not yet supplied]</span></p>
+      </article>
+      <article class="post">
+        <span class="tag" data-i18n="blogLabel">General information, not medical advice.</span>
+        <h3 class="placeholder" data-i18n="postTitlePh">[PLACEHOLDER: article title]</h3>
+        <p><span class="placeholder" data-i18n="postBodyPh">[PLACEHOLDER: article text, not yet supplied]</span></p>
+      </article>
+      <article class="post">
+        <span class="tag" data-i18n="blogLabel">General information, not medical advice.</span>
+        <h3 class="placeholder" data-i18n="postTitlePh">[PLACEHOLDER: article title]</h3>
+        <p><span class="placeholder" data-i18n="postBodyPh">[PLACEHOLDER: article text, not yet supplied]</span></p>
+      </article>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap" data-i18n="footer">CityCare Hospital, Bengaluru. Some hospital details are still to be supplied.</div>
+</footer>
+
+<script>
+  // Named placeholder constants. Replace with real values supplied by the hospital.
+  // Intentionally not phone-shaped or email-shaped.
+  const HOSPITAL_WHATSAPP_PLACEHOLDER = "PLACEHOLDER_HOSPITAL_WHATSAPP_NUMBER";
+  const HOSPITAL_EMAIL_PLACEHOLDER = "PLACEHOLDER_HOSPITAL_EMAIL_ADDRESS";
+
+  const I18N = {
+    en: {
+      title: "CityCare Hospital, Bengaluru",
+      siteName: "CityCare Hospital",
+      city: "Bengaluru",
+      reviewNote: "",
+      emTitle: "Emergency",
+      emLocal: "In an emergency, call your local emergency number now. Do not wait for a message or a reply to a form.",
+      emNumberLabel: "Hospital emergency number",
+      emNumberPh: "[PLACEHOLDER: hospital emergency number, not yet supplied]",
+      emAddressLabel: "Hospital address and map",
+      emAddressPh: "[PLACEHOLDER: street address and map location, not yet supplied]",
+      emDraft: "These details will be added once the hospital confirms them.",
+      introTitle: "Information for patients and families",
+      introText: "This is the CityCare Hospital website in Bengaluru. You can read it in English, Kannada or Hindi.",
+      navBook: "Request a visit",
+      navDoctors: "Doctors",
+      navBlog: "Health blog",
+      formTitle: "Send a visit request",
+      formIntro: "Fill in your details. This prepares a WhatsApp or email message to the hospital.",
+      noLive: "There is no live slot availability here. This form sends a visit request only. Hospital staff confirm each visit by hand.",
+      fName: "Name",
+      fPhone: "Phone number",
+      fDoctor: "Preferred doctor",
+      fDate: "Preferred date",
+      fTime: "Preferred time",
+      doctorAny: "No preference",
+      docOpt1: "[PLACEHOLDER: doctor 1]",
+      docOpt2: "[PLACEHOLDER: doctor 2]",
+      docOpt3: "[PLACEHOLDER: doctor 3]",
+      btnWa: "Send by WhatsApp",
+      btnEmail: "Send by email",
+      privacy: "This site does not save your details. They leave only in the WhatsApp or email message that you choose to send.",
+      statusOpen: "Opening your message. Please press send there. Staff will confirm the visit by hand.",
+      statusDraft: "Draft: hospital contact details are not set yet, so this message cannot reach the hospital.",
+      linkAgain: "Open the message again",
+      docTitle: "Our doctors",
+      docIntro: "Doctor details will be added once the hospital supplies them.",
+      docTag: "Placeholder card",
+      docNamePh: "[PLACEHOLDER: doctor name]",
+      docLabelSpec: "Specialty",
+      docSpecPh: "[PLACEHOLDER: specialty]",
+      docLabelCred: "Credentials",
+      docCredPh: "[PLACEHOLDER: credentials]",
+      blogTitle: "Health blog",
+      blogIntro: "Article text will be added once the hospital supplies it.",
+      blogLabel: "General information, not medical advice.",
+      postTitlePh: "[PLACEHOLDER: article title]",
+      postBodyPh: "[PLACEHOLDER: article text, not yet supplied]",
+      footer: "CityCare Hospital, Bengaluru. Some hospital details are still to be supplied."
+    },
+    kn: {
+      title: "ಸಿಟಿಕೇರ್ ಆಸ್ಪತ್ರೆ, ಬೆಂಗಳೂರು",
+      siteName: "ಸಿಟಿಕೇರ್ ಆಸ್ಪತ್ರೆ",
+      city: "ಬೆಂಗಳೂರು",
+      reviewNote: "ಈ ಕನ್ನಡ ಅನುವಾದವು ಕನ್ನಡ ಮಾತೃಭಾಷಿಕರ ಪರಿಶೀಲನೆಗೆ ಬಾಕಿ ಇದೆ. ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ ಮೊದಲು ಕರೆ ಮಾಡಿ.",
+      emTitle: "ತುರ್ತು ಪರಿಸ್ಥಿತಿ",
+      emLocal: "ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ ಈಗಲೇ ನಿಮ್ಮ ಸ್ಥಳೀಯ ತುರ್ತು ಸಂಖ್ಯೆಗೆ ಕರೆ ಮಾಡಿ. ಸಂದೇಶ ಅಥವಾ ಫಾರ್ಮ್‌ಗೆ ಉತ್ತರ ಬರುವವರೆಗೆ ಕಾಯಬೇಡಿ.",
+      emNumberLabel: "ಆಸ್ಪತ್ರೆಯ ತುರ್ತು ಸಂಖ್ಯೆ",
+      emNumberPh: "[ಮಾದರಿ ಸ್ಥಾನ: ಆಸ್ಪತ್ರೆಯ ತುರ್ತು ಸಂಖ್ಯೆ ಇನ್ನೂ ನೀಡಿಲ್ಲ]",
+      emAddressLabel: "ಆಸ್ಪತ್ರೆಯ ವಿಳಾಸ ಮತ್ತು ನಕ್ಷೆ",
+      emAddressPh: "[ಮಾದರಿ ಸ್ಥಾನ: ರಸ್ತೆ ವಿಳಾಸ ಮತ್ತು ನಕ್ಷೆ ಸ್ಥಳ ಇನ್ನೂ ನೀಡಿಲ್ಲ]",
+      emDraft: "ಆಸ್ಪತ್ರೆ ದೃಢೀಕರಿಸಿದ ನಂತರ ಈ ವಿವರಗಳನ್ನು ಸೇರಿಸಲಾಗುತ್ತದೆ.",
+      introTitle: "ರೋಗಿಗಳು ಮತ್ತು ಕುಟುಂಬಗಳಿಗೆ ಮಾಹಿತಿ",
+      introText: "ಇದು ಬೆಂಗಳೂರಿನ ಸಿಟಿಕೇರ್ ಆಸ್ಪತ್ರೆಯ ವೆಬ್‌ಸೈಟ್. ಇದನ್ನು ಇಂಗ್ಲಿಷ್, ಕನ್ನಡ ಅಥವಾ ಹಿಂದಿಯಲ್ಲಿ ಓದಬಹುದು.",
+      navBook: "ಭೇಟಿ ಕೋರಿಕೆ",
+      navDoctors: "ವೈದ್ಯರು",
+      navBlog: "ಆರೋಗ್ಯ ಬ್ಲಾಗ್",
+      formTitle: "ಭೇಟಿಗೆ ಕೋರಿಕೆ ಕಳುಹಿಸಿ",
+      formIntro: "ನಿಮ್ಮ ವಿವರಗಳನ್ನು ತುಂಬಿ. ಇದು ಆಸ್ಪತ್ರೆಗೆ WhatsApp ಅಥವಾ ಇಮೇಲ್ ಸಂದೇಶವನ್ನು ಸಿದ್ಧಪಡಿಸುತ್ತದೆ.",
+      noLive: "ಇಲ್ಲಿ ಸ್ಲಾಟ್‌ಗಳ ಲಭ್ಯತೆಯನ್ನು ನೇರವಾಗಿ ತೋರಿಸುವುದಿಲ್ಲ. ಇದು ಕೇವಲ ಭೇಟಿಯ ಕೋರಿಕೆ. ಆಸ್ಪತ್ರೆಯ ಸಿಬ್ಬಂದಿ ಪ್ರತಿ ಭೇಟಿಯನ್ನು ಕೈಯಾರೆ ದೃಢೀಕರಿಸುತ್ತಾರೆ.",
+      fName: "ಹೆಸರು",
+      fPhone: "ಫೋನ್ ಸಂಖ್ಯೆ",
+      fDoctor: "ಆದ್ಯತೆಯ ವೈದ್ಯರು",
+      fDate: "ಬಯಸುವ ದಿನಾಂಕ",
+      fTime: "ಬಯಸುವ ಸಮಯ",
+      doctorAny: "ಯಾರಾದರೂ ಸರಿ",
+      docOpt1: "[ಮಾದರಿ ಸ್ಥಾನ: ವೈದ್ಯರು 1]",
+      docOpt2: "[ಮಾದರಿ ಸ್ಥಾನ: ವೈದ್ಯರು 2]",
+      docOpt3: "[ಮಾದರಿ ಸ್ಥಾನ: ವೈದ್ಯರು 3]",
+      btnWa: "WhatsApp ಮೂಲಕ ಕಳುಹಿಸಿ",
+      btnEmail: "ಇಮೇಲ್ ಮೂಲಕ ಕಳುಹಿಸಿ",
+      privacy: "ಈ ವೆಬ್‌ಸೈಟ್ ನಿಮ್ಮ ವಿವರಗಳನ್ನು ಉಳಿಸುವುದಿಲ್ಲ. ನೀವು ಕಳುಹಿಸಲು ಆಯ್ಕೆ ಮಾಡಿದ WhatsApp ಅಥವಾ ಇಮೇಲ್ ಸಂದೇಶದ ಮೂಲಕ ಮಾತ್ರ ವಿವರಗಳು ಹೋಗುತ್ತವೆ.",
+      statusOpen: "ನಿಮ್ಮ ಸಂದೇಶ ತೆರೆಯುತ್ತಿದೆ. ಅಲ್ಲಿ ಕಳುಹಿಸು ಒತ್ತಿ. ಸಿಬ್ಬಂದಿ ಭೇಟಿಯನ್ನು ಕೈಯಾರೆ ದೃಢೀಕರಿಸುತ್ತಾರೆ.",
+      statusDraft: "ಕರಡು: ಆಸ್ಪತ್ರೆಯ ಸಂಪರ್ಕ ವಿವರಗಳನ್ನು ಇನ್ನೂ ಹೊಂದಿಸಿಲ್ಲ, ಆದ್ದರಿಂದ ಈ ಸಂದೇಶ ಆಸ್ಪತ್ರೆಗೆ ತಲುಪುವುದಿಲ್ಲ.",
+      linkAgain: "ಸಂದೇಶವನ್ನು ಮತ್ತೆ ತೆರೆಯಿರಿ",
+      docTitle: "ನಮ್ಮ ವೈದ್ಯರು",
+      docIntro: "ಆಸ್ಪತ್ರೆ ವಿವರ ನೀಡಿದ ನಂತರ ವೈದ್ಯರ ಮಾಹಿತಿಯನ್ನು ಸೇರಿಸಲಾಗುತ್ತದೆ.",
+      docTag: "ಮಾದರಿ ಕಾರ್ಡ್",
+      docNamePh: "[ಮಾದರಿ ಸ್ಥಾನ: ವೈದ್ಯರ ಹೆಸರು]",
+      docLabelSpec: "ವಿಶೇಷತೆ",
+      docSpecPh: "[ಮಾದರಿ ಸ್ಥಾನ: ವಿಶೇಷತೆ]",
+      docLabelCred: "ಅರ್ಹತೆಗಳು",
+      docCredPh: "[ಮಾದರಿ ಸ್ಥಾನ: ಅರ್ಹತೆಗಳು]",
+      blogTitle: "ಆರೋಗ್ಯ ಬ್ಲಾಗ್",
+      blogIntro: "ಲೇಖನಗಳ ಪಠ್ಯವನ್ನು ಆಸ್ಪತ್ರೆ ನೀಡಿದ ನಂತರ ಸೇರಿಸಲಾಗುತ್ತದೆ.",
+      blogLabel: "ಸಾಮಾನ್ಯ ಮಾಹಿತಿ ಮಾತ್ರ, ವೈದ್ಯಕೀಯ ಸಲಹೆ ಅಲ್ಲ.",
+      postTitlePh: "[ಮಾದರಿ ಸ್ಥಾನ: ಲೇಖನದ ಶೀರ್ಷಿಕೆ]",
+      postBodyPh: "[ಮಾದರಿ ಸ್ಥಾನ: ಲೇಖನದ ಪಠ್ಯ ಇನ್ನೂ ನೀಡಿಲ್ಲ]",
+      footer: "ಸಿಟಿಕೇರ್ ಆಸ್ಪತ್ರೆ, ಬೆಂಗಳೂರು. ಕೆಲವು ಆಸ್ಪತ್ರೆ ವಿವರಗಳನ್ನು ಇನ್ನೂ ನೀಡಬೇಕಿದೆ."
+    },
+    hi: {
+      title: "सिटीकेयर अस्पताल, बेंगलुरु",
+      siteName: "सिटीकेयर अस्पताल",
+      city: "बेंगलुरु",
+      reviewNote: "यह हिंदी अनुवाद हिंदी मातृभाषी व्यक्ति की समीक्षा के लिए लंबित है। आपात स्थिति में पहले कॉल करें।",
+      emTitle: "आपातकाल",
+      emLocal: "आपात स्थिति में अभी अपने स्थानीय आपातकालीन नंबर पर कॉल करें। संदेश या फ़ॉर्म के जवाब का इंतज़ार न करें।",
+      emNumberLabel: "अस्पताल का आपातकालीन नंबर",
+      emNumberPh: "[स्थान सुरक्षित: अस्पताल का आपातकालीन नंबर अभी नहीं दिया गया]",
+      emAddressLabel: "अस्पताल का पता और नक्शा",
+      emAddressPh: "[स्थान सुरक्षित: सड़क का पता और नक्शे की जगह अभी नहीं दी गई]",
+      emDraft: "अस्पताल की पुष्टि के बाद ये जानकारियाँ जोड़ी जाएँगी।",
+      introTitle: "मरीज़ों और परिवारों के लिए जानकारी",
+      introText: "यह बेंगलुरु के सिटीकेयर अस्पताल की वेबसाइट है। आप इसे अंग्रेज़ी, कन्नड़ या हिंदी में पढ़ सकते हैं।",
+      navBook: "विज़िट का अनुरोध",
+      navDoctors: "डॉक्टर",
+      navBlog: "स्वास्थ्य ब्लॉग",
+      formTitle: "विज़िट का अनुरोध भेजें",
+      formIntro: "अपनी जानकारी भरें। इससे अस्पताल के लिए WhatsApp या ईमेल संदेश तैयार होगा।",
+      noLive: "यहाँ स्लॉट की लाइव उपलब्धता नहीं दिखती। यह केवल विज़िट का अनुरोध है। अस्पताल का स्टाफ हर विज़िट की पुष्टि हाथ से करता है।",
+      fName: "नाम",
+      fPhone: "फ़ोन नंबर",
+      fDoctor: "पसंदीदा डॉक्टर",
+      fDate: "पसंदीदा तारीख़",
+      fTime: "पसंदीदा समय",
+      doctorAny: "कोई भी चलेगा",
+      docOpt1: "[स्थान सुरक्षित: डॉक्टर 1]",
+      docOpt2: "[स्थान सुरक्षित: डॉक्टर 2]",
+      docOpt3: "[स्थान सुरक्षित: डॉक्टर 3]",
+      btnWa: "WhatsApp से भेजें",
+      btnEmail: "ईमेल से भेजें",
+      privacy: "यह वेबसाइट आपकी जानकारी सहेजती नहीं है। जानकारी केवल उसी WhatsApp या ईमेल संदेश से जाती है जिसे आप भेजना चुनते हैं।",
+      statusOpen: "आपका संदेश खुल रहा है। वहाँ भेजें दबाएँ। स्टाफ विज़िट की पुष्टि हाथ से करेगा।",
+      statusDraft: "ड्राफ़्ट: अस्पताल का संपर्क अभी सेट नहीं है, इसलिए यह संदेश अस्पताल तक नहीं पहुँचेगा।",
+      linkAgain: "संदेश फिर से खोलें",
+      docTitle: "हमारे डॉक्टर",
+      docIntro: "अस्पताल से जानकारी मिलने के बाद डॉक्टरों का विवरण जोड़ा जाएगा।",
+      docTag: "नमूना कार्ड",
+      docNamePh: "[स्थान सुरक्षित: डॉक्टर का नाम]",
+      docLabelSpec: "विशेषज्ञता",
+      docSpecPh: "[स्थान सुरक्षित: विशेषज्ञता]",
+      docLabelCred: "योग्यताएँ",
+      docCredPh: "[स्थान सुरक्षित: योग्यताएँ]",
+      blogTitle: "स्वास्थ्य ब्लॉग",
+      blogIntro: "लेख का पाठ अस्पताल से मिलने के बाद जोड़ा जाएगा।",
+      blogLabel: "सामान्य जानकारी, चिकित्सीय सलाह नहीं।",
+      postTitlePh: "[स्थान सुरक्षित: लेख का शीर्षक]",
+      postBodyPh: "[स्थान सुरक्षित: लेख का पाठ अभी नहीं दिया गया]",
+      footer: "सिटीकेयर अस्पताल, बेंगलुरु। अस्पताल की कुछ जानकारी अभी देनी बाकी है।"
+    }
+  };
+
+  const LANG_NAMES = { en: "English", kn: "Kannada", hi: "Hindi" };
+  let currentLang = "en";
+  let lastLink = "#";
+
+  function setLang(lang) {
+    const dict = I18N[lang] || I18N.en;
+    currentLang = I18N[lang] ? lang : "en";
+    document.documentElement.lang = currentLang;
+    document.title = dict.title;
+    document.querySelectorAll("[data-i18n]").forEach(function (el) {
+      const key = el.getAttribute("data-i18n");
+      if (dict[key] !== undefined) el.textContent = dict[key];
+    });
+    document.getElementById("reviewNote").hidden = (currentLang === "en");
+    document.querySelectorAll(".lang button").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-lang") === currentLang));
+    });
+  }
+
+  document.querySelectorAll(".lang button").forEach(function (b) {
+    b.addEventListener("click", function () { setLang(b.getAttribute("data-lang")); });
+  });
+
+  // Visit request: builds a message link in the browser only. No network call, nothing stored.
+  function buildMessage(f) {
+    const en = I18N.en;
+    const doctorText = en[f.doctor] !== undefined ? en[f.doctor] : f.doctor;
+    return [
+      "Visit request from the CityCare Hospital website",
+      "Name: " + f.name,
+      "Phone: " + f.phone,
+      "Preferred doctor: " + doctorText,
+      "Preferred date: " + f.date,
+      "Preferred time: " + f.time,
+      "Site language: " + LANG_NAMES[currentLang],
+      "This is a request only. Please confirm the visit with me."
+    ].join("\n");
+  }
+
+  function buildLink(channel, message) {
+    if (channel === "email") {
+      return "mailto:" + HOSPITAL_EMAIL_PLACEHOLDER +
+        "?subject=" + encodeURIComponent("Visit request") +
+        "&body=" + encodeURIComponent(message);
+    }
+    return "https://wa.me/" + HOSPITAL_WHATSAPP_PLACEHOLDER +
+      "?text=" + encodeURIComponent(message);
+  }
+
+  function isPlaceholder(v) { return String(v).indexOf("PLACEHOLDER") === 0; }
+
+  function openLink(channel, url) {
+    if (channel === "email") { window.location.href = url; }
+    else { window.open(url, "_blank", "noopener"); }
+  }
+
+  const form = document.getElementById("visitForm");
+  const statusBox = document.getElementById("statusBox");
+  const statusDraft = document.getElementById("statusDraft");
+  const againLink = document.getElementById("againLink");
+  let lastChannel = "wa";
+
+  // Do not offer past dates (uses the device date, local time).
+  (function () {
+    const d = new Date();
+    const pad = function (n) { return String(n).padStart(2, "0"); };
+    document.getElementById("vDate").min = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  })();
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const channel = (e.submitter && e.submitter.getAttribute("data-channel")) || "wa";
+    const data = {
+      name: form.elements["name"].value.trim(),
+      phone: form.elements["phone"].value.trim(),
+      doctor: form.elements["doctor"].value,
+      date: form.elements["date"].value,
+      time: form.elements["time"].value
+    };
+    const url = buildLink(channel, buildMessage(data));
+    lastLink = url;
+    lastChannel = channel;
+    againLink.setAttribute("href", url);
+    statusDraft.hidden = !(isPlaceholder(HOSPITAL_WHATSAPP_PLACEHOLDER) || isPlaceholder(HOSPITAL_EMAIL_PLACEHOLDER));
+    statusBox.hidden = false;
+    openLink(channel, url);
+  });
+
+  againLink.addEventListener("click", function (e) {
+    e.preventDefault();
+    openLink(lastChannel, lastLink);
+  });
+
+  setLang("en");
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "wf-build-site-v1",
+    "name": "Build CityCare single-file site v1",
+    "purpose": "No site exists (site_versions = 0), so no done-when item is met yet.",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 8,
+      "time_limit_minutes": 25,
+      "retry_limit": 1,
+      "stop_loss": "Halt and report to Priority if spend reaches 8 money, 8 model calls or 25 minutes before completion_check items 1-6 all pass, or if one retry still fails any item."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "index.html (single file site v1)"
+    ],
+    "completion_check": "Pass only if all hold: (1) the file opens from disk with no build step; (2) the form has exactly 4 fields and none for symptoms or history; (3) submit shows the 'hospital will call to confirm' message and the code has no fetch, XHR, form action, localStorage, sessionStorage, cookie or beacon calls; (4) the privacy notice and demo banner are visible; (5) 112 and 108 appear in the emergency section; (6) every CityCare phone, address and ER-hours value is visibly marked as a placeholder.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  }
+]

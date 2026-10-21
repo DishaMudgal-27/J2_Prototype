@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Cafe in Indiranagar, Bengaluru</title>
+<style>
+  :root { --bg:#faf6f0; --ink:#2b2018; --accent:#6b3f1d; --card:#fff; --line:#e4d9cc; }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; scroll-padding-top:64px; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--ink); line-height:1.55; }
+  body.lb-open { overflow:hidden; }
+  header.top { position:sticky; top:0; z-index:10; background:var(--accent); color:#fff; }
+  .bar { max-width:1000px; margin:0 auto; padding:.6rem 1rem; display:flex; flex-wrap:wrap; align-items:center; gap:.4rem 1rem; }
+  .brand { font-weight:700; font-size:1.2rem; letter-spacing:.02em; }
+  nav { display:flex; flex-wrap:wrap; gap:.25rem .9rem; }
+  nav a { color:#fff; text-decoration:none; font-size:.95rem; padding:.2rem 0; }
+  nav a:hover, nav a:focus { text-decoration:underline; }
+  .hero { max-width:1000px; margin:0 auto; padding:2rem 1rem 1rem; }
+  .hero h1 { margin:0 0 .3rem; font-size:1.9rem; }
+  .hero p { margin:.2rem 0; }
+  main { max-width:1000px; margin:0 auto; padding:0 1rem 2rem; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:1.1rem 1rem; margin:1rem 0; }
+  section h2 { margin:0 0 .6rem; font-size:1.4rem; color:var(--accent); }
+  section h3 { margin:1rem 0 .4rem; font-size:1.1rem; }
+  .ph { background:#fff3b0; color:#5a4500; border:1px dashed #b38f00; border-radius:4px; padding:0 .3em; font-weight:600; }
+  ul.menu { list-style:none; margin:0; padding:0; }
+  ul.menu li { display:flex; justify-content:space-between; gap:1rem; padding:.45rem 0; border-bottom:1px solid var(--line); }
+  ul.menu li:last-child { border-bottom:0; }
+  table.hours { width:100%; border-collapse:collapse; }
+  table.hours th, table.hours td { text-align:left; padding:.45rem .3rem; border-bottom:1px solid var(--line); }
+  table.hours th { width:40%; font-weight:600; }
+  .btn { display:inline-block; background:var(--accent); color:#fff; padding:.6rem 1rem; border-radius:8px; text-decoration:none; margin-top:.5rem; }
+  .btn:hover, .btn:focus { opacity:.9; }
+  .stub { font-size:.95rem; }
+  footer { max-width:1000px; margin:0 auto; padding:1rem; font-size:.9rem; color:#6a5a4c; }
+  .menu-grid { display:grid; grid-template-columns:1fr; gap:1rem; }
+
+  /* Gallery */
+  .gallery { display:grid; grid-template-columns:repeat(2,1fr); gap:.6rem; margin-top:.8rem; }
+  .g-item { display:block; width:100%; padding:0; margin:0; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#efe3d0; cursor:zoom-in; aspect-ratio:4/3; font:inherit; }
+  .g-item img { display:block; width:100%; height:100%; object-fit:cover; transition:transform .2s ease; }
+  .g-item:hover img { transform:scale(1.04); }
+  .g-item:focus-visible, .lb button:focus-visible { outline:3px solid #b38f00; outline-offset:2px; }
+
+  /* Farms */
+  .farm { border-top:1px solid var(--line); margin-top:1.2rem; padding-top:1rem; }
+  .farm h3 { margin:0 0 .2rem; font-size:1.25rem; }
+  .farm-loc { margin:0 0 .6rem; font-size:.95rem; }
+  .farm-body { display:grid; grid-template-columns:1fr; gap:.8rem; }
+  .farm-fig { margin:0; }
+  .farm-fig img { display:block; width:100%; height:auto; aspect-ratio:3/2; object-fit:cover; border-radius:8px; border:1px solid var(--line); background:#e3d3bb; }
+  .farm-fig figcaption { margin-top:.3rem; font-size:.85rem; color:#6a5a4c; }
+  .farm h4 { margin:.8rem 0 .2rem; font-size:1rem; color:var(--accent); }
+  .farm h4:first-child { margin-top:0; }
+  .farm p { margin:.2rem 0 .5rem; }
+
+  /* Enlarged view */
+  .lb { position:fixed; inset:0; z-index:50; display:none; flex-direction:column; align-items:center; justify-content:center; gap:.7rem; padding:3.2rem 1rem 1rem; background:rgba(20,12,6,.93); color:#fff; }
+  .lb.open { display:flex; }
+  .lb figure { margin:0; max-width:100%; text-align:center; }
+  .lb img { display:block; max-width:100%; max-height:70vh; margin:0 auto; border-radius:6px; background:#efe3d0; }
+  .lb figcaption { margin-top:.5rem; font-size:.95rem; }
+  .lb-controls { display:flex; align-items:center; gap:1rem; }
+  .lb button { background:#fff; color:var(--accent); border:0; border-radius:8px; padding:.6rem 1rem; font:inherit; font-weight:600; cursor:pointer; min-height:44px; min-width:44px; }
+  .lb button.lb-close { position:absolute; top:.7rem; right:.7rem; }
+
+  @media (min-width:700px) {
+    .menu-grid { grid-template-columns:1fr 1fr; }
+    .hero h1 { font-size:2.4rem; }
+    .gallery { grid-template-columns:repeat(3,1fr); gap:.8rem; }
+    .farm-body { grid-template-columns:2fr 3fr; gap:1.2rem; align-items:start; }
+  }
+  @media (min-width:960px) {
+    .gallery { grid-template-columns:repeat(4,1fr); }
+  }
+  @media (max-width:480px) {
+    .bar { padding:.5rem .75rem; }
+    nav { gap:.2rem .7rem; }
+    nav a { font-size:.88rem; }
+    .hero { padding:1.2rem .75rem .5rem; }
+    .hero h1 { font-size:1.55rem; }
+    main { padding:0 .6rem 1.5rem; }
+    section { padding:.9rem .75rem; }
+    table.hours th, table.hours td { padding:.4rem .2rem; font-size:.95rem; }
+    ul.menu li { flex-direction:column; gap:.1rem; }
+    .btn { display:block; text-align:center; }
+    .gallery { gap:.4rem; }
+    .farm h3 { font-size:1.1rem; }
+    .lb { padding:3.2rem .5rem .8rem; }
+    .lb img { max-height:60vh; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="bar">
+    <span class="brand">Brew Lab</span>
+    <nav aria-label="Sections">
+      <a href="#menu">Menu</a>
+      <a href="#hours">Hours</a>
+      <a href="#location">Location</a>
+      <a href="#preorder">Pre-order</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#farms">Farms</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <h1>Brew Lab</h1>
+  <p>A cafe in Indiranagar, Bengaluru.</p>
+  <p><span class="ph">PLACEHOLDER: add tagline, logo and brand colours if any</span></p>
+</div>
+
+<main>
+
+  <section id="menu" aria-labelledby="menu-h">
+    <h2 id="menu-h">Menu</h2>
+    <p><span class="ph">PLACEHOLDER: add real menu categories, items and prices</span></p>
+    <div class="menu-grid">
+      <div>
+        <h3><span class="ph">PLACEHOLDER: category 1 name</span></h3>
+        <ul class="menu">
+          <li><span><span class="ph">PLACEHOLDER: item name</span></span><span class="ph">PLACEHOLDER: price</span></li>
+          <li><span><span class="ph">PLACEHOLDER: item name</span></span><span class="ph">PLACEHOLDER: price</span></li>
+          <li><span><span class="ph">PLACEHOLDER: item name</span></span><span class="ph">PLACEHOLDER: price</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3><span class="ph">PLACEHOLDER: category 2 name</span></h3>
+        <ul class="menu">
+          <li><span><span class="ph">PLACEHOLDER: item name</span></span><span class="ph">PLACEHOLDER: price</span></li>
+          <li><span><span class="ph">PLACEHOLDER: item name</span></span><span class="ph">PLACEHOLDER: price</span></li>
+          <li><span><span class="ph">PLACEHOLDER: item name</span></span><span class="ph">PLACEHOLDER: price</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3><span class="ph">PLACEHOLDER: category 3 name</span></h3>
+        <ul class="menu">
+          <li><span><span class="ph">PLACEHOLDER: item name</span></span><span class="ph">PLACEHOLDER: price</span></li>
+          <li><span><span class="ph">PLACEHOLDER: item name</span></span><span class="ph">PLACEHOLDER: price</span></li>
+          <li><span><span class="ph">PLACEHOLDER: item name</span></span><span class="ph">PLACEHOLDER: price</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="hours" aria-labelledby="hours-h">
+    <h2 id="hours-h">Hours</h2>
+    <p><span class="ph">PLACEHOLDER: add real opening hours for each day</span></p>
+    <table class="hours">
+      <tbody>
+        <tr><th scope="row">Monday</th><td><span class="ph">PLACEHOLDER: opening hours</span></td></tr>
+        <tr><th scope="row">Tuesday</th><td><span class="ph">PLACEHOLDER: opening hours</span></td></tr>
+        <tr><th scope="row">Wednesday</th><td><span class="ph">PLACEHOLDER: opening hours</span></td></tr>
+        <tr><th scope="row">Thursday</th><td><span class="ph">PLACEHOLDER: opening hours</span></td></tr>
+        <tr><th scope="row">Friday</th><td><span class="ph">PLACEHOLDER: opening hours</span></td></tr>
+        <tr><th scope="row">Saturday</th><td><span class="ph">PLACEHOLDER: opening hours</span></td></tr>
+        <tr><th scope="row">Sunday</th><td><span class="ph">PLACEHOLDER: opening hours</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="location" aria-labelledby="location-h">
+    <h2 id="location-h">Location</h2>
+    <p><strong>Brew Lab, Indiranagar, Bengaluru</strong></p>
+    <p>Street address: <span class="ph">PLACEHOLDER: add street address and PIN code</span></p>
+    <p>Phone / WhatsApp: <span class="ph">PLACEHOLDER: add phone or WhatsApp number</span></p>
+    <a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Brew+Lab+Indiranagar+Bengaluru" target="_blank" rel="noopener">Open in Google Maps</a>
+    <p class="stub"><span class="ph">PLACEHOLDER: confirm the map pin points to the exact cafe address</span></p>
+  </section>
+
+  <section id="preorder" aria-labelledby="preorder-h">
+    <h2 id="preorder-h">Pre-order for pickup</h2>
+    <p class="stub"><span class="ph">PLACEHOLDER: pre-order form (items, quantity, name, phone, pickup time) not built yet</span></p>
+    <p class="stub">Pre-orders will be for pickup only.</p>
+  </section>
+
+  <section id="gallery" aria-labelledby="gallery-h">
+    <h2 id="gallery-h">Gallery</h2>
+    <p class="stub"><span class="ph">PLACEHOLDER: replace each grey photo slot with a real cafe photo (change the src) and rewrite its alt text</span></p>
+    <p class="stub">Tap or click any photo to see it larger.</p>
+    <div class="gallery" id="gallery-grid">
+      <button type="button" class="g-item" aria-label="Open photo 1 larger"><img loading="lazy" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23efe3d0'/%3E%3Ctext x='200' y='145' text-anchor='middle' font-family='sans-serif' font-size='22' font-weight='700' fill='%236b3f1d'%3EPLACEHOLDER: cafe photo 1%3C/text%3E%3Ctext x='200' y='178' text-anchor='middle' font-family='sans-serif' font-size='15' fill='%236b3f1d'%3Eadd a real photo here%3C/text%3E%3C/svg%3E" alt="PLACEHOLDER: cafe photo 1, replace with a description of the real photo" width="400" height="300"></button>
+      <button type="button" class="g-item" aria-label="Open photo 2 larger"><img loading="lazy" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23efe3d0'/%3E%3Ctext x='200' y='145' text-anchor='middle' font-family='sans-serif' font-size='22' font-weight='700' fill='%236b3f1d'%3EPLACEHOLDER: cafe photo 2%3C/text%3E%3Ctext x='200' y='178' text-anchor='middle' font-family='sans-serif' font-size='15' fill='%236b3f1d'%3Eadd a real photo here%3C/text%3E%3C/svg%3E" alt="PLACEHOLDER: cafe photo 2, replace with a description of the real photo" width="400" height="300"></button>
+      <button type="button" class="g-item" aria-label="Open photo 3 larger"><img loading="lazy" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23efe3d0'/%3E%3Ctext x='200' y='145' text-anchor='middle' font-family='sans-serif' font-size='22' font-weight='700' fill='%236b3f1d'%3EPLACEHOLDER: cafe photo 3%3C/text%3E%3Ctext x='200' y='178' text-anchor='middle' font-family='sans-serif' font-size='15' fill='%236b3f1d'%3Eadd a real photo here%3C/text%3E%3C/svg%3E" alt="PLACEHOLDER: cafe photo 3, replace with a description of the real photo" width="400" height="300"></button>
+      <button type="button" class="g-item" aria-label="Open photo 4 larger"><img loading="lazy" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23efe3d0'/%3E%3Ctext x='200' y='145' text-anchor='middle' font-family='sans-serif' font-size='22' font-weight='700' fill='%236b3f1d'%3EPLACEHOLDER: cafe photo 4%3C/text%3E%3Ctext x='200' y='178' text-anchor='middle' font-family='sans-serif' font-size='15' fill='%236b3f1d'%3Eadd a real photo here%3C/text%3E%3C/svg%3E" alt="PLACEHOLDER: cafe photo 4, replace with a description of the real photo" width="400" height="300"></button>
+      <button type="button" class="g-item" aria-label="Open photo 5 larger"><img loading="lazy" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23efe3d0'/%3E%3Ctext x='200' y='145' text-anchor='middle' font-family='sans-serif' font-size='22' font-weight='700' fill='%236b3f1d'%3EPLACEHOLDER: cafe photo 5%3C/text%3E%3Ctext x='200' y='178' text-anchor='middle' font-family='sans-serif' font-size='15' fill='%236b3f1d'%3Eadd a real photo here%3C/text%3E%3C/svg%3E" alt="PLACEHOLDER: cafe photo 5, replace with a description of the real photo" width="400" height="300"></button>
+      <button type="button" class="g-item" aria-label="Open photo 6 larger"><img loading="lazy" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23efe3d0'/%3E%3Ctext x='200' y='145' text-anchor='middle' font-family='sans-serif' font-size='22' font-weight='700' fill='%236b3f1d'%3EPLACEHOLDER: cafe photo 6%3C/text%3E%3Ctext x='200' y='178' text-anchor='middle' font-family='sans-serif' font-size='15' fill='%236b3f1d'%3Eadd a real photo here%3C/text%3E%3C/svg%3E" alt="PLACEHOLDER: cafe photo 6, replace with a description of the real photo" width="400" height="300"></button>
+      <button type="button" class="g-item" aria-label="Open photo 7 larger"><img loading="lazy" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23efe3d0'/%3E%3Ctext x='200' y='145' text-anchor='middle' font-family='sans-serif' font-size='22' font-weight='700' fill='%236b3f1d'%3EPLACEHOLDER: cafe photo 7%3C/text%3E%3Ctext x='200' y='178' text-anchor='middle' font-family='sans-serif' font-size='15' fill='%236b3f1d'%3Eadd a real photo here%3C/text%3E%3C/svg%3E" alt="PLACEHOLDER: cafe photo 7, replace with a description of the real photo" width="400" height="300"></button>
+      <button type="button" class="g-item" aria-label="Open photo 8 larger"><img loading="lazy" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23efe3d0'/%3E%3Ctext x='200' y='145' text-anchor='middle' font-family='sans-serif' font-size='22' font-weight='700' fill='%236b3f1d'%3EPLACEHOLDER: cafe photo 8%3C/text%3E%3Ctext x='200' y='178' text-anchor='middle' font-family='sans-serif' font-size='15' fill='%236b3f1d'%3Eadd a real photo here%3C/text%3E%3C/svg%3E" alt="PLACEHOLDER: cafe photo 8, replace with a description of the real photo" width="400" height="300"></button>
+      <button type="button" class="g-item" aria-label="Open photo 9 larger"><img loading="lazy" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23efe3d0'/%3E%3Ctext x='200' y='145' text-anchor='middle' font-family='sans-serif' font-size='22' font-weight='700' fill='%236b3f1d'%3EPLACEHOLDER: cafe photo 9%3C/text%3E%3Ctext x='200' y='178' text-anchor='middle' font-family='sans-serif' font-size='15' fill='%236b3f1d'%3Eadd a real photo here%3C/text%3E%3C/svg%3E" alt="PLACEHOLDER: cafe photo 9, replace with a description of the real photo" width="400" height="300"></button>
+      <button type="button" class="g-item" aria-label="Open photo 10 larger"><img loading="lazy" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23efe3d0'/%3E%3Ctext x='200' y='145' text-anchor='middle' font-family='sans-serif' font-size='22' font-weight='700' fill='%236b3f1d'%3EPLACEHOLDER: cafe photo 10%3C/text%3E%3Ctext x='200' y='178' text-anchor='middle' font-family='sans-serif' font-size='15' fill='%236b3f1d'%3Eadd a real photo here%3C/text%3E%3C/svg%3E" alt="PLACEHOLDER: cafe photo 10, replace with a description of the real photo" width="400" height="300"></button>
+      <button type="button" class="g-item" aria-label="Open photo 11 larger"><img loading="lazy" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23efe3d0'/%3E%3Ctext x='200' y='145' text-anchor='middle' font-family='sans-serif' font-size='22' font-weight='700' fill='%236b3f1d'%3EPLACEHOLDER: cafe photo 11%3C/text%3E%3Ctext x='200' y='178' text-anchor='middle' font-family='sans-serif' font-size='15' fill='%236b3f1d'%3Eadd a real photo here%3C/text%3E%3C/svg%3E" alt="PLACEHOLDER: cafe photo 11, replace with a description of the real photo" width="400" height="300"></button>
+      <button type="button" class="g-item" aria-label="Open photo 12 larger"><img loading="lazy" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23efe3d0'/%3E%3Ctext x='200' y='145' text-anchor='middle' font-family='sans-serif' font-size='22' font-weight='700' fill='%236b3f1d'%3EPLACEHOLDER: cafe photo 12%3C/text%3E%3Ctext x='200' y='178' text-anchor='middle' font-family='sans-serif' font-size='15' fill='%236b3f1d'%3Eadd a real photo here%3C/text%3E%3C/svg%3E" alt="PLACEHOLDER: cafe photo 12, replace with a description of the real photo" width="400" height="300"></button>
+    </div>
+  </section>
+
+  <section id="farms" aria-labelledby="farms-h">
+    <h2 id="farms-h">Our coffee farms</h2>
+    <p class="stub">The story behind the coffee we serve, farm by farm.</p>
+    <p class="stub"><span class="ph">PLACEHOLDER: replace every marked line below with the real farm name, location, story and photo. Nothing here is real farm information yet.</span></p>
+
+    <article class="farm" aria-labelledby="farm1-h">
+      <h3 id="farm1-h"><span class="ph">PLACEHOLDER: farm 1 name</span></h3>
+      <p class="farm-loc"><strong>Location:</strong> <span class="ph">PLACEHOLDER: farm 1 location (village, district, state)</span></p>
+      <div class="farm-body">
+        <figure class="farm-fig">
+          <img loading="lazy" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 400'%3E%3Crect width='600' height='400' fill='%23e3d3bb'/%3E%3Ctext x='300' y='195' text-anchor='middle' font-family='sans-serif' font-size='26' font-weight='700' fill='%236b3f1d'%3EPLACEHOLDER: farm 1 photo%3C/text%3E%3Ctext x='300' y='232' text-anchor='middle' font-family='sans-serif' font-size='17' fill='%236b3f1d'%3Eadd a real photo here%3C/text%3E%3C/svg%3E" alt="PLACEHOLDER: farm 1 photo, replace with a description of the real photo" width="600" height="400">
+          <figcaption><span class="ph">PLACEHOLDER: farm 1 photo caption</span></figcaption>
+        </figure>
+        <div class="farm-story">
+          <h4>History</h4>
+          <p><span class="ph">PLACEHOLDER: add how farm 1 began, who founded it and how it came to supply Brew Lab</span></p>
+          <h4>The people</h4>
+          <p><span class="ph">PLACEHOLDER: add who runs and works on farm 1, in their own words if possible</span></p>
+          <h4>Growing and processing</h4>
+          <p><span class="ph">PLACEHOLDER: add how farm 1 grows and processes its coffee (varieties, altitude, harvest, drying, milling)</span></p>
+        </div>
+      </div>
+    </article>
+
+    <article class="farm" aria-labelledby="farm2-h">
+      <h3 id="farm2-h"><span class="ph">PLACEHOLDER: farm 2 name</span></h3>
+      <p class="farm-loc"><strong>Location:</strong> <span class="ph">PLACEHOLDER: farm 2 location (village, district, state)</span></p>
+      <div class="farm-body">
+        <figure class="farm-fig">
+          <img loading="lazy" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 400'%3E%3Crect width='600' height='400' fill='%23e3d3bb'/%3E%3Ctext x='300' y='195' text-anchor='middle' font-family='sans-serif' font-size='26' font-weight='700' fill='%236b3f1d'%3EPLACEHOLDER: farm 2 photo%3C/text%3E%3Ctext x='300' y='232' text-anchor='middle' font-family='sans-serif' font-size='17' fill='%236b3f1d'%3Eadd a real photo here%3C/text%3E%3C/svg%3E" alt="PLACEHOLDER: farm 2 photo, replace with a description of the real photo" width="600" height="400">
+          <figcaption><span class="ph">PLACEHOLDER: farm 2 photo caption</span></figcaption>
+        </figure>
+        <div class="farm-story">
+          <h4>History</h4>
+          <p><span class="ph">PLACEHOLDER: add how farm 2 began, who founded it and how it came to supply Brew Lab</span></p>
+          <h4>The people</h4>
+          <p><span class="ph">PLACEHOLDER: add who runs and works on farm 2, in their own words if possible</span></p>
+          <h4>Growing and processing</h4>
+          <p><span class="ph">PLACEHOLDER: add how farm 2 grows and processes its coffee (varieties, altitude, harvest, drying, milling)</span></p>
+        </div>
+      </div>
+    </article>
+
+    <article class="farm" aria-labelledby="farm3-h">
+      <h3 id="farm3-h"><span class="ph">PLACEHOLDER: farm 3 name</span></h3>
+      <p class="farm-loc"><strong>Location:</strong> <span class="ph">PLACEHOLDER: farm 3 location (village, district, state)</span></p>
+      <div class="farm-body">
+        <figure class="farm-fig">
+          <img loading="lazy" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 400'%3E%3Crect width='600' height='400' fill='%23e3d3bb'/%3E%3Ctext x='300' y='195' text-anchor='middle' font-family='sans-serif' font-size='26' font-weight='700' fill='%236b3f1d'%3EPLACEHOLDER: farm 3 photo%3C/text%3E%3Ctext x='300' y='232' text-anchor='middle' font-family='sans-serif' font-size='17' fill='%236b3f1d'%3Eadd a real photo here%3C/text%3E%3C/svg%3E" alt="PLACEHOLDER: farm 3 photo, replace with a description of the real photo" width="600" height="400">
+          <figcaption><span class="ph">PLACEHOLDER: farm 3 photo caption</span></figcaption>
+        </figure>
+        <div class="farm-story">
+          <h4>History</h4>
+          <p><span class="ph">PLACEHOLDER: add how farm 3 began, who founded it and how it came to supply Brew Lab</span></p>
+          <h4>The people</h4>
+          <p><span class="ph">PLACEHOLDER: add who runs and works on farm 3, in their own words if possible</span></p>
+          <h4>Growing and processing</h4>
+          <p><span class="ph">PLACEHOLDER: add how farm 3 grows and processes its coffee (varieties, altitude, harvest, drying, milling)</span></p>
+        </div>
+      </div>
+    </article>
+  </section>
+
+</main>
+
+<footer>
+  <p>&copy; Brew Lab, Indiranagar, Bengaluru.</p>
+</footer>
+
+<div class="lb" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged gallery photo" aria-hidden="true">
+  <button type="button" class="lb-close" id="lb-close" aria-label="Close enlarged photo">Close</button>
+  <figure>
+    <img id="lb-img" alt="Enlarged gallery photo" hidden>
+    <figcaption id="lb-cap"></figcaption>
+  </figure>
+  <div class="lb-controls">
+    <button type="button" id="lb-prev" aria-label="Previous photo">Prev</button>
+    <span id="lb-count" aria-live="polite"></span>
+    <button type="button" id="lb-next" aria-label="Next photo">Next</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var items = Array.prototype.slice.call(document.querySelectorAll('#gallery-grid .g-item'));
+  var box = document.getElementById('lightbox');
+  var big = document.getElementById('lb-img');
+  var cap = document.getElementById('lb-cap');
+  var count = document.getElementById('lb-count');
+  var closeBtn = document.getElementById('lb-close');
+  var current = 0;
+  var opener = null;
+
+  function show(i) {
+    current = (i + items.length) % items.length;
+    var src = items[current].querySelector('img');
+    big.src = src.getAttribute('src');
+    big.alt = src.getAttribute('alt');
+    big.hidden = false;
+    cap.textContent = src.getAttribute('alt');
+    count.textContent = (current + 1) + ' / ' + items.length;
+  }
+  function open(i) {
+    opener = items[i];
+    show(i);
+    box.classList.add('open');
+    box.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('lb-open');
+    closeBtn.focus();
+  }
+  function close() {
+    box.classList.remove('open');
+    box.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('lb-open');
+    if (opener) { opener.focus(); }
+  }
+
+  items.forEach(function (btn, i) {
+    btn.addEventListener('click', function () { open(i); });
+  });
+  closeBtn.addEventListener('click', close);
+  document.getElementById('lb-prev').addEventListener('click', function () { show(current - 1); });
+  document.getElementById('lb-next').addEventListener('click', function () { show(current + 1); });
+  box.addEventListener('click', function (e) { if (e.target === box) { close(); } });
+  document.addEventListener('keydown', function (e) {
+    if (!box.classList.contains('open')) { return; }
+    if (e.key === 'Escape') { close(); }
+    else if (e.key === 'ArrowLeft') { show(current - 1); }
+    else if (e.key === 'ArrowRight') { show(current + 1); }
+  });
+})();
+</script>
+
+</body>
+</html>

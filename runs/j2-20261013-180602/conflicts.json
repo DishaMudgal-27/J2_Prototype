@@ -1,0 +1,1068 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 2,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 2",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 23,
+        "text": "@Priority Six workflows cover items 1, 2, 3, 4, 6, 7, 9 and 10. Items 5 and 8 are left out for budget. Check texts carry no digits, targets are plain ids or classes, and tap-targets is dropped. Parts total 85 at the rate card against 60 remaining, so I expect a counter. Trade-off: the shell carries the nav, hero and N8, and sponsors go last.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 24,
+        "text": "@Adaptation COUNTER at exactly 60 of 60. Your set prices 85, so I cut 25: (1) shell loses the form part (-15), since it builds no form and the register workflow already owns item 4; touch-sized inputs stay as a styling constraint. (2) Venue and contact merge into one page_section (-10); the section keeps both a map link and a WhatsApp link, and the contact block gets id contact so nav links resolve. Sponsors (item 5) and the extra styling for item 8 stay unfunded. Trade-off: zero reserve, so any Audit fix (8 each) will need Identity to approve more budget. Merged item 6 and 7 cost 5 per item below the rate-card minimum; I accept that because both are small static blocks.",
+        "position": "COUNTER: Day-by-day schedule (10), Events by category with fees (10), Registration form (15), Venue, map and contact (10), Base style, nav and hero (15)",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 25,
+        "text": "@Priority Accepted: the five workflows (schedule, events, register, venue, shell) at exactly 60 of 60. Trade-off I am taking: item 5 (sponsors) and extra styling for item 8 are unfunded, so the done-when list stays open on those. I will ask Identity for budget for a sponsors section once these are built.",
+        "position": "accepts Priority's offer",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "priority",
+    "outcome": "Adaptation accepted Priority's COUNTER: Day-by-day schedule (10), Events by category with fees (10), Registration form (15), Venue, map and contact (10), Base style, nav and hero (15) goes to the validator.",
+    "priority_final": [
+      {
+        "id": "schedule",
+        "name": "Day-by-day schedule",
+        "goal_gap": "No schedule section exists",
+        "expected_outcome": "A schedule section with day tabs for Day 1, Day 2 and Day 3, each listing its events with the given times",
+        "outputs": [
+          "section #schedule"
+        ],
+        "completion_check": "All times and event names present and day tabs exist",
+        "dependencies": [],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          2
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "Visitors can switch between Day 1, Day 2 and Day 3 and see each day's events with the given times.",
+            "constraints": [
+              "Use only charter times and event names",
+              "Day buttons must not cause horizontal overflow",
+              "No inline JS errors on load"
+            ],
+            "context": [
+              "charter item 2",
+              "section #schedule"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-schedule builder",
+              "steps": "Add section id schedule with a heading, three day buttons of class j2-btn with class j2-daytab, and three panels of class j2-day, one per day, each listing its events with times in the form 10am-1pm. Day 1 shows Code Sprint 10am-1pm, Line Follower 2pm-5pm, AI in Daily Life 5:30pm-6:30pm. Day 2 shows Bug Hunt 11am-1pm, Poster Jam 2pm-4pm. Day 3 shows Drone Dash 10am-1pm, UI Duel 2pm-5pm, Startup Stories 5:30pm-6:30pm. Small script switches the visible panel and shows Day 1 first."
+            },
+            "verification": [
+              {
+                "text": "Schedule section exists",
+                "type": "element-count",
+                "target": "#schedule",
+                "expect": 1
+              },
+              {
+                "text": "Day tabs exist, one per day",
+                "type": "element-count",
+                "target": ".j2-daytab",
+                "expect": 3
+              },
+              {
+                "text": "Day panels exist, one per day",
+                "type": "element-count",
+                "target": ".j2-day",
+                "expect": 3
+              },
+              {
+                "text": "All schedule event names and times appear",
+                "type": "facts-present",
+                "target": [
+                  "Day 1",
+                  "Day 2",
+                  "Day 3",
+                  "Code Sprint",
+                  "Line Follower",
+                  "AI in Daily Life",
+                  "Bug Hunt",
+                  "Poster Jam",
+                  "Drone Dash",
+                  "UI Duel",
+                  "Startup Stories",
+                  "10am-1pm",
+                  "2pm-5pm",
+                  "5:30pm-6:30pm",
+                  "11am-1pm",
+                  "2pm-4pm"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Page still parses",
+                "type": "named-test",
+                "target": "page-parses",
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 4,
+          "time_limit_minutes": 12,
+          "retry_limit": 1,
+          "stop_loss": "Stop if the section is not registered after one retry or spend reaches 10"
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "events",
+        "name": "Events by category with fees",
+        "goal_gap": "No events section exists",
+        "expected_outcome": "An events section with category filters and a card per event showing its fee",
+        "outputs": [
+          "section #events"
+        ],
+        "completion_check": "All eight event cards show the given fees and the four category filters exist",
+        "dependencies": [],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          3
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "Visitors can filter events by Coding, Robotics, Design and Talks and every event card shows its given fee.",
+            "constraints": [
+              "No prizes or invented event details",
+              "Fees exactly as given",
+              "Photo areas are clearly marked placeholders"
+            ],
+            "context": [
+              "charter item 3",
+              "section #events"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-events builder",
+              "steps": "Add section id events with a heading, filter buttons of class j2-btn with class j2-filter for All, Coding, Robotics, Design and Talks, and one card of class j2-card per event with a name, category, day and fee, plus a marked placeholder photo area of class j2-photo. Fees: Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, Poster Jam free, UI Duel Rs 100, AI in Daily Life free, Startup Stories free. Categories: Coding has Code Sprint and Bug Hunt, Robotics has Line Follower and Drone Dash, Design has Poster Jam and UI Duel, Talks has AI in Daily Life and Startup Stories. Small script filters cards by category."
+            },
+            "verification": [
+              {
+                "text": "Events section exists",
+                "type": "element-count",
+                "target": "#events",
+                "expect": 1
+              },
+              {
+                "text": "Event cards exist, one per event",
+                "type": "element-count",
+                "target": ".j2-card",
+                "expect": 8
+              },
+              {
+                "text": "Filter buttons exist",
+                "type": "element-count",
+                "target": ".j2-filter",
+                "expect": 5
+              },
+              {
+                "text": "Categories and fees appear",
+                "type": "facts-present",
+                "target": [
+                  "Coding",
+                  "Robotics",
+                  "Design",
+                  "Talks",
+                  "Rs 100",
+                  "Rs 50",
+                  "Rs 150",
+                  "Rs 200"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Page still parses",
+                "type": "named-test",
+                "target": "page-parses",
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 4,
+          "time_limit_minutes": 12,
+          "retry_limit": 1,
+          "stop_loss": "Stop if the section is not registered after one retry or spend reaches 10"
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "register",
+        "name": "Registration form",
+        "goal_gap": "No registration form exists",
+        "expected_outcome": "A form with name, email, college and an event dropdown listing all events, submitting to the organiser email",
+        "outputs": [
+          "section #register"
+        ],
+        "completion_check": "Form has a submit control and mailto destination, dropdown has all events",
+        "dependencies": [],
+        "parts": [
+          "form"
+        ],
+        "covers": [
+          4
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 15,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "A student can fill name, email, college and choose an event, and submitting is directed to the organiser email.",
+            "constraints": [
+              "Destination is the charter email only",
+              "Fields are large enough for phones",
+              "No JavaScript errors"
+            ],
+            "context": [
+              "charter item 4",
+              "section #register"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-register builder",
+              "steps": "Add section id register with a heading and a form of class j2-form, action mailto:spark2026@example.com, method post, enctype text/plain. Fields: name, email, college as labelled inputs, and an event select whose options have class j2-event-option, one per event: Code Sprint, Bug Hunt, Line Follower, Drone Dash, Poster Jam, UI Duel, AI in Daily Life, Startup Stories. Add a submit button of class j2-btn labelled Register."
+            },
+            "verification": [
+              {
+                "text": "Registration form exists",
+                "type": "element-count",
+                "target": ".j2-form",
+                "expect": 1
+              },
+              {
+                "text": "Dropdown option per event",
+                "type": "element-count",
+                "target": ".j2-event-option",
+                "expect": 8
+              },
+              {
+                "text": "Form has submit and destination",
+                "type": "named-test",
+                "target": "form-has-submit",
+                "expect": true
+              },
+              {
+                "text": "Destination email and event names appear",
+                "type": "facts-present",
+                "target": [
+                  "spark2026@example.com",
+                  "Code Sprint",
+                  "Bug Hunt",
+                  "Line Follower",
+                  "Drone Dash",
+                  "Poster Jam",
+                  "UI Duel",
+                  "AI in Daily Life",
+                  "Startup Stories"
+                ],
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 15,
+          "model_call_limit": 4,
+          "time_limit_minutes": 12,
+          "retry_limit": 1,
+          "stop_loss": "Stop if the form is not registered after one retry or spend reaches 15"
+        },
+        "estimate": 15,
+        "cost": 15
+      },
+      {
+        "id": "venue",
+        "name": "Venue, map and contact",
+        "goal_gap": "No venue or contact section exists",
+        "expected_outcome": "One section with the address, a map link, a WhatsApp link and the organiser email",
+        "outputs": [
+          "section #venue",
+          "block #contact"
+        ],
+        "completion_check": "Address, map link, WhatsApp link, number and email present",
+        "dependencies": [],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          6,
+          7
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "Visitors see the college address, can open a map for it, can open a WhatsApp chat with the organisers and see the organiser email.",
+            "constraints": [
+              "No building or hall name",
+              "No invented coordinates",
+              "Only the charter number and email",
+              "wa.me link must be well formed"
+            ],
+            "context": [
+              "charter items 6 and 7",
+              "section #venue",
+              "block #contact"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-venue builder",
+              "steps": "Add section id venue with a heading, the address text, and a map link of class j2-map and class j2-btn pointing to a Google Maps search URL built from the address, opening in a new tab. Inside the same section add a block with id contact holding a button of class j2-btn and class j2-whatsapp linking to https://wa.me/910000033333 labelled Chat on WhatsApp, the number shown as +91 00000 33333, and the email shown as a mailto link."
+            },
+            "verification": [
+              {
+                "text": "Venue section exists",
+                "type": "element-count",
+                "target": "#venue",
+                "expect": 1
+              },
+              {
+                "text": "Contact block exists",
+                "type": "element-count",
+                "target": "#contact",
+                "expect": 1
+              },
+              {
+                "text": "Map link exists",
+                "type": "element-count",
+                "target": ".j2-map",
+                "expect": 1
+              },
+              {
+                "text": "WhatsApp link exists",
+                "type": "element-count",
+                "target": ".j2-whatsapp",
+                "expect": 1
+              },
+              {
+                "text": "Address, number and email appear",
+                "type": "facts-present",
+                "target": [
+                  "Northfield College of Engineering",
+                  "22 University Road, Pune 411007",
+                  "+91 00000 33333",
+                  "spark2026@example.com"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Links are well formed",
+                "type": "named-test",
+                "target": "links-resolve",
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 4,
+          "time_limit_minutes": 12,
+          "retry_limit": 1,
+          "stop_loss": "Stop if the section is not registered after one retry or spend reaches 10"
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "shell",
+        "name": "Base style, nav and hero",
+        "goal_gap": "The page has no style, navigation or hero",
+        "expected_outcome": "A mobile-first styled shell with sticky nav, hero and one main action, footer, and no overflow",
+        "outputs": [
+          "style block",
+          "nav",
+          "section #hero"
+        ],
+        "completion_check": "Hero facts present, nav links resolve, page parses",
+        "dependencies": [
+          "schedule",
+          "events",
+          "register",
+          "venue"
+        ],
+        "parts": [
+          "page_section",
+          "styling"
+        ],
+        "covers": [
+          1,
+          9,
+          10
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 15,
+          "calls": 4,
+          "time_minutes": 14
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The page shows the fest name, college, city and dates with a bold modern mobile-first style, a nav reaching every section, and one main hero action.",
+            "constraints": [
+              "No horizontal overflow at narrow and wide widths",
+              "Nav links only to existing section ids",
+              "Buttons and inputs sized for touch",
+              "Only charter facts as content",
+              "Never overwrite other workflows' sections"
+            ],
+            "context": [
+              "charter items 1, 9, 10",
+              "sections #schedule, #events, #register, #venue, #contact"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-shell builder",
+              "steps": "Create one style block with id j2-style: dark base with bold accent colours, big headings, responsive grid, buttons class j2-btn, cards class j2-card, box-sizing border-box, no fixed widths over the viewport, touch-sized form inputs. Create nav class j2-nav, sticky, with a menu toggle on phones, linking to #schedule, #events, #register, #venue, #contact. Create section id hero with the h1 Spark 2026, Northfield College of Engineering, Pune, 14 to 16 February 2027, and one main button of class j2-btn linking to #register. Add a footer."
+            },
+            "verification": [
+              {
+                "text": "Single style block exists",
+                "type": "grep-count",
+                "target": "j2-style",
+                "expect": 1
+              },
+              {
+                "text": "Nav exists",
+                "type": "element-count",
+                "target": ".j2-nav",
+                "expect": 1
+              },
+              {
+                "text": "Hero exists",
+                "type": "element-count",
+                "target": "#hero",
+                "expect": 1
+              },
+              {
+                "text": "Hero facts appear",
+                "type": "facts-present",
+                "target": [
+                  "Spark 2026",
+                  "Northfield College of Engineering",
+                  "Pune",
+                  "14 to 16 February 2027"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Every in-page link resolves",
+                "type": "named-test",
+                "target": "links-resolve",
+                "expect": true
+              },
+              {
+                "text": "Page parses",
+                "type": "named-test",
+                "target": "page-parses",
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 15,
+          "model_call_limit": 5,
+          "time_limit_minutes": 16,
+          "retry_limit": 1,
+          "stop_loss": "Stop if links-resolve or page-parses fails twice in a row or spend reaches 15"
+        },
+        "estimate": 15,
+        "cost": 15
+      }
+    ],
+    "adaptation_final": [
+      {
+        "id": "schedule",
+        "name": "Day-by-day schedule",
+        "goal_gap": "No schedule section exists",
+        "expected_outcome": "A schedule section with day tabs for Day 1, Day 2 and Day 3, each listing its events with the given times",
+        "outputs": [
+          "section #schedule"
+        ],
+        "completion_check": "All times and event names present and day tabs exist",
+        "dependencies": [],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          2
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "Visitors can switch between Day 1, Day 2 and Day 3 and see each day's events with the given times.",
+            "constraints": [
+              "Use only charter times and event names",
+              "Day buttons must not cause horizontal overflow",
+              "No inline JS errors on load"
+            ],
+            "context": [
+              "charter item 2",
+              "section #schedule"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-schedule builder",
+              "steps": "Add section id schedule with a heading, three day buttons of class j2-btn with class j2-daytab, and three panels of class j2-day, one per day, each listing its events with times in the form 10am-1pm. Day 1 shows Code Sprint 10am-1pm, Line Follower 2pm-5pm, AI in Daily Life 5:30pm-6:30pm. Day 2 shows Bug Hunt 11am-1pm, Poster Jam 2pm-4pm. Day 3 shows Drone Dash 10am-1pm, UI Duel 2pm-5pm, Startup Stories 5:30pm-6:30pm. Small script switches the visible panel and shows Day 1 first."
+            },
+            "verification": [
+              {
+                "text": "Schedule section exists",
+                "type": "element-count",
+                "target": "#schedule",
+                "expect": 1
+              },
+              {
+                "text": "Day tabs exist, one per day",
+                "type": "element-count",
+                "target": ".j2-daytab",
+                "expect": 3
+              },
+              {
+                "text": "Day panels exist, one per day",
+                "type": "element-count",
+                "target": ".j2-day",
+                "expect": 3
+              },
+              {
+                "text": "All schedule event names and times appear",
+                "type": "facts-present",
+                "target": [
+                  "Day 1",
+                  "Day 2",
+                  "Day 3",
+                  "Code Sprint",
+                  "Line Follower",
+                  "AI in Daily Life",
+                  "Bug Hunt",
+                  "Poster Jam",
+                  "Drone Dash",
+                  "UI Duel",
+                  "Startup Stories",
+                  "10am-1pm",
+                  "2pm-5pm",
+                  "5:30pm-6:30pm",
+                  "11am-1pm",
+                  "2pm-4pm"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Page still parses",
+                "type": "named-test",
+                "target": "page-parses",
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "events",
+        "name": "Events by category with fees",
+        "goal_gap": "No events section exists",
+        "expected_outcome": "An events section with category filters and a card per event showing its fee",
+        "outputs": [
+          "section #events"
+        ],
+        "completion_check": "All eight event cards show the given fees and the four category filters exist",
+        "dependencies": [],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          3
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "Visitors can filter events by Coding, Robotics, Design and Talks and every event card shows its given fee.",
+            "constraints": [
+              "No prizes or invented event details",
+              "Fees exactly as given",
+              "Photo areas are clearly marked placeholders"
+            ],
+            "context": [
+              "charter item 3",
+              "section #events"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-events builder",
+              "steps": "Add section id events with a heading, filter buttons of class j2-btn with class j2-filter for All, Coding, Robotics, Design and Talks, and one card of class j2-card per event with a name, category, day and fee, plus a marked placeholder photo area of class j2-photo. Fees: Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, Poster Jam free, UI Duel Rs 100, AI in Daily Life free, Startup Stories free. Categories: Coding has Code Sprint and Bug Hunt, Robotics has Line Follower and Drone Dash, Design has Poster Jam and UI Duel, Talks has AI in Daily Life and Startup Stories. Small script filters cards by category."
+            },
+            "verification": [
+              {
+                "text": "Events section exists",
+                "type": "element-count",
+                "target": "#events",
+                "expect": 1
+              },
+              {
+                "text": "Event cards exist, one per event",
+                "type": "element-count",
+                "target": ".j2-card",
+                "expect": 8
+              },
+              {
+                "text": "Filter buttons exist",
+                "type": "element-count",
+                "target": ".j2-filter",
+                "expect": 5
+              },
+              {
+                "text": "Categories and fees appear",
+                "type": "facts-present",
+                "target": [
+                  "Coding",
+                  "Robotics",
+                  "Design",
+                  "Talks",
+                  "Rs 100",
+                  "Rs 50",
+                  "Rs 150",
+                  "Rs 200"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Page still parses",
+                "type": "named-test",
+                "target": "page-parses",
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "register",
+        "name": "Registration form",
+        "goal_gap": "No registration form exists",
+        "expected_outcome": "A form with name, email, college and an event dropdown listing all events, submitting to the organiser email",
+        "outputs": [
+          "section #register"
+        ],
+        "completion_check": "Form has a submit control and mailto destination, dropdown has all events",
+        "dependencies": [],
+        "parts": [
+          "form"
+        ],
+        "covers": [
+          4
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 15,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "A student can fill name, email, college and choose an event, and submitting is directed to the organiser email.",
+            "constraints": [
+              "Destination is the charter email only",
+              "Fields are large enough for phones",
+              "No JavaScript errors"
+            ],
+            "context": [
+              "charter item 4",
+              "section #register"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-register builder",
+              "steps": "Add section id register with a heading and a form of class j2-form, action mailto:spark2026@example.com, method post, enctype text/plain. Fields: name, email, college as labelled inputs, and an event select whose options have class j2-event-option, one per event: Code Sprint, Bug Hunt, Line Follower, Drone Dash, Poster Jam, UI Duel, AI in Daily Life, Startup Stories. Add a submit button of class j2-btn labelled Register."
+            },
+            "verification": [
+              {
+                "text": "Registration form exists",
+                "type": "element-count",
+                "target": ".j2-form",
+                "expect": 1
+              },
+              {
+                "text": "Dropdown option per event",
+                "type": "element-count",
+                "target": ".j2-event-option",
+                "expect": 8
+              },
+              {
+                "text": "Form has submit and destination",
+                "type": "named-test",
+                "target": "form-has-submit",
+                "expect": true
+              },
+              {
+                "text": "Destination email and event names appear",
+                "type": "facts-present",
+                "target": [
+                  "spark2026@example.com",
+                  "Code Sprint",
+                  "Bug Hunt",
+                  "Line Follower",
+                  "Drone Dash",
+                  "Poster Jam",
+                  "UI Duel",
+                  "AI in Daily Life",
+                  "Startup Stories"
+                ],
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "estimate": 15,
+        "cost": 15
+      },
+      {
+        "id": "venue",
+        "name": "Venue and map",
+        "goal_gap": "No venue section exists",
+        "expected_outcome": "A venue section with the address and a map link",
+        "outputs": [
+          "section #venue"
+        ],
+        "completion_check": "Address present and map link exists",
+        "dependencies": [],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          6
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 2,
+          "time_minutes": 8
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "Visitors see the college address and can open a map for it.",
+            "constraints": [
+              "No building or hall name",
+              "No invented coordinates"
+            ],
+            "context": [
+              "charter item 6",
+              "section #venue"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-venue builder",
+              "steps": "Add section id venue with a heading, the address text, and a map link of class j2-map and class j2-btn pointing to a Google Maps search URL built from the address, opening in a new tab."
+            },
+            "verification": [
+              {
+                "text": "Venue section exists",
+                "type": "element-count",
+                "target": "#venue",
+                "expect": 1
+              },
+              {
+                "text": "Map link exists",
+                "type": "element-count",
+                "target": ".j2-map",
+                "expect": 1
+              },
+              {
+                "text": "Address appears",
+                "type": "facts-present",
+                "target": [
+                  "Northfield College of Engineering",
+                  "22 University Road, Pune 411007"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Links are well formed",
+                "type": "named-test",
+                "target": "links-resolve",
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "contact",
+        "name": "WhatsApp and email contact",
+        "goal_gap": "No contact section exists",
+        "expected_outcome": "A contact section with a WhatsApp link and the organiser email",
+        "outputs": [
+          "section #contact"
+        ],
+        "completion_check": "WhatsApp link and email present",
+        "dependencies": [],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          7
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 2,
+          "time_minutes": 8
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "Visitors can open a WhatsApp chat with the organiser number and see the organiser email.",
+            "constraints": [
+              "Only the charter number and email",
+              "wa.me link must be well formed"
+            ],
+            "context": [
+              "charter item 7",
+              "section #contact"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-contact builder",
+              "steps": "Add section id contact with a heading, a button of class j2-btn and class j2-whatsapp linking to https://wa.me/910000033333 labelled Chat on WhatsApp, the number shown as +91 00000 33333, and the email shown as a mailto link."
+            },
+            "verification": [
+              {
+                "text": "Contact section exists",
+                "type": "element-count",
+                "target": "#contact",
+                "expect": 1
+              },
+              {
+                "text": "WhatsApp link exists",
+                "type": "element-count",
+                "target": ".j2-whatsapp",
+                "expect": 1
+              },
+              {
+                "text": "Number and email appear",
+                "type": "facts-present",
+                "target": [
+                  "+91 00000 33333",
+                  "spark2026@example.com"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Links are well formed",
+                "type": "named-test",
+                "target": "links-resolve",
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "shell",
+        "name": "Base style, nav and hero",
+        "goal_gap": "The page has no style, navigation or hero",
+        "expected_outcome": "A mobile-first styled shell with sticky nav, hero and one main action, footer, and no overflow",
+        "outputs": [
+          "style block",
+          "nav",
+          "section #hero"
+        ],
+        "completion_check": "Hero facts present, nav links resolve, page parses",
+        "dependencies": [
+          "schedule",
+          "events",
+          "register",
+          "venue",
+          "contact"
+        ],
+        "parts": [
+          "page_section",
+          "form",
+          "styling"
+        ],
+        "covers": [
+          1,
+          9,
+          10
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 30,
+          "calls": 5,
+          "time_minutes": 15
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The page shows the fest name, college, city and dates with a bold modern mobile-first style, a nav reaching every section, and one main hero action.",
+            "constraints": [
+              "No horizontal overflow at narrow and wide widths",
+              "Nav links only to existing section ids",
+              "Buttons and inputs sized for touch",
+              "Only charter facts as content",
+              "Never overwrite other workflows' sections"
+            ],
+            "context": [
+              "charter items 1, 9, 10",
+              "sections #schedule, #events, #register, #venue, #contact"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-shell builder",
+              "steps": "Create one style block with id j2-style: dark base with bold accent colours, big headings, responsive grid, buttons class j2-btn, cards class j2-card, box-sizing border-box, no fixed widths over the viewport. Create nav class j2-nav, sticky, with a menu toggle on phones, linking to #schedule, #events, #register, #venue, #contact. Create section id hero with the h1 Spark 2026, Northfield College of Engineering, Pune, 14 to 16 February 2027, and one main button of class j2-btn linking to #register. Add a footer."
+            },
+            "verification": [
+              {
+                "text": "Single style block exists",
+                "type": "grep-count",
+                "target": "j2-style",
+                "expect": 1
+              },
+              {
+                "text": "Nav exists",
+                "type": "element-count",
+                "target": ".j2-nav",
+                "expect": 1
+              },
+              {
+                "text": "Hero exists",
+                "type": "element-count",
+                "target": "#hero",
+                "expect": 1
+              },
+              {
+                "text": "Hero facts appear",
+                "type": "facts-present",
+                "target": [
+                  "Spark 2026",
+                  "Northfield College of Engineering",
+                  "Pune",
+                  "14 to 16 February 2027"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Every in-page link resolves",
+                "type": "named-test",
+                "target": "links-resolve",
+                "expect": true
+              },
+              {
+                "text": "Page parses",
+                "type": "named-test",
+                "target": "page-parses",
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "estimate": 30,
+        "cost": 30
+      }
+    ],
+    "attempts_used": 2,
+    "registered": [
+      "Day-by-day schedule",
+      "Events by category with fees",
+      "Registration form"
+    ]
+  }
+]

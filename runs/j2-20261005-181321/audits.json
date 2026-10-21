@@ -1,0 +1,72 @@
+[
+  {
+    "cycle": 1,
+    "version": 4,
+    "results": [
+      {
+        "criterion": "Visitors can request an appointment",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Seen in the latest version",
+        "severity": "low"
+      },
+      {
+        "criterion": "Departments and doctors are listed",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Seen in the latest version",
+        "severity": "low"
+      },
+      {
+        "criterion": "Emergency number visible on every screen",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "Number appears only in the contact section at the bottom",
+        "severity": "high"
+      },
+      {
+        "criterion": "Layout works on a phone",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Seen in the latest version",
+        "severity": "low"
+      }
+    ],
+    "all_pass": false
+  },
+  {
+    "cycle": 2,
+    "version": 5,
+    "results": [
+      {
+        "criterion": "Visitors can request an appointment",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Seen in the latest version",
+        "severity": "low"
+      },
+      {
+        "criterion": "Departments and doctors are listed",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Seen in the latest version",
+        "severity": "low"
+      },
+      {
+        "criterion": "Emergency number visible on every screen",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Sticky bar shows the number on every screen",
+        "severity": "low"
+      },
+      {
+        "criterion": "Layout works on a phone",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Seen in the latest version",
+        "severity": "low"
+      }
+    ],
+    "all_pass": true
+  }
+]

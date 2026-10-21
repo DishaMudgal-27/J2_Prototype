@@ -1,0 +1,142 @@
+[
+  {
+    "cycle": 1,
+    "version": 4,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The file is a single HTML file with inline CSS and JavaScript, and needs no build step.",
+        "verdict": "PASS",
+        "note": "One file of 30116 bytes with an inline style block and 2 inline scripts. The only external resources are Google Fonts, which is a CDN and allowed.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The page shows the name Brew Lab and Indiranagar, Bengaluru.",
+        "verdict": "PASS",
+        "note": "The title, h1 'Brew Lab', hero eyebrow, location section and footer all say Brew Lab and Indiranagar, Bengaluru.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "A menu section lists items with a price slot for each; any price not supplied is marked as a placeholder.",
+        "verdict": "PASS",
+        "note": "6 li.menu-item slots, each with a span.ph price ('Price to be supplied', ids ph-price-1 to 6). No numeric prices appear.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "An hours section is present; any hours not supplied are marked as a placeholder.",
+        "verdict": "PASS",
+        "note": "section#hours has 7 weekday rows, each with span.ph 'Hours to be supplied'. No times are shown.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A location section names Indiranagar, Bengaluru and includes a marked placeholder for the street address.",
+        "verdict": "PASS",
+        "note": "section#location has 'Indiranagar, Bengaluru' and span.ph#ph-address 'Street address to be supplied'. The phone is also a placeholder.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A pre-order section has a form with fields for name, item, quantity and pickup time, and a marked placeholder for where orders are sent.",
+        "verdict": "PASS",
+        "note": "One form has inputs po-name, po-item, po-qty and po-time. span.ph#ph-preorder-dest marks the destination. There is no action attribute, and the submit handler calls preventDefault and sends nothing.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "A farm section contains a map container with three farm entries in one labelled data block, each marked as awaiting coordinates, and no invented coordinates.",
+        "verdict": "PASS",
+        "note": "div#farm-map is present. script#farm-data, labelled via data-label, has 3 entries with name, lat and lng all null and status 'awaiting coordinates'. JS errors: none.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The file contains no img elements and no photo file or photo URL references.",
+        "verdict": "PASS",
+        "note": "No <img> tag and no url() backgrounds in the source. All art is inline SVG or CSS gradients.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "A warm palette is defined (for example as CSS variables) and used across the page, with at least one non-photo decorative element such as SVG or CSS art.",
+        "verdict": "PASS",
+        "note": ":root defines --cream, --terracotta, --amber and others, and body, buttons and cards use them. The hero has an inline SVG coffee cup with animated steam, plus a dotted CSS divider.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "The page includes a viewport meta tag and a responsive layout rule for narrow screens.",
+        "verdict": "PASS",
+        "note": "The viewport meta tag is present and @media (max-width: 720px) collapses the grids. Mechanical check: 0px overflow at 360px and at 1280px.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 10,
+        "pass": true
+      },
+      {
+        "id": "F-11",
+        "criterion": "Every placeholder is visibly marked on the page and listed in a single comment block in the file.",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Every span.ph shows a dashed 'PLACEHOLDER:' tag, and P-01 to P-08 are listed in one comment. The caption id ph-farm-map is not named there, though P-08 covers the map awaiting state.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 11,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "mechanical": {
+      "available": true,
+      "bytes": 30116,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com",
+        "https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;600;700&display=swap",
+        "https://fonts.gstatic.com",
+        "https://www.openstreetmap.org/?mlat="
+      ],
+      "forms": 1,
+      "scripts": 4,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

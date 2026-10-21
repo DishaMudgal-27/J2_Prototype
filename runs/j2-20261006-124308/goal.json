@@ -1,0 +1,35 @@
+{
+  "statement": "Build a single-file, mobile-first website for Brew Lab, a cafe in Indiranagar, Bengaluru, that shows the menu with prices, opening hours and location, and lets visitors pre-order coffee for pickup.",
+  "site_name": "Brew Lab",
+  "audience": "Local customers in Indiranagar, Bengaluru, who want to check the menu, hours and location, and pre-order coffee for pickup.",
+  "standards": [
+    "Warm, modern look",
+    "Mobile-first layout that works on a phone screen without sideways scrolling",
+    "Plain HTML, CSS and JavaScript in one file, no build step (CDN libraries allowed)",
+    "Content facts not supplied by the Requester appear as clearly marked placeholders, never invented"
+  ],
+  "rules": [
+    "The cafe name is Brew Lab and the area is Indiranagar, Bengaluru",
+    "Opening hours are 8am to 10pm, every day",
+    "Do not invent prices, menu items, address, phone numbers or photos",
+    "No online payment is built, since the brief does not ask for it"
+  ],
+  "done_when": [
+    "The page title and header show the name Brew Lab",
+    "A menu section lists drinks, each with a price, and any price or item not supplied is a visibly marked placeholder",
+    "The page states opening hours as 8am to 10pm, every day",
+    "A location section names Indiranagar, Bengaluru and includes a map or map link, with the street address marked as a placeholder if not supplied",
+    "A pre-order form lets a visitor choose menu items and quantities, enter a name and phone number, and pick a pickup time between 8am and 10pm, and shows an order summary on submit",
+    "The file has a viewport meta tag and mobile-first CSS (base styles for small screens, min-width media queries for larger ones)",
+    "The CSS defines a warm colour palette and the layout has no fixed widths that force horizontal scrolling at 375px",
+    "The site is one HTML file with inline CSS and JavaScript and needs no build step"
+  ],
+  "open_inputs": [
+    "Menu items and their prices",
+    "Street address and map pin for the Indiranagar location",
+    "Phone number or contact for the cafe",
+    "Where pre-orders should be delivered (email, WhatsApp, phone or other)",
+    "Brand colours, logo and photos, if any"
+  ],
+  "dropped_from_brief": []
+}

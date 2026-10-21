@@ -1,0 +1,72 @@
+[
+  {
+    "cycle": 1,
+    "version": 5,
+    "results": [
+      {
+        "criterion": "The site is a single HTML file with its CSS and JavaScript inline or loaded from a CDN, and needs no build step.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "One HTML document with an inline <style> and an inline <script>. There are no external links or script tags and no build tooling.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The file has an emergency section that shows 108 as ambulance and 112 as emergency.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Section #emergency has '<strong>Ambulance:</strong> <a href=\"tel:108\">108</a>' and '<strong>Emergency:</strong> <a href=\"tel:112\">112</a>'.",
+        "severity": "low"
+      },
+      {
+        "criterion": "In that emergency section, the hospital address, phone, directions and emergency desk each appear as a visibly marked placeholder and none is shown as a real number or address.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Four list items (address, phone, directions, emergency desk) each use span.placeholder with 'To be confirmed by CityCare', styled yellow with a dashed border. A line above them says the text is a placeholder, not a real hospital fact. No other numbers or addresses appear in the section.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The file has a booking form with input validation that rejects empty or malformed required fields before sending.",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "validate() runs before the mailto and rejects empty or malformed name, phone (Indian mobile regex), email (regex) and date (empty, invalid, or in the past). The submit handler returns early if validation fails. Warning: the name regex uses \\p{L} without \\p{M}, so Devanagari and Kannada names with vowel signs should be rejected, and the error text says 'letters only'. This was read from the code, not executed.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "On valid submit, the form builds a mailto request to a visibly marked placeholder address and shows a confirmation with a hospital phone number marked as a placeholder.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "RECIPIENT = 'bookings-placeholder@example.com' is commented as a placeholder, and the page labels it 'to be confirmed by CityCare'. On valid input the handler builds the mailto href, shows #booking-confirmation, and sets window.location.href. The confirmation shows 'To be confirmed by CityCare' in span.placeholder for the hospital phone.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The form or its confirmation states in plain words that the request is sent by email and is not a confirmed appointment until the hospital replies.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The notice above the form says 'your request is sent by email to the hospital. It is not a confirmed appointment until the hospital replies to you.' The confirmation repeats it: 'This is not a confirmed appointment. The request is sent by email, and your visit is only confirmed once the hospital replies to you.'",
+        "severity": "low"
+      },
+      {
+        "criterion": "The file has a doctor profiles section with at least two profiles, each labelled as sample content.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Section #doctors has 3 article.doctor profiles. Each has a span.sample-label 'Sample content', and the section heading and a notice carry the same label.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The file has one health blog post, labelled as sample content.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Section #blog has exactly one article.blog-post with a title, body text, a 'Sample content' label, and the heading label and notice. It also includes a 108/112 urgent-help note.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The file has CSS that gives a consistent, readable layout that adapts to a narrow mobile screen.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Shared CSS variables, a consistent card style for all sections, flex-wrap layouts, box-sizing: border-box, overflow-wrap rules and a @media (max-width: 600px) block (full-width inputs and buttons, smaller padding). I did not render at 360px, so the no-horizontal-scroll claim comes from reading the rules.",
+        "severity": "low"
+      }
+    ],
+    "all_pass": true
+  }
+]

@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sweet Crumbs Bakery, Pune</title>
+<meta name="description" content="Sweet Crumbs Bakery in Pune: menu, cake orders and contact details.">
+<style>
+  :root {
+    --bg: #fff8f1;
+    --card: #ffffff;
+    --ink: #3b2a20;
+    --muted: #7a6657;
+    --accent: #b5532f;
+    --accent-dark: #8f3f22;
+    --line: #ecdccb;
+    --ph-bg: #fff2b8;
+    --ph-ink: #6b4e00;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+  }
+  a { color: var(--accent-dark); }
+  header.site-header {
+    background: var(--accent);
+    color: #fff;
+    padding: 2.5rem 1.25rem 2rem;
+    text-align: center;
+  }
+  header.site-header h1 { margin: 0 0 .25rem; font-size: 2.2rem; letter-spacing: .02em; }
+  header.site-header p { margin: 0; font-size: 1.05rem; opacity: .95; }
+  nav.site-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .5rem 1.25rem;
+    background: var(--accent-dark);
+    padding: .7rem 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  nav.site-nav a { color: #fff; text-decoration: none; font-weight: bold; padding: .25rem .4rem; }
+  nav.site-nav a:hover, nav.site-nav a:focus { text-decoration: underline; }
+  main { max-width: 960px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+  section { margin-top: 2.5rem; scroll-margin-top: 4rem; }
+  section > h2 {
+    margin: 0 0 .25rem;
+    font-size: 1.7rem;
+    color: var(--accent-dark);
+    border-bottom: 2px solid var(--line);
+    padding-bottom: .4rem;
+  }
+  .lede { color: var(--muted); margin: .5rem 0 1.25rem; }
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+  .menu-group, .contact-card, .order-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1rem 1.25rem 1.1rem;
+  }
+  .menu-group h3 { margin: 0 0 .6rem; font-size: 1.25rem; color: var(--accent); }
+  .menu-group ul { list-style: none; margin: 0; padding: 0; }
+  .menu-group li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: .75rem;
+    padding: .5rem 0;
+    border-top: 1px dashed var(--line);
+  }
+  .menu-group li:first-child { border-top: 0; }
+  .item-name { flex: 1 1 auto; min-width: 0; }
+  .item-price { flex: 0 1 auto; min-width: 0; max-width: 55%; text-align: right; font-weight: bold; }
+  .from { font-weight: normal; font-size: .85rem; color: var(--muted); display: block; }
+  .note { font-size: .9rem; color: var(--muted); margin-top: .9rem; }
+  .contact-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+  .contact-card h3, .order-card h3 { margin: 0 0 .5rem; font-size: 1.15rem; color: var(--accent); }
+  .contact-card p { margin: .25rem 0; }
+  .btn {
+    display: inline-block;
+    background: #25a244;
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    padding: .65rem 1.1rem;
+    border-radius: 8px;
+    margin-top: .4rem;
+  }
+  .btn:hover, .btn:focus { background: #1d8636; }
+
+  /* Cake order section */
+  .order-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+  .order-card p { margin: .25rem 0 .6rem; }
+  .notice {
+    background: #fdf0e4;
+    border-left: 4px solid var(--accent);
+    padding: .6rem .9rem;
+    border-radius: 0 6px 6px 0;
+    margin: .75rem 0;
+  }
+  #area-list { margin: .4rem 0 0; padding-left: 1.2rem; }
+  #area-list li { margin: .2rem 0; }
+  form#cake-form .field { margin-bottom: .9rem; }
+  form#cake-form label,
+  form#cake-form legend { display: block; font-weight: bold; margin-bottom: .25rem; padding: 0; }
+  form#cake-form .hint { font-weight: normal; font-size: .85rem; color: var(--muted); }
+  form#cake-form input[type="text"],
+  form#cake-form input[type="date"],
+  form#cake-form select,
+  form#cake-form textarea {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    font: inherit;
+    padding: .6rem .7rem;
+    border: 1px solid #cdb9a4;
+    border-radius: 6px;
+    background: #fff;
+    color: var(--ink);
+  }
+  form#cake-form textarea { min-height: 5rem; resize: vertical; }
+  form#cake-form input:focus, form#cake-form select:focus, form#cake-form textarea:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  form#cake-form fieldset { border: 0; margin: 0 0 .9rem; padding: 0; min-width: 0; }
+  .radio-row { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; }
+  .radio-row label { font-weight: normal; display: inline-flex; align-items: center; gap: .4rem; margin: 0; }
+  .field-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .9rem; }
+  form#cake-form .is-disabled { opacity: .5; }
+  button.btn { border: 0; cursor: pointer; font: inherit; font-weight: bold; width: 100%; padding: .8rem 1.1rem; }
+  #order-status { margin-top: .75rem; font-size: .95rem; overflow-wrap: anywhere; }
+  #order-preview {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    background: #f7efe6;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: .6rem .8rem;
+    margin-top: .5rem;
+    font-size: .9rem;
+  }
+
+  /* One consistent visible marker for every unknown fact */
+  .ph {
+    background: var(--ph-bg);
+    color: var(--ph-ink);
+    border: 1px dashed #c9a227;
+    border-radius: 4px;
+    padding: 0 .3rem;
+    font-family: Consolas, Menlo, monospace;
+    font-size: .88em;
+    font-weight: normal;
+    overflow-wrap: anywhere;
+  }
+
+  /* Overflow guards: grid and flex children may shrink below their content width, long text wraps */
+  .menu-grid > *, .contact-grid > *, .order-grid > *, .field-pair > *, .field { min-width: 0; }
+  .menu-group, .contact-card, .order-card { overflow-wrap: anywhere; }
+  .lede, .note, .notice, .item-name, .item-price { overflow-wrap: anywhere; }
+
+  footer {
+    text-align: center;
+    padding: 1.5rem 1rem 2rem;
+    color: var(--muted);
+    font-size: .9rem;
+    border-top: 1px solid var(--line);
+  }
+  @media (max-width: 640px) {
+    header.site-header h1 { font-size: 1.7rem; }
+    main { padding: 1rem .9rem 2.5rem; }
+    .menu-grid, .contact-grid, .order-grid, .field-pair { grid-template-columns: minmax(0, 1fr); }
+    section > h2 { font-size: 1.45rem; }
+    .btn { display: block; text-align: center; }
+    .menu-group, .contact-card, .order-card { padding: .9rem 1rem 1rem; }
+    .item-price { max-width: 50%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1>Sweet Crumbs Bakery</h1>
+  <p>Fresh bakes and custom cakes in Pune</p>
+</header>
+
+<nav class="site-nav" aria-label="Main">
+  <a href="#menu">Menu</a>
+  <a href="#cake-orders">Cake Orders</a>
+  <a href="#contact">Contact</a>
+</nav>
+
+<main>
+
+  <section id="menu" aria-labelledby="menu-title">
+    <h2 id="menu-title">Menu</h2>
+    <p class="lede">Cake prices are starting prices; the final price depends on size, flavour and design. Other items are at the fixed price shown.</p>
+
+    <div class="menu-grid">
+
+      <div class="menu-group" id="menu-cakes">
+        <h3>Cakes</h3>
+        <ul>
+          <li>
+            <span class="item-name"><span class="ph">[PLACEHOLDER: cake name 1]</span></span>
+            <span class="item-price"><span class="from">starting from</span><span class="ph">[PLACEHOLDER: starting price]</span></span>
+          </li>
+          <li>
+            <span class="item-name"><span class="ph">[PLACEHOLDER: cake name 2]</span></span>
+            <span class="item-price"><span class="from">starting from</span><span class="ph">[PLACEHOLDER: starting price]</span></span>
+          </li>
+          <li>
+            <span class="item-name"><span class="ph">[PLACEHOLDER: cake name 3]</span></span>
+            <span class="item-price"><span class="from">starting from</span><span class="ph">[PLACEHOLDER: starting price]</span></span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="menu-group" id="menu-other-1">
+        <h3><span class="ph">[PLACEHOLDER: non-cake category 1]</span></h3>
+        <ul>
+          <li>
+            <span class="item-name"><span class="ph">[PLACEHOLDER: item name]</span></span>
+            <span class="item-price"><span class="ph">[PLACEHOLDER: fixed price]</span></span>
+          </li>
+          <li>
+            <span class="item-name"><span class="ph">[PLACEHOLDER: item name]</span></span>
+            <span class="item-price"><span class="ph">[PLACEHOLDER: fixed price]</span></span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="menu-group" id="menu-other-2">
+        <h3><span class="ph">[PLACEHOLDER: non-cake category 2]</span></h3>
+        <ul>
+          <li>
+            <span class="item-name"><span class="ph">[PLACEHOLDER: item name]</span></span>
+            <span class="item-price"><span class="ph">[PLACEHOLDER: fixed price]</span></span>
+          </li>
+          <li>
+            <span class="item-name"><span class="ph">[PLACEHOLDER: item name]</span></span>
+            <span class="item-price"><span class="ph">[PLACEHOLDER: fixed price]</span></span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+    <p class="note">Menu items, categories and prices are waiting for the bakery's details.</p>
+  </section>
+
+  <section id="cake-orders" aria-labelledby="orders-title">
+    <h2 id="orders-title">Cake Orders</h2>
+    <p class="lede">Tell us about the cake you want. When you press the button, WhatsApp opens with your details already typed in, ready to send to Sweet Crumbs Bakery.</p>
+
+    <div class="order-grid">
+
+      <div class="order-card">
+        <h3>Order form</h3>
+        <form id="cake-form" novalidate>
+
+          <div class="field-pair">
+            <div class="field">
+              <label for="cake-size">Size <span class="hint">(weight or servings)</span></label>
+              <input type="text" id="cake-size" name="size" required placeholder="e.g. 1 kg">
+            </div>
+            <div class="field">
+              <label for="cake-flavour">Flavour</label>
+              <input type="text" id="cake-flavour" name="flavour" required placeholder="e.g. chocolate">
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="cake-date">Date needed</label>
+            <input type="date" id="cake-date" name="date" required>
+          </div>
+
+          <div class="field">
+            <label for="cake-message">Message on the cake <span class="hint">(optional)</span></label>
+            <input type="text" id="cake-message" name="message" placeholder="e.g. Happy Birthday">
+          </div>
+
+          <fieldset>
+            <legend>Pickup or delivery</legend>
+            <div class="radio-row">
+              <label><input type="radio" name="fulfilment" value="Pickup" checked> Pickup from the bakery</label>
+              <label><input type="radio" name="fulfilment" value="Delivery"> Delivery in Pune</label>
+            </div>
+          </fieldset>
+
+          <div class="field is-disabled" id="area-field">
+            <label for="cake-area">Delivery area</label>
+            <select id="cake-area" name="area" disabled>
+              <option value="">Choose an area</option>
+            </select>
+          </div>
+
+          <div class="field is-disabled" id="address-field">
+            <label for="cake-address">Delivery address</label>
+            <textarea id="cake-address" name="address" disabled placeholder="House or flat number, building, street, landmark"></textarea>
+          </div>
+
+          <button type="submit" class="btn" id="order-submit">Send order on WhatsApp</button>
+          <div id="order-status" role="status" aria-live="polite"></div>
+          <div id="order-preview" hidden></div>
+        </form>
+      </div>
+
+      <div class="order-card">
+        <h3>Pickup and delivery</h3>
+        <p>We offer pickup from the bakery, or delivery within these areas of Pune:</p>
+
+        <!-- EDITABLE BLOCK: delivery areas.
+             Edit, add or remove the <li> items below. The order form's area list is built from this block,
+             so this is the only place to change. Replace each marked placeholder with a real area name. -->
+        <ul id="area-list">
+          <li><span class="ph">[PLACEHOLDER: Pune delivery area 1]</span></li>
+          <li><span class="ph">[PLACEHOLDER: Pune delivery area 2]</span></li>
+          <li><span class="ph">[PLACEHOLDER: Pune delivery area 3]</span></li>
+        </ul>
+        <!-- END EDITABLE BLOCK -->
+
+        <div class="notice">
+          <strong>Orders are confirmed by the bakery.</strong> Your order is not final until Sweet Crumbs Bakery confirms it with you after you send the WhatsApp message.
+        </div>
+        <p class="note">This website does not take payment and does not store your details. Your order goes to the bakery only through the WhatsApp message you send.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="contact" aria-labelledby="contact-title">
+    <h2 id="contact-title">Contact</h2>
+    <p class="lede">Visit or get in touch with Sweet Crumbs Bakery in Pune.</p>
+
+    <div class="contact-grid">
+
+      <div class="contact-card">
+        <h3>Address</h3>
+        <p><span class="ph">[PLACEHOLDER: bakery street address]</span></p>
+        <p>Pune</p>
+      </div>
+
+      <div class="contact-card">
+        <h3>Phone</h3>
+        <p><span class="ph" id="phone-text">[PLACEHOLDER: bakery phone number]</span></p>
+      </div>
+
+      <div class="contact-card">
+        <h3>WhatsApp</h3>
+        <p>Message us on WhatsApp for questions and orders.</p>
+        <a class="btn" id="whatsapp-link" href="#contact">Chat on WhatsApp</a>
+        <p class="note" id="whatsapp-note"></p>
+      </div>
+
+      <div class="contact-card">
+        <h3>Opening hours</h3>
+        <p><span class="ph">[PLACEHOLDER: opening hours]</span></p>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  &copy; Sweet Crumbs Bakery, Pune
+</footer>
+
+<script>
+  // Single editable value: the bakery WhatsApp number, digits only with country code (for example 91XXXXXXXXXX).
+  // Used by the contact link and by the cake order form. Until the real number is set, both stay inactive
+  // and a marked placeholder is shown.
+  const WHATSAPP_NUMBER = "[PLACEHOLDER: WhatsApp number]";
+
+  (function () {
+    var digits = WHATSAPP_NUMBER.replace(/\D/g, "");
+    var link = document.getElementById("whatsapp-link");
+    var note = document.getElementById("whatsapp-note");
+    if (digits.length >= 10) {
+      link.href = "https://wa.me/" + digits;
+      link.target = "_blank";
+      link.rel = "noopener";
+    } else {
+      note.innerHTML = '<span class="ph">[PLACEHOLDER: WhatsApp number]</span>';
+      link.addEventListener("click", function (e) { e.preventDefault(); });
+      link.setAttribute("aria-disabled", "true");
+    }
+  })();
+
+  // Cake order form: builds a prefilled WhatsApp message from the fields. Nothing is sent to a server or saved.
+  (function () {
+    var form = document.getElementById("cake-form");
+    var areaSelect = document.getElementById("cake-area");
+    var addressBox = document.getElementById("cake-address");
+    var areaField = document.getElementById("area-field");
+    var addressField = document.getElementById("address-field");
+    var dateInput = document.getElementById("cake-date");
+    var status = document.getElementById("order-status");
+    var preview = document.getElementById("order-preview");
+
+    // Build the area dropdown from the single editable list in the Pickup and delivery card.
+    var items = document.querySelectorAll("#area-list li");
+    for (var i = 0; i < items.length; i++) {
+      var name = items[i].textContent.trim();
+      if (name) {
+        var opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        areaSelect.appendChild(opt);
+      }
+    }
+
+    // Earliest selectable date is today (local time).
+    var t = new Date();
+    var mm = String(t.getMonth() + 1).padStart(2, "0");
+    var dd = String(t.getDate()).padStart(2, "0");
+    dateInput.min = t.getFullYear() + "-" + mm + "-" + dd;
+
+    function fulfilment() {
+      return form.querySelector('input[name="fulfilment"]:checked').value;
+    }
+
+    function syncDelivery() {
+      var on = fulfilment() === "Delivery";
+      areaSelect.disabled = !on;
+      addressBox.disabled = !on;
+      areaField.classList.toggle("is-disabled", !on);
+      addressField.classList.toggle("is-disabled", !on);
+      if (!on) { areaSelect.value = ""; addressBox.value = ""; }
+    }
+    var radios = form.querySelectorAll('input[name="fulfilment"]');
+    for (var r = 0; r < radios.length; r++) { radios[r].addEventListener("change", syncDelivery); }
+    syncDelivery();
+
+    function formatDate(v) {
+      var p = v.split("-");
+      return p.length === 3 ? p[2] + "/" + p[1] + "/" + p[0] : v;
+    }
+
+    function show(text) {
+      status.textContent = text;
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      preview.hidden = true;
+
+      var size = document.getElementById("cake-size").value.trim();
+      var flavour = document.getElementById("cake-flavour").value.trim();
+      var date = dateInput.value;
+      var msg = document.getElementById("cake-message").value.trim();
+      var mode = fulfilment();
+      var area = areaSelect.value;
+      var address = addressBox.value.trim();
+
+      var missing = [];
+      if (!size) missing.push("size");
+      if (!flavour) missing.push("flavour");
+      if (!date) missing.push("date needed");
+      if (mode === "Delivery" && !area) missing.push("delivery area");
+      if (mode === "Delivery" && !address) missing.push("delivery address");
+      if (missing.length) {
+        show("Please fill in: " + missing.join(", ") + ".");
+        return;
+      }
+
+      var lines = [
+        "Hello Sweet Crumbs Bakery, I would like to order a cake.",
+        "Size: " + size,
+        "Flavour: " + flavour,
+        "Date needed: " + formatDate(date),
+        "Message on cake: " + (msg || "None"),
+        "Pickup or delivery: " + mode
+      ];
+      if (mode === "Delivery") {
+        lines.push("Delivery area: " + area);
+        lines.push("Delivery address: " + address);
+      }
+      lines.push("Please confirm availability and price.");
+      var text = lines.join("\n");
+
+      var digits = WHATSAPP_NUMBER.replace(/\D/g, "");
+      var url = "https://wa.me/" + digits + "?text=" + encodeURIComponent(text);
+
+      if (digits.length >= 10) {
+        show("Opening WhatsApp. Send the message to place your request; the bakery will confirm your order.");
+        window.open(url, "_blank", "noopener");
+      } else {
+        status.innerHTML = '<span class="ph">[PLACEHOLDER: WhatsApp number]</span> The bakery WhatsApp number is not set yet, so WhatsApp was not opened. Your message is shown below.';
+        preview.textContent = text;
+        preview.hidden = false;
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>

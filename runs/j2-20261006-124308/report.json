@@ -1,0 +1,214 @@
+{
+  "metrics": {
+    "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): Menu items and their prices; Street address and map pin for the Indiranagar location; Phone number or contact for the cafe; Where pre-orders should be delivered (email, WhatsApp, phone or other); Brand colours, logo and photos, if any.",
+    "brief": "A website for my cafe.",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 1,
+    "ai_calls": 14,
+    "minutes": 6.0,
+    "budget": {
+      "total": 100,
+      "start": 100,
+      "cap": 200,
+      "raises": [],
+      "spent": 70,
+      "rate_card": true
+    },
+    "site_versions": 3,
+    "site_bytes": 25526,
+    "agents": {
+      "identity": {
+        "turns": 4,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 4,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 3,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "builder": {
+        "turns": 3,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 1,
+      "grants": 1,
+      "counters": 0,
+      "refuses": 0,
+      "refuses_converted_by_code": 0,
+      "parks": 0
+    },
+    "conflicts": {
+      "total": 0,
+      "settled_by_agents": 0,
+      "resolved_by_identity": 0,
+      "asked_requester": 0,
+      "open": 0,
+      "list": []
+    },
+    "requester_questions": {
+      "total": 2,
+      "by_kind": {
+        "info": 2
+      }
+    },
+    "workflows": {
+      "registered": 3,
+      "done": 3,
+      "failed": 0,
+      "held_ever": 2,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "Core page: header, hours, location and warm mobile-first styling",
+          "agent_estimate": 35,
+          "charged": 35
+        },
+        {
+          "id": "W-2",
+          "name": "Menu section with marked placeholders",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-3",
+          "name": "Pre-order form with order summary",
+          "agent_estimate": 25,
+          "charged": 25
+        }
+      ]
+    },
+    "validator_refusals": 0,
+    "role_refusals": 0,
+    "pauses": 2,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 0,
+    "audits": [
+      {
+        "cycle": 1,
+        "version": 3,
+        "all_pass": true,
+        "pass": 8,
+        "warn": 0,
+        "fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      }
+    ],
+    "open_inputs": [
+      "Menu items and their prices",
+      "Street address and map pin for the Indiranagar location",
+      "Phone number or contact for the cafe",
+      "Where pre-orders should be delivered (email, WhatsApp, phone or other)",
+      "Brand colours, logo and photos, if any"
+    ]
+  },
+  "review": {
+    "verdict": "A clean happy-path run: three small workflows built, Audit passed 8 of 8 in one cycle at 70 of 100 budget, but nothing was contested, so the harder behaviours were not tested.",
+    "agents": {
+      "identity": {
+        "score": 4,
+        "note": "Stayed in role. Paused and asked the Requester [2], re-asked when the answer was off-topic [5], recorded the charter [8], and closed with honest caveats [26]. Lost a point because [5] repeated all four questions and [26] is far longer than the 1-3 sentence rule."
+      },
+      "adaptation": {
+        "score": 4,
+        "note": "One proposal [10] with three small workflows in build order, 70 of 100, 30 held for rework. It surfaced the missing order destination and the no-payment limit instead of hiding them. The chat shows only a summary, so the proposal fields cannot be checked."
+      },
+      "priority": {
+        "score": 4,
+        "note": "Granted all three with retry limits, a stated reserve and a named trade-off [11]. Envelope checks [15][18][21] went to Builder as required. Nothing needed bargaining, so its counter and refuse judgement is untested."
+      },
+      "coordination": {
+        "score": 5,
+        "note": "Stated its scheduling rule each time and gave exact HOLD conditions with a single file lock [13][17][20]. Never touched budget or scope. Scheduling was a straight line, so the evidence is thin."
+      },
+      "audit": {
+        "score": 4,
+        "note": "Used the code check [24], checked all 8 items and sent the result to Identity [25]. The F-9 warning is not described in [25]. Identity's caveat in [26] suggests it is about the submit check, but that is inferred."
+      },
+      "builder": {
+        "score": 5,
+        "note": "Three runs, each matching its workflow [16][19][22]. Final file 25.5 KB, no JS errors, no overflow [24]. No scope creep."
+      }
+    },
+    "went_well": [
+      "Placeholders were used instead of invented menu, address or phone, as the charter rule requires [19][22][26].",
+      "Budget handling worked: holds released money and it was charged again on run [14]; spend ended at 70 of 100.",
+      "No redirects, invalid moves, validator refusals or stuck runs across 16 agent turns."
+    ],
+    "problems": [
+      "The pre-order form sends nothing to the cafe [22][26]. Done-when passed, but the business function does not work yet.",
+      "Nobody ran the form submit. Identity admits Audit read the code [26], and the mechanical check lists no interaction test [24].",
+      "Identity's re-ask [5] repeated the same four questions instead of narrowing them.",
+      "Agent turns sum to 16 but ai_calls is 13. Unverified, but likely some turns are code-written, so call counts may not match what agents did."
+    ],
+    "learnings": [
+      "Test next with a brief and budget that force friction: a tight budget so Priority must counter, a validator rejection, an Audit NEEDS_REVISION. Metrics show 0 conflicts, counters, refusals and rework, so only the happy path is proven.",
+      "Add a scripted submit to the mechanical check (fill the form, submit, assert the summary). It would close the one caveat Identity had to state [26].",
+      "The rate card made estimate equal charge for all three workflows (35/10/25), so estimation accuracy and bargaining were not exercised. Vary costs in the next test.",
+      "Decide whether done-when should require an order destination or an explicit 'demo only' label. Today a template full of placeholders counts as done. Keep the no-invention rule.",
+      "Show the full text of warning findings like F-9 in the chat so reviewers do not have to infer them.",
+      "Keep the pause-on-missing-info step, but have Identity re-ask only the unanswered items."
+    ]
+  },
+  "events": [
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "info: 4 question(s) for the Requester",
+      "msg": 3,
+      "cycle": 0,
+      "pause": "info"
+    },
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "info: 4 question(s) for the Requester",
+      "msg": 6,
+      "cycle": 0,
+      "pause": "info"
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-2: W1-core-page (W-1) must be done and pass its completion check; index.html lock must be free",
+      "msg": 13,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-3: W2-menu (W-2) must be done and pass its completion check, since the form reads the menu data array; index.html lock must be free",
+      "msg": 13,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-3: W2-menu (W-2) must be done and pass its completion check; the index.html lock must be free",
+      "msg": 17,
+      "cycle": 1
+    }
+  ],
+  "made": "2026-10-06 12:50:41"
+}

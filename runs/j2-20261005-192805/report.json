@@ -1,0 +1,222 @@
+{
+  "metrics": {
+    "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence.",
+    "brief": "A website for CityCare Hospital in Bengaluru",
+    "model": null,
+    "mock": true,
+    "cycles": 2,
+    "ai_calls": 29,
+    "minutes": 0.0,
+    "budget": {
+      "total": 100,
+      "spent": 88,
+      "rate_card": true
+    },
+    "site_versions": 5,
+    "site_bytes": 6409,
+    "agents": {
+      "identity": {
+        "turns": 5,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "ceo": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 5,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 4,
+        "redirects": 1,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 7,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "builder": {
+        "turns": 5,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 5,
+      "grants": 2,
+      "counters": 2,
+      "refuses": 0,
+      "withdrawals": 0,
+      "conflicts": 1,
+      "ceo_decisions": 1,
+      "resolutions": [
+        {
+          "id": "C-1",
+          "cycle": 1,
+          "reason": "4 exchanges used without agreement.",
+          "ruling": "split",
+          "decided_by": "ceo",
+          "ceo_choice": "B: No blog; one small trust element within 10 units; reserve stays 20",
+          "funded": [
+            "Choose stack and scaffold",
+            "Core sections",
+            "Animations",
+            "Health tips strip"
+          ]
+        }
+      ]
+    },
+    "workflows": {
+      "registered": 5,
+      "done": 5,
+      "failed": 0,
+      "held_ever": 1,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "Choose stack and scaffold",
+          "agent_estimate": 15,
+          "charged": 15
+        },
+        {
+          "id": "W-2",
+          "name": "Core sections",
+          "agent_estimate": 45,
+          "charged": 45
+        },
+        {
+          "id": "W-3",
+          "name": "Animations",
+          "agent_estimate": 20,
+          "charged": 10
+        },
+        {
+          "id": "W-4",
+          "name": "Health tips strip",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-5",
+          "name": "Sticky emergency bar",
+          "agent_estimate": 8,
+          "charged": 8
+        }
+      ]
+    },
+    "validator_refusals": 0,
+    "role_refusals": 0,
+    "pauses": 0,
+    "limit_failures": 0,
+    "warnings": 0,
+    "audits": [
+      {
+        "cycle": 1,
+        "version": 4,
+        "all_pass": false,
+        "pass": 3,
+        "warn": 0,
+        "fail": 1
+      },
+      {
+        "cycle": 2,
+        "version": 5,
+        "all_pass": true,
+        "pass": 4,
+        "warn": 0,
+        "fail": 0
+      }
+    ],
+    "open_inputs": []
+  },
+  "review": {
+    "verdict": "Mock run: Done: Identity confirmed every done-when item holds, with Audit's evidence.",
+    "agents": {
+      "identity": {
+        "score": 4,
+        "note": "5 turns, 0 redirects, 0 invalid moves"
+      },
+      "ceo": {
+        "score": 4,
+        "note": "2 turns, 0 redirects, 0 invalid moves"
+      },
+      "adaptation": {
+        "score": 4,
+        "note": "5 turns, 0 redirects, 0 invalid moves"
+      },
+      "priority": {
+        "score": 3,
+        "note": "4 turns, 1 redirects, 0 invalid moves"
+      },
+      "coordination": {
+        "score": 4,
+        "note": "7 turns, 0 redirects, 0 invalid moves"
+      },
+      "builder": {
+        "score": 4,
+        "note": "5 turns, 0 redirects, 0 invalid moves"
+      },
+      "audit": {
+        "score": 4,
+        "note": "2 turns, 0 redirects, 0 invalid moves"
+      }
+    },
+    "went_well": [
+      "1 conflict(s) went through the J2 path; 1 CEO decision(s)."
+    ],
+    "problems": [
+      "1 illegal route pick(s) were redirected."
+    ],
+    "learnings": [
+      "Mock replies are scripted, so these learnings only show the report works."
+    ]
+  },
+  "events": [
+    {
+      "agent": "priority",
+      "type": "redirect",
+      "detail": "picked Identity, routed to Adaptation (Identity only after 4 exchanges; this was exchange 1)",
+      "msg": 6,
+      "cycle": 1
+    },
+    {
+      "agent": "identity",
+      "type": "conflict",
+      "detail": "C-1: 4 exchanges used without agreement. Ruling: split, next CEO",
+      "msg": 12,
+      "cycle": 1
+    },
+    {
+      "agent": "ceo",
+      "type": "decision",
+      "detail": "C-1: B: No blog; one small trust element within 10 units; reserve stays 20",
+      "msg": 14,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-4: waits for Core sections to finish",
+      "msg": 18,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-4: waits for Core sections to finish",
+      "msg": 21,
+      "cycle": 1
+    }
+  ],
+  "made": "2026-10-05 19:28:05"
+}

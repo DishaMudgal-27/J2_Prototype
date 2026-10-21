@@ -1,0 +1,354 @@
+{
+  "prd": {
+    "file": "prd.md",
+    "docx": "prd.docx",
+    "agent_output": {
+      "kind": "prd",
+      "requirements": [
+        {
+          "id": "R1",
+          "text": "The page shows the shop name Brew Lab as text."
+        },
+        {
+          "id": "R2",
+          "text": "The page shows the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, so coffee lovers can find the shop."
+        },
+        {
+          "id": "R3",
+          "text": "The page does not contain an embedded map. The address is text only."
+        },
+        {
+          "id": "R4",
+          "text": "The page shows a menu of seven items with prices in rupees, exactly as follows: Filter coffee 90 rupees, Cappuccino 160 rupees, Latte 180 rupees, Cold brew 200 rupees, Masala chai 80 rupees, Almond croissant 140 rupees, Banana bread slice 120 rupees."
+        },
+        {
+          "id": "R5",
+          "text": "The menu shows each item next to its price, so a customer can see what each item costs without placing an order."
+        },
+        {
+          "id": "R6",
+          "text": "The page shows the opening hours as 7 am to 10 pm, every day."
+        },
+        {
+          "id": "R7",
+          "text": "The page has a pre-order form with these fields: name, phone, items and pickup time."
+        },
+        {
+          "id": "R8",
+          "text": "When a customer submits the pre-order form, the order is sent to hello@brewlab.example."
+        },
+        {
+          "id": "R9",
+          "text": "The page states that customers collect the order at the shop, so coffee lovers and office staff nearby know the order is picked up in person."
+        },
+        {
+          "id": "R10",
+          "text": "The page takes no online payment. The pre-order form has no payment fields."
+        },
+        {
+          "id": "R11",
+          "text": "The page works on phones. A customer, including office staff nearby, can read the menu, the opening hours and the address, and fill in and submit the pre-order form, on a phone screen."
+        },
+        {
+          "id": "R12",
+          "text": "The page does not show a phone number for the shop. The form field called phone is for the customer's own number only."
+        },
+        {
+          "id": "R13",
+          "text": "The website is plain HTML, CSS and JavaScript in one file."
+        }
+      ]
+    },
+    "calls": {
+      "from": 1,
+      "to": 37
+    },
+    "workflows": [
+      "W-1",
+      "W-2",
+      "W-3",
+      "W-4",
+      "W-5",
+      "W-6",
+      "W-7",
+      "W-8"
+    ],
+    "atoms": [
+      "W-1.a1",
+      "W-2.a1",
+      "W-3.a1",
+      "W-4.a1",
+      "W-5.a1",
+      "W-6.a1",
+      "W-7.a1",
+      "W-8.a1"
+    ]
+  },
+  "hld": {
+    "file": "hld.md",
+    "docx": "hld.docx",
+    "agent_output": {
+      "kind": "hld",
+      "components": [
+        {
+          "id": "C1",
+          "name": "Shop name",
+          "responsibility": "shows the shop name Brew Lab as text at the top of the page",
+          "covers": [
+            "R1"
+          ]
+        },
+        {
+          "id": "C2",
+          "name": "Address block",
+          "responsibility": "shows the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text only, with no embedded map and no phone number for the shop",
+          "covers": [
+            "R2",
+            "R3",
+            "R12"
+          ]
+        },
+        {
+          "id": "C3",
+          "name": "Menu list",
+          "responsibility": "shows the seven items, each next to its price in rupees, so a customer can see the cost without ordering: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+          "covers": [
+            "R4",
+            "R5"
+          ]
+        },
+        {
+          "id": "C4",
+          "name": "Opening hours",
+          "responsibility": "shows the hours as 7 am to 10 pm, every day",
+          "covers": [
+            "R6"
+          ]
+        },
+        {
+          "id": "C5",
+          "name": "Pre-order form",
+          "responsibility": "collects the fields name, phone, items and pickup time. It has no payment fields, and the phone field is for the customer's own number only",
+          "covers": [
+            "R7",
+            "R10",
+            "R12"
+          ]
+        },
+        {
+          "id": "C6",
+          "name": "Order sender",
+          "responsibility": "when the customer submits the pre-order form, sends the order to hello@brewlab.example",
+          "covers": [
+            "R8"
+          ]
+        },
+        {
+          "id": "C7",
+          "name": "Pickup note",
+          "responsibility": "states that customers collect the order at the shop and that no online payment is taken",
+          "covers": [
+            "R9",
+            "R10"
+          ]
+        },
+        {
+          "id": "C8",
+          "name": "Phone layout",
+          "responsibility": "makes the layout fit a phone screen, so a customer, including office staff nearby, can read the menu, the opening hours and the address, and fill in and submit the pre-order form",
+          "covers": [
+            "R11"
+          ]
+        },
+        {
+          "id": "C9",
+          "name": "Plain HTML, CSS and JavaScript in one file",
+          "responsibility": "delivers the whole page as plain HTML, CSS and JavaScript in one file",
+          "covers": [
+            "R13"
+          ]
+        }
+      ]
+    },
+    "calls": {
+      "from": 38,
+      "to": 72
+    },
+    "workflows": [
+      "W-9",
+      "W-10",
+      "W-11",
+      "W-12",
+      "W-13",
+      "W-14",
+      "W-15",
+      "W-16",
+      "W-17",
+      "W-18"
+    ],
+    "atoms": [
+      "W-9.a1",
+      "W-10.a1",
+      "W-11.a1",
+      "W-12.a1",
+      "W-13.a1",
+      "W-14.a1",
+      "W-15.a1",
+      "W-16.a1",
+      "W-17.a1",
+      "W-18.a1"
+    ]
+  },
+  "lld": {
+    "file": "lld.md",
+    "docx": "lld.docx",
+    "agent_output": {
+      "kind": "lld",
+      "sections": [
+        {
+          "id": "S1",
+          "anchor": "shop-name",
+          "page": "index.html",
+          "implements": [
+            "C1"
+          ]
+        },
+        {
+          "id": "S2",
+          "anchor": "address",
+          "page": "index.html",
+          "implements": [
+            "C2"
+          ]
+        },
+        {
+          "id": "S3",
+          "anchor": "menu",
+          "page": "index.html",
+          "implements": [
+            "C3"
+          ]
+        },
+        {
+          "id": "S4",
+          "anchor": "opening-hours",
+          "page": "index.html",
+          "implements": [
+            "C4"
+          ]
+        },
+        {
+          "id": "S5",
+          "anchor": "pre-order",
+          "page": "index.html",
+          "implements": [
+            "C5",
+            "C6"
+          ],
+          "version": 2
+        },
+        {
+          "id": "S6",
+          "anchor": "pickup-note",
+          "page": "index.html",
+          "implements": [
+            "C7"
+          ]
+        },
+        {
+          "id": "S7",
+          "anchor": "page",
+          "page": "index.html",
+          "implements": [
+            "C8",
+            "C9"
+          ]
+        }
+      ],
+      "elements": [
+        {
+          "id": "E1",
+          "section": "S5",
+          "selector": "#order-submit",
+          "trigger": "click",
+          "behaviour": "submits the pre-order form `#order-form`, which starts the form submission. The button takes no payment and has no payment step. Implements C5"
+        },
+        {
+          "id": "E2",
+          "section": "S5",
+          "selector": "#order-form",
+          "trigger": "submit",
+          "behaviour": "checks that the fields name, phone, items and pickup time are filled in, then sends the order to hello@brewlab.example with the values the customer typed. The phone value is the customer's own number only, and no shop phone number is shown or used. The order is collected at the shop, and no online payment is taken. Implements C5, C6"
+        }
+      ],
+      "fields": [
+        {
+          "id": "F1",
+          "section": "S5",
+          "form": "order-form",
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "validation": "the field is not empty after leading and trailing spaces are removed"
+        },
+        {
+          "id": "F2",
+          "section": "S5",
+          "form": "order-form",
+          "name": "phone",
+          "type": "tel",
+          "required": true,
+          "validation": "the field is not empty and holds the customer's own phone number. It is not a shop phone number"
+        },
+        {
+          "id": "F3",
+          "section": "S5",
+          "form": "order-form",
+          "name": "items",
+          "type": "multi",
+          "required": true,
+          "validation": "the field is not empty. The customer names what they want from the menu of seven items"
+        },
+        {
+          "id": "F4",
+          "section": "S5",
+          "form": "order-form",
+          "name": "pickup time",
+          "type": "time",
+          "required": true,
+          "validation": "a time is chosen"
+        }
+      ],
+      "revisions": [
+        {
+          "section": "S5",
+          "version": 2,
+          "reason": "The LLD names the form and button #pre-order-form and #pre-order-submit, but this workflow's constraints and checks require #order-form and #order-submit, and one element cannot carry both ids. I built the workflow's ids and kept the specified behaviour and fields.",
+          "changes": {
+            "#pre-order-form": "#order-form",
+            "#pre-order-submit": "#order-submit"
+          },
+          "by": "W-28"
+        }
+      ]
+    },
+    "calls": {
+      "from": 73,
+      "to": 92
+    },
+    "workflows": [
+      "W-19",
+      "W-20",
+      "W-21",
+      "W-22",
+      "W-23"
+    ],
+    "atoms": [
+      "W-19.a1",
+      "W-20.a1",
+      "W-21.a1",
+      "W-22.a1",
+      "W-23.a1"
+    ]
+  }
+}

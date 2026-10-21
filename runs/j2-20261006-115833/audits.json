@@ -1,0 +1,132 @@
+[
+  {
+    "cycle": 1,
+    "version": 3,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The menu with prices is shown",
+        "verdict": "PASS",
+        "note": "Section present in the page",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "Opening hours are listed",
+        "verdict": "PASS",
+        "note": "Section present in the page",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The address and a map link are shown",
+        "verdict": "PASS",
+        "note": "Section present in the page",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "Layout works on a phone",
+        "verdict": "NEEDS_REVISION",
+        "note": "No viewport meta tag, so phones render the page at desktop width",
+        "severity": "high",
+        "confidence": "high",
+        "item": 4,
+        "pass": false
+      }
+    ],
+    "extra_issues": [],
+    "mechanical": {
+      "available": true,
+      "bytes": 766,
+      "broken_in_page_links": [],
+      "external_resources": [],
+      "forms": 0,
+      "scripts": 0,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": false
+  },
+  {
+    "cycle": 2,
+    "version": 4,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The menu with prices is shown",
+        "verdict": "PASS",
+        "note": "Section present in the page",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "Opening hours are listed",
+        "verdict": "PASS",
+        "note": "Section present in the page",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The address and a map link are shown",
+        "verdict": "PASS",
+        "note": "Section present in the page",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "Layout works on a phone",
+        "verdict": "PASS",
+        "note": "Viewport meta tag present; layout is fluid",
+        "severity": "low",
+        "confidence": "high",
+        "item": 4,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "mechanical": {
+      "available": true,
+      "bytes": 834,
+      "broken_in_page_links": [],
+      "external_resources": [],
+      "forms": 0,
+      "scripts": 0,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

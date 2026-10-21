@@ -1,0 +1,134 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "bouquets",
+    "name": "Header and bouquet cards",
+    "purpose": "Site v0 has no Petal & Stem name, Jaipur mention or bouquet list, so visitors cannot see what is sold or the prices.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 4,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the second attempt still fails the completion check or the run reaches 4 model calls."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "header section",
+      "five bouquet cards with rupee prices and empty photo spots",
+      "responsive CSS for this section"
+    ],
+    "completion_check": "Page text contains 'Petal & Stem' and 'Jaipur'; exactly five cards show Red rose dozen ₹899, Sunflower bunch ₹699, Mixed seasonal ₹999, White lilies ₹1,199, Orchid box ₹1,499; each card has a visible placeholder area; no horizontal overflow at 360px and 1280px.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "usable section",
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "order-form",
+    "name": "Order form with WhatsApp and delivery terms",
+    "purpose": "Visitors cannot place a delivery order and the delivery terms are not stated.",
+    "cost": 30,
+    "estimate": 30,
+    "envelope": {
+      "money_limit": 30,
+      "model_call_limit": 6,
+      "time_limit_minutes": 18,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the second attempt still shows a JavaScript error or a wrong WhatsApp link, or the run reaches 6 model calls."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "order form section",
+      "JavaScript validation and WhatsApp link builder",
+      "delivery terms text",
+      "responsive CSS for this section"
+    ],
+    "completion_check": "Submitting with any field empty is blocked; submitting with all fields filled opens a URL starting https://wa.me/919829011223 whose text contains the chosen bouquet, name, phone and address; delivery terms text is present exactly as given; no JavaScript errors; no overflow at 360px and 1280px.",
+    "dependencies": [
+      "bouquets"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "visit-info",
+    "name": "Hours, address, phone and map",
+    "purpose": "Visitors cannot find when the shop is open or where it is.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 4,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the second attempt still fails the completion check or the run reaches 4 model calls."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "visit section with hours, address, tap-to-call link and map link",
+      "responsive CSS for this section"
+    ],
+    "completion_check": "Section contains the exact hours, closed Sunday, the exact address, a link with href tel:+911414005566, and a map link whose query contains the address; no broken in-page links; no overflow at 360px and 1280px.",
+    "dependencies": [
+      "bouquets"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "viewport-fix",
+    "name": "Add mobile viewport declaration",
+    "purpose": "Audit F-11: the head has no viewport meta tag, so phones lay the page out at about 980px and the 360px layout does not apply.",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 2,
+      "time_limit_minutes": 6,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the second attempt still lacks the viewport tag or changes any content, price, form or link, or the run reaches 2 model calls."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "viewport meta tag in the page head"
+    ],
+    "completion_check": "The page head contains a meta tag named viewport with content including width=device-width and initial-scale=1; the 10 done-when items still pass; no overflow at 360px and 1280px; no JavaScript errors.",
+    "dependencies": [
+      "bouquets"
+    ],
+    "status": "done",
+    "cycle": 2,
+    "section": "W-1",
+    "revises": "W-1",
+    "agent": "W-4 Builder",
+    "last_check": "usable section and head tags",
+    "version": 4
+  }
+]

@@ -1,0 +1,130 @@
+[
+  {
+    "cycle": 1,
+    "version": 4,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The file is a single HTML document with inline CSS and JavaScript and no build step.",
+        "verdict": "PASS",
+        "note": "One <style> and one <script> block, no external CSS or JS; mechanical check: scripts 1, 34 KB.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "It has a menu section with categories and items, with prices shown as placeholders where unknown.",
+        "verdict": "PASS",
+        "note": "#menu has 3 .menu-cat blocks with 3 items each; every name and price is a .ph span.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "It has an opening hours section.",
+        "verdict": "PASS",
+        "note": "#hours has a 7-row table, Monday to Sunday, each value a .ph placeholder.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "It has a location section for Indiranagar, Bengaluru, with address and map or directions link, using placeholders where unknown.",
+        "verdict": "PASS",
+        "note": "#location has a placeholder address, phone and map pin, plus a Google Maps search link for Indiranagar Bengaluru. The page states it is neighbourhood-level only.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "It has a pre-order for pickup section where a visitor can pick menu items and quantities, choose a pickup time, see a running total or item list, and get an order summary to send.",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Steppers, #po-list, #po-total, #po-time and generate() with a Copy button are all present. Warning: #po-send has hidden but also class .btn with display:inline-block, so it shows with href='#' while SEND_CHANNEL.type is null.",
+        "severity": "medium",
+        "confidence": "high",
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "It has a photo gallery section with at least 12 image slots, each with alt text, lazy loading and a marked placeholder where no real photo exists.",
+        "verdict": "PASS",
+        "note": "12 figure.gallery-item elements, each with loading=lazy, a non-empty alt, data-placeholder and a .ph caption.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "It has a farm stories section with three separate farm entries, each with a name, location, story text, and a photo slot, with placeholders where facts are unknown.",
+        "verdict": "PASS",
+        "note": "3 article.farm entries, each with a figure photo slot (loading=lazy), h3 name, location line and 3 story paragraphs. All values are .ph, and the fact labels are blank placeholders.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "A navigation bar links to the menu, hours, location, pre-order, gallery and farms sections.",
+        "verdict": "PASS",
+        "note": "The nav has links to #menu, #hours, #location, #preorder, #gallery and #farms; mechanical check: broken_in_page_links is empty.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The layout includes a responsive viewport meta tag and CSS breakpoints for small screens.",
+        "verdict": "PASS",
+        "note": "Viewport meta present; @media (max-width:768px) and (max-width:560px) defined; overflow_px 0 at 360px and 1280px.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "Every placeholder is visibly marked in the page, and no invented phone numbers, prices or farm facts appear.",
+        "verdict": "PASS",
+        "note": "No digits-based phone, price or hours values found; all unknowns use .ph. Gallery subjects are labelled as suggestions. Medium confidence because the check was a read-through, not an automated scan.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 10,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "mechanical": {
+      "available": true,
+      "bytes": 34182,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://wa.me/",
+        "https://www.google.com/maps/search/?api=1&amp;query=Indiranagar+Bengaluru"
+      ],
+      "forms": 0,
+      "scripts": 1,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

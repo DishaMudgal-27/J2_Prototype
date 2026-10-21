@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#ffd23f",
+    "secondary": "#3ddcff",
+    "accent": "#ff4d8d",
+    "background": "#0b0f1a",
+    "surface": "#151b2e",
+    "text": "#f5f7ff",
+    "muted": "#b4bedc"
+  },
+  "fonts": {
+    "heading": "system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    "body": "system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    "google_fonts_url": null
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "64px"
+  },
+  "radius": "12px",
+  "buttons": {
+    "primary": "background:#ffd23f;color:#0b0f1a;border:0;font-weight:700;font-size:1.5rem;min-height:56px;min-width:44px;padding:12px 40px;cursor:pointer",
+    "secondary": "background:transparent;color:#3ddcff;border:2px solid #3ddcff;font-weight:700;font-size:1.25rem;min-height:48px;min-width:44px;padding:10px 28px;cursor:pointer"
+  },
+  "card": "background:#151b2e;color:#f5f7ff;border:1px solid #26304f;padding:24px",
+  "notes": "Dark navy background with bright yellow, cyan and pink accents suits a fast reaction game; system fonts keep it to one file with no external assets."
+}

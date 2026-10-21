@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CityCare Hospital, Bengaluru</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Noto+Sans+Kannada:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --muted: #444;
+    --bg: #ffffff;
+    --soft: #f3f6f9;
+    --brand: #0b4f71;
+    --alert: #a80000;
+    --alert-soft: #fff1f1;
+    --note: #fff6d6;
+    --note-border: #8a6d00;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: "Noto Sans", "Noto Sans Kannada", "Noto Sans Devanagari", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: var(--ink);
+    background: var(--bg);
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+  header.site {
+    background: var(--brand);
+    color: #fff;
+    padding: 12px 0;
+  }
+  header.site .wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .brand { font-size: 1.25rem; font-weight: 700; margin: 0; }
+  .brand small { display: block; font-size: 0.875rem; font-weight: 400; }
+  .lang { display: flex; gap: 6px; }
+  .lang button {
+    font: inherit;
+    font-size: 1rem;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 6px 14px;
+    border: 2px solid #fff;
+    background: transparent;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .lang button[aria-pressed="true"] {
+    background: #fff;
+    color: var(--brand);
+    font-weight: 700;
+  }
+  .lang button:focus-visible, a:focus-visible {
+    outline: 3px solid #ffbf00;
+    outline-offset: 2px;
+  }
+  .review-note {
+    background: var(--note);
+    border-bottom: 2px solid var(--note-border);
+    color: #3d3000;
+    padding: 10px 0;
+    font-size: 0.975rem;
+  }
+  .review-note[hidden] { display: none; }
+  section.emergency {
+    background: var(--alert-soft);
+    border: 3px solid var(--alert);
+    border-radius: 10px;
+    margin: 16px 0;
+    padding: 16px;
+  }
+  section.emergency h2 {
+    margin: 0 0 8px;
+    color: var(--alert);
+    font-size: 1.5rem;
+  }
+  .emergency .local {
+    background: var(--alert);
+    color: #fff;
+    font-weight: 700;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 0 0 12px;
+    font-size: 1.1rem;
+  }
+  dl.facts { margin: 0; }
+  dl.facts dt { font-weight: 700; margin-top: 10px; }
+  dl.facts dd { margin: 2px 0 0; }
+  .placeholder {
+    display: inline-block;
+    background: #fff;
+    border: 2px dashed var(--note-border);
+    color: #3d3000;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .draft-note {
+    margin: 12px 0 0;
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+  .intro { padding: 8px 0 24px; }
+  .intro h2 { color: var(--brand); font-size: 1.3rem; margin: 0 0 6px; }
+  footer.site {
+    background: var(--soft);
+    color: var(--muted);
+    padding: 16px 0;
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <p class="brand"><span data-i18n="siteName">CityCare Hospital</span><small data-i18n="city">Bengaluru</small></p>
+    <div class="lang" role="group" aria-label="Language / ಭಾಷೆ / भाषा">
+      <button type="button" data-lang="en" lang="en" aria-pressed="true">English</button>
+      <button type="button" data-lang="kn" lang="kn" aria-pressed="false">ಕನ್ನಡ</button>
+      <button type="button" data-lang="hi" lang="hi" aria-pressed="false">हिन्दी</button>
+    </div>
+  </div>
+</header>
+
+<div class="review-note" id="reviewNote" role="note" hidden>
+  <div class="wrap" data-i18n="reviewNote"></div>
+</div>
+
+<main class="wrap">
+
+  <section class="emergency" id="emergency" aria-labelledby="emergencyTitle">
+    <h2 id="emergencyTitle" data-i18n="emTitle">Emergency</h2>
+    <p class="local" data-i18n="emLocal">In an emergency, call your local emergency number now. Do not wait for a message or a reply to a form.</p>
+    <dl class="facts">
+      <dt data-i18n="emNumberLabel">Hospital emergency number</dt>
+      <dd><span class="placeholder" data-i18n="emNumberPh">[PLACEHOLDER: hospital emergency number, not yet supplied]</span></dd>
+      <dt data-i18n="emAddressLabel">Hospital address and map</dt>
+      <dd><span class="placeholder" data-i18n="emAddressPh">[PLACEHOLDER: street address and map location, not yet supplied]</span></dd>
+    </dl>
+    <p class="draft-note" data-i18n="emDraft">These details will be added once the hospital confirms them.</p>
+  </section>
+
+  <section class="intro" aria-labelledby="introTitle">
+    <h2 id="introTitle" data-i18n="introTitle">Information for patients and families</h2>
+    <p data-i18n="introText">This is the CityCare Hospital website in Bengaluru. You can read it in English, Kannada or Hindi.</p>
+  </section>
+
+  <!-- Later versions add: visit-request form, doctor cards, health blog. -->
+
+</main>
+
+<footer class="site">
+  <div class="wrap" data-i18n="footer">CityCare Hospital, Bengaluru. Some hospital details are still to be supplied.</div>
+</footer>
+
+<script>
+  // Named placeholder constants. Replace with real values supplied by the hospital.
+  // Intentionally not phone-shaped or email-shaped.
+  const HOSPITAL_WHATSAPP_PLACEHOLDER = "PLACEHOLDER_HOSPITAL_WHATSAPP_NUMBER";
+  const HOSPITAL_EMAIL_PLACEHOLDER = "PLACEHOLDER_HOSPITAL_EMAIL_ADDRESS";
+
+  const I18N = {
+    en: {
+      title: "CityCare Hospital, Bengaluru",
+      siteName: "CityCare Hospital",
+      city: "Bengaluru",
+      reviewNote: "",
+      emTitle: "Emergency",
+      emLocal: "In an emergency, call your local emergency number now. Do not wait for a message or a reply to a form.",
+      emNumberLabel: "Hospital emergency number",
+      emNumberPh: "[PLACEHOLDER: hospital emergency number, not yet supplied]",
+      emAddressLabel: "Hospital address and map",
+      emAddressPh: "[PLACEHOLDER: street address and map location, not yet supplied]",
+      emDraft: "These details will be added once the hospital confirms them.",
+      introTitle: "Information for patients and families",
+      introText: "This is the CityCare Hospital website in Bengaluru. You can read it in English, Kannada or Hindi.",
+      footer: "CityCare Hospital, Bengaluru. Some hospital details are still to be supplied."
+    },
+    kn: {
+      title: "ಸಿಟಿಕೇರ್ ಆಸ್ಪತ್ರೆ, ಬೆಂಗಳೂರು",
+      siteName: "ಸಿಟಿಕೇರ್ ಆಸ್ಪತ್ರೆ",
+      city: "ಬೆಂಗಳೂರು",
+      reviewNote: "ಈ ಕನ್ನಡ ಅನುವಾದವು ಕನ್ನಡ ಮಾತೃಭಾಷಿಕರ ಪರಿಶೀಲನೆಗೆ ಬಾಕಿ ಇದೆ. ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ ಮೊದಲು ಕರೆ ಮಾಡಿ.",
+      emTitle: "ತುರ್ತು ಪರಿಸ್ಥಿತಿ",
+      emLocal: "ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ ಈಗಲೇ ನಿಮ್ಮ ಸ್ಥಳೀಯ ತುರ್ತು ಸಂಖ್ಯೆಗೆ ಕರೆ ಮಾಡಿ. ಸಂದೇಶ ಅಥವಾ ಫಾರ್ಮ್‌ಗೆ ಉತ್ತರ ಬರುವವರೆಗೆ ಕಾಯಬೇಡಿ.",
+      emNumberLabel: "ಆಸ್ಪತ್ರೆಯ ತುರ್ತು ಸಂಖ್ಯೆ",
+      emNumberPh: "[ಮಾದರಿ ಸ್ಥಾನ: ಆಸ್ಪತ್ರೆಯ ತುರ್ತು ಸಂಖ್ಯೆ ಇನ್ನೂ ನೀಡಿಲ್ಲ]",
+      emAddressLabel: "ಆಸ್ಪತ್ರೆಯ ವಿಳಾಸ ಮತ್ತು ನಕ್ಷೆ",
+      emAddressPh: "[ಮಾದರಿ ಸ್ಥಾನ: ರಸ್ತೆ ವಿಳಾಸ ಮತ್ತು ನಕ್ಷೆ ಸ್ಥಳ ಇನ್ನೂ ನೀಡಿಲ್ಲ]",
+      emDraft: "ಆಸ್ಪತ್ರೆ ದೃಢೀಕರಿಸಿದ ನಂತರ ಈ ವಿವರಗಳನ್ನು ಸೇರಿಸಲಾಗುತ್ತದೆ.",
+      introTitle: "ರೋಗಿಗಳು ಮತ್ತು ಕುಟುಂಬಗಳಿಗೆ ಮಾಹಿತಿ",
+      introText: "ಇದು ಬೆಂಗಳೂರಿನ ಸಿಟಿಕೇರ್ ಆಸ್ಪತ್ರೆಯ ವೆಬ್‌ಸೈಟ್. ಇದನ್ನು ಇಂಗ್ಲಿಷ್, ಕನ್ನಡ ಅಥವಾ ಹಿಂದಿಯಲ್ಲಿ ಓದಬಹುದು.",
+      footer: "ಸಿಟಿಕೇರ್ ಆಸ್ಪತ್ರೆ, ಬೆಂಗಳೂರು. ಕೆಲವು ಆಸ್ಪತ್ರೆ ವಿವರಗಳನ್ನು ಇನ್ನೂ ನೀಡಬೇಕಿದೆ."
+    },
+    hi: {
+      title: "सिटीकेयर अस्पताल, बेंगलुरु",
+      siteName: "सिटीकेयर अस्पताल",
+      city: "बेंगलुरु",
+      reviewNote: "यह हिंदी अनुवाद हिंदी मातृभाषी व्यक्ति की समीक्षा के लिए लंबित है। आपात स्थिति में पहले कॉल करें।",
+      emTitle: "आपातकाल",
+      emLocal: "आपात स्थिति में अभी अपने स्थानीय आपातकालीन नंबर पर कॉल करें। संदेश या फ़ॉर्म के जवाब का इंतज़ार न करें।",
+      emNumberLabel: "अस्पताल का आपातकालीन नंबर",
+      emNumberPh: "[स्थान सुरक्षित: अस्पताल का आपातकालीन नंबर अभी नहीं दिया गया]",
+      emAddressLabel: "अस्पताल का पता और नक्शा",
+      emAddressPh: "[स्थान सुरक्षित: सड़क का पता और नक्शे की जगह अभी नहीं दी गई]",
+      emDraft: "अस्पताल की पुष्टि के बाद ये जानकारियाँ जोड़ी जाएँगी।",
+      introTitle: "मरीज़ों और परिवारों के लिए जानकारी",
+      introText: "यह बेंगलुरु के सिटीकेयर अस्पताल की वेबसाइट है। आप इसे अंग्रेज़ी, कन्नड़ या हिंदी में पढ़ सकते हैं।",
+      footer: "सिटीकेयर अस्पताल, बेंगलुरु। अस्पताल की कुछ जानकारी अभी देनी बाकी है।"
+    }
+  };
+
+  function setLang(lang) {
+    const dict = I18N[lang] || I18N.en;
+    document.documentElement.lang = lang;
+    document.title = dict.title;
+    document.querySelectorAll("[data-i18n]").forEach(function (el) {
+      const key = el.getAttribute("data-i18n");
+      if (dict[key] !== undefined) el.textContent = dict[key];
+    });
+    document.getElementById("reviewNote").hidden = (lang === "en");
+    document.querySelectorAll(".lang button").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-lang") === lang));
+    });
+  }
+
+  document.querySelectorAll(".lang button").forEach(function (b) {
+    b.addEventListener("click", function () { setLang(b.getAttribute("data-lang")); });
+  });
+
+  setLang("en");
+</script>
+</body>
+</html>

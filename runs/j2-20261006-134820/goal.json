@@ -1,0 +1,41 @@
+{
+  "statement": "Build a one-page website for Brew Lab, a cafe in Indiranagar, Bengaluru, that shows the menu, opening hours and location, lets visitors pre-order for pickup, and features a large photo gallery of the cafe and a detailed story section for each of its three coffee farms.",
+  "site_name": "Brew Lab",
+  "audience": "Local customers and visitors in Indiranagar, Bengaluru, mostly on phones, who want to check the menu and hours, find the cafe, pre-order for pickup, and learn where the coffee comes from.",
+  "standards": [
+    "One HTML file with inline CSS and JavaScript; CDN libraries allowed; no build step.",
+    "Low cost: no paid services and no backend; gallery images lazy-load.",
+    "Mobile-first and responsive.",
+    "Gallery images have alt text.",
+    "No invented facts: any detail not in the brief appears as a visibly marked placeholder."
+  ],
+  "rules": [
+    "Never invent prices, hours, address, phone numbers, farm names, farm facts or photos; use marked placeholders.",
+    "Every placeholder is visibly labelled so it cannot be mistaken for real content.",
+    "Keep everything the brief asks for: menu, hours, location, pre-order for pickup, large photo gallery, and detailed stories for all three farms.",
+    "Pre-order must work without a server: it builds an order summary and hands it off to a destination that is a marked placeholder."
+  ],
+  "done_when": [
+    "The site is a single HTML file with inline CSS and JS and needs no build step.",
+    "The page names Brew Lab and Indiranagar, Bengaluru, and has navigation links that jump to each section.",
+    "A menu section lists items grouped by category, with unknown prices marked as placeholders.",
+    "An hours section lists all seven days, marked as placeholder where unknown.",
+    "A location section shows the address (placeholder if unknown) and an embedded map or map link for Indiranagar, Bengaluru.",
+    "A pre-order for pickup form lets the visitor choose menu items and quantities, enter name, phone and pickup time, see a running total, and submit to a marked placeholder destination.",
+    "A photo gallery section has at least 12 image slots in a responsive grid with a lightbox, alt text on every image, and placeholder images clearly marked.",
+    "Three separate farm story sections each have a name, location, multi-paragraph story and key details (such as altitude, variety, process), all marked as placeholders where unknown.",
+    "The file has a viewport meta tag and responsive CSS so it works on a phone-width screen.",
+    "Every placeholder in the file is visibly marked as a placeholder."
+  ],
+  "open_inputs": [
+    "Menu items and prices",
+    "Opening hours for each day",
+    "Street address and map pin for the cafe",
+    "Phone number and/or WhatsApp or email for receiving pre-orders",
+    "Pickup time rules (slot length, lead time)",
+    "Cafe photos for the gallery",
+    "Names, locations and stories of the three coffee farms",
+    "Farm photos and key details (altitude, variety, process)"
+  ],
+  "dropped_from_brief": []
+}

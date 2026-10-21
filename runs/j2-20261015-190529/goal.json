@@ -1,0 +1,93 @@
+{
+  "statement": "Write a PRD for a one-page website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru, where visitors see the menu with prices, opening hours and location, and can pre-order a coffee for pickup. The HLD, LLD and website follow from it.",
+  "product_name": "Brew Lab",
+  "users": "Coffee lovers and office staff nearby",
+  "problem": "People cannot see the menu or order ahead.",
+  "features": [
+    "Menu with prices",
+    "Pre-order form (name, phone, items, pickup time) emailed to hello@brewlab.example",
+    "Map or address",
+    "Opening hours",
+    "Contact details (phone and email)"
+  ],
+  "user_groups": [
+    {
+      "name": "Coffee lovers",
+      "actions": [
+        "See the menu with prices",
+        "Check opening hours",
+        "Find the shop",
+        "Pre-order a coffee for pickup and pay at pickup"
+      ]
+    },
+    {
+      "name": "Office staff nearby",
+      "actions": [
+        "See the menu with prices",
+        "Check opening hours",
+        "Find the shop",
+        "Pre-order a coffee for pickup and pay at pickup"
+      ]
+    }
+  ],
+  "constraints": [
+    "One page only",
+    "Works on phones",
+    "No online payment, customers pay at pickup"
+  ],
+  "success_measures": [
+    "30 pre-orders per week"
+  ],
+  "facts": [
+    "Brew Lab",
+    "Indiranagar, Bengaluru",
+    "Filter coffee 90",
+    "Cappuccino 160",
+    "Latte 180",
+    "Cold brew 200",
+    "Masala chai 80",
+    "Almond croissant 140",
+    "Banana bread slice 120",
+    "Monday to Saturday 7:30 am to 9:00 pm",
+    "Sunday 8:30 am to 6:00 pm",
+    "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+    "+91 98450 12345",
+    "hello@brewlab.example",
+    "name, phone, items and pickup time",
+    "No online payment, they pay at pickup",
+    "30 pre-orders per week"
+  ],
+  "standards": [
+    "The PRD is a markdown document",
+    "Written in the order PRD, HLD, LLD, each from the one before"
+  ],
+  "rules": [
+    "Use only facts from the brief; never invent facts",
+    "Prices are in rupees"
+  ],
+  "done_when": [
+    "The Problem section states that people cannot see the menu or order ahead",
+    "The Users section names coffee lovers and office staff nearby and what each does",
+    "The Goals section states the aim of a one-page site for menu, hours, location and pre-orders",
+    "The Requirements section lists the menu with all 7 items and prices, the pre-order form fields (name, phone, items, pickup time) emailed to hello@brewlab.example, the address, both sets of opening hours, and the phone and email",
+    "The Success metrics section states 30 pre-orders per week",
+    "The Out of scope section states no online payment and no pages beyond one"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [],
+  "site_name": "Brew Lab",
+  "business_type": "prd",
+  "charter_items": [
+    "The Problem section states that people cannot see the menu or order ahead",
+    "The Users section names coffee lovers and office staff nearby and what each does",
+    "The Goals section states the aim of a one-page site for menu, hours, location and pre-orders",
+    "The Requirements section lists the menu with all 7 items and prices, the pre-order form fields (name, phone, items, pickup time) emailed to hello@brewlab.example, the address, both sets of opening hours, and the phone and email",
+    "The Success metrics section states 30 pre-orders per week",
+    "The Out of scope section states no online payment and no pages beyond one"
+  ],
+  "core_items": [
+    "The Problem section states that people cannot see the menu or order ahead",
+    "The Requirements section lists the menu with all 7 items and prices, the pre-order form fields (name, phone, items, pickup time) emailed to hello@brewlab.example, the address, both sets of opening hours, and the phone and email",
+    "The Success metrics section states 30 pre-orders per week"
+  ]
+}

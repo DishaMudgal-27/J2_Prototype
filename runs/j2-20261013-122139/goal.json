@@ -1,0 +1,58 @@
+{
+  "statement": "A single-page website for Spark 2026, the Northfield College of Engineering tech fest in Pune (14 to 16 February 2027), where students can see the day-by-day schedule, browse events by category, register for an event, see the sponsors, find the venue and contact the organisers on WhatsApp.",
+  "site_name": "Spark 2026",
+  "audience": "Students, mostly on their phones, who want to find out what is on, pick events and sign up.",
+  "standards": [
+    "Energetic, modern look",
+    "Works well on phones first, and on desktop",
+    "Plain HTML, CSS and JavaScript in one file, no build step"
+  ],
+  "rules": [
+    "Use only the facts the Requester gave; never invent names, prices, times or contact details",
+    "Photos are placeholders until real ones are supplied",
+    "Sponsors are shown by name only, no logos"
+  ],
+  "done_when": [
+    "The site shows the name Spark 2026, Northfield College of Engineering, Pune, and the dates 14 to 16 February 2027",
+    "A day-by-day schedule (Day 1, Day 2, Day 3) lists all 8 events with start and end times: Code Sprint, Line Follower and AI in Daily Life on Day 1; Bug Hunt and Poster Jam on Day 2; Drone Dash, UI Duel and Startup Stories on Day 3",
+    "Events can be browsed by category (Coding, Robotics, Design, Talks), and each event shows its price: Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, Poster Jam free, UI Duel Rs 100, AI in Daily Life free, Startup Stories free",
+    "A registration form asks for name, email, college and an event chosen from a dropdown listing all 8 events, and submitting it sends the details by email to spark2026@example.com",
+    "A sponsors section shows Nimbus Cloud, Orbit Labs and Pixel Press by name",
+    "A venue section shows Northfield College of Engineering, 22 University Road, Pune 411007, with a link to open it in maps",
+    "A WhatsApp link opens a chat with +91 00000 33333, and the email spark2026@example.com is also shown",
+    "The page has no horizontal overflow at 360px and 1280px widths",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ],
+  "business_type": "college tech fest",
+  "visitor_needs": [
+    "See the schedule day by day",
+    "Browse events by category",
+    "Register for an event with a form",
+    "See the sponsors",
+    "Find the venue",
+    "Contact the organisers on WhatsApp"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [],
+  "charter_items": [
+    "The site shows the name Spark 2026, Northfield College of Engineering, Pune, and the dates 14 to 16 February 2027",
+    "A day-by-day schedule (Day 1, Day 2, Day 3) lists all 8 events with start and end times: Code Sprint, Line Follower and AI in Daily Life on Day 1; Bug Hunt and Poster Jam on Day 2; Drone Dash, UI Duel and Startup Stories on Day 3",
+    "Events can be browsed by category (Coding, Robotics, Design, Talks), and each event shows its price: Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, Poster Jam free, UI Duel Rs 100, AI in Daily Life free, Startup Stories free",
+    "A registration form asks for name, email, college and an event chosen from a dropdown listing all 8 events, and submitting it sends the details by email to spark2026@example.com",
+    "A sponsors section shows Nimbus Cloud, Orbit Labs and Pixel Press by name",
+    "A venue section shows Northfield College of Engineering, 22 University Road, Pune 411007, with a link to open it in maps",
+    "A WhatsApp link opens a chat with +91 00000 33333, and the email spark2026@example.com is also shown",
+    "The page has no horizontal overflow at 360px and 1280px widths",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ],
+  "core_items": [
+    "The site shows the name Spark 2026, Northfield College of Engineering, Pune, and the dates 14 to 16 February 2027",
+    "A day-by-day schedule (Day 1, Day 2, Day 3) lists all 8 events with start and end times: Code Sprint, Line Follower and AI in Daily Life on Day 1; Bug Hunt and Poster Jam on Day 2; Drone Dash, UI Duel and Startup Stories on Day 3",
+    "Events can be browsed by category (Coding, Robotics, Design, Talks), and each event shows its price: Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, Poster Jam free, UI Duel Rs 100, AI in Daily Life free, Startup Stories free",
+    "A registration form asks for name, email, college and an event chosen from a dropdown listing all 8 events, and submitting it sends the details by email to spark2026@example.com",
+    "A venue section shows Northfield College of Engineering, 22 University Road, Pune 411007, with a link to open it in maps",
+    "A WhatsApp link opens a chat with +91 00000 33333, and the email spark2026@example.com is also shown",
+    "The page has no horizontal overflow at 360px and 1280px widths",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ]
+}

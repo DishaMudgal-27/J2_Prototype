@@ -9,13 +9,13 @@ STATUSES = ("open", "closed", "verify_failed", "abandoned")
 # lists: unknown forms are recorded, never rejected.
 NOUN = {"make": "artifact", "do": "deed"}
 MAKE_FORMS = ("doc", "code", "page", "test", "plan", "skill", "app")
-DO_FORMS = ("behaviour", "fetch", "send")      # behaviour has scope self and is produced; fetch and send are external, not produced yet
-FINAL_FORMS = ("page", "doc")      # makes that are the deliverable itself
+DO_FORMS = ("behaviour", "fetch", "send")      # behaviour has scope self; send is external (test sends: dry-run or mock); fetch is not produced yet
+FINAL_FORMS = ("page", "doc", "send")      # makes that are the deliverable itself; a send is a deed that ends a chain
 MAX_ATTEMPTS = 3
 MAKE_CHECKS = {"file-exists": "exists", "element-count": "exists", "grep-count": "exists", "heading-present": "exists",
                "section-not-empty": "exists", "facts-present": "meets the defined output",
                "lld-slice": "meets the defined output"}      # anything else: "valid"
-DO_CHECKS = ("behavior-steps",)      # a do item has one check, "receipt": a receipt exists and shows success
+DO_CHECKS = ("behavior-steps", "deed-send")      # a do item has one check, "receipt": a receipt exists and shows success
 
 
 def atom_status(atom, wf=None, ended=False):
@@ -48,7 +48,10 @@ def atom_view(atom, wf=None, edges=None, ended=False):
     if els:
         details["elements"] = [x.get("target") for x in els]
     if any(o["verb"] == "do" for o in out):
-        details["scope"] = "self"      # the deeds produced today are behaviour steps on the thing built
+        sends = any(o["form"] == "send" for o in out if o["verb"] == "do")
+        details["scope"] = "external" if sends else "self"      # a send reaches outside; a behaviour step acts on the thing built
+        if a.get("deed"):
+            details.update(a["deed"])      # channel, mode, sent
     return {"schema": SCHEMA, "id": a["id"], "workflow": wid, "name": name, "owner": (a.get("how") or {}).get("agent"),
             "status": atom_status(a, wf, ended), "attempt": a.get("attempts") or ag.get("attempt"),
             "goal": a.get("goal"), "how": a.get("how"), "constraints": a.get("constraints") or [],
@@ -77,7 +80,7 @@ def _outputs(a, ag):
             out.append({"verb": "make", "name": (ag.get("section_names") or [a["id"]])[0], "form": "doc" if doc else "page", "ref": ref})
         out += [{"verb": "make", "name": f, "form": "doc" if f.endswith((".md", ".docx")) else "page" if f.endswith(".html")
                  else "file", "ref": f} for f in files]
-    out += [{"verb": "do", "name": r.get("check"), "form": "behaviour", "ref": f"{a['id']}:{r.get('attempt')}"}
+    out += [{"verb": "do", "name": r.get("check"), "form": "send" if r.get("type") == "deed-send" else "behaviour", "ref": f"{a['id']}:{r.get('attempt')}"}
             for r in a.get("results") or [] if r.get("type") in DO_CHECKS]
     return out
 

@@ -1,0 +1,37 @@
+{
+  "statement": "Build a one-file, mobile-first website for Brew Lab, a cafe in Indiranagar, Bengaluru. It shows the menu with prices, opening hours (8am to 10pm every day) and the location, and lets visitors pre-order coffee for pickup.",
+  "site_name": "Brew Lab",
+  "audience": "People in and around Indiranagar, Bengaluru who want to check the menu, hours and location, or pre-order coffee for pickup, mostly on their phones.",
+  "standards": [
+    "Warm, modern look and tone",
+    "Mobile-first layout: base styles for small screens, wider layouts added with min-width media queries",
+    "Plain HTML, CSS and JavaScript in one file, no build step (CDN libraries allowed)",
+    "Prices shown in rupees (₹)"
+  ],
+  "rules": [
+    "Do not invent facts the Requester has not given (menu items, prices, address, phone, photos); show them as visibly marked placeholders",
+    "Opening hours are exactly 8am to 10pm, every day",
+    "Do not claim an order is confirmed or paid unless a real order channel exists in the file; until then the pre-order flow must state that it is a request for pickup"
+  ],
+  "done_when": [
+    "The page title and header show the name Brew Lab and mention Indiranagar, Bengaluru",
+    "A menu section lists items grouped by category, each with a name and a price in ₹; any price not supplied is visibly marked as a placeholder",
+    "An opening hours section states 8am to 10pm for every day of the week",
+    "A location section names Indiranagar, Bengaluru and includes a map link or embed; the street address is visibly marked as a placeholder until supplied",
+    "A pre-order form lets a visitor choose coffee items and quantities, enter a name and a pickup time, see a running total, and submit",
+    "The file has a viewport meta tag, its base CSS targets small screens, and it uses min-width media queries for larger screens",
+    "The layout has no horizontal scrolling at 360px width",
+    "The site is a single HTML file with no build step and no local file dependencies",
+    "Every placeholder is visibly marked so it can be told apart from real content"
+  ],
+  "open_inputs": [
+    "Menu items and prices",
+    "Street address and map location",
+    "Phone number or other contact",
+    "Where pre-orders should go (for example WhatsApp, email or an ordering service) and whether payment is taken online",
+    "Pickup rules (earliest slot, lead time)",
+    "Logo, photos and brand colours if any",
+    "Language (English only assumed unless told otherwise)"
+  ],
+  "dropped_from_brief": []
+}
