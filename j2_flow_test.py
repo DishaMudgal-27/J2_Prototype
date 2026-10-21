@@ -5283,8 +5283,9 @@ def map_tab():
     many = [spk("fn:identity", "fn:adaptation", 4), spk("fn:adaptation", "fn:priority", 7), spk("fn:priority", "fn:coordination", 2), spk("fn:coordination", "fn:audit", 9), spk("fn:audit", "fn:identity", 1)]
     out3 = render_node(snap, docs={"docs": {}, "map": {**mp2, "edges": edges + many}})["map"]
     svg3 = out3[out3.index("<svg class=\"mapsvg\""):out3.index("</svg>", out3.index("<svg class=\"mapsvg\"")) + 6]
-    assert "<caption>Messages between functions (speaks to)</caption>" in out3 and "speaks to Adaptation: 4" not in svg3 and svg3.count('stroke-dasharray="1 3"') == 0, "too many lines go in a table"
+    assert '<details class="mapdd"><summary>Messages between functions (speaks to)</summary>' in out3 and "speaks to Adaptation: 4" not in svg3 and svg3.count('stroke-dasharray="1 3"') == 0, "too many lines go in a table"
     assert out3.count("<tr><td>") >= 5 and "<td>Coordination</td><td>Audit</td><td>9</td>" in out3
+    assert not re.search(r'<details class="mapdd"[^>]* open', out3), "the table starts closed, a click opens it"
     cards2 = out2.split('<div class="mapcards">')[1].split('<div class="maplegend"')[0]      # small screens: the functions stacked as cards
     assert cards2.count('data-node="fn:') == 5 and cards2.count('class="mapcard st-') == 1 + 5 + 6 and "speaks to Adaptation · 4" in cards2 and "speaks to Priority · 7" in cards2
     assert "waiting on Priority" in cards2 and "blocked" in cards2 and "speaks to Identity · 2" in cards2 and "Identity speaks to you · 5" in cards2 and "<b>?</b>" in cards2
@@ -5343,8 +5344,9 @@ def map_tab():
     real = render_node(snap, docs={"docs": {}, "map": saved})["map"]
     assert real.count("<g><title>") + real.count("<a href") >= 9 and "Product requirements" in real and "v6" in real and f"Not recorded ({len(saved['not_recorded'])})" in real
     assert not re.search(r"envelope|done.when", real, re.I)
-    assert real.count('data-maptab=') >= 10 and ">FUNCTIONS</text>" in real and "<caption>Messages between functions (speaks to)</caption>" in real      # six pairs: a table, not crossing lines
-    assert "<caption>Who made each step (calls by function)</caption>" in real and "<td>Low-level design to Website</td><td>not recorded</td>" in real
+    assert real.count('data-maptab=') >= 10 and ">FUNCTIONS</text>" in real and '<details class="mapdd"><summary>Messages between functions (speaks to)</summary>' in real      # six pairs: a table, not crossing lines
+    assert '<details class="mapdd"><summary>Who made each step (calls by function)</summary>' in real and "<td>Low-level design to Website</td><td>not recorded</td>" in real
+    assert not re.search(r'<details class="mapdd"[^>]* open', real), "both tables start closed on the real map too"
     assert "<td>Charter to Product requirements</td><td>%d</td>" % by_fn("identity", docs_rec["prd"]["calls"], calls) in real
     rc = real.split('<div class="mapcards">')[1].split('<div class="maplegend"')[0]
     lab = {k: by[f"work:{k}"]["label"] for k in ("prd", "hld", "lld", "website")}

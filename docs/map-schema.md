@@ -86,7 +86,9 @@ In a finished run the page says "left open", never "running".
 Function-to-work lines use the same dotted "speaks to" style, are drawn under the boxes and stop at the top of a box, so
 they never hide text. They are faint by default; hovering or clicking a function (or focusing it and pressing Enter)
 highlights its lines and shows each count; a click keeps it highlighted until the next click. With more than 12 lines
-none is shown until a function is hovered or clicked. A small "view" link on each function opens its tab.
+none is shown until a function is hovered or clicked. A small "view" link on each function opens its tab. "Messages between
+functions" and "Who made each step" are closed dropdowns under the drawing, named like "Not recorded": collapsed by default,
+a click opens them.
 `renderMap(map)` is one pure function: inline SVG at wide widths and a card list at 600px and under (the functions and the
 work as a top-to-bottom list: "speaks to ...", "worked on: ..." on a function, "made with: Identity 3, Audit 2" on a work box,
 "hands off to ...", and "made by ..." on a step; no SVG lines). Status is never colour alone. Every box with a `file` links to its Open view
