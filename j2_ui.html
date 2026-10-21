@@ -1055,7 +1055,7 @@ $("pane-artifacts").addEventListener("click", async e => { const b = e.target.cl
 // list for 600px and under. Status is never colour alone: solid = filed and checked, dashed = left open, double = running now, thick red
 // edge plus "!" = fault or blocked, hollow = not made, thick amber edge plus "?" = waiting (on you, or on another function).
 const MAP = {nodes: [], edges: [], status: {}, legend: [], not_recorded: []};
-let mapKey = "", mapT = 0, MAPPIN = "";      // MAPPIN: the function whose lines stay highlighted after a click
+let mapKey = "", mapT = 0, MAPPIN = "", MAPSEL = "";      // MAPPIN: the function whose lines stay highlighted and whose box is expanded after a click; MAPSEL: the expanded work box
 const MAPW = {filed: "filed and checked", running: "running now", left_open: "left open", waiting: "waiting", waiting_on_you: "waiting on you", fault: "fault", not_made: "not made", idle: ""};
 const MAPS = {filed: "filed", running: "running now", left_open: "left open", waiting: "waiting", waiting_on_you: "waiting on you", fault: "fault", not_made: "not made", idle: ""};
 const MAXWORK = 12;      // more function-to-work lines than this show only on hover or click
@@ -1097,7 +1097,7 @@ function renderMap(m){
   const pairs = new Set(ff.map(e => [e.from, e.to].sort().join("|"))), draw = pairs.size <= MAXLINES;
   const wlN = speaks.filter(e => String(e.to).startsWith("work:")).length;
   const hl = fns.map(f => `.mapsvg[data-hover="${f.id}"] .mapln[data-from="${f.id}"],.mapsvg[data-pin="${f.id}"] .mapln[data-from="${f.id}"]{opacity:1;stroke-width:2.2}.mapsvg[data-hover="${f.id}"] .maplbl[data-from="${f.id}"],.mapsvg[data-pin="${f.id}"] .maplbl[data-from="${f.id}"]{opacity:1}`).join("");
-  let svg = `<svg class="mapsvg${wlN > MAXWORK ? " many" : ""}" data-pin="${esc(MAPPIN)}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Map of the run: who is working and the work in order"><defs><style>.mapln{opacity:.2}.maplbl{opacity:0;font-size:11px;paint-order:stroke;stroke:var(--panel);stroke-width:3px}.mapsvg.many .mapln{opacity:0}.mapfn{cursor:pointer}.mapfn[aria-pressed="true"] rect:first-of-type{filter:drop-shadow(0 0 3px var(--muted))}${hl}</style><marker id="maparrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--muted)"/></marker></defs>`
+  let svg = `<svg class="mapsvg${wlN > MAXWORK ? " many" : ""}" data-pin="${esc(MAPPIN)}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Map of the run: who is working and the work in order"><defs><style>.mapln{opacity:.2}.maplbl{opacity:0;font-size:11px;paint-order:stroke;stroke:var(--panel);stroke-width:3px}.mapsvg.many .mapln{opacity:0}.mapfn,.mapwk{cursor:pointer}.mapfn[aria-pressed="true"] rect:first-of-type,.mapwk[aria-pressed="true"] rect:first-of-type{filter:drop-shadow(0 0 3px var(--muted))}${hl}</style><marker id="maparrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--muted)"/></marker></defs>`
     + `<text class="rowlab" x="0" y="${PY + 24}">PEOPLE</text>${fns.length ? `<text class="rowlab" x="0" y="${FY + FH / 2 + 4}">FUNCTIONS</text>` : ""}<text class="rowlab" x="0" y="${ROW + BH / 2 + 4}">WORK</text>`;
   people.forEach(n => { svg += `<g><title>${mapWords(mapTip(n))}</title>${mapShape("rect", n.status, null, X0, PY, 96, 34, n.color)}<text x="${X0 + 48}" y="${PY + 21}" text-anchor="middle" style="font-weight:600">${mapWords(n.label)}</text>${mapBadge(n.status, X0 + 96, PY)}</g>`; });
   const line = (a, b, text, d) => `<path d="${d}" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="1 3" stroke-linecap="round" marker-end="url(#maparrow)"/>`;
@@ -1116,25 +1116,35 @@ function renderMap(m){
     const lx = mt ** 3 * sx + 3 * mt * mt * t * sx + 3 * mt * t * t * ex + t ** 3 * ex, ly = mt ** 3 * y0 + 3 * mt * mt * t * (y0 + 40) + 3 * mt * t * t * (y1 - 40) + t ** 3 * y1;
     return `<path class="mapln" data-from="${esc(e.from)}" data-to="${esc(e.to)}" d="M${sx} ${y0} C${sx} ${y0 + 40} ${ex} ${y1 - 40} ${ex} ${y1}" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="1 3" stroke-linecap="round" marker-end="url(#maparrow)"><title>${mapWords(lineWord(e))}</title></path>`
       + `<text class="maplbl" data-from="${esc(e.from)}" data-to="${esc(e.to)}" x="${lx + 4}" y="${ly}">${e.n != null ? e.n : "wrote it"}</text>`; }).join("");
-  fns.forEach(n => { const p = pos[n.id], who = mapState(n);
-    const g = `${mapShape("rect", n.status, null, p.x, p.y, FW, FH, n.color)}<text x="${p.x + 10}" y="${p.y + 20}" style="font-weight:600">${mapWords(n.label)}</text>`
-      + `<text class="sub" x="${p.x + 10}" y="${p.y + 37}">${mapWords(who, 20)}</text><text class="sub" x="${p.x + 10}" y="${p.y + 54}">${mapSay(n.detail, 20)}</text>`
-      + `<text class="sub" x="${p.x + 10}" y="${p.y + FH - 10}">${n.calls || 0} call${n.calls === 1 ? "" : "s"}</text>${mapBadge(n.status, p.x + FW - 6, p.y + 6)}`;
+  const SFW = 96, SFH = 36;      // a collapsed function box: sized to its name, not the full slot
+  fns.forEach(n => { const p = pos[n.id], who = mapState(n), open = MAPPIN === n.id;
+    const sx = p.x + (FW - SFW) / 2, sy = p.y + (FH - SFH) / 2;
+    const g = open
+      ? `${mapShape("rect", n.status, null, p.x, p.y, FW, FH, n.color)}<text x="${p.x + 10}" y="${p.y + 20}" style="font-weight:600">${mapWords(n.label)}</text>`
+        + `<text class="sub" x="${p.x + 10}" y="${p.y + 37}">${mapWords(who, 20)}</text><text class="sub" x="${p.x + 10}" y="${p.y + 54}">${mapSay(n.detail, 20)}</text>`
+        + `<text class="sub" x="${p.x + 10}" y="${p.y + FH - 10}">${n.calls || 0} call${n.calls === 1 ? "" : "s"}</text>${mapBadge(n.status, p.x + FW - 6, p.y + 6)}`
+      : `${mapShape("rect", n.status, null, sx, sy, SFW, SFH, n.color)}<text x="${sx + SFW / 2}" y="${sy + SFH / 2 + 4}" text-anchor="middle" style="font-weight:600">${mapWords(n.label)}</text>${mapBadge(n.status, sx + SFW - 6, sy + 6)}`;
     const view = n.tab ? `<a href="#" data-maptab="${esc(n.tab)}" aria-label="Open the ${esc(n.label)} view"><text class="sub" x="${p.x + FW - 10}" y="${p.y + FH - 10}" text-anchor="end" style="text-decoration:underline">view</text></a>` : "";
-    svg += `<g class="mapfn" data-fn="${esc(n.id)}" tabindex="0" role="button" aria-pressed="${MAPPIN === n.id}" aria-label="${esc(n.label)}: show the work it spoke to"><title>${mapWords(mapTip(n))}</title>${g}</g>${view}`; });
+    svg += `<g class="mapfn" data-fn="${esc(n.id)}" tabindex="0" role="button" aria-pressed="${open}" aria-label="${esc(n.label)}: ${open ? "hide its state and calls" : "show its state and calls"}"><title>${mapWords(mapTip(n))}</title>${g}</g>${view}`; });
   work.forEach((n, i) => { const p = work[i + 1]; if (!p) return; const a = pos[n.id], b = pos[p.id], x1 = n.kind === "engine" ? a.x + R : a.x + BW, x2 = p.kind === "engine" ? b.x - R : b.x;
     svg += `<line x1="${x1}" y1="${ROW + BH / 2}" x2="${x2}" y2="${ROW + BH / 2}" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#maparrow)"/>`; });
   const idx = Object.fromEntries(work.map((n, i) => [n.id, i]));
   edges.filter(e => e.kind === "handoff" && idx[e.from] != null && idx[e.to] != null && idx[e.to] - idx[e.from] > 2).forEach(e => {
     const a = pos[e.from], b = pos[e.to], d = 22 + 5 * (idx[e.to] - idx[e.from]), y = ROW + BH;
     svg += `<path d="M${a.cx} ${y} C${a.cx} ${y + d} ${b.cx} ${y + d} ${b.cx} ${y + 2}" fill="none" stroke="var(--muted)" stroke-width="1.5"${e.basis === "declared" ? ' stroke-dasharray="2 3"' : ""} marker-end="url(#maparrow)"><title>hand-off${e.basis === "declared" ? " (by order, not recorded)" : ""}</title></path>`; });
-  work.forEach(n => { const p = pos[n.id]; let g;
+  const SBH = 36;      // a collapsed work box: full width (labels can be long), height sized to one line
+  work.forEach(n => { const p = pos[n.id]; let g, cls = "", attrs = "";
     if (n.kind === "engine"){ g = `${mapShape("circle", n.status, p, 0, 0, 0, 0, "--muted")}<text x="${p.x}" y="${p.y + 4}" text-anchor="middle" style="font-weight:600;font-size:11.5px">${mapWords(n.label)}</text>${mapBadge(n.status, p.x + R - 4, p.y - R + 4)}<text class="sub" x="${p.x}" y="${p.y + R + 16}" text-anchor="middle">${mapWords(n.detail.split(" · ")[0], 22)}</text>`; }
-    else { const L = mapLabelLines(n.label);
-      g = `${mapShape("rect", n.status, null, p.x, p.y, BW, BH, n.color)}${L.map((l, k) => `<text x="${p.x + 10}" y="${p.y + 20 + k * 14}" style="font-weight:600">${mapWords(l)}</text>`).join("")}`
-        + `<text class="sub" x="${p.x + 10}" y="${p.y + BH - 24}">${n.version != null ? "v" + esc(n.version) : "version not recorded"}</text><text class="sub" x="${p.x + 10}" y="${p.y + BH - 10}">${esc(MAPS[n.status])}</text>${mapBadge(n.status, p.x + BW - 6, p.y + 6)}`; }
+    else { const open = MAPSEL === n.id, by = p.y + (BH - SBH) / 2;
+      g = open
+        ? (() => { const L = mapLabelLines(n.label); return `${mapShape("rect", n.status, null, p.x, p.y, BW, BH, n.color)}${L.map((l, k) => `<text x="${p.x + 10}" y="${p.y + 20 + k * 14}" style="font-weight:600">${mapWords(l)}</text>`).join("")}`
+          + `<text class="sub" x="${p.x + 10}" y="${p.y + BH - 24}">${n.version != null ? "v" + esc(n.version) : "version not recorded"}</text><text class="sub" x="${p.x + 10}" y="${p.y + BH - 10}">${esc(MAPS[n.status])}</text>`; })()
+        : `${mapShape("rect", n.status, null, p.x, by, BW, SBH, n.color)}<text x="${p.x + BW / 2}" y="${by + SBH / 2 + 4}" text-anchor="middle" style="font-weight:600">${mapWords(n.label)}</text>`;
+      g += mapBadge(n.status, p.x + BW - 6, (open ? p.y : by) + 6);
+      cls = "mapwk"; attrs = ` data-wk="${esc(n.id)}" tabindex="0" role="button" aria-pressed="${open}" aria-label="${esc(n.label)}: ${open ? "hide its version and status" : "show its version and status"}"`; }
     const tip = `<title>${mapWords(mapTip(n) + (n.kind === "engine" ? ", " + mapMade(n) : ""))}</title>`;
-    svg += n.file ? `<a href="#" data-mapopen="${esc(n.file)}" aria-label="Open ${esc(n.label)}">${tip}${g}</a>` : `<g>${tip}${g}</g>`; });
+    const openLink = n.kind !== "engine" && n.file ? `<a href="#" data-mapopen="${esc(n.file)}" aria-label="Open ${esc(n.label)}"><text class="sub" x="${p.x + BW - 10}" y="${p.y + BH - 10}" text-anchor="end" style="text-decoration:underline">open</text></a>` : "";
+    svg += cls ? `<g class="${cls}"${attrs}>${tip}${g}</g>${openLink}` : `<g>${tip}${g}</g>`; });
   svg += "</svg>";
   // under the drawing: messages between functions when there are too many lines to draw, and who made each step
   const table = (cap, head, rows) => `<details class="mapdd"><summary>${mapWords(cap)}</summary><table class="maptable"><thead><tr>${head.map(h => `<th>${mapWords(h)}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${mapWords(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></details>`;
@@ -1178,9 +1188,11 @@ async function loadMap(){
 const mapHover = (e, on) => { const g = e.target.closest && e.target.closest(".mapfn"), svg = $("pane-map").querySelector && $("pane-map").querySelector(".mapsvg"); if (!g || !svg) return; if (on) svg.dataset.hover = g.dataset.fn; else delete svg.dataset.hover; };
 $("pane-map").addEventListener("mouseover", e => mapHover(e, true)); $("pane-map").addEventListener("mouseout", e => mapHover(e, false));
 $("pane-map").addEventListener("focusin", e => mapHover(e, true)); $("pane-map").addEventListener("focusout", e => mapHover(e, false));
-$("pane-map").addEventListener("keydown", e => { const g = e.target.closest && e.target.closest(".mapfn"); if (g && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); MAPPIN = MAPPIN === g.dataset.fn ? "" : g.dataset.fn; paint($("pane-map"), renderMap(MAP)); } });
+$("pane-map").addEventListener("keydown", e => { const g = e.target.closest && e.target.closest(".mapfn"); if (g && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); MAPPIN = MAPPIN === g.dataset.fn ? "" : g.dataset.fn; paint($("pane-map"), renderMap(MAP)); return; }
+  const w = e.target.closest && e.target.closest(".mapwk"); if (w && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); MAPSEL = MAPSEL === w.dataset.wk ? "" : w.dataset.wk; paint($("pane-map"), renderMap(MAP)); } });
 $("pane-map").addEventListener("click", async e => { const t = e.target.closest("[data-maptab]"); if (t){ e.preventDefault(); showTab(t.dataset.maptab); return; }
   const g = e.target.closest(".mapfn"); if (g){ e.preventDefault(); MAPPIN = MAPPIN === g.dataset.fn ? "" : g.dataset.fn; paint($("pane-map"), renderMap(MAP)); return; }
+  const w = e.target.closest(".mapwk"); if (w){ e.preventDefault(); MAPSEL = MAPSEL === w.dataset.wk ? "" : w.dataset.wk; paint($("pane-map"), renderMap(MAP)); return; }
   const b = e.target.closest("[data-mapopen]"); if (!b) return; e.preventDefault();
   const f = b.dataset.mapopen; ARTOPEN = f; showTab("artifacts"); await loadArtifacts();
   const r = [...ARTS.deliverables, ...ARTS.records].find(x => x.file === f);

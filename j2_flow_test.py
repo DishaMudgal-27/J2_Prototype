@@ -5270,16 +5270,29 @@ def map_tab():
     mp2 = {**mp, "nodes": [nodes[0], *fnodes, *nodes[1:]], "edges": edges + few}
     out2 = render_node(snap, docs={"docs": {}, "map": mp2})["map"]
     svg2 = out2[out2.index("<svg class=\"mapsvg\""):out2.index("</svg>", out2.index("<svg class=\"mapsvg\"")) + 6]
-    fbox = lambda k: svg2.split(f'data-fn="fn:{k}"')[1].split('<a href="#" data-maptab=')[0]
+    fbox = lambda svg, k: svg.split(f'data-fn="fn:{k}"')[1].split('<a href="#" data-maptab=')[0]
+    notitle = lambda s: re.sub(r"<title>.*?</title>", "", s)      # the tooltip always keeps the full text; check what's visible without it separately
     assert ">FUNCTIONS</text>" in svg2 and svg2.index(">PEOPLE<") < svg2.index(">FUNCTIONS<") < svg2.index(">WORK<") and svg2.count("data-maptab=") == 5
-    assert fbox("identity").count("<rect") == 2 and ">running now<" in fbox("identity") and "writing the charter" in fbox("identity") and ">3 calls<" in fbox("identity")      # double = running now
-    assert 'stroke="var(--validator)" stroke-width="4"' in fbox("adaptation") and ">?</text>" in fbox("adaptation") and ">waiting on Priority<" in fbox("adaptation")
-    assert 'stroke="var(--validator)" stroke-width="4"' in fbox("priority") and ">waiting on you<" in fbox("priority") and ">1 call<" in fbox("priority")
-    assert 'stroke="var(--bad)" stroke-width="4"' in fbox("coordination") and ">!</text>" in fbox("coordination") and ">blocked<" in fbox("coordination")
-    assert 'stroke="var(--line)"' in fbox("audit") and ">idle<" in fbox("audit") and "last seen: " in fbox("audit") and "@Identity" not in fbox("audit") and not re.search(r"done.when", fbox("audit"))
-    assert "<title>Identity, running now, writing the charter, 3 AI calls, 12.5 s, 100 tokens in, 20 out</title>" in fbox("identity")      # the full text and numbers in a tooltip
+    # need-to-know, collapsed by default: a small box sized to the name and the status shape; state, detail and calls wait for a click
+    assert fbox(svg2, "identity").count("<rect") == 2 and ">Identity<" in fbox(svg2, "identity") and ">running now<" not in fbox(svg2, "identity") and "writing the charter" not in notitle(fbox(svg2, "identity")) and "calls<" not in fbox(svg2, "identity") and 'aria-pressed="false"' in fbox(svg2, "identity")      # double = running now (shape only)
+    assert 'stroke="var(--validator)" stroke-width="4"' in fbox(svg2, "adaptation") and ">?</text>" in fbox(svg2, "adaptation") and ">waiting on Priority<" not in fbox(svg2, "adaptation")
+    assert 'stroke="var(--validator)" stroke-width="4"' in fbox(svg2, "priority") and ">waiting on you<" not in fbox(svg2, "priority")
+    assert 'stroke="var(--bad)" stroke-width="4"' in fbox(svg2, "coordination") and ">!</text>" in fbox(svg2, "coordination") and ">blocked<" not in fbox(svg2, "coordination")
+    assert 'stroke="var(--line)"' in fbox(svg2, "audit") and ">idle<" not in fbox(svg2, "audit") and "last seen: " not in notitle(fbox(svg2, "audit"))
+    assert "<title>Identity, running now, writing the charter, 3 AI calls, 12.5 s, 100 tokens in, 20 out</title>" in fbox(svg2, "identity")      # the full text still in a tooltip on hover, collapsed or not
     assert "2 from you · 5 to you" in svg2 and svg2.count('stroke-dasharray="1 3"') >= 3 and "Messages between functions" not in out2      # few lines: drawn, no table
     assert "Identity speaks to Adaptation: 4 messages" in svg2 and "Adaptation speaks to Priority: 7 messages" in svg2
+    # a click (pin) expands just that one function's box to full size: state, detail and calls appear; the rest stay collapsed
+    oi = render_node(snap, docs={"docs": {}, "map": mp2, "mappin": "fn:identity"})["map"]
+    si = oi[oi.index("<svg class=\"mapsvg\""):oi.index("</svg>", oi.index("<svg class=\"mapsvg\"")) + 6]
+    assert ">running now<" in fbox(si, "identity") and "writing the charter" in fbox(si, "identity") and ">3 calls<" in fbox(si, "identity") and 'aria-pressed="true"' in fbox(si, "identity")
+    assert ">blocked<" not in fbox(si, "coordination") and 'aria-pressed="false"' in fbox(si, "coordination"), "only the pinned function expands"
+    oa = render_node(snap, docs={"docs": {}, "map": mp2, "mappin": "fn:priority"})["map"]
+    sa = oa[oa.index("<svg class=\"mapsvg\""):oa.index("</svg>", oa.index("<svg class=\"mapsvg\"")) + 6]
+    assert ">waiting on you<" in fbox(sa, "priority") and ">1 call<" in fbox(sa, "priority")
+    ou = render_node(snap, docs={"docs": {}, "map": mp2, "mappin": "fn:audit"})["map"]
+    su = ou[ou.index("<svg class=\"mapsvg\""):ou.index("</svg>", ou.index("<svg class=\"mapsvg\"")) + 6]
+    assert ">idle<" in fbox(su, "audit") and "last seen: " in fbox(su, "audit") and "@Identity" not in fbox(su, "audit") and not re.search(r"done.when", fbox(su, "audit"))
     many = [spk("fn:identity", "fn:adaptation", 4), spk("fn:adaptation", "fn:priority", 7), spk("fn:priority", "fn:coordination", 2), spk("fn:coordination", "fn:audit", 9), spk("fn:audit", "fn:identity", 1)]
     out3 = render_node(snap, docs={"docs": {}, "map": {**mp2, "edges": edges + many}})["map"]
     svg3 = out3[out3.index("<svg class=\"mapsvg\""):out3.index("</svg>", out3.index("<svg class=\"mapsvg\"")) + 6]
@@ -5317,17 +5330,27 @@ def map_tab():
     assert not re.search(r"envelope|done.when", o4 + s5, re.I)
     out = render_node(snap, docs={"docs": {}, "map": mp})["map"]
     svg = out[out.index("<svg class=\"mapsvg\""):out.index("</svg>", out.index("<svg class=\"mapsvg\"")) + 6]
-    assert out.count("data-mapopen=") >= 6 * 2 and 'data-mapopen="f0.md"' in svg and 'aria-label="Open Box 0 with a very long name"' in svg      # linked in the SVG and in the cards
+    assert out.count("data-mapopen=") >= 6 * 2 and 'data-mapopen="f0.md"' in svg and 'aria-label="Open Box 0 with a very long name"' in svg      # a small "open" link, separate from the box
     assert "Identity running" in out and "3 of 4 checks passed" in out and 'class="mappill running"' in out and 'class="mappill checks"' in out
-    box = lambda i: svg.split(f'data-mapopen="f{i}.md"')[1].split("</a>")[0]
-    assert 'stroke-dasharray="6 4"' in box(2) and "stroke-dasharray" not in box(0)                       # dashed = left open
-    assert box(1).count("<rect") == 2 and box(0).count("<rect") == 1                                      # double = running now
-    assert 'stroke="var(--bad)" stroke-width="4"' in box(3) and ">!</text>" in box(3)                       # thick red edge plus "!"
-    assert 'fill="none" stroke="var(--line)"' in box(4) and ">!</text>" not in box(4)                      # hollow = not made
-    assert 'stroke="var(--validator)" stroke-width="4"' in box(5) and ">?</text>" in box(5) and "version not recorded" in box(5)
-    assert "color-mix(in srgb, var(--prd) 14%, var(--panel))" in box(0) and "var(--hld)" in box(1) and ">v1<" in box(0) and ">filed<" in box(0)
-    assert ">left open<" in box(2) and ">running now<" in box(1) and ">fault<" in box(3) and ">not made<" in box(4) and ">waiting on you<" in box(5)
-    assert "<title>Box 3 with a very long name, version 4, fault, Every checklist item passes inside its limits</title>" in box(3)      # full text in a tooltip
+    wbox = lambda s, i: s.split(f'data-wk="work:t{i}"')[1].split(f'<a href="#" data-mapopen="f{i}.md"')[0]
+    assert 'stroke-dasharray="6 4"' in wbox(svg, 2) and "stroke-dasharray" not in wbox(svg, 0)                       # dashed = left open: a shape, never hidden by a click
+    assert wbox(svg, 1).count("<rect") == 2 and wbox(svg, 0).count("<rect") == 1                                      # double = running now
+    assert 'stroke="var(--bad)" stroke-width="4"' in wbox(svg, 3) and ">!</text>" in wbox(svg, 3)                       # thick red edge plus "!"
+    assert 'fill="none" stroke="var(--line)"' in wbox(svg, 4) and ">!</text>" not in wbox(svg, 4)                      # hollow = not made
+    assert 'stroke="var(--validator)" stroke-width="4"' in wbox(svg, 5) and ">?</text>" in wbox(svg, 5)
+    assert "color-mix(in srgb, var(--prd) 14%, var(--panel))" in wbox(svg, 0) and "var(--hld)" in wbox(svg, 1)
+    assert "<title>Box 3 with a very long name, version 4, fault, Every checklist item passes inside its limits</title>" in wbox(svg, 3)      # full text stays in a tooltip on hover
+    # need-to-know, collapsed by default: a small work box sized to the name; version and status word wait for a click
+    assert ">Box 0 with a very long name<" in wbox(svg, 0) and ">v1<" not in wbox(svg, 0) and ">filed<" not in wbox(svg, 0) and 'aria-pressed="false"' in wbox(svg, 0)
+    status_word = {0: "filed", 1: "running now", 2: "left open", 3: "fault", 4: "not made", 5: "waiting on you"}
+    for i, word in status_word.items():
+        oN = render_node(snap, docs={"docs": {}, "map": mp, "mapsel": f"work:t{i}"})["map"]
+        svN = oN[oN.index("<svg class=\"mapsvg\""):oN.index("</svg>", oN.index("<svg class=\"mapsvg\"")) + 6]
+        assert f">{word}<" in wbox(svN, i) and 'aria-pressed="true"' in wbox(svN, i), (i, word)
+        other = 0 if i != 0 else 1
+        assert f">{status_word[other]}<" not in wbox(svN, other) and 'aria-pressed="false"' in wbox(svN, other), "only the clicked box expands"
+        if i == 0: assert ">v1<" in wbox(svN, 0)
+        if i == 5: assert "version not recorded" in wbox(svN, 5)
     assert not re.search(r"envelope|done.when", out, re.I), "plain words"
     assert "<circle" in svg and svg.count("<path") >= 2 and 'stroke-dasharray="2 3"' in svg and 'marker-end="url(#maparrow)"' in svg
     assert 'role="img"' in svg and 'viewBox="0 0' in svg and 'width="' not in svg.split(">")[0], "scales to the screen"
