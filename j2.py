@@ -46,6 +46,7 @@ import time
 
 import j2_artifacts
 import j2_check
+import j2_map
 import j2_schema
 import j2_send
 import llm
@@ -6910,6 +6911,10 @@ class J2Run:
             j2_artifacts.write(self.dir)
         except Exception as e:
             self._event("system", "artifacts_json", f"artifacts.json not written: {e}")
+        try:      # map.json (schema map/1), built from the files above; same rule: never changes the run
+            j2_map.write(self.dir)
+        except Exception as e:
+            self._event("system", "map_json", f"map.json not written: {e}")
 
     def _review(self, metrics):
         """One extra model call, outside J2: a reviewer reads the run and writes learnings. Its scores are judgment."""

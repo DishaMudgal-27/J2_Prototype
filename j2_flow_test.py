@@ -5040,6 +5040,190 @@ def j2_ui_idruns(ids):
     return ", ".join(out)
 
 
+def map_tab():
+    """Map v1 (map/1): map.json written beside atoms.json (additive, after the summary and again after the report), the
+    same map from a rebuilt folder, an old run, a live run, /api/map, the SVG for every status (never colour alone), the
+    card list for small screens, plain words, and (with Chrome) no sideways scroll at 500px."""
+    import copy
+    import shutil
+    import threading
+    import urllib.error
+    import urllib.request
+    import html as htmllib
+    import j2_map as M
+    import j2_server
+    run = docs_run(DESIGN_BRIEF, 900)
+    name = os.path.basename(run.dir)
+    saved = json.load(open(os.path.join(run.dir, "map.json")))
+    atoms = json.load(open(os.path.join(run.dir, "atoms.json")))["atoms"]
+    assert os.path.exists(os.path.join(run.dir, "atoms.json")) and saved["schema"] == "map/1" and saved["run"] == name and not saved["live"]
+    # golden structure: the Requester, then the work in order with a step between each pair
+    assert [n["id"] for n in saved["nodes"]] == ["person:requester", "work:charter", "step:charter>prd", "work:prd", "step:prd>hld",
+        "work:hld", "step:hld>lld", "work:lld", "step:lld>website", "work:website"], [n["id"] for n in saved["nodes"]]
+    assert [(n["kind"], n["row"]) for n in saved["nodes"]] == [("person", "people")] + [(k, "work") for k in
+        ("work", "engine", "work", "engine", "work", "engine", "work", "engine", "work")]
+    by = {n["id"]: n for n in saved["nodes"]}
+    assert [by[f"work:{k}"]["status"] for k in ("charter", "prd", "hld", "lld", "website")] == ["filed"] * 5
+    assert [by[f"work:{k}"]["label"] for k in ("prd", "hld", "lld", "website")] == ["Product requirements", "High-level design", "Low-level design", "Website"]
+    assert [by[f"work:{k}"]["tag"] for k in ("prd", "hld", "lld", "website")] == ["PRD", "HLD", "LLD", "Site"]
+    assert [by[f"work:{k}"]["color"] for k in ("prd", "hld", "lld", "website")] == ["--prd", "--hld", "--lld", "--site"]
+    rows = {r["type"]: r for r in json.load(open(os.path.join(run.dir, "artifacts.json")))["rows"]}
+    for k in ("prd", "hld", "lld", "website"):      # versions and files come from artifacts.json, never invented
+        assert by[f"work:{k}"]["version"] == rows[k]["version"] and by[f"work:{k}"]["file"] == rows[k]["file"], k
+    assert by["work:charter"]["version"] is None and by["work:charter"]["file"] == "goal.json"
+    assert [by[f"step:{a}>{b}"]["label"] for a, b in (("charter", "prd"), ("prd", "hld"), ("hld", "lld"), ("lld", "website"))] == ["Write", "Write", "Write", "Build"]
+    for k, step in (("prd", "charter>prd"), ("hld", "prd>hld"), ("lld", "hld>lld"), ("website", "lld>website")):      # counts equal the atoms
+        mine = [a for a in atoms if a["workflow"] in rows[k]["workflows"]]
+        ok = sum(1 for a in mine for x in a["verification"] if x["met"] is True)
+        tot = sum(1 for a in mine for x in a["verification"] if x["met"] is not None)
+        assert by[f"step:{step}"]["detail"] == f"{len(rows[k]['workflows'])} workflows · {ok} of {tot} checks passed", (k, by[f"step:{step}"]["detail"])
+    assert {(e["from"], e["to"], e["basis"]) for e in saved["edges"] if e["kind"] == "handoff"} == {
+        ("work:prd", "work:hld", "recorded"), ("work:prd", "work:lld", "recorded"), ("work:hld", "work:lld", "recorded"),
+        ("work:hld", "work:website", "recorded"), ("work:lld", "work:website", "recorded"), ("work:charter", "work:prd", "declared")}
+    assert sum(1 for e in saved["edges"] if e["kind"] == "step") == 8
+    ck = [x for a in atoms for x in a["verification"] if x["met"] is not None]
+    assert saved["status"] == {"state": "Done", "state_status": "idle", "checks": {"passed": sum(x["met"] is True for x in ck), "run": len(ck)}}
+    assert "version of Charter" in saved["not_recorded"] and any("Functions row" in x for x in saved["not_recorded"]) and \
+        any("Knows row" in x for x in saved["not_recorded"]) and not any(n["kind"] in ("function", "know") for n in saved["nodes"])
+    assert [l["key"] for l in saved["legend"] if not l["drawn"]] == ["function", "speaks_to"]
+    assert saved == M.build(run.dir), "map.json is what the folder builds"
+    assert by["person:requester"]["detail"] == "1 message from you" and by["person:requester"]["status"] == "idle"
+    # a plain website run has the Charter and the site only; a PRD-only run has no site
+    plain = docs_run(BREW_LAB, 200)
+    assert [n["id"] for n in json.load(open(os.path.join(plain.dir, "map.json")))["nodes"]] == ["person:requester", "work:charter", "step:charter>website", "work:website"]
+    # an old run: no artifacts.json, atoms.json or map.json; the same boxes, and the gaps are named
+    old = os.path.join(j2.RUNS_DIR, "j2-20200102-000000")
+    shutil.copytree(run.dir, old)
+    for f in ("artifacts.json", "atoms.json", "map.json"):
+        os.remove(os.path.join(old, f))
+    m_old = M.build(old)
+    assert [(n["id"], n["status"], n["version"]) for n in m_old["nodes"]] == [(n["id"], n["status"], n["version"]) for n in saved["nodes"]]
+    assert "artifacts.json (rows rebuilt from the folder)" in m_old["not_recorded"] and "atoms.json (atoms rebuilt from workflows.json)" in m_old["not_recorded"]
+    assert not any(os.path.exists(os.path.join(old, f)) for f in ("artifacts.json", "atoms.json", "map.json")), "building a map never writes to an old run"
+    assert M.build(None)["nodes"] == [] and M.build(os.path.join(run.dir, "nope"))["not_recorded"] == ["run not found"]
+    # statuses: a finished run says "left open", never "running"; fault and not made
+    edit = os.path.join(j2.RUNS_DIR, "j2-20200103-000000")
+    shutil.copytree(run.dir, edit)
+    doc = json.load(open(os.path.join(edit, "atoms.json")))
+    pick = lambda k: next(a for a in doc["atoms"] if a["workflow"] in rows[k]["workflows"])
+    pick("hld")["status"], pick("lld")["status"] = "open", "verify_failed"
+    json.dump(doc, open(os.path.join(edit, "atoms.json"), "w"))
+    json.dump({"schema": "artifacts/1", "rows": [r for r in rows.values() if r["type"] != "website"] + [r for r in json.load(open(os.path.join(edit, "artifacts.json")))["rows"] if r["kind"] == "record"]}, open(os.path.join(edit, "artifacts.json"), "w"))
+    me = M.build(edit)
+    st = {n["id"]: n["status"] for n in me["nodes"]}
+    assert st["work:hld"] == "left_open" and st["work:lld"] == "fault" and st["work:website"] == "not_made" and "running" not in json.dumps(st)      # the summary still lists the site as planned
+    # a live run: open means running now, the pill names who is working, a pending question is waiting on you, planned stages are not made
+    snap = j2.saved_snapshot(name, 0)
+    snap["atoms_v1"] = {a["id"]: a for a in doc["atoms"]}
+    lane = {"id": "identity", "name": "Identity", "status": "working"}
+    live = M.build(edit, {"snapshot": {**snap, "status": "running", "lanes": [lane], "paused": None}, "stages": ["prd", "hld", "lld", "send_email", "website"],
+                          "stage_words": {"send_email": "the test email"}})
+    ls = {n["id"]: n for n in live["nodes"]}
+    assert live["live"] and ls["work:hld"]["status"] == "running" and ls["work:lld"]["status"] == "fault" and live["status"]["state"] == "Identity running"
+    assert ls["work:website"]["status"] == "filed"      # built: a live run reads the folder as it is
+    prd_only = docs_run("Write a PRD for Campus Notes." + CAMPUS, 400)      # planned but not built: hollow, "not started", the deed named from the stage words
+    pl = M.build(prd_only.dir, {"snapshot": {**j2.saved_snapshot(os.path.basename(prd_only.dir), 0), "status": "running", "lanes": [], "paused": None},
+                                "stages": ["prd", "hld", "send_email", "website"], "stage_words": {"send_email": "the test email"}})
+    ps = {n["id"]: n for n in pl["nodes"]}
+    assert [n["id"] for n in pl["nodes"] if n["kind"] == "work"] == ["work:charter", "work:prd", "work:hld", "work:send_email", "work:website"], list(ps)
+    assert all(ps[k]["status"] == "not_made" and ps[k]["detail"] == "not started" and ps[k]["file"] is None for k in ("work:hld", "work:send_email", "work:website"))
+    assert ps["work:send_email"]["label"] == "The test email" and ps["work:hld"]["label"] == "High-level design" and ps["work:prd"]["status"] == "filed"
+    ask = M.build(edit, {"snapshot": {**snap, "status": "waiting", "lanes": [], "paused": {"kind": "limit"}}, "stages": [], "stage_words": {}})
+    assert ask["status"] == {**ask["status"], "state": "Waiting on you", "state_status": "waiting_on_you"} and \
+        {n["id"]: n["status"] for n in ask["nodes"]}["person:requester"] == "waiting_on_you"
+    # /api/map: live (idle run reads its folder), saved, old, missing
+    keep, j2_server.RUN = j2_server.RUN, run
+    srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{srv.server_address[1]}"
+    get = lambda path: json.load(urllib.request.urlopen(base + path))
+    try:
+        for q in ("", f"?run={name}"):
+            assert get("/api/map" + q) == saved, q
+        assert [n["id"] for n in get("/api/map?run=j2-20200102-000000")["nodes"]] == [n["id"] for n in saved["nodes"]]
+        assert get("/api/map?run=j2-20990101-000000")["nodes"] == [] and get("/api/map?run=../x")["nodes"] == []
+        assert get("/api/artifacts")["deliverables"] and urllib.request.urlopen(base + "/api/artifact?name=goal.json").read()      # the box's Open view
+    finally:
+        j2_server.RUN = keep
+        srv.shutdown()
+        for f in ("j2-20200102-000000", "j2-20200103-000000"):
+            shutil.rmtree(os.path.join(j2.RUNS_DIR, f), ignore_errors=True)
+    if not shutil.which("node"):
+        print("map render skipped: node not found")
+        return
+    # the SVG: every status has its own shape and mark, boxes link to Artifacts, full text in a tooltip, plain words
+    nodes = [{"id": "person:requester", "kind": "person", "row": "people", "label": "You", "status": "waiting_on_you", "version": None, "detail": "2 messages from you", "file": None, "tag": None, "color": "--user", "workflows": []}]
+    for i, (stt, color) in enumerate((("filed", "--prd"), ("running", "--hld"), ("left_open", "--lld"), ("fault", "--site"), ("not_made", "--other"), ("waiting_on_you", "--charter"))):
+        nodes.append({"id": f"work:t{i}", "kind": "work", "row": "work", "label": f"Box {i} with a very long name", "status": stt, "version": i + 1 if i != 5 else None,
+                      "detail": "Every done-when item passes inside its envelope", "file": f"f{i}.md", "tag": "X", "color": color, "workflows": []})
+        if i < 5:
+            nodes.append({"id": f"step:{i}", "kind": "engine", "row": "work", "label": "Write", "status": stt, "version": None, "detail": "3 workflows · 4 of 4 checks passed",
+                          "file": None, "tag": None, "color": None, "workflows": []})
+    edges = [{"from": "work:t0", "to": "work:t3", "kind": "handoff", "label": "x", "n": 1, "basis": "recorded"}, {"from": "work:t1", "to": "work:t5", "kind": "handoff", "label": "x", "n": 1, "basis": "declared"}]
+    mp = {"schema": "map/1", "status": {"state": "Identity running", "state_status": "running", "checks": {"passed": 3, "run": 4}}, "nodes": nodes, "edges": edges, "legend": saved["legend"], "not_recorded": ["version of Charter"]}
+    out = render_node(snap, docs={"docs": {}, "map": mp})["map"]
+    svg = out[out.index("<svg class=\"mapsvg\""):out.index("</svg>", out.index("<svg class=\"mapsvg\"")) + 6]
+    assert out.count("data-mapopen=") >= 6 * 2 and 'data-mapopen="f0.md"' in svg and 'aria-label="Open Box 0 with a very long name"' in svg      # linked in the SVG and in the cards
+    assert "Identity running" in out and "3 of 4 checks passed" in out and 'class="mappill running"' in out and 'class="mappill checks"' in out
+    box = lambda i: svg.split(f'data-mapopen="f{i}.md"')[1].split("</a>")[0]
+    assert 'stroke-dasharray="6 4"' in box(2) and "stroke-dasharray" not in box(0)                       # dashed = left open
+    assert box(1).count("<rect") == 2 and box(0).count("<rect") == 1                                      # double = running now
+    assert 'stroke="var(--bad)" stroke-width="4"' in box(3) and ">!</text>" in box(3)                       # thick red edge plus "!"
+    assert 'fill="none" stroke="var(--line)"' in box(4) and ">!</text>" not in box(4)                      # hollow = not made
+    assert 'stroke="var(--validator)" stroke-width="4"' in box(5) and ">?</text>" in box(5) and "version not recorded" in box(5)
+    assert "color-mix(in srgb, var(--prd) 14%, var(--panel))" in box(0) and "var(--hld)" in box(1) and ">v1<" in box(0) and ">filed<" in box(0)
+    assert ">left open<" in box(2) and ">running now<" in box(1) and ">fault<" in box(3) and ">not made<" in box(4) and ">waiting on you<" in box(5)
+    assert "<title>Box 3 with a very long name, version 4, fault, Every checklist item passes inside its limits</title>" in box(3)      # full text in a tooltip
+    assert not re.search(r"envelope|done.when", out, re.I), "plain words"
+    assert "<circle" in svg and svg.count("<path") >= 2 and 'stroke-dasharray="2 3"' in svg and 'marker-end="url(#maparrow)"' in svg
+    assert 'role="img"' in svg and 'viewBox="0 0' in svg and 'width="' not in svg.split(">")[0], "scales to the screen"
+    # small screens: the same boxes as cards, the work as a top-to-bottom list with "hands off to" lines
+    cards = out.split('<div class="mapcards">')[1].split('<div class="maplegend"')[0]
+    assert cards.count('class="mapcard st-') == 7 and cards.count('class="mapstep"') == 5 and "hands off to Box 3 with a very long name" in cards
+    assert 'class="mapcard st-fault"' in cards and "<b>!</b>" in cards and "<b>?</b>" in cards and "left open" in cards and "running now" in cards
+    ui = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "j2_ui.html"), encoding="utf-8").read()
+    assert "@media (max-width:600px){.mapsvgwrap{display:none}.mapcards{display:block}}" in ui and ".mapcards{display:none}" in ui
+    assert ".mapsvg{width:100%;height:auto" in ui and "st-running{border-style:double" in ui and "st-left_open{border-style:dashed" in ui
+    assert ui.index('data-tab="artifacts"') < ui.index('data-tab="map"') < ui.index('data-tab="style"') and ui.index('data-tab="docs"') < ui.index('data-tab="artifacts"')
+    empty = render_node(snap, docs={"docs": {}, "map": {"nodes": [], "edges": []}})["map"]
+    assert "Nothing to draw yet." in empty
+    real = render_node(snap, docs={"docs": {}, "map": saved})["map"]
+    assert real.count("<g><title>") + real.count("<a href") >= 9 and "Product requirements" in real and "v6" in real and "Not recorded (3)" in real
+    assert not re.search(r"envelope|done.when", real, re.I)
+    # a browser: no sideways scroll at 500px, cards shown, SVG hidden; the tab sits after Artifacts and the pane reads plain
+    chrome = j2.j2_check.find_chrome()
+    if chrome and BROWSER:
+        import subprocess
+        css = re.search(r"<style>(.*?)</style>", ui, re.S).group(1)
+        page = os.path.join(tempfile.mkdtemp(prefix="j2-map-"), "map.html")
+        open(page, "w", encoding="utf-8").write(f"<html><head><meta name=viewport content='width=device-width'><style>{css}</style></head><body>{real}"
+            "<script>document.body.setAttribute('data-m', [document.documentElement.scrollWidth, innerWidth, getComputedStyle(document.querySelector('.mapsvgwrap')).display, getComputedStyle(document.querySelector('.mapcards')).display].join('|'))</script></body></html>")
+        for width, want in ((500, "none|block"), (1100, "block|none")):
+            dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", f"--window-size={width},800", "--virtual-time-budget=2000", "--dump-dom", "file://" + page],
+                                 capture_output=True, text=True, timeout=120).stdout
+            sw, iw, a, b = re.search(r'data-m="([^"]+)"', dom).group(1).split("|")
+            assert int(sw) <= int(iw) and f"{a}|{b}" == want, (width, sw, iw, a, b)
+    if chrome and BROWSER:      # the real page, a saved run: the Map tab is after Artifacts and its pane reads in plain words
+        import subprocess
+        keep, j2_server.RUN = j2_server.RUN, run
+        srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        try:
+            dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=8000", "--dump-dom",
+                                  f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={name}"], capture_output=True, text=True, timeout=120).stdout
+        finally:
+            j2_server.RUN = keep
+            srv.shutdown()
+        pane = dom.split('id="pane-map"')[1].split('id="pane-style"')[0]
+        text = htmllib.unescape(re.sub(r"<[^>]+>", " ", pane))
+        assert "Product requirements" in text and re.search(r"\d+ of \d+ checks passed", text) and "Done" in text, text[:300]
+        assert 'data-mapopen="prd.md"' in pane and not re.search(r"envelope|done.when", text, re.I), "plain words in the Map tab"
+        assert dom.index('data-tab="artifacts"') < dom.index('data-tab="map"')
+    print("map: map.json written beside atoms.json and equal to the folder's build, golden nodes/edges/statuses, counts from the atoms, "
+          "old run rebuilt with its gaps named, left open vs running, fault, not made, waiting on you, /api/map live/saved/old/missing, "
+          "SVG shapes and marks per status, links to Artifacts, tooltips, plain words, cards for small screens ok")
+
+
 def atom_schema():
     """atom/1: the adapter maps a stored run (makes and dos), edges are what each builder's prompt actually held
     (manifest, LLD slice, earlier document), used_by is the exact inverse, warnings never change a run, atoms.json is
@@ -5285,6 +5469,7 @@ if __name__ == "__main__":
         send_deeds()
         artifact_types()
         artifacts_tab()
+        map_tab()
         docs_repeat_failure()
         docs_intake_and_compare()
         plain_unchanged("f6938b2", slim="0")      # J2_SLIM=0 is the old path, prompt for prompt
