@@ -3925,7 +3925,7 @@ def output_tags():
     closed = sum(a["status"] == "closed" for a in stored)
     failed = sum(a["status"] in ("verify_failed", "abandoned") for a in stored)
     assert f"{closed} closed · {failed} failed · {len(stored) - closed - failed} open" in summ, summ
-    assert f"{snap['spent']} of {snap['budget']} used" in summ and htmllib_unescape(snap["outcome"][:60]) in htmllib_unescape(summ), summ
+    assert f"{snap['spent']} of {snap['budget']} used" in summ and htmllib_unescape(snap["outcome"].replace("done-when", "checklist")[:60]) in htmllib_unescape(summ), summ
     assert "<b>Built:</b> PRD, HLD, LLD, website" in summ, summ
     # a stored run, when present: the document groups are the documents' own workflows
     here = os.path.dirname(os.path.abspath(__file__))

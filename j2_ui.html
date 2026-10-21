@@ -641,7 +641,7 @@ function idRuns(ids){        // W-1, W-2, W-3, W-5 -> "W-1 to W-3, W-5"; ids tha
 function runSummary(s){
   const at = Object.values(s.atoms_v1 || {}), n = st => at.filter(a => st(a.status)).length;
   const built = [...(s.docset_files || []).map(d => d.kind.toUpperCase()), ...(s.doc && !(s.docset_files || []).length && (s.files || []).length ? ["PRD"] : []), ...(s.versions ? ["website"] : [])];
-  return `<div class="runsum" data-summary><div><b>Outcome:</b> ${clip("sum-outcome", s.outcome || s.status || "not started", 160)}</div>`
+  return `<div class="runsum" data-summary><div><b>Outcome:</b> ${clip("sum-outcome", dv(s.outcome || s.status || "not started"), 160)}</div>`
     + `<div><b>Credits:</b> ${s.spent} of ${s.budget} used</div>`
     + `<div><b>Work atoms:</b> ${n(x => x === "closed")} closed · ${n(x => x === "verify_failed" || x === "abandoned")} failed · ${n(x => x !== "closed" && x !== "verify_failed" && x !== "abandoned")} open</div>`
     + `<div><b>Built:</b> ${built.length ? built.join(", ") : "nothing yet"}</div></div>`;
