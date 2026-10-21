@@ -64,7 +64,24 @@ Each check names the output item it is about in `applies_to`.
 | make | valid | it breaks no rule | yes (named-test, tap-targets, ids-unique) |
 | make | meets the defined output | it is what "done when" asked | yes (facts-present, lld-slice) |
 | do | receipt | a receipt exists and shows success; evidence is the receipt id from `receipts.jsonl` | yes, for behaviour steps run in Chrome or by the fake driver (scope self) |
-| do, scope external | receipt | the same, for fetching data or sending | defined, nothing produces them yet |
+| do, scope external | receipt | the same, for fetching data or sending | send: yes, in test mode only (see Send deeds); fetch: defined, nothing produces it yet |
+
+## Send deeds (test mode, phase 1)
+
+`send_email` and `send_slack_message` are do items of form `send`, scope `external`, one atom each, built by code after the
+documents (no charter, plan, builder or audit; no model writes the message). The brief only triggers them (a send verb
+near "email" or "Slack"). The recipient comes only from `J2_TEST_EMAIL` and `J2_TEST_SLACK_TARGET`; anything else is
+refused and a brief that names another recipient is told so. The one check, `deed-send`, reads the send receipt in
+`receipts.jsonl` (masked recipient and hash, body and document hashes, mode, no secret) and never sends.
+
+| `J2_SEND_MODE` | What happens | Check | Atom |
+|---|---|---|---|
+| `dry-run` (default) | nothing is sent; note "Not sent (dry run)" | does not pass (could not run) | open |
+| `mock` | one message goes to an in-process recorder, nothing leaves the machine | passes | closed |
+| target unset or refused | nothing is sent | fails | verify_failed |
+
+A declined send (live confirmation) is `abandoned`; that question and real transports (SMTP, Slack webhook) are not built yet.
+Price: `rates_deed` in `agents/j2/rates.json` (placeholder, 5 each; `J2_RATES=0` makes it free), funded by the stage gate.
 
 ## Edges
 
@@ -82,4 +99,4 @@ guessed. Runs stored before this schema have no record of what a prompt held, so
 ## Warnings (never change an outcome, a prompt or a retry)
 
 An edge to a missing atom; a cycle; an atom whose output is never used and is not a final output (forms `page`,
-`doc`); an output item without a verb.
+`doc`, `send`); an output item without a verb.

@@ -15,5 +15,10 @@
     "doc_section": 10,
     "requirements_section": 48,
     "fix": 8
+  },
+  "_note_deed": "PLACEHOLDER price of a send deed (test sends only): 5 each, not measured. J2_RATES=0 makes it free.",
+  "rates_deed": {
+    "send_email": 5,
+    "send_slack_message": 5
   }
 }

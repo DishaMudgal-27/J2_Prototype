@@ -4635,6 +4635,171 @@ def docs_repeat_failure():
           "a single document ends, wording is about the document, the message's check results are code's and never claim a pass over an unmet condition ok")
 
 
+def send_deeds():
+    """Send deeds, phase 1 (no network): the brief's send words trigger a trailing deed stage; the recipient comes only
+    from J2_TEST_EMAIL / J2_TEST_SLACK_TARGET; dry-run leaves the atom open, mock records one message; the proof check
+    reads the receipt; funding goes through the stage gate; a plain brief is untouched."""
+    import j2_schema as S
+    import j2_send
+    FAKE = {"J2_TEST_EMAIL": "me@example.invalid", "J2_TEST_SLACK_TARGET": "#j2-test",
+            "J2_SMTP_PASSWORD": "pw-should-never-appear", "J2_SLACK_WEBHOOK_URL": "https://hooks.invalid/never-in-a-file"}
+    keep = {k: os.environ.get(k) for k in (*FAKE, "J2_SEND_MODE")}
+
+    def env(mode=None, **kw):
+        for k in keep:
+            os.environ.pop(k, None)
+        os.environ.update({**FAKE, **{k: v for k, v in kw.items() if v is not None}})
+        for k, v in kw.items():
+            if v is None:
+                os.environ.pop(k, None)
+        if mode:
+            os.environ["J2_SEND_MODE"] = mode
+        j2_send.SENT.clear()
+
+    def deed_of(run, kind="send_email"):
+        w = next(w for w in run.past_workflows + run.workflows if w["name"] == j2_send.DEEDS[kind]["label"])
+        return w, w["atoms"][0]
+
+    def run_text(run):
+        return "".join(open(os.path.join(run.dir, f), encoding="utf-8").read() for f in os.listdir(run.dir)
+                       if f.endswith((".json", ".jsonl", ".md")))
+    try:
+        # 1: a send verb near email or slack triggers; a mere mention does not
+        d = j2_send.detect_deeds
+        assert d("Send me an email with the PRD") == ["send_email"] and d("email it to me") == ["send_email"]
+        assert d("send the PRD by email") == ["send_email"] and d("forward it by e-mail") == ["send_email"]
+        assert d("Post it to Slack") == ["send_slack_message"] and d("Slack me the PRD") == ["send_slack_message"]
+        assert d("send an email and post to Slack") == ["send_email", "send_slack_message"]
+        for t in ("", None, BREW_LAB, "a Slack link in the footer", "integrate with Slack", "an email field in the form",
+                  "show our email address", "Slack is where the team chats", "design a logo"):
+            assert d(t) == [], t
+        # 2: the allowlist: everything refused if unset; one recipient; no line breaks; nothing else gets through
+        env(J2_TEST_EMAIL=None, J2_TEST_SLACK_TARGET=None)
+        ok, why = j2_send.allowed("email", "me@example.invalid")
+        assert not ok and "J2_TEST_EMAIL" in why and "example.invalid" not in why, why
+        assert not j2_send.allowed("slack", "#j2-test")[0]
+        env()
+        assert j2_send.allowed("email", "me@example.invalid")[0] and j2_send.allowed("email", " ME@Example.invalid ")[0]
+        assert j2_send.allowed("slack", "#j2-test")[0]
+        for ch, to in (("email", "other@example.invalid"), ("email", "me@example.invalid, other@example.invalid"),
+                       ("email", "me@example.invalid\nBcc: x@example.invalid"), ("email", "me@example.invalid\r"),
+                       ("email", ["me@example.invalid"]), ("email", None), ("email", ""), ("slack", "#general"),
+                       ("slack", "#j2-test #general"), ("slack", "#j2-test\n"), ("fax", "me@example.invalid")):
+            assert not j2_send.allowed(ch, to)[0], (ch, to)
+        env("mock")
+        for msg in ({"channel": "email", "to": "other@example.invalid", "subject": "s", "body": "b"},
+                    {"channel": "slack", "to": "#general", "subject": None, "body": "b"},
+                    {"channel": "email", "to": "me@example.invalid", "subject": "s", "body": "b", "cc": "x@example.invalid"},
+                    {"channel": "email", "to": "me@example.invalid", "subject": "s", "body": "b", "bcc": "x@example.invalid"}):
+            r = j2_send.deliver(msg)
+            assert not r["sent"] and r["refused"] and not j2_send.SENT, (msg, r)
+        # 3: dry-run is the default: nothing is sent, the atom stays open, the proof check does not pass
+        env()
+        run = docs_run("Write a PRD for Campus Notes. Send me an email with it." + CAMPUS, 400)
+        assert run.stages == ["prd", "send_email"] and run.outcome.startswith("Done"), (run.stages, run.outcome)
+        assert "Not sent (dry run)" in run.outcome and not j2_send.SENT
+        w, a = deed_of(run)
+        assert a["status"] == "could not run" and a["results"][0]["pass"] is None and a["results"][0]["evidence"] == "Not sent (dry run)"
+        assert a["human_output"]["text"] == "Not sent (dry run)." and w["status"] == "done" and w["cost"] == 5
+        views = json.load(open(os.path.join(run.dir, "atoms.json")))["atoms"]
+        v = next(v for v in views if v["id"] == a["id"])
+        assert v["status"] == "open" and v["notes"] == "Not sent (dry run)." and v["verification"][0]["met"] is None
+        # the atom shape: verb do, form send, scope external, one deed-send check, edges to the PRD's atoms
+        assert v["output"] == [{"verb": "do", "name": a["results"][0]["check"], "form": "send", "ref": f"{a['id']}:1"}], v["output"]
+        assert v["details"]["scope"] == "external" and v["details"]["mode"] == "dry-run" and v["details"]["sent"] is False
+        assert S.atom_kind(v) == "do" and len(v["verification"]) == 1 and v["verification"][0]["method"].startswith("deed-send")
+        assert {e["atom"] for e in v["depends_on"]} == set(run.docs["prd"]["atoms"]) and v["owner"] == "code"
+        assert all(a["id"] in [u["atom"] for u in x["used_by"]] for x in views if x["id"] in run.docs["prd"]["atoms"])
+        assert not any(a["id"] in x for x in json.load(open(os.path.join(run.dir, "atoms.json")))["warnings"]), "warned about a send"
+        rec = [json.loads(x) for x in open(os.path.join(run.dir, "receipts.jsonl"), encoding="utf-8")]
+        rec = next(r for r in rec if r.get("type") == "deed-send-record")
+        for k in ("atom", "deed", "channel", "mode", "to_masked", "to_hash", "subject", "body_sha256", "body_chars", "artifact",
+                  "artifact_sha256", "sent", "result", "refused", "t", "by"):
+            assert k in rec, k
+        assert rec["mode"] == "dry-run" and rec["sent"] is False and rec["to_masked"] == "m***@example.invalid" and rec["by"] == "code"
+        assert "me@example.invalid" not in run_text(run) and not any(x in run_text(run) for x in
+                                                                    (FAKE["J2_SMTP_PASSWORD"], FAKE["J2_SLACK_WEBHOOK_URL"]))
+        # 4: mock: one message recorded, to the configured target only; the check passes and the atom closes
+        env("mock")
+        run = docs_run("Write a PRD for Campus Notes. Send me an email with it." + CAMPUS, 400)
+        w, a = deed_of(run)
+        assert len(j2_send.SENT) == 1 and j2_send.SENT[0]["to"] == "me@example.invalid" and j2_send.SENT[0]["channel"] == "email"
+        assert "prd.md" in j2_send.SENT[0]["subject"] and "Sections:" in j2_send.SENT[0]["body"]
+        assert a["status"] == "passed" and a["results"][0]["pass"] is True and "mock" in a["results"][0]["evidence"]
+        v = next(v for v in json.load(open(os.path.join(run.dir, "atoms.json")))["atoms"] if v["id"] == a["id"])
+        assert v["status"] == "closed" and v["details"]["mode"] == "mock" and v["details"]["sent"] is True
+        assert "me@example.invalid" not in run_text(run) and FAKE["J2_SMTP_PASSWORD"] not in run_text(run)
+        # the proof check only reads: running it again sends nothing more, and it fails if the document changed
+        c = a["verification"][0]
+        assert j2_send.check(c, run.dir)["pass"] is True and len(j2_send.SENT) == 1
+        with open(os.path.join(run.dir, "prd.md"), "a", encoding="utf-8") as f:
+            f.write("\n## Extra\nchanged\n")
+        assert j2_send.check(c, run.dir)["pass"] is False and "changed" in j2_send.check(c, run.dir)["evidence"]
+        assert j2_send.check({**c, "atom": "W-99.a1"}, run.dir)["pass"] is False      # no receipt
+        env("mock", J2_TEST_EMAIL="someone-else@example.invalid")      # the configured target moved: the receipt no longer matches
+        assert j2_send.check(c, run.dir)["pass"] is False
+        # a Slack send, and both together, in order
+        env("mock")
+        run = docs_run("Write a PRD for Campus Notes. Email it to me and post it to Slack." + CAMPUS, 400)
+        assert run.stages == ["prd", "send_email", "send_slack_message"] and run.outcome.startswith("Done"), run.stages
+        assert [(m["channel"], m["to"]) for m in j2_send.SENT] == [("email", "me@example.invalid"), ("slack", "#j2-test")]
+        assert deed_of(run, "send_slack_message")[1]["status"] == "passed"
+        # target not configured: nothing is sent, the atom is verify_failed, the outcome says so
+        env("mock", J2_TEST_EMAIL=None)
+        run = docs_run("Write a PRD for Campus Notes. Send me an email with it." + CAMPUS, 400)
+        w, a = deed_of(run)
+        assert not j2_send.SENT and a["status"] == "failed" and w["status"] == "failed"
+        assert run.outcome.startswith("Done with open items") and "J2_TEST_EMAIL" in run.outcome, run.outcome
+        v = next(v for v in json.load(open(os.path.join(run.dir, "atoms.json")))["atoms"] if v["id"] == a["id"])
+        assert v["status"] == "verify_failed"
+        # 5: the brief names another recipient: told in plain words, the send still goes only to the configured target
+        env("mock")
+        run = docs_run("Write a PRD for Campus Notes. Send me an email with it, to boss@elsewhere.invalid." + CAMPUS, 400)
+        note = next(m["text"] for m in run.chat if m["who"] == "system" and "different address" in m["text"])
+        assert "Test mode sends only to the configured test address" in note and "boss@elsewhere.invalid" not in note, note
+        assert [m["to"] for m in j2_send.SENT] == ["me@example.invalid"], j2_send.SENT      # never the one in the brief
+        assert not any("different" in m["text"] for m in docs_run("Write a PRD for Campus Notes. Email it to me@example.invalid." + CAMPUS, 400).chat
+                       if m["who"] == "system")
+        # 6: budget: 5 credits each from rates_deed; J2_RATES=0 makes them free; short credits go through the stage gate
+        env()
+        base = docs_run("Write a PRD for Campus Notes." + CAMPUS, 400)
+        with_email = docs_run("Write a PRD for Campus Notes. Send me an email with it." + CAMPUS, 400)
+        assert with_email.spent - base.spent == 5 == json.load(open(os.path.join(j2.J2_DIR, "rates.json")))["rates_deed"]["send_email"]
+        rates_on = j2.RATES_ON
+        j2.RATES_ON = False      # J2_RATES=0: the deed's price is 0 (a whole PRD run needs the rate card, so the price is read directly)
+        try:
+            assert j2.RATES_DEED() == {} and with_email._stage_cost("send_email") == 0 and with_email._stage_cost("send_slack_message") == 0
+        finally:
+            j2.RATES_ON = rates_on
+        assert with_email._stage_cost("send_email") == 5 and with_email._stage_cost("send_slack_message") == 5
+        run = docs_run("Write a PRD for Campus Notes. Send me an email with it." + CAMPUS, 100)
+        assert run.paused and run.paused["kind"] == "limit" and run.stages == ["prd", "send_email"], run.outcome
+        text = stage_question(run)
+        assert "the test email (needs at least 5 work credits; not covered)" in text and "the product requirements (needs at least 98" in text, text
+        say(run, "Option 1")      # add the credits: the PRD and the email are both done
+        assert run.outcome.startswith("Done") and deed_of(run)[0]["cost"] == 5, run.outcome
+        run = docs_run("Write a PRD for Campus Notes. Send me an email with it." + CAMPUS, 100)
+        say(run, "Option 2")      # leave the email out: no send workflow exists
+        assert run.stages == ["prd"] and run.outcome.startswith("Done") and not any(
+            w["name"] == "Send a test email" for w in run.past_workflows + run.workflows)
+        # 10: no send words: no deed stage, nothing recorded; send words with no document: told, and the site is built as before
+        run = docs_run("Write a PRD for Campus Notes." + CAMPUS, 400)
+        assert run.stages == ["prd"] and not run.deed_log and "deed-send-record" not in run_text(run)
+        run = docs_run(BREW_LAB + " Email it to me.", 200)
+        assert not run.stages and run.outcome.startswith("Done") and not j2_send.SENT and "deed-send-record" not in run_text(run)
+        assert any("A send needs a document" in m["text"] for m in run.chat if m["who"] == "system")
+    finally:
+        for k, v in keep.items():
+            os.environ.pop(k, None)
+            if v is not None:
+                os.environ[k] = v
+        j2_send.SENT.clear()
+    print("send deeds: trigger needs a send verb, allowlist refuses anything but the two configured targets, dry-run stays open "
+          "(not sent), mock records one message, proof check only reads the receipt, no secret or full address in any file, "
+          "another recipient in the brief is told and ignored, 5 credits each and free with J2_RATES=0, stage gate funds it, "
+          "plain briefs untouched ok")
+
+
 def atom_schema():
     """atom/1: the adapter maps a stored run (makes and dos), edges are what each builder's prompt actually held
     (manifest, LLD slice, earlier document), used_by is the exact inverse, warnings never change a run, atoms.json is
@@ -4877,6 +5042,7 @@ if __name__ == "__main__":
         docs_detection()
         docs_chain()
         docs_funding()
+        send_deeds()
         docs_repeat_failure()
         docs_intake_and_compare()
         plain_unchanged("f6938b2", slim="0")      # J2_SLIM=0 is the old path, prompt for prompt

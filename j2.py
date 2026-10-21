@@ -46,6 +46,7 @@ import time
 
 import j2_check
 import j2_schema
+import j2_send
 import llm
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -188,6 +189,11 @@ def RATES_WEB():
 
 def RATES_DOC():
     return _rate_card("rates_prd")
+
+
+def RATES_DEED():
+    """Price of each send deed (rates.json "rates_deed"); empty, so free, with J2_RATES=0."""
+    return _rate_card("rates_deed")
 
 
 def price(w):
@@ -608,6 +614,8 @@ def run_check(c, site_dir, page, doc=False):
     """{actual, pass, evidence} for one check against the built site (doc=True: page is a markdown document). Code
     only."""
     t, target, expect = c.get("type"), c.get("target"), c.get("expect")
+    if t == "deed-send":      # reads the send receipt in this run's receipts.jsonl; never sends
+        return j2_send.check(c, os.path.dirname(site_dir))
     if doc:
         return doc_check(c, page)
     try:
@@ -2560,6 +2568,7 @@ class J2Run:
         # design documents (opt-in, code-detected): the stages of a run (PRD, HLD, LLD, then the site), each document's
         # agent_output, and what earlier stages left behind. Empty for every other run.
         self.docset, self.stages, self.stage_i, self.chain, self.docs = [], [], 0, {}, {}
+        self.deed_log, self.deed_seen = [], set()      # send deeds done (note, result) and the notices already given
         self.open_docs = []          # documents the Requester accepted as they were, with what was still not right
         self.given = {}              # workflow id -> {"edges": [{atom, why}], "whole": bool}: what its builder's prompt held (atom/1)
         self.past_workflows, self.stage_archive, self.site_tag, self.stage_checked = [], [], "", True
@@ -3227,16 +3236,28 @@ class J2Run:
             return
         said = [self.request] + [x["answer"] for x in self.intake]
         docs = detect_documents(*said)
+        deeds = j2_send.detect_deeds(*said)
+        for k in deeds:      # the brief never chooses the recipient: say so once, in plain words
+            if j2_send.names_other(k, *said) and k not in self.deed_seen:
+                self.deed_seen.add(k)
+                self.post("system", f"You named a different {'address' if k == 'send_email' else 'Slack channel or person'}. "
+                          f"Test mode sends only to the configured test {'address' if k == 'send_email' else 'Slack target'}, "
+                          "so nothing goes to the one you named.", warning=True)
+        if deeds and not docs and "none" not in self.deed_seen:
+            self.deed_seen.add("none")
+            self.post("system", "A send needs a document to send. Ask for a PRD, HLD or LLD as well; nothing will be sent.",
+                      warning=True)
         if not docs:
             return
         self.docset = docs
-        self.stages = docs + (["website"] if wants_site(*said) else [])
+        self.stages = docs + deeds + (["website"] if wants_site(*said) else [])
         self.stage_i = 0
         self._apply_output(self.stages[0])
         self.site_tag = self.stages[0] + "-" if len(self.stages) > 1 else ""      # one document keeps its plain file names
         self.stage_checked = False       # the funding of the whole chain is checked once, when the first stage's plan starts
         names = " and ".join(f"the {k.upper()}" for k in docs) if len(docs) < 3 else "the PRD, the HLD and the LLD"
         self.post("system", f"Documents asked for: {names}" + (", then the website" if "website" in self.stages else "")
+                  + (f", then {and_list(j2_send.DEEDS[k]['words'] for k in deeds)} of the last document" if deeds else "")
                   + ". They are written in that order, each from the one before.")
 
     @property
@@ -3272,6 +3293,8 @@ class J2Run:
     def _stage_cost(self, kind):
         """The least a stage can cost on the rate card: every section a doc_section and one requirements_section, or the
         site's essentials (a scaffold, three sections, a form). 0 when the rate card is off."""
+        if kind in j2_send.DEEDS:
+            return RATES_DEED().get(kind, 0)
         if kind == "website":
             r, parts = RATES_WEB(), self.SITE_ESSENTIALS
             return sum(r.get(k, 0) for k in parts)
@@ -3279,7 +3302,7 @@ class J2Run:
         return r.get("doc_section", 0) * (n - 1) + r.get("requirements_section", 0)
 
     STAGE_WORDS = {"prd": "the product requirements", "hld": "the high-level design", "lld": "the low-level design",
-                   "website": "the website"}
+                   "website": "the website", **{k: f"the {d['words']}" for k, d in j2_send.DEEDS.items()}}
 
     def _advance(self, i):
         """Start stage i, unless the credits left can't cover it and the rest (then the Requester is asked). False when
@@ -3392,7 +3415,10 @@ class J2Run:
         self.turn = None
 
     def _begin_stage(self, kind, base):
-        """Fresh working state for the next stage; the earlier stage's workflows and documents are kept for the record."""
+        """Fresh working state for the next stage; the earlier stage's workflows and documents are kept for the record.
+        A send deed (j2_send.DEEDS) is the one stage with no agents: code does it all in _deed_stage."""
+        if kind in j2_send.DEEDS:
+            return self._deed_stage(kind)
         self.past_workflows += self.workflows
         self.workflows, self.sites, self.sections, self.audits, self.style = [], [], {}, [], None
         self.goal, self.stamped, self.proposed_atoms, self.p_refused = None, False, {}, {}
@@ -3421,6 +3447,65 @@ class J2Run:
         self.post("system", f"Next: the {kind.upper()}, written from the {'PRD' if kind == 'hld' else 'HLD'}'s agent_output.")
         self._handoff("adaptation", kind="propose", new_cycle=True,
                       why=f"The {self.stages[self.stage_i - 1].upper()} is done. Propose the first workflows for the {kind.upper()}.")
+
+    def _deed_stage(self, kind):
+        """A send deed after the documents: one workflow, one atom, no charter, plan, builder or audit. Code builds the
+        message from the last finished document, sends it (dry-run or mock; recipient only from the environment),
+        writes the receipt, and runs the atom's one check, which only reads that receipt. Then the chain goes on."""
+        self.past_workflows += self.workflows
+        self.workflows = []
+        d, cost = j2_send.DEEDS[kind], RATES_DEED().get(kind, 0)
+        wid = f"W-{len(self.past_workflows) + 1}"
+        src = next(reversed(self.docs)) if self.docs else None
+        art = self.docs[src] if src else None
+        text = open(os.path.join(self.dir, art["file"]), encoding="utf-8").read() if art else ""
+        aid = f"{wid}.a1"
+        atom = {"id": aid, "goal": f"Send the {d['words']} about {art['file'] if art else 'the document'}",
+                "how": {"agent": "code"}, "constraints": [f"only to the target in {d['var']}", "built by code, no model"],
+                "context": [art["file"]] if art else [],
+                "expected_output": [{"text": f"The {d['words']} reaches the configured test target", "kind": "send",
+                                     "target": kind}],
+                "verification": [{"text": f"The {d['words']} was sent to the configured test target", "type": "deed-send",
+                                  "target": kind, "expect": True, "atom": aid, "item": 1}]}
+        wf = {"id": wid, "proposal_id": None, "name": d["label"], "covers": [], "fixes": [], "covers_text": [],
+              "purpose": f"The Requester asked for a {d['words']}", "cost": cost, "estimate": cost,
+              "envelope": {"money_limit": cost, "model_call_limit": 0, "retry_limit": 0}, "charged": True,
+              "calls_used": 0, "retries_used": 0, "outputs": None, "completion_check": "", "dependencies": [],
+              "status": "running", "cycle": self.cycle, "agent": "Code", "section": None, "revises": None, "atoms": [atom]}
+        self.workflows = [wf]
+        self._recalc_spent()
+        self.given[wid] = {"edges": [{"atom": x, "why": f"the message is built from {art['file']}"}
+                                     for x in art["atoms"]] if art else [], "whole": False}
+        rec = j2_send.send(kind, art["file"], text, art["file"]) if art else \
+            {"deed": kind, "channel": d["channel"], "mode": j2_send.mode(), "sent": False, "result": "refused",
+             "refused": "there is no finished document to send", "artifact": None}
+        os.makedirs(self.dir, exist_ok=True)
+        with open(os.path.join(self.dir, "receipts.jsonl"), "a", encoding="utf-8") as f:
+            f.write(json.dumps({"atom": aid, "type": "deed-send-record", **rec, "t": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                                "by": "code"}, ensure_ascii=False) + "\n")
+        self._run_checks(wf, 1, "", atoms=[atom])
+        ok = atom["results"][0]["pass"]
+        note = ("Not sent (dry run)." if ok is None else f"Not sent: {rec['refused'] or atom['results'][0]['evidence']}."
+                if ok is False else f"The {d['words']} was sent in test mode to the mock recorder only.")
+        atom["human_output"] = {"text": note}
+        atom["deed"] = {k: rec.get(k) for k in ("channel", "mode", "sent")}
+        wf["status"] = "failed" if ok is False else "done"
+        self.save("workflows.json", self.workflows)
+        self.deed_log.append({"kind": kind, "pass": ok, "note": note})
+        self.post("system", f"{d['label']}: {note}", warning=ok is False)
+        if self._advance(self.stage_i + 1):
+            return
+        self._deeds_finished()
+
+    def _deeds_finished(self):
+        """The last stage was a send: the closing message and outcome, with what each send did in plain words."""
+        words = " ".join(x["note"] for x in self.deed_log)
+        self.post("identity", f"{'Your design documents are ready.' if len(self.docset) > 1 else 'Your document is ready.'} {words}",
+                  done=True, to_user=True, next="user")
+        base = ("Done: the design documents are workable. Every done-when item, rubric item and necessary condition "
+                "passes in each." if len(self.docset) > 1 else self.out["done"])
+        self.outcome = f"Done with open items: {words}" if any(x["pass"] is False for x in self.deed_log) else f"{base} {words}"
+        self.turn = None
 
     def _identity_intake(self, h):
         """J2.a: is there enough information to work? If not, Identity asks the Requester and the run waits; the
