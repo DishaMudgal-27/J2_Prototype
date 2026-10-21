@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bengaluru JS Meetup</title>
+<meta name="description" content="Bengaluru JS Meetup, happening in November. Schedule, speakers, RSVP, sponsors and code of conduct.">
+<style>
+  :root {
+    --bg: #fafaf7;
+    --surface: #ffffff;
+    --ink: #1b1b1f;
+    --muted: #5c5c66;
+    --line: #d9d9d2;
+    --accent: #1f4fd8;
+    --accent-ink: #ffffff;
+    --tba-bg: #fff6d6;
+    --tba-ink: #6b5200;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121316;
+      --surface: #1b1d22;
+      --ink: #eeeef2;
+      --muted: #a4a4b0;
+      --line: #33363d;
+      --accent: #7da2ff;
+      --accent-ink: #0c1330;
+      --tba-bg: #3a3112;
+      --tba-ink: #f1dc8a;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  a { color: var(--accent); }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  header.site {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  header.site .wrap {
+    display: flex; flex-wrap: wrap; align-items: center;
+    justify-content: space-between; gap: 8px 24px; padding-top: 10px; padding-bottom: 10px;
+  }
+  .brand { font-weight: 700; text-decoration: none; color: var(--ink); }
+  nav ul { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; padding: 0; }
+  nav a { text-decoration: none; color: var(--muted); font-size: 0.95rem; padding: 4px 2px; border-bottom: 2px solid transparent; }
+  nav a:hover, nav a.active { color: var(--ink); border-bottom-color: var(--accent); }
+
+  .hero { padding: 72px 0 56px; border-bottom: 1px solid var(--line); }
+  .eyebrow { color: var(--muted); font-size: 0.9rem; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 8px; }
+  h1 { font-size: clamp(2rem, 6vw, 3.4rem); line-height: 1.1; margin: 0 0 16px; }
+  .hero p.lead { font-size: 1.2rem; max-width: 40ch; margin: 0 0 20px; }
+
+  .tba {
+    display: inline-block;
+    background: var(--tba-bg);
+    color: var(--tba-ink);
+    border-radius: 6px;
+    padding: 1px 8px;
+    font-weight: 600;
+    font-size: 0.92em;
+  }
+
+  section.block { padding: 56px 0; border-bottom: 1px solid var(--line); }
+  section.block h2 { font-size: 1.7rem; margin: 0 0 8px; }
+  .note { color: var(--muted); margin: 0 0 24px; max-width: 62ch; }
+
+  .table-wrap { overflow-x: auto; }
+  table.schedule { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+  table.schedule th, table.schedule td { text-align: left; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  table.schedule th { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  table.schedule tr:last-child td { border-bottom: none; }
+
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+  .avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: repeating-linear-gradient(45deg, var(--line), var(--line) 6px, transparent 6px, transparent 12px);
+    border: 1px dashed var(--muted);
+    margin-bottom: 14px;
+  }
+  .card h3 { margin: 0 0 4px; font-size: 1.05rem; }
+  .card p { margin: 0 0 6px; color: var(--muted); font-size: 0.95rem; }
+
+  .btn {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--accent-ink);
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    border: 0;
+    font-size: 1rem;
+  }
+  .btn[aria-disabled="true"] {
+    background: transparent;
+    color: var(--muted);
+    border: 2px dashed var(--muted);
+    cursor: not-allowed;
+  }
+
+  .logos { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .logo-slot {
+    min-height: 100px;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    border: 2px dashed var(--line);
+    border-radius: var(--radius);
+    color: var(--muted);
+    padding: 12px;
+    background: var(--surface);
+  }
+
+  .coc-box { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--radius); padding: 20px; }
+
+  footer { padding: 32px 0 48px; color: var(--muted); font-size: 0.9rem; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="#top">Bengaluru JS Meetup</a>
+    <nav aria-label="Sections">
+      <ul>
+        <li><a href="#schedule">Schedule</a></li>
+        <li><a href="#speakers">Speakers</a></li>
+        <li><a href="#rsvp">RSVP</a></li>
+        <li><a href="#sponsors">Sponsors</a></li>
+        <li><a href="#conduct">Code of Conduct</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Happening in November</p>
+      <h1>Bengaluru JS Meetup</h1>
+      <p class="lead">A meetup for JavaScript people in Bengaluru, taking place in November.</p>
+      <p>Exact date: <span class="tba">To be announced</span></p>
+    </div>
+  </div>
+
+  <section class="block" id="schedule" aria-labelledby="schedule-h">
+    <div class="wrap">
+      <h2 id="schedule-h">Schedule</h2>
+      <p class="note">The programme is not confirmed yet. The rows below show the layout only; the number of slots may change once the programme is set.</p>
+      <div class="table-wrap">
+        <table class="schedule">
+          <thead>
+            <tr><th scope="col">Time slot</th><th scope="col">Talk</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="tba">To be announced</span></td><td><span class="tba">To be announced</span></td></tr>
+            <tr><td><span class="tba">To be announced</span></td><td><span class="tba">To be announced</span></td></tr>
+            <tr><td><span class="tba">To be announced</span></td><td><span class="tba">To be announced</span></td></tr>
+            <tr><td><span class="tba">To be announced</span></td><td><span class="tba">To be announced</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="speakers" aria-labelledby="speakers-h">
+    <div class="wrap">
+      <h2 id="speakers-h">Speakers</h2>
+      <p class="note">Speakers have not been confirmed. Cards below are layout placeholders.</p>
+      <div class="grid">
+        <article class="card">
+          <div class="avatar" role="presentation"></div>
+          <h3><span class="tba">To be announced</span></h3>
+          <p>Talk: <span class="tba">To be announced</span></p>
+        </article>
+        <article class="card">
+          <div class="avatar" role="presentation"></div>
+          <h3><span class="tba">To be announced</span></h3>
+          <p>Talk: <span class="tba">To be announced</span></p>
+        </article>
+        <article class="card">
+          <div class="avatar" role="presentation"></div>
+          <h3><span class="tba">To be announced</span></h3>
+          <p>Talk: <span class="tba">To be announced</span></p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="rsvp" aria-labelledby="rsvp-h">
+    <div class="wrap">
+      <h2 id="rsvp-h">RSVP</h2>
+      <p class="note">Sign-ups happen on an external page. This page does not collect any attendee details.</p>
+      <p>
+        <a class="btn" id="rsvp-link" role="link" aria-disabled="true" data-placeholder="true" tabindex="0">RSVP link: placeholder</a>
+      </p>
+      <p>External RSVP page: <span class="tba">To be announced</span></p>
+    </div>
+  </section>
+
+  <section class="block" id="sponsors" aria-labelledby="sponsors-h">
+    <div class="wrap">
+      <h2 id="sponsors-h">Sponsors</h2>
+      <p class="note">Sponsors have not been confirmed. Logo slots below are placeholders.</p>
+      <div class="logos">
+        <div class="logo-slot">Sponsor logo: <span class="tba">To be announced</span></div>
+        <div class="logo-slot">Sponsor logo: <span class="tba">To be announced</span></div>
+        <div class="logo-slot">Sponsor logo: <span class="tba">To be announced</span></div>
+        <div class="logo-slot">Sponsor logo: <span class="tba">To be announced</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="conduct" aria-labelledby="conduct-h">
+    <div class="wrap">
+      <h2 id="conduct-h">Code of Conduct</h2>
+      <div class="coc-box">
+        <p><strong>Placeholder:</strong> the code of conduct text is <span class="tba">To be announced</span>.</p>
+        <p>The organisers will publish it here before the event.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Bengaluru JS Meetup, November. Content marked "To be announced" is not yet confirmed.</p>
+  </div>
+</footer>
+
+<script>
+  // Placeholder RSVP control: does nothing until a real link is supplied.
+  var rsvp = document.getElementById('rsvp-link');
+  if (rsvp) {
+    rsvp.addEventListener('click', function (e) {
+      if (rsvp.getAttribute('aria-disabled') === 'true') { e.preventDefault(); }
+    });
+  }
+
+  // Highlight the nav link for the section in view.
+  var links = document.querySelectorAll('nav a');
+  var sections = Array.prototype.map.call(links, function (a) {
+    return document.querySelector(a.getAttribute('href'));
+  });
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          links.forEach(function (a) {
+            a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id);
+          });
+        }
+      });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    sections.forEach(function (s) { if (s) { io.observe(s); } });
+  }
+</script>
+</body>
+</html>

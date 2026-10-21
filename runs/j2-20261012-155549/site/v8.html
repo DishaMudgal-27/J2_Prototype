@@ -1,0 +1,1284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spark 2026</title>
+<!-- J2:style head start (owner W-1) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;700&amp;display=swap"><style>:root{--j2-primary:#FF6B35;--j2-secondary:#7C3AED;--j2-accent:#22D3EE;--j2-background:#0B1020;--j2-surface:#151B33;--j2-text:#F5F7FF;--j2-muted:#A9B1D6;--j2-font-heading:'Space Grotesk', 'Segoe UI', system-ui, sans-serif;--j2-font-body:'Inter', 'Segoe UI', system-ui, sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:16px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#FF6B35;color:#0B1020;min-height:48px;padding:0 28px;font-weight:700;border:2px solid #FF6B35;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-btn-secondary{display:inline-block;background:transparent;color:#22D3EE;min-height:48px;padding:0 28px;font-weight:700;border:2px solid #22D3EE;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-card{background:#151B33;color:#F5F7FF;border:1px solid rgba(169,177,214,0.2);border-radius:16px;padding:24px}</style>
+<!-- J2:style head end -->
+<!-- J2:W-8 head start (owner W-8) -->
+<style>
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{overflow-x:clip;max-width:100%}
+section[id]{scroll-margin-top:72px}
+section[id]+section[id]{border-top:1px solid rgba(169,177,214,0.12)}
+img,svg,video{max-width:100%}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+<!-- J2:W-8 head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<section id="hero" class="hero-w1" aria-labelledby="hero-title">
+  <style>
+    #hero.hero-w1 {
+      position: relative;
+      overflow: hidden;
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 88vh;
+      display: flex;
+      align-items: center;
+      padding: 96px 20px 64px;
+      background:
+        radial-gradient(ellipse 60% 50% at 85% 10%, rgba(124, 58, 237, 0.45), transparent 70%),
+        radial-gradient(ellipse 50% 45% at 10% 90%, rgba(255, 107, 53, 0.30), transparent 70%),
+        var(--j2-background, #0B1020);
+      color: var(--j2-text, #F5F7FF);
+      font-family: var(--j2-font-body, 'Inter', system-ui, sans-serif);
+    }
+    #hero.hero-w1 *, #hero.hero-w1 *::before, #hero.hero-w1 *::after { box-sizing: border-box; }
+    #hero .hero-glow {
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      right: -120px;
+      top: 20%;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, #FF6B35, #7C3AED, #22D3EE, #FF6B35);
+      filter: blur(70px);
+      opacity: 0.35;
+      pointer-events: none;
+      animation: hero-spin 18s linear infinite;
+    }
+    @keyframes hero-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { #hero .hero-glow { animation: none; } }
+    #hero .hero-inner {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    #hero .hero-badge {
+      display: inline-block;
+      margin: 0 0 20px;
+      padding: 8px 16px;
+      border: 1px solid var(--j2-accent, #22D3EE);
+      border-radius: 999px;
+      color: var(--j2-accent, #22D3EE);
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    #hero .hero-title {
+      margin: 0 0 16px;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: clamp(2.75rem, 13vw, 6rem);
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      overflow-wrap: anywhere;
+    }
+    #hero .hero-title span {
+      background: linear-gradient(90deg, #FF6B35, #22D3EE);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    #hero .hero-college {
+      margin: 0 0 8px;
+      font-size: clamp(1.125rem, 4.5vw, 1.75rem);
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    #hero .hero-dates {
+      margin: 0 0 24px;
+      font-size: clamp(1.125rem, 4.5vw, 1.5rem);
+      font-weight: 600;
+      color: var(--j2-primary, #FF6B35);
+    }
+    #hero .hero-tagline {
+      margin: 0 0 28px;
+      max-width: 36rem;
+      color: var(--j2-muted, #A9B1D6);
+      font-size: 1.0625rem;
+      line-height: 1.6;
+    }
+    #hero .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 0 0 32px;
+    }
+    #hero .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    #hero .hero-stats li {
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: rgba(21, 27, 51, 0.85);
+      border: 1px solid rgba(169, 177, 214, 0.25);
+      font-size: 0.9375rem;
+      font-weight: 500;
+    }
+    @media (max-width: 420px) {
+      #hero.hero-w1 { padding: 80px 16px 48px; }
+      #hero .hero-actions .j2-btn,
+      #hero .hero-actions .j2-btn-secondary { width: 100%; }
+    }
+  </style>
+
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <p class="hero-badge">Tech fest</p>
+    <h1 id="hero-title" class="hero-title"><span>Spark 2026</span></h1>
+    <p class="hero-college">Northfield College of Engineering, Pune</p>
+    <p class="hero-dates">14 to 16 February 2027</p>
+    <p class="hero-tagline">Three days of coding, robotics, design and talks. Check the schedule, pick your events and sign up from your phone.</p>
+    <div class="hero-actions">
+      <a class="j2-btn" href="#register">Register now</a>
+      <a class="j2-btn j2-btn-secondary" href="#schedule">See the schedule</a>
+    </div>
+    <ul class="hero-stats">
+      <li>3 days</li>
+      <li>8 events</li>
+      <li>4 categories</li>
+    </ul>
+  </div>
+</section>
+<!-- J2:W-1 end -->
+<!-- J2:W-2 start (owner W-2) -->
+<section id="schedule" class="sched-w2" aria-labelledby="schedule-title">
+  <style>
+    #schedule.sched-w2 {
+      box-sizing: border-box;
+      width: 100%;
+      padding: var(--j2-section, 64px) 20px;
+      background: var(--j2-background, #0B1020);
+      color: var(--j2-text, #F5F7FF);
+      font-family: var(--j2-font-body, 'Inter', system-ui, sans-serif);
+    }
+    #schedule.sched-w2 *, #schedule.sched-w2 *::before, #schedule.sched-w2 *::after { box-sizing: border-box; }
+    #schedule .sched-inner { width: 100%; max-width: 1100px; margin: 0 auto; }
+    #schedule .sched-title {
+      margin: 0 0 8px;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: clamp(2rem, 8vw, 3rem);
+      line-height: 1.1;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+    #schedule .sched-intro {
+      margin: 0 0 32px;
+      max-width: 36rem;
+      color: var(--j2-muted, #A9B1D6);
+      font-size: 1.0625rem;
+      line-height: 1.6;
+    }
+    #schedule .sched-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    #schedule .sched-day { min-width: 0; border-top: 4px solid var(--j2-primary, #FF6B35); }
+    #schedule .sched-day.sched-d2 { border-top-color: var(--j2-secondary, #7C3AED); }
+    #schedule .sched-day.sched-d3 { border-top-color: var(--j2-accent, #22D3EE); }
+    #schedule .sched-day-title {
+      margin: 0 0 16px;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    #schedule .sched-events { margin: 0; padding: 0; list-style: none; }
+    #schedule .sched-row {
+      padding: 14px 0;
+      border-top: 1px solid rgba(169, 177, 214, 0.2);
+    }
+    #schedule .sched-row:first-child { border-top: 0; padding-top: 0; }
+    #schedule .sched-row:last-child { padding-bottom: 0; }
+    #schedule .sched-time {
+      display: block;
+      margin: 0 0 4px;
+      color: var(--j2-accent, #22D3EE);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    #schedule .sched-name {
+      display: block;
+      font-size: 1.125rem;
+      font-weight: 600;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+    @media (min-width: 900px) {
+      #schedule .sched-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+    }
+    @media (max-width: 420px) {
+      #schedule.sched-w2 { padding: 48px 16px; }
+    }
+  </style>
+
+  <div class="sched-inner">
+    <h2 id="schedule-title" class="sched-title">Schedule</h2>
+    <p class="sched-intro">What is on, day by day. Tap through to the events section for prices and categories.</p>
+
+    <ol class="sched-grid">
+      <li class="sched-day sched-d1 j2-card" aria-labelledby="sched-h1">
+        <h3 id="sched-h1" class="sched-day-title">Day 1</h3>
+        <ul class="sched-events">
+          <li class="sched-row"><span class="sched-time">10am-1pm</span><span class="sched-name">Code Sprint</span></li>
+          <li class="sched-row"><span class="sched-time">2pm-5pm</span><span class="sched-name">Line Follower</span></li>
+          <li class="sched-row"><span class="sched-time">5:30pm-6:30pm</span><span class="sched-name">AI in Daily Life</span></li>
+        </ul>
+      </li>
+      <li class="sched-day sched-d2 j2-card" aria-labelledby="sched-h2">
+        <h3 id="sched-h2" class="sched-day-title">Day 2</h3>
+        <ul class="sched-events">
+          <li class="sched-row"><span class="sched-time">11am-1pm</span><span class="sched-name">Bug Hunt</span></li>
+          <li class="sched-row"><span class="sched-time">2pm-4pm</span><span class="sched-name">Poster Jam</span></li>
+        </ul>
+      </li>
+      <li class="sched-day sched-d3 j2-card" aria-labelledby="sched-h3">
+        <h3 id="sched-h3" class="sched-day-title">Day 3</h3>
+        <ul class="sched-events">
+          <li class="sched-row"><span class="sched-time">10am-1pm</span><span class="sched-name">Drone Dash</span></li>
+          <li class="sched-row"><span class="sched-time">2pm-5pm</span><span class="sched-name">UI Duel</span></li>
+          <li class="sched-row"><span class="sched-time">5:30pm-6:30pm</span><span class="sched-name">Startup Stories</span></li>
+        </ul>
+      </li>
+    </ol>
+  </div>
+</section>
+<!-- J2:W-2 end -->
+<!-- J2:W-3 start (owner W-3) -->
+<section id="events" class="events-w3" aria-labelledby="events-title">
+  <style>
+    #events.events-w3 {
+      box-sizing: border-box;
+      width: 100%;
+      padding: var(--j2-section, 64px) 20px;
+      background: var(--j2-background, #0B1020);
+      color: var(--j2-text, #F5F7FF);
+      font-family: var(--j2-font-body, 'Inter', system-ui, sans-serif);
+    }
+    #events.events-w3 *, #events.events-w3 *::before, #events.events-w3 *::after { box-sizing: border-box; }
+    #events [hidden] { display: none !important; }
+    #events .ev-inner { width: 100%; max-width: 1100px; margin: 0 auto; }
+    #events .ev-title {
+      margin: 0 0 8px;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: clamp(2rem, 8vw, 3rem);
+      line-height: 1.1;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+    #events .ev-intro {
+      margin: 0 0 24px;
+      max-width: 36rem;
+      color: var(--j2-muted, #A9B1D6);
+      font-size: 1.0625rem;
+      line-height: 1.6;
+    }
+    #events .ev-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 0 0 16px;
+      padding: 0;
+    }
+    #events .ev-filter {
+      font: inherit;
+      font-weight: 700;
+      padding: 0 20px;
+      min-width: 48px;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #events .ev-filter:focus-visible {
+      outline: 3px solid var(--j2-text, #F5F7FF);
+      outline-offset: 2px;
+    }
+    #events .ev-filter[aria-pressed="true"] {
+      background: var(--j2-accent, #22D3EE);
+      color: var(--j2-background, #0B1020);
+    }
+    #events .ev-status {
+      margin: 0 0 24px;
+      color: var(--j2-muted, #A9B1D6);
+      font-size: 0.9375rem;
+    }
+    #events .ev-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    #events .event-card { min-width: 0; }
+    #events .ev-body {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      border-top: 4px solid var(--j2-primary, #FF6B35);
+    }
+    #events .event-card[data-category="Robotics"] .ev-body { border-top-color: var(--j2-secondary, #7C3AED); }
+    #events .event-card[data-category="Design"] .ev-body { border-top-color: var(--j2-accent, #22D3EE); }
+    #events .event-card[data-category="Talks"] .ev-body { border-top-color: var(--j2-muted, #A9B1D6); }
+    #events .ev-cat {
+      align-self: flex-start;
+      margin: 0;
+      padding: 4px 12px;
+      border: 1px solid var(--j2-accent, #22D3EE);
+      border-radius: 999px;
+      color: var(--j2-accent, #22D3EE);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    #events .ev-name {
+      margin: 0;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: 1.375rem;
+      font-weight: 700;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+    #events .ev-meta {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      color: var(--j2-muted, #A9B1D6);
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+    #events .ev-meta strong { color: var(--j2-text, #F5F7FF); font-weight: 600; }
+    #events .ev-price {
+      margin: auto 0 0;
+      padding-top: 4px;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--j2-primary, #FF6B35);
+    }
+    #events .ev-price.is-free { color: var(--j2-accent, #22D3EE); }
+    @media (min-width: 640px) {
+      #events .ev-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (min-width: 1000px) {
+      #events .ev-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+    }
+    @media (max-width: 420px) {
+      #events.events-w3 { padding: 48px 16px; }
+    }
+  </style>
+
+  <div class="ev-inner">
+    <h2 id="events-title" class="ev-title">Events</h2>
+    <p class="ev-intro">Eight events across four categories. Pick a category to narrow the list.</p>
+
+    <div class="ev-filters" role="group" aria-label="Filter events by category">
+      <button type="button" class="j2-btn-secondary ev-filter" data-filter="all" aria-pressed="true">All</button>
+      <button type="button" class="j2-btn-secondary ev-filter" data-filter="Coding" aria-pressed="false">Coding</button>
+      <button type="button" class="j2-btn-secondary ev-filter" data-filter="Robotics" aria-pressed="false">Robotics</button>
+      <button type="button" class="j2-btn-secondary ev-filter" data-filter="Design" aria-pressed="false">Design</button>
+      <button type="button" class="j2-btn-secondary ev-filter" data-filter="Talks" aria-pressed="false">Talks</button>
+    </div>
+    <p class="ev-status" id="ev-status" role="status" aria-live="polite">Showing all 8 events</p>
+
+    <ul class="ev-grid" id="ev-grid">
+      <li class="event-card" data-category="Coding">
+        <div class="j2-card ev-body">
+          <p class="ev-cat">Coding</p>
+          <h3 class="ev-name">Code Sprint</h3>
+          <ul class="ev-meta">
+            <li><strong>Day 1</strong></li>
+            <li>10am-1pm</li>
+          </ul>
+          <p class="ev-price">Rs 100</p>
+        </div>
+      </li>
+      <li class="event-card" data-category="Coding">
+        <div class="j2-card ev-body">
+          <p class="ev-cat">Coding</p>
+          <h3 class="ev-name">Bug Hunt</h3>
+          <ul class="ev-meta">
+            <li><strong>Day 2</strong></li>
+            <li>11am-1pm</li>
+          </ul>
+          <p class="ev-price">Rs 50</p>
+        </div>
+      </li>
+      <li class="event-card" data-category="Robotics">
+        <div class="j2-card ev-body">
+          <p class="ev-cat">Robotics</p>
+          <h3 class="ev-name">Line Follower</h3>
+          <ul class="ev-meta">
+            <li><strong>Day 1</strong></li>
+            <li>2pm-5pm</li>
+          </ul>
+          <p class="ev-price">Rs 150</p>
+        </div>
+      </li>
+      <li class="event-card" data-category="Robotics">
+        <div class="j2-card ev-body">
+          <p class="ev-cat">Robotics</p>
+          <h3 class="ev-name">Drone Dash</h3>
+          <ul class="ev-meta">
+            <li><strong>Day 3</strong></li>
+            <li>10am-1pm</li>
+          </ul>
+          <p class="ev-price">Rs 200</p>
+        </div>
+      </li>
+      <li class="event-card" data-category="Design">
+        <div class="j2-card ev-body">
+          <p class="ev-cat">Design</p>
+          <h3 class="ev-name">Poster Jam</h3>
+          <ul class="ev-meta">
+            <li><strong>Day 2</strong></li>
+            <li>2pm-4pm</li>
+          </ul>
+          <p class="ev-price is-free">Free</p>
+        </div>
+      </li>
+      <li class="event-card" data-category="Design">
+        <div class="j2-card ev-body">
+          <p class="ev-cat">Design</p>
+          <h3 class="ev-name">UI Duel</h3>
+          <ul class="ev-meta">
+            <li><strong>Day 3</strong></li>
+            <li>2pm-5pm</li>
+          </ul>
+          <p class="ev-price">Rs 100</p>
+        </div>
+      </li>
+      <li class="event-card" data-category="Talks">
+        <div class="j2-card ev-body">
+          <p class="ev-cat">Talks</p>
+          <h3 class="ev-name">AI in Daily Life</h3>
+          <ul class="ev-meta">
+            <li><strong>Day 1</strong></li>
+            <li>5:30pm-6:30pm</li>
+          </ul>
+          <p class="ev-price is-free">Free</p>
+        </div>
+      </li>
+      <li class="event-card" data-category="Talks">
+        <div class="j2-card ev-body">
+          <p class="ev-cat">Talks</p>
+          <h3 class="ev-name">Startup Stories</h3>
+          <ul class="ev-meta">
+            <li><strong>Day 3</strong></li>
+            <li>5:30pm-6:30pm</li>
+          </ul>
+          <p class="ev-price is-free">Free</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <script>
+    (function () {
+      var root = document.getElementById('events');
+      if (!root) { return; }
+      var buttons = root.querySelectorAll('.ev-filter');
+      var cards = root.querySelectorAll('.event-card');
+      var status = document.getElementById('ev-status');
+
+      function apply(filter) {
+        var shown = 0;
+        for (var i = 0; i < cards.length; i++) {
+          var match = filter === 'all' || cards[i].getAttribute('data-category') === filter;
+          if (match) { cards[i].removeAttribute('hidden'); shown++; }
+          else { cards[i].setAttribute('hidden', ''); }
+        }
+        for (var j = 0; j < buttons.length; j++) {
+          buttons[j].setAttribute('aria-pressed', buttons[j].getAttribute('data-filter') === filter ? 'true' : 'false');
+        }
+        if (status) {
+          status.textContent = filter === 'all'
+            ? 'Showing all ' + shown + ' events'
+            : 'Showing ' + shown + ' ' + filter + ' events';
+        }
+      }
+
+      for (var k = 0; k < buttons.length; k++) {
+        buttons[k].addEventListener('click', function () {
+          apply(this.getAttribute('data-filter'));
+        });
+      }
+    })();
+  </script>
+</section>
+<!-- J2:W-3 end -->
+<!-- J2:W-4 start (owner W-4) -->
+<section id="register" class="reg-w4" aria-labelledby="register-title">
+  <style>
+    #register.reg-w4 {
+      box-sizing: border-box;
+      width: 100%;
+      padding: var(--j2-section, 64px) 20px;
+      background: var(--j2-background, #0B1020);
+      color: var(--j2-text, #F5F7FF);
+      font-family: var(--j2-font-body, 'Inter', system-ui, sans-serif);
+    }
+    #register.reg-w4 *, #register.reg-w4 *::before, #register.reg-w4 *::after { box-sizing: border-box; }
+    #register [hidden] { display: none !important; }
+    #register .reg-inner { width: 100%; max-width: 640px; margin: 0 auto; }
+    #register .reg-title {
+      margin: 0 0 8px;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: clamp(2rem, 8vw, 3rem);
+      line-height: 1.1;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+    #register .reg-intro {
+      margin: 0 0 24px;
+      color: var(--j2-muted, #A9B1D6);
+      font-size: 1.0625rem;
+      line-height: 1.6;
+    }
+    #register .reg-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      border-top: 4px solid var(--j2-primary, #FF6B35);
+      min-width: 0;
+    }
+    #register .reg-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    #register .reg-label {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--j2-text, #F5F7FF);
+    }
+    #register .reg-input {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      min-height: 48px;
+      padding: 10px 16px;
+      font: inherit;
+      font-size: 1rem;
+      color: var(--j2-text, #F5F7FF);
+      background: var(--j2-background, #0B1020);
+      border: 2px solid var(--j2-muted, #A9B1D6);
+      border-radius: 12px;
+      color-scheme: dark;
+    }
+    #register .reg-input:focus-visible {
+      outline: 3px solid var(--j2-accent, #22D3EE);
+      outline-offset: 2px;
+      border-color: var(--j2-accent, #22D3EE);
+    }
+    #register .reg-input[aria-invalid="true"] { border-color: var(--j2-primary, #FF6B35); }
+    #register .reg-error {
+      margin: 0;
+      min-height: 0;
+      color: var(--j2-primary, #FF6B35);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    #register .reg-error:empty { display: none; }
+    #register .reg-submit {
+      font: inherit;
+      font-weight: 700;
+      width: 100%;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #register .reg-submit:focus-visible {
+      outline: 3px solid var(--j2-text, #F5F7FF);
+      outline-offset: 2px;
+    }
+    #register .reg-note {
+      margin: 0;
+      color: var(--j2-muted, #A9B1D6);
+      font-size: 0.9375rem;
+      line-height: 1.5;
+    }
+    #register .reg-confirm {
+      margin-top: 20px;
+      border-top: 4px solid var(--j2-accent, #22D3EE);
+      min-width: 0;
+    }
+    #register .reg-confirm:focus { outline: none; }
+    #register .reg-confirm-title {
+      margin: 0 0 8px;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: 1.375rem;
+      font-weight: 700;
+      color: var(--j2-accent, #22D3EE);
+    }
+    #register .reg-confirm p {
+      margin: 0 0 12px;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+    #register .reg-confirm p:last-child { margin-bottom: 0; }
+    #register .reg-confirm a {
+      color: var(--j2-accent, #22D3EE);
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+    @media (min-width: 640px) {
+      #register .reg-submit { width: auto; align-self: flex-start; }
+    }
+    @media (max-width: 420px) {
+      #register.reg-w4 { padding: 48px 16px; }
+      #register .reg-form, #register .reg-confirm { padding: 20px; }
+    }
+  </style>
+
+  <div class="reg-inner">
+    <h2 id="register-title" class="reg-title">Register</h2>
+    <p class="reg-intro">Pick an event and fill in your details. Submitting opens an email to the organisers with your details filled in. Press send in that email to finish registering.</p>
+
+    <form id="reg-form" class="j2-card reg-form" novalidate>
+      <div class="reg-field">
+        <label class="reg-label" for="reg-name">Name</label>
+        <input class="reg-input" type="text" id="reg-name" name="name" autocomplete="name" required aria-describedby="reg-name-err">
+        <p class="reg-error" id="reg-name-err"></p>
+      </div>
+
+      <div class="reg-field">
+        <label class="reg-label" for="reg-email">Email</label>
+        <input class="reg-input" type="email" id="reg-email" name="email" autocomplete="email" inputmode="email" required aria-describedby="reg-email-err">
+        <p class="reg-error" id="reg-email-err"></p>
+      </div>
+
+      <div class="reg-field">
+        <label class="reg-label" for="reg-college">College</label>
+        <input class="reg-input" type="text" id="reg-college" name="college" autocomplete="organization" required aria-describedby="reg-college-err">
+        <p class="reg-error" id="reg-college-err"></p>
+      </div>
+
+      <div class="reg-field">
+        <label class="reg-label" for="reg-event">Event</label>
+        <select class="reg-input" id="reg-event" name="event" required aria-describedby="reg-event-err">
+          <option value="">Choose an event</option>
+          <option value="Code Sprint">Code Sprint</option>
+          <option value="Bug Hunt">Bug Hunt</option>
+          <option value="Line Follower">Line Follower</option>
+          <option value="Drone Dash">Drone Dash</option>
+          <option value="Poster Jam">Poster Jam</option>
+          <option value="UI Duel">UI Duel</option>
+          <option value="AI in Daily Life">AI in Daily Life</option>
+          <option value="Startup Stories">Startup Stories</option>
+        </select>
+        <p class="reg-error" id="reg-event-err"></p>
+      </div>
+
+      <button type="submit" class="j2-btn reg-submit">Register</button>
+      <p class="reg-note">All four fields are required. Prices and timings are in the events section.</p>
+    </form>
+
+    <div id="reg-confirm" class="j2-card reg-confirm" role="status" aria-live="polite" tabindex="-1" hidden></div>
+  </div>
+
+  <script>
+    (function () {
+      var form = document.getElementById('reg-form');
+      var box = document.getElementById('reg-confirm');
+      if (!form || !box) { return; }
+
+      var TO = 'spark2026@example.com';
+      var fields = [
+        { el: document.getElementById('reg-name'), err: document.getElementById('reg-name-err'), msg: 'Enter your name.' },
+        { el: document.getElementById('reg-email'), err: document.getElementById('reg-email-err'), msg: 'Enter your email.', bad: 'Enter a valid email address.' },
+        { el: document.getElementById('reg-college'), err: document.getElementById('reg-college-err'), msg: 'Enter your college.' },
+        { el: document.getElementById('reg-event'), err: document.getElementById('reg-event-err'), msg: 'Choose an event.' }
+      ];
+      var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      function setError(f, text) {
+        f.err.textContent = text;
+        f.el.setAttribute('aria-invalid', text ? 'true' : 'false');
+      }
+
+      function check(f) {
+        var v = f.el.value.trim();
+        if (!v) { setError(f, f.msg); return false; }
+        if (f.bad && !EMAIL_RE.test(v)) { setError(f, f.bad); return false; }
+        setError(f, '');
+        return true;
+      }
+
+      for (var i = 0; i < fields.length; i++) {
+        (function (f) {
+          var evt = f.el.tagName === 'SELECT' ? 'change' : 'input';
+          f.el.addEventListener(evt, function () {
+            if (f.el.getAttribute('aria-invalid') === 'true') { check(f); }
+          });
+        })(fields[i]);
+      }
+
+      function addPara(parent, text) {
+        var p = document.createElement('p');
+        p.textContent = text;
+        parent.appendChild(p);
+        return p;
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var firstBad = null;
+        for (var k = 0; k < fields.length; k++) {
+          if (!check(fields[k]) && !firstBad) { firstBad = fields[k].el; }
+        }
+        if (firstBad) {
+          box.setAttribute('hidden', '');
+          firstBad.focus();
+          return;
+        }
+
+        var name = fields[0].el.value.trim();
+        var email = fields[1].el.value.trim();
+        var college = fields[2].el.value.trim();
+        var event = fields[3].el.value;
+
+        var body = [
+          'Spark 2026 registration',
+          '',
+          'Name: ' + name,
+          'Email: ' + email,
+          'College: ' + college,
+          'Event: ' + event
+        ].join('\r\n');
+        var mailto = 'mailto:' + TO +
+          '?subject=' + encodeURIComponent('Spark 2026 registration: ' + event) +
+          '&body=' + encodeURIComponent(body);
+
+        while (box.firstChild) { box.removeChild(box.firstChild); }
+        var h = document.createElement('h3');
+        h.className = 'reg-confirm-title';
+        h.textContent = 'Almost done, ' + name;
+        box.appendChild(h);
+        addPara(box, 'Your registration for ' + event + ' is ready. Your mail app should open with your details addressed to ' + TO + '. Press send in that email to complete it.');
+        var p2 = document.createElement('p');
+        p2.appendChild(document.createTextNode('Nothing opened? '));
+        var a = document.createElement('a');
+        a.href = mailto;
+        a.textContent = 'Open the email again';
+        p2.appendChild(a);
+        p2.appendChild(document.createTextNode(' or send your details to ' + TO + ' yourself.'));
+        box.appendChild(p2);
+
+        box.removeAttribute('hidden');
+        box.focus();
+        if (box.scrollIntoView) { box.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+
+        try { window.location.href = mailto; } catch (err) { /* fallback link is shown above */ }
+      });
+    })();
+  </script>
+</section>
+<!-- J2:W-4 end -->
+<!-- J2:W-5 start (owner W-5) -->
+<section id="venue" class="venue-w5" aria-labelledby="venue-title">
+  <style>
+    #venue.venue-w5, #contact.contact-w5 {
+      box-sizing: border-box;
+      width: 100%;
+      padding: var(--j2-section, 64px) 20px;
+      background: var(--j2-background, #0B1020);
+      color: var(--j2-text, #F5F7FF);
+      font-family: var(--j2-font-body, 'Inter', system-ui, sans-serif);
+    }
+    #venue.venue-w5 *, #venue.venue-w5 *::before, #venue.venue-w5 *::after,
+    #contact.contact-w5 *, #contact.contact-w5 *::before, #contact.contact-w5 *::after { box-sizing: border-box; }
+    #venue .vc-inner, #contact .vc-inner { width: 100%; max-width: 1100px; margin: 0 auto; }
+    #venue .vc-title, #contact .vc-title {
+      margin: 0 0 8px;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: clamp(2rem, 8vw, 3rem);
+      line-height: 1.1;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+    #venue .vc-intro, #contact .vc-intro {
+      margin: 0 0 24px;
+      max-width: 36rem;
+      color: var(--j2-muted, #A9B1D6);
+      font-size: 1.0625rem;
+      line-height: 1.6;
+    }
+    #venue .vc-card { min-width: 0; max-width: 640px; border-top: 4px solid var(--j2-secondary, #7C3AED); }
+    #contact .vc-card { min-width: 0; max-width: 640px; border-top: 4px solid var(--j2-accent, #22D3EE); }
+    #venue .vc-label, #contact .vc-label {
+      margin: 0 0 8px;
+      color: var(--j2-accent, #22D3EE);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    #venue .vc-address {
+      margin: 0 0 20px;
+      font-style: normal;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: clamp(1.25rem, 5vw, 1.625rem);
+      font-weight: 700;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+    #contact .vc-row { margin: 0 0 20px; }
+    #contact .vc-row:last-child { margin-bottom: 0; }
+    #contact .vc-phone {
+      margin: 12px 0 0;
+      color: var(--j2-muted, #A9B1D6);
+      font-size: 0.9375rem;
+    }
+    #contact .vc-email {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+    #contact .vc-email a {
+      color: var(--j2-accent, #22D3EE);
+      overflow-wrap: anywhere;
+    }
+    #venue .j2-btn-secondary:focus-visible,
+    #contact .j2-btn:focus-visible,
+    #contact .vc-email a:focus-visible {
+      outline: 3px solid var(--j2-text, #F5F7FF);
+      outline-offset: 2px;
+    }
+    @media (max-width: 420px) {
+      #venue.venue-w5, #contact.contact-w5 { padding: 48px 16px; }
+      #venue .vc-card, #contact .vc-card { padding: 20px; }
+      #venue .j2-btn-secondary, #contact .j2-btn { width: 100%; }
+    }
+  </style>
+
+  <div class="vc-inner">
+    <h2 id="venue-title" class="vc-title">Venue</h2>
+    <p class="vc-intro">Everything happens at our college campus in Pune.</p>
+    <div class="j2-card vc-card">
+      <p class="vc-label">Find us</p>
+      <address class="vc-address">Northfield College of Engineering, 22 University Road, Pune 411007</address>
+      <a class="j2-btn-secondary" href="https://www.google.com/maps/search/?api=1&amp;query=Northfield%20College%20of%20Engineering%2C%2022%20University%20Road%2C%20Pune%20411007" target="_blank" rel="noopener">Open in maps</a>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="contact-w5" aria-labelledby="contact-title">
+  <div class="vc-inner">
+    <h2 id="contact-title" class="vc-title">Contact the organisers</h2>
+    <p class="vc-intro">Questions about events or registration? Message us on WhatsApp or write to us.</p>
+    <div class="j2-card vc-card">
+      <div class="vc-row">
+        <p class="vc-label">WhatsApp</p>
+        <a class="j2-btn" href="https://wa.me/910000033333" target="_blank" rel="noopener">Chat on WhatsApp</a>
+        <p class="vc-phone">+91 00000 33333</p>
+      </div>
+      <div class="vc-row">
+        <p class="vc-label">Email</p>
+        <p class="vc-email"><a href="mailto:spark2026@example.com">spark2026@example.com</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- J2:W-5 end -->
+<!-- J2:W-6 start (owner W-6) -->
+<section id="sponsors" class="spons-w6" aria-labelledby="sponsors-title">
+  <style>
+    #sponsors.spons-w6 {
+      box-sizing: border-box;
+      width: 100%;
+      padding: var(--j2-section, 64px) 20px;
+      background: var(--j2-background, #0B1020);
+      color: var(--j2-text, #F5F7FF);
+      font-family: var(--j2-font-body, 'Inter', system-ui, sans-serif);
+    }
+    #sponsors.spons-w6 *, #sponsors.spons-w6 *::before, #sponsors.spons-w6 *::after { box-sizing: border-box; }
+    #sponsors .sp-inner { width: 100%; max-width: 1100px; margin: 0 auto; }
+    #sponsors .sp-title {
+      margin: 0 0 8px;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: clamp(2rem, 8vw, 3rem);
+      line-height: 1.1;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+    #sponsors .sp-intro {
+      margin: 0 0 32px;
+      max-width: 36rem;
+      color: var(--j2-muted, #A9B1D6);
+      font-size: 1.0625rem;
+      line-height: 1.6;
+    }
+    #sponsors .sp-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    #sponsors .sp-item {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 120px;
+      text-align: center;
+      border-top: 4px solid var(--j2-primary, #FF6B35);
+    }
+    #sponsors .sp-item.sp-2 { border-top-color: var(--j2-secondary, #7C3AED); }
+    #sponsors .sp-item.sp-3 { border-top-color: var(--j2-accent, #22D3EE); }
+    #sponsors .sp-name {
+      margin: 0;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: clamp(1.375rem, 5vw, 1.75rem);
+      font-weight: 700;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+    @media (min-width: 640px) {
+      #sponsors .sp-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+    }
+    @media (max-width: 420px) {
+      #sponsors.spons-w6 { padding: 48px 16px; }
+      #sponsors .sp-item { padding: 20px; min-height: 96px; }
+    }
+  </style>
+
+  <div class="sp-inner">
+    <h2 id="sponsors-title" class="sp-title">Sponsors</h2>
+    <p class="sp-intro">Spark 2026 is made possible by these sponsors.</p>
+
+    <ul class="sp-grid">
+      <li class="sp-item sp-1 j2-card"><p class="sp-name">Nimbus Cloud</p></li>
+      <li class="sp-item sp-2 j2-card"><p class="sp-name">Orbit Labs</p></li>
+      <li class="sp-item sp-3 j2-card"><p class="sp-name">Pixel Press</p></li>
+    </ul>
+  </div>
+</section>
+<!-- J2:W-6 end -->
+<!-- J2:W-7 start (owner W-7) -->
+<section id="gallery" class="gal-w7" aria-labelledby="gallery-title">
+  <style>
+    #gallery.gal-w7 {
+      box-sizing: border-box;
+      width: 100%;
+      padding: var(--j2-section, 64px) 20px;
+      background: var(--j2-background, #0B1020);
+      color: var(--j2-text, #F5F7FF);
+      font-family: var(--j2-font-body, 'Inter', system-ui, sans-serif);
+    }
+    #gallery.gal-w7 *, #gallery.gal-w7 *::before, #gallery.gal-w7 *::after { box-sizing: border-box; }
+    #gallery .gal-inner { width: 100%; max-width: 1100px; margin: 0 auto; }
+    #gallery .gal-title {
+      margin: 0 0 8px;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: clamp(2rem, 8vw, 3rem);
+      line-height: 1.1;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+    #gallery .gal-intro {
+      margin: 0 0 32px;
+      max-width: 36rem;
+      color: var(--j2-muted, #A9B1D6);
+      font-size: 1.0625rem;
+      line-height: 1.6;
+    }
+    #gallery .gal-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    #gallery .gal-tile {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      aspect-ratio: 4 / 3;
+      padding: 16px;
+      text-align: center;
+      background: var(--j2-surface, #151B33);
+      border: 2px dashed var(--j2-muted, #A9B1D6);
+      border-radius: var(--j2-radius, 16px);
+      color: var(--j2-text, #F5F7FF);
+    }
+    #gallery .gal-tile.gal-2 { border-color: var(--j2-secondary, #7C3AED); }
+    #gallery .gal-tile.gal-3 { border-color: var(--j2-accent, #22D3EE); }
+    #gallery .gal-icon {
+      width: 40px;
+      height: 40px;
+      flex: none;
+      color: var(--j2-primary, #FF6B35);
+    }
+    #gallery .gal-tile.gal-3 .gal-icon { color: var(--j2-accent, #22D3EE); }
+    #gallery .gal-label {
+      margin: 0;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: 1.125rem;
+      font-weight: 700;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+    #gallery .gal-note {
+      margin: 0;
+      color: var(--j2-muted, #A9B1D6);
+      font-size: 0.9375rem;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+    }
+    @media (min-width: 640px) {
+      #gallery .gal-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+    }
+    @media (max-width: 420px) {
+      #gallery.gal-w7 { padding: 48px 16px; }
+    }
+  </style>
+
+  <div class="gal-inner">
+    <h2 id="gallery-title" class="gal-title">Gallery</h2>
+    <p class="gal-intro">Photos from the fest will appear here. These tiles mark where they will go.</p>
+
+    <ul class="gal-grid">
+      <li class="gal-tile gal-1">
+        <svg class="gal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="M21 16l-5-5-8 8"></path></svg>
+        <p class="gal-label">Photo placeholder</p>
+        <p class="gal-note">Image to be added</p>
+      </li>
+      <li class="gal-tile gal-2">
+        <svg class="gal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="M21 16l-5-5-8 8"></path></svg>
+        <p class="gal-label">Photo placeholder</p>
+        <p class="gal-note">Image to be added</p>
+      </li>
+      <li class="gal-tile gal-3">
+        <svg class="gal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="M21 16l-5-5-8 8"></path></svg>
+        <p class="gal-label">Photo placeholder</p>
+        <p class="gal-note">Image to be added</p>
+      </li>
+    </ul>
+  </div>
+</section>
+<!-- J2:W-7 end -->
+<!-- J2:W-8 start (owner W-8) -->
+<nav id="nav" class="nav-w8" aria-label="Main">
+  <style>
+    #nav.nav-w8 {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      box-sizing: border-box;
+      background: rgba(11, 16, 32, 0.92);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(169, 177, 214, 0.2);
+      font-family: var(--j2-font-body, 'Inter', system-ui, sans-serif);
+      color: var(--j2-text, #F5F7FF);
+    }
+    #nav.nav-w8 *, #nav.nav-w8 *::before, #nav.nav-w8 *::after { box-sizing: border-box; }
+    #nav [hidden] { display: none !important; }
+    #nav .n8-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+      max-width: 1200px;
+      height: 64px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+    #nav .n8-brand {
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--j2-text, #F5F7FF);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    #nav .n8-brand span { color: var(--j2-primary, #FF6B35); }
+    #nav .n8-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: none;
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      background: transparent;
+      color: var(--j2-accent, #22D3EE);
+      border: 2px solid var(--j2-accent, #22D3EE);
+      border-radius: 999px;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #nav .n8-bars, #nav .n8-bars::before, #nav .n8-bars::after {
+      display: block;
+      width: 20px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 2px;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+    #nav .n8-bars { position: relative; }
+    #nav .n8-bars::before, #nav .n8-bars::after { content: ""; position: absolute; left: 0; }
+    #nav .n8-bars::before { top: -6px; }
+    #nav .n8-bars::after { top: 6px; }
+    #nav.n8-open .n8-bars { background: transparent; }
+    #nav.n8-open .n8-bars::before { top: 0; transform: rotate(45deg); }
+    #nav.n8-open .n8-bars::after { top: 0; transform: rotate(-45deg); }
+    #nav .n8-menu {
+      margin: 0;
+      padding: 8px 16px 16px;
+      list-style: none;
+    }
+    #nav.n8-js .n8-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      max-height: calc(100vh - 64px);
+      overflow-y: auto;
+      background: var(--j2-surface, #151B33);
+      border-bottom: 1px solid rgba(169, 177, 214, 0.2);
+    }
+    #nav.n8-js.n8-open .n8-menu { display: block; }
+    #nav .n8-menu a:not(.j2-btn) {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      padding: 0 12px;
+      border-radius: 12px;
+      color: var(--j2-text, #F5F7FF);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    #nav .n8-menu a:not(.j2-btn)[aria-current="true"] { color: var(--j2-accent, #22D3EE); }
+    #nav .n8-menu .n8-cta-item { margin-top: 8px; }
+    #nav .n8-menu .n8-cta { width: 100%; }
+    #nav a:focus-visible, #nav .n8-toggle:focus-visible {
+      outline: 3px solid var(--j2-text, #F5F7FF);
+      outline-offset: 2px;
+    }
+    @media (min-width: 960px) {
+      #nav .n8-toggle, #nav.n8-js .n8-toggle { display: none; }
+      #nav .n8-menu, #nav.n8-js .n8-menu, #nav.n8-js.n8-open .n8-menu {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        position: static;
+        max-height: none;
+        overflow: visible;
+        padding: 0;
+        background: transparent;
+        border: 0;
+      }
+      #nav .n8-menu .n8-cta-item { margin: 0 0 0 8px; }
+      #nav .n8-menu .n8-cta { width: auto; padding: 0 24px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #nav .n8-bars, #nav .n8-bars::before, #nav .n8-bars::after { transition: none; }
+    }
+  </style>
+
+  <div class="n8-bar">
+    <a class="n8-brand" href="#hero" aria-label="Spark 2026, back to top">Spark <span>2026</span></a>
+    <button type="button" class="n8-toggle" aria-controls="n8-menu" aria-expanded="false" aria-label="Open menu"><span class="n8-bars" aria-hidden="true"></span></button>
+    <ul class="n8-menu" id="n8-menu">
+      <li><a href="#schedule">Schedule</a></li>
+      <li><a href="#events">Events</a></li>
+      <li><a href="#venue">Venue</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="#sponsors">Sponsors</a></li>
+      <li><a href="#gallery">Gallery</a></li>
+      <li class="n8-cta-item"><a class="j2-btn n8-cta" href="#register">Register</a></li>
+    </ul>
+  </div>
+
+  <script>
+    (function () {
+      var nav = document.getElementById('nav');
+      var btn = nav ? nav.querySelector('.n8-toggle') : null;
+      var menu = document.getElementById('n8-menu');
+      if (!nav || !btn || !menu) { return; }
+      nav.classList.add('n8-js');
+
+      var links = menu.querySelectorAll('a[href^="#"]');
+      var targets = [];
+      for (var i = 0; i < links.length; i++) {
+        var id = links[i].getAttribute('href').slice(1);
+        var t = id ? document.getElementById(id) : null;
+        if (!t) { links[i].parentNode.setAttribute('hidden', ''); continue; }
+        targets.push({ link: links[i], el: t });
+      }
+
+      function setOpen(open) {
+        if (open) { nav.classList.add('n8-open'); } else { nav.classList.remove('n8-open'); }
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      }
+
+      btn.addEventListener('click', function () {
+        setOpen(!nav.classList.contains('n8-open'));
+      });
+      for (var j = 0; j < links.length; j++) {
+        links[j].addEventListener('click', function () { setOpen(false); });
+      }
+      document.addEventListener('click', function (e) {
+        if (nav.classList.contains('n8-open') && !nav.contains(e.target)) { setOpen(false); }
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && nav.classList.contains('n8-open')) {
+          setOpen(false);
+          btn.focus();
+        }
+      });
+      if (window.matchMedia) {
+        var mq = window.matchMedia('(min-width: 960px)');
+        var onChange = function () { if (mq.matches) { setOpen(false); } };
+        if (mq.addEventListener) { mq.addEventListener('change', onChange); }
+        else if (mq.addListener) { mq.addListener(onChange); }
+      }
+
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          for (var k = 0; k < entries.length; k++) {
+            if (!entries[k].isIntersecting) { continue; }
+            for (var m = 0; m < targets.length; m++) {
+              if (targets[m].el === entries[k].target) { targets[m].link.setAttribute('aria-current', 'true'); }
+              else { targets[m].link.removeAttribute('aria-current'); }
+            }
+          }
+        }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+        for (var n = 0; n < targets.length; n++) { io.observe(targets[n].el); }
+      }
+    })();
+  </script>
+</nav>
+<!-- J2:W-8 end -->
+</body>
+</html>

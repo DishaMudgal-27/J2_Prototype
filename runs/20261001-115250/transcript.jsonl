@@ -1,0 +1,8 @@
+{"who": "system", "text": "Model busy (503), waiting 10s and retrying."}
+{"who": "Engineering", "text": "Hi @Marketing and @Sales. For a successful launch of our AI interview feature, we need robust infrastructure. Without proper load testing and QA, we risk a major launch-day outage. I propose we allocate $5,000 to Engineering to secure our systems, leaving $2,500 each for Marketing and Sales to drive and close the initial leads.", "stance": "propose", "split": {"Marketing": 2500, "Engineering": 5000, "Sales": 2500}}
+{"who": "Marketing", "text": "@Engineering, a $2,500 budget for Marketing is completely unworkable. Below $4,500, our paid ad campaigns won't even reach enough recruiters to make this launch viable. No matter how stable the tech is, nobody will use it if they don't know it exists. Let's balance this: Marketing $5,000, Engineering $3,000, and Sales $2,000.", "stance": "propose", "split": {"Marketing": 5000, "Engineering": 3000, "Sales": 2000}}
+{"who": "system", "text": "Model busy (503), waiting 10s and retrying."}
+{"who": "system", "text": "Model busy (503), waiting 30s and retrying."}
+{"who": "Engineering", "text": "@Marketing, I hear you, but $3,000 for Engineering puts us below our absolute safety threshold for load testing. If our servers crash on day one, those paid ads are wasted money. I can compromise at $3,500 for Engineering to barely cover essential load tests, which lets you keep $4,500 for campaigns. @Sales, that leaves you with $2,000.", "stance": "propose", "split": {"Marketing": 4500, "Engineering": 3500, "Sales": 2000}}
+{"who": "system", "text": "Model busy (503), waiting 10s and retrying."}
+{"who": "system", "text": "Model busy (503), waiting 30s and retrying."}

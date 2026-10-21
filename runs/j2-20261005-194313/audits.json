@@ -1,0 +1,218 @@
+[
+  {
+    "cycle": 1,
+    "version": 2,
+    "results": [
+      {
+        "criterion": "The site is one HTML file with its CSS and JavaScript inline or loaded from a CDN, needing no build step.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Single HTML file, 15,238 bytes, inline style and one script, 0 external resources per mechanical check.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The file contains navigable sections for Home, Book a Visit, Emergency, Doctors and Health Blog, all reachable from a navigation menu.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Nav links #home, #book, #emergency, #doctors, #blog all have matching section ids. Broken in-page links: none. Doctors and Blog sections exist but are stubs (see their own findings).",
+        "severity": "low"
+      },
+      {
+        "criterion": "The Book a Visit section has a request form with fields for patient name, phone number, preferred date, department or doctor, and reason for visit, and visible text saying staff will confirm by phone or WhatsApp.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Form #visitForm has pname, phone, pdate, dept, reason. Visible text: 'Our staff will confirm your visit by phone or WhatsApp.'",
+        "severity": "low"
+      },
+      {
+        "criterion": "The form text makes no claim of instant or automatic confirmation, and the file has no live slot picker or backend call.",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "No fetch, XMLHttpRequest or slot picker in the script; date field is free choice with hint 'Staff will tell you what is available.' Warning: the submit message 'Request received. Staff will contact you...' sits alongside a visible notice that requests are not delivered. A patient could believe a request reached staff. Needs a delivery decision or a wording fix before live.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "Emergency information is visible from every view, either in the header or a persistent banner, and includes an emergency number shown as a marked placeholder.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Sticky header.site contains .emergency-bar with '[Emergency number]' plus a 'To be confirmed' tag and a link to #emergency.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The Doctors section has several profile cards, each with name, specialty and qualifications, every one shown as a marked placeholder.",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "#doctors contains only a .stub text: 'Doctor profiles are added in a later step.' No profile cards exist.",
+        "severity": "high"
+      },
+      {
+        "criterion": "The Health Blog section lists posts, and at least one post opens or expands to its full text.",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "#blog contains only a .stub: 'Health blog posts are added in a later step.' No posts, no expand control.",
+        "severity": "high"
+      },
+      {
+        "criterion": "A language switch offers English, Kannada and Hindi, and choosing one changes the text of every section, the booking form labels and every blog post, with the page language attribute updated.",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "No language control in the markup. The script has no translation logic. <html lang=\"en\"> is static.",
+        "severity": "high"
+      },
+      {
+        "criterion": "Each language view has complete translations: no section, form label, button or blog post is left in English in the Kannada or Hindi view, apart from proper names and marked placeholders.",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "No Kannada or Devanagari text anywhere in the file. All content is English only.",
+        "severity": "high"
+      },
+      {
+        "criterion": "Every placeholder carries the same visible 'to be confirmed' marking in all three languages, and the site shows a visible list of all placeholders still open.",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "The .tbc tag is consistent in English and an open-items list exists (#open-items). The tag is English only. The list omits doctor names, qualifications, specialties and blog medical review, which the charter names as open inputs.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "The site shows a visible notice that the Kannada and Hindi text is awaiting native-speaker review, and a visible notice that placeholder medical facts are not final.",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "The 'not final' notice is present (Home notice, Emergency notice). No native-speaker review notice exists in the file.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "The file includes a mobile viewport setting and a layout that adapts to narrow screens, so the menu, form and emergency information stay usable.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Viewport meta present. @media (max-width:720px) shows a menu button and collapsible nav. Mechanical check: overflow 0px at 360px and 1280px, no JS errors.",
+        "severity": "low"
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 15238,
+      "broken_in_page_links": [],
+      "external_resources": [],
+      "forms": 1,
+      "scripts": 1,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": false
+  },
+  {
+    "cycle": 2,
+    "version": 3,
+    "results": [
+      {
+        "criterion": "The site is one HTML file with its CSS and JavaScript inline or loaded from a CDN, needing no build step.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Mechanical check: one HTML file, 17,472 bytes, 1 script, 0 external resources.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The file contains navigable sections for Home, Book a Visit, Emergency, Doctors and Health Blog, all reachable from a navigation menu.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Nav links #home, #book, #emergency, #doctors and #blog all match section ids. Broken in-page links: none. Menu button works on narrow screens.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The Book a Visit section has a request form with fields for patient name, phone number, preferred date, department or doctor, and reason for visit, and visible text saying staff will confirm by phone or WhatsApp.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Form #visitForm has pname, phone, pdate, dept and reason. Visible text: 'Our staff will confirm your visit by phone or WhatsApp. Your visit is not booked until they do.'",
+        "severity": "low"
+      },
+      {
+        "criterion": "The form text makes no claim of instant or automatic confirmation, and the file has no live slot picker or backend call.",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "No fetch, XMLHttpRequest or slot picker in the script. The date field is free choice. Warning: the submit message 'Request received. Staff will contact you...' contradicts the visible 'Draft form... requests are not delivered' notice. A patient could believe staff received the request. The fix (8) is unfunded.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "Emergency information is visible from every view, either in the header or a persistent banner, and includes an emergency number shown as a marked placeholder.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Sticky header.site contains .emergency-bar with '[Emergency number]', a 'To be confirmed' tag and a link to #emergency.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The Doctors section has several profile cards, each with name, specialty and qualifications, every one shown as a marked placeholder.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "#doctors has 4 article.card.doc cards. Each has name, specialty and qualifications, each followed by a .tbc 'To be confirmed' tag. No real-looking names. Overflow 0px at 360px.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The Health Blog section lists posts, and at least one post opens or expands to its full text.",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "#blog contains only .stub: 'Health blog posts are added in a later step.' No posts and no expand control.",
+        "severity": "high"
+      },
+      {
+        "criterion": "A language switch offers English, Kannada and Hindi, and choosing one changes the text of every section, the booking form labels and every blog post, with the page language attribute updated.",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "No language control in the markup. The script has no translation logic. <html lang=\"en\"> is static.",
+        "severity": "high"
+      },
+      {
+        "criterion": "Each language view has complete translations: no section, form label, button or blog post is left in English in the Kannada or Hindi view, apart from proper names and marked placeholders.",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "No Kannada or Devanagari text anywhere in the file. All content is English only.",
+        "severity": "high"
+      },
+      {
+        "criterion": "Every placeholder carries the same visible 'to be confirmed' marking in all three languages, and the site shows a visible list of all placeholders still open.",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "The .tbc tag is consistent but English only. #open-items now lists emergency, booking and doctor items. It omits blog medical review and native-speaker review, which the charter names as open inputs.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "The site shows a visible notice that the Kannada and Hindi text is awaiting native-speaker review, and a visible notice that placeholder medical facts are not final.",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "The 'not final' notice is present on Home, Emergency and Doctors. No native-speaker review notice appears in the file.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "The file includes a mobile viewport setting and a layout that adapts to narrow screens, so the menu, form and emergency information stay usable.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Viewport meta present. @media (max-width:720px) shows a collapsible menu and a full-width submit button. Mechanical check: overflow 0px at 360px and 1280px, no JS errors.",
+        "severity": "low"
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 17472,
+      "broken_in_page_links": [],
+      "external_resources": [],
+      "forms": 1,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": false
+  }
+]

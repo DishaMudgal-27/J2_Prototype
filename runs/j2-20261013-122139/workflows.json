@@ -1,0 +1,1617 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "hero",
+    "name": "Hero and identity",
+    "covers": [
+      1
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The site shows the name Spark 2026, Northfield College of Engineering, Pune, and the dates 14 to 16 February 2027"
+    ],
+    "purpose": "Site v0 is empty, so no name, college, city or dates are shown.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 6,
+      "time_limit_minutes": 20,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 3,
+    "retries_used": 0,
+    "outputs": [
+      "section j2-hero"
+    ],
+    "completion_check": "Hero section exists and the page contains the name, college, city and dates.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-1.a1",
+        "goal": "The hero section shows Spark 2026, Northfield College of Engineering, Pune and 14 to 16 February 2027.",
+        "constraints": [
+          "Use only charter facts",
+          "Photo area is a placeholder block with class j2-photo-placeholder",
+          "Single file, no build step"
+        ],
+        "context": [
+          "charter item 1"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-1 Builder",
+          "steps": "Create section id j2-hero with an h1, a subtitle line for the college and city, a dates line, and a call-to-action link (class j2-btn) to #j2-register. Add one div with class j2-photo-placeholder."
+        },
+        "verification": [
+          {
+            "text": "Hero shows name, college, city and dates",
+            "type": "facts-present",
+            "target": [
+              "Spark 2026",
+              "Northfield College of Engineering",
+              "Pune",
+              "14 to 16 February 2027"
+            ],
+            "expect": true
+          },
+          {
+            "text": "Exactly one hero section",
+            "type": "element-count",
+            "target": "#j2-hero",
+            "expect": 1
+          },
+          {
+            "text": "Hero buttons are tappable",
+            "type": "tap-targets",
+            "target": "j2-hero",
+            "expect": 44
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-1.a1",
+            "check": "Hero shows name, college, city and dates",
+            "type": "facts-present",
+            "target": [
+              "Spark 2026",
+              "Northfield College of Engineering",
+              "Pune",
+              "14 to 16 February 2027"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 4 fact(s) on the page",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-13T12:30:06",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Exactly one hero section",
+            "type": "element-count",
+            "target": "#j2-hero",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#j2-hero', expected 1",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-13T12:30:06",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Hero buttons are tappable",
+            "type": "tap-targets",
+            "target": "j2-hero",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 2,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 2 tap target(s) in 'j2-hero' at least 44x44px at 360px",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-13T12:30:07",
+            "by": "code"
+          }
+        ],
+        "attempts": 3,
+        "status": "passed"
+      }
+    ],
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "usable section and head tags",
+    "style_guide": true,
+    "version": 3
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "schedule",
+    "name": "Day-by-day schedule",
+    "covers": [
+      2
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A day-by-day schedule (Day 1, Day 2, Day 3) lists all 8 events with start and end times: Code Sprint, Line Follower and AI in Daily Life on Day 1; Bug Hunt and Poster Jam on Day 2; Drone Dash, UI Duel and Startup Stories on Day 3"
+    ],
+    "purpose": "No schedule is on the page.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 6,
+      "time_limit_minutes": 20,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section j2-schedule"
+    ],
+    "completion_check": "3 day groups, 8 slots, all event names and times present.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-2.a1",
+        "goal": "The schedule lists Day 1, Day 2 and Day 3 with all 8 events and their times.",
+        "constraints": [
+          "Use only given times and days",
+          "Do not use class j2-card here"
+        ],
+        "context": [
+          "charter item 2"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-2 Builder",
+          "steps": "Create section id j2-schedule with 3 blocks of class j2-day (Day 1, Day 2, Day 3), each holding items of class j2-slot with event name and time range. Day 1: Code Sprint, Line Follower, AI in Daily Life. Day 2: Bug Hunt, Poster Jam. Day 3: Drone Dash, UI Duel, Startup Stories."
+        },
+        "verification": [
+          {
+            "text": "3 day groups",
+            "type": "element-count",
+            "target": ".j2-day",
+            "expect": 3
+          },
+          {
+            "text": "8 event slots",
+            "type": "element-count",
+            "target": ".j2-slot",
+            "expect": 8
+          },
+          {
+            "text": "All days, events and times present",
+            "type": "facts-present",
+            "target": [
+              "Day 1",
+              "Day 2",
+              "Day 3",
+              "Code Sprint",
+              "Bug Hunt",
+              "Line Follower",
+              "Drone Dash",
+              "Poster Jam",
+              "UI Duel",
+              "AI in Daily Life",
+              "Startup Stories",
+              "10am to 1pm",
+              "11am to 1pm",
+              "2pm to 5pm",
+              "2pm to 4pm",
+              "5:30pm to 6:30pm"
+            ],
+            "expect": true
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-2.a1",
+            "check": "3 day groups",
+            "type": "element-count",
+            "target": ".j2-day",
+            "expect": 3,
+            "actual": 3,
+            "pass": true,
+            "evidence": "3 element(s) match '.j2-day', expected 3",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:30:35",
+            "by": "code"
+          },
+          {
+            "atom": "W-2.a1",
+            "check": "8 event slots",
+            "type": "element-count",
+            "target": ".j2-slot",
+            "expect": 8,
+            "actual": 8,
+            "pass": true,
+            "evidence": "8 element(s) match '.j2-slot', expected 8",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:30:35",
+            "by": "code"
+          },
+          {
+            "atom": "W-2.a1",
+            "check": "All days, events and times present",
+            "type": "facts-present",
+            "target": [
+              "Day 1",
+              "Day 2",
+              "Day 3",
+              "Code Sprint",
+              "Bug Hunt",
+              "Line Follower",
+              "Drone Dash",
+              "Poster Jam",
+              "UI Duel",
+              "AI in Daily Life",
+              "Startup Stories",
+              "10am to 1pm",
+              "11am to 1pm",
+              "2pm to 5pm",
+              "2pm to 4pm",
+              "5:30pm to 6:30pm"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 16 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:30:35",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 4
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "events",
+    "name": "Events by category with prices",
+    "covers": [
+      3
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Events can be browsed by category (Coding, Robotics, Design, Talks), and each event shows its price: Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, Poster Jam free, UI Duel Rs 100, AI in Daily Life free, Startup Stories free"
+    ],
+    "purpose": "Events cannot be browsed by category and prices are not shown.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 8,
+      "time_limit_minutes": 30,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": false,
+    "calls_used": 0,
+    "retries_used": 0,
+    "outputs": [
+      "section j2-events"
+    ],
+    "completion_check": "8 cards, 4 filter buttons, all prices present.",
+    "dependencies": [],
+    "status": "held",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-3.a1",
+        "goal": "Visitors filter 8 event cards by category and see each event's price.",
+        "constraints": [
+          "Use only given prices and categories",
+          "Filter must show all cards by default",
+          "No JavaScript errors"
+        ],
+        "context": [
+          "charter item 3"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-3 Builder",
+          "steps": "Create section id j2-events with a filter bar of 4 buttons class j2-filter (Coding, Robotics, Design, Talks) plus an All button of class j2-filter-all, and a grid of 8 cards class j2-card with data-category, name, category label and price. Add JS that shows only cards of the chosen category."
+        },
+        "verification": [
+          {
+            "text": "8 event cards",
+            "type": "element-count",
+            "target": ".j2-card",
+            "expect": 8
+          },
+          {
+            "text": "4 category filter buttons",
+            "type": "element-count",
+            "target": ".j2-filter",
+            "expect": 4
+          },
+          {
+            "text": "Categories and prices present",
+            "type": "facts-present",
+            "target": [
+              "Coding",
+              "Robotics",
+              "Design",
+              "Talks",
+              "Rs 100",
+              "Rs 50",
+              "Rs 150",
+              "Rs 200",
+              "free"
+            ],
+            "expect": true
+          },
+          {
+            "text": "Filter controls are tappable",
+            "type": "tap-targets",
+            "target": "j2-events",
+            "expect": 44
+          }
+        ]
+      }
+    ],
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder"
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "register",
+    "name": "Registration form",
+    "covers": [
+      4
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A registration form asks for name, email, college and an event chosen from a dropdown listing all 8 events, and submitting it sends the details by email to spark2026@example.com"
+    ],
+    "purpose": "Students cannot sign up for an event.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 8,
+      "time_limit_minutes": 30,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": false,
+    "calls_used": 0,
+    "retries_used": 0,
+    "outputs": [
+      "section j2-register"
+    ],
+    "completion_check": "Form has 4 fields, 8 event options and a submit that emails spark2026@example.com.",
+    "dependencies": [],
+    "status": "held",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-4.a1",
+        "goal": "Submitting the form sends name, email, college and chosen event by email to spark2026@example.com.",
+        "constraints": [
+          "No invented backend",
+          "Use a mailto action built from the form values",
+          "Fields are required"
+        ],
+        "context": [
+          "charter item 4"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-4 Builder",
+          "steps": "Create section id j2-register with form class j2-form: required inputs for name, email, college, and a select with 8 option elements of class j2-event-option, one per event. Add a submit button (class j2-btn). On submit, JS opens a mailto: to spark2026@example.com with the details in the body, then shows a confirmation message."
+        },
+        "verification": [
+          {
+            "text": "Form has a submit",
+            "type": "named-test",
+            "target": "form-has-submit",
+            "expect": true
+          },
+          {
+            "text": "One form",
+            "type": "element-count",
+            "target": ".j2-form",
+            "expect": 1
+          },
+          {
+            "text": "Dropdown lists 8 events",
+            "type": "element-count",
+            "target": ".j2-event-option",
+            "expect": 8
+          },
+          {
+            "text": "Organiser email present",
+            "type": "facts-present",
+            "target": [
+              "spark2026@example.com"
+            ],
+            "expect": true
+          },
+          {
+            "text": "Form fields are tappable",
+            "type": "tap-targets",
+            "target": "j2-register",
+            "expect": 44
+          }
+        ]
+      }
+    ],
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder"
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "sponsors",
+    "name": "Sponsors",
+    "covers": [
+      5
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A sponsors section shows Nimbus Cloud, Orbit Labs and Pixel Press by name"
+    ],
+    "purpose": "Sponsors are not shown.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 6,
+      "time_limit_minutes": 20,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section j2-sponsors"
+    ],
+    "completion_check": "3 sponsor items with the right names.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-5.a1",
+        "goal": "The sponsors section shows Nimbus Cloud, Orbit Labs and Pixel Press by name only.",
+        "constraints": [
+          "No logos or images"
+        ],
+        "context": [
+          "charter item 5"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-5 Builder",
+          "steps": "Create section id j2-sponsors with 3 text items of class j2-sponsor."
+        },
+        "verification": [
+          {
+            "text": "3 sponsor items",
+            "type": "element-count",
+            "target": ".j2-sponsor",
+            "expect": 3
+          },
+          {
+            "text": "Sponsor names present",
+            "type": "facts-present",
+            "target": [
+              "Nimbus Cloud",
+              "Orbit Labs",
+              "Pixel Press"
+            ],
+            "expect": true
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-5.a1",
+            "check": "3 sponsor items",
+            "type": "element-count",
+            "target": ".j2-sponsor",
+            "expect": 3,
+            "actual": 3,
+            "pass": true,
+            "evidence": "3 element(s) match '.j2-sponsor', expected 3",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:31:00",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "Sponsor names present",
+            "type": "facts-present",
+            "target": [
+              "Nimbus Cloud",
+              "Orbit Labs",
+              "Pixel Press"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 3 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:31:00",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section",
+    "version": 5
+  },
+  {
+    "id": "W-6",
+    "proposal_id": "venue",
+    "name": "Venue",
+    "covers": [
+      6
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A venue section shows Northfield College of Engineering, 22 University Road, Pune 411007, with a link to open it in maps"
+    ],
+    "purpose": "Students cannot find the venue.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 6,
+      "time_limit_minutes": 20,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": false,
+    "calls_used": 0,
+    "retries_used": 0,
+    "outputs": [
+      "section j2-venue"
+    ],
+    "completion_check": "Address present and one maps link.",
+    "dependencies": [],
+    "status": "held",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-6.a1",
+        "goal": "The venue section shows the college address and a link that opens it in maps.",
+        "constraints": [
+          "Maps link is a search URL built from the address"
+        ],
+        "context": [
+          "charter item 6"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-6 Builder",
+          "steps": "Create section id j2-venue with the college name and address, and one link of class j2-map-link (also j2-btn) to a Google Maps search URL for the address, opening in a new tab."
+        },
+        "verification": [
+          {
+            "text": "Address present",
+            "type": "facts-present",
+            "target": [
+              "Northfield College of Engineering",
+              "22 University Road, Pune 411007"
+            ],
+            "expect": true
+          },
+          {
+            "text": "One maps link",
+            "type": "element-count",
+            "target": ".j2-map-link",
+            "expect": 1
+          },
+          {
+            "text": "Venue link is tappable",
+            "type": "tap-targets",
+            "target": "j2-venue",
+            "expect": 44
+          }
+        ]
+      }
+    ],
+    "section": "W-6",
+    "revises": null,
+    "agent": "W-6 Builder"
+  },
+  {
+    "id": "W-7",
+    "proposal_id": "contact",
+    "name": "Contact on WhatsApp",
+    "covers": [
+      7
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A WhatsApp link opens a chat with +91 00000 33333, and the email spark2026@example.com is also shown"
+    ],
+    "purpose": "No way to contact the organisers.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 6,
+      "time_limit_minutes": 20,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": false,
+    "calls_used": 0,
+    "retries_used": 0,
+    "outputs": [
+      "section j2-contact"
+    ],
+    "completion_check": "WhatsApp link, number and email present.",
+    "dependencies": [],
+    "status": "held",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-7.a1",
+        "goal": "A WhatsApp link opens a chat with +91 00000 33333 and spark2026@example.com is shown.",
+        "constraints": [
+          "Link uses wa.me with digits 910000033333"
+        ],
+        "context": [
+          "charter item 7"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-7 Builder",
+          "steps": "Create section id j2-contact with one link of class j2-whatsapp (also j2-btn) to https://wa.me/910000033333, the number as text, and the email as a mailto link."
+        },
+        "verification": [
+          {
+            "text": "Number and email present",
+            "type": "facts-present",
+            "target": [
+              "+91 00000 33333",
+              "spark2026@example.com"
+            ],
+            "expect": true
+          },
+          {
+            "text": "One WhatsApp link",
+            "type": "element-count",
+            "target": ".j2-whatsapp",
+            "expect": 1
+          },
+          {
+            "text": "Contact links are tappable",
+            "type": "tap-targets",
+            "target": "j2-contact",
+            "expect": 44
+          }
+        ]
+      }
+    ],
+    "section": "W-7",
+    "revises": null,
+    "agent": "W-7 Builder"
+  },
+  {
+    "id": "W-8",
+    "proposal_id": "base",
+    "name": "Base style, nav and responsiveness",
+    "covers": [
+      8,
+      9
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The page has no horizontal overflow at 360px and 1280px widths",
+      "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+    ],
+    "purpose": "No shared look, navigation or overflow protection, so the page can break at 360px and 1280px or have dead links.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 8,
+      "time_limit_minutes": 30,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row or overflow remains at 360px after the second retry"
+    },
+    "charged": false,
+    "calls_used": 0,
+    "retries_used": 0,
+    "outputs": [
+      "section j2-base"
+    ],
+    "completion_check": "Page parses, nav links resolve, nav controls are 44px.",
+    "dependencies": [
+      "hero",
+      "schedule",
+      "events",
+      "register",
+      "sponsors",
+      "venue",
+      "contact"
+    ],
+    "status": "held",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-8.a1",
+        "goal": "The page has a mobile-first modern theme and a nav, with no horizontal overflow at 360px and 1280px and no dead in-page links.",
+        "constraints": [
+          "Define j2-btn and j2-card styles",
+          "box-sizing border-box, max-width 100%, no fixed widths over 100vw",
+          "Viewport meta present",
+          "No JavaScript errors"
+        ],
+        "context": [
+          "charter items 8 and 9",
+          "sections j2-hero, j2-schedule, j2-events, j2-register, j2-sponsors, j2-venue, j2-contact"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-8 Builder",
+          "steps": "Create section id j2-base holding the shared CSS and a nav with id j2-nav linking to #j2-schedule, #j2-events, #j2-register, #j2-sponsors, #j2-venue and #j2-contact. Add vibrant gradient theme, responsive grids, and overflow-x protection."
+        },
+        "verification": [
+          {
+            "text": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true
+          },
+          {
+            "text": "All in-page links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true
+          },
+          {
+            "text": "One nav",
+            "type": "element-count",
+            "target": "#j2-nav",
+            "expect": 1
+          },
+          {
+            "text": "Nav links are tappable",
+            "type": "tap-targets",
+            "target": "j2-nav",
+            "expect": 44
+          }
+        ]
+      }
+    ],
+    "section": "W-8",
+    "revises": null,
+    "agent": "W-8 Builder"
+  },
+  {
+    "id": "W-9",
+    "proposal_id": "events",
+    "name": "Events by category with prices",
+    "covers": [
+      3
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Events can be browsed by category (Coding, Robotics, Design, Talks), and each event shows its price: Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, Poster Jam free, UI Duel Rs 100, AI in Daily Life free, Startup Stories free"
+    ],
+    "purpose": "Events cannot be browsed by category and prices are not shown.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 8,
+      "time_limit_minutes": 30,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section j2-events"
+    ],
+    "completion_check": "8 cards, 4 filter buttons, all prices present, filter controls at least 44px.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-9.a1",
+        "goal": "Visitors filter 8 event cards by category and see each event's price.",
+        "constraints": [
+          "Use only given prices and categories",
+          "Filter must show all cards by default",
+          "No JavaScript errors"
+        ],
+        "context": [
+          "charter item 3"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-3 Builder",
+          "steps": "Create section id j2-events with a filter bar of 4 buttons class j2-filter (Coding, Robotics, Design, Talks) plus an All button of class j2-filter-all, and a grid of 8 cards class j2-card with data-category, name, category label and price. Add JS that shows only cards of the chosen category."
+        },
+        "verification": [
+          {
+            "text": "8 event cards",
+            "type": "element-count",
+            "target": ".j2-card",
+            "expect": 8
+          },
+          {
+            "text": "4 category filter buttons",
+            "type": "element-count",
+            "target": ".j2-filter",
+            "expect": 4
+          },
+          {
+            "text": "Categories and prices present",
+            "type": "facts-present",
+            "target": [
+              "Coding",
+              "Robotics",
+              "Design",
+              "Talks",
+              "Code Sprint",
+              "Bug Hunt",
+              "Line Follower",
+              "Drone Dash",
+              "Poster Jam",
+              "UI Duel",
+              "AI in Daily Life",
+              "Startup Stories",
+              "Rs 100",
+              "Rs 50",
+              "Rs 150",
+              "Rs 200",
+              "free"
+            ],
+            "expect": true
+          },
+          {
+            "text": "Filter controls are tappable",
+            "type": "tap-targets",
+            "target": "#j2-events",
+            "expect": 44
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-9.a1",
+            "check": "8 event cards",
+            "type": "element-count",
+            "target": ".j2-card",
+            "expect": 8,
+            "actual": 8,
+            "pass": true,
+            "evidence": "8 element(s) match '.j2-card', expected 8",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:32:35",
+            "by": "code"
+          },
+          {
+            "atom": "W-9.a1",
+            "check": "4 category filter buttons",
+            "type": "element-count",
+            "target": ".j2-filter",
+            "expect": 4,
+            "actual": 4,
+            "pass": true,
+            "evidence": "4 element(s) match '.j2-filter', expected 4",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:32:35",
+            "by": "code"
+          },
+          {
+            "atom": "W-9.a1",
+            "check": "Categories and prices present",
+            "type": "facts-present",
+            "target": [
+              "Coding",
+              "Robotics",
+              "Design",
+              "Talks",
+              "Code Sprint",
+              "Bug Hunt",
+              "Line Follower",
+              "Drone Dash",
+              "Poster Jam",
+              "UI Duel",
+              "AI in Daily Life",
+              "Startup Stories",
+              "Rs 100",
+              "Rs 50",
+              "Rs 150",
+              "Rs 200",
+              "free"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 17 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:32:35",
+            "by": "code"
+          },
+          {
+            "atom": "W-9.a1",
+            "check": "Filter controls are tappable",
+            "type": "tap-targets",
+            "target": "#j2-events",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 6,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 6 tap target(s) in '#j2-events' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:32:38",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-9",
+    "revises": null,
+    "agent": "W-9 Builder",
+    "last_check": "usable section",
+    "version": 6
+  },
+  {
+    "id": "W-10",
+    "proposal_id": "register",
+    "name": "Registration form",
+    "covers": [
+      4
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A registration form asks for name, email, college and an event chosen from a dropdown listing all 8 events, and submitting it sends the details by email to spark2026@example.com"
+    ],
+    "purpose": "Students cannot sign up for an event.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 8,
+      "time_limit_minutes": 30,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section j2-register"
+    ],
+    "completion_check": "Form has 4 fields, 8 event options, a submit, and emails spark2026@example.com.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-10.a1",
+        "goal": "Submitting the form sends name, email, college and chosen event by email to spark2026@example.com.",
+        "constraints": [
+          "No invented backend",
+          "Use a mailto action built from the form values",
+          "Fields are required"
+        ],
+        "context": [
+          "charter item 4"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-4 Builder",
+          "steps": "Create section id j2-register with form class j2-form: required inputs for name, email, college, and a select with 8 option elements of class j2-event-option, one per event. Add a submit button (class j2-btn). On submit, JS opens a mailto: to spark2026@example.com with the details in the body, then shows a confirmation message."
+        },
+        "verification": [
+          {
+            "text": "Form has a submit",
+            "type": "named-test",
+            "target": "form-has-submit",
+            "expect": true
+          },
+          {
+            "text": "One form",
+            "type": "element-count",
+            "target": ".j2-form",
+            "expect": 1
+          },
+          {
+            "text": "Dropdown lists 8 events",
+            "type": "element-count",
+            "target": ".j2-event-option",
+            "expect": 8
+          },
+          {
+            "text": "Organiser email present",
+            "type": "facts-present",
+            "target": [
+              "spark2026@example.com"
+            ],
+            "expect": true
+          },
+          {
+            "text": "Form fields are tappable",
+            "type": "tap-targets",
+            "target": "#j2-register",
+            "expect": 44
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-10.a1",
+            "check": "Form has a submit",
+            "type": "named-test",
+            "target": "form-has-submit",
+            "expect": true,
+            "actual": [
+              1
+            ],
+            "pass": true,
+            "evidence": "1 form(s), each with a submit control",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:33:10",
+            "by": "code"
+          },
+          {
+            "atom": "W-10.a1",
+            "check": "One form",
+            "type": "element-count",
+            "target": ".j2-form",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '.j2-form', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:33:10",
+            "by": "code"
+          },
+          {
+            "atom": "W-10.a1",
+            "check": "Dropdown lists 8 events",
+            "type": "element-count",
+            "target": ".j2-event-option",
+            "expect": 8,
+            "actual": 8,
+            "pass": true,
+            "evidence": "8 element(s) match '.j2-event-option', expected 8",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:33:10",
+            "by": "code"
+          },
+          {
+            "atom": "W-10.a1",
+            "check": "Organiser email present",
+            "type": "facts-present",
+            "target": [
+              "spark2026@example.com"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 1 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:33:10",
+            "by": "code"
+          },
+          {
+            "atom": "W-10.a1",
+            "check": "Form fields are tappable",
+            "type": "tap-targets",
+            "target": "#j2-register",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 5,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 5 tap target(s) in '#j2-register' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:33:12",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-10",
+    "revises": null,
+    "agent": "W-10 Builder",
+    "last_check": "usable section",
+    "version": 7
+  },
+  {
+    "id": "W-11",
+    "proposal_id": "venue",
+    "name": "Venue",
+    "covers": [
+      6
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A venue section shows Northfield College of Engineering, 22 University Road, Pune 411007, with a link to open it in maps"
+    ],
+    "purpose": "Students cannot find the venue.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 6,
+      "time_limit_minutes": 20,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section j2-venue"
+    ],
+    "completion_check": "Address present and one maps link at least 44px.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-11.a1",
+        "goal": "The venue section shows the college address and a link that opens it in maps.",
+        "constraints": [
+          "Maps link is a search URL built from the address"
+        ],
+        "context": [
+          "charter item 6"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-6 Builder",
+          "steps": "Create section id j2-venue with the college name and address, and one link of class j2-map-link (also j2-btn) to a Google Maps search URL for the address, opening in a new tab."
+        },
+        "verification": [
+          {
+            "text": "Address present",
+            "type": "facts-present",
+            "target": [
+              "Northfield College of Engineering",
+              "22 University Road, Pune 411007"
+            ],
+            "expect": true
+          },
+          {
+            "text": "One maps link",
+            "type": "element-count",
+            "target": ".j2-map-link",
+            "expect": 1
+          },
+          {
+            "text": "Venue link is tappable",
+            "type": "tap-targets",
+            "target": "#j2-venue",
+            "expect": 44
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-11.a1",
+            "check": "Address present",
+            "type": "facts-present",
+            "target": [
+              "Northfield College of Engineering",
+              "22 University Road, Pune 411007"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 2 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:33:32",
+            "by": "code"
+          },
+          {
+            "atom": "W-11.a1",
+            "check": "One maps link",
+            "type": "element-count",
+            "target": ".j2-map-link",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '.j2-map-link', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:33:32",
+            "by": "code"
+          },
+          {
+            "atom": "W-11.a1",
+            "check": "Venue link is tappable",
+            "type": "tap-targets",
+            "target": "#j2-venue",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 1,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 1 tap target(s) in '#j2-venue' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:33:33",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-11",
+    "revises": null,
+    "agent": "W-11 Builder",
+    "last_check": "usable section",
+    "version": 8
+  },
+  {
+    "id": "W-12",
+    "proposal_id": "contact",
+    "name": "Contact on WhatsApp",
+    "covers": [
+      7
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A WhatsApp link opens a chat with +91 00000 33333, and the email spark2026@example.com is also shown"
+    ],
+    "purpose": "No way to contact the organisers.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 6,
+      "time_limit_minutes": 20,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section j2-contact"
+    ],
+    "completion_check": "WhatsApp link, number and email present, links at least 44px.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-12.a1",
+        "goal": "A WhatsApp link opens a chat with +91 00000 33333 and spark2026@example.com is shown.",
+        "constraints": [
+          "Link uses wa.me with digits 910000033333"
+        ],
+        "context": [
+          "charter item 7"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-7 Builder",
+          "steps": "Create section id j2-contact with one link of class j2-whatsapp (also j2-btn) to https://wa.me/910000033333, the number as text, and the email as a mailto link."
+        },
+        "verification": [
+          {
+            "text": "Number and email present",
+            "type": "facts-present",
+            "target": [
+              "+91 00000 33333",
+              "spark2026@example.com"
+            ],
+            "expect": true
+          },
+          {
+            "text": "One WhatsApp link",
+            "type": "element-count",
+            "target": ".j2-whatsapp",
+            "expect": 1
+          },
+          {
+            "text": "Contact links are tappable",
+            "type": "tap-targets",
+            "target": "#j2-contact",
+            "expect": 44
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-12.a1",
+            "check": "Number and email present",
+            "type": "facts-present",
+            "target": [
+              "+91 00000 33333",
+              "spark2026@example.com"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 2 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:33:56",
+            "by": "code"
+          },
+          {
+            "atom": "W-12.a1",
+            "check": "One WhatsApp link",
+            "type": "element-count",
+            "target": ".j2-whatsapp",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '.j2-whatsapp', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:33:56",
+            "by": "code"
+          },
+          {
+            "atom": "W-12.a1",
+            "check": "Contact links are tappable",
+            "type": "tap-targets",
+            "target": "#j2-contact",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 2,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 2 tap target(s) in '#j2-contact' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:33:57",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-12",
+    "revises": null,
+    "agent": "W-12 Builder",
+    "last_check": "usable section",
+    "version": 9
+  },
+  {
+    "id": "W-13",
+    "proposal_id": "base",
+    "name": "Base style, nav and responsiveness",
+    "covers": [
+      8,
+      9
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The page has no horizontal overflow at 360px and 1280px widths",
+      "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+    ],
+    "purpose": "No shared look, navigation or overflow protection, so the page can break at 360px and 1280px or have dead links.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 8,
+      "time_limit_minutes": 30,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row or overflow remains at 360px after the second retry"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section j2-base"
+    ],
+    "completion_check": "Page parses, nav links resolve, nav controls are at least 44px.",
+    "dependencies": [
+      "hero",
+      "schedule",
+      "events",
+      "register",
+      "sponsors",
+      "venue",
+      "contact"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-13.a1",
+        "goal": "The page has a mobile-first modern theme and a nav, with no horizontal overflow at 360px and 1280px and no dead in-page links.",
+        "constraints": [
+          "Define j2-btn and j2-card styles",
+          "box-sizing border-box, max-width 100%, no fixed widths over 100vw",
+          "Viewport meta present",
+          "No JavaScript errors"
+        ],
+        "context": [
+          "charter items 8 and 9",
+          "sections j2-hero, j2-schedule, j2-events, j2-register, j2-sponsors, j2-venue, j2-contact"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-8 Builder",
+          "steps": "Create section id j2-base holding the shared CSS and a nav with id j2-nav linking to #j2-schedule, #j2-events, #j2-register, #j2-sponsors, #j2-venue and #j2-contact. Add vibrant gradient theme, responsive grids, and overflow-x protection."
+        },
+        "verification": [
+          {
+            "text": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true
+          },
+          {
+            "text": "All in-page links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true
+          },
+          {
+            "text": "One nav",
+            "type": "element-count",
+            "target": "#j2-nav",
+            "expect": 1
+          },
+          {
+            "text": "Nav links are tappable",
+            "type": "tap-targets",
+            "target": "#j2-nav",
+            "expect": 44
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-13.a1",
+            "check": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true,
+            "actual": {
+              "body": true,
+              "unbalanced": []
+            },
+            "pass": true,
+            "evidence": "page parses, tags balanced",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:34:33",
+            "by": "code"
+          },
+          {
+            "atom": "W-13.a1",
+            "check": "All in-page links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true,
+            "actual": [],
+            "pass": true,
+            "evidence": "every in-page link resolves",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:34:33",
+            "by": "code"
+          },
+          {
+            "atom": "W-13.a1",
+            "check": "One nav",
+            "type": "element-count",
+            "target": "#j2-nav",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#j2-nav', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:34:33",
+            "by": "code"
+          },
+          {
+            "atom": "W-13.a1",
+            "check": "Nav links are tappable",
+            "type": "tap-targets",
+            "target": "#j2-nav",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 7,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 7 tap target(s) in '#j2-nav' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T12:34:34",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-13",
+    "revises": null,
+    "agent": "W-13 Builder",
+    "last_check": "usable section and head tags",
+    "version": 10
+  }
+]

@@ -1,0 +1,114 @@
+[
+  {
+    "cycle": 1,
+    "version": 1,
+    "results": [
+      {
+        "criterion": "1. Single HTML file that opens and works with no build step",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Read the code directly. One HTML document with inline style and script. No external src/href resources, no imports, no CDN. The submit handler and date-min logic run without any build.",
+        "severity": "low"
+      },
+      {
+        "criterion": "2. 'Request a visit' form (name, phone, department, preferred date/time) shows a confirmation that the hospital will call to confirm",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Form has exactly 4 inputs: #name, #phone, #dept, #when. On valid submit, #confirm shows: 'The hospital will call you to confirm... No appointment is held or booked until the hospital confirms with you by phone.' No availability is shown. Code-read only, not run in a browser. Validation logic (past-time check by string compare of datetime-local values) is consistent.",
+        "severity": "low"
+      },
+      {
+        "criterion": "3. No symptoms or history, nothing stored or sent, short privacy notice visible",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "Searched the script: no fetch, XMLHttpRequest, sendBeacon, localStorage, sessionStorage or document.cookie. The form has no action attribute, and submit calls preventDefault and form.reset(). No symptom or history field exists. The privacy notice sits inside the form, so it is visible before submit. Warning: it is hidden together with the form after submit, and the confirmation does not repeat it. Not a standards breach.",
+        "severity": "low"
+      },
+      {
+        "criterion": "4. Emergency section shows 112 (general) and 108 (ambulance), and Audit has verified both",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "Presence confirmed: #emergency shows 112 'General emergency' and 108 'Ambulance' in large type with tel: links, repeated in the top banner and in the confirmation message. Verification is from my own background knowledge (112 as India's single emergency number, 108 as the public ambulance number in Karnataka), not from a source in the run record. This is unverified against a cited source. A source (government or Karnataka health department page) should be attached before launch.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "5. CityCare phone, address and ER hours are clearly marked placeholders or Requester-confirmed",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "All six CityCare-specific values (ER phone, ER hours, ER entrance, address, main phone, OPD hours) use the .ph class with a visible 'PLACEHOLDER:' prefix and bracketed 'to be confirmed' text. The demo banner and footer repeat this. The only phone-like string is the input format hint '98450 00000', which is an example and not presented as a CityCare number. The department list is labelled 'sample list, to be confirmed by CityCare'.",
+        "severity": "low"
+      },
+      {
+        "criterion": "6. Before launch, Requester has confirmed real phone numbers, address and ER hours and the site shows them",
+        "verdict": "BLOCKED_BY_EVIDENCE",
+        "pass": false,
+        "note": "Chat has no Requester confirmation of any CityCare detail; requester_feedback is null. The site still shows placeholders only. This is a launch blocker, not a build defect. It is not closable by Adaptation.",
+        "severity": "high"
+      },
+      {
+        "criterion": "7. Audit has checked the site against standards and rules and found no open material defect",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "Checked against all charter standards and rules: demo banner present, no symptoms or history asked, no invented facts, confirmation wording safe, emergency section prominent with a 'call first, do not fill in a form' line. No material defect found in the file. Closure still depends on items 4 (source for 112/108) and 6 (Requester details). Also noted: Builder reported no spend figure, so the 8-unit cost is unmeasured.",
+        "severity": "medium"
+      }
+    ],
+    "all_pass": false
+  },
+  {
+    "cycle": 2,
+    "version": 1,
+    "results": [
+      {
+        "criterion": "1. The site is a single HTML file that opens and works with no build step.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Read the code: one HTML document with inline style and script, no external src or href resources, no imports. Not run in a browser.",
+        "severity": "low"
+      },
+      {
+        "criterion": "2. 'Request a visit' form (name, phone, department, preferred date/time) shows a confirmation that the hospital will call to confirm.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Exactly 4 inputs: #name, #phone, #dept, #when. The #confirm text reads 'The hospital will call you to confirm... No appointment is held or booked until the hospital confirms with you by phone.' No availability is shown. Code-read only, not executed.",
+        "severity": "low"
+      },
+      {
+        "criterion": "3. No symptoms or history collected, nothing stored or sent, short privacy notice visible.",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "The script has no fetch, XMLHttpRequest, sendBeacon, localStorage, sessionStorage or document.cookie. Submit calls preventDefault and form.reset(). The privacy notice is inside the form and visible before submit, but it is hidden with the form after submit. Warning: the form has no action or method, so if JavaScript failed to load, a native submit would be a GET to the same page and append name and phone to the URL. The values would not go to a server, but they would sit in the address bar and history. A durable fix is method=post with a no-op handler or a JS-only form. Not a standards breach.",
+        "severity": "low"
+      },
+      {
+        "criterion": "4. Emergency section shows 112 (general) and 108 (ambulance), and Audit has verified both.",
+        "verdict": "BLOCKED_BY_EVIDENCE",
+        "pass": false,
+        "note": "Presence confirmed: #emergency shows 112 'General emergency' and 108 'Ambulance' in large type with tel: links, repeated in the top banner and the confirmation. Verification is missing: the run record has no cited source, and I have no source access in this turn. My recollection that 112 is India's single emergency number and 108 is the public ambulance number in Karnataka is unverified and not accepted as evidence.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "5. All CityCare-specific details (phone, address, ER hours) are clearly marked placeholders or Requester-confirmed.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "All six values (ER phone, ER hours, ER entrance, address, main phone, OPD hours) use the .ph class, which adds a visible 'PLACEHOLDER:' prefix, plus bracketed '[..., to be confirmed]' text. The demo banner and footer repeat this. The Requester accepted placeholders for now. The only phone-like string is the input hint '98450 00000', an example format. The wording is 'to be confirmed' rather than the Requester's 'Hospital to confirm', which is equivalent in meaning.",
+        "severity": "low"
+      },
+      {
+        "criterion": "6. Before launch, the Requester has confirmed the real phone numbers, address and ER hours, and the site shows them.",
+        "verdict": "BLOCKED_BY_EVIDENCE",
+        "pass": false,
+        "note": "The Requester said they do not yet have the real emergency line or address. The site shows placeholders only. This is a launch blocker, not a build defect. Adaptation cannot close it. Questions 4 (departments) and 5 (banner) went unanswered.",
+        "severity": "high"
+      },
+      {
+        "criterion": "7. Audit has checked the site against these standards and rules and found no open material defect.",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "Checked against all charter standards and rules. Demo banner and form banner are present. No symptoms or history are asked. There are no invented CityCare facts. The confirmation never implies a held appointment. The emergency section says 'call first, do not fill in a form'. No material defect in the file. Closure still depends on items 4 and 6. The 8-unit build cost is unmeasured because Builder reported no figure. Checks were by code reading, not in a browser.",
+        "severity": "medium"
+      }
+    ],
+    "all_pass": false
+  }
+]

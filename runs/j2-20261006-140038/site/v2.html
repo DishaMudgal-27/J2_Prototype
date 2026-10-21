@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Coffee in Indiranagar, Bengaluru</title>
+<meta name="description" content="Brew Lab, Indiranagar, Bengaluru: menu, prices, opening hours, location and pre-order for pickup.">
+<style>
+:root{--bg:#faf6f0;--ink:#2a1d14;--muted:#6b5a4d;--accent:#7a4a21;--line:#e4d9cc;--card:#fff;--err:#a11a1a}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+header{background:var(--accent);color:#fff;padding:28px 16px 20px;text-align:center}
+header h1{margin:0;font-size:2rem;letter-spacing:.02em}
+header p{margin:6px 0 0;opacity:.9}
+nav{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:12px 16px;background:#fff;border-bottom:1px solid var(--line)}
+nav a{color:var(--accent);text-decoration:none;font-weight:600;padding:10px 14px;border:1px solid var(--line);border-radius:8px;min-height:44px;display:inline-flex;align-items:center}
+main{max-width:640px;margin:0 auto;padding:8px 16px 32px}
+section{padding:24px 0 8px}
+h2{margin:0 0 12px;font-size:1.4rem;color:var(--accent)}
+h3{margin:18px 0 6px;font-size:1.05rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:4px 14px}
+ul.menu{list-style:none;margin:0;padding:0}
+ul.menu li{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+ul.menu li:last-child{border-bottom:0}
+.price{white-space:nowrap;font-weight:600}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:10px 0;border-bottom:1px solid var(--line)}
+tr:last-child th,tr:last-child td{border-bottom:0}
+th{font-weight:600;width:40%}
+.ph{background:#fff3c4;color:#6a4b00;border-radius:4px;padding:1px 6px;font-size:.85em;font-weight:600}
+.note{color:var(--muted);font-size:.9rem;margin:8px 0 0}
+a.btn,button.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;margin-top:8px;padding:0 18px;background:var(--accent);color:#fff;text-decoration:none;border:0;border-radius:8px;font:inherit;font-weight:600;cursor:pointer}
+form.order{padding:10px 0 14px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.row label{flex:1}
+.row input[type=number]{width:72px}
+.field{padding:12px 0 0}
+.field label{display:block;font-weight:600;margin-bottom:4px}
+input[type=text],input[type=time],input[type=number]{font:inherit;font-size:16px;min-height:44px;padding:6px 10px;border:1px solid #bda893;border-radius:8px;background:#fff;color:var(--ink)}
+input[type=text],input[type=time]{width:100%}
+.err{color:var(--err);font-weight:600;margin:10px 0 0;min-height:1.2em}
+.result{margin-top:12px;padding:12px 14px;background:#fff;border:1px solid var(--line);border-radius:10px}
+.result pre{white-space:pre-wrap;word-break:break-word;margin:8px 0 0;font:inherit}
+.result[hidden]{display:none}
+footer{text-align:center;color:var(--muted);font-size:.85rem;padding:16px;border-top:1px solid var(--line)}
+@media (min-width:600px){body{font-size:18px}header h1{font-size:2.4rem}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Brew Lab</h1>
+  <p>Coffee in Indiranagar, Bengaluru</p>
+</header>
+<nav aria-label="Page sections">
+  <a href="#menu">Menu</a>
+  <a href="#preorder">Pre-order</a>
+  <a href="#hours">Hours</a>
+  <a href="#location">Location</a>
+</nav>
+<main>
+  <section id="menu">
+    <h2>Menu</h2>
+    <div class="card">
+      <ul class="menu">
+        <li data-item="item-1" data-price=""><span>Menu item 1 <span class="ph">[PLACEHOLDER] name</span></span><span class="price"><span class="ph">[PLACEHOLDER] price</span></span></li>
+        <li data-item="item-2" data-price=""><span>Menu item 2 <span class="ph">[PLACEHOLDER] name</span></span><span class="price"><span class="ph">[PLACEHOLDER] price</span></span></li>
+        <li data-item="item-3" data-price=""><span>Menu item 3 <span class="ph">[PLACEHOLDER] name</span></span><span class="price"><span class="ph">[PLACEHOLDER] price</span></span></li>
+        <li data-item="item-4" data-price=""><span>Menu item 4 <span class="ph">[PLACEHOLDER] name</span></span><span class="price"><span class="ph">[PLACEHOLDER] price</span></span></li>
+      </ul>
+    </div>
+    <p class="note"><span class="ph">[PLACEHOLDER]</span> Brew Lab has not yet supplied its menu items or prices. These rows will be replaced with the real menu.</p>
+  </section>
+
+  <section id="preorder">
+    <h2>Pre-order for pickup</h2>
+    <p class="note" style="margin-top:0">Choose your items, add your name and a pickup time. Nothing is sent until you tap the button.</p>
+    <div class="card">
+      <form class="order" id="order-form" novalidate>
+        <!-- Keep these rows in step with the Menu section above. -->
+        <div class="row"><label for="q-item-1">Menu item 1 <span class="ph">[PLACEHOLDER] name</span></label><input type="number" id="q-item-1" name="item-1" data-label="Menu item 1" min="0" max="9" value="0" inputmode="numeric"></div>
+        <div class="row"><label for="q-item-2">Menu item 2 <span class="ph">[PLACEHOLDER] name</span></label><input type="number" id="q-item-2" name="item-2" data-label="Menu item 2" min="0" max="9" value="0" inputmode="numeric"></div>
+        <div class="row"><label for="q-item-3">Menu item 3 <span class="ph">[PLACEHOLDER] name</span></label><input type="number" id="q-item-3" name="item-3" data-label="Menu item 3" min="0" max="9" value="0" inputmode="numeric"></div>
+        <div class="row"><label for="q-item-4">Menu item 4 <span class="ph">[PLACEHOLDER] name</span></label><input type="number" id="q-item-4" name="item-4" data-label="Menu item 4" min="0" max="9" value="0" inputmode="numeric"></div>
+        <div class="field">
+          <label for="p-name">Your name</label>
+          <input type="text" id="p-name" name="name" autocomplete="name" required>
+        </div>
+        <div class="field">
+          <label for="p-time">Pickup time</label>
+          <input type="time" id="p-time" name="time" required>
+        </div>
+        <p class="err" id="order-err" role="alert" aria-live="assertive"></p>
+        <button class="btn" type="submit">Send pre-order</button>
+      </form>
+    </div>
+    <div class="result" id="order-result" hidden aria-live="polite"></div>
+    <p class="note"><span class="ph">[PLACEHOLDER]</span> Order destination: <span class="ph">[PLACEHOLDER] WhatsApp or phone number that receives orders</span>. Pickup time rules (earliest slot, lead time, last order): <span class="ph">[PLACEHOLDER]</span>. Until the destination is supplied, the button only shows your order summary on this page and sends nothing.</p>
+  </section>
+
+  <section id="hours">
+    <h2>Opening hours</h2>
+    <div class="card">
+      <table>
+        <tbody>
+          <tr><th scope="row">Monday</th><td><span class="ph">[PLACEHOLDER] hours</span></td></tr>
+          <tr><th scope="row">Tuesday</th><td><span class="ph">[PLACEHOLDER] hours</span></td></tr>
+          <tr><th scope="row">Wednesday</th><td><span class="ph">[PLACEHOLDER] hours</span></td></tr>
+          <tr><th scope="row">Thursday</th><td><span class="ph">[PLACEHOLDER] hours</span></td></tr>
+          <tr><th scope="row">Friday</th><td><span class="ph">[PLACEHOLDER] hours</span></td></tr>
+          <tr><th scope="row">Saturday</th><td><span class="ph">[PLACEHOLDER] hours</span></td></tr>
+          <tr><th scope="row">Sunday</th><td><span class="ph">[PLACEHOLDER] hours</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note"><span class="ph">[PLACEHOLDER]</span> Real opening hours have not been supplied yet.</p>
+  </section>
+
+  <section id="location">
+    <h2>Location</h2>
+    <div class="card">
+      <h3>Brew Lab, Indiranagar, Bengaluru</h3>
+      <p>Street address: <span class="ph">[PLACEHOLDER] street address and pin code</span></p>
+      <p>Phone: <span class="ph">[PLACEHOLDER] contact phone number</span></p>
+    </div>
+    <a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Brew+Lab+Indiranagar+Bengaluru" target="_blank" rel="noopener">Get directions</a>
+    <p class="note"><span class="ph">[PLACEHOLDER]</span> This link is a general search for Indiranagar, Bengaluru. It will be replaced with the exact map link once the address is supplied.</p>
+  </section>
+</main>
+<footer>Brew Lab, Indiranagar, Bengaluru</footer>
+<script>
+(function(){
+  // Digits only, with country code (for example 91XXXXXXXXXX). Empty until Brew Lab supplies it.
+  var ORDER_DEST = "";
+  var form = document.getElementById("order-form");
+  var err = document.getElementById("order-err");
+  var out = document.getElementById("order-result");
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    err.textContent = "";
+    out.hidden = true;
+    var name = form.elements.name.value.trim();
+    var time = form.elements.time.value;
+    var lines = [];
+    var qtys = form.querySelectorAll("input[type=number]");
+    for (var i = 0; i < qtys.length; i++) {
+      var q = parseInt(qtys[i].value, 10);
+      if (q > 0) lines.push(q + " x " + qtys[i].getAttribute("data-label"));
+    }
+    var msg = "";
+    if (!name) msg = "Please enter your name.";
+    else if (!time) msg = "Please choose a pickup time.";
+    else if (!lines.length) msg = "Please choose at least one item.";
+    if (msg) {
+      err.textContent = msg;
+      var bad = !name ? form.elements.name : (!time ? form.elements.time : qtys[0]);
+      bad.focus();
+      return;
+    }
+    var text = "Brew Lab pickup order\nName: " + name + "\nPickup time: " + time + "\n" + lines.join("\n");
+    out.hidden = false;
+    out.textContent = "";
+    var p = document.createElement("strong");
+    var pre = document.createElement("pre");
+    pre.textContent = text;
+    if (/^\d{8,15}$/.test(ORDER_DEST)) {
+      p.textContent = "Opening your order message.";
+      window.open("https://wa.me/" + ORDER_DEST + "?text=" + encodeURIComponent(text), "_blank", "noopener");
+    } else {
+      p.textContent = "Order not sent: the order destination is still a placeholder. Your summary:";
+    }
+    out.appendChild(p);
+    out.appendChild(pre);
+  });
+})();
+</script>
+</body>
+</html>

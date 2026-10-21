@@ -1,0 +1,277 @@
+[
+  {
+    "cycle": 1,
+    "version": 4,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the shop name Petal & Stem and mentions Jaipur.",
+        "verdict": "PASS",
+        "note": "h1 reads 'Petal & Stem' and the eyebrow reads 'Flower shop in Jaipur'; both are visible in the screenshot.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The page lists exactly these bouquets with prices: Red rose dozen ₹899, Sunflower bunch ₹699, Mixed seasonal ₹999, White lilies ₹1,199, Orchid box ₹1,499.",
+        "verdict": "PASS",
+        "note": "#bouquets has 5 li cards: Red rose dozen ₹899, Sunflower bunch ₹699, Mixed seasonal ₹999, White lilies ₹1,199, Orchid box ₹1,499. The select in #order lists the same five.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "Each bouquet has an empty image placeholder spot.",
+        "verdict": "PASS",
+        "note": "5 empty div.ps-bq-photo elements with a dashed border and an accent fill, one per card. No images were invented.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "An order form lets a visitor pick a bouquet and enter name, phone and delivery address, and its submit action opens a WhatsApp message to +91 98290 11223 with those details filled in.",
+        "verdict": "PASS",
+        "note": "Form has bouquet select, name, phone and address. Submit builds https://wa.me/919829011223?text=... containing bouquet, name, phone and address. Mechanical check: 1 of 1 form submitted, no invalid fields, no errors.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The page states same day delivery inside Jaipur for orders before 4pm, a ₹99 delivery charge, and pay on delivery.",
+        "verdict": "PASS",
+        "note": "#delivery cards read 'Inside Jaipur / Order before 4pm and we deliver the same day', '₹99', and 'Pay on delivery'. The order form also states pay on delivery.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The page shows shop timings of 9am to 8pm Monday to Saturday and closed on Sunday.",
+        "verdict": "PASS",
+        "note": "#visit dl shows 'Monday to Saturday: 9am to 8pm' and 'Sunday: Closed'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "The page shows the address 12 MI Road, near Panch Batti, Jaipur 302001, the phone +91 141 400 5566 as a tap-to-call link, and a map link or embed for the address.",
+        "verdict": "PASS",
+        "note": "address element reads '12 MI Road, near Panch Batti, Jaipur 302001'. Two links use href tel:+911414005566. The Google Maps search link uses the same address as its query.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The file has no JavaScript errors, no horizontal overflow at 360px and 1280px, and no broken in-page links.",
+        "verdict": "PASS",
+        "note": "Mechanical check: js_errors [], overflow_px 0 at 360px and 1280px, broken_in_page_links [].",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-9",
+        "criterion": "Markup hygiene: one title element",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The head has two <title> elements: 'Petal & Stem' from the style block and 'Petal & Stem | Flower shop in Jaipur' from W-1. Browsers use the first one, so the intended SEO title is ignored.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-10",
+        "criterion": "Rule: use only facts the Requester supplied",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Copy adds small claims the Requester did not give: 'Bouquets for every occasion', 'fresh flowers', 'One flat charge'. None changes prices, terms or contacts.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Palette, Playfair headings, cards and pill buttons match the style guide. Measured fonts include Arial, most likely the form submit button, which has no font-family inherit.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "58 text pairs checked at both widths and 0 low-contrast; the screenshot text is easy to read.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "1 h1, 0 skipped heading levels, and the large Petal & Stem title dominates the first screen.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "The screenshot shows a filled 'Order a bouquet' button first; the first-screen action measured is 'Order a bouquet'.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS",
+        "note": "The nav has Bouquets, Order, Delivery and Visit us; they wrap in view at 360px and each target is at least 44px tall.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "Smallest tap target measured at 44px on the phone with 0 small targets.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "0 img elements; the 5 placeholder divs have role=img with descriptive aria-labels.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 20825,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&amp;family=Playfair+Display:wght@600;700&amp;display=swap",
+        "https://www.google.com/maps/search/?api=1&amp;query=12+MI+Road+near+Panch+Batti+Jaipur+302001"
+      ],
+      "forms": 1,
+      "scripts": 3,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 58,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Nunito Sans",
+            "Playfair Display",
+            "Arial"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 9
+          },
+          "first_screen_actions": [
+            "Order a bouquet"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 58,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Nunito Sans",
+            "Playfair Display",
+            "Arial"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 9
+          },
+          "first_screen_actions": [
+            "Order a bouquet"
+          ]
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v4.png",
+    "all_pass": true
+  }
+]

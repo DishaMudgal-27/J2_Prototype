@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Thread &amp; Loom</title>
+<!-- J2:style head start (owner W-1) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Jost:wght@400;500;600&amp;display=swap"><style>:root{--j2-primary:#6B3A2A;--j2-secondary:#5B6B4A;--j2-accent:#B5651D;--j2-background:#F7F1E8;--j2-surface:#FFFDF8;--j2-text:#2E2620;--j2-muted:#6E6258;--j2-font-heading:'Cormorant Garamond', Georgia, serif;--j2-font-body:'Jost', system-ui, -apple-system, 'Segoe UI', sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:12px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#6B3A2A;color:#FFFFFF;border:1.5px solid #6B3A2A;min-height:44px;padding:0 22px;border-radius:999px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-btn-secondary{display:inline-block;background:transparent;color:#6B3A2A;border:1.5px solid #6B3A2A;min-height:44px;padding:0 22px;border-radius:999px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-card{background:#FFFDF8;border:1px solid #E3D6C3;border-radius:12px;box-shadow:0 1px 3px rgba(46,38,32,0.08);overflow:hidden}</style>
+<!-- J2:style head end -->
+<!-- J2:W-2 head start (owner W-2) -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- J2:W-2 head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<section id="products" class="tl-catalogue" aria-labelledby="tl-products-title">
+<style>
+.tl-catalogue{--tl-primary:var(--j2-primary,#6B3A2A);--tl-secondary:var(--j2-secondary,#5B6B4A);--tl-accent:var(--j2-accent,#B5651D);--tl-bg:var(--j2-background,#F7F1E8);--tl-surface:var(--j2-surface,#FFFDF8);--tl-text:var(--j2-text,#2E2620);--tl-muted:var(--j2-muted,#6E6258);--tl-line:#E3D6C3;--tl-radius:var(--j2-radius,12px);background:var(--tl-bg);color:var(--tl-text);font-family:var(--j2-font-body,'Jost',system-ui,sans-serif);padding:48px 16px;box-sizing:border-box;scroll-margin-top:72px}
+.tl-catalogue *,.tl-catalogue *::before,.tl-catalogue *::after{box-sizing:border-box}
+.tl-catalogue .tl-wrap{max-width:1160px;margin:0 auto;width:100%}
+.tl-catalogue h2,.tl-catalogue h3,.tl-catalogue h4{font-family:var(--j2-font-heading,'Cormorant Garamond',Georgia,serif);color:var(--tl-primary);margin:0;font-weight:600}
+.tl-catalogue .tl-title{font-size:clamp(1.9rem,6vw,2.75rem);line-height:1.15}
+.tl-catalogue .tl-intro{color:var(--tl-muted);margin:8px 0 24px;max-width:60ch;line-height:1.5}
+.tl-catalogue .tl-filters{background:var(--tl-surface);border:1px solid var(--tl-line);border-radius:var(--tl-radius);padding:16px;display:grid;gap:16px;margin-bottom:24px}
+.tl-catalogue .tl-label{display:block;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tl-muted);margin-bottom:8px;font-weight:500}
+.tl-catalogue .tl-chips{display:flex;flex-wrap:wrap;gap:8px}
+.tl-catalogue .tl-chip{min-height:44px;padding:0 18px;border-radius:999px;border:1.5px solid var(--tl-primary);background:transparent;color:var(--tl-primary);font:inherit;font-weight:500;cursor:pointer}
+.tl-catalogue .tl-chip[aria-pressed="true"]{background:var(--tl-primary);color:#fff}
+.tl-catalogue .tl-chip:focus-visible,.tl-catalogue .tl-select:focus-visible,.tl-catalogue .tl-order:focus-visible{outline:3px solid var(--tl-accent);outline-offset:2px}
+.tl-catalogue .tl-selects{display:grid;grid-template-columns:1fr;gap:16px}
+.tl-catalogue .tl-select{width:100%;min-height:44px;padding:0 12px;border:1.5px solid var(--tl-line);border-radius:8px;background:#fff;color:var(--tl-text);font:inherit}
+.tl-catalogue .tl-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.tl-catalogue .tl-count{margin:0;color:var(--tl-muted);font-size:.95rem}
+.tl-catalogue .tl-group{margin-top:32px}
+.tl-catalogue .tl-group[hidden]{display:none}
+.tl-catalogue .tl-group-title{font-size:1.75rem;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--tl-accent)}
+.tl-catalogue .tl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px}
+.tl-catalogue .tl-card{display:flex;flex-direction:column;min-width:0}
+.tl-catalogue .tl-card[hidden]{display:none!important}
+.tl-catalogue .tl-photo{aspect-ratio:4/5;background:#EFE5D5;border-bottom:1px dashed var(--tl-accent);display:flex;align-items:center;justify-content:center;color:var(--tl-muted);font-size:.9rem}
+.tl-catalogue .tl-body{padding:16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.tl-catalogue .tl-name{font-size:1.35rem;line-height:1.2}
+.tl-catalogue .tl-sizes{margin:0;color:var(--tl-muted);font-size:.9rem}
+.tl-catalogue .tl-price{margin:0 0 10px;font-size:1.25rem;font-weight:600;color:var(--tl-text)}
+.tl-catalogue .tl-order{margin-top:auto;width:100%;text-align:center}
+.tl-catalogue .tl-empty{margin-top:32px;padding:24px;text-align:center;background:var(--tl-surface);border:1px dashed var(--tl-line);border-radius:var(--tl-radius);color:var(--tl-muted)}
+.tl-catalogue .tl-empty[hidden]{display:none}
+@media (min-width:640px){.tl-catalogue{padding:64px 24px}.tl-catalogue .tl-selects{grid-template-columns:1fr 1fr}.tl-catalogue .tl-filters{padding:24px}}
+</style>
+<div class="tl-wrap">
+  <h2 id="tl-products-title" class="tl-title">Shop the collection</h2>
+  <p class="tl-intro">Handloom kurtas, sarees, cotton shirts and dupattas. Pick a category, narrow by size or price, then order on WhatsApp.</p>
+
+  <div class="tl-filters" role="group" aria-label="Product filters">
+    <div>
+      <span class="tl-label" id="tl-cat-label">Category</span>
+      <div class="tl-chips" role="group" aria-labelledby="tl-cat-label">
+        <button type="button" class="tl-chip" data-cat="all" aria-pressed="true">All</button>
+        <button type="button" class="tl-chip" data-cat="kurtas" aria-pressed="false">Kurtas</button>
+        <button type="button" class="tl-chip" data-cat="sarees" aria-pressed="false">Sarees</button>
+        <button type="button" class="tl-chip" data-cat="shirts" aria-pressed="false">Shirts</button>
+        <button type="button" class="tl-chip" data-cat="dupattas" aria-pressed="false">Dupattas</button>
+      </div>
+    </div>
+    <div class="tl-selects">
+      <div>
+        <label class="tl-label" for="tl-size">Size</label>
+        <select id="tl-size" class="tl-select">
+          <option value="all">All sizes</option>
+          <option value="XS">XS</option>
+          <option value="S">S</option>
+          <option value="M">M</option>
+          <option value="L">L</option>
+          <option value="XL">XL</option>
+          <option value="XXL">XXL</option>
+          <option value="FREE">Free size</option>
+        </select>
+      </div>
+      <div>
+        <label class="tl-label" for="tl-price">Price</label>
+        <select id="tl-price" class="tl-select">
+          <option value="all">All prices</option>
+          <option value="0-1499">Under ₹1,500</option>
+          <option value="1500-2999">₹1,500 to ₹2,999</option>
+          <option value="3000-999999">₹3,000 and above</option>
+        </select>
+      </div>
+    </div>
+    <div class="tl-bar">
+      <p class="tl-count" id="tl-count" role="status" aria-live="polite">Showing 10 of 10 products</p>
+      <button type="button" class="j2-btn j2-btn-secondary" id="tl-reset">Clear filters</button>
+    </div>
+  </div>
+
+  <div class="tl-group" data-group="kurtas">
+    <h3 class="tl-group-title">Kurtas <span class="tl-group-count">(3)</span></h3>
+    <div class="tl-grid">
+      <article class="j2-card tl-card" id="p-indigo-block-print-kurta" data-cat="kurtas" data-price="1499" data-sizes="S M L XL XXL">
+        <div class="tl-photo" role="img" aria-label="Photo of Indigo block-print kurta coming soon"><span>Photo coming soon</span></div>
+        <div class="tl-body">
+          <h4 class="tl-name">Indigo block-print kurta</h4>
+          <p class="tl-sizes">Sizes: S to XXL</p>
+          <p class="tl-price">₹1,499</p>
+          <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order Indigo block-print kurta on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Indigo%20block-print%20kurta">Order on WhatsApp</a>
+        </div>
+      </article>
+      <article class="j2-card tl-card" id="p-mustard-handloom-kurta" data-cat="kurtas" data-price="1699" data-sizes="S M L XL">
+        <div class="tl-photo" role="img" aria-label="Photo of Mustard handloom kurta coming soon"><span>Photo coming soon</span></div>
+        <div class="tl-body">
+          <h4 class="tl-name">Mustard handloom kurta</h4>
+          <p class="tl-sizes">Sizes: S to XL</p>
+          <p class="tl-price">₹1,699</p>
+          <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order Mustard handloom kurta on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Mustard%20handloom%20kurta">Order on WhatsApp</a>
+        </div>
+      </article>
+      <article class="j2-card tl-card" id="p-white-chikankari-kurta" data-cat="kurtas" data-price="2199" data-sizes="XS S M L XL">
+        <div class="tl-photo" role="img" aria-label="Photo of White chikankari kurta coming soon"><span>Photo coming soon</span></div>
+        <div class="tl-body">
+          <h4 class="tl-name">White chikankari kurta</h4>
+          <p class="tl-sizes">Sizes: XS to XL</p>
+          <p class="tl-price">₹2,199</p>
+          <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order White chikankari kurta on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20White%20chikankari%20kurta">Order on WhatsApp</a>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <div class="tl-group" data-group="sarees">
+    <h3 class="tl-group-title">Sarees <span class="tl-group-count">(3)</span></h3>
+    <div class="tl-grid">
+      <article class="j2-card tl-card" id="p-maheshwari-cotton-saree" data-cat="sarees" data-price="3499" data-sizes="FREE">
+        <div class="tl-photo" role="img" aria-label="Photo of Maheshwari cotton saree coming soon"><span>Photo coming soon</span></div>
+        <div class="tl-body">
+          <h4 class="tl-name">Maheshwari cotton saree</h4>
+          <p class="tl-sizes">Free size</p>
+          <p class="tl-price">₹3,499</p>
+          <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order Maheshwari cotton saree on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Maheshwari%20cotton%20saree">Order on WhatsApp</a>
+        </div>
+      </article>
+      <article class="j2-card tl-card" id="p-chanderi-silk-cotton-saree" data-cat="sarees" data-price="4999" data-sizes="FREE">
+        <div class="tl-photo" role="img" aria-label="Photo of Chanderi silk-cotton saree coming soon"><span>Photo coming soon</span></div>
+        <div class="tl-body">
+          <h4 class="tl-name">Chanderi silk-cotton saree</h4>
+          <p class="tl-sizes">Free size</p>
+          <p class="tl-price">₹4,999</p>
+          <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order Chanderi silk-cotton saree on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Chanderi%20silk-cotton%20saree">Order on WhatsApp</a>
+        </div>
+      </article>
+      <article class="j2-card tl-card" id="p-ikat-handloom-saree" data-cat="sarees" data-price="3999" data-sizes="FREE">
+        <div class="tl-photo" role="img" aria-label="Photo of Ikat handloom saree coming soon"><span>Photo coming soon</span></div>
+        <div class="tl-body">
+          <h4 class="tl-name">Ikat handloom saree</h4>
+          <p class="tl-sizes">Free size</p>
+          <p class="tl-price">₹3,999</p>
+          <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order Ikat handloom saree on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Ikat%20handloom%20saree">Order on WhatsApp</a>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <div class="tl-group" data-group="shirts">
+    <h3 class="tl-group-title">Shirts <span class="tl-group-count">(2)</span></h3>
+    <div class="tl-grid">
+      <article class="j2-card tl-card" id="p-khadi-cotton-shirt" data-cat="shirts" data-price="1299" data-sizes="S M L XL XXL">
+        <div class="tl-photo" role="img" aria-label="Photo of Khadi cotton shirt coming soon"><span>Photo coming soon</span></div>
+        <div class="tl-body">
+          <h4 class="tl-name">Khadi cotton shirt</h4>
+          <p class="tl-sizes">Sizes: S to XXL</p>
+          <p class="tl-price">₹1,299</p>
+          <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order Khadi cotton shirt on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Khadi%20cotton%20shirt">Order on WhatsApp</a>
+        </div>
+      </article>
+      <article class="j2-card tl-card" id="p-linen-blend-shirt" data-cat="shirts" data-price="1599" data-sizes="M L XL XXL">
+        <div class="tl-photo" role="img" aria-label="Photo of Linen-blend shirt coming soon"><span>Photo coming soon</span></div>
+        <div class="tl-body">
+          <h4 class="tl-name">Linen-blend shirt</h4>
+          <p class="tl-sizes">Sizes: M to XXL</p>
+          <p class="tl-price">₹1,599</p>
+          <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order Linen-blend shirt on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Linen-blend%20shirt">Order on WhatsApp</a>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <div class="tl-group" data-group="dupattas">
+    <h3 class="tl-group-title">Dupattas <span class="tl-group-count">(2)</span></h3>
+    <div class="tl-grid">
+      <article class="j2-card tl-card" id="p-ajrakh-dupatta" data-cat="dupattas" data-price="899" data-sizes="FREE">
+        <div class="tl-photo" role="img" aria-label="Photo of Ajrakh dupatta coming soon"><span>Photo coming soon</span></div>
+        <div class="tl-body">
+          <h4 class="tl-name">Ajrakh dupatta</h4>
+          <p class="tl-sizes">Free size</p>
+          <p class="tl-price">₹899</p>
+          <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order Ajrakh dupatta on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Ajrakh%20dupatta">Order on WhatsApp</a>
+        </div>
+      </article>
+      <article class="j2-card tl-card" id="p-bandhani-dupatta" data-cat="dupattas" data-price="1099" data-sizes="FREE">
+        <div class="tl-photo" role="img" aria-label="Photo of Bandhani dupatta coming soon"><span>Photo coming soon</span></div>
+        <div class="tl-body">
+          <h4 class="tl-name">Bandhani dupatta</h4>
+          <p class="tl-sizes">Free size</p>
+          <p class="tl-price">₹1,099</p>
+          <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order Bandhani dupatta on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Bandhani%20dupatta">Order on WhatsApp</a>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <div class="tl-empty" id="tl-empty" hidden>No products match these filters. Try a different size or price, or clear the filters.</div>
+</div>
+<script>
+(function () {
+  var root = document.getElementById('products');
+  if (!root) return;
+  var cards = root.querySelectorAll('.tl-card');
+  var groups = root.querySelectorAll('.tl-group');
+  var chips = root.querySelectorAll('.tl-chip');
+  var sizeSel = document.getElementById('tl-size');
+  var priceSel = document.getElementById('tl-price');
+  var countEl = document.getElementById('tl-count');
+  var emptyEl = document.getElementById('tl-empty');
+  var resetBtn = document.getElementById('tl-reset');
+  var state = { cat: 'all', size: 'all', price: 'all' };
+
+  function apply() {
+    var range = state.price === 'all' ? null : state.price.split('-');
+    var min = range ? Number(range[0]) : 0;
+    var max = range ? Number(range[1]) : Infinity;
+    var shown = 0;
+    var i;
+    for (i = 0; i < cards.length; i++) {
+      var c = cards[i];
+      var price = Number(c.getAttribute('data-price'));
+      var sizes = (c.getAttribute('data-sizes') || '').split(' ');
+      var ok = (state.cat === 'all' || c.getAttribute('data-cat') === state.cat) &&
+               (state.size === 'all' || sizes.indexOf(state.size) !== -1) &&
+               price >= min && price <= max;
+      c.hidden = !ok;
+      if (ok) shown++;
+    }
+    for (i = 0; i < groups.length; i++) {
+      var g = groups[i];
+      var n = g.querySelectorAll('.tl-card:not([hidden])').length;
+      g.hidden = n === 0;
+      var cnt = g.querySelector('.tl-group-count');
+      if (cnt) cnt.textContent = '(' + n + ')';
+    }
+    if (countEl) countEl.textContent = 'Showing ' + shown + ' of ' + cards.length + ' products';
+    if (emptyEl) emptyEl.hidden = shown !== 0;
+  }
+
+  for (var k = 0; k < chips.length; k++) {
+    chips[k].addEventListener('click', function () {
+      state.cat = this.getAttribute('data-cat');
+      for (var j = 0; j < chips.length; j++) {
+        chips[j].setAttribute('aria-pressed', chips[j] === this ? 'true' : 'false');
+      }
+      apply();
+    });
+  }
+  if (sizeSel) sizeSel.addEventListener('change', function () { state.size = sizeSel.value; apply(); });
+  if (priceSel) priceSel.addEventListener('change', function () { state.price = priceSel.value; apply(); });
+  if (resetBtn) resetBtn.addEventListener('click', function () {
+    state = { cat: 'all', size: 'all', price: 'all' };
+    if (sizeSel) sizeSel.value = 'all';
+    if (priceSel) priceSel.value = 'all';
+    for (var j = 0; j < chips.length; j++) {
+      chips[j].setAttribute('aria-pressed', chips[j].getAttribute('data-cat') === 'all' ? 'true' : 'false');
+    }
+    apply();
+  });
+  apply();
+})();
+</script>
+</section>
+<!-- J2:W-1 end -->
+<!-- J2:W-2 start (owner W-2) -->
+<header id="tl-top" class="tl-nav" role="banner">
+<style>
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{padding-top:64px}
+.tl-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:64px;background:var(--j2-surface);border-bottom:1px solid #E3D6C3;box-shadow:0 1px 3px rgba(46,38,32,0.08);font-family:var(--j2-font-body);box-sizing:border-box}
+.tl-nav *,.tl-nav *::before,.tl-nav *::after{box-sizing:border-box}
+.tl-nav .tl-nav-bar{max-width:1160px;height:100%;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.tl-nav .tl-brand{font-family:var(--j2-font-heading);font-size:1.6rem;font-weight:700;line-height:1;color:var(--j2-primary);text-decoration:none;white-space:nowrap;min-height:44px;display:inline-flex;align-items:center}
+.tl-nav .tl-menu{list-style:none;margin:0;padding:0;display:flex;align-items:center;gap:8px}
+.tl-nav .tl-menu a{display:flex;align-items:center;min-height:44px;padding:0 14px;border-radius:999px;color:var(--j2-text);text-decoration:none;font-weight:500}
+.tl-nav .tl-menu a:hover{color:var(--j2-primary);background:var(--j2-background)}
+.tl-nav a:focus-visible,.tl-nav button:focus-visible,.tl-skip:focus-visible{outline:3px solid var(--j2-accent);outline-offset:2px}
+.tl-nav .tl-toggle{display:none;width:44px;height:44px;padding:0;border:1.5px solid var(--j2-primary);border-radius:999px;background:transparent;color:var(--j2-primary);cursor:pointer;align-items:center;justify-content:center;flex-direction:column;gap:5px}
+.tl-nav .tl-toggle span{display:block;width:18px;height:2px;background:var(--j2-primary);border-radius:2px;transition:transform .2s,opacity .2s}
+.tl-nav .tl-toggle[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.tl-nav .tl-toggle[aria-expanded="true"] span:nth-child(2){opacity:0}
+.tl-nav .tl-toggle[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.tl-skip{position:absolute;left:8px;top:-60px;z-index:1100;background:var(--j2-primary);color:#fff;padding:12px 16px;border-radius:8px;text-decoration:none}
+.tl-skip:focus{top:8px}
+@media (max-width:767px){
+  .tl-nav.is-js .tl-toggle{display:inline-flex}
+  .tl-nav.is-js .tl-menu{display:none;position:absolute;top:64px;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;padding:8px 16px 16px;background:var(--j2-surface);border-bottom:1px solid #E3D6C3;box-shadow:0 4px 8px rgba(46,38,32,0.08)}
+  .tl-nav.is-js .tl-menu.is-open{display:flex}
+  .tl-nav.is-js .tl-menu a{border-radius:var(--j2-radius);padding:0 12px}
+}
+@media (min-width:768px){.tl-nav .tl-nav-bar{padding:0 24px}}
+</style>
+<a class="tl-skip" href="#products">Skip to products</a>
+<div class="tl-nav-bar">
+  <a class="tl-brand" href="#tl-top">Thread &amp; Loom</a>
+  <button type="button" class="tl-toggle" id="tl-nav-toggle" aria-expanded="false" aria-controls="tl-nav-menu" aria-label="Open menu"><span></span><span></span><span></span></button>
+  <nav aria-label="Main">
+    <ul class="tl-menu" id="tl-nav-menu">
+      <li><a href="#products">Products</a></li>
+    </ul>
+  </nav>
+</div>
+<script>
+(function () {
+  var header = document.getElementById('tl-top');
+  var toggle = document.getElementById('tl-nav-toggle');
+  var menu = document.getElementById('tl-nav-menu');
+  if (!header || !toggle || !menu) return;
+  if (document.body && header.parentNode === document.body && document.body.firstChild !== header) {
+    document.body.insertBefore(header, document.body.firstChild);
+  }
+  header.classList.add('is-js');
+  function setOpen(open) {
+    menu.classList.toggle('is-open', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  }
+  toggle.addEventListener('click', function () {
+    setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+  });
+  menu.addEventListener('click', function (e) {
+    if (e.target && e.target.closest && e.target.closest('a')) setOpen(false);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+      setOpen(false);
+      toggle.focus();
+    }
+  });
+  window.addEventListener('resize', function () {
+    if (window.innerWidth >= 768) setOpen(false);
+  });
+})();
+</script>
+</header>
+<!-- J2:W-2 end -->
+</body>
+</html>

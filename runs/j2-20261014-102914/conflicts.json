@@ -1,0 +1,1041 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 1,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 1",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 84,
+        "text": "@Priority 6 revisions, one fix part each (two for W-1): sizes cut to S, M, L, XL (W-5); unsupplied sponsor badges removed (W-9); fee calculator no longer a form (W-4); hero CTA static to #register, one title, countdown moved inside #home (W-1); #gallery added to the menu (W-2); contrast button moved in-flow so it cannot cover the countdown (W-12). The N6 '0' is unconfirmed. My likely suspect is the calculator's default 0 values, so W-4 starts those blank. The file will stay over 60 KB: only the duplicate title is fixed, and trimming the rest would mean rewriting several sections.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 85,
+        "text": "@Adaptation COUNTER: your 6 fixes cost 56 against 50 remaining. I cut the duplicate-title part (F-20) from fix-hero. It is a low-severity warning that does not block workable, so the hero fix is now 8 and the total is 48, leaving 2. The other five stay: F-16 sizes, F-16 badges, F-17, F-18 and F-19 each block a necessary condition or break the no-invented-facts rule. Park F-20 for a later cycle if budget frees up. Funding it alone costs 8 more than the remaining 2.",
+        "position": "COUNTER: T-shirt sizes S, M, L, XL only (8), Remove unsupplied sponsor badges (8), Fee calculator is not a form (8), Hero CTA static to #register, countdown inside hero (8), Menu link to gallery (8), Contrast toggle no longer covers content (8)",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 86,
+        "text": "@Priority ACCEPT the counter: 5 fixes at 8 each (40 of the remaining 50). They clear F-16, F-17, F-18 and F-19, which are the failing necessary conditions and the invented-facts problem. F-20 (duplicate title tag, 80 KB file) is parked: it is a low-severity warning that does not block workable. Trade-off: the duplicate title and file size stay until budget frees up. The 2 left over cannot fund another fix.",
+        "position": "accepts Priority's offer",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "priority",
+    "outcome": "Adaptation accepted Priority's COUNTER: T-shirt sizes S, M, L, XL only (8), Remove unsupplied sponsor badges (8), Fee calculator is not a form (8), Hero CTA static to #register, countdown inside hero (8), Menu link to gallery (8), Contrast toggle no longer covers content (8) goes to the validator.",
+    "priority_final": [
+      {
+        "id": "fix-sizes",
+        "name": "T-shirt sizes S, M, L, XL only",
+        "goal_gap": "F-16: registration offers S to XXL; only S, M, L and XL were supplied",
+        "expected_outcome": "Size dropdown lists exactly S, M, L and XL, shown only when T-shirt is yes",
+        "outputs": [
+          "section#register"
+        ],
+        "completion_check": "4 size options, S/M/L/XL, size wrapper still present, form submits",
+        "dependencies": [],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-16"
+        ],
+        "revises": "W-5",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The T-shirt size dropdown offers only S, M, L and XL and still appears only when T-shirt is yes.",
+            "constraints": [
+              "No other sizes",
+              "Keep mailto:run@example.com and guardian rule",
+              "Keep every other field unchanged"
+            ],
+            "context": [
+              "charter item 4",
+              "section W-5"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-5 Builder",
+              "steps": "In section#register, replace the size options inside div#tshirt-size-wrap with exactly four option.size-option elements: S, M, L, XL. Remove XXL and any other size."
+            },
+            "verification": [
+              {
+                "text": "Exactly 4 size options",
+                "type": "element-count",
+                "target": ".size-option",
+                "expect": 4
+              },
+              {
+                "text": "One size wrapper",
+                "type": "element-count",
+                "target": "#tshirt-size-wrap",
+                "expect": 1
+              },
+              {
+                "text": "Destination email present",
+                "type": "facts-present",
+                "target": [
+                  "run@example.com"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Form has submit",
+                "type": "named-test",
+                "target": "form-has-submit",
+                "expect": true
+              },
+              {
+                "text": "Form fields at least 44px",
+                "type": "tap-targets",
+                "target": "#register",
+                "expect": 44
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 8,
+          "model_call_limit": 3,
+          "time_limit_minutes": 10,
+          "retry_limit": 2,
+          "stop_loss": "Stop if the same verification fails twice in a row or spend reaches 8"
+        },
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "fix-sponsor-badges",
+        "name": "Remove unsupplied sponsor badges",
+        "goal_gap": "F-16: sponsors show badges 'Top tier', 'Second tier', 'Supporters' that were not supplied",
+        "expected_outcome": "Sponsors show only tier names and sponsor names as supplied",
+        "outputs": [
+          "section#sponsors"
+        ],
+        "completion_check": "3 tiers, all names present, no badge text",
+        "dependencies": [],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-16"
+        ],
+        "revises": "W-9",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The sponsors section shows only Gold, Silver and Community with the supplied sponsor names and no extra badge labels.",
+            "constraints": [
+              "Names exactly as supplied",
+              "Logo placeholders only"
+            ],
+            "context": [
+              "charter item 8",
+              "section W-9"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-9 Builder",
+              "steps": "In section#sponsors keep three div.sponsor-tier and delete the badge elements reading Top tier, Second tier and Supporters. Keep logo placeholders."
+            },
+            "verification": [
+              {
+                "text": "Tiers and sponsor names appear",
+                "type": "facts-present",
+                "target": [
+                  "Gold",
+                  "Silver",
+                  "Community",
+                  "Meridian Bank",
+                  "Trailhead Sports",
+                  "Aqua Pure",
+                  "Pune Runners Club"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Exactly 3 tiers",
+                "type": "element-count",
+                "target": ".sponsor-tier",
+                "expect": 3
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 8,
+          "model_call_limit": 3,
+          "time_limit_minutes": 10,
+          "retry_limit": 2,
+          "stop_loss": "Stop if the same verification fails twice in a row or spend reaches 8"
+        },
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "fix-fee-form",
+        "name": "Fee calculator is not a form",
+        "goal_gap": "F-17: form#fee-form has no destination; N6 reports a stray '0'",
+        "expected_outcome": "Calculator works without a form element; no stray default 0 text",
+        "outputs": [
+          "section#fees"
+        ],
+        "completion_check": "Calculator fields and total exist, no form without destination",
+        "dependencies": [],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-17"
+        ],
+        "revises": "W-4",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The fee calculator updates the total live from plain inputs with no form element and no hard-coded default 0 text.",
+            "constraints": [
+              "Discount only on race fees up to 31 December 2026",
+              "Runners 1 to 10",
+              "T-shirts Rs 250, never discounted"
+            ],
+            "context": [
+              "charter item 3",
+              "section W-4"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-4 Builder",
+              "steps": "In section#fees replace the form wrapper with div.fee-calc. Keep select#fee-race, input#fee-runners (min 1 max 10), input#fee-shirts and output#fee-total updated on input. Remove the Update total submit button. Start the T-shirt field blank with a placeholder and treat blank as none, so no bare 0 is printed."
+            },
+            "verification": [
+              {
+                "text": "Rule facts shown",
+                "type": "facts-present",
+                "target": [
+                  "Rs 250",
+                  "10% off race fees only",
+                  "31 December 2026"
+                ],
+                "expect": true
+              },
+              {
+                "text": "One total output",
+                "type": "element-count",
+                "target": "#fee-total",
+                "expect": 1
+              },
+              {
+                "text": "One runners input",
+                "type": "element-count",
+                "target": "#fee-runners",
+                "expect": 1
+              },
+              {
+                "text": "One race select",
+                "type": "element-count",
+                "target": "#fee-race",
+                "expect": 1
+              },
+              {
+                "text": "Fields at least 44px",
+                "type": "tap-targets",
+                "target": "#fees",
+                "expect": 44
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 8,
+          "model_call_limit": 3,
+          "time_limit_minutes": 10,
+          "retry_limit": 2,
+          "stop_loss": "Stop if the same verification fails twice in a row or spend reaches 8"
+        },
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "fix-hero",
+        "name": "Hero CTA static to #register, countdown inside hero",
+        "goal_gap": "F-18: CTA static href is #countdown; countdown is a section the menu cannot reach",
+        "expected_outcome": "CTA links to #register in HTML and countdown lives inside #home",
+        "outputs": [
+          "section#home",
+          "div#countdown"
+        ],
+        "completion_check": "1 CTA, 1 timer, links resolve, page parses",
+        "dependencies": [],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-18"
+        ],
+        "revises": "W-1",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The hero's single main action links to #register in static HTML and the countdown to 14 February 2027 sits inside the hero.",
+            "constraints": [
+              "No script rewrites the CTA href",
+              "Countdown never throws errors",
+              "Keep all charter item 1 facts"
+            ],
+            "context": [
+              "charter items 1 and 10",
+              "section W-1"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-1 Builder",
+              "steps": "Set a.j2-btn.j2-hero-cta href to #register and remove the script that rewrites it. Change section#countdown into div#countdown inside section#home, keeping div#countdown-timer."
+            },
+            "verification": [
+              {
+                "text": "Name, dates, expo hours and venue appear",
+                "type": "facts-present",
+                "target": [
+                  "Riverside Run 2027",
+                  "Pune",
+                  "Sunday 14 February 2027",
+                  "Saturday 13 February 2027",
+                  "10am to 6pm",
+                  "Riverside Grounds, 5 River Road, Pune 411001"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Countdown names race day",
+                "type": "facts-present",
+                "target": [
+                  "14 February 2027"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Exactly 1 countdown timer element",
+                "type": "element-count",
+                "target": "#countdown-timer",
+                "expect": 1
+              },
+              {
+                "text": "Exactly 1 hero main action",
+                "type": "element-count",
+                "target": ".j2-hero-cta",
+                "expect": 1
+              },
+              {
+                "text": "Hero tap targets at least 44px",
+                "type": "tap-targets",
+                "target": "#home",
+                "expect": 44
+              },
+              {
+                "text": "In-page links resolve",
+                "type": "named-test",
+                "target": "links-resolve",
+                "expect": true
+              },
+              {
+                "text": "Page parses",
+                "type": "named-test",
+                "target": "page-parses",
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 8,
+          "model_call_limit": 3,
+          "time_limit_minutes": 10,
+          "retry_limit": 2,
+          "stop_loss": "Stop if the same verification fails twice in a row or spend reaches 8"
+        },
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "fix-nav-gallery",
+        "name": "Menu link to gallery",
+        "goal_gap": "F-18: nav has no link to #gallery",
+        "expected_outcome": "Menu has 11 links including #gallery",
+        "outputs": [
+          "nav#site-nav"
+        ],
+        "completion_check": "11 nav links resolve, tap targets pass",
+        "dependencies": [],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-18"
+        ],
+        "revises": "W-2",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The sticky menu links to every section including #gallery and still highlights the section in view.",
+            "constraints": [
+              "No horizontal overflow at 360px",
+              "Existing 10 links unchanged"
+            ],
+            "context": [
+              "charter item 11",
+              "section W-2"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-2 Builder",
+              "steps": "In nav#site-nav add an 11th a.nav-link to #gallery labelled Gallery, placed after #sponsors. Keep the IntersectionObserver is-active logic and make it include #gallery."
+            },
+            "verification": [
+              {
+                "text": "Exactly 11 nav links",
+                "type": "element-count",
+                "target": ".nav-link",
+                "expect": 11
+              },
+              {
+                "text": "Nav links resolve",
+                "type": "named-test",
+                "target": "links-resolve",
+                "expect": true
+              },
+              {
+                "text": "Nav tap targets at least 44px",
+                "type": "tap-targets",
+                "target": "#site-nav",
+                "expect": 44
+              },
+              {
+                "text": "Page parses",
+                "type": "named-test",
+                "target": "page-parses",
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 8,
+          "model_call_limit": 3,
+          "time_limit_minutes": 10,
+          "retry_limit": 2,
+          "stop_loss": "Stop if the same verification fails twice in a row or spend reaches 8"
+        },
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "fix-contrast-button",
+        "name": "Contrast toggle no longer covers content",
+        "goal_gap": "F-19: fixed contrast button covers countdown labels at 360px; contrast-section is a non-nav section",
+        "expected_outcome": "Toggle sits in normal page flow, covers nothing, and still switches the whole page",
+        "outputs": [
+          "button#contrast-toggle",
+          "div#contrast-wrap"
+        ],
+        "completion_check": "1 toggle, tap target 44px, page parses",
+        "dependencies": [],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-19"
+        ],
+        "revises": "W-12",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The high-contrast toggle sits in normal page flow below the menu, overlaps no content at 360px or 1280px, and still toggles hc-mode on body and back.",
+            "constraints": [
+              "No position fixed on the toggle",
+              "Toggle reachable at all screen sizes",
+              "Whole-page hc-mode styles unchanged"
+            ],
+            "context": [
+              "charter item 12",
+              "section W-12"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-12 Builder",
+              "steps": "Replace section#contrast-section with div#contrast-wrap placed at the top of the body content under the fixed menu, holding button#contrast-toggle (aria-pressed) with static positioning. Keep the hc-mode toggle and saved choice."
+            },
+            "verification": [
+              {
+                "text": "One toggle",
+                "type": "element-count",
+                "target": "#contrast-toggle",
+                "expect": 1
+              },
+              {
+                "text": "Toggle at least 44px",
+                "type": "tap-targets",
+                "target": "#contrast-wrap",
+                "expect": 44
+              },
+              {
+                "text": "Page parses",
+                "type": "named-test",
+                "target": "page-parses",
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 8,
+          "model_call_limit": 3,
+          "time_limit_minutes": 10,
+          "retry_limit": 2,
+          "stop_loss": "Stop if the same verification fails twice in a row or spend reaches 8"
+        },
+        "estimate": 8,
+        "cost": 8
+      }
+    ],
+    "adaptation_final": [
+      {
+        "id": "fix-sizes",
+        "name": "T-shirt sizes S, M, L, XL only",
+        "goal_gap": "F-16: registration offers S to XXL; only S, M, L and XL were supplied",
+        "expected_outcome": "Size dropdown lists exactly S, M, L and XL, shown only when T-shirt is yes",
+        "outputs": [
+          "section#register"
+        ],
+        "completion_check": "4 size options, S/M/L/XL, size wrapper still present, form submits",
+        "dependencies": [],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-16"
+        ],
+        "revises": "W-5",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The T-shirt size dropdown offers only S, M, L and XL and still appears only when T-shirt is yes.",
+            "constraints": [
+              "No other sizes",
+              "Keep mailto:run@example.com and guardian rule",
+              "Keep every other field unchanged"
+            ],
+            "context": [
+              "charter item 4",
+              "section W-5"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-5 Builder",
+              "steps": "In section#register, replace the size options inside div#tshirt-size-wrap with exactly four option.size-option elements: S, M, L, XL. Remove XXL and any other size."
+            },
+            "verification": [
+              {
+                "text": "Exactly 4 size options",
+                "type": "element-count",
+                "target": ".size-option",
+                "expect": 4
+              },
+              {
+                "text": "One size wrapper",
+                "type": "element-count",
+                "target": "#tshirt-size-wrap",
+                "expect": 1
+              },
+              {
+                "text": "Destination email present",
+                "type": "facts-present",
+                "target": [
+                  "run@example.com"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Form has submit",
+                "type": "named-test",
+                "target": "form-has-submit",
+                "expect": true
+              },
+              {
+                "text": "Form fields at least 44px",
+                "type": "tap-targets",
+                "target": "#register",
+                "expect": 44
+              }
+            ]
+          }
+        ],
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "fix-sponsor-badges",
+        "name": "Remove unsupplied sponsor badges",
+        "goal_gap": "F-16: sponsors show badges 'Top tier', 'Second tier', 'Supporters' that were not supplied",
+        "expected_outcome": "Sponsors show only tier names and sponsor names as supplied",
+        "outputs": [
+          "section#sponsors"
+        ],
+        "completion_check": "3 tiers, all names present, no badge text",
+        "dependencies": [],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-16"
+        ],
+        "revises": "W-9",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The sponsors section shows only Gold, Silver and Community with the supplied sponsor names and no extra badge labels.",
+            "constraints": [
+              "Names exactly as supplied",
+              "Logo placeholders only"
+            ],
+            "context": [
+              "charter item 8",
+              "section W-9"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-9 Builder",
+              "steps": "In section#sponsors keep three div.sponsor-tier and delete the badge elements reading Top tier, Second tier and Supporters. Keep logo placeholders."
+            },
+            "verification": [
+              {
+                "text": "Tiers and sponsor names appear",
+                "type": "facts-present",
+                "target": [
+                  "Gold",
+                  "Silver",
+                  "Community",
+                  "Meridian Bank",
+                  "Trailhead Sports",
+                  "Aqua Pure",
+                  "Pune Runners Club"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Exactly 3 tiers",
+                "type": "element-count",
+                "target": ".sponsor-tier",
+                "expect": 3
+              }
+            ]
+          }
+        ],
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "fix-fee-form",
+        "name": "Fee calculator is not a form",
+        "goal_gap": "F-17: form#fee-form has no destination; N6 reports a stray '0'",
+        "expected_outcome": "Calculator works without a form element; no stray default 0 text",
+        "outputs": [
+          "section#fees"
+        ],
+        "completion_check": "Calculator fields and total exist, no form without destination",
+        "dependencies": [],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-17"
+        ],
+        "revises": "W-4",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The fee calculator updates the total live from plain inputs with no form element and no hard-coded default 0 text.",
+            "constraints": [
+              "Discount only on race fees up to 31 December 2026",
+              "Runners 1 to 10",
+              "T-shirts Rs 250, never discounted"
+            ],
+            "context": [
+              "charter item 3",
+              "section W-4"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-4 Builder",
+              "steps": "In section#fees replace the form wrapper with div.fee-calc. Keep select#fee-race, input#fee-runners (min 1 max 10), input#fee-shirts and output#fee-total updated on input. Remove the Update total submit button. Start the T-shirt field blank with a placeholder and treat blank as none, so no bare 0 is printed."
+            },
+            "verification": [
+              {
+                "text": "Rule facts shown",
+                "type": "facts-present",
+                "target": [
+                  "Rs 250",
+                  "10% off race fees only",
+                  "31 December 2026"
+                ],
+                "expect": true
+              },
+              {
+                "text": "One total output",
+                "type": "element-count",
+                "target": "#fee-total",
+                "expect": 1
+              },
+              {
+                "text": "One runners input",
+                "type": "element-count",
+                "target": "#fee-runners",
+                "expect": 1
+              },
+              {
+                "text": "One race select",
+                "type": "element-count",
+                "target": "#fee-race",
+                "expect": 1
+              },
+              {
+                "text": "Fields at least 44px",
+                "type": "tap-targets",
+                "target": "#fees",
+                "expect": 44
+              }
+            ]
+          }
+        ],
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "fix-hero",
+        "name": "Hero CTA, single title, countdown inside hero",
+        "goal_gap": "F-18: CTA static href is #countdown; F-20: duplicate title tag; countdown is a section the menu cannot reach",
+        "expected_outcome": "CTA links to #register in HTML, one title tag, countdown lives inside #home",
+        "outputs": [
+          "section#home",
+          "div#countdown"
+        ],
+        "completion_check": "1 CTA, 1 timer, links resolve, page parses",
+        "dependencies": [],
+        "parts": [
+          "fix",
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-18",
+          "F-20"
+        ],
+        "revises": "W-1",
+        "estimated_resources": {
+          "money": 16,
+          "calls": 4,
+          "time_minutes": 12
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The hero's single main action links to #register in static HTML, the head has one title, and the countdown to 14 February 2027 sits inside the hero.",
+            "constraints": [
+              "No script rewrites the CTA href",
+              "Countdown never throws errors",
+              "Keep all charter item 1 facts"
+            ],
+            "context": [
+              "charter items 1 and 10",
+              "section W-1"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-1 Builder",
+              "steps": "Set a.j2-btn.j2-hero-cta href to #register and remove the script that rewrites it. Keep exactly one title tag in the head. Change section#countdown into div#countdown inside section#home, keeping div#countdown-timer."
+            },
+            "verification": [
+              {
+                "text": "Name, dates, expo hours and venue appear",
+                "type": "facts-present",
+                "target": [
+                  "Riverside Run 2027",
+                  "Pune",
+                  "Sunday 14 February 2027",
+                  "Saturday 13 February 2027",
+                  "10am to 6pm",
+                  "Riverside Grounds, 5 River Road, Pune 411001"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Countdown names race day",
+                "type": "facts-present",
+                "target": [
+                  "14 February 2027"
+                ],
+                "expect": true
+              },
+              {
+                "text": "Exactly 1 countdown timer element",
+                "type": "element-count",
+                "target": "#countdown-timer",
+                "expect": 1
+              },
+              {
+                "text": "Exactly 1 hero main action",
+                "type": "element-count",
+                "target": ".j2-hero-cta",
+                "expect": 1
+              },
+              {
+                "text": "Hero tap targets at least 44px",
+                "type": "tap-targets",
+                "target": "#home",
+                "expect": 44
+              },
+              {
+                "text": "In-page links resolve",
+                "type": "named-test",
+                "target": "links-resolve",
+                "expect": true
+              },
+              {
+                "text": "Page parses",
+                "type": "named-test",
+                "target": "page-parses",
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "estimate": 16,
+        "cost": 16
+      },
+      {
+        "id": "fix-nav-gallery",
+        "name": "Menu link to gallery",
+        "goal_gap": "F-18: nav has no link to #gallery",
+        "expected_outcome": "Menu has 11 links including #gallery",
+        "outputs": [
+          "nav#site-nav"
+        ],
+        "completion_check": "11 nav links resolve, tap targets pass",
+        "dependencies": [],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-18"
+        ],
+        "revises": "W-2",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The sticky menu links to every section including #gallery and still highlights the section in view.",
+            "constraints": [
+              "No horizontal overflow at 360px",
+              "Existing 10 links unchanged"
+            ],
+            "context": [
+              "charter item 11",
+              "section W-2"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-2 Builder",
+              "steps": "In nav#site-nav add an 11th a.nav-link to #gallery labelled Gallery, placed after #sponsors. Keep the IntersectionObserver is-active logic and make it include #gallery."
+            },
+            "verification": [
+              {
+                "text": "Exactly 11 nav links",
+                "type": "element-count",
+                "target": ".nav-link",
+                "expect": 11
+              },
+              {
+                "text": "Nav links resolve",
+                "type": "named-test",
+                "target": "links-resolve",
+                "expect": true
+              },
+              {
+                "text": "Nav tap targets at least 44px",
+                "type": "tap-targets",
+                "target": "#site-nav",
+                "expect": 44
+              },
+              {
+                "text": "Page parses",
+                "type": "named-test",
+                "target": "page-parses",
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "fix-contrast-button",
+        "name": "Contrast toggle no longer covers content",
+        "goal_gap": "F-19: fixed contrast button covers countdown labels at 360px; contrast-section is a non-nav section",
+        "expected_outcome": "Toggle sits in normal page flow, covers nothing, and still switches the whole page",
+        "outputs": [
+          "button#contrast-toggle",
+          "div#contrast-wrap"
+        ],
+        "completion_check": "1 toggle, tap target 44px, page parses",
+        "dependencies": [],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-19"
+        ],
+        "revises": "W-12",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 3,
+          "time_minutes": 10
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The high-contrast toggle sits in normal page flow below the menu, overlaps no content at 360px or 1280px, and still toggles hc-mode on body and back.",
+            "constraints": [
+              "No position fixed on the toggle",
+              "Toggle reachable at all screen sizes",
+              "Whole-page hc-mode styles unchanged"
+            ],
+            "context": [
+              "charter item 12",
+              "section W-12"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-12 Builder",
+              "steps": "Replace section#contrast-section with div#contrast-wrap placed at the top of the body content under the fixed menu, holding button#contrast-toggle (aria-pressed) with static positioning. Keep the hc-mode toggle and saved choice."
+            },
+            "verification": [
+              {
+                "text": "One toggle",
+                "type": "element-count",
+                "target": "#contrast-toggle",
+                "expect": 1
+              },
+              {
+                "text": "Toggle at least 44px",
+                "type": "tap-targets",
+                "target": "#contrast-wrap",
+                "expect": 44
+              },
+              {
+                "text": "Page parses",
+                "type": "named-test",
+                "target": "page-parses",
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "estimate": 8,
+        "cost": 8
+      }
+    ],
+    "attempts_used": 2,
+    "registered": [
+      "T-shirt sizes S, M, L, XL only",
+      "Remove unsupplied sponsor badges",
+      "Fee calculator is not a form",
+      "Hero CTA static to #register, countdown inside hero",
+      "Menu link to gallery",
+      "Contrast toggle no longer covers content"
+    ]
+  }
+]

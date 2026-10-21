@@ -1,0 +1,4864 @@
+{
+  "schema": "atom/1",
+  "atoms": [
+    {
+      "schema": "atom/1",
+      "id": "W-1.a1",
+      "workflow": "W-1",
+      "name": "Write Problem section",
+      "owner": "W-1 Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The Problem section states that customers today cannot see the menu or order ahead.",
+      "how": {
+        "kind": "AI",
+        "agent": "W-1 Builder",
+        "steps": "Write the section '## Problem' in plain language, naming Brew Lab and stating that customers today cannot see the menu or order ahead."
+      },
+      "constraints": [
+        "No invented facts",
+        "Plain everyday language"
+      ],
+      "context": [
+        "charter problem",
+        "done-when 1"
+      ],
+      "defined_output": [
+        {
+          "text": "A Problem heading",
+          "kind": "heading",
+          "target": "Problem",
+          "met": true
+        },
+        {
+          "text": "The problem statement",
+          "kind": "facts",
+          "target": [
+            "cannot see the menu or order ahead"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Write Problem section",
+          "method": "heading-present: Problem heading present",
+          "met": true,
+          "evidence": "heading 'Problem' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Write Problem section",
+          "method": "section-not-empty: Problem section has content",
+          "met": true,
+          "evidence": "section 'Problem' has 85 word(s), needs 20"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Write Problem section",
+          "method": "facts-present: Problem fact present",
+          "met": true,
+          "evidence": "all 1 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Write Problem section",
+          "form": "doc",
+          "ref": "prd.md#Problem"
+        },
+        {
+          "verb": "make",
+          "name": "site/v1.md",
+          "form": "doc",
+          "ref": "site/v1.md"
+        },
+        {
+          "verb": "make",
+          "name": "prd.md",
+          "form": "doc",
+          "ref": "prd.md"
+        }
+      ],
+      "depends_on": [],
+      "used_by": [
+        {
+          "atom": "W-2.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-3.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-4.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-5.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-6.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-7.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-8.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "This part explains the problem the website solves: customers can't see the menu or order ahead today.",
+      "details": {
+        "section": "W-1"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-2.a1",
+      "workflow": "W-2",
+      "name": "Write Users section",
+      "owner": "W-2 Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The Users section names Coffee lovers and Office staff nearby and lists what each group does on the page.",
+      "how": {
+        "kind": "AI",
+        "agent": "W-2 Builder",
+        "steps": "Write the section '## Users' with a subsection per group: Coffee lovers (look at the menu with prices, check the opening hours, find the address, place a pre-order for pickup) and Office staff nearby (place a quick pre-order on their phone, pick it up on the way to work)."
+      },
+      "constraints": [
+        "No invented facts",
+        "Plain everyday language"
+      ],
+      "context": [
+        "charter user_groups",
+        "done-when 2"
+      ],
+      "defined_output": [
+        {
+          "text": "A Users heading",
+          "kind": "heading",
+          "target": "Users",
+          "met": true
+        },
+        {
+          "text": "Both user group names",
+          "kind": "facts",
+          "target": [
+            "Coffee lovers",
+            "Office staff nearby"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Write Users section",
+          "method": "heading-present: Users heading present",
+          "met": true,
+          "evidence": "heading 'Users' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Write Users section",
+          "method": "section-not-empty: Users section has content",
+          "met": true,
+          "evidence": "section 'Users' has 64 word(s), needs 40"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Write Users section",
+          "method": "facts-present: Both groups named",
+          "met": true,
+          "evidence": "all 2 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Write Users section",
+          "form": "doc",
+          "ref": "prd.md#Users"
+        },
+        {
+          "verb": "make",
+          "name": "site/v2.md",
+          "form": "doc",
+          "ref": "site/v2.md"
+        },
+        {
+          "verb": "make",
+          "name": "prd.md",
+          "form": "doc",
+          "ref": "prd.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-1.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-3.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-4.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-5.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-6.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-7.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-8.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "This part describes the two kinds of customers, coffee lovers and office staff nearby, and what each of them does on the page.",
+      "details": {
+        "section": "W-2"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-3.a1",
+      "workflow": "W-3",
+      "name": "Write Goals section",
+      "owner": "W-3 Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The Goals section states that customers can see the menu, check the hours, find the address and pre-order for pickup.",
+      "how": {
+        "kind": "AI",
+        "agent": "W-3 Builder",
+        "steps": "Write the section '## Goals' with numbered goals G1 see the menu with prices, G2 check the opening hours, G3 find the address, G4 pre-order for pickup at the shop."
+      },
+      "constraints": [
+        "Goals numbered G1, G2, ... uniquely",
+        "No invented facts"
+      ],
+      "context": [
+        "charter statement",
+        "done-when 3"
+      ],
+      "defined_output": [
+        {
+          "text": "A Goals heading",
+          "kind": "heading",
+          "target": "Goals",
+          "met": true
+        },
+        {
+          "text": "Numbered goal ids",
+          "kind": "ids",
+          "target": "G",
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Write Goals section",
+          "method": "heading-present: Goals heading present",
+          "met": true,
+          "evidence": "heading 'Goals' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Write Goals section",
+          "method": "section-not-empty: Goals section has content",
+          "met": true,
+          "evidence": "section 'Goals' has 105 word(s), needs 30"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Write Goals section",
+          "method": "ids-unique: Goal ids unique",
+          "met": true,
+          "evidence": "4 unique id(s): G1, G2, G3, G4"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Write Goals section",
+          "form": "doc",
+          "ref": "prd.md#Goals"
+        },
+        {
+          "verb": "make",
+          "name": "site/v3.md",
+          "form": "doc",
+          "ref": "site/v3.md"
+        },
+        {
+          "verb": "make",
+          "name": "prd.md",
+          "form": "doc",
+          "ref": "prd.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-1.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-2.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-4.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-5.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-6.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-7.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-8.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "I wrote the Goals section of the Brew Lab document. It sets four goals: customers can see the menu with prices, check the opening hours, find the address, and pre-order for pickup at the shop.",
+      "details": {
+        "section": "W-3"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-4.a1",
+      "workflow": "W-4",
+      "name": "Write Requirements section",
+      "owner": "W-4 Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The Requirements section lists name and address as text with no map, the seven priced menu items, the hours, the pre-order form, phone support and no shop phone number, as numbered requirements.",
+      "how": {
+        "kind": "AI",
+        "agent": "W-4 Builder",
+        "steps": "Write the section '## Requirements' as numbered requirements R1, R2, ...: shop name and address as text with no embedded map; the seven menu items with rupee prices; opening hours 7 am to 10 pm, every day; pre-order form with fields name, phone, items and pickup time sent to hello@brewlab.example, pickup at the shop, no online payment; the page works on phones; the page shows no shop phone number."
+      },
+      "constraints": [
+        "Ids R1, R2, ... unique and sequential",
+        "Facts copied exactly",
+        "No shop phone number or map",
+        "No invented facts",
+        "Nothing to be confirmed"
+      ],
+      "context": [
+        "charter features",
+        "charter facts",
+        "done-when 4-8"
+      ],
+      "defined_output": [
+        {
+          "text": "A Requirements heading",
+          "kind": "heading",
+          "target": "Requirements",
+          "met": true
+        },
+        {
+          "text": "Numbered requirement ids",
+          "kind": "ids",
+          "target": "R",
+          "met": true
+        },
+        {
+          "text": "All brief facts exactly",
+          "kind": "facts",
+          "target": [
+            "Brew Lab",
+            "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+            "Filter coffee 90",
+            "Cappuccino 160",
+            "Latte 180",
+            "Cold brew 200",
+            "Masala chai 80",
+            "Almond croissant 140",
+            "Banana bread slice 120",
+            "7 am to 10 pm, every day",
+            "name, phone, items and pickup time",
+            "hello@brewlab.example"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Write Requirements section",
+          "method": "heading-present: Requirements heading present",
+          "met": true,
+          "evidence": "heading 'Requirements' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Write Requirements section",
+          "method": "section-not-empty: Requirements section has content",
+          "met": true,
+          "evidence": "section 'Requirements' has 309 word(s), needs 120"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Write Requirements section",
+          "method": "ids-unique: Requirement ids unique",
+          "met": true,
+          "evidence": "13 unique id(s): R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Write Requirements section",
+          "method": "facts-present: Brief facts present exactly",
+          "met": true,
+          "evidence": "all 12 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Write Requirements section",
+          "form": "doc",
+          "ref": "prd.md#Requirements"
+        },
+        {
+          "verb": "make",
+          "name": "site/v4.md",
+          "form": "doc",
+          "ref": "site/v4.md"
+        },
+        {
+          "verb": "make",
+          "name": "prd.md",
+          "form": "doc",
+          "ref": "prd.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-1.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-2.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-3.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-5.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-6.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-7.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-8.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-9.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-10.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-12.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-13.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-14.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-16.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-18.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-19.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-20.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-21.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-22.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-23.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        }
+      ],
+      "notes": "It created A Requirements heading, Numbered requirement ids and All brief facts exactly.",
+      "details": {
+        "section": "W-4"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-5.a1",
+      "workflow": "W-5",
+      "name": "Write Success metrics section",
+      "owner": "W-5 Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The Success metrics section states 20 pre-orders a week within the first month and each goal has a metric naming it.",
+      "how": {
+        "kind": "AI",
+        "agent": "W-5 Builder",
+        "steps": "Write the section '## Success metrics' with a metric for each of G1.. naming the goal it measures; the pre-order metric (G4) is 20 pre-orders a week within the first month; other metrics that need no number are stated without invented figures."
+      },
+      "constraints": [
+        "Each metric names its goal",
+        "Numeric metric states its window",
+        "No invented facts"
+      ],
+      "context": [
+        "charter success_measures",
+        "Goals section",
+        "done-when 9"
+      ],
+      "defined_output": [
+        {
+          "text": "A Success metrics heading",
+          "kind": "heading",
+          "target": "Success metrics",
+          "met": true
+        },
+        {
+          "text": "The pre-order target",
+          "kind": "facts",
+          "target": [
+            "20 pre-orders a week within the first month"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Write Success metrics section",
+          "method": "heading-present: Success metrics heading present",
+          "met": true,
+          "evidence": "heading 'Success metrics' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Write Success metrics section",
+          "method": "section-not-empty: Success metrics section has content",
+          "met": true,
+          "evidence": "section 'Success metrics' has 76 word(s), needs 30"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Write Success metrics section",
+          "method": "facts-present: Target stated exactly",
+          "met": true,
+          "evidence": "all 1 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Write Success metrics section",
+          "form": "doc",
+          "ref": "prd.md#Success metrics"
+        },
+        {
+          "verb": "make",
+          "name": "site/v5.md",
+          "form": "doc",
+          "ref": "site/v5.md"
+        },
+        {
+          "verb": "make",
+          "name": "prd.md",
+          "form": "doc",
+          "ref": "prd.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-1.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-2.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-3.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-4.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-6.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-7.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-8.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "I wrote the Success metrics section of the document. It sets the target of 20 pre-orders a week within the first month and gives each of the four goals a metric that names it.",
+      "details": {
+        "section": "W-5"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-6.a1",
+      "workflow": "W-6",
+      "name": "Write Out of scope section",
+      "owner": "W-6 Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The Out of scope section lists online payment, an embedded map and a shop phone number, and no item in the document is marked to be confirmed.",
+      "how": {
+        "kind": "AI",
+        "agent": "W-6 Builder",
+        "steps": "Write the section '## Out of scope' listing online payment, an embedded map and a shop phone number as not part of this version. Do not use any to-be-confirmed marks."
+      },
+      "constraints": [
+        "No to-be-confirmed wording anywhere",
+        "No invented facts"
+      ],
+      "context": [
+        "charter constraints",
+        "charter rules",
+        "done-when 10, 11"
+      ],
+      "defined_output": [
+        {
+          "text": "An Out of scope heading",
+          "kind": "heading",
+          "target": "Out of scope",
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Write Out of scope section",
+          "method": "heading-present: Out of scope heading present",
+          "met": true,
+          "evidence": "heading 'Out of scope' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Write Out of scope section",
+          "method": "section-not-empty: Out of scope section has content",
+          "met": true,
+          "evidence": "section 'Out of scope' has 93 word(s), needs 15"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Write Out of scope section",
+          "form": "doc",
+          "ref": "prd.md#Out of scope"
+        },
+        {
+          "verb": "make",
+          "name": "site/v6.md",
+          "form": "doc",
+          "ref": "site/v6.md"
+        },
+        {
+          "verb": "make",
+          "name": "prd.md",
+          "form": "doc",
+          "ref": "prd.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-1.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-2.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-3.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-4.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-5.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-7.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-8.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "I wrote the Out of scope section, which lists online payment, an embedded map and a shop phone number as not part of this version. It also leaves out any to-be-confirmed marks, so nothing in the document is left open.",
+      "details": {
+        "section": "W-6"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-7.a1",
+      "workflow": "W-7",
+      "name": "Fix Out of scope section",
+      "owner": "W-6 Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "Out of scope has no claim about how or when customers pay and still lists the three exclusions.",
+      "how": {
+        "kind": "AI",
+        "agent": "W-6 Builder",
+        "steps": "Rewrite the \"## Out of scope\" section. Remove the sentence \"Customers pay when they collect the order at the shop.\" State only that the page takes no online payment and that customers collect the order at the shop. Keep the embedded map and shop phone number exclusions."
+      },
+      "constraints": [
+        "No invented facts",
+        "No to-be-confirmed marks",
+        "Keep the three exclusions"
+      ],
+      "context": [
+        "Charter items 10 and 11",
+        "Section W-6",
+        "Findings D-5, F-12"
+      ],
+      "defined_output": [
+        {
+          "text": "Out of scope heading exists",
+          "kind": "heading",
+          "target": "Out of scope",
+          "met": true
+        },
+        {
+          "text": "Address kept exactly",
+          "kind": "facts",
+          "target": [
+            "12, 100 Feet Road, Indiranagar, Bengaluru 560038"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Fix Out of scope section",
+          "method": "heading-present: Out of scope heading present",
+          "met": true,
+          "evidence": "heading 'Out of scope' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Fix Out of scope section",
+          "method": "section-not-empty: Out of scope has content",
+          "met": true,
+          "evidence": "section 'Out of scope' has 90 word(s), needs 1"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Fix Out of scope section",
+          "method": "facts-present: Address kept exactly",
+          "met": true,
+          "evidence": "all 1 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Fix Out of scope section",
+          "form": "doc",
+          "ref": "prd.md#Out of scope"
+        },
+        {
+          "verb": "make",
+          "name": "site/v7.md",
+          "form": "doc",
+          "ref": "site/v7.md"
+        },
+        {
+          "verb": "make",
+          "name": "prd.md",
+          "form": "doc",
+          "ref": "prd.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-1.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-2.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-3.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-4.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-5.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-6.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-8.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "This part now lists what the page will not do: take online payment, show a map, or show a shop phone number. It no longer says anything about how customers pay.",
+      "details": {
+        "section": "W-6"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-8.a1",
+      "workflow": "W-8",
+      "name": "Fix Success metrics section",
+      "owner": "W-5 Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "Metrics G1 to G3 each state a measurement window and G4 keeps its target.",
+      "how": {
+        "kind": "AI",
+        "agent": "W-5 Builder",
+        "steps": "Rewrite the \"## Success metrics\" section. Keep one metric per goal G1 to G4. State that G1 to G3 are checked on the page when it goes live and then weekly through the first month. Keep G4 as 20 pre-orders a week within the first month."
+      },
+      "constraints": [
+        "No new figures",
+        "Each metric names its goal",
+        "No to-be-confirmed marks"
+      ],
+      "context": [
+        "Charter item 9",
+        "Section W-5",
+        "Finding F-13"
+      ],
+      "defined_output": [
+        {
+          "text": "Success metrics heading exists",
+          "kind": "heading",
+          "target": "Success metrics",
+          "met": true
+        },
+        {
+          "text": "Pre-order target stated exactly",
+          "kind": "facts",
+          "target": [
+            "20 pre-orders a week within the first month"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Fix Success metrics section",
+          "method": "heading-present: Success metrics heading present",
+          "met": true,
+          "evidence": "heading 'Success metrics' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Fix Success metrics section",
+          "method": "section-not-empty: Success metrics has content",
+          "met": true,
+          "evidence": "section 'Success metrics' has 147 word(s), needs 1"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Fix Success metrics section",
+          "method": "facts-present: Target stated exactly",
+          "met": true,
+          "evidence": "all 1 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Fix Success metrics section",
+          "form": "doc",
+          "ref": "prd.md#Success metrics"
+        },
+        {
+          "verb": "make",
+          "name": "site/v8.md",
+          "form": "doc",
+          "ref": "site/v8.md"
+        },
+        {
+          "verb": "make",
+          "name": "prd.md",
+          "form": "doc",
+          "ref": "prd.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-1.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-2.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-3.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-4.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-5.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-6.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-7.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [],
+      "notes": "I rewrote the Success metrics section so the menu, opening hours and address are each checked when the page goes live and then every week through the first month. The pre-order target stays at 20 pre-orders a week within the first month, and no new numbers were added.",
+      "details": {
+        "section": "W-5"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-9.a1",
+      "workflow": "W-9",
+      "name": "Write HLD Purpose and scope section",
+      "owner": "W Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The Purpose and scope section states what Brew Lab's page is for and what it covers.",
+      "how": {
+        "kind": "AI",
+        "agent": "W Builder",
+        "steps": "Write the section under the heading '## Purpose and scope': name Brew Lab, the users, the problem, and what is in and out of scope, using only PRD facts."
+      },
+      "constraints": [
+        "No invented facts",
+        "Nothing to be confirmed",
+        "No shop phone number"
+      ],
+      "context": [
+        "charter item 1",
+        "PRD R1 to R13"
+      ],
+      "defined_output": [
+        {
+          "text": "A Purpose and scope heading",
+          "kind": "heading",
+          "target": "Purpose and scope",
+          "met": true
+        },
+        {
+          "text": "The shop name and address appear",
+          "kind": "facts",
+          "target": [
+            "Brew Lab",
+            "12, 100 Feet Road, Indiranagar, Bengaluru 560038"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Write HLD Purpose and scope section",
+          "method": "heading-present: Heading present",
+          "met": true,
+          "evidence": "heading 'Purpose and scope' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Write HLD Purpose and scope section",
+          "method": "section-not-empty: Section has content",
+          "met": true,
+          "evidence": "section 'Purpose and scope' has 236 word(s), needs 40"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Write HLD Purpose and scope section",
+          "method": "facts-present: Brief facts present",
+          "met": true,
+          "evidence": "all 2 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Write HLD Purpose and scope section",
+          "form": "doc",
+          "ref": "hld.md#Purpose and scope"
+        },
+        {
+          "verb": "make",
+          "name": "site/v1.md",
+          "form": "doc",
+          "ref": "site/v1.md"
+        },
+        {
+          "verb": "make",
+          "name": "hld.md",
+          "form": "doc",
+          "ref": "hld.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-4.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-10.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-12.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-13.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-14.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-16.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-18.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "This part explains why the Brew Lab page exists, who it is for, and what it does and does not include.",
+      "details": {
+        "section": "W-9"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-10.a1",
+      "workflow": "W-10",
+      "name": "Write HLD Pages section",
+      "owner": "W Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The Pages section describes the one page and what a visitor sees on it.",
+      "how": {
+        "kind": "AI",
+        "agent": "W Builder",
+        "steps": "Write the section under the heading '## Pages': one page showing name, address as text, menu with rupee prices, opening hours, the pre-order form and the pickup note."
+      },
+      "constraints": [
+        "No invented facts",
+        "No embedded map",
+        "No shop phone number",
+        "Nothing to be confirmed"
+      ],
+      "context": [
+        "charter item 2",
+        "PRD R1 to R12"
+      ],
+      "defined_output": [
+        {
+          "text": "A Pages heading",
+          "kind": "heading",
+          "target": "Pages",
+          "met": true
+        },
+        {
+          "text": "Opening hours and the order email appear",
+          "kind": "facts",
+          "target": [
+            "7 am to 10 pm",
+            "hello@brewlab.example"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Write HLD Pages section",
+          "method": "heading-present: Heading present",
+          "met": true,
+          "evidence": "heading 'Pages' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Write HLD Pages section",
+          "method": "section-not-empty: Section has content",
+          "met": true,
+          "evidence": "section 'Pages' has 208 word(s), needs 40"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Write HLD Pages section",
+          "method": "facts-present: Brief facts present",
+          "met": true,
+          "evidence": "all 2 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Write HLD Pages section",
+          "form": "doc",
+          "ref": "hld.md#Pages"
+        },
+        {
+          "verb": "make",
+          "name": "site/v2.md",
+          "form": "doc",
+          "ref": "site/v2.md"
+        },
+        {
+          "verb": "make",
+          "name": "hld.md",
+          "form": "doc",
+          "ref": "hld.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-4.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-9.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-11.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-12.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-13.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-14.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-16.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-18.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "This part describes the one page of the Brew Lab website and what a visitor sees on it, from the shop name and menu to the pre-order form.",
+      "details": {
+        "section": "W-10"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-11.a1",
+      "workflow": "W-11",
+      "name": "Write HLD Components section",
+      "owner": "W Builder",
+      "status": "closed",
+      "attempt": 2,
+      "goal": "Every PRD requirement R1 to R13 is covered by a component that states its responsibility.",
+      "how": {
+        "kind": "AI",
+        "agent": "W Builder",
+        "steps": "Write the section under the heading '## Components': list C1, C2, ... (for example header, menu, hours, pre-order form, pickup note, layout and single file). Each gives its responsibility and the requirement ids it covers, so that R1 to R13 are all named."
+      },
+      "constraints": [
+        "No invented facts",
+        "Components numbered C1, C2, ... in order",
+        "Each component states its responsibility",
+        "Nothing to be confirmed"
+      ],
+      "context": [
+        "charter item 3",
+        "PRD R1 to R13"
+      ],
+      "defined_output": [
+        {
+          "text": "A Components heading",
+          "kind": "heading",
+          "target": "Components",
+          "met": true
+        },
+        {
+          "text": "Requirement ids R1 to R13 are named",
+          "kind": "ids",
+          "target": "R",
+          "met": true
+        },
+        {
+          "text": "Menu items and prices appear",
+          "kind": "facts",
+          "target": [
+            "Filter coffee",
+            "Cappuccino",
+            "Latte",
+            "Cold brew",
+            "Masala chai",
+            "Almond croissant",
+            "Banana bread slice"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Write HLD Components section",
+          "method": "heading-present: Heading present",
+          "met": true,
+          "evidence": "heading 'Components' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Write HLD Components section",
+          "method": "section-not-empty: Section has content",
+          "met": true,
+          "evidence": "section 'Components' has 533 word(s), needs 120"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Write HLD Components section",
+          "method": "ids-unique: Requirement ids are unique",
+          "met": true,
+          "evidence": "13 unique id(s): R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Write HLD Components section",
+          "method": "ids-unique: Component ids are unique",
+          "met": true,
+          "evidence": "9 unique id(s): C1, C2, C3, C4, C5, C6, C7, C8, C9"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Write HLD Components section",
+          "method": "facts-present: All requirements are named",
+          "met": true,
+          "evidence": "all 13 fact(s) in the document"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Write HLD Components section",
+          "method": "facts-present: Menu items and prices appear",
+          "met": true,
+          "evidence": "all 7 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Write HLD Components section",
+          "form": "doc",
+          "ref": "hld.md#Components"
+        },
+        {
+          "verb": "make",
+          "name": "site/v4.md",
+          "form": "doc",
+          "ref": "site/v4.md"
+        },
+        {
+          "verb": "make",
+          "name": "hld.md",
+          "form": "doc",
+          "ref": "hld.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-4.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-9.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-10.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-12.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-13.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-14.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-16.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-18.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-19.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-20.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-21.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-22.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-23.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-24.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-25.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-26.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-27.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-28.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-29.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-30.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-31.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-32.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        }
+      ],
+      "notes": "@Coordination I wrote the Components section of the high-level design for Brew Lab. It lists nine components, from the header and menu to the pre-order form and the phone layout, and every requirement from R1 to R13 is covered by at least one of them.",
+      "details": {
+        "section": "W-11"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-12.a1",
+      "workflow": "W-12",
+      "name": "Write HLD Data flow section",
+      "owner": "W Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The Data flow section explains how a pre-order goes from the form to hello@brewlab.example.",
+      "how": {
+        "kind": "AI",
+        "agent": "W Builder",
+        "steps": "Write the section under the heading '## Data flow': the customer fills in name, phone, items and pickup time, submits, the order is sent to hello@brewlab.example, and the customer collects it at the shop. No payment data."
+      },
+      "constraints": [
+        "No invented facts",
+        "No online payment",
+        "Nothing to be confirmed"
+      ],
+      "context": [
+        "charter item 4",
+        "PRD R7, R8, R10"
+      ],
+      "defined_output": [
+        {
+          "text": "A Data flow heading",
+          "kind": "heading",
+          "target": "Data flow",
+          "met": true
+        },
+        {
+          "text": "The order email appears",
+          "kind": "facts",
+          "target": [
+            "hello@brewlab.example"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Write HLD Data flow section",
+          "method": "heading-present: Heading present",
+          "met": true,
+          "evidence": "heading 'Data flow' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Write HLD Data flow section",
+          "method": "section-not-empty: Section has content",
+          "met": true,
+          "evidence": "section 'Data flow' has 218 word(s), needs 40"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Write HLD Data flow section",
+          "method": "facts-present: Order email present",
+          "met": true,
+          "evidence": "all 1 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Write HLD Data flow section",
+          "form": "doc",
+          "ref": "hld.md#Data flow"
+        },
+        {
+          "verb": "make",
+          "name": "site/v5.md",
+          "form": "doc",
+          "ref": "site/v5.md"
+        },
+        {
+          "verb": "make",
+          "name": "hld.md",
+          "form": "doc",
+          "ref": "hld.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-4.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-9.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-10.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-13.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-14.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-16.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-18.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "This part explains how a customer's order travels from the form on the page to the shop's email, and that the customer then collects it in person without paying online.",
+      "details": {
+        "section": "W-12"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-13.a1",
+      "workflow": "W-13",
+      "name": "Write HLD Hosting and deployment section",
+      "owner": "W Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The Hosting and deployment section says how the one-file page is delivered, without invented facts.",
+      "how": {
+        "kind": "AI",
+        "agent": "W Builder",
+        "steps": "Write the section under the heading '## Hosting and deployment': one file of plain HTML, CSS and JavaScript, with no build step, served as a static page. Put any assumption on a line starting 'Assumption:'."
+      },
+      "constraints": [
+        "No invented facts or provider names unless labelled Assumption:",
+        "Plain HTML, CSS and JavaScript in one file",
+        "Nothing to be confirmed"
+      ],
+      "context": [
+        "charter item 5",
+        "PRD R13"
+      ],
+      "defined_output": [
+        {
+          "text": "A Hosting and deployment heading",
+          "kind": "heading",
+          "target": "Hosting and deployment",
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Write HLD Hosting and deployment section",
+          "method": "heading-present: Heading present",
+          "met": true,
+          "evidence": "heading 'Hosting and deployment' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Write HLD Hosting and deployment section",
+          "method": "section-not-empty: Section has content",
+          "met": true,
+          "evidence": "section 'Hosting and deployment' has 216 word(s), needs 40"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Write HLD Hosting and deployment section",
+          "form": "doc",
+          "ref": "hld.md#Hosting and deployment"
+        },
+        {
+          "verb": "make",
+          "name": "site/v6.md",
+          "form": "doc",
+          "ref": "site/v6.md"
+        },
+        {
+          "verb": "make",
+          "name": "hld.md",
+          "form": "doc",
+          "ref": "hld.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-4.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-9.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-10.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-12.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-14.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-16.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-18.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "This part explains where the Brew Lab page will live and how it gets published. The page is a single file that is put online as it is, with no extra build work.",
+      "details": {
+        "section": "W-13"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-14.a1",
+      "workflow": "W-14",
+      "name": "Write HLD Risks section",
+      "owner": "W Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The Risks section lists the risks to the page and its goal, each with a mitigation.",
+      "how": {
+        "kind": "AI",
+        "agent": "W Builder",
+        "steps": "Write the section under the heading '## Risks': for example orders not reaching hello@brewlab.example, a form hard to use on a phone, and too few pre-orders against the 20 pre-orders a week target."
+      },
+      "constraints": [
+        "No invented facts or numbers",
+        "Nothing to be confirmed",
+        "Label any assumption with 'Assumption:'"
+      ],
+      "context": [
+        "charter item 6",
+        "PRD R7, R8, R11, success measure"
+      ],
+      "defined_output": [
+        {
+          "text": "A Risks heading",
+          "kind": "heading",
+          "target": "Risks",
+          "met": true
+        },
+        {
+          "text": "The success target appears",
+          "kind": "facts",
+          "target": [
+            "20 pre-orders a week"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Write HLD Risks section",
+          "method": "heading-present: Heading present",
+          "met": true,
+          "evidence": "heading 'Risks' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Write HLD Risks section",
+          "method": "section-not-empty: Section has content",
+          "met": true,
+          "evidence": "section 'Risks' has 464 word(s), needs 40"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Write HLD Risks section",
+          "method": "facts-present: Target present",
+          "met": true,
+          "evidence": "all 1 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Write HLD Risks section",
+          "form": "doc",
+          "ref": "hld.md#Risks"
+        },
+        {
+          "verb": "make",
+          "name": "site/v7.md",
+          "form": "doc",
+          "ref": "site/v7.md"
+        },
+        {
+          "verb": "make",
+          "name": "hld.md",
+          "form": "doc",
+          "ref": "hld.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-4.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-9.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-10.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-12.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-13.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-15.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-16.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-18.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "This part lists what could go wrong with the Brew Lab page, such as orders not arriving by email or too few people ordering ahead, and says how each problem would be reduced.",
+      "details": {
+        "section": "W-14"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-15.a1",
+      "workflow": "W-15",
+      "name": "Fix HLD Components section names",
+      "owner": "W-11 Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The Components section renames C1 to Shop name and C9 to One-file page and keeps every requirement R1 to R13 named.",
+      "how": {
+        "kind": "AI",
+        "agent": "W-11 Builder",
+        "steps": "Rewrite the section under the heading '## Components'. Rename C1 to 'Shop name' and C9 to 'One-file page' (also in traceability wording). Keep C1 to C9 ids, responsibilities and the R1 to R13 list unchanged."
+      },
+      "constraints": [
+        "Keep all other content and facts unchanged",
+        "Add no new facts",
+        "Do not use the words Header, Requester or Single-file"
+      ],
+      "context": [
+        "charter item 3",
+        "section W-11"
+      ],
+      "defined_output": [
+        {
+          "text": "Components heading exists",
+          "kind": "heading",
+          "target": "Components",
+          "met": true
+        },
+        {
+          "text": "Requirement ids R1 to R13 are named",
+          "kind": "ids",
+          "target": "R",
+          "met": true
+        },
+        {
+          "text": "Menu items appear",
+          "kind": "facts",
+          "target": [
+            "Filter coffee",
+            "Cappuccino",
+            "Latte",
+            "Cold brew",
+            "Masala chai",
+            "Almond croissant",
+            "Banana bread slice"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Fix HLD Components section names",
+          "method": "heading-present: Components heading present",
+          "met": true,
+          "evidence": "heading 'Components' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Fix HLD Components section names",
+          "method": "section-not-empty: Components section has content",
+          "met": true,
+          "evidence": "section 'Components' has 536 word(s), needs 150"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Fix HLD Components section names",
+          "method": "ids-unique: Requirement ids unique",
+          "met": true,
+          "evidence": "13 unique id(s): R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Fix HLD Components section names",
+          "method": "facts-present: All requirements named",
+          "met": true,
+          "evidence": "all 13 fact(s) in the document"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Fix HLD Components section names",
+          "method": "facts-present: Menu items appear",
+          "met": true,
+          "evidence": "all 7 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Fix HLD Components section names",
+          "form": "doc",
+          "ref": "hld.md#Components"
+        },
+        {
+          "verb": "make",
+          "name": "site/v8.md",
+          "form": "doc",
+          "ref": "site/v8.md"
+        },
+        {
+          "verb": "make",
+          "name": "hld.md",
+          "form": "doc",
+          "ref": "hld.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-4.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-9.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-10.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-12.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-13.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-14.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-16.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-18.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-19.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-20.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-21.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-22.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-23.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-24.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-25.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-26.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-27.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-28.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-29.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-30.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-31.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-32.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        }
+      ],
+      "notes": "This part now names two of the page's building blocks with plain words from your brief. Nothing else about how the page is made has changed.",
+      "details": {
+        "section": "W-11"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-16.a1",
+      "workflow": "W-16",
+      "name": "Fix HLD Risks section wording",
+      "owner": "W-14 Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The Risks section no longer uses the word Requester and keeps all six risks and the 20 pre-orders a week target.",
+      "how": {
+        "kind": "AI",
+        "agent": "W-14 Builder",
+        "steps": "Rewrite the section under the heading '## Risks'. Replace 'for the Requester to confirm' with an 'Assumption:' line saying the host and web address are to be chosen by the shop owner. Keep the six risks and mitigations unchanged."
+      },
+      "constraints": [
+        "Keep all other content and facts unchanged",
+        "Add no new facts",
+        "Do not use the word Requester"
+      ],
+      "context": [
+        "charter item 6",
+        "section W-14"
+      ],
+      "defined_output": [
+        {
+          "text": "Risks heading exists",
+          "kind": "heading",
+          "target": "Risks",
+          "met": true
+        },
+        {
+          "text": "Target appears",
+          "kind": "facts",
+          "target": [
+            "20 pre-orders a week"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Fix HLD Risks section wording",
+          "method": "heading-present: Risks heading present",
+          "met": true,
+          "evidence": "heading 'Risks' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Fix HLD Risks section wording",
+          "method": "section-not-empty: Risks section has content",
+          "met": true,
+          "evidence": "section 'Risks' has 469 word(s), needs 40"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Fix HLD Risks section wording",
+          "method": "facts-present: Target present",
+          "met": true,
+          "evidence": "all 1 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Fix HLD Risks section wording",
+          "form": "doc",
+          "ref": "hld.md#Risks"
+        },
+        {
+          "verb": "make",
+          "name": "site/v9.md",
+          "form": "doc",
+          "ref": "site/v9.md"
+        },
+        {
+          "verb": "make",
+          "name": "hld.md",
+          "form": "doc",
+          "ref": "hld.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-4.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-9.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-10.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-12.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-13.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-14.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-17.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-18.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "The list of risks now says the shop owner will choose where the page is hosted and its web address. Everything else in the risks is the same.",
+      "details": {
+        "section": "W-14"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-17.a1",
+      "workflow": "W-17",
+      "name": "Fix HLD Components C9 name",
+      "owner": "W-11 Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The Components section uses the name 'Plain HTML, CSS and JavaScript in one file' for C9 and in the R13 line, with every requirement mapping unchanged.",
+      "how": {
+        "kind": "AI",
+        "agent": "W-11 Builder",
+        "steps": "Rewrite the section under the heading '## Components': rename C9 to 'Plain HTML, CSS and JavaScript in one file', use the same name in the R13 traceability line, and keep everything else as is."
+      },
+      "constraints": [
+        "Keep C1 to C8 and all requirement mappings unchanged",
+        "Add no new facts",
+        "Header, Single-file and One-file appear nowhere"
+      ],
+      "context": [
+        "PRD R13",
+        "Section W-11",
+        "Audit finding F-7"
+      ],
+      "defined_output": [
+        {
+          "text": "The Components heading exists",
+          "kind": "heading",
+          "target": "Components",
+          "met": true
+        },
+        {
+          "text": "Requirement ids R1 to R13 are named",
+          "kind": "ids",
+          "target": "R",
+          "met": true
+        },
+        {
+          "text": "All seven menu items appear",
+          "kind": "facts",
+          "target": [
+            "Filter coffee",
+            "Cappuccino",
+            "Latte",
+            "Cold brew",
+            "Masala chai",
+            "Almond croissant",
+            "Banana bread slice"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Fix HLD Components C9 name",
+          "method": "heading-present: Components heading present",
+          "met": true,
+          "evidence": "heading 'Components' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Fix HLD Components C9 name",
+          "method": "section-not-empty: Components section has content",
+          "met": true,
+          "evidence": "section 'Components' has 548 word(s), needs 40"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Fix HLD Components C9 name",
+          "method": "ids-unique: Requirement ids unique",
+          "met": true,
+          "evidence": "13 unique id(s): R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Fix HLD Components C9 name",
+          "method": "ids-unique: Component ids unique",
+          "met": true,
+          "evidence": "9 unique id(s): C1, C2, C3, C4, C5, C6, C7, C8, C9"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Fix HLD Components C9 name",
+          "method": "facts-present: All requirements named",
+          "met": true,
+          "evidence": "all 13 fact(s) in the document"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Fix HLD Components C9 name",
+          "method": "facts-present: Menu items appear",
+          "met": true,
+          "evidence": "all 7 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Fix HLD Components C9 name",
+          "form": "doc",
+          "ref": "hld.md#Components"
+        },
+        {
+          "verb": "make",
+          "name": "site/v10.md",
+          "form": "doc",
+          "ref": "site/v10.md"
+        },
+        {
+          "verb": "make",
+          "name": "hld.md",
+          "form": "doc",
+          "ref": "hld.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-4.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-9.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-10.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-12.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-13.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-14.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-16.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-18.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-19.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-20.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-21.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-22.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-23.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-24.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-25.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-26.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-27.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-28.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-29.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-30.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-31.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-32.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        }
+      ],
+      "notes": "This part fixes the name of the last building block of the page so it uses the same words as your brief. Nothing else about the page plan changed.",
+      "details": {
+        "section": "W-11"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-18.a1",
+      "workflow": "W-18",
+      "name": "Fix HLD Hosting assumption wording",
+      "owner": "W-13 Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The Hosting and deployment section's Assumption line says the host and web address are to be chosen by the shop owner, and the word Requester is gone.",
+      "how": {
+        "kind": "AI",
+        "agent": "W-13 Builder",
+        "steps": "Rewrite the section under the heading '## Hosting and deployment': change the Assumption line to say the host and web address are 'to be chosen by the shop owner', and keep everything else as is."
+      },
+      "constraints": [
+        "Keep every other sentence unchanged",
+        "Add no new facts",
+        "Requester appears nowhere"
+      ],
+      "context": [
+        "PRD R13",
+        "Section W-13",
+        "Audit finding F-7"
+      ],
+      "defined_output": [
+        {
+          "text": "The Hosting and deployment heading exists",
+          "kind": "heading",
+          "target": "Hosting and deployment",
+          "met": true
+        },
+        {
+          "text": "The order email is still named",
+          "kind": "facts",
+          "target": [
+            "hello@brewlab.example"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Fix HLD Hosting assumption wording",
+          "method": "heading-present: Hosting heading present",
+          "met": true,
+          "evidence": "heading 'Hosting and deployment' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Fix HLD Hosting assumption wording",
+          "method": "section-not-empty: Hosting section has content",
+          "met": true,
+          "evidence": "section 'Hosting and deployment' has 216 word(s), needs 40"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Fix HLD Hosting assumption wording",
+          "method": "facts-present: Order email present",
+          "met": true,
+          "evidence": "all 1 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Fix HLD Hosting assumption wording",
+          "form": "doc",
+          "ref": "hld.md#Hosting and deployment"
+        },
+        {
+          "verb": "make",
+          "name": "site/v11.md",
+          "form": "doc",
+          "ref": "site/v11.md"
+        },
+        {
+          "verb": "make",
+          "name": "hld.md",
+          "form": "doc",
+          "ref": "hld.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-4.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-9.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-10.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-12.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-13.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-14.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-16.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [],
+      "notes": "This part explains how the Brew Lab page is hosted and put online. It now says the shop owner will choose where the page lives and its web address.",
+      "details": {
+        "section": "W-13"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-19.a1",
+      "workflow": "W-19",
+      "name": "Write LLD Pages and sections",
+      "owner": "W-1 Builder",
+      "status": "closed",
+      "attempt": 2,
+      "goal": "The Pages and sections section lists each page section with an id and names every component C1 to C9 it implements.",
+      "how": {
+        "kind": "AI",
+        "agent": "W-1 Builder",
+        "steps": "Write the section '## Pages and sections'. Give each page section an id S1, S2 and so on, for the shop name, address, menu, opening hours, pre-order form and pickup note. For each, name the components it implements, so that C1, C2, C3, C4, C5, C6, C7, C8 and C9 all appear."
+      },
+      "constraints": [
+        "No invented facts",
+        "No embedded map",
+        "No shop phone number",
+        "Section ids are unique"
+      ],
+      "context": [
+        "done-when item 1",
+        "HLD Components C1-C9",
+        "PRD R1-R13"
+      ],
+      "defined_output": [
+        {
+          "text": "A heading Pages and sections",
+          "kind": "heading",
+          "target": "Pages and sections",
+          "met": true
+        },
+        {
+          "text": "Component ids C1 to C9 appear",
+          "kind": "ids",
+          "target": "C",
+          "met": true
+        },
+        {
+          "text": "Shop name, address, menu items with prices and hours appear",
+          "kind": "facts",
+          "target": [
+            "Brew Lab",
+            "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+            "Filter coffee",
+            "Cappuccino",
+            "Latte",
+            "Cold brew",
+            "Masala chai",
+            "Almond croissant",
+            "Banana bread slice",
+            "7 am to 10 pm"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Write LLD Pages and sections",
+          "method": "heading-present: Heading Pages and sections is present",
+          "met": true,
+          "evidence": "heading 'Pages and sections' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Write LLD Pages and sections",
+          "method": "section-not-empty: The section is not empty",
+          "met": true,
+          "evidence": "section 'Pages and sections' has 441 word(s), needs 120"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Write LLD Pages and sections",
+          "method": "ids-unique: Component ids are unique",
+          "met": true,
+          "evidence": "9 unique id(s): C1, C2, C3, C4, C5, C6, C7, C8, C9"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Write LLD Pages and sections",
+          "method": "facts-present: Key facts appear exactly",
+          "met": true,
+          "evidence": "all 10 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Write LLD Pages and sections",
+          "form": "doc",
+          "ref": "lld.md#Pages and sections"
+        },
+        {
+          "verb": "make",
+          "name": "site/v2.md",
+          "form": "doc",
+          "ref": "site/v2.md"
+        },
+        {
+          "verb": "make",
+          "name": "lld.md",
+          "form": "doc",
+          "ref": "lld.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-4.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-20.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-21.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-22.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-23.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-24.a1",
+          "why": "LLD slice S1: its pages and sections were in this builder's prompt"
+        },
+        {
+          "atom": "W-25.a1",
+          "why": "LLD slice S2: its pages and sections were in this builder's prompt"
+        },
+        {
+          "atom": "W-26.a1",
+          "why": "LLD slice S3: its pages and sections were in this builder's prompt"
+        },
+        {
+          "atom": "W-27.a1",
+          "why": "LLD slice S4: its pages and sections were in this builder's prompt"
+        },
+        {
+          "atom": "W-28.a1",
+          "why": "LLD slice S5: its pages and sections were in this builder's prompt"
+        },
+        {
+          "atom": "W-29.a1",
+          "why": "LLD slice S6: its pages and sections were in this builder's prompt"
+        },
+        {
+          "atom": "W-30.a1",
+          "why": "LLD slice S7: its pages and sections were in this builder's prompt"
+        }
+      ],
+      "notes": "This part lays out the Brew Lab page section by section: shop name, address, menu with prices, opening hours, pre-order form and pickup note. It also shows which part of the page delivers each piece of the plan.",
+      "details": {
+        "section": "W-19"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-20.a1",
+      "workflow": "W-20",
+      "name": "Write LLD Interactive elements",
+      "owner": "W-2 Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The Interactive elements section lists each interactive element with an id, a selector, a trigger and a behaviour.",
+      "how": {
+        "kind": "AI",
+        "agent": "W-2 Builder",
+        "steps": "Write the section '## Interactive elements'. Give ids E1, E2 and so on, to the pre-order submit button and the form submission that sends the order to hello@brewlab.example. For each, state selector, trigger and behaviour, and the section id it belongs to."
+      },
+      "constraints": [
+        "No invented facts",
+        "No online payment",
+        "Every element has selector, trigger and behaviour"
+      ],
+      "context": [
+        "done-when item 2",
+        "section ids S1 onward",
+        "HLD C5, C6"
+      ],
+      "defined_output": [
+        {
+          "text": "A heading Interactive elements",
+          "kind": "heading",
+          "target": "Interactive elements",
+          "met": true
+        },
+        {
+          "text": "Element ids E1, E2 appear",
+          "kind": "ids",
+          "target": "E",
+          "met": true
+        },
+        {
+          "text": "The order email address appears",
+          "kind": "facts",
+          "target": [
+            "hello@brewlab.example"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Write LLD Interactive elements",
+          "method": "heading-present: Heading is present",
+          "met": true,
+          "evidence": "heading 'Interactive elements' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Write LLD Interactive elements",
+          "method": "section-not-empty: The section is not empty",
+          "met": true,
+          "evidence": "section 'Interactive elements' has 246 word(s), needs 60"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Write LLD Interactive elements",
+          "method": "ids-unique: Element ids are unique",
+          "met": true,
+          "evidence": "2 unique id(s): E1, E2"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Write LLD Interactive elements",
+          "method": "facts-present: Order email appears",
+          "met": true,
+          "evidence": "all 1 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Write LLD Interactive elements",
+          "form": "doc",
+          "ref": "lld.md#Interactive elements"
+        },
+        {
+          "verb": "make",
+          "name": "site/v3.md",
+          "form": "doc",
+          "ref": "site/v3.md"
+        },
+        {
+          "verb": "make",
+          "name": "lld.md",
+          "form": "doc",
+          "ref": "lld.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-4.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-19.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-21.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-22.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-23.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-28.a1",
+          "why": "LLD slice S5: its interactive elements were in this builder's prompt"
+        }
+      ],
+      "notes": "This part describes what happens when a customer taps the order button: the order details are checked and sent to the shop's email address.",
+      "details": {
+        "section": "W-20"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-21.a1",
+      "workflow": "W-21",
+      "name": "Write LLD Form fields",
+      "owner": "W-3 Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The Form fields section lists name, phone, items and pickup time, each with a name, a type and a required flag.",
+      "how": {
+        "kind": "AI",
+        "agent": "W-3 Builder",
+        "steps": "Write the section '## Form fields'. Give ids F1, F2, F3 and F4 to name, phone, items and pickup time. For each, state the field name, the input type and whether it is required. Say the form has no payment fields."
+      },
+      "constraints": [
+        "No invented facts",
+        "No payment fields",
+        "Phone is the customer's own number only"
+      ],
+      "context": [
+        "done-when item 3",
+        "PRD R7, R10, R12",
+        "HLD C5"
+      ],
+      "defined_output": [
+        {
+          "text": "A heading Form fields",
+          "kind": "heading",
+          "target": "Form fields",
+          "met": true
+        },
+        {
+          "text": "Field ids F1 to F4 appear",
+          "kind": "ids",
+          "target": "F",
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Write LLD Form fields",
+          "method": "heading-present: Heading is present",
+          "met": true,
+          "evidence": "heading 'Form fields' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Write LLD Form fields",
+          "method": "section-not-empty: The section is not empty",
+          "met": true,
+          "evidence": "section 'Form fields' has 388 word(s), needs 60"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Write LLD Form fields",
+          "method": "ids-unique: Field ids are unique",
+          "met": true,
+          "evidence": "4 unique id(s): F1, F2, F3, F4"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Write LLD Form fields",
+          "form": "doc",
+          "ref": "lld.md#Form fields"
+        },
+        {
+          "verb": "make",
+          "name": "site/v4.md",
+          "form": "doc",
+          "ref": "site/v4.md"
+        },
+        {
+          "verb": "make",
+          "name": "lld.md",
+          "form": "doc",
+          "ref": "lld.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-4.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-19.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-20.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-22.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-23.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-28.a1",
+          "why": "LLD slice S5: its form fields were in this builder's prompt"
+        }
+      ],
+      "notes": "This part describes the four boxes a customer fills in to pre-order: name, phone, items and pickup time. It also says there is nothing to pay on the form.",
+      "details": {
+        "section": "W-21"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-22.a1",
+      "workflow": "W-22",
+      "name": "Write LLD File structure",
+      "owner": "W-4 Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The File structure section describes how the single file is organised into HTML, CSS and JavaScript parts.",
+      "how": {
+        "kind": "AI",
+        "agent": "W-4 Builder",
+        "steps": "Write the section '## File structure'. Describe the one file with its HTML, CSS and JavaScript parts and where each section id S1 onward sits. Use the wording 'Plain HTML, CSS and JavaScript in one file'."
+      },
+      "constraints": [
+        "No invented facts",
+        "No build step",
+        "One file only"
+      ],
+      "context": [
+        "done-when item 4",
+        "PRD R13",
+        "HLD C9"
+      ],
+      "defined_output": [
+        {
+          "text": "A heading File structure",
+          "kind": "heading",
+          "target": "File structure",
+          "met": true
+        },
+        {
+          "text": "The one-file wording appears",
+          "kind": "facts",
+          "target": [
+            "Plain HTML, CSS and JavaScript in one file"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Write LLD File structure",
+          "method": "heading-present: Heading is present",
+          "met": true,
+          "evidence": "heading 'File structure' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Write LLD File structure",
+          "method": "section-not-empty: The section is not empty",
+          "met": true,
+          "evidence": "section 'File structure' has 453 word(s), needs 40"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Write LLD File structure",
+          "method": "facts-present: One-file wording appears",
+          "met": true,
+          "evidence": "all 1 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Write LLD File structure",
+          "form": "doc",
+          "ref": "lld.md#File structure"
+        },
+        {
+          "verb": "make",
+          "name": "site/v5.md",
+          "form": "doc",
+          "ref": "site/v5.md"
+        },
+        {
+          "verb": "make",
+          "name": "lld.md",
+          "form": "doc",
+          "ref": "lld.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-4.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-19.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-20.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-21.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-23.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "I wrote the File structure section of the design. It explains that the whole Brew Lab page lives in one file of plain HTML, CSS and JavaScript, and shows where each part of the page sits inside that file.",
+      "details": {
+        "section": "W-22"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-23.a1",
+      "workflow": "W-23",
+      "name": "Write LLD Responsive and accessibility rules",
+      "owner": "W-5 Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The Responsive and accessibility rules section sets rules so the page is usable on phones and by assistive tools.",
+      "how": {
+        "kind": "AI",
+        "agent": "W-5 Builder",
+        "steps": "Write the section '## Responsive and accessibility rules'. State rules for phone layout, readable menu, opening hours and address, and a usable pre-order form. Add labels for every form field, keyboard access and readable contrast."
+      },
+      "constraints": [
+        "No invented facts",
+        "Must work on phones",
+        "No horizontal overflow at 360px and 1280px"
+      ],
+      "context": [
+        "done-when item 5",
+        "PRD R11",
+        "HLD C8"
+      ],
+      "defined_output": [
+        {
+          "text": "A heading Responsive and accessibility rules",
+          "kind": "heading",
+          "target": "Responsive and accessibility rules",
+          "met": true
+        },
+        {
+          "text": "Phone use is stated",
+          "kind": "facts",
+          "target": [
+            "Works on phones"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Write LLD Responsive and accessibility rules",
+          "method": "heading-present: Heading is present",
+          "met": true,
+          "evidence": "heading 'Responsive and accessibility rules' found in the document"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Write LLD Responsive and accessibility rules",
+          "method": "section-not-empty: The section is not empty",
+          "met": true,
+          "evidence": "section 'Responsive and accessibility rules' has 748 word(s), needs 60"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Write LLD Responsive and accessibility rules",
+          "method": "facts-present: Phone use is stated",
+          "met": true,
+          "evidence": "all 1 fact(s) in the document"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Write LLD Responsive and accessibility rules",
+          "form": "doc",
+          "ref": "lld.md#Responsive and accessibility rules"
+        },
+        {
+          "verb": "make",
+          "name": "site/v6.md",
+          "form": "doc",
+          "ref": "site/v6.md"
+        },
+        {
+          "verb": "make",
+          "name": "lld.md",
+          "form": "doc",
+          "ref": "lld.md"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-4.a1",
+          "why": "the PRD's requirements were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "the HLD's components were in this builder's prompt (charter)"
+        },
+        {
+          "atom": "W-19.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-20.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-21.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-22.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [],
+      "notes": "This part sets out how the page should look and behave on a phone and for people who use assistive tools. It makes sure the menu, hours, address and order form are easy to read and use.",
+      "details": {
+        "section": "W-23"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-24.a1",
+      "workflow": "W-24",
+      "name": "Shop name section",
+      "owner": "Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "Visitors see the name Brew Lab and one main action to pre-order.",
+      "how": {
+        "kind": "AI",
+        "agent": "Builder",
+        "steps": "Create section #shop-name with an h1 reading Brew Lab and a link #hero-order (class j2-btn) pointing to #pre-order."
+      },
+      "constraints": [
+        "Create only #shop-name, .j2-btn and #hero-order",
+        "Show no phone number",
+        "Other sections stay unchanged"
+      ],
+      "context": [
+        "charter item 1",
+        "section S1"
+      ],
+      "defined_output": [
+        {
+          "text": "The shop name section",
+          "kind": "section",
+          "target": "#shop-name",
+          "met": true
+        },
+        {
+          "text": "The main action link",
+          "kind": "element",
+          "target": "#hero-order",
+          "met": true
+        },
+        {
+          "text": "The name is shown",
+          "kind": "facts",
+          "target": [
+            "Brew Lab"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Shop name section",
+          "method": "element-count: One #shop-name section",
+          "met": true,
+          "evidence": "1 element(s) match '#shop-name', expected 1"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Shop name section",
+          "method": "element-count: One main action link",
+          "met": true,
+          "evidence": "1 element(s) match '#hero-order', expected 1"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Shop name section",
+          "method": "facts-present: Name shown",
+          "met": true,
+          "evidence": "all 1 fact(s) on the page"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Shop name section",
+          "method": "lld-slice: The page matches LLD section(s) S1: ids, selectors and form fields as specified",
+          "met": true,
+          "evidence": "all 1 spec item(s) are on the page as written"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Shop name section",
+          "form": "page",
+          "ref": "site/index.html#shop-name"
+        },
+        {
+          "verb": "make",
+          "name": "site/v1.html",
+          "form": "page",
+          "ref": "site/v1.html"
+        },
+        {
+          "verb": "make",
+          "name": "site/index.html",
+          "form": "page",
+          "ref": "site/index.html"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-19.a1",
+          "why": "LLD slice S1: its pages and sections were in this builder's prompt"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-25.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-26.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-27.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-28.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-29.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-30.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-31.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-32.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "The top of your page now shows the name Brew Lab in big letters, with one clear button that takes visitors to the pre-order form.",
+      "details": {
+        "selectors": [
+          "#shop-name",
+          "#shop-name-title",
+          "#hero-order",
+          ".j2-btn"
+        ],
+        "ids": [
+          "shop-name",
+          "shop-name-title",
+          "hero-order"
+        ],
+        "section": "W-24",
+        "anchor": "shop-name",
+        "elements": [
+          "#hero-order"
+        ]
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-25.a1",
+      "workflow": "W-25",
+      "name": "Address section",
+      "owner": "Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "Visitors can read the shop address as text with no embedded map.",
+      "how": {
+        "kind": "AI",
+        "agent": "Builder",
+        "steps": "Create section #address with a heading and the address as plain text."
+      },
+      "constraints": [
+        "Create only #address",
+        "No iframe or map",
+        "Other sections stay unchanged"
+      ],
+      "context": [
+        "charter item 2",
+        "section S2"
+      ],
+      "defined_output": [
+        {
+          "text": "The address section",
+          "kind": "section",
+          "target": "#address",
+          "met": true
+        },
+        {
+          "text": "The address text",
+          "kind": "facts",
+          "target": [
+            "12, 100 Feet Road, Indiranagar, Bengaluru 560038"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Address section",
+          "method": "element-count: One #address section",
+          "met": true,
+          "evidence": "1 element(s) match '#address', expected 1"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Address section",
+          "method": "facts-present: Address shown exactly",
+          "met": true,
+          "evidence": "all 1 fact(s) on the page"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Address section",
+          "method": "lld-slice: The page matches LLD section(s) S2: ids, selectors and form fields as specified",
+          "met": true,
+          "evidence": "all 1 spec item(s) are on the page as written"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Address section",
+          "form": "page",
+          "ref": "site/index.html#address"
+        },
+        {
+          "verb": "make",
+          "name": "site/v2.html",
+          "form": "page",
+          "ref": "site/v2.html"
+        },
+        {
+          "verb": "make",
+          "name": "site/index.html",
+          "form": "page",
+          "ref": "site/index.html"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-19.a1",
+          "why": "LLD slice S2: its pages and sections were in this builder's prompt"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-24.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-26.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-27.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-28.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-29.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-30.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-31.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-32.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "This part adds the shop address to the page as plain text, so visitors can see where to find Brew Lab. There is no map.",
+      "details": {
+        "selectors": [
+          "#address",
+          "#address-title",
+          "#address-text",
+          ".address-inner",
+          ".j2-card"
+        ],
+        "ids": [
+          "address",
+          "address-title",
+          "address-text"
+        ],
+        "section": "W-25",
+        "anchor": "address"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-26.a1",
+      "workflow": "W-26",
+      "name": "Menu section",
+      "owner": "Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "Visitors see seven menu items with their prices in rupees.",
+      "how": {
+        "kind": "AI",
+        "agent": "Builder",
+        "steps": "Create section #menu with a heading that says prices are in rupees and a list of seven .menu-item entries, each reading name then price."
+      },
+      "constraints": [
+        "Create only #menu and .menu-item",
+        "Exactly seven .menu-item entries",
+        "Each entry's text is the item name followed by the price, e.g. Filter coffee 90",
+        "Other sections stay unchanged"
+      ],
+      "context": [
+        "charter item 3",
+        "section S3"
+      ],
+      "defined_output": [
+        {
+          "text": "The menu section",
+          "kind": "section",
+          "target": "#menu",
+          "met": true
+        },
+        {
+          "text": "Seven menu items",
+          "kind": "element",
+          "target": ".menu-item",
+          "count": 7,
+          "met": true
+        },
+        {
+          "text": "All items and prices",
+          "kind": "facts",
+          "target": [
+            "Filter coffee 90",
+            "Cappuccino 160",
+            "Latte 180",
+            "Cold brew 200",
+            "Masala chai 80",
+            "Almond croissant 140",
+            "Banana bread slice 120"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Menu section",
+          "method": "element-count: Seven .menu-item entries",
+          "met": true,
+          "evidence": "7 element(s) match '.menu-item', expected 7"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Menu section",
+          "method": "facts-present: All items and prices shown",
+          "met": true,
+          "evidence": "all 7 fact(s) on the page"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Menu section",
+          "method": "element-count: The menu section",
+          "met": true,
+          "evidence": "1 element(s) match '#menu', expected 1"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Menu section",
+          "method": "lld-slice: The page matches LLD section(s) S3: ids, selectors and form fields as specified",
+          "met": true,
+          "evidence": "all 1 spec item(s) are on the page as written"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Menu section",
+          "form": "page",
+          "ref": "site/index.html#menu"
+        },
+        {
+          "verb": "make",
+          "name": "site/v3.html",
+          "form": "page",
+          "ref": "site/v3.html"
+        },
+        {
+          "verb": "make",
+          "name": "site/index.html",
+          "form": "page",
+          "ref": "site/index.html"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-19.a1",
+          "why": "LLD slice S3: its pages and sections were in this builder's prompt"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-24.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-25.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-27.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-28.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-29.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-30.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-31.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-32.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "Visitors can now see all seven menu items with their prices in rupees.",
+      "details": {
+        "selectors": [
+          "#menu",
+          "#menu-title",
+          ".menu-inner",
+          ".menu-note",
+          ".menu-list",
+          ".j2-card",
+          ".menu-item",
+          ".menu-name",
+          ".menu-price"
+        ],
+        "ids": [
+          "menu",
+          "menu-title"
+        ],
+        "section": "W-26",
+        "anchor": "menu",
+        "elements": [
+          ".menu-item"
+        ]
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-27.a1",
+      "workflow": "W-27",
+      "name": "Opening hours section",
+      "owner": "Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "Visitors can read the opening hours.",
+      "how": {
+        "kind": "AI",
+        "agent": "Builder",
+        "steps": "Create section #opening-hours with a heading and the hours text."
+      },
+      "constraints": [
+        "Create only #opening-hours",
+        "Other sections stay unchanged"
+      ],
+      "context": [
+        "charter item 4",
+        "section S4"
+      ],
+      "defined_output": [
+        {
+          "text": "The hours section",
+          "kind": "section",
+          "target": "#opening-hours",
+          "met": true
+        },
+        {
+          "text": "The hours",
+          "kind": "facts",
+          "target": [
+            "7 am to 10 pm, every day"
+          ],
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Opening hours section",
+          "method": "element-count: One #opening-hours section",
+          "met": true,
+          "evidence": "1 element(s) match '#opening-hours', expected 1"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Opening hours section",
+          "method": "facts-present: Hours shown exactly",
+          "met": true,
+          "evidence": "all 1 fact(s) on the page"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Opening hours section",
+          "method": "lld-slice: The page matches LLD section(s) S4: ids, selectors and form fields as specified",
+          "met": true,
+          "evidence": "all 1 spec item(s) are on the page as written"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Opening hours section",
+          "form": "page",
+          "ref": "site/index.html#opening-hours"
+        },
+        {
+          "verb": "make",
+          "name": "site/v4.html",
+          "form": "page",
+          "ref": "site/v4.html"
+        },
+        {
+          "verb": "make",
+          "name": "site/index.html",
+          "form": "page",
+          "ref": "site/index.html"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-19.a1",
+          "why": "LLD slice S4: its pages and sections were in this builder's prompt"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-24.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-25.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-26.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-28.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-29.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-30.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-31.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-32.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "The page now tells visitors the shop is open from 7 am to 10 pm, every day.",
+      "details": {
+        "selectors": [
+          "#opening-hours",
+          "#opening-hours-title",
+          "#opening-hours-text",
+          ".hours-inner",
+          ".hours-card",
+          ".j2-card"
+        ],
+        "ids": [
+          "opening-hours",
+          "opening-hours-title",
+          "opening-hours-text"
+        ],
+        "section": "W-27",
+        "anchor": "opening-hours"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-28.a1",
+      "workflow": "W-28",
+      "name": "Pre-order form section",
+      "owner": "Builder",
+      "status": "verify_failed",
+      "attempt": 2,
+      "goal": "Customers can fill in a pre-order form that sends the order to hello@brewlab.example.",
+      "how": {
+        "kind": "AI",
+        "agent": "Builder",
+        "steps": "Create section #pre-order holding form #order-form with labelled fields #order-name, #order-phone, #order-items, #order-time and a submit button #order-submit (class j2-btn). The form action is mailto:hello@brewlab.example. Fields are at least 44px tall."
+      },
+      "constraints": [
+        "Create only #pre-order, #order-form, #order-name, #order-phone, #order-items, #order-time and #order-submit",
+        "The form action is a mailto to hello@brewlab.example",
+        "Label every field",
+        "No payment fields",
+        "Other sections stay unchanged"
+      ],
+      "context": [
+        "charter items 5 and 6",
+        "section S5"
+      ],
+      "defined_output": [
+        {
+          "text": "The pre-order section",
+          "kind": "section",
+          "target": "#pre-order",
+          "met": true
+        },
+        {
+          "text": "The form",
+          "kind": "element",
+          "target": "#order-form",
+          "met": true
+        },
+        {
+          "text": "The four fields",
+          "kind": "element",
+          "target": "#order-name",
+          "met": true
+        },
+        {
+          "text": "The email",
+          "kind": "facts",
+          "target": [
+            "hello@brewlab.example"
+          ],
+          "met": true
+        },
+        {
+          "text": "The form has a submit control",
+          "kind": "test",
+          "target": "form-has-submit",
+          "met": true
+        },
+        {
+          "text": "Fields can be filled",
+          "kind": "behavior",
+          "target": "#order-form",
+          "steps": [
+            "set #order-name Asha",
+            "set #order-phone 9999999999",
+            "set #order-items Latte",
+            "set #order-time 8:30",
+            "expect-visible #order-submit"
+          ],
+          "met": true
+        },
+        {
+          "text": "Form fields are big enough to tap",
+          "kind": "tap",
+          "target": "#pre-order",
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "#order-form",
+          "method": "element-count: One form",
+          "met": true,
+          "evidence": "1 element(s) match '#order-form', expected 1"
+        },
+        {
+          "check": "valid",
+          "applies_to": "form-has-submit",
+          "method": "named-test: Form has a submit control",
+          "met": true,
+          "evidence": "1 form(s), each with a submit control"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "hello@brewlab.example",
+          "method": "facts-present: Email shown",
+          "met": true,
+          "evidence": "all 1 fact(s) on the page"
+        },
+        {
+          "check": "exists",
+          "applies_to": "#pre-order",
+          "method": "element-count: The pre-order section",
+          "met": true,
+          "evidence": "1 element(s) match '#pre-order', expected 1"
+        },
+        {
+          "check": "exists",
+          "applies_to": "#order-name",
+          "method": "element-count: The four fields",
+          "met": true,
+          "evidence": "1 element(s) match '#order-name', expected 1"
+        },
+        {
+          "check": "receipt",
+          "applies_to": "Fields can be filled",
+          "method": "behavior-steps: Fields can be filled",
+          "met": true,
+          "evidence": "W-28.a1:2"
+        },
+        {
+          "check": "valid",
+          "applies_to": "#pre-order",
+          "method": "tap-targets: Form fields are big enough to tap",
+          "met": true,
+          "evidence": "all 5 tap target(s) in '#pre-order' at least 44x44px at 360px"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "S5",
+          "method": "lld-slice: The page matches LLD section(s) S5: ids, selectors and form fields as specified",
+          "met": false,
+          "evidence": "F3 field items is type text, the spec says multi"
+        }
+      ],
+      "output": [
+        {
+          "verb": "do",
+          "name": "Fields can be filled",
+          "form": "behaviour",
+          "ref": "W-28.a1:2"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-19.a1",
+          "why": "LLD slice S5: its pages and sections were in this builder's prompt"
+        },
+        {
+          "atom": "W-20.a1",
+          "why": "LLD slice S5: its interactive elements were in this builder's prompt"
+        },
+        {
+          "atom": "W-21.a1",
+          "why": "LLD slice S5: its form fields were in this builder's prompt"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-24.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-25.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-26.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-27.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [],
+      "notes": "Customers can choose what they want from the seven menu items, then send the pre-order to the shop's email.",
+      "details": {
+        "elements": [
+          "#order-form",
+          "#order-name"
+        ],
+        "scope": "self"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-29.a1",
+      "workflow": "W-29",
+      "name": "Pickup note section",
+      "owner": "Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "Visitors read that they collect the order at the shop and that no online payment is taken.",
+      "how": {
+        "kind": "AI",
+        "agent": "Builder",
+        "steps": "Create section #pickup-note with a paragraph #collect-line saying customers collect the order at the shop and a paragraph #payment-line saying no online payment is taken."
+      },
+      "constraints": [
+        "Create only #pickup-note, #collect-line and #payment-line",
+        "Say nothing about when or how customers pay",
+        "Other sections stay unchanged"
+      ],
+      "context": [
+        "charter item 7",
+        "section S6"
+      ],
+      "defined_output": [
+        {
+          "text": "The pickup note section",
+          "kind": "section",
+          "target": "#pickup-note",
+          "met": true
+        },
+        {
+          "text": "The collect line",
+          "kind": "element",
+          "target": "#collect-line",
+          "met": true
+        },
+        {
+          "text": "The payment line",
+          "kind": "element",
+          "target": "#payment-line",
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Pickup note section",
+          "method": "element-count: One #pickup-note section",
+          "met": true,
+          "evidence": "1 element(s) match '#pickup-note', expected 1"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Pickup note section",
+          "method": "element-count: One collect line",
+          "met": true,
+          "evidence": "1 element(s) match '#collect-line', expected 1"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Pickup note section",
+          "method": "element-count: One payment line",
+          "met": true,
+          "evidence": "1 element(s) match '#payment-line', expected 1"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Pickup note section",
+          "method": "lld-slice: The page matches LLD section(s) S6: ids, selectors and form fields as specified",
+          "met": true,
+          "evidence": "all 1 spec item(s) are on the page as written"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Pickup note section",
+          "form": "page",
+          "ref": "site/index.html#pickup-note"
+        },
+        {
+          "verb": "make",
+          "name": "site/v7.html",
+          "form": "page",
+          "ref": "site/v7.html"
+        },
+        {
+          "verb": "make",
+          "name": "site/index.html",
+          "form": "page",
+          "ref": "site/index.html"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-19.a1",
+          "why": "LLD slice S6: its pages and sections were in this builder's prompt"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-24.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-25.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-26.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-27.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-30.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-31.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-32.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "Your page now tells customers they collect their order at the shop and that no online payment is taken.",
+      "details": {
+        "selectors": [
+          "#pickup-note",
+          "#collect-line",
+          "#payment-line",
+          ".pickup-inner",
+          ".j2-card"
+        ],
+        "ids": [
+          "pickup-note",
+          "collect-line",
+          "payment-line"
+        ],
+        "section": "W-29",
+        "anchor": "pickup-note",
+        "elements": [
+          "#collect-line",
+          "#payment-line"
+        ]
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-30.a1",
+      "workflow": "W-30",
+      "name": "Page layout, navigation and polish",
+      "owner": "Builder",
+      "status": "closed",
+      "attempt": 2,
+      "goal": "The page has working in-page navigation and a phone-friendly layout that has no errors and shows no shop phone number.",
+      "how": {
+        "kind": "AI",
+        "agent": "Builder",
+        "steps": "Create nav #page-nav with six links to the existing section ids. Add the single-file CSS: a fluid column, wrapped text, buttons and fields at least 44px tall, and a single-column layout on small screens."
+      },
+      "constraints": [
+        "Create only #page-nav and the shared CSS",
+        "Nav links point to #shop-name, #address, #menu, #opening-hours, #pre-order and #pickup-note",
+        "Responsive layout with no horizontal overflow at 360px and 1280px",
+        "No tel: links and no shop phone number",
+        "Plain HTML, CSS and JavaScript in one file",
+        "Add no JavaScript that can throw errors"
+      ],
+      "context": [
+        "charter items 8, 9, 10 and 11",
+        "section S7"
+      ],
+      "defined_output": [
+        {
+          "text": "The navigation",
+          "kind": "section",
+          "target": "#page-nav",
+          "met": true
+        },
+        {
+          "text": "Links resolve",
+          "kind": "test",
+          "target": "links-resolve",
+          "met": true
+        },
+        {
+          "text": "Page parses",
+          "kind": "test",
+          "target": "page-parses",
+          "met": true
+        },
+        {
+          "text": "Nav buttons and links are big enough to tap",
+          "kind": "tap",
+          "target": "#page-nav",
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Page layout, navigation and polish",
+          "method": "element-count: One nav",
+          "met": true,
+          "evidence": "1 element(s) match '#page-nav', expected 1"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Page layout, navigation and polish",
+          "method": "named-test: Links resolve",
+          "met": true,
+          "evidence": "every in-page link resolves"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Page layout, navigation and polish",
+          "method": "named-test: Page parses",
+          "met": true,
+          "evidence": "page parses, tags balanced"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Page layout, navigation and polish",
+          "method": "tap-targets: Nav buttons and links are big enough to tap",
+          "met": true,
+          "evidence": "all 6 tap target(s) in '#page-nav' at least 44x44px at 360px"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Page layout, navigation and polish",
+          "method": "lld-slice: The page matches LLD section(s) S7: ids, selectors and form fields as specified",
+          "met": true,
+          "evidence": "all 1 spec item(s) are on the page as written"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Page layout, navigation and polish",
+          "form": "page",
+          "ref": "site/index.html#page-nav"
+        },
+        {
+          "verb": "make",
+          "name": "site/v9.html",
+          "form": "page",
+          "ref": "site/v9.html"
+        },
+        {
+          "verb": "make",
+          "name": "site/index.html",
+          "form": "page",
+          "ref": "site/index.html"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-19.a1",
+          "why": "LLD slice S7: its pages and sections were in this builder's prompt"
+        },
+        {
+          "atom": "W-11.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-24.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-25.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-26.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-27.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-29.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-31.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-32.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "Visitors get a simple row of buttons at the top of the page to jump to any part of it, and the page fits neatly on a phone.",
+      "details": {
+        "selectors": [
+          "#page",
+          "#page-nav",
+          ".nav-list",
+          ".nav-link"
+        ],
+        "ids": [
+          "page",
+          "page-nav"
+        ],
+        "section": "W-30",
+        "anchor": "page-nav"
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-31.a1",
+      "workflow": "W-31",
+      "name": "Hero main action and success-target comment",
+      "owner": "Builder",
+      "status": "closed",
+      "attempt": 2,
+      "goal": "The hero #shop-name is the first block in the page, ahead of #page-nav, and holds one obvious main action link #hero-order to #pre-order, and the success target is carried only in an HTML comment.",
+      "how": {
+        "kind": "AI",
+        "agent": "Builder",
+        "steps": "In section W-24, keep #shop-name with its heading #shop-name-title and its main action link #hero-order (class j2-btn, href #pre-order) as a direct child of #shop-name. Place #shop-name ahead of #page-nav in the page order without changing the look. Add an HTML comment inside #shop-name that contains the text '20 pre-orders a week within the first month'. Do not display it."
+      },
+      "constraints": [
+        "Do not change how the hero or the page looks",
+        "Keep the hero #shop-name with its link #hero-order placed before #page-nav in the page order",
+        "Keep #hero-order as the one main action link, a direct child of #shop-name with class j2-btn, linking to #pre-order",
+        "Put the text '20 pre-orders a week within the first month' only inside an HTML comment, never as visible text",
+        "Other sections stay unchanged",
+        "Show no shop phone number and add no new facts"
+      ],
+      "context": [
+        "charter items 1, 11",
+        "section W-24",
+        "section W-30",
+        "LLD S1"
+      ],
+      "defined_output": [
+        {
+          "text": "The hero section",
+          "kind": "section",
+          "target": "#shop-name",
+          "met": true
+        },
+        {
+          "text": "The one main action link",
+          "kind": "element",
+          "target": "#hero-order",
+          "count": 1,
+          "met": true
+        },
+        {
+          "text": "The shop name is shown",
+          "kind": "facts",
+          "target": [
+            "Brew Lab"
+          ],
+          "met": true
+        },
+        {
+          "text": "The success target is in the page source",
+          "kind": "facts",
+          "target": [
+            "20 pre-orders a week within the first month"
+          ],
+          "met": true
+        },
+        {
+          "text": "Links all resolve",
+          "kind": "test",
+          "target": "links-resolve",
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Hero main action and success-target comment",
+          "method": "element-count: One hero section",
+          "met": true,
+          "evidence": "1 element(s) match '#shop-name', expected 1"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Hero main action and success-target comment",
+          "method": "element-count: One main action link",
+          "met": true,
+          "evidence": "1 element(s) match '#hero-order', expected 1"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Hero main action and success-target comment",
+          "method": "facts-present: Name shown",
+          "met": true,
+          "evidence": "all 1 fact(s) on the page"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Hero main action and success-target comment",
+          "method": "facts-present: Success target present in the page source",
+          "met": true,
+          "evidence": "all 1 fact(s) on the page"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Hero main action and success-target comment",
+          "method": "named-test: All in-page links resolve",
+          "met": true,
+          "evidence": "every in-page link resolves"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Hero main action and success-target comment",
+          "method": "named-test: The page parses",
+          "met": true,
+          "evidence": "page parses, tags balanced"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Hero main action and success-target comment",
+          "method": "tap-targets: Hero buttons are big enough to tap",
+          "met": true,
+          "evidence": "all 1 tap target(s) in '#shop-name' at least 44x44px at 360px"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Hero main action and success-target comment",
+          "form": "page",
+          "ref": "site/index.html#shop-name"
+        },
+        {
+          "verb": "make",
+          "name": "site/v11.html",
+          "form": "page",
+          "ref": "site/v11.html"
+        },
+        {
+          "verb": "make",
+          "name": "site/index.html",
+          "form": "page",
+          "ref": "site/index.html"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-11.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-24.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-25.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-26.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-27.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-29.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-30.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [
+        {
+          "atom": "W-32.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "notes": "The top of the page shows the shop name and a single button to start a pre-order. Your target of 20 pre-orders a week is kept in the page source for your records and is not shown to visitors.",
+      "details": {
+        "selectors": [
+          "#shop-name",
+          "#shop-name-title",
+          "#hero-order",
+          ".j2-btn"
+        ],
+        "ids": [
+          "shop-name",
+          "shop-name-title",
+          "hero-order"
+        ],
+        "section": "W-24",
+        "anchor": "shop-name",
+        "elements": [
+          "#hero-order"
+        ]
+      }
+    },
+    {
+      "schema": "atom/1",
+      "id": "W-32.a1",
+      "workflow": "W-32",
+      "name": "Hero order fix for main action detection",
+      "owner": "Builder",
+      "status": "closed",
+      "attempt": 1,
+      "goal": "The hero keeps one visible main action link, #hero-order, ahead of the nav in the page order after the page script runs.",
+      "how": {
+        "kind": "AI",
+        "agent": "Builder",
+        "steps": "Rewrite section W-24 so #shop-name with #shop-name-title and the link #hero-order (class j2-btn, href #pre-order) sits first in the body before #page-nav. Remove or change any script that moves #page or #page-nav ahead of #shop-name, and put the nav in place in the markup instead. Keep the hero look the same."
+      },
+      "constraints": [
+        "Change only the hero #shop-name and its position relative to #page-nav",
+        "The nav script must not move #page or #page-nav before #shop-name",
+        "Keep #shop-name, #shop-name-title and #hero-order, with one #hero-order link to #pre-order",
+        "No visual change",
+        "The 20 pre-orders target stays only in an HTML comment",
+        "No new facts and no shop phone number",
+        "Other sections stay unchanged"
+      ],
+      "context": [
+        "charter item 1",
+        "charter item 10",
+        "section W-24",
+        "section S1",
+        "section S7"
+      ],
+      "defined_output": [
+        {
+          "text": "The hero section",
+          "kind": "section",
+          "target": "#shop-name",
+          "met": true
+        },
+        {
+          "text": "The main action link",
+          "kind": "element",
+          "target": "#hero-order",
+          "met": true
+        },
+        {
+          "text": "The brand name",
+          "kind": "facts",
+          "target": [
+            "Brew Lab"
+          ],
+          "met": true
+        },
+        {
+          "text": "Links resolve",
+          "kind": "test",
+          "target": "links-resolve",
+          "met": true
+        },
+        {
+          "text": "The page parses",
+          "kind": "test",
+          "target": "page-parses",
+          "met": true
+        },
+        {
+          "text": "Hero button is big enough to tap",
+          "kind": "tap",
+          "target": "#shop-name",
+          "met": true
+        }
+      ],
+      "verification": [
+        {
+          "check": "exists",
+          "applies_to": "Hero order fix for main action detection",
+          "method": "element-count: One hero section",
+          "met": true,
+          "evidence": "1 element(s) match '#shop-name', expected 1"
+        },
+        {
+          "check": "exists",
+          "applies_to": "Hero order fix for main action detection",
+          "method": "element-count: One main action link",
+          "met": true,
+          "evidence": "1 element(s) match '#hero-order', expected 1"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Hero order fix for main action detection",
+          "method": "facts-present: Brand name shown",
+          "met": true,
+          "evidence": "all 1 fact(s) on the page"
+        },
+        {
+          "check": "meets the defined output",
+          "applies_to": "Hero order fix for main action detection",
+          "method": "facts-present: Success target still in the page source",
+          "met": true,
+          "evidence": "all 1 fact(s) on the page"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Hero order fix for main action detection",
+          "method": "named-test: All in-page links resolve",
+          "met": true,
+          "evidence": "every in-page link resolves"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Hero order fix for main action detection",
+          "method": "named-test: The page parses",
+          "met": true,
+          "evidence": "page parses, tags balanced"
+        },
+        {
+          "check": "valid",
+          "applies_to": "Hero order fix for main action detection",
+          "method": "tap-targets: Hero buttons are big enough to tap",
+          "met": true,
+          "evidence": "all 1 tap target(s) in '#shop-name' at least 44x44px at 360px"
+        }
+      ],
+      "output": [
+        {
+          "verb": "make",
+          "name": "Hero order fix for main action detection",
+          "form": "page",
+          "ref": "site/index.html#shop-name"
+        },
+        {
+          "verb": "make",
+          "name": "site/v12.html",
+          "form": "page",
+          "ref": "site/v12.html"
+        },
+        {
+          "verb": "make",
+          "name": "site/index.html",
+          "form": "page",
+          "ref": "site/index.html"
+        }
+      ],
+      "depends_on": [
+        {
+          "atom": "W-11.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-15.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-17.a1",
+          "why": "the HLD component summary was in this builder's prompt"
+        },
+        {
+          "atom": "W-24.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-25.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-26.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-27.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-29.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-30.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        },
+        {
+          "atom": "W-31.a1",
+          "why": "its section, anchor and selectors were listed in this builder's prompt"
+        }
+      ],
+      "used_by": [],
+      "notes": "The top of the page, with the Brew Lab name and the pre-order button, stays at the very top of the page. Its look is the same as before.",
+      "details": {
+        "selectors": [
+          "#shop-name",
+          "#shop-name-title",
+          "#hero-order",
+          ".j2-btn"
+        ],
+        "ids": [
+          "shop-name",
+          "shop-name-title",
+          "hero-order"
+        ],
+        "section": "W-24",
+        "anchor": "shop-name",
+        "elements": [
+          "#hero-order"
+        ]
+      }
+    }
+  ],
+  "warnings": [
+    "W-28.a1: its output is never used and is not a final output"
+  ]
+}

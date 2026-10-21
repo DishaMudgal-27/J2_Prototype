@@ -1,0 +1,44 @@
+{
+  "statement": "Build a single-file website for Paws Haven animal shelter in Mysuru with pets for adoption, donate, volunteer sign-up, success stories, and a full English/Kannada version.",
+  "site_name": "Paws Haven",
+  "audience": "Prospective adopters, donors and volunteers in and around Mysuru, reading English or Kannada, mostly on mobile phones.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file, CDN libraries allowed, no build step.",
+    "Mobile-first responsive layout that stays readable at 360px width.",
+    "Accessible basics: alt text on images, labels on form fields, readable contrast, keyboard-usable navigation and toggle.",
+    "Kannada text renders with a Kannada-capable font and does not overflow or break layouts.",
+    "No personal data is stored, and none is sent to a third-party service."
+  ],
+  "rules": [
+    "Donate takes no payment on the site: show UPI QR and bank details only, with no gateway, card form or payment script.",
+    "Adoption inquiries and volunteer sign-ups open a pre-filled WhatsApp or email message to the shelter; there is no backend and no third-party form service.",
+    "Kannada is full parity with an English/Kannada toggle, machine-drafted and labelled as pending native-speaker review.",
+    "Invent no shelter facts. Any fact the brief does not give appears as a visibly marked placeholder.",
+    "Pet profiles and success stories that are not supplied are shown as clearly labelled sample entries, not as real animals or real adopters."
+  ],
+  "done_when": [
+    "The site is one HTML file with its CSS and JavaScript inline or loaded from CDN, and needs no build step.",
+    "The file shows the name Paws Haven and Mysuru, and has navigation to Home, Adopt, Donate, Volunteer and Success Stories sections.",
+    "The Adopt section lists pets, each with name, species, age and a short description, and each has an inquiry button that opens a pre-filled WhatsApp or email message.",
+    "The Donate section shows a UPI QR area and bank details as marked placeholders, and the file contains no payment gateway script, card input or payment form.",
+    "The Volunteer section has a sign-up form with labelled fields (at least name, phone, email, availability) whose submit action opens a pre-filled WhatsApp or email message, and the file has no form action posting to an external service and no data storage code.",
+    "The Success Stories section shows at least three stories, each with a pet name and a short text.",
+    "An English/Kannada toggle is present, and every visible text string, including nav, buttons, form labels, placeholders and messages, has a Kannada version that the toggle switches to.",
+    "In Kannada mode and in English mode the file shows a visible notice that the Kannada text is pending native-speaker review.",
+    "The file loads a Kannada-capable font and sets the page lang attribute to match the selected language.",
+    "Every shelter fact not given in the brief (UPI ID, QR image, bank details, phone, WhatsApp number, email, address) appears as a visibly marked placeholder.",
+    "The file has a viewport meta tag and responsive CSS rules for narrow screens."
+  ],
+  "open_inputs": [
+    "UPI ID and UPI QR code image",
+    "Bank account details for donations",
+    "Shelter phone number",
+    "Shelter WhatsApp number",
+    "Shelter email address",
+    "Shelter address and opening hours",
+    "Real pet profiles and photos",
+    "Real success stories and photos",
+    "Native Kannada speaker to review the Kannada text"
+  ],
+  "dropped_from_brief": []
+}

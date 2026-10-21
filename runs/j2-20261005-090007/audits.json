@@ -1,0 +1,83 @@
+[
+  {
+    "cycle": 1,
+    "version": 4,
+    "results": [
+      {
+        "criterion": "Visitors can request an appointment",
+        "pass": true,
+        "note": "Present in the latest version"
+      },
+      {
+        "criterion": "Departments and doctors are listed",
+        "pass": true,
+        "note": "Present in the latest version"
+      },
+      {
+        "criterion": "Emergency number visible on every screen",
+        "pass": false,
+        "note": "Number only appears in the contact section at the bottom"
+      },
+      {
+        "criterion": "Layout works on a phone",
+        "pass": true,
+        "note": "Present in the latest version"
+      }
+    ],
+    "all_pass": false
+  },
+  {
+    "cycle": 2,
+    "version": 5,
+    "results": [
+      {
+        "criterion": "Visitors can request an appointment",
+        "pass": true,
+        "note": "Present in the latest version"
+      },
+      {
+        "criterion": "Departments and doctors are listed",
+        "pass": true,
+        "note": "Present in the latest version"
+      },
+      {
+        "criterion": "Emergency number visible on every screen",
+        "pass": true,
+        "note": "Sticky bar shows the number on every screen"
+      },
+      {
+        "criterion": "Layout works on a phone",
+        "pass": true,
+        "note": "Present in the latest version"
+      }
+    ],
+    "all_pass": true
+  },
+  {
+    "cycle": 3,
+    "version": 5,
+    "results": [
+      {
+        "criterion": "Visitors can request an appointment",
+        "pass": true,
+        "note": "Present in the latest version"
+      },
+      {
+        "criterion": "Departments and doctors are listed",
+        "pass": true,
+        "note": "Present in the latest version"
+      },
+      {
+        "criterion": "Emergency number visible on every screen",
+        "pass": true,
+        "note": "Sticky bar shows the number on every screen"
+      },
+      {
+        "criterion": "Layout works on a phone",
+        "pass": true,
+        "note": "Present in the latest version"
+      }
+    ],
+    "all_pass": true
+  }
+]

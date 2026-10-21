@@ -1,0 +1,448 @@
+{
+  "run": "20261013-164543",
+  "output_type": "website",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "sections": [
+    "style",
+    "W-1",
+    "W-2",
+    "W-3",
+    "W-4",
+    "W-5",
+    "W-6",
+    "W-7"
+  ],
+  "conditions": null,
+  "force_audit_fail": null,
+  "test_lessons": false,
+  "model": "sonnet",
+  "mock": false,
+  "brief": "make a website for our college tech fest called Spark 2026 at Northfield College of Engineering in Pune. students should be able to see the schedule day by day, browse events by category, register for an event with a form, see the sponsors, find the venue, and contact the organisers on whatsapp. it should feel energetic and modern and work well on phones",
+  "change_requests": [],
+  "status": "done",
+  "outcome": "Done: the site is workable. Every done-when item passes with Audit's evidence and the render check is clean.",
+  "budget": {
+    "start": 200,
+    "granted": 200,
+    "used": 98,
+    "raises": []
+  },
+  "ai_calls": 29,
+  "cycles": 2,
+  "links": {
+    "identity->requester": 2,
+    "identity->adaptation": 2,
+    "validator->adaptation": 1,
+    "adaptation->priority": 2,
+    "validator->coordination": 2,
+    "coordination->priority": 8,
+    "priority->W": 8,
+    "W->coordination": 8,
+    "audit->identity": 2
+  },
+  "verification": {
+    "passed": 8,
+    "failed": 0,
+    "escalated": 0,
+    "could_not_run": 0,
+    "checks_run": 43
+  },
+  "identity_to_requester_decisions": 0,
+  "identity_to_requester_facts": 1,
+  "priority_rulings": {
+    "grant": 2,
+    "counter": 0,
+    "refuse": 0
+  },
+  "questions_to_user": [
+    {
+      "kind": "info",
+      "asked": [
+        "Please send these: What are the fest dates, and can you share the list of events? For each one I need the name, category (like coding, robotics, gaming), day, time and room.; What is the organisers' WhatsApp number, and the exact venue address inside Northfield College of Engineering (building or ground name, and a map link if you have one); Which sponsors should be shown? Please share their names, and logos if you have them.; When a student fills in the registration form, where should their details go."
+      ],
+      "answer": "Dates: 14 to 16 February 2027. Venue: Northfield College of Engineering, 22 University Road, Pune 411007. Organisers on WhatsApp: +91 00000 33333. Email: spark2026@example.com. Events: Coding: Code Sprint (day 1, 10am to 1pm, Rs 100); Bug Hunt (day 2, 11am to 1pm, Rs 50). Robotics: Line Follower (day 1, 2pm to 5pm, Rs 150); Drone Dash (day 3, 10am to 1pm, Rs 200). Design: Poster Jam (day 2, 2pm to 4pm, free); UI Duel (day 3, 2pm to 5pm, Rs 100). Talks: AI in Daily Life (day 1, 5:30pm to 6:30pm, free); Startup Stories (day 3, 5:30pm to 6:30pm, free). Registration form fields: name, email, college, event (dropdown); submitting sends an email to spark2026@example.com. Sponsors: Nimbus Cloud, Orbit Labs, Pixel Press (names only, no logos). No photos yet, use placeholders."
+    }
+  ],
+  "conflicts": [],
+  "validator_rejections": [
+    {
+      "cycle": 2,
+      "workflow": "Add mobile viewport tag to head",
+      "reason": "work atom 1: check 5 tap-targets targets '#site-nav', which the atom's how or constraints doesn't tell the builder to create"
+    }
+  ],
+  "holds": [
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-7: w-venue (W-6) has not run yet; W-7 also needs W-6's section on the page before it can check that every in-page link resolves"
+    }
+  ],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 8,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-1",
+          "item": "R-1",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-2",
+          "item": "R-2",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-3",
+          "item": "R-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-4",
+          "item": "R-4",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-5",
+          "item": "R-5",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-6",
+          "item": "R-6",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "R-7",
+          "item": "R-7",
+          "verdict": "PASS"
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "version": 9,
+      "all_pass": true,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-1",
+          "item": "R-1",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-2",
+          "item": "R-2",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-3",
+          "item": "R-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-4",
+          "item": "R-4",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-5",
+          "item": "R-5",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-6",
+          "item": "R-6",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-7",
+          "item": "R-7",
+          "verdict": "PASS"
+        }
+      ]
+    }
+  ],
+  "site_versions": 9,
+  "workable": [],
+  "to_be_confirmed": [],
+  "dropped_by_requester": [],
+  "workflow_agents": [
+    {
+      "id": "W-1",
+      "agent": "W-1 Builder",
+      "section": "W-1",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-2",
+      "agent": "W-2 Builder",
+      "section": "W-2",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-3",
+      "agent": "W-3 Builder",
+      "section": "W-3",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-4",
+      "agent": "W-4 Builder",
+      "section": "W-4",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-5",
+      "agent": "W-5 Builder",
+      "section": "W-5",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-6",
+      "agent": "W-6 Builder",
+      "section": "W-6",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-7",
+      "agent": "W-7 Builder",
+      "section": "W-7",
+      "revises": null,
+      "status": "done",
+      "calls": 2,
+      "retries": 0
+    },
+    {
+      "id": "W-8",
+      "agent": "W-8 Builder",
+      "section": "W-1",
+      "revises": "W-1",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    }
+  ],
+  "limits_hit": [],
+  "lessons": {
+    "memory": false,
+    "saved": [],
+    "used": []
+  },
+  "playbooks": {
+    "saved": null,
+    "used": []
+  },
+  "business_type": "college tech fest",
+  "style_guide": true,
+  "rubric": [
+    {
+      "id": "R-1",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-2",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-3",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-4",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-5",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-6",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-7",
+      "pass": true,
+      "verdict": "PASS"
+    }
+  ],
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The page shows the name Spark 2026, Northfield College of Engineering, Pune, and the dates 14 to 16 February 2027 near the top",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "A day-by-day schedule has Day 1, Day 2 and Day 3 with their dates, listing each event with its start and end time: Day 1 Code Sprint 10am-1pm, Line Follower 2pm-5pm, AI in Daily Life 5:30pm-6:30pm; Day 2 Bug Hunt 11am-1pm, Poster Jam 2pm-4pm; Day 3 Drone Dash 10am-1pm, UI Duel 2pm-5pm, Startup Stories 5:30pm-6:30pm",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "Events can be browsed by category (Coding, Robotics, Design, Talks) with a way to filter, and each of the 8 events shows name, category, day, time and price (Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, Poster Jam free, UI Duel Rs 100, AI in Daily Life free, Startup Stories free)",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "A registration form has name, email, college and an event dropdown listing all 8 events, requires the fields before sending, and submitting sends the details by email to spark2026@example.com",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "A sponsors section names Nimbus Cloud, Orbit Labs and Pixel Press as text, with no logos",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "A venue section shows the address 22 University Road, Pune 411007 and a map or map link for it",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "A WhatsApp button links to wa.me/910000033333 and the email spark2026@example.com is shown as a contact",
+      "pass": true
+    },
+    {
+      "item": 8,
+      "criterion": "The layout has a mobile viewport setting, no horizontal overflow at 360px and 1280px widths, and a navigation that works on a phone",
+      "pass": true
+    },
+    {
+      "item": 9,
+      "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+      "pass": true
+    },
+    {
+      "item": 10,
+      "criterion": "The look is energetic and modern: a bold colour palette set once and reused, large headings, and photo areas labelled as placeholders",
+      "pass": true
+    }
+  ],
+  "route_check_violations": []
+}

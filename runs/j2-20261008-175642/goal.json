@@ -1,0 +1,63 @@
+{
+  "statement": "A single-file, phone-first website for Thread & Loom, a handloom clothing boutique in Pune. Visitors can browse products by category, filter by size and price, read the size guide, see new arrivals, order on WhatsApp, view a lookbook, and find store hours, location, policies and reviews.",
+  "site_name": "Thread & Loom",
+  "audience": "Shoppers in and around Pune, mostly on phones, looking for handloom kurtas, sarees, cotton shirts and dupattas.",
+  "standards": [
+    "Earthy and elegant look: warm natural colours and a refined type style.",
+    "Works well on phones first, and also on desktop.",
+    "Plain HTML, CSS and JavaScript in one file, no build step.",
+    "Use only facts the Requester supplied. No invented products, prices, numbers, offers or claims."
+  ],
+  "rules": [
+    "Orders go through WhatsApp at +91 00000 11111.",
+    "Prices are in rupees.",
+    "Sarees and dupattas are free size.",
+    "Exchange only, within 7 days, if unworn with tags. No returns on sale items.",
+    "Delivery: Pune in 2 days, Rs 79, free above Rs 2,999, pay on delivery."
+  ],
+  "done_when": [
+    "The file shows the name Thread & Loom, Pune, with an earthy, elegant colour scheme.",
+    "The file lists all 10 products under four categories, with these exact names and prices: Kurtas: Indigo block-print kurta 1,499; Mustard handloom kurta 1,699; White chikankari kurta 2,199. Sarees: Ikat handloom saree 3,499; Khadi silk saree 4,999; Cotton jamdani saree 3,999. Shirts: Khadi cotton shirt 1,299; Linen-blend shirt 1,599. Dupattas: Block-print dupatta 899; Chanderi dupatta 1,099.",
+    "The file has working category browsing and working size and price filters. Sizes: Indigo block-print kurta S-XXL; Mustard handloom kurta S-XL; White chikankari kurta XS-XL; Khadi cotton shirt S-XXL; Linen-blend shirt M-XXL; all sarees and dupattas free size.",
+    "The file has a size guide table with chest in inches: XS 32, S 34, M 36, L 38, XL 40, XXL 42.",
+    "Every product has an order button linking to WhatsApp number 910000011111 with the product name in the message.",
+    "The file shows the address 18 FC Road, Shivajinagar, Pune 411005, shop phone +91 00000 22222, and timings 11am to 9pm Tuesday to Sunday, closed Monday.",
+    "The file shows the return and exchange policy: exchange within 7 days if unworn with tags, no returns on sale items.",
+    "The file shows the delivery details: Pune in 2 days, Rs 79, free above Rs 2,999, pay on delivery.",
+    "The file has a mobile viewport tag, no horizontal overflow at 360px and 1280px, no JavaScript errors, and no broken in-page links."
+  ],
+  "business_type": "clothing boutique",
+  "visitor_needs": [
+    "Browse products by category",
+    "Filter by size and price",
+    "See a size guide",
+    "See new arrivals",
+    "Order on WhatsApp",
+    "See a lookbook of styled outfits",
+    "See store timings and location",
+    "Read the return and exchange policy",
+    "Read customer reviews"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [],
+  "confirmed_facts": [],
+  "dropped_by_requester": [
+    "The file has a New Arrivals section showing exactly: White chikankari kurta, Ikat handloom saree, Linen-blend shirt.",
+    "The file has a lookbook section with 3 styled outfits, each built only from the 10 listed products.",
+    "The file shows these 3 reviews: \"Beautiful fabric, fits perfectly\" - Meera K.; \"Fast delivery and lovely packing\" - Arjun S.; \"My go-to for festive kurtas\" - Priya D."
+  ],
+  "dropped_reasons": [
+    {
+      "criterion": "The file has a New Arrivals section showing exactly: White chikankari kurta, Ikat handloom saree, Linen-blend shirt.",
+      "reason": "The Requester chose to leave it out (Identity: the site can't be finished as asked without your decision.): Add 25 more. Leave out the lookbook, new arrivals and reviews."
+    },
+    {
+      "criterion": "The file has a lookbook section with 3 styled outfits, each built only from the 10 listed products.",
+      "reason": "The Requester chose to leave it out (Identity: the site can't be finished as asked without your decision.): Add 25 more. Leave out the lookbook, new arrivals and reviews."
+    },
+    {
+      "criterion": "The file shows these 3 reviews: \"Beautiful fabric, fits perfectly\" - Meera K.; \"Fast delivery and lovely packing\" - Arjun S.; \"My go-to for festive kurtas\" - Priya D.",
+      "reason": "The Requester chose to leave it out (Identity: the site can't be finished as asked without your decision.): Add 25 more. Leave out the lookbook, new arrivals and reviews."
+    }
+  ]
+}

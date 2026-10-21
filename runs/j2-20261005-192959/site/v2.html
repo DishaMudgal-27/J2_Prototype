@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Specialty Coffee, Indiranagar, Bengaluru</title>
+<meta name="description" content="Brew Lab is a small specialty coffee shop in Indiranagar, Bengaluru.">
+<style>
+  :root {
+    --espresso: #3b2418;
+    --roast: #6b4129;
+    --caramel: #b9783f;
+    --cream: #faf3e8;
+    --latte: #efe1cc;
+    --paper: #fffaf2;
+    --ink: #2b1b12;
+    --muted: #6f5a4c;
+    --ph-bg: #fff1c9;
+    --ph-line: #c99a1e;
+    --radius: 16px;
+    --font-head: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    color: var(--ink);
+    background: var(--cream);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  img, svg { max-width: 100%; }
+  a { color: var(--roast); }
+  h1, h2, h3 { font-family: var(--font-head); color: var(--espresso); line-height: 1.2; margin: 0 0 .5em; }
+  h1 { font-size: clamp(2.2rem, 8vw, 3.6rem); }
+  h2 { font-size: clamp(1.6rem, 5vw, 2.2rem); }
+  h3 { font-size: 1.15rem; }
+  p { margin: 0 0 1em; }
+
+  .wrap { width: 100%; max-width: 960px; margin: 0 auto; padding: 0 20px; }
+  section { padding: 56px 0; }
+  section:nth-of-type(even) { background: var(--paper); }
+  .eyebrow { text-transform: uppercase; letter-spacing: .14em; font-size: .78rem; color: var(--caramel); font-weight: 700; margin-bottom: .5em; }
+
+  /* header */
+  header.top { background: var(--espresso); color: var(--cream); position: sticky; top: 0; z-index: 10; }
+  header.top .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 16px; padding-top: 10px; padding-bottom: 10px; }
+  .brand { font-family: var(--font-head); font-size: 1.3rem; font-weight: 700; color: var(--cream); text-decoration: none; }
+  nav { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+  nav a { color: var(--latte); text-decoration: none; font-size: .9rem; padding: 4px 0; }
+  nav a:hover { color: #fff; text-decoration: underline; }
+
+  /* hero */
+  .hero { background: linear-gradient(160deg, var(--espresso) 0%, var(--roast) 100%); color: var(--cream); padding: 72px 0 64px; }
+  .hero h1 { color: var(--cream); }
+  .hero p { max-width: 36em; font-size: 1.1rem; color: var(--latte); }
+  .hero .eyebrow { color: #e3b184; }
+
+  /* placeholder marking */
+  .ph {
+    display: inline-block;
+    background: var(--ph-bg);
+    border: 1px dashed var(--ph-line);
+    color: #6a4d00;
+    border-radius: 6px;
+    padding: 0 6px;
+    font-size: .8rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .ph-block { background: var(--ph-bg); border: 1px dashed var(--ph-line); border-radius: 10px; padding: 10px 14px; color: #5a4200; font-size: .92rem; }
+
+  /* menu */
+  .menu-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  .menu-group { background: #fff; border-radius: var(--radius); padding: 18px 20px; box-shadow: 0 2px 10px rgba(59,36,24,.07); }
+  .menu-group h3 { border-bottom: 2px solid var(--latte); padding-bottom: 8px; margin-bottom: 8px; }
+  .menu-item { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--latte); }
+  .menu-item:last-child { border-bottom: 0; }
+  .menu-item .name { font-weight: 600; }
+  .menu-item .desc { display: block; font-size: .85rem; color: var(--muted); font-weight: 400; }
+  .price { text-align: right; font-weight: 700; color: var(--roast); flex-shrink: 0; }
+  .price .ph { display: block; margin-top: 2px; }
+
+  /* hours + location */
+  .two-col { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  .card { background: #fff; border-radius: var(--radius); padding: 22px; box-shadow: 0 2px 10px rgba(59,36,24,.07); }
+  table.hours { width: 100%; border-collapse: collapse; }
+  table.hours td { padding: 8px 0; border-bottom: 1px solid var(--latte); }
+  table.hours td:last-child { text-align: right; }
+  address { font-style: normal; }
+  .map-box { margin-top: 14px; min-height: 140px; border-radius: 12px; border: 2px dashed var(--ph-line); background: var(--ph-bg); display: flex; align-items: center; justify-content: center; text-align: center; padding: 14px; color: #5a4200; font-size: .92rem; }
+
+  /* beans */
+  .beans-points { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 18px; }
+  .beans-points .card h3 { color: var(--roast); }
+
+  /* loyalty */
+  .stamps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; max-width: 420px; margin: 18px 0; }
+  .stamp { aspect-ratio: 1; border-radius: 50%; border: 2px dashed var(--caramel); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--roast); background: var(--cream); font-size: .95rem; }
+  .stamp.free { background: var(--caramel); color: #fff; border: 2px solid var(--roast); font-size: .72rem; text-align: center; line-height: 1.1; }
+  .steps { padding-left: 1.2em; }
+  .steps li { margin-bottom: .4em; }
+
+  /* pre-order */
+  .notice { background: #fff; border-left: 5px solid var(--caramel); border-radius: 10px; padding: 12px 16px; margin: 0 0 18px; box-shadow: 0 2px 10px rgba(59,36,24,.07); }
+  .notice p { margin: 0 0 .4em; }
+  .notice p:last-child { margin-bottom: 0; }
+  .order-form { display: grid; gap: 16px; min-width: 0; }
+  .field { display: grid; gap: 6px; min-width: 0; }
+  .field label, .order-form legend { font-weight: 700; color: var(--espresso); }
+  .order-form fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  .order-form legend { padding: 0; margin-bottom: 6px; }
+  .order-form input[type="text"], .order-form textarea {
+    width: 100%; max-width: 100%; font: inherit; color: var(--ink);
+    padding: 12px 14px; border: 1.5px solid #cdb79a; border-radius: 10px; background: #fff;
+  }
+  .order-form textarea { resize: vertical; min-height: 72px; }
+  .order-form input:focus, .order-form textarea:focus, .qty-btn:focus-visible, .btn:focus-visible {
+    outline: 3px solid rgba(185,120,63,.5); outline-offset: 1px;
+  }
+  .order-rows { background: #fff; border-radius: var(--radius); padding: 6px 16px; box-shadow: 0 2px 10px rgba(59,36,24,.07); }
+  .order-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--latte); }
+  .order-row:last-child { border-bottom: 0; }
+  .order-row .oname { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+  .order-row .oname .ph { margin-left: 4px; }
+  .stepper { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .qty-btn { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--caramel); background: var(--cream); color: var(--roast); font-size: 1.3rem; font-weight: 700; line-height: 1; cursor: pointer; }
+  .qty-btn:active { background: var(--latte); }
+  .qty-val { min-width: 2ch; text-align: center; font-weight: 700; font-size: 1.1rem; }
+  .btn { font: inherit; font-weight: 700; background: var(--espresso); color: var(--cream); border: 0; border-radius: 999px; padding: 14px 24px; cursor: pointer; min-height: 48px; }
+  .btn:hover { background: var(--roast); }
+  .form-status { margin: 0; min-height: 1.5em; font-weight: 600; }
+  .form-status.err { color: #9b2c1b; }
+  .form-status.warn { color: #6a4d00; }
+  .form-status.ok { color: #2f5d2a; }
+  .summary { font-size: .95rem; color: var(--muted); margin: 0; }
+
+  /* placeholder list */
+  .ph-list { list-style: none; padding: 0; margin: 0; }
+  .ph-list li { padding: 10px 14px; margin-bottom: 8px; background: var(--ph-bg); border: 1px dashed var(--ph-line); border-radius: 10px; color: #5a4200; }
+
+  footer { background: var(--espresso); color: var(--latte); padding: 28px 0; font-size: .9rem; text-align: center; }
+  footer p { margin: 0; }
+
+  @media (min-width: 640px) {
+    .menu-grid { grid-template-columns: 1fr 1fr; }
+    .two-col { grid-template-columns: 1fr 1fr; }
+    .beans-points { grid-template-columns: repeat(3, 1fr); }
+    section { padding: 72px 0; }
+    .order-form { max-width: 640px; }
+  }
+  @media (max-width: 380px) {
+    .stamps { gap: 6px; }
+    .stamp.free { font-size: .62rem; }
+    .menu-item { flex-direction: column; gap: 2px; }
+    .price { text-align: left; }
+    .order-row { flex-wrap: wrap; }
+    .btn { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top">Brew Lab</a>
+    <nav aria-label="Main">
+      <a href="#menu">Menu</a>
+      <a href="#hours">Hours</a>
+      <a href="#location">Find us</a>
+      <a href="#beans">Beans</a>
+      <a href="#loyalty">Loyalty</a>
+      <a href="#preorder">Pre-order</a>
+      <a href="#placeholders">To confirm</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Specialty coffee &middot; Indiranagar, Bengaluru</p>
+      <h1>Small shop.<br>Carefully brewed coffee.</h1>
+      <p>Brew Lab is a small specialty coffee shop in Indiranagar. See the menu, check when we are open and find us. You can also pre-order a coffee for pickup further down this page.</p>
+    </div>
+  </div>
+
+  <!-- MENU -->
+  <section id="menu" aria-labelledby="menu-h">
+    <div class="wrap">
+      <p class="eyebrow">What we serve</p>
+      <h2 id="menu-h">Menu</h2>
+      <p class="ph-block"><strong>Placeholder menu.</strong> Items and prices below are examples only. The shop will confirm the real menu and prices.</p>
+      <div class="menu-grid" style="margin-top:16px">
+        <div class="menu-group">
+          <h3>Espresso</h3>
+          <div class="menu-item"><span class="name">Espresso<span class="desc">Single shot</span></span><span class="price">&#8377;120<span class="ph">placeholder price</span></span></div>
+          <div class="menu-item"><span class="name">Americano<span class="desc">Espresso with hot water</span></span><span class="price">&#8377;150<span class="ph">placeholder price</span></span></div>
+          <div class="menu-item"><span class="name">Cappuccino<span class="desc">Espresso, steamed milk, foam</span></span><span class="price">&#8377;180<span class="ph">placeholder price</span></span></div>
+          <div class="menu-item"><span class="name">Latte<span class="desc">Espresso with silky milk</span></span><span class="price">&#8377;190<span class="ph">placeholder price</span></span></div>
+        </div>
+        <div class="menu-group">
+          <h3>Filter and cold</h3>
+          <div class="menu-item"><span class="name">Pour Over<span class="desc">Brewed by hand, one cup</span></span><span class="price">&#8377;220<span class="ph">placeholder price</span></span></div>
+          <div class="menu-item"><span class="name">Cold Brew<span class="desc">Slow steeped, served over ice</span></span><span class="price">&#8377;210<span class="ph">placeholder price</span></span></div>
+          <div class="menu-item"><span class="name">Iced Latte<span class="desc">Espresso, cold milk, ice</span></span><span class="price">&#8377;200<span class="ph">placeholder price</span></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOURS -->
+  <section id="hours" aria-labelledby="hours-h">
+    <div class="wrap">
+      <p class="eyebrow">Drop by</p>
+      <h2 id="hours-h">Opening hours</h2>
+      <div class="card">
+        <p class="ph-block">Placeholder hours. The shop will confirm the real opening times.</p>
+        <table class="hours">
+          <tr><td>Monday to Friday</td><td><span class="ph">placeholder: 8:00 am &ndash; 9:00 pm</span></td></tr>
+          <tr><td>Saturday</td><td><span class="ph">placeholder: 8:00 am &ndash; 10:00 pm</span></td></tr>
+          <tr><td>Sunday</td><td><span class="ph">placeholder: 9:00 am &ndash; 10:00 pm</span></td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOCATION -->
+  <section id="location" aria-labelledby="loc-h">
+    <div class="wrap">
+      <p class="eyebrow">Where we are</p>
+      <h2 id="loc-h">Find us in Indiranagar</h2>
+      <div class="card">
+        <address>
+          <strong>Brew Lab</strong><br>
+          <span class="ph">placeholder: street address</span><br>
+          Indiranagar, Bengaluru, Karnataka<br>
+          <span class="ph">placeholder: PIN code</span>
+        </address>
+        <div class="map-box">Placeholder: map and directions link will be added once the shop confirms its address.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BEANS AND FARMS -->
+  <section id="beans" aria-labelledby="beans-h">
+    <div class="wrap">
+      <p class="eyebrow">From farm to cup</p>
+      <h2 id="beans-h">Our beans and the farms behind them</h2>
+      <p>We care about where our coffee comes from. Good coffee starts with the people who grow it, and we want to tell that story properly.</p>
+      <div class="beans-points">
+        <div class="card">
+          <h3>Grown with care</h3>
+          <p>Specialty coffee depends on careful farming and picking, so we choose beans with that in mind.</p>
+        </div>
+        <div class="card">
+          <h3>Roasted for flavour</h3>
+          <p>Roast level shapes how a cup tastes. We aim to bring out the character of each bean.</p>
+        </div>
+        <div class="card">
+          <h3>Fresh in your cup</h3>
+          <p>Fresh beans, ground and brewed to order, make a noticeable difference.</p>
+        </div>
+      </div>
+      <p class="ph-block" style="margin-top:16px"><strong>Placeholder.</strong> The names of our partner farms, where they are and how we source from them will be added once the shop confirms them.</p>
+    </div>
+  </section>
+
+  <!-- LOYALTY -->
+  <section id="loyalty" aria-labelledby="loy-h">
+    <div class="wrap">
+      <p class="eyebrow">Our thank-you</p>
+      <h2 id="loy-h">Loyalty card</h2>
+      <p><strong>Buy 9, get the 10th free.</strong></p>
+      <div class="stamps" role="img" aria-label="Loyalty card with nine stamps and a tenth free drink">
+        <div class="stamp">1</div><div class="stamp">2</div><div class="stamp">3</div><div class="stamp">4</div><div class="stamp">5</div>
+        <div class="stamp">6</div><div class="stamp">7</div><div class="stamp">8</div><div class="stamp">9</div><div class="stamp free">10th free</div>
+      </div>
+      <ol class="steps">
+        <li>Ask for a loyalty card at the counter.</li>
+        <li>Get a stamp each time you buy a coffee.</li>
+        <li>When you buy 9 drinks, your 10th free drink is on us.</li>
+      </ol>
+      <p class="ph-block">Placeholder: fine print, such as which drinks count, is to be confirmed by the shop.</p>
+    </div>
+  </section>
+
+  <!-- PRE-ORDER -->
+  <section id="preorder" aria-labelledby="pre-h">
+    <div class="wrap">
+      <p class="eyebrow">Skip the wait</p>
+      <h2 id="pre-h">Pre-order for pickup</h2>
+      <div class="notice">
+        <p><strong>Payment is at pickup.</strong> You pay in the shop when you collect your order.</p>
+        <p><strong>Your order is confirmed only when the shop replies.</strong> Tapping the button opens a WhatsApp message for you to send. Until the shop replies, treat it as a request, not a confirmed order.</p>
+        <p>This page does not store or send anything itself.</p>
+      </div>
+      <p class="ph-block" style="margin-bottom:18px"><strong>Placeholder.</strong> The shop's WhatsApp number and the item prices are not confirmed yet. Menu items here match the placeholder menu above.</p>
+
+      <form class="order-form" id="order-form" novalidate>
+        <div class="field">
+          <label for="cust-name">Your name</label>
+          <input type="text" id="cust-name" name="name" autocomplete="name" maxlength="60" placeholder="Name for the pickup" required>
+        </div>
+
+        <fieldset>
+          <legend>Choose your items</legend>
+          <div class="order-rows" id="order-rows">
+            <div class="order-row" data-item="Espresso">
+              <span class="oname" id="n-0">Espresso <span class="ph">placeholder price</span></span>
+              <span class="stepper" role="group" aria-labelledby="n-0">
+                <button type="button" class="qty-btn" data-dir="-1" aria-label="Remove one Espresso">&minus;</button>
+                <span class="qty-val" aria-live="polite">0</span>
+                <button type="button" class="qty-btn" data-dir="1" aria-label="Add one Espresso">+</button>
+              </span>
+            </div>
+            <div class="order-row" data-item="Americano">
+              <span class="oname" id="n-1">Americano <span class="ph">placeholder price</span></span>
+              <span class="stepper" role="group" aria-labelledby="n-1">
+                <button type="button" class="qty-btn" data-dir="-1" aria-label="Remove one Americano">&minus;</button>
+                <span class="qty-val" aria-live="polite">0</span>
+                <button type="button" class="qty-btn" data-dir="1" aria-label="Add one Americano">+</button>
+              </span>
+            </div>
+            <div class="order-row" data-item="Cappuccino">
+              <span class="oname" id="n-2">Cappuccino <span class="ph">placeholder price</span></span>
+              <span class="stepper" role="group" aria-labelledby="n-2">
+                <button type="button" class="qty-btn" data-dir="-1" aria-label="Remove one Cappuccino">&minus;</button>
+                <span class="qty-val" aria-live="polite">0</span>
+                <button type="button" class="qty-btn" data-dir="1" aria-label="Add one Cappuccino">+</button>
+              </span>
+            </div>
+            <div class="order-row" data-item="Latte">
+              <span class="oname" id="n-3">Latte <span class="ph">placeholder price</span></span>
+              <span class="stepper" role="group" aria-labelledby="n-3">
+                <button type="button" class="qty-btn" data-dir="-1" aria-label="Remove one Latte">&minus;</button>
+                <span class="qty-val" aria-live="polite">0</span>
+                <button type="button" class="qty-btn" data-dir="1" aria-label="Add one Latte">+</button>
+              </span>
+            </div>
+            <div class="order-row" data-item="Pour Over">
+              <span class="oname" id="n-4">Pour Over <span class="ph">placeholder price</span></span>
+              <span class="stepper" role="group" aria-labelledby="n-4">
+                <button type="button" class="qty-btn" data-dir="-1" aria-label="Remove one Pour Over">&minus;</button>
+                <span class="qty-val" aria-live="polite">0</span>
+                <button type="button" class="qty-btn" data-dir="1" aria-label="Add one Pour Over">+</button>
+              </span>
+            </div>
+            <div class="order-row" data-item="Cold Brew">
+              <span class="oname" id="n-5">Cold Brew <span class="ph">placeholder price</span></span>
+              <span class="stepper" role="group" aria-labelledby="n-5">
+                <button type="button" class="qty-btn" data-dir="-1" aria-label="Remove one Cold Brew">&minus;</button>
+                <span class="qty-val" aria-live="polite">0</span>
+                <button type="button" class="qty-btn" data-dir="1" aria-label="Add one Cold Brew">+</button>
+              </span>
+            </div>
+            <div class="order-row" data-item="Iced Latte">
+              <span class="oname" id="n-6">Iced Latte <span class="ph">placeholder price</span></span>
+              <span class="stepper" role="group" aria-labelledby="n-6">
+                <button type="button" class="qty-btn" data-dir="-1" aria-label="Remove one Iced Latte">&minus;</button>
+                <span class="qty-val" aria-live="polite">0</span>
+                <button type="button" class="qty-btn" data-dir="1" aria-label="Add one Iced Latte">+</button>
+              </span>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label for="cust-note">Note for the shop (optional)</label>
+          <textarea id="cust-note" name="note" maxlength="200" placeholder="For example: preferred pickup time, oat milk, less sugar"></textarea>
+        </div>
+
+        <p class="summary" id="order-summary">No items chosen yet.</p>
+        <button type="submit" class="btn">Open WhatsApp with my order</button>
+        <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+      </form>
+      <noscript><p class="ph-block">The pre-order form needs JavaScript. Please enable it, or order at the shop.</p></noscript>
+    </div>
+  </section>
+
+  <!-- PLACEHOLDER LIST -->
+  <section id="placeholders" aria-labelledby="ph-h">
+    <div class="wrap">
+      <p class="eyebrow">Work in progress</p>
+      <h2 id="ph-h">Details still to be confirmed</h2>
+      <p>These details on the page are placeholders until the shop confirms them:</p>
+      <ul class="ph-list">
+        <li>Menu items and all prices</li>
+        <li>Opening hours</li>
+        <li>Street address, PIN code and map location</li>
+        <li>Bean details, farm names and sourcing</li>
+        <li>Loyalty card fine print</li>
+        <li>Shop WhatsApp number for pre-orders (a placeholder, set once as WHATSAPP_NUMBER in the page script)</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>&copy; Brew Lab &middot; Indiranagar, Bengaluru</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  // ============================================================
+  // PLACEHOLDER: SHOP WHATSAPP NUMBER (the only place it is set)
+  // Replace with the shop's real number: country code plus number,
+  // digits only, no "+" or spaces. Example format: 919876543210
+  // The value below is a placeholder and will not reach the shop.
+  // ============================================================
+  var WHATSAPP_NUMBER = "910000000000"; // PLACEHOLDER, replace before launch
+  var PLACEHOLDER_NUMBER = "910000000000";
+
+  var MAX_QTY = 20;
+  var form = document.getElementById("order-form");
+  var rows = Array.prototype.slice.call(document.querySelectorAll("#order-rows .order-row"));
+  var summary = document.getElementById("order-summary");
+  var statusEl = document.getElementById("form-status");
+  var nameEl = document.getElementById("cust-name");
+  var noteEl = document.getElementById("cust-note");
+
+  function qtyOf(row) {
+    return parseInt(row.querySelector(".qty-val").textContent, 10) || 0;
+  }
+
+  function chosen() {
+    var list = [];
+    rows.forEach(function (row) {
+      var q = qtyOf(row);
+      if (q > 0) { list.push({ item: row.getAttribute("data-item"), qty: q }); }
+    });
+    return list;
+  }
+
+  function setStatus(msg, cls) {
+    statusEl.textContent = msg;
+    statusEl.className = "form-status" + (cls ? " " + cls : "");
+  }
+
+  function updateSummary() {
+    var list = chosen();
+    if (!list.length) {
+      summary.textContent = "No items chosen yet.";
+      return;
+    }
+    var count = list.reduce(function (n, l) { return n + l.qty; }, 0);
+    summary.textContent = count + (count === 1 ? " drink chosen: " : " drinks chosen: ") +
+      list.map(function (l) { return l.qty + " x " + l.item; }).join(", ");
+  }
+
+  rows.forEach(function (row) {
+    row.addEventListener("click", function (e) {
+      var btn = e.target.closest ? e.target.closest(".qty-btn") : null;
+      if (!btn) { return; }
+      var dir = parseInt(btn.getAttribute("data-dir"), 10);
+      var next = Math.max(0, Math.min(MAX_QTY, qtyOf(row) + dir));
+      row.querySelector(".qty-val").textContent = String(next);
+      updateSummary();
+      if (statusEl.className.indexOf("err") !== -1) { setStatus("", ""); }
+    });
+  });
+
+  function buildMessage(name, list, note) {
+    var lines = [];
+    lines.push("Hi Brew Lab, I would like to pre-order for pickup.");
+    lines.push("");
+    lines.push("Name: " + name);
+    lines.push("");
+    lines.push("Items:");
+    list.forEach(function (l) { lines.push("- " + l.qty + " x " + l.item); });
+    if (note) {
+      lines.push("");
+      lines.push("Note: " + note);
+    }
+    lines.push("");
+    lines.push("I will pay at pickup. Please reply to confirm my order.");
+    return lines.join("\n");
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = nameEl.value.replace(/\s+/g, " ").trim();
+    var note = noteEl.value.replace(/\s+/g, " ").trim();
+    var list = chosen();
+
+    if (!name) {
+      setStatus("Please enter your name.", "err");
+      nameEl.focus();
+      return;
+    }
+    if (!list.length) {
+      setStatus("Please choose at least one item.", "err");
+      return;
+    }
+
+    var text = buildMessage(name, list, note);
+    var url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(text);
+
+    var win = window.open(url, "_blank", "noopener");
+    if (!win) { window.location.href = url; }
+
+    if (WHATSAPP_NUMBER === PLACEHOLDER_NUMBER) {
+      setStatus("Preview only: the shop's WhatsApp number is still a placeholder, so this message will not reach the shop yet.", "warn");
+    } else {
+      setStatus("WhatsApp should now be open with your order. Send the message. Your order is confirmed only when the shop replies.", "ok");
+    }
+  });
+
+  updateSummary();
+})();
+</script>
+
+</body>
+</html>

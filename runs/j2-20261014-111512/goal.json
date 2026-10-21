@@ -1,0 +1,68 @@
+{
+  "statement": "Build Tap Rush, a 30-second reaction game, as one self-contained web page playable by tap or click on a phone or laptop with no login.",
+  "site_name": "Tap Rush",
+  "audience": "Anyone on a phone or laptop, no login needed",
+  "standards": [
+    "Dark background, bright coloured circles, large text",
+    "Works on a 360px wide phone with no horizontal scrolling",
+    "Controls are tap or mouse click only",
+    "One page in one file, no external images, fonts or scripts",
+    "No JavaScript errors"
+  ],
+  "rules": [
+    "Use exactly: game name \"Tap Rush\", round length 30 seconds, circle lifetime 1 second, 1 point per circle",
+    "No sign-up forms, no contact details, no prices",
+    "Do not invent anything the brief does not state; mark it to be confirmed or ask",
+    "Add no features beyond the three screens described"
+  ],
+  "done_when": [
+    "The start screen shows the name \"Tap Rush\"",
+    "The start screen has one line of instructions and a \"Start\" button",
+    "The play screen shows a visible score and a countdown timer",
+    "A round lasts exactly 30 seconds, then the end screen appears",
+    "Coloured circles appear at random spots in the play area, and tapping or clicking one adds exactly 1 point",
+    "Each circle disappears 1 second after it appears if not tapped",
+    "The end screen shows the final score, the best score this session and a \"Play again\" button that starts a new round",
+    "The only controls are tap or mouse click",
+    "The page has a dark background, bright circles and large text",
+    "There is no horizontal overflow at 360px or 1280px width",
+    "The file is one page with no external images, fonts or scripts, and has no sign-up form, contact details or prices",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ],
+  "business_type": "browser game",
+  "visitor_needs": [
+    "Start a round from a start screen",
+    "See score and countdown while playing",
+    "Tap or click circles to score",
+    "See final score and best score this session, then play again"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [],
+  "charter_items": [
+    "The start screen shows the name \"Tap Rush\"",
+    "The start screen has one line of instructions and a \"Start\" button",
+    "The play screen shows a visible score and a countdown timer",
+    "A round lasts exactly 30 seconds, then the end screen appears",
+    "Coloured circles appear at random spots in the play area, and tapping or clicking one adds exactly 1 point",
+    "Each circle disappears 1 second after it appears if not tapped",
+    "The end screen shows the final score, the best score this session and a \"Play again\" button that starts a new round",
+    "The only controls are tap or mouse click",
+    "The page has a dark background, bright circles and large text",
+    "There is no horizontal overflow at 360px or 1280px width",
+    "The file is one page with no external images, fonts or scripts, and has no sign-up form, contact details or prices",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ],
+  "core_items": [
+    "The start screen shows the name \"Tap Rush\"",
+    "The start screen has one line of instructions and a \"Start\" button",
+    "The play screen shows a visible score and a countdown timer",
+    "A round lasts exactly 30 seconds, then the end screen appears",
+    "Coloured circles appear at random spots in the play area, and tapping or clicking one adds exactly 1 point",
+    "Each circle disappears 1 second after it appears if not tapped",
+    "The end screen shows the final score, the best score this session and a \"Play again\" button that starts a new round",
+    "The only controls are tap or mouse click",
+    "There is no horizontal overflow at 360px or 1280px width",
+    "The file is one page with no external images, fonts or scripts, and has no sign-up form, contact details or prices",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ]
+}

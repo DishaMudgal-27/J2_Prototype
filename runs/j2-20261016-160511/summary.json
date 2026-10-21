@@ -1,0 +1,1197 @@
+{
+  "run": "20261016-160511",
+  "output_type": "website",
+  "j2_fixes": 0,
+  "design_documents": {
+    "requested": [
+      "prd",
+      "hld",
+      "lld"
+    ],
+    "stages": [
+      "prd",
+      "hld",
+      "lld",
+      "website"
+    ],
+    "files": {
+      "prd": "prd.md",
+      "hld": "hld.md",
+      "lld": "lld.md"
+    },
+    "chain": [
+      {
+        "requirement": "R1",
+        "component": "C1",
+        "lld_section": "S1",
+        "atoms": [
+          "W-26.a1"
+        ]
+      },
+      {
+        "requirement": "R2",
+        "component": "C2",
+        "lld_section": "S2",
+        "atoms": [
+          "W-27.a1"
+        ]
+      },
+      {
+        "requirement": "R3",
+        "component": "C3",
+        "lld_section": "S3",
+        "atoms": [
+          "W-28.a1"
+        ]
+      },
+      {
+        "requirement": "R4",
+        "component": "C4",
+        "lld_section": "S4",
+        "atoms": [
+          "W-29.a1"
+        ]
+      },
+      {
+        "requirement": "R5",
+        "component": "C1",
+        "lld_section": "S1",
+        "atoms": [
+          "W-26.a1"
+        ]
+      },
+      {
+        "requirement": "R5",
+        "component": "C2",
+        "lld_section": "S2",
+        "atoms": [
+          "W-27.a1"
+        ]
+      },
+      {
+        "requirement": "R5",
+        "component": "C3",
+        "lld_section": "S3",
+        "atoms": [
+          "W-28.a1"
+        ]
+      },
+      {
+        "requirement": "R5",
+        "component": "C4",
+        "lld_section": "S4",
+        "atoms": [
+          "W-29.a1"
+        ]
+      },
+      {
+        "requirement": "R5",
+        "component": "C5",
+        "lld_section": "S5",
+        "atoms": [
+          "W-30.a1",
+          "W-31.a1"
+        ]
+      },
+      {
+        "requirement": "R6",
+        "component": "C1",
+        "lld_section": "S1",
+        "atoms": [
+          "W-26.a1"
+        ]
+      },
+      {
+        "requirement": "R6",
+        "component": "C2",
+        "lld_section": "S2",
+        "atoms": [
+          "W-27.a1"
+        ]
+      },
+      {
+        "requirement": "R6",
+        "component": "C3",
+        "lld_section": "S3",
+        "atoms": [
+          "W-28.a1"
+        ]
+      },
+      {
+        "requirement": "R6",
+        "component": "C4",
+        "lld_section": "S4",
+        "atoms": [
+          "W-29.a1"
+        ]
+      },
+      {
+        "requirement": "R6",
+        "component": "C5",
+        "lld_section": "S5",
+        "atoms": [
+          "W-30.a1",
+          "W-31.a1"
+        ]
+      },
+      {
+        "requirement": "R7",
+        "component": "C2",
+        "lld_section": "S2",
+        "atoms": [
+          "W-27.a1"
+        ]
+      }
+    ],
+    "lld_revisions": [
+      {
+        "section": "S2",
+        "version": 2,
+        "reason": "The LLD slice lists a quantity field, select, number and time field types and ids such as #pre-order-submit, #pre-order-fields and #pre-order-status. The charter and the Requester's answer say four fields (name, phone, items, pickup time) with no quantity, and the atom allows only the #po-* ids. I followed the charter. Mailto cannot confirm receipt, so there is no separate status element.",
+        "changes": {
+          "#pre-order-submit": "#po-submit",
+          "#pre-order-fields": "#pre-order-form",
+          "#pre-order-status": "#po-error"
+        },
+        "by": "W-27"
+      }
+    ],
+    "lld_compare": {
+      "matches": [
+        "S1",
+        "S3",
+        "S4",
+        "S5"
+      ],
+      "mismatches": [
+        {
+          "section": "S2",
+          "evidence": "F3 field coffee-item is type text, the spec says select; F4 field quantity isn't in #pre-order-form"
+        }
+      ],
+      "dropped": []
+    }
+  },
+  "provider": "claude-cli",
+  "sections": [
+    "style",
+    "W-26",
+    "W-27",
+    "W-28",
+    "W-29",
+    "W-30"
+  ],
+  "conditions": {
+    "met": 8,
+    "total": 8,
+    "warnings": 0,
+    "list": [
+      {
+        "id": "N1",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "met": true,
+        "evidence": "all 5 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "met": true,
+        "evidence": "all 15 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "met": true,
+        "evidence": "every number, phone and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "N7",
+        "met": true,
+        "evidence": "1 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "met": true,
+        "evidence": "the nav reaches all 4 section(s); the hero has 1 main action(s)"
+      }
+    ]
+  },
+  "necessary_conditions": {
+    "met": 8,
+    "total": 8,
+    "warnings": 0,
+    "list": [
+      {
+        "id": "N1",
+        "text": "The page opens (it parses, tags balanced)",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "text": "No JavaScript errors on load",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "text": "No horizontal overflow at 360px and 1280px",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "text": "Every in-page link resolves; WhatsApp (wa.me) and tel: links are well formed",
+        "met": true,
+        "evidence": "all 5 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "text": "Every charter fact appears exactly, and nothing is \"to be confirmed\"",
+        "met": true,
+        "evidence": "all 15 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "text": "No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers",
+        "met": true,
+        "evidence": "every number, phone and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "N7",
+        "text": "Every form has a submit control and a destination (action or mailto)",
+        "met": true,
+        "evidence": "1 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "text": "A nav reaches every section, and the hero has one obvious main action",
+        "met": true,
+        "evidence": "the nav reaches all 4 section(s); the hero has 1 main action(s)"
+      }
+    ]
+  },
+  "force_audit_fail": null,
+  "test_lessons": false,
+  "model": "sonnet",
+  "mock": false,
+  "brief": "A one-page website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru. Visitors see the menu with prices, the opening hours and where to find the shop, and they can pre-order a coffee for pickup. Write the design docs first. Users: coffee lovers and office staff nearby. Problem: people cannot see the menu or order ahead. Must-have: menu with prices, pre-order form, map or address, opening hours. Constraints: one page only, works on phones, no payment. Success: 30 pre-orders per week.",
+  "change_requests": [],
+  "status": "done_with_open_items",
+  "outcome": "Done with open items: shipped as is after the Requester accepted a document as it is. Still not workable: the product requirements: document rubric D-5 (NEEDS_REVISION): No invented facts: every fact comes from the brief or the Requester's answers, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim not in the brief; necessary condition P4 not met: No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line (not in the charter or the Requester's answers, and not marked Assumption: Give).",
+  "budget": {
+    "start": 500,
+    "granted": 500,
+    "used": 500,
+    "raises": []
+  },
+  "ai_calls": 114,
+  "cycles": 9,
+  "links": {
+    "identity->adaptation": 8,
+    "validator->adaptation": 2,
+    "adaptation->priority": 9,
+    "validator->coordination": 9,
+    "coordination->priority": 31,
+    "priority->W": 31,
+    "W->coordination": 31,
+    "audit->identity": 9,
+    "identity->requester": 5,
+    "adaptation->coordination": 2
+  },
+  "verification": {
+    "passed": 31,
+    "failed": 0,
+    "escalated": 0,
+    "could_not_run": 0,
+    "checks_run": 162
+  },
+  "identity_to_requester_decisions": 2,
+  "identity_to_requester_facts": 1,
+  "priority_rulings": {
+    "grant": 9,
+    "counter": 0,
+    "refuse": 0
+  },
+  "questions_to_user": [
+    {
+      "kind": "limit",
+      "asked": [
+        "The same problem came back twice. Keep going, finish as it is, or stop the whole run here?"
+      ],
+      "answer": "option 2",
+      "decision": "ship",
+      "named": [],
+      "dropped": []
+    },
+    {
+      "kind": "limit",
+      "asked": [
+        "The team paused after a round of work. Keep going, finish as it is, or stop the whole run here?"
+      ],
+      "answer": "option 1",
+      "decision": "continue",
+      "named": [],
+      "dropped": []
+    },
+    {
+      "kind": "info",
+      "asked": [
+        "Please send these: What coffees and other items are on the menu, and what is the price of each (in rupees); What are the opening hours for each day of the week, including any days you are closed; What is the full shop address in Indiranagar, and do you want a map on the page as well as the written address; Where should pre-orders go, and what phone number or email should customers see on the page? Also, what should the pre-order form ask for (for example name, phone, item, quantity, pickup time)."
+      ],
+      "answer": "Menu (rupees): Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120.\nHours: Monday to Saturday 7:30 am to 9:00 pm, Sunday 8:30 am to 6:00 pm. No closed days.\nAddress: 12, 100 Feet Road, Indiranagar, Bengaluru 560038. Show the written address only, no embedded map.\nPre-orders: email them to hello@brewlab.example. Show phone +91 98450 12345 and email hello@brewlab.example on the page.\nPre-order form asks for: name, phone, items, pickup time. No payment, customers pay at pickup."
+    }
+  ],
+  "conflicts": [],
+  "validator_rejections": [],
+  "holds": [
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-2: prd-problem (W-1) not done"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-3: prd-users (W-2) not done"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-4: prd-goals (W-3) not done"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-5: prd-requirements (W-4) not done"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-6: prd-metrics (W-5) not done"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-3: prd-users (W-2) not done"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-4: prd-goals (W-3) not done"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-5: prd-requirements (W-4) not done"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-6: prd-metrics (W-5) not done"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-4: prd-goals (W-3) not done"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-5: prd-requirements (W-4) not done"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-6: prd-metrics (W-5) not done"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-5: prd-requirements (W-4) not done"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-6: prd-metrics (W-5) not done"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-6: prd-metrics (W-5) not done"
+    },
+    {
+      "cycle": 2,
+      "by": "coordination",
+      "detail": "W-7: W-8 (revised prd-requirements) not done"
+    },
+    {
+      "cycle": 3,
+      "by": "coordination",
+      "detail": "W-10: hld-purpose (W-9) not done"
+    },
+    {
+      "cycle": 3,
+      "by": "coordination",
+      "detail": "W-11: hld-pages (W-10) not done"
+    },
+    {
+      "cycle": 3,
+      "by": "coordination",
+      "detail": "W-12: hld-components (W-11) not done"
+    },
+    {
+      "cycle": 3,
+      "by": "coordination",
+      "detail": "W-13: hld-dataflow (W-12) not done"
+    },
+    {
+      "cycle": 3,
+      "by": "coordination",
+      "detail": "W-14: hld-hosting (W-13) not done"
+    },
+    {
+      "cycle": 3,
+      "by": "coordination",
+      "detail": "W-11: hld-pages (W-10) not done"
+    },
+    {
+      "cycle": 3,
+      "by": "coordination",
+      "detail": "W-12: hld-components (W-11) not done"
+    },
+    {
+      "cycle": 3,
+      "by": "coordination",
+      "detail": "W-13: hld-dataflow (W-12) not done"
+    },
+    {
+      "cycle": 3,
+      "by": "coordination",
+      "detail": "W-14: hld-hosting (W-13) not done"
+    },
+    {
+      "cycle": 3,
+      "by": "coordination",
+      "detail": "W-12: hld-components (W-11) not done"
+    },
+    {
+      "cycle": 3,
+      "by": "coordination",
+      "detail": "W-13: hld-dataflow (W-12) not done"
+    },
+    {
+      "cycle": 3,
+      "by": "coordination",
+      "detail": "W-14: hld-hosting (W-13) not done"
+    },
+    {
+      "cycle": 3,
+      "by": "coordination",
+      "detail": "W-13: hld-dataflow (W-12) not done"
+    },
+    {
+      "cycle": 3,
+      "by": "coordination",
+      "detail": "W-14: hld-hosting (W-13) not done"
+    },
+    {
+      "cycle": 3,
+      "by": "coordination",
+      "detail": "W-14: hld-hosting (W-13) not done"
+    },
+    {
+      "cycle": 4,
+      "by": "coordination",
+      "detail": "W-17: hld-components is being revised by W-16, which is not done"
+    },
+    {
+      "cycle": 4,
+      "by": "coordination",
+      "detail": "W-15: hld-dataflow is being revised by W-17, which is not done"
+    },
+    {
+      "cycle": 4,
+      "by": "coordination",
+      "detail": "W-15: hld-dataflow is being revised by W-17, which is not done"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-19: lld-pages (W-18) not done"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-20: lld-interactive (W-19) not done"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-21: lld-fields (W-20) not done"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-22: lld-files (W-21) not done"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-20: lld-interactive (W-19) not done"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-21: lld-fields (W-20) not done"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-22: lld-files (W-21) not done"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-21: lld-fields (W-20) not done"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-22: lld-files (W-21) not done"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-22: lld-files (W-21) not done"
+    },
+    {
+      "cycle": 8,
+      "by": "coordination",
+      "detail": "W-27: site-menu (W-26) not done"
+    },
+    {
+      "cycle": 8,
+      "by": "coordination",
+      "detail": "W-28: site-preorder (W-27) not done"
+    },
+    {
+      "cycle": 8,
+      "by": "coordination",
+      "detail": "W-29: site-address (W-28) not done"
+    },
+    {
+      "cycle": 8,
+      "by": "coordination",
+      "detail": "W-30: site-menu, site-preorder, site-address and site-hours (W-26 to W-29) not done"
+    },
+    {
+      "cycle": 8,
+      "by": "coordination",
+      "detail": "W-28: site-preorder (W-27) not done"
+    },
+    {
+      "cycle": 8,
+      "by": "coordination",
+      "detail": "W-29: site-address (W-28) not done"
+    },
+    {
+      "cycle": 8,
+      "by": "coordination",
+      "detail": "W-30: site-menu, site-preorder, site-address and site-hours (W-26 to W-29): W-27, W-28 and W-29 not done"
+    },
+    {
+      "cycle": 8,
+      "by": "coordination",
+      "detail": "W-29: site-address (W-28) not done"
+    },
+    {
+      "cycle": 8,
+      "by": "coordination",
+      "detail": "W-30: site-address (W-28) and site-hours (W-29) not done"
+    },
+    {
+      "cycle": 8,
+      "by": "coordination",
+      "detail": "W-30: site-hours (W-29) not done"
+    }
+  ],
+  "audits": [
+    {
+      "cycle": 8,
+      "version": 7,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-1",
+          "item": "R-1",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-2",
+          "item": "R-2",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-3",
+          "item": "R-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-4",
+          "item": "R-4",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-5",
+          "item": "R-5",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-6",
+          "item": "R-6",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-7",
+          "item": "R-7",
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": null,
+          "verdict": "POLICY_CONCERN"
+        },
+        {
+          "id": "F-10",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    },
+    {
+      "cycle": 9,
+      "version": 8,
+      "all_pass": true,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-1",
+          "item": "R-1",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-2",
+          "item": "R-2",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-3",
+          "item": "R-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-4",
+          "item": "R-4",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-5",
+          "item": "R-5",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-6",
+          "item": "R-6",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-7",
+          "item": "R-7",
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": null,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    }
+  ],
+  "site_versions": 8,
+  "workable": [],
+  "to_be_confirmed": [],
+  "dropped_by_requester": [],
+  "workflow_agents": [
+    {
+      "id": "W-1",
+      "agent": "W-1 Builder",
+      "section": "W-1",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-2",
+      "agent": "W-2 Builder",
+      "section": "W-2",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-3",
+      "agent": "W-3 Builder",
+      "section": "W-3",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-4",
+      "agent": "W-4 Builder",
+      "section": "W-4",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-5",
+      "agent": "W-5 Builder",
+      "section": "W-5",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-6",
+      "agent": "W-6 Builder",
+      "section": "W-6",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-7",
+      "agent": "W-7 Builder",
+      "section": "W-5",
+      "revises": "W-5",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-8",
+      "agent": "W-8 Builder",
+      "section": "W-4",
+      "revises": "W-4",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-9",
+      "agent": "W-9 Builder",
+      "section": "W-9",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-10",
+      "agent": "W-10 Builder",
+      "section": "W-10",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-11",
+      "agent": "W-11 Builder",
+      "section": "W-11",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-12",
+      "agent": "W-12 Builder",
+      "section": "W-12",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-13",
+      "agent": "W-13 Builder",
+      "section": "W-13",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-14",
+      "agent": "W-14 Builder",
+      "section": "W-14",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-15",
+      "agent": "W-15 Builder",
+      "section": "W-13",
+      "revises": "W-13",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-16",
+      "agent": "W-16 Builder",
+      "section": "W-11",
+      "revises": "W-11",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-17",
+      "agent": "W-17 Builder",
+      "section": "W-12",
+      "revises": "W-12",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-18",
+      "agent": "W-18 Builder",
+      "section": "W-18",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-19",
+      "agent": "W-19 Builder",
+      "section": "W-19",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-20",
+      "agent": "W-20 Builder",
+      "section": "W-20",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-21",
+      "agent": "W-21 Builder",
+      "section": "W-21",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-22",
+      "agent": "W-22 Builder",
+      "section": "W-22",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-23",
+      "agent": "W-23 Builder",
+      "section": "W-19",
+      "revises": "W-19",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-24",
+      "agent": "W-24 Builder",
+      "section": "W-22",
+      "revises": "W-22",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-25",
+      "agent": "W-25 Builder",
+      "section": "W-19",
+      "revises": "W-19",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-26",
+      "agent": "W-26 Builder",
+      "section": "W-26",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-27",
+      "agent": "W-27 Builder",
+      "section": "W-27",
+      "revises": null,
+      "status": "done",
+      "calls": 2,
+      "retries": 0
+    },
+    {
+      "id": "W-28",
+      "agent": "W-28 Builder",
+      "section": "W-28",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-29",
+      "agent": "W-29 Builder",
+      "section": "W-29",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-30",
+      "agent": "W-30 Builder",
+      "section": "W-30",
+      "revises": null,
+      "status": "done",
+      "calls": 2,
+      "retries": 0
+    },
+    {
+      "id": "W-31",
+      "agent": "W-31 Builder",
+      "section": "W-30",
+      "revises": "W-30",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    }
+  ],
+  "limits_hit": [
+    "The same failure came back twice in a row, so another cycle would likely repeat it.",
+    "The department used its 6 cycles (J2_MAX_CYCLES) and the site isn't workable yet."
+  ],
+  "lessons": {
+    "memory": false,
+    "saved": [],
+    "used": []
+  },
+  "playbooks": {
+    "saved": null,
+    "used": []
+  },
+  "business_type": "coffee shop",
+  "style_guide": true,
+  "rubric": [
+    {
+      "id": "R-1",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-2",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-3",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-4",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-5",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-6",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-7",
+      "pass": true,
+      "verdict": "PASS"
+    }
+  ],
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "The page shows the menu with all seven items and their prices: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "The page shows the opening hours: Monday to Saturday 7:30 am to 9:00 pm, Sunday 8:30 am to 6:00 pm, with no closed days",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "The page shows the phone +91 98450 12345 and the email hello@brewlab.example",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "The page has a pre-order form with the fields name, phone, items and pickup time, and it sends the order to hello@brewlab.example",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "The page states that there is no online payment and customers pay at pickup, and has no payment field",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "The site is a single page that works on phones: no horizontal overflow at 360px and 1280px, and no broken in-page link",
+      "pass": true
+    },
+    {
+      "item": 8,
+      "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+      "pass": true
+    }
+  ],
+  "route_check_violations": []
+}

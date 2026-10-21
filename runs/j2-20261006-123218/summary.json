@@ -1,0 +1,164 @@
+{
+  "run": "20261006-123218",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "model": "sonnet",
+  "mock": false,
+  "brief": "A one-page website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru. Visitors should see the menu with prices, the opening hours, and where to find us, and be able to pre-order a coffee for pickup. It should feel warm and modern and work well on a phone. Include a section about our beans and the farms they come from, and a simple loyalty-card explainer (buy 9, get the 10th free).",
+  "change_requests": [],
+  "status": "stopped",
+  "outcome": "Stopped: every done-when item passes with Audit's evidence, but Identity did not declare done. Done means the done-when list only, so this needs a look at Identity's reason above.",
+  "budget": {
+    "start": 200,
+    "granted": 200,
+    "used": 90,
+    "raises": []
+  },
+  "ai_calls": 14,
+  "cycles": 1,
+  "questions_to_user": [],
+  "conflicts": [],
+  "validator_rejections": [],
+  "holds": [
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-3: W-2 (wf-info) must be done"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-4: index.html write lock is held by the W-2 run; starts after W-3 finishes"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-4: index.html write lock is held by the W-3 run; starts after W-3 finishes"
+    }
+  ],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 4,
+      "all_pass": true,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-11",
+          "item": null,
+          "verdict": "NEEDS_REVISION"
+        }
+      ]
+    }
+  ],
+  "site_versions": 4,
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The file is a single HTML document with inline or CDN CSS and JS and no build step",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "The page has a menu section listing items with a price shown for each (real or marked placeholder)",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "The page has an opening-hours section with every day of the week listed (real or marked placeholder)",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "The page has a where-to-find-us section naming Indiranagar, Bengaluru, with an address and a map link or embed (address marked placeholder if unknown)",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "The page has a pre-order-for-pickup form where a visitor picks items and quantities, enters name, phone and pickup time, and gets an order summary on submit; the order destination is a marked placeholder",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "The page has a beans-and-farms section describing the beans and their farms (farm details marked placeholder if unknown)",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "The page has a loyalty-card explainer stating buy 9, get the 10th free",
+      "pass": true
+    },
+    {
+      "item": 8,
+      "criterion": "The file has a viewport meta tag and responsive CSS rules with a mobile layout",
+      "pass": true
+    },
+    {
+      "item": 9,
+      "criterion": "Every placeholder is visibly marked in the page text, and none is presented as fact",
+      "pass": true
+    },
+    {
+      "item": 10,
+      "criterion": "Navigation links to each section work as in-page anchors",
+      "pass": true
+    }
+  ],
+  "route_check_violations": [
+    {
+      "agent": "audit",
+      "detail": "picked Adaptation, routed to Identity (everything passes, so Identity decides whether done-when holds)",
+      "msg": 22,
+      "cycle": 1
+    }
+  ]
+}

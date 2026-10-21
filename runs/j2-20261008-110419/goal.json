@@ -1,0 +1,51 @@
+{
+  "statement": "Build a one-file, phone-friendly website for Thread & Loom, a handloom clothing boutique in Pune, where visitors can browse products by category, filter by size and price, read the size guide, see new arrivals, order on WhatsApp, view a lookbook, and find the shop's timings, location, return and exchange policy, delivery details and customer reviews.",
+  "site_name": "Thread & Loom",
+  "audience": "Shoppers in and around Pune, mostly on phones, looking for handloom kurtas, sarees, cotton shirts and dupattas.",
+  "standards": [
+    "Earthy and elegant look: warm natural colours, calm spacing, serif or refined headings, defined as CSS variables",
+    "Mobile first: viewport meta tag set, readable text and tap-friendly buttons at 360px, no horizontal overflow at 360px or 1280px",
+    "Plain HTML, CSS and JavaScript in one file, no build step",
+    "Prices shown in rupees (₹) exactly as supplied",
+    "No JavaScript errors, no broken in-page links, forms and filters work"
+  ],
+  "rules": [
+    "Use only facts the Requester supplied; do not invent products, prices, reviews, policies, offers or contact details",
+    "No photos or stock images: every product and lookbook outfit gets an empty photo spot",
+    "Lookbook outfits use only the 10 listed products",
+    "Orders go through WhatsApp using the supplied order number; the shop phone is shown separately for calls"
+  ],
+  "done_when": [
+    "The file shows the name Thread & Loom and Pune in the page title and header, with a navigation to every section",
+    "Four categories (Kurtas, Sarees, Shirts, Dupattas) are browsable and the file lists exactly these 10 products with these prices: Indigo block-print kurta ₹1,499; Mustard handloom kurta ₹1,699; White chikankari kurta ₹2,199; Maheshwari cotton saree ₹3,499; Chanderi silk-cotton saree ₹4,999; Ikat handloom saree ₹3,999; Khadi cotton shirt ₹1,299; Linen-blend shirt ₹1,599; Ajrakh dupatta ₹899; Bandhani dupatta ₹1,099",
+    "Product sizes in the file are: Indigo kurta S-XXL, Mustard kurta S-XL, White chikankari kurta XS-XL, Khadi shirt S-XXL, Linen-blend shirt M-XXL, and free size for all three sarees and both dupattas",
+    "A size filter and a price filter in the file's script narrow the visible products, and the free size items are reachable through the size filter",
+    "A size guide table lists chest in inches: XS 32, S 34, M 36, L 38, XL 40, XXL 42",
+    "A New Arrivals section shows the White chikankari kurta, Ikat handloom saree and Linen-blend shirt",
+    "Every product has an Order on WhatsApp link to wa.me/910000011111 with a pre-filled message containing the product name",
+    "A Lookbook section shows 3 styled outfits, each built only from the listed products, each with an empty photo spot",
+    "Every product card and every lookbook outfit has an empty photo spot and no image file or stock photo is used",
+    "A visit section shows the address 18 FC Road, Shivajinagar, Pune 411005, the timings 11am to 9pm Tuesday to Sunday with Monday closed, and the shop phone +91 00000 22222 as a tap-to-call link",
+    "The return and exchange policy states: exchange within 7 days if unworn with tags, and no returns on sale items",
+    "A reviews section shows three reviews: \"Beautiful fabric, fits perfectly\" - Meera K.; \"Fast delivery and lovely packing\" - Arjun S.; \"My go-to for festive kurtas\" - Priya D.",
+    "A delivery section states: delivery across Pune in 2 days, ₹79 charge, free above ₹2,999, pay on delivery or UPI",
+    "The file has a viewport meta tag and CSS that prevents horizontal overflow at 360px and 1280px, with an earthy colour palette set in CSS variables",
+    "The script runs without errors and every in-page link points to an existing section id"
+  ],
+  "business_type": "clothing boutique",
+  "visitor_needs": [
+    "Browse products by category",
+    "Filter by size and price",
+    "See a size guide",
+    "Check new arrivals",
+    "Order on WhatsApp",
+    "See a lookbook of styled outfits",
+    "Find store timings and location",
+    "Read the return and exchange policy",
+    "Read customer reviews",
+    "See delivery charges and payment options"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [],
+  "confirmed_facts": []
+}

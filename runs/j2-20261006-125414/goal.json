@@ -1,0 +1,41 @@
+{
+  "statement": "Build a one-page website for Brew Lab, a cafe in Indiranagar, Bengaluru, that lets visitors see the menu, opening hours and location, pre-order for pickup, browse a large photo gallery of the cafe, and read a detailed story about each of its three coffee farms.",
+  "site_name": "Brew Lab",
+  "audience": "Local customers and visitors in Indiranagar, Bengaluru, mostly on mobile phones, who want to check the menu and hours, find the cafe, order ahead for pickup, and learn where the coffee comes from.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file; CDN libraries allowed; no build step.",
+    "Low cost: no paid services or subscriptions required to run the site as delivered.",
+    "Mobile-first and responsive; readable on a small phone screen.",
+    "Images lazy-load and have alt text, so a large gallery does not slow the page.",
+    "Every missing fact is shown as a visibly marked placeholder, never an invented value."
+  ],
+  "rules": [
+    "Never invent facts: prices, phone numbers, hours, address, farm names, farm details and photos are placeholders until supplied.",
+    "Pre-order works entirely in the browser (no backend): the visitor builds an order and a pickup time, and the site produces an order summary to send through a channel set in open_inputs.",
+    "The site is a single page with anchor navigation between sections.",
+    "Both the large gallery and the detailed farm stories stay in scope; cost is controlled through placeholders and lazy loading, not by cutting either."
+  ],
+  "done_when": [
+    "The file is a single HTML document with inline CSS and JavaScript and no build step.",
+    "It has a menu section with categories and items, with prices shown as placeholders where unknown.",
+    "It has an opening hours section.",
+    "It has a location section for Indiranagar, Bengaluru, with address and map or directions link, using placeholders where unknown.",
+    "It has a pre-order for pickup section where a visitor can pick menu items and quantities, choose a pickup time, see a running total or item list, and get an order summary to send.",
+    "It has a photo gallery section with at least 12 image slots, each with alt text, lazy loading and a marked placeholder where no real photo exists.",
+    "It has a farm stories section with three separate farm entries, each with a name, location, story text, and a photo slot, with placeholders where facts are unknown.",
+    "A navigation bar links to the menu, hours, location, pre-order, gallery and farms sections.",
+    "The layout includes a responsive viewport meta tag and CSS breakpoints for small screens.",
+    "Every placeholder is visibly marked in the page, and no invented phone numbers, prices or farm facts appear."
+  ],
+  "open_inputs": [
+    "Menu items and prices",
+    "Opening hours for each day",
+    "Full street address and map link",
+    "Cafe phone number and the channel for receiving pre-orders (for example WhatsApp number or email)",
+    "Pickup time rules (earliest slot, lead time, closing cutoff)",
+    "Cafe photos for the gallery",
+    "Names, locations, stories and photos for the three coffee farms",
+    "Logo or brand colours, if any"
+  ],
+  "dropped_from_brief": []
+}

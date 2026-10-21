@@ -1,0 +1,993 @@
+[
+  {
+    "cycle": 1,
+    "version": 3,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the name Thread & Loom, mentions Pune, and says the shop sells handloom kurtas, sarees, cotton shirts and dupattas.",
+        "verdict": "NEEDS_REVISION",
+        "note": "Only the product line 'Handloom kurtas, sarees, cotton shirts and dupattas.' is visible; 'Thread & Loom' appears only in <title> and the WhatsApp message text, and 'Pune' appears nowhere in the file.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": false
+      },
+      {
+        "id": "F-2",
+        "criterion": "All 10 products are listed with name, category, price in rupees and sizes exactly as supplied: Indigo block-print kurta 1,499 (S-XXL), Mustard handloom kurta 1,699 (S-XL), White chikankari kurta 2,199 (XS-XL), Maheshwari cotton saree 3,499, Chanderi silk-cotton saree 4,999, Ikat handloom saree 3,999, Khadi cotton shirt 1,299 (S-XXL), Linen-blend shirt 1,599 (M-XXL), Ajrakh dupatta 899, Bandhani dupatta 1,099 (sarees and dupattas free size).",
+        "verdict": "PASS",
+        "note": "10 li.j2-product cards in code; names, prices (1,499 / 1,699 / 2,199 / 3,499 / 4,999 / 3,999 / 1,299 / 1,599 / 899 / 1,099) and sizes match the brief; sarees and dupattas show 'Free size'; screenshot shows the first cards rendering correctly.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "Visitors can browse by category (All, Kurtas, Sarees, Shirts, Dupattas) and the product list updates when they pick one.",
+        "verdict": "PASS",
+        "note": "5 tabs with data-category; apply() toggles card.hidden and updates the count; card categories give 10/3/3/2/2; no JS errors in the mechanical check. Click behaviour was not run in a browser, so confidence is medium.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "Visitors can filter products by size and by price range, and the list updates; free-size items are handled in the size filter.",
+        "verdict": "NEEDS_REVISION",
+        "note": "No size or price control exists in the file; forms: 0 in the mechanical check. Only data-price and data-sizes attributes are present, unused.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": false
+      },
+      {
+        "id": "F-5",
+        "criterion": "A size guide table shows chest in inches: XS 32, S 34, M 36, L 38, XL 40, XXL 42.",
+        "verdict": "NEEDS_REVISION",
+        "note": "No table element or size guide section in the file.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": false
+      },
+      {
+        "id": "F-6",
+        "criterion": "A New Arrivals section shows exactly: White chikankari kurta, Ikat handloom saree, Linen-blend shirt.",
+        "verdict": "NEEDS_REVISION",
+        "note": "No New Arrivals section or badge in the file.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": false
+      },
+      {
+        "id": "F-7",
+        "criterion": "Each product has an order button that opens a WhatsApp link to 910000011111 with the product name prefilled in the message.",
+        "verdict": "PASS",
+        "note": "Script builds https://wa.me/910000011111?text=encodeURIComponent('Hi Thread & Loom, I would like to order: '+name) for each card; screenshot shows 'Order on WhatsApp' buttons on cards; external resources list wa.me.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "A Lookbook section shows 3 styled outfits, each built only from the listed products.",
+        "verdict": "NEEDS_REVISION",
+        "note": "No Lookbook section in the file.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": false
+      },
+      {
+        "id": "F-9",
+        "criterion": "A store section shows the address 18 FC Road, Shivajinagar, Pune 411005, the shop phone +91 00000 22222, and the timings 11am to 9pm Tuesday to Sunday, closed Monday.",
+        "verdict": "NEEDS_REVISION",
+        "note": "'18 FC Road', '+91 00000 22222' and the timings do not appear in the file; W-3 reported it did not build the store section.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": false
+      },
+      {
+        "id": "F-10",
+        "criterion": "The return and exchange policy states: exchange within 7 days if unworn with tags; no returns on sale items.",
+        "verdict": "NEEDS_REVISION",
+        "note": "No policy text ('7 days', 'unworn with tags') in the file.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": false
+      },
+      {
+        "id": "F-11",
+        "criterion": "A reviews section shows three reviews: \"Beautiful fabric, fits perfectly\" - Meera K., \"Fast delivery and lovely packing\" - Arjun S., \"My go-to for festive kurtas\" - Priya D.",
+        "verdict": "NEEDS_REVISION",
+        "note": "None of the three review quotes or reviewer names appear in the file.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 11,
+        "pass": false
+      },
+      {
+        "id": "F-12",
+        "criterion": "Delivery information states: across Pune in 2 days, Rs 79, free above Rs 2,999, pay on delivery or UPI.",
+        "verdict": "NEEDS_REVISION",
+        "note": "No delivery text (2 days, Rs 79, free above Rs 2,999, pay on delivery or UPI) in the file.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 12,
+        "pass": false
+      },
+      {
+        "id": "F-13",
+        "criterion": "Every product card has an empty photo spot, and the page loads no stock photos.",
+        "verdict": "UNPAID",
+        "note": "Built on the page, but no workflow covers item 13, so nobody paid for it. Register a workflow that covers it at its rate-card minimum (page_section, 10). (Audit's own note: Each of the 10 cards has an empty div.j2-photo with a dashed border; mechanical check shows images: 0; screenshot shows empty spots.)",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 13,
+        "pass": false
+      },
+      {
+        "id": "F-14",
+        "criterion": "The page has a mobile viewport tag and responsive layout rules so nothing scrolls sideways at 360px or 1280px, and it has no JavaScript errors and no broken in-page links.",
+        "verdict": "UNPAID",
+        "note": "Built on the page, but no workflow covers item 14, so nobody paid for it. Register a workflow that covers it at its rate-card minimum (styling, 5). (Audit's own note: Viewport meta present; overflow_px 0 at 360 and 1280; js_errors []; broken_in_page_links [].)",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 14,
+        "pass": false
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-15",
+        "criterion": "Rubric R-3: exactly one main heading",
+        "verdict": "NEEDS_REVISION",
+        "note": "Mechanical check: h1 count 0 at both widths; the page starts at an h2 'Our Collection' with no brand heading.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "Screenshot shows Cormorant Garamond headings, Nunito Sans body, terracotta buttons and white cards on cream, matching the style guide.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "Contrast check: 58 elements checked, 0 low at both widths.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "NEEDS_REVISION",
+        "note": "Measured by code: 0 h1 headings (the page needs exactly one)",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "First screen offers 'All' and 'Order on WhatsApp'; the order action is clear but repeats on every card and the page opens mid-catalogue with no brand or hero.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "nav_elements 0 and in_page_links 0; only one section exists today so nothing is unreachable, but navigation is needed once the other sections are added.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "small_tap_targets count 0 with min 44px on phone; tabs and order buttons are 44px tall in the screenshot.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "images: 0 and images_without_alt []; photo spots are empty divs marked aria-hidden.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 15178,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Nunito+Sans:wght@400;600;700&amp;display=swap",
+        "https://wa.me/"
+      ],
+      "forms": 0,
+      "scripts": 2,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 58,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 0,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Nunito Sans",
+            "Cormorant Garamond"
+          ],
+          "nav": {
+            "nav_elements": 0,
+            "in_page_links": 0
+          },
+          "first_screen_actions": [
+            "All",
+            "Order on WhatsApp"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 58,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 0,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Nunito Sans",
+            "Cormorant Garamond"
+          ],
+          "nav": {
+            "nav_elements": 0,
+            "in_page_links": 0
+          },
+          "first_screen_actions": [
+            "All",
+            "Order on WhatsApp",
+            "Order on WhatsApp",
+            "Order on WhatsApp",
+            "Order on WhatsApp",
+            "Order on WhatsApp"
+          ]
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v3.png",
+    "all_pass": false
+  },
+  {
+    "cycle": 1,
+    "version": 6,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the name Thread & Loom, mentions Pune, and says the shop sells handloom kurtas, sarees, cotton shirts and dupattas.",
+        "verdict": "PASS",
+        "note": "One h1 'Thread & Loom'; 'Pune' in the hero eyebrow and subline; 'Handloom kurtas, sarees, cotton shirts and dupattas.' is visible in the screenshot.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "All 10 products are listed with name, category, price in rupees and sizes exactly as supplied: Indigo block-print kurta 1,499 (S-XXL), Mustard handloom kurta 1,699 (S-XL), White chikankari kurta 2,199 (XS-XL), Maheshwari cotton saree 3,499, Chanderi silk-cotton saree 4,999, Ikat handloom saree 3,999, Khadi cotton shirt 1,299 (S-XXL), Linen-blend shirt 1,599 (M-XXL), Ajrakh dupatta 899, Bandhani dupatta 1,099 (sarees and dupattas free size).",
+        "verdict": "PASS",
+        "note": "10 li.j2-product cards; all names, prices and sizes match the brief; sarees and dupattas show 'Free size'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "Visitors can browse by category (All, Kurtas, Sarees, Shirts, Dupattas) and the product list updates when they pick one.",
+        "verdict": "PASS",
+        "note": "5 tabs with data-category; apply() toggles card.hidden and the count; categories give 10/3/3/2/2. No click test was run in a browser.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "Visitors can filter products by size and by price range, and the list updates; free-size items are handled in the size filter.",
+        "verdict": "PASS",
+        "note": "Size and price selects plus reset; sizeOk() passes 'FREE'. By hand count: size S shows 9, XS 6, price tiers 4/3/3, matching W-5's figures. Not click-tested in a browser.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A size guide table shows chest in inches: XS 32, S 34, M 36, L 38, XL 40, XXL 42.",
+        "verdict": "NEEDS_REVISION",
+        "note": "No table element or size guide section in the file; not funded in this cycle.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": false
+      },
+      {
+        "id": "F-6",
+        "criterion": "A New Arrivals section shows exactly: White chikankari kurta, Ikat handloom saree, Linen-blend shirt.",
+        "verdict": "NEEDS_REVISION",
+        "note": "No New Arrivals section or badge in the file. The Requester dropped this in chat [24], but the charter done_when still lists it.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": false
+      },
+      {
+        "id": "F-7",
+        "criterion": "Each product has an order button that opens a WhatsApp link to 910000011111 with the product name prefilled in the message.",
+        "verdict": "PASS",
+        "note": "Script builds https://wa.me/910000011111?text=encodeURIComponent('Hi Thread & Loom, I would like to order: '+name) for each of the 10 cards; wa.me is in the external resources.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "A Lookbook section shows 3 styled outfits, each built only from the listed products.",
+        "verdict": "NEEDS_REVISION",
+        "note": "No Lookbook section in the file. The Requester dropped this in chat [24], but the charter still lists it.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": false
+      },
+      {
+        "id": "F-9",
+        "criterion": "A store section shows the address 18 FC Road, Shivajinagar, Pune 411005, the shop phone +91 00000 22222, and the timings 11am to 9pm Tuesday to Sunday, closed Monday.",
+        "verdict": "NEEDS_REVISION",
+        "note": "'18 FC Road', '+91 00000 22222' and the timings do not appear in the file.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": false
+      },
+      {
+        "id": "F-10",
+        "criterion": "The return and exchange policy states: exchange within 7 days if unworn with tags; no returns on sale items.",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '7 days' or 'unworn with tags' text in the file.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": false
+      },
+      {
+        "id": "F-11",
+        "criterion": "A reviews section shows three reviews: \"Beautiful fabric, fits perfectly\" - Meera K., \"Fast delivery and lovely packing\" - Arjun S., \"My go-to for festive kurtas\" - Priya D.",
+        "verdict": "NEEDS_REVISION",
+        "note": "None of the three review quotes or reviewer names appear in the file. The Requester dropped this in chat [24], but the charter still lists it.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 11,
+        "pass": false
+      },
+      {
+        "id": "F-12",
+        "criterion": "Delivery information states: across Pune in 2 days, Rs 79, free above Rs 2,999, pay on delivery or UPI.",
+        "verdict": "NEEDS_REVISION",
+        "note": "No delivery text (2 days, Rs 79, free above Rs 2,999, pay on delivery or UPI) in the file.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 12,
+        "pass": false
+      },
+      {
+        "id": "F-13",
+        "criterion": "Every product card has an empty photo spot, and the page loads no stock photos.",
+        "verdict": "UNPAID",
+        "note": "Built on the page, but no workflow covers item 13, so nobody paid for it. Register a workflow that covers it at its rate-card minimum (page_section, 10). (Audit's own note: 10 div.j2-photo with dashed border; images: 0 in the mechanical check. Warning: no registered workflow covers item 13, so it is built but unpaid.)",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 13,
+        "pass": false
+      },
+      {
+        "id": "F-14",
+        "criterion": "The page has a mobile viewport tag and responsive layout rules so nothing scrolls sideways at 360px or 1280px, and it has no JavaScript errors and no broken in-page links.",
+        "verdict": "PASS",
+        "note": "Viewport meta present; overflow_px 0 at 360 and 1280; js_errors []; broken_in_page_links [].",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 14,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-15",
+        "criterion": "Department rule: forms work",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Mechanical check: form 1 (filters) has no submit button, ok:false. It filters live on change and its submit handler calls preventDefault, so it works as designed. Identity should decide if this counts against the 'forms work' rule.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Fonts are Cormorant Garamond and Nunito Sans, and the palette and buttons follow the style guide. At 1280px the 'Our Collection' intro line is left-offset while its heading is centred.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "71 text pairs checked at both widths, 0 low-contrast.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "1 h1, 0 skipped heading levels at both widths; the name 'Thread & Loom' stands out in the screenshot.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "The filled 'Browse the collection' button is the clear first action in the screenshot at both widths.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The nav has 3 working links (Collection, Filters, Top) and is usable at 360px; it will need new links as sections are added.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "small_tap_targets count 0 at 360px (min 44px).",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "0 images, none without alt; photo spots are aria-hidden divs.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 26085,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Nunito+Sans:wght@400;600;700&amp;display=swap",
+        "https://wa.me/"
+      ],
+      "forms": 1,
+      "scripts": 5,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "design": {
+        "desktop": {
+          "contrast": {
+            "checked": 71,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Nunito Sans",
+            "Cormorant Garamond"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 4
+          },
+          "first_screen_actions": [
+            "Browse the collection",
+            "All"
+          ]
+        },
+        "phone": {
+          "contrast": {
+            "checked": 71,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Nunito Sans",
+            "Cormorant Garamond"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 4
+          },
+          "first_screen_actions": [
+            "Browse the collection",
+            "All"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        }
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": false,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": false
+        }
+      ],
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v6.png",
+    "all_pass": false
+  },
+  {
+    "cycle": 1,
+    "version": 6,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the name Thread & Loom, mentions Pune, and says the shop sells handloom kurtas, sarees, cotton shirts and dupattas.",
+        "verdict": "PASS",
+        "note": "One h1 'Thread & Loom'; 'Pune' in the eyebrow and subline; 'Handloom kurtas, sarees, cotton shirts and dupattas.' in the hero and the screenshot.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "All 10 products are listed with name, category, price in rupees and sizes exactly as supplied: Indigo block-print kurta 1,499 (S-XXL), Mustard handloom kurta 1,699 (S-XL), White chikankari kurta 2,199 (XS-XL), Maheshwari cotton saree 3,499, Chanderi silk-cotton saree 4,999, Ikat handloom saree 3,999, Khadi cotton shirt 1,299 (S-XXL), Linen-blend shirt 1,599 (M-XXL), Ajrakh dupatta 899, Bandhani dupatta 1,099 (sarees and dupattas free size).",
+        "verdict": "PASS",
+        "note": "10 li.j2-product cards; names, prices (1,499 to 899) and sizes match the brief; sarees and dupattas show 'Free size'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "Visitors can browse by category (All, Kurtas, Sarees, Shirts, Dupattas) and the product list updates when they pick one.",
+        "verdict": "PASS",
+        "note": "5 tabs with data-category; apply() toggles card.hidden and the count; counts 10/3/3/2/2 by code. No browser click test was run.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "Visitors can filter products by size and by price range, and the list updates; free-size items are handled in the size filter.",
+        "verdict": "PASS",
+        "note": "Size and price selects plus reset; sizeOk() passes 'FREE'; the tab click re-runs the filter. Hand count: size S 9, XS 6, price tiers 4/3/3. Not click-tested.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A size guide table shows chest in inches: XS 32, S 34, M 36, L 38, XL 40, XXL 42.",
+        "verdict": "NEEDS_REVISION",
+        "note": "No table element or size guide text in the file; unfunded, and the Requester chose to finish without it.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": false
+      },
+      {
+        "id": "F-6",
+        "criterion": "A New Arrivals section shows exactly: White chikankari kurta, Ikat handloom saree, Linen-blend shirt.",
+        "verdict": "NEEDS_REVISION",
+        "note": "No New Arrivals section or badge in the file. The Requester dropped it in chat but the charter still lists it.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": false
+      },
+      {
+        "id": "F-7",
+        "criterion": "Each product has an order button that opens a WhatsApp link to 910000011111 with the product name prefilled in the message.",
+        "verdict": "PASS",
+        "note": "Script builds https://wa.me/910000011111?text=encodeURIComponent('Hi Thread & Loom, I would like to order: '+name) for each of the 10 cards; wa.me is in the external resources.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "A Lookbook section shows 3 styled outfits, each built only from the listed products.",
+        "verdict": "NEEDS_REVISION",
+        "note": "No Lookbook section in the file. The Requester dropped it in chat but the charter still lists it.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": false
+      },
+      {
+        "id": "F-9",
+        "criterion": "A store section shows the address 18 FC Road, Shivajinagar, Pune 411005, the shop phone +91 00000 22222, and the timings 11am to 9pm Tuesday to Sunday, closed Monday.",
+        "verdict": "NEEDS_REVISION",
+        "note": "'18 FC Road', '+91 00000 22222' and the timings do not appear in the file.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": false
+      },
+      {
+        "id": "F-10",
+        "criterion": "The return and exchange policy states: exchange within 7 days if unworn with tags; no returns on sale items.",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '7 days' or 'unworn with tags' text in the file.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": false
+      },
+      {
+        "id": "F-11",
+        "criterion": "A reviews section shows three reviews: \"Beautiful fabric, fits perfectly\" - Meera K., \"Fast delivery and lovely packing\" - Arjun S., \"My go-to for festive kurtas\" - Priya D.",
+        "verdict": "NEEDS_REVISION",
+        "note": "None of the three review quotes or reviewer names appear in the file. The Requester dropped it in chat but the charter still lists it.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 11,
+        "pass": false
+      },
+      {
+        "id": "F-12",
+        "criterion": "Delivery information states: across Pune in 2 days, Rs 79, free above Rs 2,999, pay on delivery or UPI.",
+        "verdict": "NEEDS_REVISION",
+        "note": "No delivery text (2 days, Rs 79, free above Rs 2,999, pay on delivery or UPI) in the file.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 12,
+        "pass": false
+      },
+      {
+        "id": "F-13",
+        "criterion": "Every product card has an empty photo spot, and the page loads no stock photos.",
+        "verdict": "UNPAID",
+        "note": "Built on the page, but no workflow covers item 13, so nobody paid for it. Register a workflow that covers it at its rate-card minimum (page_section, 10). (Audit's own note: 10 div.j2-photo with dashed border; images: 0 in the mechanical check. Warning: no registered workflow covers item 13, so it is built but unpaid.)",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 13,
+        "pass": false
+      },
+      {
+        "id": "F-14",
+        "criterion": "The page has a mobile viewport tag and responsive layout rules so nothing scrolls sideways at 360px or 1280px, and it has no JavaScript errors and no broken in-page links.",
+        "verdict": "PASS",
+        "note": "Viewport meta present; overflow_px 0 at 360 and 1280; js_errors []; broken_in_page_links [].",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 14,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-15",
+        "criterion": "Forms work",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Mechanical check: filter form has no submit button (0 of 1). The selects work on change, submit is prevented, and no errors occurred, so no user-facing defect is seen.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Fonts, colours and buttons follow the style guide; on desktop the 'Our Collection' subline sits left of centre under a centred heading.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "71 text pairs checked at both widths, 0 low-contrast.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "Exactly 1 h1, 0 skipped heading levels; the name dominates the first screen.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "'Browse the collection' is the single filled button above the fold on both screenshots.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Nav shows Collection, Filters and Top and wraps cleanly at 360px, but it cannot reach store, returns, delivery or size guide because those sections do not exist.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "Small tap targets at 44px minimum: count 0 on phone.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "0 images on the page; the photo spots are aria-hidden divs, so no alt text is missing.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 26085,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Nunito+Sans:wght@400;600;700&amp;display=swap",
+        "https://wa.me/"
+      ],
+      "forms": 1,
+      "scripts": 5,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": false,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": false
+        }
+      ],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 71,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Nunito Sans",
+            "Cormorant Garamond"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 4
+          },
+          "first_screen_actions": [
+            "Browse the collection",
+            "All"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 71,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Nunito Sans",
+            "Cormorant Garamond"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 4
+          },
+          "first_screen_actions": [
+            "Browse the collection",
+            "All"
+          ]
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v6.png",
+    "all_pass": false
+  }
+]

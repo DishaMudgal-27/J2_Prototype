@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Indiranagar, Bengaluru</title>
+<meta name="description" content="Brew Lab, a cafe in Indiranagar, Bengaluru. Menu and pre-order for pickup.">
+<style>
+:root{--bg:#faf6f0;--ink:#2b1d14;--muted:#6b5a4d;--accent:#6f4528;--accent-d:#4f2f19;--card:#fff;--line:#e4d9cc;--ph:#fff3c4;--ph-ink:#7a5b00}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;font-size:16px}
+header.site{position:sticky;top:0;z-index:10;background:var(--accent-d);color:#fff}
+.bar{max-width:960px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{font-weight:700;font-size:1.25rem;letter-spacing:.02em;color:#fff;text-decoration:none}
+nav ul{list-style:none;margin:0;padding:0;display:flex;gap:4px;flex-wrap:wrap}
+nav a{display:inline-block;padding:8px 12px;color:#fff;text-decoration:none;border-radius:6px;min-height:40px}
+nav a:hover,nav a:focus{background:rgba(255,255,255,.18)}
+.hero{background:linear-gradient(135deg,#4f2f19,#8a5a37);color:#fff;padding:40px 16px}
+.hero .in{max-width:960px;margin:0 auto}
+.hero h1{margin:0 0 8px;font-size:2rem}
+.hero p{margin:0 0 16px;max-width:560px}
+.btn{display:inline-block;background:#fff;color:var(--accent-d);padding:12px 20px;border-radius:8px;font-weight:600;text-decoration:none;border:0;font-size:1rem;cursor:pointer;min-height:44px}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-d)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+main{max-width:960px;margin:0 auto;padding:0 16px}
+section{padding:36px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:0}
+h2{margin:0 0 6px;font-size:1.6rem;color:var(--accent-d)}
+h3{margin:24px 0 8px;font-size:1.1rem;color:var(--accent)}
+.lead{color:var(--muted);margin:0 0 16px}
+.ph{background:var(--ph);color:var(--ph-ink);border:1px dashed #d4b24c;border-radius:4px;padding:0 6px;font-size:.85em;font-weight:600;white-space:nowrap}
+.note{background:var(--ph);color:var(--ph-ink);border:1px dashed #d4b24c;border-radius:8px;padding:10px 12px;font-size:.92rem;margin:0 0 16px}
+.menu-grid{display:grid;grid-template-columns:1fr;gap:16px}
+.cat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:4px 16px 12px}
+.cat h3{margin-top:12px}
+.item{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0}
+.item .nm{font-weight:500}
+form{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}
+fieldset{border:0;margin:0 0 16px;padding:0}
+legend{font-weight:700;color:var(--accent-d);padding:0;margin-bottom:8px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--line)}
+.row .lbl{flex:1}
+.row small{display:block;color:var(--muted)}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:40px;height:40px;border-radius:8px;border:1px solid var(--accent);background:#fff;color:var(--accent);font-size:1.2rem;cursor:pointer}
+.qty button:active{background:var(--accent);color:#fff}
+.qty input{width:52px;height:40px;text-align:center;border:1px solid var(--line);border-radius:8px;font-size:1rem}
+.field{margin-bottom:14px}
+.field label{display:block;font-weight:600;margin-bottom:4px}
+.field input{width:100%;padding:11px 12px;border:1px solid #bfae9d;border-radius:8px;font-size:1rem;background:#fff;color:var(--ink)}
+.field .hint{font-size:.85rem;color:var(--muted);margin-top:4px}
+.summary{background:#f4ece2;border-radius:8px;padding:12px 14px;margin:0 0 16px}
+.summary h3{margin:0 0 8px}
+.summary ul{list-style:none;margin:0;padding:0}
+.summary li{display:flex;justify-content:space-between;gap:12px;padding:3px 0}
+.summary .tot{border-top:1px solid #cdb9a3;margin-top:8px;padding-top:8px;font-weight:700;display:flex;justify-content:space-between;gap:12px}
+.err{color:#9b1c1c;font-size:.9rem;min-height:1.2em;margin:0 0 8px}
+#confirm{display:none;margin-top:16px;background:#eaf5e6;border:1px solid #9cc790;border-radius:10px;padding:14px}
+#confirm pre{white-space:pre-wrap;font-family:inherit;margin:8px 0 0}
+footer{background:var(--accent-d);color:#e9dccd;text-align:center;padding:20px 16px;font-size:.9rem}
+@media (min-width:700px){
+.menu-grid{grid-template-columns:1fr 1fr}
+.hero h1{font-size:2.6rem}
+}
+@media (max-width:480px){
+.bar{padding:8px 12px}
+nav a{padding:8px 9px;font-size:.95rem}
+.hero{padding:28px 12px}
+.hero h1{font-size:1.7rem}
+main{padding:0 12px}
+form{padding:12px}
+.row{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="bar">
+    <a class="brand" href="#top">Brew Lab</a>
+    <nav aria-label="Page sections">
+      <ul>
+        <li><a href="#menu">Menu</a></li>
+        <li><a href="#preorder">Pre-order</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div class="hero" id="top">
+  <div class="in">
+    <h1>Brew Lab</h1>
+    <p>Coffee in Indiranagar, Bengaluru. Browse the menu and pre-order for pickup. <span class="ph">Placeholder: tagline</span></p>
+    <a class="btn" href="#preorder">Pre-order for pickup</a>
+  </div>
+</div>
+
+<main>
+<section id="menu" aria-labelledby="menu-h">
+  <h2 id="menu-h">Menu</h2>
+  <p class="lead">Drinks and food, by category.</p>
+  <p class="note">Placeholder content: the cafe has not yet supplied its menu. Category names, item names and prices below are stand-ins and will be replaced.</p>
+  <div class="menu-grid" id="menuGrid"></div>
+</section>
+
+<section id="preorder" aria-labelledby="po-h">
+  <h2 id="po-h">Pre-order for pickup</h2>
+  <p class="lead">Choose items, tell us who you are and when you will collect.</p>
+  <p class="note">Placeholder: how orders reach the cafe, pickup lead time and slot rules, and whether payment is online or at pickup are not yet confirmed. This page does not take payment.</p>
+  <form id="orderForm" novalidate>
+    <fieldset>
+      <legend>1. Pick items and quantities</legend>
+      <div id="orderItems"></div>
+    </fieldset>
+
+    <div class="summary" aria-live="polite">
+      <h3>Order summary</h3>
+      <ul id="sumList"><li>No items yet.</li></ul>
+      <div class="tot"><span>Total</span><span id="sumTotal">₹0</span></div>
+      <div id="sumNote" class="hint" style="font-size:.85rem;color:#6b5a4d;margin-top:6px"></div>
+    </div>
+
+    <fieldset>
+      <legend>2. Your details</legend>
+      <div class="field">
+        <label for="cname">Name</label>
+        <input id="cname" name="name" type="text" autocomplete="name" required>
+      </div>
+      <div class="field">
+        <label for="cphone">Phone number</label>
+        <input id="cphone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="e.g. 98450 00000" required>
+      </div>
+      <div class="field">
+        <label for="ctime">Pickup time</label>
+        <input id="ctime" name="time" type="time" required>
+        <div class="hint"><span class="ph">Placeholder: minimum lead time and slot length</span></div>
+      </div>
+    </fieldset>
+
+    <p class="err" id="err" role="alert"></p>
+    <button class="btn primary" type="submit" id="submitBtn">Review and place pre-order</button>
+  </form>
+
+  <div id="confirm" role="status" tabindex="-1">
+    <strong>Order recorded on this page.</strong>
+    <p style="margin:6px 0 0"><span class="ph">Placeholder: sending to the cafe is not set up yet</span> This order has not been sent to Brew Lab. Details below.</p>
+    <pre id="confirmText"></pre>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div>Brew Lab, Indiranagar, Bengaluru</div>
+</footer>
+
+<script>
+(function(){
+  // PLACEHOLDER DATA: replace names and prices when the cafe supplies its menu.
+  // price: null means "price not supplied yet".
+  var MENU=[
+    {cat:"Coffee",items:[
+      {id:"c1",name:"Coffee item 1",price:null},
+      {id:"c2",name:"Coffee item 2",price:null},
+      {id:"c3",name:"Coffee item 3",price:null}]},
+    {cat:"Tea and other drinks",items:[
+      {id:"t1",name:"Drink item 1",price:null},
+      {id:"t2",name:"Drink item 2",price:null}]},
+    {cat:"Food",items:[
+      {id:"f1",name:"Food item 1",price:null},
+      {id:"f2",name:"Food item 2",price:null},
+      {id:"f3",name:"Food item 3",price:null}]}
+  ];
+  var CUR="₹";
+  var qty={};
+  var flat=[];
+  MENU.forEach(function(c){c.items.forEach(function(i){flat.push(i);qty[i.id]=0;});});
+
+  function priceHTML(i){
+    return i.price==null?'<span class="ph">Price placeholder</span>':CUR+i.price;
+  }
+  function esc(s){var d=document.createElement("div");d.textContent=s;return d.innerHTML;}
+
+  // Menu display
+  var grid=document.getElementById("menuGrid"),h="";
+  MENU.forEach(function(c){
+    h+='<div class="cat"><h3>'+esc(c.cat)+' <span class="ph">placeholder</span></h3>';
+    c.items.forEach(function(i){
+      h+='<div class="item"><span class="nm">'+esc(i.name)+'</span><span>'+priceHTML(i)+'</span></div>';
+    });
+    h+='</div>';
+  });
+  grid.innerHTML=h;
+
+  // Order rows
+  var box=document.getElementById("orderItems"),o="";
+  MENU.forEach(function(c){
+    o+='<h3>'+esc(c.cat)+'</h3>';
+    c.items.forEach(function(i){
+      o+='<div class="row"><div class="lbl">'+esc(i.name)+'<small>'+priceHTML(i)+'</small></div>'+
+        '<div class="qty">'+
+        '<button type="button" data-d="-1" data-id="'+i.id+'" aria-label="Decrease '+esc(i.name)+'">−</button>'+
+        '<input type="number" min="0" max="20" value="0" id="q_'+i.id+'" data-id="'+i.id+'" aria-label="Quantity of '+esc(i.name)+'" inputmode="numeric">'+
+        '<button type="button" data-d="1" data-id="'+i.id+'" aria-label="Increase '+esc(i.name)+'">+</button>'+
+        '</div></div>';
+    });
+  });
+  box.innerHTML=o;
+
+  function clamp(n){n=parseInt(n,10);if(isNaN(n)||n<0)n=0;return n>20?20:n;}
+  function setQty(id,n){qty[id]=clamp(n);document.getElementById("q_"+id).value=qty[id];render();}
+
+  box.addEventListener("click",function(e){
+    var b=e.target.closest("button[data-id]");if(!b)return;
+    setQty(b.dataset.id,qty[b.dataset.id]+parseInt(b.dataset.d,10));
+  });
+  box.addEventListener("input",function(e){
+    var t=e.target;if(t.dataset&&t.dataset.id&&t.tagName==="INPUT"){qty[t.dataset.id]=clamp(t.value);render();}
+  });
+  box.addEventListener("change",function(e){
+    var t=e.target;if(t.dataset&&t.dataset.id&&t.tagName==="INPUT"){t.value=qty[t.dataset.id];}
+  });
+
+  function lines(){
+    var out=[],total=0,unpriced=0;
+    flat.forEach(function(i){
+      var q=qty[i.id];if(!q)return;
+      var sub=null;
+      if(i.price==null){unpriced++;}else{sub=i.price*q;total+=sub;}
+      out.push({name:i.name,q:q,sub:sub});
+    });
+    return {out:out,total:total,unpriced:unpriced};
+  }
+
+  function render(){
+    var r=lines(),ul=document.getElementById("sumList");
+    if(!r.out.length){ul.innerHTML="<li>No items yet.</li>";}
+    else{
+      ul.innerHTML=r.out.map(function(l){
+        return "<li><span>"+l.q+" × "+esc(l.name)+"</span><span>"+(l.sub==null?"price TBC":CUR+l.sub)+"</span></li>";
+      }).join("");
+    }
+    document.getElementById("sumTotal").textContent=CUR+r.total+(r.unpriced?" + TBC":"");
+    document.getElementById("sumNote").textContent=r.unpriced?
+      "Placeholder: "+r.unpriced+" selected item(s) have no price yet, so the total is incomplete.":"";
+  }
+
+  var form=document.getElementById("orderForm"),err=document.getElementById("err"),conf=document.getElementById("confirm");
+  form.addEventListener("submit",function(e){
+    e.preventDefault();
+    conf.style.display="none";
+    var r=lines(),name=form.name.value.trim(),phone=form.phone.value.trim(),time=form.time.value;
+    var digits=phone.replace(/\D/g,"");
+    if(!r.out.length){err.textContent="Please pick at least one item.";return;}
+    if(!name){err.textContent="Please enter your name.";form.name.focus();return;}
+    if(digits.length<10||digits.length>13||!/^[+\d\s\-()]+$/.test(phone)){err.textContent="Please enter a valid phone number (10 digits or more).";form.phone.focus();return;}
+    if(!time){err.textContent="Please choose a pickup time.";form.time.focus();return;}
+    err.textContent="";
+    var t="Name: "+name+"\nPhone: "+phone+"\nPickup time: "+time+"\n\n"+
+      r.out.map(function(l){return l.q+" × "+l.name+" - "+(l.sub==null?"price TBC":CUR+l.sub);}).join("\n")+
+      "\n\nTotal: "+CUR+r.total+(r.unpriced?" + TBC (some prices not set)":"")+"\nPayment: placeholder, to be confirmed by the cafe";
+    document.getElementById("confirmText").textContent=t;
+    conf.style.display="block";
+    conf.focus();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

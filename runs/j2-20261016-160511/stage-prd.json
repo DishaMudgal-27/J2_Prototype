@@ -1,0 +1,581 @@
+{
+  "stage": "prd",
+  "goal": {
+    "statement": "Write a PRD for a one-page, phone-friendly website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru, where visitors can see the menu with prices, opening hours and location, and pre-order a coffee for pickup without paying online.",
+    "product_name": "Brew Lab",
+    "users": "Coffee lovers and office staff near the shop in Indiranagar, Bengaluru",
+    "problem": "People cannot see the menu or order ahead.",
+    "features": [
+      "Menu with prices",
+      "Pre-order form for pickup",
+      "Map or address",
+      "Opening hours"
+    ],
+    "user_groups": [
+      {
+        "name": "Coffee lovers",
+        "actions": [
+          "See the menu with prices",
+          "See the opening hours",
+          "Find where the shop is",
+          "Pre-order a coffee for pickup"
+        ]
+      },
+      {
+        "name": "Office staff nearby",
+        "actions": [
+          "See the menu with prices",
+          "See the opening hours",
+          "Find where the shop is",
+          "Pre-order a coffee for pickup"
+        ]
+      }
+    ],
+    "constraints": [
+      "One page only",
+      "Works on phones",
+      "No payment"
+    ],
+    "success_measures": [
+      "30 pre-orders per week"
+    ],
+    "facts": [
+      "Brew Lab",
+      "Indiranagar, Bengaluru",
+      "specialty coffee shop",
+      "coffee lovers",
+      "office staff nearby",
+      "menu with prices",
+      "pre-order form",
+      "map or address",
+      "opening hours",
+      "one page only",
+      "works on phones",
+      "no payment",
+      "30 pre-orders per week"
+    ],
+    "standards": [
+      "Plain markdown document with the sections Problem, Users, Goals, Requirements, Success metrics, Out of scope",
+      "Everyday wording, no unexplained jargon"
+    ],
+    "rules": [
+      "Use only facts from the brief and the answers; mark anything unknown as to be confirmed",
+      "Write order: PRD, then HLD, then LLD, each from the one before"
+    ],
+    "done_when": [
+      "Problem section states that people cannot see the menu or order ahead at Brew Lab",
+      "Users section names coffee lovers and office staff nearby and what each group does: see menu and prices, see opening hours, find the shop, pre-order for pickup",
+      "Goals section states the aim of a one-page, phone-friendly site for Brew Lab in Indiranagar, Bengaluru",
+      "Requirements section lists menu with prices, pre-order form for pickup, map or address, and opening hours",
+      "Requirements section states the constraints: one page only, works on phones, no payment",
+      "Success metrics section states 30 pre-orders per week",
+      "Out of scope section lists online payment and any additional pages",
+      "Document contains no item marked to be confirmed"
+    ],
+    "to_be_confirmed": [],
+    "dropped_from_brief": [],
+    "site_name": "Brew Lab",
+    "business_type": "prd",
+    "charter_items": [
+      "Problem section states that people cannot see the menu or order ahead at Brew Lab",
+      "Users section names coffee lovers and office staff nearby and what each group does: see menu and prices, see opening hours, find the shop, pre-order for pickup",
+      "Goals section states the aim of a one-page, phone-friendly site for Brew Lab in Indiranagar, Bengaluru",
+      "Requirements section lists menu with prices, pre-order form for pickup, map or address, and opening hours",
+      "Requirements section states the constraints: one page only, works on phones, no payment",
+      "Success metrics section states 30 pre-orders per week",
+      "Out of scope section lists online payment and any additional pages",
+      "Document contains no item marked to be confirmed"
+    ],
+    "core_items": [
+      "Problem section states that people cannot see the menu or order ahead at Brew Lab",
+      "Requirements section lists menu with prices, pre-order form for pickup, map or address, and opening hours",
+      "Requirements section states the constraints: one page only, works on phones, no payment",
+      "Success metrics section states 30 pre-orders per week"
+    ],
+    "confirmed_facts": []
+  },
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 6,
+      "results": [
+        {
+          "id": "F-1",
+          "criterion": "Problem section states that people cannot see the menu or order ahead at Brew Lab",
+          "verdict": "PASS",
+          "note": "Problem: \"People cannot see the menu or order ahead.\" in a paragraph naming Brew Lab.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 1,
+          "pass": true
+        },
+        {
+          "id": "F-2",
+          "criterion": "Users section names coffee lovers and office staff nearby and what each group does: see menu and prices, see opening hours, find the shop, pre-order for pickup",
+          "verdict": "PASS",
+          "note": "Users lists Coffee lovers and Office staff nearby, each with see menu with prices, see opening hours, find where the shop is, pre-order for pickup.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 2,
+          "pass": true
+        },
+        {
+          "id": "F-3",
+          "criterion": "Goals section states the aim of a one-page, phone-friendly site for Brew Lab in Indiranagar, Bengaluru",
+          "verdict": "PASS",
+          "note": "Goals: \"The aim is a one-page, phone-friendly website for Brew Lab, a specialty coffee shop in Indiranagar, Bengaluru.\"",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 3,
+          "pass": true
+        },
+        {
+          "id": "F-4",
+          "criterion": "Requirements section lists menu with prices, pre-order form for pickup, map or address, and opening hours",
+          "verdict": "PASS",
+          "note": "R1 menu with prices, R2 pre-order form for pickup, R3 map or address, R4 opening hours.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 4,
+          "pass": true
+        },
+        {
+          "id": "F-5",
+          "criterion": "Requirements section states the constraints: one page only, works on phones, no payment",
+          "verdict": "PASS",
+          "note": "R5 one page only, R6 works on phones, R7 no payment.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 5,
+          "pass": true
+        },
+        {
+          "id": "F-6",
+          "criterion": "Success metrics section states 30 pre-orders per week",
+          "verdict": "PASS",
+          "note": "Table: \"M1: 30 pre-orders per week\".",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 6,
+          "pass": true
+        },
+        {
+          "id": "F-7",
+          "criterion": "Out of scope section lists online payment and any additional pages",
+          "verdict": "PASS",
+          "note": "Bullets: \"Online payment\" and \"Any additional pages\".",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 7,
+          "pass": true
+        },
+        {
+          "id": "F-8",
+          "criterion": "Document contains no item marked to be confirmed",
+          "verdict": "PASS",
+          "note": "P5 met: nothing to be confirmed; no such text in v6.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 8,
+          "pass": true
+        }
+      ],
+      "extra_issues": [
+        {
+          "id": "F-9",
+          "criterion": "Rule: use only facts from the brief; P4 no invented facts",
+          "verdict": "NEEDS_REVISION",
+          "note": "P4 not met. Unlabelled additions not in the brief: \"(measurement window: one week)\", \"sent through the pre-order form on the Brew Lab site\", \"M1\".",
+          "severity": "medium",
+          "confidence": "low",
+          "needs_requester_fact": null
+        }
+      ],
+      "rubric": [
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "criterion": "Every requirement is specific and testable",
+          "verdict": "PASS",
+          "note": "R1 to R7 each state a checkable page behaviour, e.g. R7 \"the pre-order form does not ask for or take any online payment\".",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "criterion": "Goals and success metrics are measurable",
+          "verdict": "PASS",
+          "note": "G1 is paired with M1: \"30 pre-orders per week\" and a stated one-week window.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "criterion": "Users and problem are consistent with the requirements",
+          "verdict": "PASS",
+          "note": "The Problem (cannot see menu or order ahead) maps to R1, R2 and the Users actions, which match one for one.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "criterion": "Out of scope is explicit",
+          "verdict": "PASS",
+          "note": "Out of scope names online payment and additional pages, each with a reason.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "criterion": "No invented facts: every fact comes from the brief or the Requester's answers, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim not in the brief",
+          "verdict": "NEEDS_REVISION",
+          "note": "Unlabelled claims not in the brief: \"(measurement window: one week)\"; \"sent through the pre-order form on the Brew Lab site\"; \"The target is counted every week.\"; \"a pre-order sent through the form shows a visitor saw the menu with prices\"; \"visitors can check when Brew Lab is open without leaving the page\".",
+          "rubric": true,
+          "severity": "medium",
+          "pass": false
+        }
+      ],
+      "mechanical": {},
+      "screenshot": null,
+      "all_pass": false,
+      "output": "prd",
+      "conditions": [
+        {
+          "id": "P1",
+          "text": "All six sections are present and not empty",
+          "check": "sections-present",
+          "met": true,
+          "evidence": "all 6 sections present, none empty"
+        },
+        {
+          "id": "P2",
+          "text": "Requirement ids are unique and sequential (R1, R2, ...)",
+          "check": "ids-sequential",
+          "met": true,
+          "evidence": "R1 to R7, unique and in order"
+        },
+        {
+          "id": "P3",
+          "text": "Every brief fact appears exactly",
+          "check": "facts-present-all",
+          "met": true,
+          "evidence": "all 13 brief fact(s) appear"
+        },
+        {
+          "id": "P4",
+          "text": "No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+          "check": "no-invented-facts",
+          "met": false,
+          "evidence": "not in the charter or the Requester's answers, and not marked Assumption: Give",
+          "assumptions": []
+        },
+        {
+          "id": "P5",
+          "text": "Nothing is \"to be confirmed\"",
+          "check": "nothing-to-be-confirmed",
+          "met": true,
+          "evidence": "nothing to be confirmed"
+        },
+        {
+          "id": "P6",
+          "text": "Every goal has a matching success metric",
+          "check": "ids-covered",
+          "met": true,
+          "evidence": "each of G1 has a Success metrics entry"
+        },
+        {
+          "id": "P7",
+          "text": "Every user group named in the charter appears in Requirements or in a \"no actions in this version\" statement",
+          "check": "groups-covered",
+          "met": true,
+          "evidence": "each of the 2 user group(s) has a requirement or a \"no actions\" statement"
+        },
+        {
+          "id": "P8",
+          "text": "Each numeric success metric states its measurement window, or says \"measurement window not set\"",
+          "check": "metric-window",
+          "met": true,
+          "evidence": "each of the 1 numeric metric(s) states a window",
+          "severity": "warn"
+        }
+      ],
+      "read": "Full PRD v6: Problem (2 short paragraphs), Users (intro plus two 4-bullet lists), Goals (1 line plus G1), Requirements (R1 to R7), Success metrics (1 table row plus 1 bullet), Out of scope (2 bullets). Also the 8 done-when items, P1 to P8 code results, the rubric and the brief."
+    },
+    {
+      "cycle": 2,
+      "version": 8,
+      "results": [
+        {
+          "id": "F-1",
+          "criterion": "Problem section states that people cannot see the menu or order ahead at Brew Lab",
+          "verdict": "PASS",
+          "note": "Problem: 'Brew Lab is a small specialty coffee shop in Indiranagar, Bengaluru. People cannot see the menu or order ahead.'",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 1,
+          "pass": true
+        },
+        {
+          "id": "F-2",
+          "criterion": "Users section names coffee lovers and office staff nearby and what each group does: see menu and prices, see opening hours, find the shop, pre-order for pickup",
+          "verdict": "PASS",
+          "note": "Users lists Coffee lovers and Office staff nearby, each with: see the menu with prices, see the opening hours, find where the shop is, pre-order a coffee for pickup.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 2,
+          "pass": true
+        },
+        {
+          "id": "F-3",
+          "criterion": "Goals section states the aim of a one-page, phone-friendly site for Brew Lab in Indiranagar, Bengaluru",
+          "verdict": "PASS",
+          "note": "Goals: 'The aim is a one-page, phone-friendly website for Brew Lab, a specialty coffee shop in Indiranagar, Bengaluru.'",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 3,
+          "pass": true
+        },
+        {
+          "id": "F-4",
+          "criterion": "Requirements section lists menu with prices, pre-order form for pickup, map or address, and opening hours",
+          "verdict": "PASS",
+          "note": "R1 menu with prices, R2 pre-order form for pickup, R3 map or address, R4 opening hours.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 4,
+          "pass": true
+        },
+        {
+          "id": "F-5",
+          "criterion": "Requirements section states the constraints: one page only, works on phones, no payment",
+          "verdict": "PASS",
+          "note": "R5 'one page only', R6 'works on phones', R7 'no payment'.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 5,
+          "pass": true
+        },
+        {
+          "id": "F-6",
+          "criterion": "Success metrics section states 30 pre-orders per week",
+          "verdict": "PASS",
+          "note": "'The success measure for Brew Lab is 30 pre-orders per week.' and table row 'G1 | 30 pre-orders per week'.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 6,
+          "pass": true
+        },
+        {
+          "id": "F-7",
+          "criterion": "Out of scope section lists online payment and any additional pages",
+          "verdict": "PASS",
+          "note": "Bullets 'Online payment' and 'Any additional pages'.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 7,
+          "pass": true
+        },
+        {
+          "id": "F-8",
+          "criterion": "Document contains no item marked to be confirmed",
+          "verdict": "PASS",
+          "note": "No 'to be confirmed' text in v8; P5 met.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 8,
+          "pass": true
+        }
+      ],
+      "extra_issues": [
+        {
+          "id": "F-9",
+          "criterion": "Rule: use only facts from the brief and answers (P4 no-invented-facts)",
+          "verdict": "NEEDS_REVISION",
+          "note": "P4 not met and the offending token is not named. Candidate unlabelled claims: 'Both are near the Brew Lab shop in Indiranagar, Bengaluru' (Users); 'each item' (R1); 'fill in and send the pre-order form' (R6).",
+          "severity": "medium",
+          "confidence": "low",
+          "needs_requester_fact": null
+        }
+      ],
+      "rubric": [
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "criterion": "Every requirement is specific and testable",
+          "verdict": "PASS",
+          "note": "R1 to R7 each name a visible page element or a checkable constraint, for example R7 'does not ask for or take any online payment'.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "criterion": "Goals and success metrics are measurable",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "Target is a number, '30 pre-orders per week', but the text says 'measurement window not set', so the period is not fixed. Code P8 reports a window as stated, which does not match the text.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "criterion": "Users and problem are consistent with the requirements",
+          "verdict": "PASS",
+          "note": "Problem, Users and R1 to R4 all cover menu with prices, opening hours, location and pre-order for pickup for both groups.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "criterion": "Out of scope is explicit",
+          "verdict": "PASS",
+          "note": "Out of scope names online payment and additional pages, each with a reason.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "criterion": "No invented facts: every fact comes from the brief or the Requester's answers, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim not in the brief",
+          "verdict": "NEEDS_REVISION",
+          "note": "Code P4 fails with no token named. Unlabelled claim not in the brief: 'Both are near the Brew Lab shop in Indiranagar, Bengaluru' (the brief says only 'office staff nearby'). Lower-risk wording: 'each item', 'fill in and send the pre-order form'.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": false
+        }
+      ],
+      "mechanical": {},
+      "screenshot": null,
+      "all_pass": false,
+      "output": "prd",
+      "conditions": [
+        {
+          "id": "P1",
+          "text": "All six sections are present and not empty",
+          "check": "sections-present",
+          "met": true,
+          "evidence": "all 6 sections present, none empty"
+        },
+        {
+          "id": "P2",
+          "text": "Requirement ids are unique and sequential (R1, R2, ...)",
+          "check": "ids-sequential",
+          "met": true,
+          "evidence": "R1 to R7, unique and in order"
+        },
+        {
+          "id": "P3",
+          "text": "Every brief fact appears exactly",
+          "check": "facts-present-all",
+          "met": true,
+          "evidence": "all 13 brief fact(s) appear"
+        },
+        {
+          "id": "P4",
+          "text": "No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+          "check": "no-invented-facts",
+          "met": false,
+          "evidence": "not in the charter or the Requester's answers, and not marked Assumption: Give",
+          "assumptions": []
+        },
+        {
+          "id": "P5",
+          "text": "Nothing is \"to be confirmed\"",
+          "check": "nothing-to-be-confirmed",
+          "met": true,
+          "evidence": "nothing to be confirmed"
+        },
+        {
+          "id": "P6",
+          "text": "Every goal has a matching success metric",
+          "check": "ids-covered",
+          "met": true,
+          "evidence": "each of G1 has a Success metrics entry"
+        },
+        {
+          "id": "P7",
+          "text": "Every user group named in the charter appears in Requirements or in a \"no actions in this version\" statement",
+          "check": "groups-covered",
+          "met": true,
+          "evidence": "each of the 2 user group(s) has a requirement or a \"no actions\" statement"
+        },
+        {
+          "id": "P8",
+          "text": "Each numeric success metric states its measurement window, or says \"measurement window not set\"",
+          "check": "metric-window",
+          "met": true,
+          "evidence": "each of the 2 numeric metric(s) states a window",
+          "severity": "warn"
+        }
+      ],
+      "read": "PRD v8 in full: Problem (2 short paragraphs), Users (intro, 2 four-item lists, 1 closing line), Goals (1 aim line, G1), Requirements (intro, R1 to R7), Success metrics (target line, 1-row table, G1 line, window line), Out of scope (2 bullets). Also the 8 done-when items, the P1 to P8 code results, the rubric, and the brief text."
+    }
+  ],
+  "sections": {
+    "W-1": {
+      "owner": "W-1",
+      "head": "",
+      "body": "## Problem\n\nBrew Lab is a small specialty coffee shop in Indiranagar, Bengaluru. People cannot see the menu or order ahead.\n\nCoffee lovers and office staff nearby cannot look up what Brew Lab offers and what it costs before they visit, and they cannot ask for a coffee in advance to pick up at the shop.",
+      "workflow": "PRD Problem section"
+    },
+    "W-2": {
+      "owner": "W-2",
+      "head": "",
+      "body": "## Users\n\nThe two user groups are coffee lovers and office staff nearby. Both are near the Brew Lab shop in Indiranagar, Bengaluru.\n\n**Coffee lovers**\n\n- See the menu with prices.\n- See the opening hours.\n- Find where the shop is.\n- Pre-order a coffee for pickup.\n\n**Office staff nearby**\n\n- See the menu with prices.\n- See the opening hours.\n- Find where the shop is.\n- Pre-order a coffee for pickup.\n\nBoth groups pre-order without paying online.",
+      "workflow": "PRD Users section"
+    },
+    "W-3": {
+      "owner": "W-3",
+      "head": "",
+      "body": "## Goals\n\nThe aim is a one-page, phone-friendly website for Brew Lab, a specialty coffee shop in Indiranagar, Bengaluru.\n\n- **G1**: Give Brew Lab in Indiranagar, Bengaluru a one-page site that works on phones, where visitors see the menu with prices and pre-order a coffee for pickup without paying online.",
+      "workflow": "PRD Goals section"
+    },
+    "W-4": {
+      "owner": "W-8",
+      "head": "",
+      "body": "## Requirements\n\nThese requirements apply to coffee lovers and office staff nearby, who both use the Brew Lab site.\n\n1. **R1**: The page shows the menu with prices, so coffee lovers and office staff nearby can see each item and what it costs before they visit.\n2. **R2**: The page has a pre-order form for pickup, so coffee lovers and office staff nearby can pre-order a coffee and collect it at the shop.\n3. **R3**: The page shows the shop's map or address, so visitors can find where Brew Lab is in Indiranagar, Bengaluru.\n4. **R4**: The page shows the opening hours, so visitors can check when Brew Lab is open.\n5. **R5**: The site is one page only: the menu, pre-order form, map or address and opening hours are all on that single page.\n6. **R6**: The site works on phones: a visitor on a phone can read the menu with prices, the opening hours and the address, and can fill in and send the pre-order form.\n7. **R7**: The site has no payment: the pre-order form does not ask for or take any online payment.",
+      "workflow": "Revise PRD Requirements section"
+    },
+    "W-5": {
+      "owner": "W-7",
+      "head": "",
+      "body": "## Success metrics\n\nThe success measure for Brew Lab is 30 pre-orders per week.\n\n| Goal | Metric |\n|------|--------|\n| G1 | 30 pre-orders per week |\n\n- **G1**: 30 pre-orders per week measures this goal, a one-page, phone-friendly site for Brew Lab in Indiranagar, Bengaluru where visitors pre-order a coffee for pickup without paying online.\n\nThe measurement window is not set for the G1 metric: measurement window not set.",
+      "workflow": "Revise PRD Success metrics section"
+    },
+    "W-6": {
+      "owner": "W-6",
+      "head": "",
+      "body": "## Out of scope\n\nThis version of the Brew Lab site leaves out the following:\n\n- Online payment: the site has no payment. The pre-order form does not ask for or take any online payment, so a visitor pre-orders a coffee for pickup without paying online.\n- Any additional pages: the site is one page only. The menu with prices, the pre-order form, the map or address and the opening hours all stay on that single page, and no other page is built.",
+      "workflow": "PRD Out of scope section"
+    }
+  }
+}

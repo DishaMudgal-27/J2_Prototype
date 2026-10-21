@@ -1,0 +1,13 @@
+Messages 1-191
+- **Brief:** One-page Brew Lab site (Indiranagar, Bengaluru) with menu and prices, no-payment pre-order form, address and hours. Target is 30 pre-orders per week. Order of work: PRD, HLD, LLD, site.
+- **PRD:** Six sections (W-1 to W-6) written. Audit failed the no-invented-facts check (P4) on v6 and again on v8 after one rework (W-7, W-8). The suspected cause, unconfirmed, is "Both are near the Brew Lab shop" in Users.
+- **PRD decision:** Requester chose option 2, so PRD v8 was accepted as is with P4 unmet. Success metrics still says the measurement window is not set.
+- **HLD:** Six sections (W-9 to W-14). v6 failed H5 on unlabelled stack tokens. Fixed by W-15 to W-17. v9 is workable, H1 to H6 met.
+- **HLD warnings:** The order route to the shop was undecided (the Requester has since said mailto). Risks states "the site is one file" as fact.
+- **LLD:** Five sections (W-18 to W-22). v5 failed L2, L3 and L6. Revisions W-23 and W-24 fixed L2 and L6. L3 still failed on colon forms in v7.
+- **LLD decision:** Requester chose to keep going. W-25 fixed L3. v8 is workable, L1 to L6 met. Warnings: unlabelled design rules in Responsive, and the E1 and E2 selectors are not in File structure.
+- **Exports:** prd.docx, hld.docx and lld.docx are done.
+- **Site facts from Requester:** 7 menu items from Masala chai at 80 to Cold brew at 200. Hours Mon to Sat 7:30 am to 9:00 pm, Sun 8:30 am to 6:00 pm. Address 12, 100 Feet Road, Indiranagar, Bengaluru 560038, text only, no map. Form fields are name, phone, items and pickup time, emailed to hello@brewlab.example. Phone +91 98450 12345. No payment, pay at pickup.
+- **Site progress:** Five workflows (W-26 to W-30) granted at 70. W-26 (Menu) is done and passed its checks. W-27 (Pre-order) is running. W-28 to W-30 are on hold.
+- **Open conflict:** W-27's LLD slice lists a quantity field, select, number and time types, and #pre-order-submit. The charter says four fields, no quantity, #po-submit. Coordination flagged it twice and nobody has settled it. It may fail the slice check.
+- **Budget:** 457 of 500 used. The held workflows need 35, leaving 8, enough for one fix. Priority's rule is that a second check failure goes to Identity, not a re-bid.

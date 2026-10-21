@@ -1,0 +1,278 @@
+{
+  "metrics": {
+    "outcome": "Crashed: RuntimeError: claude -p failed (exit 1): You've hit your individual spend limit · run /usage-credits to ask your admin for a higher limit · your session limit resets 8:30pm (Asia/Calcutta)",
+    "brief": "Make a website for CodeSprint Pune 2027, a two-day student and professional hackathon in Pune. Participants should be able to compare the three tracks, work out what they will pay with a fee calculator, register their team with a form, see the day-one and day-two schedule, see the prizes for each track, read FAQs, and see sponsors by tier. Mentors should be able to sign up with a separate form. Add a countdown to the start of the hackathon, a menu that stays on screen and shows which section you are in, and a high-contrast mode that works across the whole page. It should feel energetic and clear and work well on phones.\nDay one: Saturday 6 March 2027. Day two: Sunday 7 March 2027. Venue: Lakeside Tech Hall, 12 Lake Road, Pune 411002. Tracks: Web Track (team size 1 to 4, build time 24 hours, first prize Rs 50000); AI Track (team size 2 to 4, build time 24 hours, first prize Rs 75000); Hardware Track (team size 2 to 4, build time 30 hours, first prize Rs 60000). Entry fee per participant: Student Rs 400, Professional Rs 800. Meal pass: Rs 200 each, optional. Early-bird: 10% off entry fees only (not meal passes) for registrations up to 15 February 2027. Fee calculator: choose ticket type (Student or Professional), number of participants (1 to 4) and number of meal passes; show the total. Registration form: team name, lead name, lead email, lead phone, track (dropdown), ticket type (Student or Professional), college name (only shown if ticket type is Student, and required only then), number of participants (1 to 4), meal passes yes/no, dietary preference (Vegetarian or Non-vegetarian, only shown if meal passes is yes); sends to register@example.com. Mentor form: name, email, area of expertise (Web, AI, Hardware), available Saturday / Sunday / both; sends to mentors@example.com. Schedule: Day one 9:00am check-in opens, 10:00am opening and kickoff, 1:00pm lunch, 8:00pm mentor round. Day two 10:00am final submissions close, 11:00am demos begin, 3:00pm prize ceremony. FAQs: Can I change my track? Yes, until 20 February 2027 by email. Is there parking? Yes, free at the north gate. Are refunds available? No. Do I need my own laptop? Yes. Is there Wi-Fi? Yes, at the hall. Can I join without a team? Yes, we will match you with a team on day one. Sponsors: Gold: Northwind Cloud; Silver: Bytecraft Labs, Circuit House; Community: Pune Coders Club. Contact: code@example.com, WhatsApp +91 00000 55555. No photos yet, use placeholders for photos and sponsor logos.",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 3,
+    "ai_calls": 44,
+    "minutes": 16.6,
+    "budget": {
+      "total": 200,
+      "start": 200,
+      "cap": 400,
+      "raises": [],
+      "spent": 169,
+      "rate_card": true
+    },
+    "site_versions": 16,
+    "site_bytes": 49065,
+    "agents": {
+      "identity": {
+        "turns": 3,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 4,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 15,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 13,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-1": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-2": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-3": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-4": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-5": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-6": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-7": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-8": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-9": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-10": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-11": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-12": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-13": {
+        "turns": 0,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 3,
+      "grants": 3,
+      "counters": 0,
+      "refuses": 0,
+      "refuses_converted_by_code": 0,
+      "parks": 0
+    },
+    "conflicts": {
+      "total": 0,
+      "settled_by_agents": 0,
+      "resolved_by_identity": 0,
+      "asked_requester": 0,
+      "open": 0,
+      "list": []
+    },
+    "requester_questions": {
+      "total": 0,
+      "by_kind": {}
+    },
+    "workflows": {
+      "registered": 13,
+      "done": 12,
+      "failed": 0,
+      "held_ever": 0,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "Hero and countdown",
+          "agent_estimate": 20,
+          "charged": 20
+        },
+        {
+          "id": "W-2",
+          "name": "Track comparison",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-3",
+          "name": "Fee calculator",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-4",
+          "name": "Team registration form",
+          "agent_estimate": 15,
+          "charged": 15
+        },
+        {
+          "id": "W-5",
+          "name": "Mentor sign-up form",
+          "agent_estimate": 15,
+          "charged": 15
+        },
+        {
+          "id": "W-6",
+          "name": "Schedule",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-7",
+          "name": "Prizes",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-8",
+          "name": "FAQ",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-9",
+          "name": "Sponsors",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-10",
+          "name": "Contact and sticky menu",
+          "agent_estimate": 20,
+          "charged": 20
+        },
+        {
+          "id": "W-11",
+          "name": "Contrast mode and global styling",
+          "agent_estimate": 15,
+          "charged": 15
+        },
+        {
+          "id": "W-12",
+          "name": "Fee calculator: no form, no invented cap",
+          "agent_estimate": 16,
+          "charged": 16
+        },
+        {
+          "id": "W-13",
+          "name": "Fee calculator: no literal zero",
+          "agent_estimate": 8,
+          "charged": 8
+        }
+      ]
+    },
+    "validator_refusals": 2,
+    "role_refusals": 0,
+    "pauses": 0,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 0,
+    "audits": [
+      {
+        "cycle": 1,
+        "version": 15,
+        "all_pass": false,
+        "pass": 13,
+        "warn": 1,
+        "fail": 0,
+        "rubric_fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      },
+      {
+        "cycle": 2,
+        "version": 16,
+        "all_pass": false,
+        "pass": 13,
+        "warn": 1,
+        "fail": 0,
+        "rubric_fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      }
+    ],
+    "to_be_confirmed": [],
+    "workable": [
+      "necessary condition N6 not met: No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers (not in the charter or the Requester's answers: 0)"
+    ],
+    "lessons": {
+      "memory": false,
+      "saved": [],
+      "used": []
+    }
+  },
+  "review": {
+    "verdict": "Reviewer call failed: RuntimeError: claude -p failed (exit 1): You've hit your individual spend limit · run /usage-credits to ask your admin for a higher limit · your session limit resets 8:30pm (Asia/Calcutta)"
+  },
+  "events": [
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "Team registration form: work atom 1: expected output item 6 behavior step 'set #reg-college ': set takes a selector and a value",
+      "msg": 5,
+      "cycle": 1
+    },
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "High-contrast mode: work atom 1: expected output item 2 behavior step 4 targets '#schedule', which the atom's how or constraints doesn't tell the builder to create",
+      "msg": 6,
+      "cycle": 1
+    }
+  ],
+  "made": "2026-10-14 17:59:45"
+}

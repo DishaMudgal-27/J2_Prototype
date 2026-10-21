@@ -1,0 +1,281 @@
+[
+  {
+    "cycle": 1,
+    "version": 9,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The menu lists exactly these 11 dishes with prices in rupees: Starters: Medu vada 120, Veg cutlet 140, Chicken 65 260. Mains: Masala dosa 160, Mysore dosa 180, Idli sambar 110, Veg thali 280, Chicken chettinad 340, Fish curry meal 360. Desserts: Payasam 100, Filter coffee 60",
+        "verdict": "PASS",
+        "note": "#menu has 11 li.kk-dish; names and prices match the charter (120, 140, 260, 160, 180, 110, 280, 340, 360, 100, 60) with the rupee sign.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "Each dish is marked veg or non-veg (non-veg: Chicken 65, Chicken chettinad, Fish curry meal; all others veg), and All, Veg and Non-veg filter buttons show only the matching dishes",
+        "verdict": "PASS",
+        "note": "data-diet counts in the markup are 8 veg and 3 non-veg (the 3 are Chicken 65, Chicken chettinad, Fish curry meal). The script sets dish.hidden and the CSS hides [hidden]. Not clicked in a browser, but js_errors is empty.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "A Today's specials section shows Mysore dosa and Fish curry meal",
+        "verdict": "PASS",
+        "note": "#specials has exactly two cards, Mysore dosa (₹180) and Fish curry meal (₹360), with no offer wording.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "A Book a table button opens WhatsApp (wa.me link) for +91 00000 33333 with a prefilled message asking for name, date, time and number of people, and the page says tables are for 1 to 8 people",
+        "verdict": "PASS",
+        "note": "The #kk-book-link href is https://wa.me/910000033333?text=... and the message asks for Name, Date, Time and Number of people (1 to 8). 'Tables are for 1 to 8 people.' is on the page. The header 'Book a table' button scrolls to #booking.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The page shows the address 7 Karve Road, Kothrud, Pune 411038, the hours 8am to 10:30pm every day with kitchen closing at 10pm, and the restaurant phone +91 00000 44444 as a tap-to-call link",
+        "verdict": "PASS",
+        "note": "#contact has '7 Karve Road, Kothrud, Pune 411038', '8am to 10:30pm every day', 'Kitchen closes at 10pm' and a link to tel:+910000044444.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A dish photo section shows empty labelled photo spots for dishes, with no fake or stock photos",
+        "verdict": "PASS",
+        "note": "#photos has six div.kk-photo-frame spots with figcaptions. The mechanical check reports images: 0 and the only external resources are the Google Fonts stylesheet and the wa.me link.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "A reviews section shows exactly these three: \"Best dosa in Kothrud\" by Anita R., \"Feels like home\" by Vikram S., \"Great filter coffee\" by Neha P.",
+        "verdict": "PASS",
+        "note": "#reviews has three figures: Best dosa in Kothrud / Anita R., Feels like home / Vikram S., Great filter coffee / Neha P. There are no ratings and no extra reviewers.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The site name Kaveri Kitchen appears in the page title and header, and a navigation lets visitors jump to menu, specials, booking, photos, reviews and contact",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The h1 is 'Kaveri Kitchen' and the nav has six working links (broken_in_page_links is empty). The head has two <title> tags and two <meta charset> tags; the first title ('Kaveri Kitchen') wins and contains the name.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The page has a viewport meta tag and layout rules for narrow screens, with no horizontal overflow at 360px and 1280px",
+        "verdict": "PASS",
+        "note": "The viewport meta tag is present and there are media queries at 480, 600, 700 and 1024px. The mechanical check shows overflow_px 0 at both 360px and 1280px.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "The file contains no offers or discounts and no placeholder text such as lorem ipsum or TBD",
+        "verdict": "PASS",
+        "note": "Reading the file, I found no 'lorem', 'TBD', 'offer', 'discount' or '% off'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-11",
+        "criterion": "Valid, tidy head (HTML hygiene)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The style block and the W-1 head block each add a <title> and a <meta charset>, so the duplicates are in the markup. There is no visible effect, but it is invalid HTML and could confuse later edits.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "The screenshot shows Lora headings and Nunito body text, terracotta primary buttons, white cards with 12px radius, and the cream background, all matching the style guide.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "The measurements checked 117 text elements at both widths and found 0 low-contrast ones.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "There is one h1 and no skipped heading levels; the brand and section titles stand out in the screenshot.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "The screenshot shows a filled terracotta 'Book a table' button right under the tagline, and it is the first action listed on the first screen.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS",
+        "note": "The six-link nav is visible on the first screen as a 3x2 grid at 360px and a single row at 1280px, with a matching footer nav and Back to top.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "The measured minimum tap target is 44px, with 0 small targets at 360px.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "The page has 0 images, so none lack alt text; the photo spots are divs with captions.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 30919,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Lora:wght@600;700&amp;family=Nunito:wght@400;600;700&amp;display=swap",
+        "https://wa.me/910000033333?text=Hello%20Kaveri%20Kitchen%2C%20I%20would%20like%20to%20book%20a%20table.%0A%0AName%3A%20%0ADate%3A%20%0ATime%3A%20%0ANumber%20of%20people%20%281%20to%208%29%3A%20"
+      ],
+      "forms": 0,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 117,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Nunito",
+            "Lora"
+          ],
+          "nav": {
+            "nav_elements": 2,
+            "in_page_links": 15
+          },
+          "first_screen_actions": [
+            "Book a table",
+            "All"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 117,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Nunito",
+            "Lora"
+          ],
+          "nav": {
+            "nav_elements": 2,
+            "in_page_links": 15
+          },
+          "first_screen_actions": [
+            "Book a table",
+            "All"
+          ]
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v9.png",
+    "all_pass": true
+  }
+]

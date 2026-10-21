@@ -1,0 +1,31 @@
+{
+  "statement": "Build a one-page website for Brew Lab, a cafe in Indiranagar, Bengaluru, that shows its menu with prices, opening hours, location and phone number, a photo gallery with empty spots, and stories about where its coffee comes from.",
+  "site_name": "Brew Lab",
+  "audience": "People in and around Bengaluru deciding whether to visit Brew Lab, and regulars checking the menu, hours or address, mostly on their phones.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file, no build step",
+    "Readable and usable on a phone (360px wide) and a desktop (1280px wide) with no sideways scrolling",
+    "All text is real content from the Requester; no invented facts, photos, reviews or links",
+    "Warm, simple look that suits a specialty coffee cafe"
+  ],
+  "rules": [
+    "Use only the facts the Requester supplied: address, hours, phone, menu items and prices, and the three coffee stories",
+    "Do not invent an email, Instagram page, map link or opening-day exceptions",
+    "Do not use stock or placeholder photos as if they were the cafe's own; gallery spots stay clearly empty",
+    "Prices are shown in rupees exactly as given"
+  ],
+  "done_when": [
+    "The page shows the name Brew Lab and says it is a cafe in Bengaluru",
+    "A menu section lists exactly: Espresso ₹120, Cappuccino ₹180, Cold brew ₹200, Pour-over ₹220, Croissant ₹150, Banana bread ₹130",
+    "A timings section states open 8am to 10pm every day, with no closed days",
+    "A location section shows the address 100 Feet Road, Indiranagar, Bengaluru 560038",
+    "The phone number +91 80 4000 2468 appears on the page as a tap-to-call link",
+    "A photo gallery section contains empty, clearly labelled photo spots with no images",
+    "A coffee stories section has three stories: Ratnagiri Estate (Chikmagalur, shade-grown coffee), Kerehaklu (Chikmagalur, coffee grown alongside pepper and cardamom), Baarbara Estate (Coorg, only ripe cherries hand-picked)",
+    "A navigation menu links to each section and every in-page link points to a section that exists",
+    "The page has a mobile viewport setting and layout rules that keep it within the screen width at 360px and 1280px",
+    "The page has no JavaScript errors and no text such as 'to be confirmed' or 'lorem ipsum'"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": []
+}

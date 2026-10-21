@@ -1,0 +1,83 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "wf-build-site-v1",
+    "name": "Build single-file CityCare site",
+    "purpose": "No site file exists. Home, Book a Visit, Emergency, Doctors and Health Blog sections, the EN/KN/HI switch and placeholder markers are all missing.",
+    "cost": 22,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 22,
+      "model_call_limit": 8,
+      "time_limit_minutes": 40,
+      "retry_limit": 1,
+      "stop_loss": "Stop and report if spend reaches 22, calls reach 8, or the file still fails any completion_check item after the one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site/index.html",
+      "site/placeholder_register.md"
+    ],
+    "completion_check": "File exists as a single .html. Search finds no <form action, fetch(, XMLHttpRequest, localStorage, sessionStorage or document.cookie. All 5 section ids are linked from the nav. 'pending native review' appears in the KN and HI views. Every phone-like digit sequence and address string sits inside the placeholder marker.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "wf-check-donewhen-v1",
+    "name": "Static check of site against done-when list",
+    "purpose": "Nothing confirms the built file meets the 11 done-when items, so completion would be asserted, not measured.",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 3,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop and report if spend reaches 5 or calls reach 3 without a complete 11-row report."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site/checklist_report.md"
+    ],
+    "completion_check": "Report has 11 rows, each marked PASS or FAIL with a quoted evidence line. Any FAIL names the fix.",
+    "dependencies": [
+      "wf-build-site-v1"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "W-3",
+    "name": "Add 'Hospital to confirm' label to emergency placeholders",
+    "purpose": "Item 5: em_num and em_addr render only as [PLACEHOLDER: ...]. The string 'Hospital to confirm' appears nowhere in the file, though the Requester asked to keep it.",
+    "cost": 4,
+    "estimate": 3,
+    "envelope": {
+      "money_limit": 4,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop and report if spend reaches 4, calls reach 3, or the file still fails any completion_check item after the one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site/index.html (v3)",
+      "site/label_recheck.md"
+    ],
+    "completion_check": "Search of site/index.html finds 'Hospital to confirm' at least twice in each of the en, kn and hi dictionaries (em_num and em_addr). Every instance sits inside the ph() marker. No new phone-like digit sequence or address string appears. A diff shows no change to the booking handler, .cols CSS or any other key. site/label_recheck.md has 2 rows (items 5 and 11), each PASS or FAIL with a quoted evidence line.",
+    "dependencies": [
+      "wf-build-site-v1"
+    ],
+    "status": "done",
+    "cycle": 3
+  }
+]

@@ -1,0 +1,36 @@
+{
+  "statement": "Build a one-file website for Petal & Stem, a flower shop in Jaipur, where visitors can see the bouquets with prices, place a delivery order through WhatsApp, and find the shop timings and location.",
+  "site_name": "Petal & Stem",
+  "audience": "People in Jaipur who want to buy flowers for delivery or visit the shop at 12 MI Road, many on a phone.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file, no build step",
+    "Prices in rupees, shown exactly as given",
+    "Works on a phone (360px wide) and a desktop (1280px wide)",
+    "No JavaScript errors"
+  ],
+  "rules": [
+    "Use only the facts the Requester supplied; invent no bouquets, prices, areas or contact details",
+    "Orders go to WhatsApp +91 98290 11223 and payment is on delivery; no online payment",
+    "Photo spots stay empty placeholders until real photos are supplied"
+  ],
+  "done_when": [
+    "The page shows the shop name Petal & Stem and mentions Jaipur.",
+    "The page lists exactly these bouquets with prices: Red rose dozen ₹899, Sunflower bunch ₹699, Mixed seasonal ₹999, White lilies ₹1,199, Orchid box ₹1,499.",
+    "Each bouquet has an empty image placeholder spot.",
+    "An order form lets a visitor pick a bouquet and enter name, phone and delivery address, and its submit action opens a WhatsApp message to +91 98290 11223 with those details filled in.",
+    "The page states same day delivery inside Jaipur for orders before 4pm, a ₹99 delivery charge, and pay on delivery.",
+    "The page shows shop timings of 9am to 8pm Monday to Saturday and closed on Sunday.",
+    "The page shows the address 12 MI Road, near Panch Batti, Jaipur 302001, the phone +91 141 400 5566 as a tap-to-call link, and a map link or embed for the address.",
+    "The file has no JavaScript errors, no horizontal overflow at 360px and 1280px, and no broken in-page links."
+  ],
+  "business_type": "florist",
+  "visitor_needs": [
+    "See bouquets with prices",
+    "Order a bouquet for delivery",
+    "Know delivery terms: same day inside Jaipur before 4pm, ₹99 charge, pay on delivery",
+    "Know shop timings",
+    "Find the shop address and phone"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": []
+}

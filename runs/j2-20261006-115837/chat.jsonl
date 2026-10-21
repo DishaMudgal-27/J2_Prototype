@@ -1,0 +1,2 @@
+{"id": 1, "t": "11:58:37", "who": "audit", "text": "@Identity can you send the phone number?", "next": "identity"}
+{"id": 2, "t": "11:58:37", "who": "system", "text": "Route check: Audit addressed the Requester. Only Identity talks to the Requester, so the message goes to Identity first.", "redirect": true}

@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#7A3E2B",
+    "secondary": "#4F5D3A",
+    "accent": "#B7791F",
+    "background": "#F7F1E7",
+    "surface": "#FFFBF4",
+    "text": "#2B211B",
+    "muted": "#6B5B4E"
+  },
+  "fonts": {
+    "heading": "'Cormorant Garamond', Georgia, serif",
+    "body": "'Nunito Sans', system-ui, -apple-system, 'Segoe UI', sans-serif",
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap"
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "64px"
+  },
+  "radius": "12px",
+  "buttons": {
+    "primary": "background:#7A3E2B;color:#FFFBF4;border:2px solid #7A3E2B;min-height:44px;padding:0 24px;font-weight:700;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer",
+    "secondary": "background:transparent;color:#7A3E2B;border:2px solid #7A3E2B;min-height:44px;padding:0 24px;font-weight:700;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer"
+  },
+  "card": "background:#FFFBF4;border:1px solid #E3D6C3;border-radius:12px;padding:16px;box-shadow:0 1px 2px rgba(43,33,27,0.06)",
+  "notes": "Terracotta, olive and ochre on warm cream echo natural dyes and handloom cotton, with a serif heading for an elegant feel; text and primary colours pass WCAG AA on the cream background."
+}

@@ -1,0 +1,38 @@
+{
+  "statement": "Build a one-page website for Brew Lab, Indiranagar, Bengaluru, showing the menu with prices, opening hours, location, a pre-order option and a map of the three farms, with a warm feel and no photographs.",
+  "site_name": "Brew Lab",
+  "audience": "Local customers in and around Indiranagar, Bengaluru, who want to check the menu, prices, hours and location, pre-order, and learn where the ingredients come from.",
+  "standards": [
+    "Single file of plain HTML, CSS and JavaScript, no build step; CDN libraries allowed.",
+    "Warm feel achieved without photographs: warm colour palette, friendly typography, SVG or CSS illustration and texture.",
+    "Readable and usable on a phone screen as well as a desktop.",
+    "Every missing fact is shown as a visibly marked placeholder, never an invented value."
+  ],
+  "rules": [
+    "Use no photographs: no img elements or CSS backgrounds pointing to photo files or photo URLs.",
+    "Do not invent prices, hours, phone numbers, street address, pre-order destination or farm coordinates.",
+    "Farm coordinates live in one clearly labelled data block so they can be filled in without changing the page structure.",
+    "Keep everything the brief asks for on a single page."
+  ],
+  "done_when": [
+    "The file is a single HTML file with inline CSS and JavaScript, and needs no build step.",
+    "The page shows the name Brew Lab and Indiranagar, Bengaluru.",
+    "A menu section lists items with a price slot for each; any price not supplied is marked as a placeholder.",
+    "An hours section is present; any hours not supplied are marked as a placeholder.",
+    "A location section names Indiranagar, Bengaluru and includes a marked placeholder for the street address.",
+    "A pre-order section has a form with fields for name, item, quantity and pickup time, and a marked placeholder for where orders are sent.",
+    "A farm section contains a map container with three farm entries in one labelled data block, each marked as awaiting coordinates, and no invented coordinates.",
+    "The file contains no img elements and no photo file or photo URL references.",
+    "A warm palette is defined (for example as CSS variables) and used across the page, with at least one non-photo decorative element such as SVG or CSS art.",
+    "The page includes a viewport meta tag and a responsive layout rule for narrow screens.",
+    "Every placeholder is visibly marked on the page and listed in a single comment block in the file."
+  ],
+  "open_inputs": [
+    "Menu items and their prices",
+    "Opening hours",
+    "Street address and phone number",
+    "Where pre-orders are sent (phone, WhatsApp, email or other)",
+    "Coordinates and names of the three farms (promised next week)"
+  ],
+  "dropped_from_brief": []
+}

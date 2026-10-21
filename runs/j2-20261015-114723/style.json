@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#4F2BD9",
+    "secondary": "#0F172A",
+    "accent": "#FF6B1A",
+    "background": "#F6F4FF",
+    "surface": "#FFFFFF",
+    "text": "#0F172A",
+    "muted": "#475569"
+  },
+  "fonts": {
+    "heading": "'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif",
+    "body": "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif",
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap"
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "56px"
+  },
+  "radius": "12px",
+  "buttons": {
+    "primary": "background:#4F2BD9;color:#FFFFFF;border:2px solid #4F2BD9;font-weight:700;min-height:48px;padding:12px 24px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer",
+    "secondary": "background:#FFFFFF;color:#4F2BD9;border:2px solid #4F2BD9;font-weight:700;min-height:48px;padding:12px 24px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer"
+  },
+  "card": "background:#FFFFFF;border:2px solid #0F172A;border-radius:12px;padding:20px;box-shadow:6px 6px 0 #FF6B1A",
+  "notes": "Electric indigo on navy with an orange spark feels like a hackathon, and the dark-on-light text keeps it clear and AA readable on phones."
+}

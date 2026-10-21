@@ -1,0 +1,728 @@
+{
+  "metrics": {
+    "outcome": "Done: the site is workable. Every done-when item passes with Audit's evidence and the render check is clean.",
+    "brief": "Make a website for Riverside Run 2027, a city running event in Pune. Runners should be able to compare the three races, work out what they will pay with a fee calculator, register with a form, see the race-day and expo-day schedule, see the route and water stations for each race, read FAQs, and see sponsors by tier. Volunteers should be able to sign up with a separate form. Add a countdown to race day, a menu that stays on screen and shows which section you are in, and a high-contrast mode that works across the whole page. It should feel sporty and clear and work well on phones.",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 2,
+    "ai_calls": 64,
+    "minutes": 31.8,
+    "budget": {
+      "total": 230,
+      "start": 200,
+      "cap": 400,
+      "raises": [
+        {
+          "cycle": 1,
+          "asked": 30,
+          "from": 200,
+          "to": 230,
+          "why": "the Requester's answer: Option 1"
+        }
+      ],
+      "spent": 222,
+      "rate_card": true
+    },
+    "site_versions": 23,
+    "site_bytes": 80531,
+    "agents": {
+      "identity": {
+        "turns": 7,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 4,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 24,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 21,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 3,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-1": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-2": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-3": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-4": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-5": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-6": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-7": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-8": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-9": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-10": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-11": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-12": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-13": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-14": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-15": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-16": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-17": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-18": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-19": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-20": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-21": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 3,
+      "grants": 2,
+      "counters": 1,
+      "refuses": 0,
+      "refuses_converted_by_code": 0,
+      "parks": 0
+    },
+    "conflicts": {
+      "total": 1,
+      "settled_by_agents": 1,
+      "resolved_by_identity": 0,
+      "asked_requester": 0,
+      "open": 0,
+      "list": [
+        {
+          "id": "C-1",
+          "cycle": 1,
+          "topic": "proposal",
+          "between": [
+            "adaptation",
+            "priority"
+          ],
+          "attempts": 2,
+          "escalated": false,
+          "resolved_by": "agents",
+          "user_question": null,
+          "user_answer": null,
+          "outcome": "Adaptation accepted Priority's COUNTER: T-shirt sizes S, M, L, XL only (8), Remove unsupplied sponsor badges (8), Fee calculator is not a form (8), Hero CTA static to #register, countdown inside hero (8), Menu link to gallery (8), Contrast toggle no longer covers content (8) goes to the validator."
+        }
+      ]
+    },
+    "requester_questions": {
+      "total": 3,
+      "by_kind": {
+        "limit": 1,
+        "info": 1,
+        "fact": 1
+      }
+    },
+    "workflows": {
+      "registered": 21,
+      "done": 21,
+      "failed": 0,
+      "held_ever": 3,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "Hero and countdown",
+          "agent_estimate": 20,
+          "charged": 20
+        },
+        {
+          "id": "W-2",
+          "name": "Sticky menu with section highlight",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-3",
+          "name": "Race comparison",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-4",
+          "name": "Fee calculator",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-5",
+          "name": "Registration form",
+          "agent_estimate": 15,
+          "charged": 15
+        },
+        {
+          "id": "W-6",
+          "name": "Expo and race-day schedule",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-7",
+          "name": "Routes and water stations",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-8",
+          "name": "FAQ",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-9",
+          "name": "Sponsors by tier",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-10",
+          "name": "Volunteer form",
+          "agent_estimate": 15,
+          "charged": 15
+        },
+        {
+          "id": "W-11",
+          "name": "Contact details",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-12",
+          "name": "High-contrast toggle",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-13",
+          "name": "Mobile layout, photo placeholders, error-free page",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-14",
+          "name": "T-shirt sizes S, M, L, XL only",
+          "agent_estimate": 8,
+          "charged": 8
+        },
+        {
+          "id": "W-15",
+          "name": "Remove unsupplied sponsor badges",
+          "agent_estimate": 8,
+          "charged": 8
+        },
+        {
+          "id": "W-16",
+          "name": "Fee calculator is not a form",
+          "agent_estimate": 8,
+          "charged": 8
+        },
+        {
+          "id": "W-17",
+          "name": "Hero CTA static to #register, countdown inside hero",
+          "agent_estimate": 8,
+          "charged": 8
+        },
+        {
+          "id": "W-18",
+          "name": "Menu link to gallery",
+          "agent_estimate": 8,
+          "charged": 8
+        },
+        {
+          "id": "W-19",
+          "name": "Contrast toggle no longer covers content",
+          "agent_estimate": 8,
+          "charged": 8
+        },
+        {
+          "id": "W-20",
+          "name": "Fee total blank until a race is chosen",
+          "agent_estimate": 8,
+          "charged": 8
+        },
+        {
+          "id": "W-21",
+          "name": "Countdown labels fit, single title",
+          "agent_estimate": 16,
+          "charged": 16
+        }
+      ]
+    },
+    "validator_refusals": 1,
+    "role_refusals": 0,
+    "pauses": 3,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 13,
+    "audits": [
+      {
+        "cycle": 1,
+        "version": 15,
+        "all_pass": false,
+        "pass": 11,
+        "warn": 4,
+        "fail": 0,
+        "rubric_fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      },
+      {
+        "cycle": 1,
+        "version": 21,
+        "all_pass": false,
+        "pass": 13,
+        "warn": 2,
+        "fail": 0,
+        "rubric_fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      },
+      {
+        "cycle": 2,
+        "version": 23,
+        "all_pass": true,
+        "pass": 12,
+        "warn": 3,
+        "fail": 0,
+        "rubric_fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      }
+    ],
+    "to_be_confirmed": [],
+    "workable": [],
+    "lessons": {
+      "memory": false,
+      "saved": [],
+      "used": []
+    }
+  },
+  "review": {
+    "verdict": "The department delivered a workable site in 2 cycles inside the raised budget (222 of 230), with all 15 done-when items and all 8 necessary conditions met at v23 [145], but about a third of the spend (72 of 222 credits) went on fixing avoidable errors such as invented content.",
+    "agents": {
+      "identity": {
+        "score": 4,
+        "note": "Asked the Requester one clear question about T-shirt sizes instead of guessing [78], and gave a decision-ready budget choice [122]. Drifted from role by prescribing the fix wording ('Choose a race to see your total') [127] and detailed fixes [82]. Also missed the missing size list when recording the charter."
+      },
+      "adaptation": {
+        "score": 3,
+        "note": "Accepted Priority's counter within 2 attempts [86] and kept fixes small. Did not flag that the registration form needed a size list nobody supplied. The W-1 before W-5 order forced a fallback CTA and a later rework (W-17). The first W-21 proposal was rejected by the validator [128]. Accepted the over-60 KB file [129]."
+      },
+      "priority": {
+        "score": 4,
+        "note": "Granted 13 at rate-card minimum with a 50 reserve [9]. Its counter was reasoned, but the F-20 it parked came back as F-23 in cycle 2 [85]. It rewrote W-21's steps itself [130], which is design work the role file forbids. 24 near-identical 'within limits' turns."
+      },
+      "coordination": {
+        "score": 4,
+        "note": "Stated its scheduling rule every time. Holds named the exact missing condition [44]. Ordering W-2 after the section targets avoided a second failed link check [17]. Repeated the same unresolved CTA note about nine times without an owner acting [17, 26, 30, 44, 49, 54, 59, 64, 69]."
+      },
+      "audit": {
+        "score": 5,
+        "note": "Found the invented sizes, invented badges, fee-form destination, covered countdown labels, and the 'SECONDS' wrap, each with a finding id [77, 121]. Said plainly that high-contrast was checked in code only [145]."
+      },
+      "W-1": {
+        "score": 3,
+        "note": "Failed the #register link check and used a JS fallback it named as a shortcut [13, 16]. Left a duplicate title and countdown labels that broke at 360px."
+      },
+      "W-2": {
+        "score": 4,
+        "note": "Clean first attempt [61]. Menu later needed a gallery link, which was not its fault."
+      },
+      "W-3": {
+        "score": 5,
+        "note": "Clean, supplied facts only [20]."
+      },
+      "W-4": {
+        "score": 3,
+        "note": "Needed a retry for the submit button [23]. Wrapped the calculator in a form it did not need and was reworked twice (W-16, W-20)."
+      },
+      "W-5": {
+        "score": 3,
+        "note": "Invented sizes S to XXL, though it disclosed this [29], against the 'supplied facts only' rule."
+      },
+      "W-6": {
+        "score": 5,
+        "note": "Clean, no added times [33]."
+      },
+      "W-7": {
+        "score": 5,
+        "note": "Clean, placeholders only [37]."
+      },
+      "W-8": {
+        "score": 4,
+        "note": "Failed the 44px check, then rebuilt with real buttons [40, 43]. Acceptable fix."
+      },
+      "W-9": {
+        "score": 3,
+        "note": "Added 'Top tier', 'Second tier' and 'Supporters' badges nobody supplied [48, 82]."
+      },
+      "W-10": {
+        "score": 5,
+        "note": "Clean, correct destination [52]."
+      },
+      "W-11": {
+        "score": 5,
+        "note": "Clean [57]."
+      },
+      "W-12": {
+        "score": 3,
+        "note": "Fixed-position toggle covered the countdown labels at 360px [77]."
+      },
+      "W-13": {
+        "score": 3,
+        "note": "Built the gallery with no menu link. Added a 'Contact the team' link mainly to give the tap-target check something to measure [72]."
+      },
+      "W-14": {
+        "score": 5,
+        "note": "Sizes fixed first time [111]."
+      },
+      "W-15": {
+        "score": 5,
+        "note": "Badges removed first time [116]."
+      },
+      "W-16": {
+        "score": 4,
+        "note": "Removed the form wrapper, but the default total still failed N6 [121]."
+      },
+      "W-17": {
+        "score": 4,
+        "note": "Static CTA and countdown moved into the hero. Label wrap remained for the next fix [121]."
+      },
+      "W-18": {
+        "score": 3,
+        "note": "Gallery link added, but its note on highlight order is garbled [101]. Menu order differs from page order [145]."
+      },
+      "W-19": {
+        "score": 4,
+        "note": "Covering problem fixed [96]. Visual check of high-contrast still missing."
+      },
+      "W-20": {
+        "score": 5,
+        "note": "Total blank until a race is chosen, rules kept [135]."
+      },
+      "W-21": {
+        "score": 4,
+        "note": "Labels and title fixed, confirmed by Audit [145]. Its own report only said 'should' [140]."
+      }
+    },
+    "went_well": [
+      "0 failed workflows, 0 redirects, 0 invalid moves, 0 role refusals. Estimates matched charges on all 21 workflows.",
+      "The Adaptation vs Priority conflict settled itself in 2 attempts, with no escalation [85, 86].",
+      "Code checks caught real defects early: the #register link [13], the missing submit button [23], the FAQ tap target [40].",
+      "Audit stopped three invented-content or layout problems from shipping [77, 121]. Identity asked the Requester instead of keeping the invented sizes [78]."
+    ],
+    "problems": [
+      "Invented content got in twice (sizes [29], badges [48]) despite the charter rule, and was caught only at the first Audit [77].",
+      "The fix reserve of 50 ran out at v21 with 2 credits left [122]. Rework was 72 of 222 credits (32%) and forced a Requester pause.",
+      "The N6 check flagged Rs 270, which Identity confirmed is correct [127]. This looks like a checker false positive. It forced a UX change (W-20) and extra audit rounds.",
+      "The file grew from 62 KB (v11) to 81 KB against the ~60 KB rule. It drew 13 warnings and no owner acted [53, 129].",
+      "Role drift: Priority rewrote proposal steps [130], where team.md says rejected proposals go back to Adaptation. Identity prescribed the fix text [127]. Code did not catch either.",
+      "Priority and Coordination took 45 of 80 turns for 21 builds, mostly repeated 'within limits' handoffs and the same CTA note.",
+      "High-contrast was judged from code only [145]. W-13 and W-8 added or changed markup partly to satisfy a check [72, 43].",
+      "Lessons were off (memory false, none saved), so the 'save a lesson after a confirmed fix' step went untested."
+    ],
+    "learnings": [
+      "Make Identity list missing option lists (sizes) as to-be-confirmed at J2.a, and add a builder rule: report a missing fact to Coordination, do not invent it. Test: rerun with sizes absent and see whether W-5 flags it. Evidence [29, 78].",
+      "Run N6 (no invented content) as a per-workflow code check, not only after the last build. It would have caught W-5 and W-9 at once. Evidence [76].",
+      "Fix the test system's N6 so it allows values derived from the charter's formulas, such as Rs 270. Evidence [120, 127].",
+      "Set the fix reserve from observed rework (about 30% here), not a fixed 50. Test 30% on the next brief. Evidence [122].",
+      "Either enforce the 60 KB limit in the validator (one trim step in W-13) or drop it. Warnings nobody owns are noise. Evidence: 13 warnings.",
+      "Batch Priority and Coordination handoffs when runs are within limits, and keep hold messages. Test: compare turns and AI calls. Savings unmeasured.",
+      "Add a rendered high-contrast check (toggle on, measure contrast) so that done-when item is not verified from code alone.",
+      "Route validator rejections to Adaptation, as team.md says, and keep Priority and Identity from rewriting proposals.",
+      "Evidence is thin: one brief, one run, Sonnet, memory off. Do not generalise the 32% rework or the turn counts."
+    ]
+  },
+  "events": [
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "info: 1 question(s) for the Requester",
+      "msg": 3,
+      "cycle": 0,
+      "pause": "info"
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-2: Nav targets #sponsors, #volunteer and #contact do not exist yet; needs W-9, W-10 and W-11 done so all 10 links resolve",
+      "msg": 44,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-12: Dependency sticky-nav (W-2) is not done",
+      "msg": 44,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-13: Depends on all section workflows; W-9, W-10, W-11, W-2 and W-12 are not done",
+      "msg": 44,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-2: Nav targets #volunteer and #contact do not exist yet; needs W-10 and W-11 done so all 10 links resolve",
+      "msg": 49,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-12: Dependency sticky-nav (W-2) is not done",
+      "msg": 49,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-13: Depends on all section workflows; W-10, W-11, W-2 and W-12 are not done",
+      "msg": 49,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "warning",
+      "detail": "Warning: site v11 is 62 KB, over builder.md's ~60 KB single-page rule.",
+      "msg": 53,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-2: #contact does not exist yet; needs W-11 done so all 10 nav links resolve",
+      "msg": 54,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-12: Dependency sticky-nav (W-2) is not done",
+      "msg": 54,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-13: Depends on all section workflows; W-11, W-2 and W-12 are not done",
+      "msg": 54,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "warning",
+      "detail": "Warning: site v12 is 65 KB, over builder.md's ~60 KB single-page rule.",
+      "msg": 58,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "warning",
+      "detail": "Warning: site v13 is 71 KB, over builder.md's ~60 KB single-page rule.",
+      "msg": 63,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "warning",
+      "detail": "Warning: site v14 is 75 KB, over builder.md's ~60 KB single-page rule.",
+      "msg": 68,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "warning",
+      "detail": "Warning: site v15 is 80 KB, over builder.md's ~60 KB single-page rule.",
+      "msg": 73,
+      "cycle": 1
+    },
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "fact: 1 question(s) for the Requester",
+      "msg": 79,
+      "cycle": 1,
+      "pause": "fact"
+    },
+    {
+      "agent": "adaptation",
+      "type": "dispute",
+      "detail": "C-1: Adaptation vs Priority about what to fund in cycle 1",
+      "msg": 85,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "warning",
+      "detail": "Warning: site v16 is 79 KB, over builder.md's ~60 KB single-page rule.",
+      "msg": 92,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "warning",
+      "detail": "Warning: site v17 is 80 KB, over builder.md's ~60 KB single-page rule.",
+      "msg": 97,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "warning",
+      "detail": "Warning: site v18 is 80 KB, over builder.md's ~60 KB single-page rule.",
+      "msg": 102,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "warning",
+      "detail": "Warning: site v19 is 80 KB, over builder.md's ~60 KB single-page rule.",
+      "msg": 107,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "warning",
+      "detail": "Warning: site v20 is 80 KB, over builder.md's ~60 KB single-page rule.",
+      "msg": 112,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "warning",
+      "detail": "Warning: site v21 is 79 KB, over builder.md's ~60 KB single-page rule.",
+      "msg": 117,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "limit",
+      "detail": "Out of budget: 2 of 200 work credits left, less than the cheapest rate-card part, and the site isn't workable yet.",
+      "msg": 122,
+      "cycle": 1
+    },
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "limit: 1 question(s) for the Requester",
+      "msg": 123,
+      "cycle": 1,
+      "pause": "limit"
+    },
+    {
+      "agent": "identity",
+      "type": "budget_raise",
+      "detail": "200 -> 230 (asked +30, cap 400; the Requester's answer: Option 1)",
+      "msg": 125,
+      "cycle": 1
+    },
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "Countdown labels fit, single title: work atom 1: check 5 element-count targets '#countdown-timer', which the atom's how or constraints doesn't tell the builder to create; work atom 1: check 6 element-count targets '.j2-hero-cta', which the atom's how or constraints doesn't tell the builder to create; work atom 1: check 7 tap-targets targets '#home', which the atom's how or constraints doesn't tell the builder to create",
+      "msg": 128,
+      "cycle": 2
+    },
+    {
+      "agent": "system",
+      "type": "warning",
+      "detail": "Warning: site v22 is 80 KB, over builder.md's ~60 KB single-page rule.",
+      "msg": 136,
+      "cycle": 2
+    },
+    {
+      "agent": "system",
+      "type": "warning",
+      "detail": "Warning: site v23 is 81 KB, over builder.md's ~60 KB single-page rule.",
+      "msg": 141,
+      "cycle": 2
+    }
+  ],
+  "made": "2026-10-14 11:03:18"
+}

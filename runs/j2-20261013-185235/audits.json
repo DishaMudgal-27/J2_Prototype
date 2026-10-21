@@ -1,0 +1,908 @@
+[
+  {
+    "cycle": 1,
+    "version": 3,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "Problem section states that booking is done on paper and slots get double-booked",
+        "verdict": "PASS",
+        "note": "Text: 'Today, booking is done on paper, and slots get double-booked.' under '## Problem' (about 53 words).",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "Users section names both students and lab staff and lists what each group does in LabSlot",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Users' heading in v3; P1 reports Users (missing). W-2 is on HOLD and has not run.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": false
+      },
+      {
+        "id": "F-3",
+        "criterion": "Goals section states the goal of replacing paper booking and avoiding double-booked slots",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Goals' heading in v3; P6 reports no G ids. The Problem section only says LabSlot is 'intended to replace paper booking and avoid double-booked slots', which is not a Goals section.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": false
+      },
+      {
+        "id": "F-4",
+        "criterion": "Requirements section lists book a slot, cancel a slot and see availability for students, and view all bookings and cancel a booking for a student for lab staff",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Requirements' heading; P2 'no Requirements section'; P3 lists book a slot, cancel a slot, see availability, view all bookings, cancel a booking for a student as missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": false
+      },
+      {
+        "id": "F-5",
+        "criterion": "Requirements section states that LabSlot must work on phones",
+        "verdict": "NEEDS_REVISION",
+        "note": "No Requirements section. The only phone mention is 'phone-friendly web app' in Problem; P3 lists 'it must work on phones' as missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": false
+      },
+      {
+        "id": "F-6",
+        "criterion": "Success metrics section states that 80% of bookings are made without staff help, counted per term",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Success metrics' heading; P3 lists '80% of bookings are made without staff help' and 'per term' as missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": false
+      },
+      {
+        "id": "F-7",
+        "criterion": "Out of scope section lists what LabSlot does not cover, without adding features beyond the must-have list",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Out of scope' heading in v3; P1 reports it missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": false
+      },
+      {
+        "id": "F-8",
+        "criterion": "The product name LabSlot is used consistently throughout the document",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Title and all 3 mentions in Problem read 'LabSlot' with no variants. Only one of six sections exists, so consistency is unproven for the rest.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-9",
+        "criterion": "Run record matches the document",
+        "verdict": "NEEDS_REVISION",
+        "note": "W-1 results say 'heading ## Problem not found' on 3 attempts, but v3 contains '## Problem' with body text. Either the checks ran against a stale copy or the heading was fixed after attempt 3. W-1 is still marked escalated.",
+        "severity": "medium",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "D-1",
+        "item": "D-1",
+        "criterion": "Every requirement is specific and testable",
+        "verdict": "NEEDS_REVISION",
+        "note": "No Requirements section exists, so no requirement can be judged specific or testable.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "D-2",
+        "item": "D-2",
+        "criterion": "Goals and success metrics are measurable",
+        "verdict": "NEEDS_REVISION",
+        "note": "No Goals or Success metrics section exists; P6 reports no G ids.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "D-3",
+        "item": "D-3",
+        "criterion": "Users and problem are consistent with the requirements",
+        "verdict": "NEEDS_REVISION",
+        "note": "Problem names students and lab staff, but there are no Users or Requirements sections to compare it against.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "D-4",
+        "item": "D-4",
+        "criterion": "Out of scope is explicit",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Out of scope' section; P1 reports it missing.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "D-5",
+        "item": "D-5",
+        "criterion": "No invented facts: every fact comes from the brief or the Requester's answers, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim not in the brief",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "One unlabelled claim goes beyond the brief: 'Students and lab staff are both affected by this problem.' The brief names these as users but not as affected parties. 'phone-friendly' follows from the phone constraint. P4 met.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {},
+    "screenshot": null,
+    "all_pass": false,
+    "output": "prd",
+    "conditions": [
+      {
+        "id": "P1",
+        "text": "All six sections are present and not empty",
+        "check": "sections-present",
+        "met": false,
+        "evidence": "missing or empty: Users (missing), Goals (missing), Requirements (missing), Success metrics (missing), Out of scope (missing)"
+      },
+      {
+        "id": "P2",
+        "text": "Requirement ids are unique and sequential (R1, R2, ...)",
+        "check": "ids-sequential",
+        "met": false,
+        "evidence": "no Requirements section"
+      },
+      {
+        "id": "P3",
+        "text": "Every brief fact appears exactly",
+        "check": "facts-present-all",
+        "met": false,
+        "evidence": "missing: ['80% of bookings are made without staff help', 'per term', 'book a slot', 'cancel a slot', 'see availability', 'view all bookings', 'cancel a booking for a student', 'it must work on phones']"
+      },
+      {
+        "id": "P4",
+        "text": "No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+        "check": "no-invented-facts",
+        "met": true,
+        "evidence": "every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+        "assumptions": []
+      },
+      {
+        "id": "P5",
+        "text": "Nothing is \"to be confirmed\"",
+        "check": "nothing-to-be-confirmed",
+        "met": true,
+        "evidence": "nothing to be confirmed"
+      },
+      {
+        "id": "P6",
+        "text": "Every goal has a matching success metric",
+        "check": "ids-covered",
+        "met": false,
+        "evidence": "no G1, G2, ... ids in Goals"
+      },
+      {
+        "id": "P7",
+        "text": "Every user group named in the charter appears in Requirements or in a \"no actions in this version\" statement",
+        "check": "groups-covered",
+        "met": false,
+        "evidence": "no requirement and no \"have no actions in this version\" statement for: Students, Lab staff"
+      },
+      {
+        "id": "P8",
+        "text": "Each numeric success metric states its measurement window, or says \"measurement window not set\"",
+        "check": "metric-window",
+        "met": true,
+        "evidence": "no numeric metrics",
+        "severity": "warn"
+      }
+    ],
+    "read": "PRD v3: title '# LabSlot' and one '## Problem' section of about 53 words. Also read the W-1 attempt record, the Adaptation and Coordination messages, the code necessary-conditions results (P1 to P8), and the charter done-when list."
+  },
+  {
+    "cycle": 2,
+    "version": 3,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "Problem section states that booking is done on paper and slots get double-booked",
+        "verdict": "PASS",
+        "note": "'## Problem' says: 'Today, booking is done on paper, and slots get double-booked.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "Users section names both students and lab staff and lists what each group does in LabSlot",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Users' heading in v3; P1 reports Users missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": false
+      },
+      {
+        "id": "F-3",
+        "criterion": "Goals section states the goal of replacing paper booking and avoiding double-booked slots",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Goals' heading; P6 finds no G ids. The Problem sentence 'intended to replace paper booking and avoid double-booked slots' is not a Goals section.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": false
+      },
+      {
+        "id": "F-4",
+        "criterion": "Requirements section lists book a slot, cancel a slot and see availability for students, and view all bookings and cancel a booking for a student for lab staff",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Requirements' heading; P2 'no Requirements section'; P3 lists all five actions as missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": false
+      },
+      {
+        "id": "F-5",
+        "criterion": "Requirements section states that LabSlot must work on phones",
+        "verdict": "NEEDS_REVISION",
+        "note": "No Requirements section. The only phone mention is 'phone-friendly web app' in Problem; P3 lists 'it must work on phones' as missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": false
+      },
+      {
+        "id": "F-6",
+        "criterion": "Success metrics section states that 80% of bookings are made without staff help, counted per term",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Success metrics' heading; P3 lists '80% of bookings are made without staff help' and 'per term' as missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": false
+      },
+      {
+        "id": "F-7",
+        "criterion": "Out of scope section lists what LabSlot does not cover, without adding features beyond the must-have list",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Out of scope' heading; P1 reports it missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": false
+      },
+      {
+        "id": "F-8",
+        "criterion": "The product name LabSlot is used consistently throughout the document",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Title and all 3 mentions in Problem read 'LabSlot' with no variants; only 1 of 6 sections exists, so consistency is unproven for the rest.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-9",
+        "criterion": "Run record matches the document",
+        "verdict": "NEEDS_REVISION",
+        "note": "v3 contains '## Problem' with about 53 words, but the W-1 check results on all 3 attempts say the heading was not found.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "D-1",
+        "item": "D-1",
+        "criterion": "Every requirement is specific and testable",
+        "verdict": "NEEDS_REVISION",
+        "note": "No Requirements section exists, so no requirement can be judged specific or testable.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "D-2",
+        "item": "D-2",
+        "criterion": "Goals and success metrics are measurable",
+        "verdict": "NEEDS_REVISION",
+        "note": "No Goals or Success metrics section exists; the 80% per term metric is absent.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "D-3",
+        "item": "D-3",
+        "criterion": "Users and problem are consistent with the requirements",
+        "verdict": "NEEDS_REVISION",
+        "note": "The Problem section exists, but there are no Users or Requirements to check it against.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "D-4",
+        "item": "D-4",
+        "criterion": "Out of scope is explicit",
+        "verdict": "NEEDS_REVISION",
+        "note": "No Out of scope section exists.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "D-5",
+        "item": "D-5",
+        "criterion": "No invented facts: every fact comes from the brief or the Requester's answers, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim not in the brief",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Unlabelled claim not in the brief: 'Students and lab staff are both affected by this problem.' The brief names both groups as users but does not say both are affected by the problem. Everything else in Problem traces to the brief.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {},
+    "screenshot": null,
+    "all_pass": false,
+    "output": "prd",
+    "conditions": [
+      {
+        "id": "P1",
+        "text": "All six sections are present and not empty",
+        "check": "sections-present",
+        "met": false,
+        "evidence": "missing or empty: Users (missing), Goals (missing), Requirements (missing), Success metrics (missing), Out of scope (missing)"
+      },
+      {
+        "id": "P2",
+        "text": "Requirement ids are unique and sequential (R1, R2, ...)",
+        "check": "ids-sequential",
+        "met": false,
+        "evidence": "no Requirements section"
+      },
+      {
+        "id": "P3",
+        "text": "Every brief fact appears exactly",
+        "check": "facts-present-all",
+        "met": false,
+        "evidence": "missing: ['80% of bookings are made without staff help', 'per term', 'book a slot', 'cancel a slot', 'see availability', 'view all bookings', 'cancel a booking for a student', 'it must work on phones']"
+      },
+      {
+        "id": "P4",
+        "text": "No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+        "check": "no-invented-facts",
+        "met": true,
+        "evidence": "every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+        "assumptions": []
+      },
+      {
+        "id": "P5",
+        "text": "Nothing is \"to be confirmed\"",
+        "check": "nothing-to-be-confirmed",
+        "met": true,
+        "evidence": "nothing to be confirmed"
+      },
+      {
+        "id": "P6",
+        "text": "Every goal has a matching success metric",
+        "check": "ids-covered",
+        "met": false,
+        "evidence": "no G1, G2, ... ids in Goals"
+      },
+      {
+        "id": "P7",
+        "text": "Every user group named in the charter appears in Requirements or in a \"no actions in this version\" statement",
+        "check": "groups-covered",
+        "met": false,
+        "evidence": "no requirement and no \"have no actions in this version\" statement for: Students, Lab staff"
+      },
+      {
+        "id": "P8",
+        "text": "Each numeric success metric states its measurement window, or says \"measurement window not set\"",
+        "check": "metric-window",
+        "met": true,
+        "evidence": "no numeric metrics",
+        "severity": "warn"
+      }
+    ],
+    "read": "Charter done-when list (8 items), necessary conditions P1 to P8 (code results), the document rubric, the brief and Requester answers, and PRD v3 in full (title plus one Problem section of about 53 words)."
+  },
+  {
+    "cycle": 3,
+    "version": 3,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "Problem section states that booking is done on paper and slots get double-booked",
+        "verdict": "PASS",
+        "note": "'## Problem' says: 'Today, booking is done on paper, and slots get double-booked.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "Users section names both students and lab staff and lists what each group does in LabSlot",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Users' heading in v3; P1 reports Users missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": false
+      },
+      {
+        "id": "F-3",
+        "criterion": "Goals section states the goal of replacing paper booking and avoiding double-booked slots",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Goals' heading; P6 finds no G ids. The Problem sentence 'intended to replace paper booking and avoid double-booked slots' is not a Goals section.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": false
+      },
+      {
+        "id": "F-4",
+        "criterion": "Requirements section lists book a slot, cancel a slot and see availability for students, and view all bookings and cancel a booking for a student for lab staff",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Requirements' heading; P2 reports no Requirements section; P3 lists all five actions as missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": false
+      },
+      {
+        "id": "F-5",
+        "criterion": "Requirements section states that LabSlot must work on phones",
+        "verdict": "NEEDS_REVISION",
+        "note": "No Requirements section. The only phone mention is 'phone-friendly web app' in Problem; P3 lists 'it must work on phones' as missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": false
+      },
+      {
+        "id": "F-6",
+        "criterion": "Success metrics section states that 80% of bookings are made without staff help, counted per term",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Success metrics' heading; P3 lists '80% of bookings are made without staff help' and 'per term' as missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": false
+      },
+      {
+        "id": "F-7",
+        "criterion": "Out of scope section lists what LabSlot does not cover, without adding features beyond the must-have list",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Out of scope' heading in v3; P1 reports it missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": false
+      },
+      {
+        "id": "F-8",
+        "criterion": "The product name LabSlot is used consistently throughout the document",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Title and all 4 mentions in Problem read 'LabSlot' with no variants. Only 1 of 6 sections exists, so consistency is unproven for the rest.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-9",
+        "criterion": "Run record matches the document",
+        "verdict": "NEEDS_REVISION",
+        "note": "Code logged '## Problem' not found on 3 attempts (messages 13, 15, 17), but v3 contains '## Problem' on its own line.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-10",
+        "criterion": "Department rules: every reply names a next speaker",
+        "verdict": "POLICY_CONCERN",
+        "note": "Messages 25, 31 and 41 show Adaptation picked no next speaker, so no proposal reached Priority and no fix has been funded or registered.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "D-1",
+        "item": "D-1",
+        "criterion": "Every requirement is specific and testable",
+        "verdict": "NEEDS_REVISION",
+        "note": "No Requirements section exists, so no requirement can be judged specific or testable.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "D-2",
+        "item": "D-2",
+        "criterion": "Goals and success metrics are measurable",
+        "verdict": "NEEDS_REVISION",
+        "note": "No Goals or Success metrics section exists, so nothing measurable is stated.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "D-3",
+        "item": "D-3",
+        "criterion": "Users and problem are consistent with the requirements",
+        "verdict": "NEEDS_REVISION",
+        "note": "Problem exists but there are no Users or Requirements to check it against; P7 is not met.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "D-4",
+        "item": "D-4",
+        "criterion": "Out of scope is explicit",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Out of scope' section exists.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "D-5",
+        "item": "D-5",
+        "criterion": "No invented facts: every fact comes from the brief or the Requester's answers, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim not in the brief",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Unlabelled claim not in the brief: 'Students and lab staff are both affected by this problem.' Everything else in Problem comes from the brief.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {},
+    "screenshot": null,
+    "all_pass": false,
+    "output": "prd",
+    "conditions": [
+      {
+        "id": "P1",
+        "text": "All six sections are present and not empty",
+        "check": "sections-present",
+        "met": false,
+        "evidence": "missing or empty: Users (missing), Goals (missing), Requirements (missing), Success metrics (missing), Out of scope (missing)"
+      },
+      {
+        "id": "P2",
+        "text": "Requirement ids are unique and sequential (R1, R2, ...)",
+        "check": "ids-sequential",
+        "met": false,
+        "evidence": "no Requirements section"
+      },
+      {
+        "id": "P3",
+        "text": "Every brief fact appears exactly",
+        "check": "facts-present-all",
+        "met": false,
+        "evidence": "missing: ['80% of bookings are made without staff help', 'per term', 'book a slot', 'cancel a slot', 'see availability', 'view all bookings', 'cancel a booking for a student', 'it must work on phones']"
+      },
+      {
+        "id": "P4",
+        "text": "No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+        "check": "no-invented-facts",
+        "met": true,
+        "evidence": "every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+        "assumptions": []
+      },
+      {
+        "id": "P5",
+        "text": "Nothing is \"to be confirmed\"",
+        "check": "nothing-to-be-confirmed",
+        "met": true,
+        "evidence": "nothing to be confirmed"
+      },
+      {
+        "id": "P6",
+        "text": "Every goal has a matching success metric",
+        "check": "ids-covered",
+        "met": false,
+        "evidence": "no G1, G2, ... ids in Goals"
+      },
+      {
+        "id": "P7",
+        "text": "Every user group named in the charter appears in Requirements or in a \"no actions in this version\" statement",
+        "check": "groups-covered",
+        "met": false,
+        "evidence": "no requirement and no \"have no actions in this version\" statement for: Students, Lab staff"
+      },
+      {
+        "id": "P8",
+        "text": "Each numeric success metric states its measurement window, or says \"measurement window not set\"",
+        "check": "metric-window",
+        "met": true,
+        "evidence": "no numeric metrics",
+        "severity": "warn"
+      }
+    ],
+    "read": "PRD v3 in full (title plus the Problem section, about 55 words, 1 of 6 sections). The charter and 8 done-when items, the 8 code-checked conditions P1 to P8, the document rubric D-1 to D-5, the brief and Requester answers, and chat messages 13 to 43 for the run record and routing."
+  },
+  {
+    "cycle": 4,
+    "version": 3,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "Problem section states that booking is done on paper and slots get double-booked",
+        "verdict": "PASS",
+        "note": "Under '## Problem': 'Today, booking is done on paper, and slots get double-booked.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "Users section names both students and lab staff and lists what each group does in LabSlot",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Users' heading in v3; P1 reports Users missing; W-2 is on HOLD and has not run.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": false
+      },
+      {
+        "id": "F-3",
+        "criterion": "Goals section states the goal of replacing paper booking and avoiding double-booked slots",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Goals' heading; P6 finds no G ids. The Problem sentence 'intended to replace paper booking and avoid double-booked slots' is not a Goals section.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": false
+      },
+      {
+        "id": "F-4",
+        "criterion": "Requirements section lists book a slot, cancel a slot and see availability for students, and view all bookings and cancel a booking for a student for lab staff",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Requirements' heading; P2 reports no Requirements section; P3 lists all five actions as missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": false
+      },
+      {
+        "id": "F-5",
+        "criterion": "Requirements section states that LabSlot must work on phones",
+        "verdict": "NEEDS_REVISION",
+        "note": "No Requirements section. The only phone mention is 'phone-friendly web app' in Problem; P3 lists 'it must work on phones' as missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": false
+      },
+      {
+        "id": "F-6",
+        "criterion": "Success metrics section states that 80% of bookings are made without staff help, counted per term",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Success metrics' heading; P3 lists '80% of bookings are made without staff help' and 'per term' as missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": false
+      },
+      {
+        "id": "F-7",
+        "criterion": "Out of scope section lists what LabSlot does not cover, without adding features beyond the must-have list",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Out of scope' heading in v3; P1 reports it missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": false
+      },
+      {
+        "id": "F-8",
+        "criterion": "The product name LabSlot is used consistently throughout the document",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Title and all 4 mentions in Problem read 'LabSlot' with no variants; only 1 of 6 sections exists, so consistency is unproven for the rest.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-9",
+        "criterion": "Run record matches the document",
+        "verdict": "NEEDS_REVISION",
+        "note": "W-1 results say '## Problem' not found on attempt 3, but v3 contains '## Problem' as its own line.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-10",
+        "criterion": "Department rules: every reply names next",
+        "verdict": "POLICY_CONCERN",
+        "note": "Messages 24, 30, 40 and 46 from Adaptation each end with no next speaker; code logged 'Adaptation proposed no workflows' after each.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "D-1",
+        "item": "D-1",
+        "criterion": "Every requirement is specific and testable",
+        "verdict": "NEEDS_REVISION",
+        "note": "No Requirements section exists, so no requirement can be judged specific or testable.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "D-2",
+        "item": "D-2",
+        "criterion": "Goals and success metrics are measurable",
+        "verdict": "NEEDS_REVISION",
+        "note": "No Goals or Success metrics section exists, so nothing measurable can be judged.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "D-3",
+        "item": "D-3",
+        "criterion": "Users and problem are consistent with the requirements",
+        "verdict": "NEEDS_REVISION",
+        "note": "Problem exists but there are no Users or Requirements to check it against.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "D-4",
+        "item": "D-4",
+        "criterion": "Out of scope is explicit",
+        "verdict": "NEEDS_REVISION",
+        "note": "No '## Out of scope' section exists.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "D-5",
+        "item": "D-5",
+        "criterion": "No invented facts: every fact comes from the brief or the Requester's answers, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim not in the brief",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Unlabelled claim not in the brief: 'Students and lab staff are both affected by this problem.' The brief names both groups as users but does not say both are affected.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {},
+    "screenshot": null,
+    "all_pass": false,
+    "output": "prd",
+    "conditions": [
+      {
+        "id": "P1",
+        "text": "All six sections are present and not empty",
+        "check": "sections-present",
+        "met": false,
+        "evidence": "missing or empty: Users (missing), Goals (missing), Requirements (missing), Success metrics (missing), Out of scope (missing)"
+      },
+      {
+        "id": "P2",
+        "text": "Requirement ids are unique and sequential (R1, R2, ...)",
+        "check": "ids-sequential",
+        "met": false,
+        "evidence": "no Requirements section"
+      },
+      {
+        "id": "P3",
+        "text": "Every brief fact appears exactly",
+        "check": "facts-present-all",
+        "met": false,
+        "evidence": "missing: ['80% of bookings are made without staff help', 'per term', 'book a slot', 'cancel a slot', 'see availability', 'view all bookings', 'cancel a booking for a student', 'it must work on phones']"
+      },
+      {
+        "id": "P4",
+        "text": "No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+        "check": "no-invented-facts",
+        "met": true,
+        "evidence": "every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+        "assumptions": []
+      },
+      {
+        "id": "P5",
+        "text": "Nothing is \"to be confirmed\"",
+        "check": "nothing-to-be-confirmed",
+        "met": true,
+        "evidence": "nothing to be confirmed"
+      },
+      {
+        "id": "P6",
+        "text": "Every goal has a matching success metric",
+        "check": "ids-covered",
+        "met": false,
+        "evidence": "no G1, G2, ... ids in Goals"
+      },
+      {
+        "id": "P7",
+        "text": "Every user group named in the charter appears in Requirements or in a \"no actions in this version\" statement",
+        "check": "groups-covered",
+        "met": false,
+        "evidence": "no requirement and no \"have no actions in this version\" statement for: Students, Lab staff"
+      },
+      {
+        "id": "P8",
+        "text": "Each numeric success metric states its measurement window, or says \"measurement window not set\"",
+        "check": "metric-window",
+        "met": true,
+        "evidence": "no numeric metrics",
+        "severity": "warn"
+      }
+    ],
+    "read": "Read the charter, 8 done-when items, 8 code-checked conditions (P1 to P8), the document rubric, the brief facts, and PRD v3 (one title and one Problem section of about 50 words). Read chat messages 1 to 49, including the W-1 run record and the Adaptation messages that were cut off."
+  }
+]

@@ -1,0 +1,38 @@
+{
+  "statement": "Build a one-file English website for CityCare Hospital, Bengaluru, with an emergency info section, a visit booking form, doctor profiles, one health blog post and styling. Kannada and Hindi versions are deferred for budget. Anything only the hospital can supply is shown as a visibly marked placeholder.",
+  "site_name": "CityCare Hospital",
+  "audience": "Patients and their families in Bengaluru who want to book a visit, find emergency information, read about doctors and read health advice.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in a single file; CDN libraries allowed; no build step.",
+    "Budget is 60 units. Planned scope is 50 (emergency section 10, booking form 15, doctor profiles 10, one blog post 10, styling 5), leaving 10 for fixes.",
+    "Emergency information is a patient-safety matter: nothing invented may look like a real hospital fact."
+  ],
+  "rules": [
+    "Emergency info shows only the national numbers 108 (ambulance) and 112 (emergency) as real numbers.",
+    "Hospital-specific details (address, phone, directions, emergency desk) appear as visibly marked placeholders such as 'To be confirmed by CityCare'.",
+    "Never present a placeholder as a real hospital number, address or email.",
+    "Doctor profiles and blog text are sample content and must be labelled as sample.",
+    "The booking form sends by mailto to a clearly marked placeholder address and must state that the request is sent by email and is not a confirmed appointment until the hospital replies.",
+    "Kannada and Hindi are out of scope for this run; the run does not pause for Requester-only facts, which are tracked as open inputs."
+  ],
+  "done_when": [
+    "The site is a single HTML file with its CSS and JavaScript inline or loaded from a CDN, and needs no build step.",
+    "The file has an emergency section that shows 108 as ambulance and 112 as emergency.",
+    "In that emergency section, the hospital address, phone, directions and emergency desk each appear as a visibly marked placeholder (for example 'To be confirmed by CityCare') and none is shown as a real number or address.",
+    "The file has a booking form with input validation that rejects empty or malformed required fields before sending.",
+    "On valid submit, the form builds a mailto request to a visibly marked placeholder address and shows a confirmation with a hospital phone number marked as a placeholder.",
+    "The form or its confirmation states in plain words that the request is sent by email and is not a confirmed appointment until the hospital replies.",
+    "The file has a doctor profiles section with at least two profiles, each labelled as sample content.",
+    "The file has one health blog post, labelled as sample content.",
+    "The file has CSS that gives a consistent, readable layout that adapts to a narrow mobile screen."
+  ],
+  "open_inputs": [
+    "Receiving email address for booking requests (placeholder in use).",
+    "Hospital address, phone number, directions and emergency desk details (placeholders in use).",
+    "Real doctor names, specialties and details to replace the sample profiles.",
+    "Real or approved blog content to replace the sample post.",
+    "Kannada and Hindi versions: deferred for budget; needs a decision on funding (about 24 units for both) and translated or reviewed text.",
+    "No Kannada or Hindi content is required in the file, and no text in the file should claim a placeholder is a verified hospital detail (tracked here, not a done-when item)."
+  ],
+  "open_inputs_note": "Hospital-specific facts stay marked placeholders until the Requester supplies them."
+}

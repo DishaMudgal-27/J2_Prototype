@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Indiranagar, Bengaluru</title>
+<meta name="description" content="Brew Lab, a cafe in Indiranagar, Bengaluru.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+<!--
+PLACEHOLDER REGISTER (single list of every placeholder on this page)
+Each item is shown on the page with a dashed, highlighted "PLACEHOLDER" tag.
+Replace the tagged text when the real fact arrives, then delete its line here.
+
+P-01  Street address (Location section, id="ph-address")
+P-02  Phone number (Location section, id="ph-phone")
+P-03  Menu item names, 6 slots (Menu section, ids "ph-item-1" to "ph-item-6")
+P-04  Menu prices, 6 slots, one per item (Menu section, ids "ph-price-1" to "ph-price-6")
+P-05  Opening hours, 7 days (Hours section, ids "ph-hours-mon", "ph-hours-tue", "ph-hours-wed",
+      "ph-hours-thu", "ph-hours-fri", "ph-hours-sat", "ph-hours-sun")
+P-06  Pre-order destination, where orders are sent: phone, WhatsApp, email or other
+      (Pre-order section, id="ph-preorder-dest"). The form has no action attribute on purpose.
+      When the destination is known, set it in the form's submit handler (script at the end of the file)
+      and remove the "not connected" message.
+
+Later workflows append their own lines below (farm coordinates).
+-->
+
+<style>
+:root {
+  --cream: #fbf3e4;
+  --cream-deep: #f3e5c8;
+  --espresso: #3b2216;
+  --roast: #6b3f26;
+  --terracotta: #c4623a;
+  --amber: #e3a23b;
+  --sage: #7d8f5a;
+  --card: #fffaf0;
+  --ph-bg: #fff1b8;
+  --ph-line: #b8860b;
+  --radius: 18px;
+  --shadow: 0 6px 18px rgba(59, 34, 22, 0.12);
+  --serif: "Fraunces", Georgia, "Times New Roman", serif;
+  --sans: "Nunito", "Trebuchet MS", system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--espresso);
+  background-color: var(--cream);
+  background-image: radial-gradient(rgba(196, 98, 58, 0.07) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
+}
+
+h1, h2, h3 {
+  font-family: var(--serif);
+  line-height: 1.15;
+  margin: 0 0 0.5em;
+  color: var(--espresso);
+}
+
+a { color: var(--terracotta); }
+
+.wrap {
+  width: min(1050px, 100% - 2.5rem);
+  margin-inline: auto;
+}
+
+/* Header */
+.site-header {
+  background: var(--espresso);
+  color: var(--cream);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.site-header .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+}
+.brand {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--cream);
+  text-decoration: none;
+}
+.brand svg { width: 28px; height: 28px; }
+.site-header nav a {
+  color: var(--cream);
+  text-decoration: none;
+  font-weight: 700;
+  margin-left: 1.25rem;
+  padding-bottom: 2px;
+  border-bottom: 2px solid transparent;
+}
+.site-header nav a:hover { border-bottom-color: var(--amber); }
+
+/* Hero */
+.hero {
+  background: linear-gradient(180deg, var(--cream-deep) 0%, var(--cream) 100%);
+  padding: 3.5rem 0 2.5rem;
+  overflow: hidden;
+}
+.hero .wrap {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  align-items: center;
+  gap: 2rem;
+}
+.eyebrow {
+  display: inline-block;
+  background: var(--terracotta);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0.8rem;
+  border-radius: 999px;
+  margin-bottom: 1rem;
+}
+.hero h1 { font-size: clamp(2.4rem, 6vw, 4rem); }
+.hero p.lead {
+  font-size: 1.2rem;
+  max-width: 34ch;
+  color: var(--roast);
+}
+.hero-art { display: flex; justify-content: center; }
+.hero-art svg { width: min(340px, 100%); height: auto; }
+
+.steam path {
+  stroke-dasharray: 6 8;
+  animation: drift 3.2s ease-in-out infinite;
+}
+.steam path:nth-child(2) { animation-delay: 0.6s; }
+.steam path:nth-child(3) { animation-delay: 1.2s; }
+@keyframes drift {
+  0%, 100% { transform: translateY(0); opacity: 0.9; }
+  50% { transform: translateY(-6px); opacity: 0.45; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .steam path { animation: none; }
+  html { scroll-behavior: auto; }
+}
+
+/* Sections */
+section.block { padding: 3rem 0; }
+section.block h2 { font-size: clamp(1.8rem, 4vw, 2.4rem); }
+.section-sub { color: var(--roast); margin-top: -0.25rem; margin-bottom: 1.5rem; }
+section.block { scroll-margin-top: 4rem; }
+
+.divider {
+  height: 14px;
+  background:
+    radial-gradient(circle at 7px 7px, var(--amber) 4px, transparent 5px) 0 0 / 28px 14px repeat-x;
+  opacity: 0.8;
+}
+
+/* Menu */
+.menu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.menu-item {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(107, 63, 38, 0.12);
+  border-left: 6px solid var(--terracotta);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.menu-item:nth-child(even) { border-left-color: var(--amber); }
+.menu-item:nth-child(3n) { border-left-color: var(--sage); }
+.menu-item .item-name { font-family: var(--serif); font-weight: 600; font-size: 1.1rem; }
+.menu-item .item-price { font-weight: 700; color: var(--roast); }
+.menu-note { margin-top: 1.25rem; color: var(--roast); font-size: 0.95rem; }
+
+/* Hours */
+.hours-card { max-width: 640px; }
+.hours-table { width: 100%; border-collapse: collapse; }
+.hours-table caption {
+  text-align: left;
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1.3rem;
+  padding-bottom: 0.6rem;
+}
+.hours-table th,
+.hours-table td {
+  text-align: left;
+  padding: 0.65rem 0.25rem;
+  border-bottom: 1px dashed rgba(107, 63, 38, 0.3);
+  vertical-align: middle;
+}
+.hours-table th { font-weight: 700; color: var(--roast); width: 8.5rem; }
+.hours-table tr:last-child th,
+.hours-table tr:last-child td { border-bottom: 0; }
+
+/* Pre-order */
+.preorder-card { max-width: 720px; }
+.preorder-form { display: grid; gap: 1rem; }
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.field { display: flex; flex-direction: column; gap: 0.3rem; }
+.field label {
+  font-weight: 700;
+  color: var(--roast);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.field input {
+  font: inherit;
+  color: var(--espresso);
+  background: #fff;
+  border: 2px solid rgba(107, 63, 38, 0.3);
+  border-radius: 12px;
+  padding: 0.65rem 0.8rem;
+  width: 100%;
+  min-height: 46px;
+}
+.field input:focus {
+  outline: 3px solid var(--amber);
+  outline-offset: 1px;
+  border-color: var(--terracotta);
+}
+.field .hint { font-size: 0.85rem; color: var(--roast); }
+.btn {
+  font: inherit;
+  font-weight: 700;
+  background: var(--terracotta);
+  color: #fff;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.8rem 1.8rem;
+  cursor: pointer;
+  min-height: 46px;
+  justify-self: start;
+  box-shadow: var(--shadow);
+}
+.btn:hover { background: #a84e2b; }
+.btn:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.dest-note { margin: 0; font-size: 0.95rem; color: var(--roast); }
+.form-status {
+  margin: 0;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  background: var(--cream-deep);
+  border-left: 6px solid var(--amber);
+  font-weight: 600;
+}
+.form-status[hidden] { display: none; }
+
+/* Location */
+.location-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(107, 63, 38, 0.12);
+}
+.card h3 { font-size: 1.3rem; }
+.card dl { margin: 0; }
+.card dt {
+  font-weight: 700;
+  color: var(--roast);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 1rem;
+}
+.card dt:first-child { margin-top: 0; }
+.card dd { margin: 0.2rem 0 0; }
+
+.area-card {
+  background: var(--sage);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.area-card h3 { color: #fff; }
+.area-card p { margin: 0 0 0.8rem; position: relative; z-index: 1; }
+.area-card svg {
+  position: absolute;
+  right: -20px;
+  bottom: -20px;
+  width: 190px;
+  opacity: 0.22;
+}
+
+/* Placeholder marker */
+.ph {
+  display: inline-block;
+  background: var(--ph-bg);
+  color: #5c4300;
+  border: 2px dashed var(--ph-line);
+  border-radius: 8px;
+  padding: 0.1rem 0.6rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.ph::before {
+  content: "PLACEHOLDER: ";
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+/* Footer */
+footer {
+  background: var(--espresso);
+  color: var(--cream);
+  padding: 2rem 0;
+  margin-top: 2rem;
+  text-align: center;
+}
+footer p { margin: 0.25rem 0; }
+footer .small { opacity: 0.75; font-size: 0.9rem; }
+
+/* Narrow screens */
+@media (max-width: 720px) {
+  body { font-size: 1rem; }
+  .hero { padding: 2rem 0 1.5rem; }
+  .hero .wrap { grid-template-columns: 1fr; text-align: center; }
+  .hero p.lead { margin-inline: auto; }
+  .hero-art { order: -1; }
+  .hero-art svg { width: 220px; }
+  .location-grid { grid-template-columns: 1fr; }
+  .menu-grid { grid-template-columns: 1fr; }
+  .field-row { grid-template-columns: 1fr; }
+  .btn { justify-self: stretch; }
+  .hours-table th { width: 6rem; }
+  .site-header .wrap { flex-direction: column; gap: 0.4rem; }
+  .site-header nav a { margin: 0 0.6rem; }
+  section.block { padding: 2rem 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Brew Lab home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <ellipse cx="16" cy="16" rx="10" ry="14" transform="rotate(25 16 16)" fill="#e3a23b"/>
+        <path d="M10 6 C 18 12, 14 20, 22 26" stroke="#3b2216" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      </svg>
+      Brew Lab
+    </a>
+    <nav aria-label="Main">
+      <a href="#menu">Menu</a>
+      <a href="#hours">Hours</a>
+      <a href="#preorder">Pre-order</a>
+      <a href="#location">Find us</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow">Indiranagar, Bengaluru</span>
+        <h1>Brew Lab</h1>
+        <p class="lead">A warm corner in Indiranagar for slow cups, good company and ingredients with a story.</p>
+      </div>
+      <div class="hero-art">
+        <svg viewBox="0 0 340 300" role="img" aria-label="Illustration of a steaming cup of coffee">
+          <circle cx="170" cy="150" r="130" fill="#f3e5c8"/>
+          <circle cx="170" cy="150" r="100" fill="#fbf3e4"/>
+          <g class="steam" fill="none" stroke="#c4623a" stroke-width="6" stroke-linecap="round">
+            <path d="M135 105 C 120 85, 150 70, 135 48"/>
+            <path d="M170 100 C 155 78, 185 62, 170 38"/>
+            <path d="M205 105 C 190 85, 220 70, 205 48"/>
+          </g>
+          <path d="M92 125 H 248 V 190 C 248 232, 218 252, 170 252 C 122 252, 92 232, 92 190 Z" fill="#c4623a"/>
+          <path d="M92 125 H 248 V 140 H 92 Z" fill="#a84e2b"/>
+          <ellipse cx="170" cy="125" rx="78" ry="12" fill="#3b2216"/>
+          <ellipse cx="170" cy="123" rx="64" ry="8" fill="#6b3f26"/>
+          <path d="M248 145 C 290 140, 292 205, 244 205" fill="none" stroke="#c4623a" stroke-width="14" stroke-linecap="round"/>
+          <path d="M120 175 q 12 -14 24 0 t 24 0 t 24 0 t 24 0" fill="none" stroke="#fbf3e4" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+          <ellipse cx="170" cy="262" rx="100" ry="10" fill="#3b2216" opacity="0.15"/>
+          <g fill="#e3a23b">
+            <ellipse cx="55" cy="235" rx="11" ry="16" transform="rotate(30 55 235)"/>
+            <ellipse cx="288" cy="250" rx="11" ry="16" transform="rotate(-25 288 250)"/>
+            <ellipse cx="300" cy="95" rx="8" ry="12" transform="rotate(20 300 95)"/>
+          </g>
+          <g stroke="#3b2216" stroke-width="2" fill="none" stroke-linecap="round">
+            <path d="M50 226 q 8 8 10 18"/>
+            <path d="M293 242 q -8 8 -10 18"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider" aria-hidden="true"></div>
+
+  <section class="block" id="menu">
+    <div class="wrap">
+      <h2>The menu</h2>
+      <p class="section-sub">Every item comes with its price. The real menu is on its way.</p>
+      <ul class="menu-grid">
+        <li class="menu-item">
+          <span class="item-name"><span class="ph" id="ph-item-1">Menu item 1 to be supplied</span></span>
+          <span class="item-price"><span class="ph" id="ph-price-1">Price to be supplied</span></span>
+        </li>
+        <li class="menu-item">
+          <span class="item-name"><span class="ph" id="ph-item-2">Menu item 2 to be supplied</span></span>
+          <span class="item-price"><span class="ph" id="ph-price-2">Price to be supplied</span></span>
+        </li>
+        <li class="menu-item">
+          <span class="item-name"><span class="ph" id="ph-item-3">Menu item 3 to be supplied</span></span>
+          <span class="item-price"><span class="ph" id="ph-price-3">Price to be supplied</span></span>
+        </li>
+        <li class="menu-item">
+          <span class="item-name"><span class="ph" id="ph-item-4">Menu item 4 to be supplied</span></span>
+          <span class="item-price"><span class="ph" id="ph-price-4">Price to be supplied</span></span>
+        </li>
+        <li class="menu-item">
+          <span class="item-name"><span class="ph" id="ph-item-5">Menu item 5 to be supplied</span></span>
+          <span class="item-price"><span class="ph" id="ph-price-5">Price to be supplied</span></span>
+        </li>
+        <li class="menu-item">
+          <span class="item-name"><span class="ph" id="ph-item-6">Menu item 6 to be supplied</span></span>
+          <span class="item-price"><span class="ph" id="ph-price-6">Price to be supplied</span></span>
+        </li>
+      </ul>
+      <p class="menu-note">More items can be added by copying one of the slots above.</p>
+    </div>
+  </section>
+
+  <div class="divider" aria-hidden="true"></div>
+
+  <section class="block" id="hours">
+    <div class="wrap">
+      <h2>Opening hours</h2>
+      <p class="section-sub">When the doors are open at Brew Lab, Indiranagar.</p>
+      <div class="card hours-card">
+        <table class="hours-table">
+          <caption>Weekly hours</caption>
+          <tbody>
+            <tr><th scope="row">Monday</th><td><span class="ph" id="ph-hours-mon">Hours to be supplied</span></td></tr>
+            <tr><th scope="row">Tuesday</th><td><span class="ph" id="ph-hours-tue">Hours to be supplied</span></td></tr>
+            <tr><th scope="row">Wednesday</th><td><span class="ph" id="ph-hours-wed">Hours to be supplied</span></td></tr>
+            <tr><th scope="row">Thursday</th><td><span class="ph" id="ph-hours-thu">Hours to be supplied</span></td></tr>
+            <tr><th scope="row">Friday</th><td><span class="ph" id="ph-hours-fri">Hours to be supplied</span></td></tr>
+            <tr><th scope="row">Saturday</th><td><span class="ph" id="ph-hours-sat">Hours to be supplied</span></td></tr>
+            <tr><th scope="row">Sunday</th><td><span class="ph" id="ph-hours-sun">Hours to be supplied</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider" aria-hidden="true"></div>
+
+  <section class="block" id="preorder">
+    <div class="wrap">
+      <h2>Pre-order</h2>
+      <p class="section-sub">Tell us what you would like and when you will drop by, and we will have it ready.</p>
+      <div class="card preorder-card">
+        <form class="preorder-form" id="preorder-form" aria-describedby="preorder-dest-note">
+          <div class="field">
+            <label for="po-name">Your name</label>
+            <input type="text" id="po-name" name="name" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="po-item">Item</label>
+            <input type="text" id="po-item" name="item" required>
+            <span class="hint">Type the item as it appears on the menu above.</span>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="po-qty">Quantity</label>
+              <input type="number" id="po-qty" name="quantity" min="1" max="50" step="1" value="1" inputmode="numeric" required>
+            </div>
+            <div class="field">
+              <label for="po-time">Pickup time</label>
+              <input type="time" id="po-time" name="pickup_time" required>
+              <span class="hint">Please choose a time within opening hours.</span>
+            </div>
+          </div>
+          <p class="dest-note" id="preorder-dest-note">Orders will be sent to: <span class="ph" id="ph-preorder-dest">Order destination to be supplied (phone, WhatsApp, email or other)</span></p>
+          <button type="submit" class="btn">Place pre-order</button>
+          <p class="form-status" id="preorder-status" role="status" aria-live="polite" hidden></p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider" aria-hidden="true"></div>
+
+  <section class="block" id="location">
+    <div class="wrap">
+      <h2>Find us in Indiranagar</h2>
+      <p class="section-sub">Brew Lab, Indiranagar, Bengaluru.</p>
+      <div class="location-grid">
+        <div class="card">
+          <h3>Visit Brew Lab</h3>
+          <dl>
+            <dt>Neighbourhood</dt>
+            <dd>Indiranagar, Bengaluru</dd>
+            <dt>Street address</dt>
+            <dd><span class="ph" id="ph-address">Street address to be supplied</span></dd>
+            <dt>Phone</dt>
+            <dd><span class="ph" id="ph-phone">Phone number to be supplied</span></dd>
+          </dl>
+        </div>
+        <div class="card area-card">
+          <h3>Right in the neighbourhood</h3>
+          <p>Drop in for a cup, or order ahead and walk out with it warm.</p>
+          <p>Exact directions will appear here once the street address is confirmed.</p>
+          <svg viewBox="0 0 200 200" aria-hidden="true">
+            <path d="M100 10 C 55 10, 30 45, 30 80 C 30 130, 100 190, 100 190 C 100 190, 170 130, 170 80 C 170 45, 145 10, 100 10 Z" fill="#fff"/>
+            <circle cx="100" cy="80" r="26" fill="#7d8f5a"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Brew Lab</strong> &middot; Indiranagar, Bengaluru</p>
+    <p class="small">Made with warmth, no photographs needed.</p>
+  </div>
+</footer>
+
+<script>
+/* Pre-order form handler.
+   The order destination is not known yet (placeholder P-06), so the form has no action
+   and nothing is sent anywhere. When the destination is supplied, send the order here. */
+(function () {
+  var form = document.getElementById("preorder-form");
+  var status = document.getElementById("preorder-status");
+  if (!form || !status) { return; }
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    status.textContent = "Thank you. Pre-orders are not switched on yet because the order destination has not been set. Nothing was sent. Please check back soon.";
+    status.hidden = false;
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -11,7 +11,7 @@ __pycache__/
 .pytest_cache/
 
 # Local run output and state (runs/ holds chat logs and AI calls; memory/ holds lessons)
-runs/
+
 memory/
 _backup/
 projects/

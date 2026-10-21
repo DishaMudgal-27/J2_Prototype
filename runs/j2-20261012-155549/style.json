@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#FF6B35",
+    "secondary": "#7C3AED",
+    "accent": "#22D3EE",
+    "background": "#0B1020",
+    "surface": "#151B33",
+    "text": "#F5F7FF",
+    "muted": "#A9B1D6"
+  },
+  "fonts": {
+    "heading": "'Space Grotesk', 'Segoe UI', system-ui, sans-serif",
+    "body": "'Inter', 'Segoe UI', system-ui, sans-serif",
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap"
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "64px"
+  },
+  "radius": "16px",
+  "buttons": {
+    "primary": "background:#FF6B35;color:#0B1020;min-height:48px;padding:0 28px;font-weight:700;border:2px solid #FF6B35;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer",
+    "secondary": "background:transparent;color:#22D3EE;min-height:48px;padding:0 28px;font-weight:700;border:2px solid #22D3EE;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer"
+  },
+  "card": "background:#151B33;color:#F5F7FF;border:1px solid rgba(169,177,214,0.2);border-radius:16px;padding:24px",
+  "notes": "Dark navy with orange and cyan accents reads as energetic and techy for students; text and button colours all pass WCAG AA on their backgrounds."
+}

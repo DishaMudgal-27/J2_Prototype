@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Thread &amp; Loom</title>
+<!-- J2:style head start (owner W-1) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Jost:wght@400;500;600&amp;display=swap"><style>:root{--j2-primary:#7A3E2B;--j2-secondary:#4F5B3A;--j2-accent:#B7791F;--j2-background:#F6EFE4;--j2-surface:#FFFBF5;--j2-text:#2B2118;--j2-muted:#6B5D4F;--j2-font-heading:'Cormorant Garamond', Georgia, serif;--j2-font-body:'Jost', 'Segoe UI', Arial, sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:12px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#7A3E2B;color:#FFFBF5;border:1.5px solid #7A3E2B;min-height:48px;padding:0 24px;border-radius:999px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-btn-secondary{display:inline-block;background:transparent;color:#7A3E2B;border:1.5px solid #7A3E2B;min-height:48px;padding:0 24px;border-radius:999px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-card{background:#FFFBF5;border:1px solid #E3D6C3;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(43,33,24,0.08)}</style>
+<!-- J2:style head end -->
+<!-- J2:W-1 head start (owner W-2) -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- J2:W-1 head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-2) -->
+<style>
+  #top, #products { font-family: var(--j2-font-body); color: var(--j2-text); }
+  .tl-topbar { background: var(--j2-surface); border-bottom: 1px solid #E3D6C3; }
+  .tl-topbar-inner { max-width: 1200px; margin: 0 auto; padding: 12px 16px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+  .tl-brand { font-family: var(--j2-font-heading); font-size: 1.75rem; font-weight: 700; color: var(--j2-primary); letter-spacing: 0.01em; margin: 0; }
+  .tl-products { background: var(--j2-background); padding: 48px 16px; }
+  .tl-wrap { max-width: 1200px; margin: 0 auto; }
+  .tl-products h2 { font-family: var(--j2-font-heading); font-size: 2rem; margin: 0 0 8px; color: var(--j2-text); }
+  .tl-lede { color: var(--j2-muted); margin: 0 0 24px; }
+  .tl-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; }
+  .tl-tab { box-sizing: border-box; padding: 0 16px; font-family: var(--j2-font-body); font-size: 1rem; }
+  .tl-tab[aria-pressed="true"] { background: var(--j2-primary); color: var(--j2-surface); }
+  .tl-tab:focus-visible { outline: 2px solid var(--j2-accent); outline-offset: 2px; }
+  .tl-status { font-size: 0.9rem; color: var(--j2-muted); margin: 0 0 16px; }
+  .tl-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  .tl-product { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .tl-product[hidden] { display: none; }
+  .tl-swatch { height: 8px; border-radius: 999px; background: var(--j2-accent); }
+  .tl-product[data-category="Kurtas"] .tl-swatch { background: #3F4E7A; }
+  .tl-product[data-category="Sarees"] .tl-swatch { background: var(--j2-primary); }
+  .tl-product[data-category="Shirts"] .tl-swatch { background: var(--j2-secondary); }
+  .tl-product[data-category="Dupattas"] .tl-swatch { background: var(--j2-accent); }
+  .tl-cat { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--j2-muted); margin: 0; }
+  .tl-name { font-family: var(--j2-font-heading); font-size: 1.4rem; line-height: 1.2; margin: 0; overflow-wrap: anywhere; }
+  .tl-price { font-size: 1.2rem; font-weight: 600; color: var(--j2-primary); margin: 0; }
+  .tl-sizes { font-size: 0.9rem; color: var(--j2-muted); margin: 0 0 8px; }
+  .tl-product .j2-btn { margin-top: auto; width: 100%; }
+  @media (min-width: 600px) { .tl-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 960px) { .tl-grid { grid-template-columns: repeat(3, 1fr); gap: 24px; } .tl-products { padding: 64px 24px; } }
+  @media (min-width: 1200px) { .tl-grid { grid-template-columns: repeat(4, 1fr); } }
+</style>
+
+<header id="top" class="tl-topbar">
+  <div class="tl-topbar-inner">
+    <p class="tl-brand">Thread &amp; Loom</p>
+    <a class="j2-btn" id="order-top" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20place%20an%20order." target="_blank" rel="noopener">Order on WhatsApp</a>
+  </div>
+</header>
+
+<section id="products" class="tl-products" aria-labelledby="products-title">
+  <div class="tl-wrap">
+    <h2 id="products-title">Our Collection</h2>
+    <p class="tl-lede">Tap Order on WhatsApp on any piece and we will take it from there.</p>
+
+    <div class="tl-tabs" id="category-tabs" role="group" aria-label="Browse by category">
+      <button type="button" class="j2-btn-secondary tl-tab" data-filter="All" aria-pressed="true">All</button>
+      <button type="button" class="j2-btn-secondary tl-tab" data-filter="Kurtas" aria-pressed="false">Kurtas</button>
+      <button type="button" class="j2-btn-secondary tl-tab" data-filter="Sarees" aria-pressed="false">Sarees</button>
+      <button type="button" class="j2-btn-secondary tl-tab" data-filter="Shirts" aria-pressed="false">Shirts</button>
+      <button type="button" class="j2-btn-secondary tl-tab" data-filter="Dupattas" aria-pressed="false">Dupattas</button>
+    </div>
+    <p class="tl-status" id="tab-status" role="status" aria-live="polite">Showing 10 products</p>
+
+    <div class="tl-grid" id="product-grid">
+
+      <article class="j2-card tl-product" data-category="Kurtas" data-price="1499" data-sizes="S,M,L,XL,XXL">
+        <div class="tl-swatch"></div>
+        <p class="tl-cat">Kurtas</p>
+        <h3 class="tl-name">Indigo block-print kurta</h3>
+        <p class="tl-price">₹1,499</p>
+        <p class="tl-sizes">Sizes: S to XXL</p>
+        <a class="j2-btn" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Indigo%20block-print%20kurta" target="_blank" rel="noopener">Order on WhatsApp</a>
+      </article>
+
+      <article class="j2-card tl-product" data-category="Kurtas" data-price="1699" data-sizes="S,M,L,XL">
+        <div class="tl-swatch"></div>
+        <p class="tl-cat">Kurtas</p>
+        <h3 class="tl-name">Mustard handloom kurta</h3>
+        <p class="tl-price">₹1,699</p>
+        <p class="tl-sizes">Sizes: S to XL</p>
+        <a class="j2-btn" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Mustard%20handloom%20kurta" target="_blank" rel="noopener">Order on WhatsApp</a>
+      </article>
+
+      <article class="j2-card tl-product" data-category="Kurtas" data-price="2199" data-sizes="XS,S,M,L,XL" data-new="true">
+        <div class="tl-swatch"></div>
+        <p class="tl-cat">Kurtas</p>
+        <h3 class="tl-name">White chikankari kurta</h3>
+        <p class="tl-price">₹2,199</p>
+        <p class="tl-sizes">Sizes: XS to XL</p>
+        <a class="j2-btn" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20White%20chikankari%20kurta" target="_blank" rel="noopener">Order on WhatsApp</a>
+      </article>
+
+      <article class="j2-card tl-product" data-category="Sarees" data-price="3499" data-sizes="free" data-new="true">
+        <div class="tl-swatch"></div>
+        <p class="tl-cat">Sarees</p>
+        <h3 class="tl-name">Ikat handloom saree</h3>
+        <p class="tl-price">₹3,499</p>
+        <p class="tl-sizes">Free size</p>
+        <a class="j2-btn" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Ikat%20handloom%20saree" target="_blank" rel="noopener">Order on WhatsApp</a>
+      </article>
+
+      <article class="j2-card tl-product" data-category="Sarees" data-price="4999" data-sizes="free">
+        <div class="tl-swatch"></div>
+        <p class="tl-cat">Sarees</p>
+        <h3 class="tl-name">Khadi silk saree</h3>
+        <p class="tl-price">₹4,999</p>
+        <p class="tl-sizes">Free size</p>
+        <a class="j2-btn" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Khadi%20silk%20saree" target="_blank" rel="noopener">Order on WhatsApp</a>
+      </article>
+
+      <article class="j2-card tl-product" data-category="Sarees" data-price="3999" data-sizes="free">
+        <div class="tl-swatch"></div>
+        <p class="tl-cat">Sarees</p>
+        <h3 class="tl-name">Cotton jamdani saree</h3>
+        <p class="tl-price">₹3,999</p>
+        <p class="tl-sizes">Free size</p>
+        <a class="j2-btn" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Cotton%20jamdani%20saree" target="_blank" rel="noopener">Order on WhatsApp</a>
+      </article>
+
+      <article class="j2-card tl-product" data-category="Shirts" data-price="1299" data-sizes="S,M,L,XL,XXL">
+        <div class="tl-swatch"></div>
+        <p class="tl-cat">Shirts</p>
+        <h3 class="tl-name">Khadi cotton shirt</h3>
+        <p class="tl-price">₹1,299</p>
+        <p class="tl-sizes">Sizes: S to XXL</p>
+        <a class="j2-btn" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Khadi%20cotton%20shirt" target="_blank" rel="noopener">Order on WhatsApp</a>
+      </article>
+
+      <article class="j2-card tl-product" data-category="Shirts" data-price="1599" data-sizes="M,L,XL,XXL" data-new="true">
+        <div class="tl-swatch"></div>
+        <p class="tl-cat">Shirts</p>
+        <h3 class="tl-name">Linen-blend shirt</h3>
+        <p class="tl-price">₹1,599</p>
+        <p class="tl-sizes">Sizes: M to XXL</p>
+        <a class="j2-btn" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Linen-blend%20shirt" target="_blank" rel="noopener">Order on WhatsApp</a>
+      </article>
+
+      <article class="j2-card tl-product" data-category="Dupattas" data-price="899" data-sizes="free">
+        <div class="tl-swatch"></div>
+        <p class="tl-cat">Dupattas</p>
+        <h3 class="tl-name">Block-print dupatta</h3>
+        <p class="tl-price">₹899</p>
+        <p class="tl-sizes">Free size</p>
+        <a class="j2-btn" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Block-print%20dupatta" target="_blank" rel="noopener">Order on WhatsApp</a>
+      </article>
+
+      <article class="j2-card tl-product" data-category="Dupattas" data-price="1099" data-sizes="free">
+        <div class="tl-swatch"></div>
+        <p class="tl-cat">Dupattas</p>
+        <h3 class="tl-name">Chanderi dupatta</h3>
+        <p class="tl-price">₹1,099</p>
+        <p class="tl-sizes">Free size</p>
+        <a class="j2-btn" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Chanderi%20dupatta" target="_blank" rel="noopener">Order on WhatsApp</a>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  var tabs = document.querySelectorAll('#category-tabs .tl-tab');
+  var cards = document.querySelectorAll('#product-grid .tl-product');
+  var status = document.getElementById('tab-status');
+  if (!tabs.length || !cards.length) { return; }
+
+  function showCategory(cat) {
+    var shown = 0;
+    cards.forEach(function (card) {
+      var match = cat === 'All' || card.getAttribute('data-category') === cat;
+      card.hidden = !match;
+      if (match) { shown += 1; }
+    });
+    tabs.forEach(function (tab) {
+      tab.setAttribute('aria-pressed', tab.getAttribute('data-filter') === cat ? 'true' : 'false');
+    });
+    if (status) {
+      status.textContent = 'Showing ' + shown + ' product' + (shown === 1 ? '' : 's');
+    }
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      showCategory(tab.getAttribute('data-filter'));
+    });
+  });
+
+  showCategory('All');
+})();
+</script>
+<!-- J2:W-1 end -->
+</body>
+</html>

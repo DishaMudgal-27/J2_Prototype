@@ -1,0 +1,207 @@
+{
+  "metrics": {
+    "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): Exact event date in November; Speaker names and talk titles; Schedule times and session order; Venue name, full address and exact map coordinates; Sponsor names and logo files; External RSVP page link; Code of conduct text.",
+    "brief": "An event page for Bengaluru JS Meetup in November: schedule, speakers, RSVP, venue and map, code of conduct, and sponsor logos.",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 1,
+    "ai_calls": 12,
+    "minutes": 3.1,
+    "budget": {
+      "total": 50,
+      "start": 50,
+      "cap": 100,
+      "raises": [],
+      "spent": 45,
+      "rate_card": true
+    },
+    "site_versions": 2,
+    "site_bytes": 12474,
+    "agents": {
+      "identity": {
+        "turns": 3,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "ceo": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "builder": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 1,
+      "grants": 1,
+      "counters": 0,
+      "refuses": 0,
+      "refuses_converted_by_code": 0,
+      "withdrawals": 0,
+      "conflicts": 0,
+      "ceo_decisions": 3,
+      "resolutions": []
+    },
+    "workflows": {
+      "registered": 2,
+      "done": 2,
+      "failed": 0,
+      "held_ever": 0,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "Build single-file event page with placeholder sections",
+          "agent_estimate": 35,
+          "charged": 35
+        },
+        {
+          "id": "W-2",
+          "name": "Add Venue section and Leaflet OpenStreetMap map",
+          "agent_estimate": 10,
+          "charged": 10
+        }
+      ]
+    },
+    "ceo_choices": {
+      "made": 3,
+      "picked_shown_first": 1,
+      "picked_identity_first": 1,
+      "note": "options are shuffled before the CEO sees them; shown_first measures position bias, identity_first measures pull toward the option Identity listed first"
+    },
+    "validator_refusals": 0,
+    "role_refusals": 0,
+    "pauses": 0,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 0,
+    "audits": [
+      {
+        "cycle": 1,
+        "version": 2,
+        "all_pass": true,
+        "pass": 9,
+        "warn": 1,
+        "fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      }
+    ],
+    "open_inputs": [
+      "Exact event date in November",
+      "Speaker names and talk titles",
+      "Schedule times and session order",
+      "Venue name, full address and exact map coordinates",
+      "Sponsor names and logo files",
+      "External RSVP page link",
+      "Code of conduct text"
+    ]
+  },
+  "review": {
+    "verdict": "The department took the happy path cleanly: a sparse but compliant placeholder page, 10 of 10 done-when items passed on v2, 11 calls, 3.1 minutes, no redirects, refusals or retries. The run says little about negotiation, conflict or failure handling because none occurred.",
+    "agents": {
+      "identity": {
+        "score": 4,
+        "note": "Stayed in role with 3 turns: charter question [2], hand-off [4], done verdict [16]. It bundled three decisions into one ASK_CEO although its file says one question. It accepted the unobserved OSM tile warning by inference from the code [16] instead of asking for observed evidence."
+      },
+      "adaptation": {
+        "score": 4,
+        "note": "One turn, two small workflows [6] that map to the done-when items. It sized the plan to the budget, leaving 5 and zero retry, and said so openly. The chat shows only a summary, so the full proposal fields are unverified."
+      },
+      "priority": {
+        "score": 4,
+        "note": "Granted both with a stated trade-off (retry_limit 0) and left Adaptation's grouping alone [7]. It did not question whether 45 of 50 is proportionate for a 12 KB page; its reason was only that nothing competes."
+      },
+      "coordination": {
+        "score": 4,
+        "note": "It stated its rule, respected the W-2 dependency on W-1 and the shared-writer limit on index.html [9][11]. The case was trivial (two sequential workflows), so holds and collisions were never tested."
+      },
+      "audit": {
+        "score": 4,
+        "note": "It checked all 10 items and honestly flagged that tile rendering was confirmed from code, not observed [15]. It did not mark item 7 BLOCKED_BY_EVIDENCE or ask for a rerun, and it checked the final site only."
+      },
+      "ceo": {
+        "score": 4,
+        "note": "Three decisions with one-sentence reasons, each noting that the brief was silent [3]. It also instructed Adaptation, which is outside a charter question, and restated all options at length. Shown-first 1 of 3 and Identity-first 1 of 3 show no position bias, but n=3 is too small to conclude."
+      },
+      "builder": {
+        "score": 5,
+        "note": "It ran both workflows as declared with no scope drift, no retries and a 12 KB file [10][12]. All 10 done-when items passed on its output."
+      }
+    },
+    "went_well": [
+      "Zero redirects, invalid moves, validator refusals, role refusals, pauses or stuck turns. Every hand-off was legal.",
+      "The no-invented-facts rule held end to end: Audit passed item 10 and all seven missing facts were tracked as open inputs [15][17].",
+      "Priority and Identity were disciplined: Priority left design alone [7], Identity used 3 turns and did not manage the work.",
+      "Audit separated what it observed (overflow, JS errors) from what it inferred (tiles) [14][15]."
+    ],
+    "problems": [
+      "Item 7 (map renders with OSM tiles) was never observed. The mechanical check logged no tile.openstreetmap.org request [15], and Identity accepted it on inference [16].",
+      "The 45 spent equals the agent estimates exactly (35, 35, 10, 10), and rate_card is true. It is a billed rate, not measured cost, so estimate accuracy was not tested.",
+      "Adaptation sized its work to fit the budget and left no room for a fix [6][7]. Any failed check would have needed a new decision. It never failed, so the cost of that choice is untested.",
+      "Done-when mostly tests that content is absent. The Requester gets a page with 7 open inputs. The pause-for-Requester rule never triggered because CEO decision 1 [3] made every item closable without them."
+    ],
+    "learnings": [
+      "Test next: a brief or budget that forces a COUNTER, a HOLD or a failed completion check. This run had 0 counters, 0 conflicts, 0 holds and 0 failures, so those paths have no evidence.",
+      "Change the test system: capture network requests in the mechanical check (tile and CDN hosts) so map-style items are observed. Also name the 3 external resources it counts.",
+      "Change the test system: log real tokens or calls next to the rate-card charge, so Priority's estimates can be compared with actual cost.",
+      "Keep: the CEO option shuffle with position logging. Needs many more decisions before it says anything about bias.",
+      "Test whether Identity should send one question per ASK_CEO, or whether the format should allow a bundled list. Evidence is one instance [2]."
+    ]
+  },
+  "events": [
+    {
+      "agent": "ceo",
+      "type": "decision",
+      "detail": "charter Q1: option 2 of 3",
+      "msg": 3,
+      "cycle": 0,
+      "shown_pos": 1,
+      "original_pos": 1,
+      "n_options": 3
+    },
+    {
+      "agent": "ceo",
+      "type": "decision",
+      "detail": "charter Q2: option 1 of 3",
+      "msg": 3,
+      "cycle": 0,
+      "shown_pos": 0,
+      "original_pos": 0,
+      "n_options": 3
+    },
+    {
+      "agent": "ceo",
+      "type": "decision",
+      "detail": "charter Q3: option 2 of 3",
+      "msg": 3,
+      "cycle": 0,
+      "shown_pos": 1,
+      "original_pos": 1,
+      "n_options": 3
+    }
+  ],
+  "made": "2026-10-05 20:43:45"
+}

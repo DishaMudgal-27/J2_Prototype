@@ -1,0 +1,223 @@
+{
+  "metrics": {
+    "outcome": "Stopped: every done-when item passes with Audit's evidence, but Identity did not declare done. Done means the done-when list only, so this needs a look at Identity's reason above.",
+    "brief": "A one-page website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru. Visitors should see the menu with prices, the opening hours, and where to find us, and be able to pre-order a coffee for pickup. It should feel warm and modern and work well on a phone. Include a section about our beans and the farms they come from, and a simple loyalty-card explainer (buy 9, get the 10th free).",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 1,
+    "ai_calls": 14,
+    "minutes": 5.8,
+    "budget": {
+      "total": 200,
+      "start": 200,
+      "cap": 400,
+      "raises": [],
+      "spent": 90,
+      "rate_card": true
+    },
+    "site_versions": 4,
+    "site_bytes": 29677,
+    "agents": {
+      "identity": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 5,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 4,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "builder": {
+        "turns": 4,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 1,
+        "redirects": 1,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 1,
+      "grants": 1,
+      "counters": 0,
+      "refuses": 0,
+      "refuses_converted_by_code": 0,
+      "parks": 0
+    },
+    "conflicts": {
+      "total": 0,
+      "settled_by_agents": 0,
+      "resolved_by_identity": 0,
+      "asked_requester": 0,
+      "open": 0,
+      "list": []
+    },
+    "requester_questions": {
+      "total": 0,
+      "by_kind": {}
+    },
+    "workflows": {
+      "registered": 4,
+      "done": 4,
+      "failed": 0,
+      "held_ever": 2,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "Page shell, anchor nav and warm mobile-first styling",
+          "agent_estimate": 15,
+          "charged": 15
+        },
+        {
+          "id": "W-2",
+          "name": "Menu, opening hours and where-to-find-us sections",
+          "agent_estimate": 30,
+          "charged": 30
+        },
+        {
+          "id": "W-3",
+          "name": "Pickup pre-order form with order summary",
+          "agent_estimate": 25,
+          "charged": 25
+        },
+        {
+          "id": "W-4",
+          "name": "Beans-and-farms section and loyalty-card explainer",
+          "agent_estimate": 20,
+          "charged": 20
+        }
+      ]
+    },
+    "validator_refusals": 0,
+    "role_refusals": 0,
+    "pauses": 0,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 0,
+    "audits": [
+      {
+        "cycle": 1,
+        "version": 4,
+        "all_pass": true,
+        "pass": 9,
+        "warn": 1,
+        "fail": 0,
+        "mechanical": [
+          "phone overflow 10px"
+        ],
+        "mechanical_ran": true
+      }
+    ],
+    "open_inputs": [
+      "Menu items and prices in INR",
+      "Opening hours for each day",
+      "Street address and map location",
+      "Phone, WhatsApp or email for contact",
+      "How pre-orders reach the shop (WhatsApp number, email or other) and whether payment is at pickup or online",
+      "Pickup time rules (earliest slot, lead time)",
+      "Bean names, roast details, and the farms and regions they come from",
+      "Photos and logo, if any"
+    ]
+  },
+  "review": {
+    "verdict": "The department built all ten done-when items in one cycle for 90 of 200 budget, but shipped a 10px overflow at 360px, and the run stopped before the rework Identity ordered could happen.",
+    "agents": {
+      "identity": {
+        "score": 4,
+        "note": "The charter [2] was sound, with no invented facts. The ruling at [24] cites the 360px no-scroll standard, which is a defensible reading of 'material finding'. But it blocked 'done' on a clause that is not in done-when, so it effectively widened done-when (openly, not silently). It also mentioned the 8-cost fix, which drifts toward Priority's territory."
+      },
+      "adaptation": {
+        "score": 4,
+        "note": "One turn, one proposal [4]: four small workflows, 90 of 200, unknowns marked as placeholders. Efficient and in role. It never got to act on the rework, and I can't see its completion checks, so evidence is thin."
+      },
+      "priority": {
+        "score": 4,
+        "note": "It granted all four with envelopes tied to done-when items and left 110 in reserve for fixes [5]. It named an 8 price for a fix, and Identity used that figure. It did not push back on the four-way split. 'None is padded' is asserted, not shown."
+      },
+      "coordination": {
+        "score": 4,
+        "note": "It stated its scheduling rule every time, gave exact HOLD conditions [10][14], and kept one writer on index.html. One claim was wrong: [7] promised each handoff would be 'Audit-clean', but Audit ran only once, at the end."
+      },
+      "audit": {
+        "score": 4,
+        "note": "It used the code measurement and said plainly that it could not find the cause [22]. 'Please fix it and re-run' edges into repair and scheduling, which the role forbids. The overflow-x:hidden cause is a guess, though marked 'may'. Its prose says 9 of 10 pass, but the code counts all_pass true."
+      },
+      "builder": {
+        "score": 4,
+        "note": "It stayed in scope on each of four runs and reported untouched stubs [13][19]. Result: 30 KB, no JS errors, no broken links, every unknown marked as a placeholder. It shipped a phone overflow on a brief that stresses phones. The cause is unknown."
+      }
+    },
+    "went_well": [
+      "Clean run: 0 invalid moves, 0 validator refusals, 13 AI calls, 5.8 minutes, 90 of 200 spent.",
+      "Placeholders were respected: 6 menu rows with placeholder names and prices [13], 'not sent' on the order summary [16], and the exact loyalty line [19].",
+      "The single-writer lock serialized W-1 to W-4 without collisions, and HOLD released budget back [11].",
+      "The code overflow measurement [21] gave Audit a hard fact to cite."
+    ],
+    "problems": [
+      "The 360px no-scroll rule is in standards but not in done-when. Done-when item 8 only checks the viewport meta tag and responsive CSS. So the harness reads 'all pass' while Identity reads 'not done' [24], and the run ends with no rework.",
+      "The route check at [23] sent Audit's pick of Adaptation to Identity because 'everything passes'. team.md allows Audit to Adaptation for correctable defects, and F-11 was NEEDS_REVISION. The code's all_pass ignored that finding.",
+      "The mechanical check ran only on v4, so there is no way to tell which workflow introduced the overflow. A guess is the W-4 loyalty graphic, unverified.",
+      "The Requester was asked nothing about 8 open inputs. This is allowed by the charter, but the page is a template, with no real menu, hours or address.",
+      "The envelope estimates equal the charges exactly (rate card). Budget data says nothing about estimation accuracy."
+    ],
+    "learnings": [
+      "Put 'no horizontal scroll at 360px' into done-when, or state that standards count toward done. Evidence: [24] and the outcome line.",
+      "Compute all_pass from findings (any NEEDS_REVISION means not pass) and allow Audit to Adaptation on those. Evidence: [22][23] and metrics.",
+      "Continue the cycle after Identity rules for rework. Otherwise this test cannot show whether the 8-cost fix works. Next test: rerun from v4 with the rework allowed.",
+      "Run the code mechanical check after every workflow, not only at the end. It is cheap and would pin the defect to one run.",
+      "Keep the one-proposal, serial, rate-card setup. Test next: a brief with real menu and hours, to see how agents treat supplied facts.",
+      "Evidence is thin: one cycle, one model, one brief. It does not show whether rework or Requester questions work."
+    ]
+  },
+  "events": [
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-3: W-2 (wf-info) must be done",
+      "msg": 10,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-4: index.html write lock is held by the W-2 run; starts after W-3 finishes",
+      "msg": 10,
+      "cycle": 1
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-4: index.html write lock is held by the W-3 run; starts after W-3 finishes",
+      "msg": 14,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "mechanical",
+      "detail": "phone overflow 10px",
+      "msg": 21,
+      "cycle": 1
+    },
+    {
+      "agent": "audit",
+      "type": "redirect",
+      "detail": "picked Adaptation, routed to Identity (everything passes, so Identity decides whether done-when holds)",
+      "msg": 22,
+      "cycle": 1
+    }
+  ],
+  "made": "2026-10-06 12:39:33"
+}

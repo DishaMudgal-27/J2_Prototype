@@ -1,0 +1,30 @@
+{
+  "statement": "Build a one-page website for Brew Lab, a cafe on 100 Feet Road, Indiranagar, Bengaluru, that shows its menu, opening hours, location, a photo gallery and stories about where its coffee comes from.",
+  "site_name": "Brew Lab",
+  "audience": "People in and around Bengaluru deciding whether to visit the cafe, mostly on their phones, who want to see what is served, when it is open and how to get there.",
+  "standards": [
+    "Single plain HTML, CSS and JavaScript file, no build step (CDN libraries allowed)",
+    "Mobile-first layout that is readable and has no horizontal scrolling at 360px and 1280px",
+    "No JavaScript errors on load",
+    "Every fact on the page comes from the Requester's brief and answers; nothing is invented",
+    "Warm, simple look that suits a specialty coffee cafe, with readable text contrast"
+  ],
+  "rules": [
+    "Never invent facts such as extra menu items, prices, hours, awards, farm details or photos",
+    "Prices are shown in rupees exactly as supplied",
+    "Empty photo spots must be clearly labelled as placeholders, not fake images",
+    "Coffee stories use only the details supplied for the three estates"
+  ],
+  "done_when": [
+    "The page title and main heading say Brew Lab, and the text mentions Bengaluru",
+    "A menu section lists exactly these items and prices: Espresso ₹120, Cappuccino ₹180, Cold brew ₹200, Pour-over ₹220, Croissant ₹150, Banana bread ₹130",
+    "A timings section says the cafe is open 8am to 10pm every day and has no closed days",
+    "A location section shows the address 100 Feet Road, Indiranagar, Bengaluru 560038, the phone number +91 80 4000 2468 as a tap-to-call link, and a directions link built from the address",
+    "A gallery section has at least 6 empty, labelled photo spots (cafe, food, drinks) ready to be filled in later",
+    "A coffee stories section has three stories: Ratnagiri Estate (Chikmagalur, shade-grown coffee), Kerehaklu (Chikmagalur, coffee grown alongside pepper and cardamom) and Baarbara Estate (Coorg, only ripe cherries hand-picked)",
+    "A navigation menu links to the menu, timings, location, gallery and stories sections, and every in-page link points to an element that exists",
+    "The layout has no horizontal overflow at 360px and 1280px widths and the file has no JavaScript errors"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": []
+}

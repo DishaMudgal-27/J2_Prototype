@@ -1,0 +1,415 @@
+{
+  "metrics": {
+    "outcome": "Done: the site is workable. Every done-when item passes with Audit's evidence and the render check is clean.",
+    "brief": "make a website for my cousin's clothing boutique called Thread & Loom in Pune. it sells handloom kurtas, sarees, cotton shirts and dupattas. people should be able to browse products by category, filter by size and price, see a size guide, check new arrivals, and order on whatsapp. also show a lookbook section with styled outfits, the store timings and location, the return and exchange policy, and a few customer reviews. it should feel earthy and elegant and work well on phones",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 3,
+    "ai_calls": 44,
+    "minutes": 12.8,
+    "budget": {
+      "total": 150,
+      "start": 150,
+      "cap": 300,
+      "raises": [],
+      "spent": 133,
+      "rate_card": true
+    },
+    "site_versions": 13,
+    "site_bytes": 44699,
+    "agents": {
+      "identity": {
+        "turns": 8,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 3,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 15,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 14,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-1": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-2": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-3": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-4": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-5": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-6": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-7": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-8": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-9": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-10": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-11": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-12": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-13": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 2,
+      "grants": 2,
+      "counters": 0,
+      "refuses": 0,
+      "refuses_converted_by_code": 0,
+      "parks": 0
+    },
+    "conflicts": {
+      "total": 0,
+      "settled_by_agents": 0,
+      "resolved_by_identity": 0,
+      "asked_requester": 0,
+      "open": 0,
+      "list": []
+    },
+    "requester_questions": {
+      "total": 4,
+      "by_kind": {
+        "limit": 1,
+        "info": 3
+      }
+    },
+    "workflows": {
+      "registered": 13,
+      "done": 13,
+      "failed": 0,
+      "held_ever": 0,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "Header and intro",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-2",
+          "name": "Product catalogue by category",
+          "agent_estimate": 20,
+          "charged": 20
+        },
+        {
+          "id": "W-3",
+          "name": "Size and price filters",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-4",
+          "name": "Size guide",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-5",
+          "name": "New arrivals",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-6",
+          "name": "WhatsApp order buttons",
+          "agent_estimate": 15,
+          "charged": 15
+        },
+        {
+          "id": "W-7",
+          "name": "Lookbook",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-8",
+          "name": "Visit us",
+          "agent_estimate": 5,
+          "charged": 5
+        },
+        {
+          "id": "W-9",
+          "name": "Returns, exchange and delivery",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-10",
+          "name": "Customer reviews",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-11",
+          "name": "Earthy responsive styling",
+          "agent_estimate": 5,
+          "charged": 5
+        },
+        {
+          "id": "W-12",
+          "name": "Navigation and footer anchors",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-13",
+          "name": "Intro main action button",
+          "agent_estimate": 8,
+          "charged": 8
+        }
+      ]
+    },
+    "validator_refusals": 0,
+    "role_refusals": 0,
+    "pauses": 4,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 0,
+    "audits": [
+      {
+        "cycle": 2,
+        "version": 9,
+        "all_pass": false,
+        "pass": 10,
+        "warn": 0,
+        "fail": 3,
+        "rubric_fail": 2,
+        "mechanical": [],
+        "mechanical_ran": true
+      },
+      {
+        "cycle": 3,
+        "version": 13,
+        "all_pass": true,
+        "pass": 11,
+        "warn": 2,
+        "fail": 0,
+        "rubric_fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      }
+    ],
+    "to_be_confirmed": [],
+    "workable": [],
+    "lessons": {
+      "memory": false,
+      "saved": [],
+      "used": []
+    }
+  },
+  "review": {
+    "verdict": "The department delivered a site that passes all 13 done-when items on code checks, in 3 cycles and 133 of 150 budget with no conflicts or role redirects, but one cycle was lost to a turn cap its own plan could not fit, and the filters and order links were never actually run.",
+    "agents": {
+      "identity": {
+        "score": 3,
+        "note": "Closed well: honest final message with caveats [73], and it never asked the Requester over a disagreement. But it drifted into design and ordering: the exact viewport tag, the nav list and 'W-10, W-11, W-12 in that order' [49][54]. Its limit question said 1 thing was still wrong [45] when 3 items were unmet [49]."
+      },
+      "adaptation": {
+        "score": 4,
+        "note": "Sensible one-workflow-per-section plan with the trade-off stated [14]; smallest fix for R-4 [55]. But the 12-workflow plan could not fit the 30-turn cap, it asked Priority to release workflows 'in this order' [50], and its item 13 coverage claim was flagged unpaid [53]."
+      },
+      "priority": {
+        "score": 4,
+        "note": "Two real decisions, both reasoned: grant with a 25 fix reserve [15], and refuse a duplicate item 13 charge [56]. The other 13 turns were identical 'within limits' lines. It also echoed a run order [56], which is Coordination's job."
+      },
+      "coordination": {
+        "score": 4,
+        "note": "Stated its scheduling rule every time, kept one writer at a time, 0 holds, 0 collisions [17]-[67]. It told builders three times to test the live page [61][64][67] although none had a browser; that is outside its role and could not be acted on."
+      },
+      "audit": {
+        "score": 4,
+        "note": "Found real gaps at v9 (reviews, viewport tag, nav) [53] and was honest at v13 that filters and order links were not clicked [72]. Its v9 text says item 13 passes while the tally says UNPAID, and F-14, R-4 and R-5 are only in the code tally."
+      },
+      "W-1": {
+        "score": 3,
+        "note": "Intro had no main button and chips that looked clickable, so W-13 had to rewrite the section [54][66]. Its 'check holds' gave no method [19]."
+      },
+      "W-2": {
+        "score": 5,
+        "note": "10 cards with supplied names, prices and sizes, empty photo spots [22]; items 1 to 9 passed at v9 [53]."
+      },
+      "W-3": {
+        "score": 4,
+        "note": "Filters built and honestly labelled 'not run in a browser' [25]; behaviour still unverified at the end [72]."
+      },
+      "W-4": {
+        "score": 5,
+        "note": "Size table matches the supplied data [28]."
+      },
+      "W-5": {
+        "score": 5,
+        "note": "Exactly the 3 supplied arrivals [31]."
+      },
+      "W-6": {
+        "score": 4,
+        "note": "Order links on 13 cards, built by a script rather than markup, so they depend on JS running; unclicked [34][72]."
+      },
+      "W-7": {
+        "score": 5,
+        "note": "3 outfits with the exact pairings [37]."
+      },
+      "W-8": {
+        "score": 5,
+        "note": "Address, timings and phone as supplied [40]."
+      },
+      "W-9": {
+        "score": 5,
+        "note": "Only supplied policy and delivery terms [43]."
+      },
+      "W-10": {
+        "score": 5,
+        "note": "3 reviews with the exact wording and no invented ratings [60]."
+      },
+      "W-11": {
+        "score": 5,
+        "note": "Added the viewport tag and overflow guards and flagged the overflow check as unconfirmed [63]; the code check later showed 0 overflow [71]."
+      },
+      "W-12": {
+        "score": 3,
+        "note": "Links all resolve, but on a 360px phone the sticky nav scrolls sideways and hides the last links [69][72]."
+      },
+      "W-13": {
+        "score": 5,
+        "note": "One main button, chips made plain, R-4 cleared [66][72]."
+      }
+    },
+    "went_well": [
+      "No invented facts: every product, price, size, timing and review matches the Requester's messages [4][7][10]; Audit passed all 13 items at v13 [72].",
+      "Clean mechanics: 0 redirects, 0 invalid moves, 0 conflicts, 0 validator or role refusals, and the write lock passed in order every time.",
+      "Honest reporting: builders said 'not run in a browser' [25][34][63], Audit said it had no click tool [72], and Identity passed that on to the Requester [73].",
+      "The fix cycle was cheap: the audit at v9 [53] led to one new 8-unit workflow plus 3 already-paid ones. Spend ended at 133 of 150.",
+      "Priority refused a double charge with a reason [56]; Adaptation chose the smallest fix [55]."
+    ],
+    "problems": [
+      "Cycle 1 hit the 30-turn cap with 9 of 12 workflows done [45]. Each workflow takes 3 turns (Coordination, Priority, builder), so 12 need about 36. Cost: an extra Requester question and a lost cycle. The plan [14] never accounted for the cap.",
+      "Identity gave implementation detail and run order [49][54], against its role file. Adaptation [50] and Priority [56] repeated the order.",
+      "Three information rounds [2][5][8]. Per-product sizes, new arrivals and lookbook pairings follow directly from the brief's features and could have been asked in round one. The questions also render as one run-on line with semicolons and a single '1.'.",
+      "Items 3 (filters) and 6 (order links) passed on code reading only [72]. The mechanical check covers overflow, JS errors and anchors, not behaviour [52][71]. At v9 it reported 'no broken in-page links' when there was no nav at all.",
+      "The department shipped a known phone nav defect on a mobile-first brief with 17 budget left [72][73]. The Requester was told but not asked whether to fix it first.",
+      "The item 13 'unpaid' flag [53] cost two Priority and Adaptation exchanges [55][56] and cleared once W-12 ran [72]. Evidence is thin on why it fired while W-12 was registered and funded."
+    ],
+    "learnings": [
+      "Pick: stop counting the routine envelope-check turns against the per-cycle cap. 13 of 13 checks said 'within limits' with 0 holds, and the lines are templated; turns (55) exceed AI calls (43), so they are probably code-written (unverified). Trade-off: less visible Priority activity in the chat. Alternative: set the cap to about 3 x workflows + 10.",
+      "Test system, highest value: add a scripted browser check that picks each size and price filter and counts visible cards, and checks each order link's number and product name. Items 3 and 6 are the core function and have no run evidence. Also list the 4 external resources and the count of anchors tested.",
+      "This was a happy-path run: a fully cooperative Requester, 2 proposals, 2 grants, 0 counters, 0 refusals, 0 holds, 0 validator rejections, lessons memory off. Negotiation, conflicts, holds, retries and lesson saving are untested. Next run: budget around 90 (below the 125 rate-card total), a vaguer Requester who changes one fact, and memory on.",
+      "Design: have Identity derive its question list from the brief's feature list in round one, as one numbered list. Evidence: [2], [5] and [8] asked for facts the features already implied.",
+      "Design: Identity's role file bans picking tools or run order, yet [49] and [54] did both. Consider a code flag when Identity names tags or an order; one run is thin evidence of a pattern.",
+      "Keep: the 25 fix reserve (about 17%, only 8 used), one section per workflow (the intro was fixed without touching other sections), and the stated scheduling rule."
+    ]
+  },
+  "events": [
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "info: 1 question(s) for the Requester",
+      "msg": 3,
+      "cycle": 0,
+      "pause": "info"
+    },
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "info: 1 question(s) for the Requester",
+      "msg": 6,
+      "cycle": 0,
+      "pause": "info"
+    },
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "info: 1 question(s) for the Requester",
+      "msg": 9,
+      "cycle": 0,
+      "pause": "info"
+    },
+    {
+      "agent": "system",
+      "type": "limit",
+      "detail": "Cycle 1 used 30 turns (the per-cycle cap) without finishing.",
+      "msg": 45,
+      "cycle": 1
+    },
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "limit: 1 question(s) for the Requester",
+      "msg": 46,
+      "cycle": 1,
+      "pause": "limit"
+    },
+    {
+      "agent": "validator",
+      "type": "unpaid",
+      "detail": "item 13 passes but no workflow covers it",
+      "msg": 53,
+      "cycle": 2
+    },
+    {
+      "agent": "identity",
+      "type": "audience_mix",
+      "detail": "to_agents reads as user-facing ('@Requester')",
+      "msg": 73,
+      "cycle": 3
+    }
+  ],
+  "made": "2026-10-08 16:01:15"
+}

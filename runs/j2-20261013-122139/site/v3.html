@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spark 2026</title>
+<!-- J2:style head start (owner W-1) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;700&amp;display=swap"><style>:root{--j2-primary:#FF4F8B;--j2-secondary:#6C5CE7;--j2-accent:#FFD23F;--j2-background:#0F1020;--j2-surface:#1B1D3A;--j2-text:#F5F6FF;--j2-muted:#B8BCE0;--j2-font-heading:'Space Grotesk', 'Segoe UI', system-ui, sans-serif;--j2-font-body:'Inter', 'Segoe UI', system-ui, sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:16px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#FF4F8B;color:#0F1020;border:2px solid #FF4F8B;min-height:48px;padding:12px 28px;border-radius:999px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;}.j2-btn-secondary{display:inline-block;background:transparent;color:#F5F6FF;border:2px solid #FFD23F;min-height:48px;padding:12px 28px;border-radius:999px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;}.j2-card{background:#1B1D3A;color:#F5F6FF;border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:24px;}</style>
+<!-- J2:style head end -->
+<!-- J2:W-1 head start (owner W-1) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- J2:W-1 head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<section id="j2-hero" class="j2-hero" data-section="j2-hero" aria-labelledby="j2-hero-title">
+  <style>
+    #j2-hero {
+      position: relative;
+      overflow: hidden;
+      box-sizing: border-box;
+      max-width: 100%;
+      padding: 48px 20px 64px;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(255, 79, 139, 0.35), transparent 45%),
+        radial-gradient(circle at 90% 85%, rgba(108, 92, 231, 0.45), transparent 50%),
+        var(--j2-background, #0F1020);
+      color: var(--j2-text, #F5F6FF);
+    }
+    #j2-hero *, #j2-hero *::before, #j2-hero *::after { box-sizing: border-box; }
+    #j2-hero j2-hero {
+      display: block;
+      max-width: 100%;
+    }
+    #j2-hero .j2-hero-inner {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 32px;
+      align-items: center;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    #j2-hero .j2-hero-text { min-width: 0; }
+    #j2-hero .j2-hero-tag {
+      display: inline-block;
+      margin: 0 0 16px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: var(--j2-accent, #FFD23F);
+      color: #0F1020;
+      font-weight: 700;
+      font-size: 0.875rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    #j2-hero h1 {
+      margin: 0 0 12px;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: clamp(2.75rem, 13vw, 5.5rem);
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      overflow-wrap: anywhere;
+      background: linear-gradient(90deg, #FF4F8B, #FFD23F);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: #FF4F8B;
+    }
+    #j2-hero .j2-hero-college {
+      margin: 0 0 8px;
+      font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif);
+      font-size: clamp(1.125rem, 4.5vw, 1.625rem);
+      font-weight: 500;
+      color: var(--j2-text, #F5F6FF);
+    }
+    #j2-hero .j2-hero-dates {
+      margin: 0 0 28px;
+      font-size: clamp(1.125rem, 4.5vw, 1.375rem);
+      font-weight: 600;
+      color: var(--j2-accent, #FFD23F);
+    }
+    #j2-hero .j2-hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    #j2-hero .j2-hero-actions a {
+      max-width: 100%;
+      min-width: 44px;
+      min-height: 48px;
+      text-align: center;
+    }
+    #j2-hero .j2-photo-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 100%;
+      aspect-ratio: 4 / 3;
+      border-radius: var(--j2-radius, 16px);
+      border: 2px dashed rgba(255, 210, 63, 0.6);
+      background: linear-gradient(135deg, rgba(108, 92, 231, 0.35), rgba(255, 79, 139, 0.25));
+      color: var(--j2-muted, #B8BCE0);
+      font-size: 0.9375rem;
+      text-align: center;
+      padding: 16px;
+    }
+    @media (min-width: 900px) {
+      #j2-hero { padding: 96px 32px 104px; }
+      #j2-hero .j2-hero-inner { grid-template-columns: 1.1fr 0.9fr; gap: 56px; }
+    }
+  </style>
+  <j2-hero>
+    <div class="j2-hero-inner">
+      <div class="j2-hero-text">
+        <p class="j2-hero-tag">College tech fest</p>
+        <h1 id="j2-hero-title">Spark 2026</h1>
+        <p class="j2-hero-college">Northfield College of Engineering, Pune</p>
+        <p class="j2-hero-dates">14 to 16 February 2027</p>
+        <div class="j2-hero-actions">
+          <a class="j2-btn" href="#j2-register">Register for an event</a>
+          <a class="j2-btn j2-btn-secondary" href="#j2-schedule">See the schedule</a>
+        </div>
+      </div>
+      <div class="j2-photo-placeholder" role="img" aria-label="Photo placeholder for Spark 2026">Photo coming soon</div>
+    </div>
+  </j2-hero>
+</section>
+<!-- J2:W-1 end -->
+</body>
+</html>

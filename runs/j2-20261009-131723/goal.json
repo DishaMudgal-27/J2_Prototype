@@ -1,0 +1,57 @@
+{
+  "statement": "Build a mobile-friendly, earthy and elegant single-file website for Thread & Loom, a handloom clothing boutique in Pune, where visitors can browse and filter products, read the size guide, see new arrivals and a lookbook, find the shop, read policies and reviews, and place orders on WhatsApp.",
+  "site_name": "Thread & Loom",
+  "audience": "Shoppers in and around Pune, mostly on phones, looking for handloom kurtas, sarees, cotton shirts and dupattas.",
+  "standards": [
+    "Earthy, elegant look: warm neutral and natural colour palette defined once in CSS variables, with a serif or refined heading font",
+    "Mobile first: viewport meta tag present, layout works at 360px and 1280px with no horizontal overflow",
+    "Plain HTML, CSS and JavaScript in one file, no build step",
+    "Only facts from the Requester appear; no invented products, prices, or claims",
+    "Product and lookbook images are clearly placeholders until real photos are supplied"
+  ],
+  "rules": [
+    "Never invent a fact; anything missing is marked to be confirmed",
+    "Prices are in rupees exactly as given",
+    "No sale badges or discounts, since nothing is on sale",
+    "Phone and WhatsApp numbers are tap-to-use links",
+    "Lookbook outfits use only the 10 listed products"
+  ],
+  "done_when": [
+    "The site shows the name Thread & Loom and the address 18 FC Road, Shivajinagar, Pune 411005, with a map or directions link",
+    "The site shows the WhatsApp order number +91 00000 11111 and the shop phone +91 00000 22222 as tap-to-use links",
+    "All 10 products appear with name, category and price: Indigo block-print kurta 1,499; Mustard handloom kurta 1,699; White chikankari kurta 2,199; Ikat handloom saree 3,499; Khadi silk saree 4,999; Cotton jamdani saree 3,999; Khadi cotton shirt 1,299; Linen-blend shirt 1,599; Block-print dupatta 899; Chanderi dupatta 1,099",
+    "Each product has an order button that opens WhatsApp to +91 00000 11111 with a prefilled message naming that product",
+    "Visitors can browse by category: kurtas, sarees, cotton shirts, dupattas (plus an all view)",
+    "A size filter works with these sizes: Indigo block-print kurta S to XXL; Mustard handloom kurta S to XL; White chikankari kurta XS to XL; Khadi cotton shirt S to XXL; Linen-blend shirt M to XXL; sarees and dupattas free size",
+    "A price filter works across the product list and combines with the category and size filters",
+    "A size guide shows chest in inches: XS 32, S 34, M 36, L 38, XL 40, XXL 42",
+    "A New Arrivals section shows the White chikankari kurta, Ikat handloom saree and Linen-blend shirt",
+    "A lookbook section shows 3 styled outfits built from the listed products, with placeholder images",
+    "Store timings show 11am to 9pm, Tuesday to Sunday, closed Monday",
+    "The exchange policy states: exchange within 7 days if unworn with tags, no returns on sale items; delivery info states Pune in 2 days, Rs 79, free above 2,999, pay on delivery",
+    "Three customer reviews appear: \"Beautiful fabric, fits perfectly\" Meera K.; \"Fast delivery and lovely packing\" Arjun S.; \"My go-to for festive kurtas\" Priya D.",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, no broken in-page links, and nothing marked to be confirmed"
+  ],
+  "business_type": "clothing boutique",
+  "visitor_needs": [
+    "Browse products by category",
+    "Filter by size and price",
+    "See a size guide",
+    "Check new arrivals",
+    "Order on WhatsApp",
+    "See a lookbook of styled outfits",
+    "Find store timings and location",
+    "Read return, exchange and delivery policy",
+    "Read customer reviews"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [],
+  "core_items": [
+    "The site shows the name Thread & Loom and the address 18 FC Road, Shivajinagar, Pune 411005, with a map or directions link",
+    "The site shows the WhatsApp order number +91 00000 11111 and the shop phone +91 00000 22222 as tap-to-use links",
+    "All 10 products appear with name, category and price: Indigo block-print kurta 1,499; Mustard handloom kurta 1,699; White chikankari kurta 2,199; Ikat handloom saree 3,499; Khadi silk saree 4,999; Cotton jamdani saree 3,999; Khadi cotton shirt 1,299; Linen-blend shirt 1,599; Block-print dupatta 899; Chanderi dupatta 1,099",
+    "Each product has an order button that opens WhatsApp to +91 00000 11111 with a prefilled message naming that product",
+    "Store timings show 11am to 9pm, Tuesday to Sunday, closed Monday",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, no broken in-page links, and nothing marked to be confirmed"
+  ]
+}

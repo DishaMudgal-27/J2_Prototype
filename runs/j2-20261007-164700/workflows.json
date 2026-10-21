@@ -1,0 +1,99 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "wf-header-menu",
+    "name": "Header, navigation, menu and site styling",
+    "purpose": "The site is empty: no Brew Lab title or heading, no navigation, no menu, no warm look.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 4,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the run exceeds 4 model calls or 12 minutes, or if the same completion_check item fails twice in a row."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "page title and h1 Brew Lab (Bengaluru)",
+      "nav with 5 in-page links",
+      "section#menu with Espresso ₹120, Cappuccino ₹180, Cold brew ₹200, Pour-over ₹220, Croissant ₹150, Banana bread ₹130",
+      "global CSS with no horizontal overflow at 360px and 1280px"
+    ],
+    "completion_check": "Title and h1 contain Brew Lab and text mentions Bengaluru; #menu lists exactly the six items with the exact prices; all five nav hrefs match existing element ids; no horizontal scroll at 360px and 1280px; no JS errors.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "usable section and head tags",
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "wf-visit",
+    "name": "Timings and location section",
+    "purpose": "Visitors cannot see when the cafe is open or how to reach it.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the run exceeds 3 model calls or 10 minutes, or if the same completion_check item fails twice in a row."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section#timings",
+      "section#location",
+      "tel:+918040002468 link",
+      "directions link built from the address"
+    ],
+    "completion_check": "#timings says 8am to 10pm every day and no closed days; #location shows 100 Feet Road, Indiranagar, Bengaluru 560038; the phone is an a[href^='tel:'] link for +91 80 4000 2468; a directions link URL contains the encoded address; no overflow at 360px.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "wf-gallery-stories",
+    "name": "Photo gallery placeholders and coffee stories",
+    "purpose": "No gallery and no stories about where the coffee comes from.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the run exceeds 3 model calls or 10 minutes, or if the same completion_check item fails twice in a row."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section#gallery with 6+ labelled placeholder tiles",
+      "section#stories with 3 story cards"
+    ],
+    "completion_check": "#gallery has at least 6 placeholder tiles each labelled as a photo placeholder with a category of cafe, food or drinks and no fake images; #stories has exactly three stories: Ratnagiri Estate (Chikmagalur, shade-grown), Kerehaklu (Chikmagalur, grown alongside pepper and cardamom), Baarbara Estate (Coorg, only ripe cherries hand-picked), with no added facts; no overflow at 360px.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  }
+]

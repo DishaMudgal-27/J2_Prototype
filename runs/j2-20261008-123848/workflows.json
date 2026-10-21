@@ -1,0 +1,219 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "catalogue",
+    "name": "Product list with category browse",
+    "covers": [
+      2,
+      3
+    ],
+    "fixes": [],
+    "purpose": "Site v0 has no product list, so shoppers cannot see the 10 products or browse by category.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the card count or any supplied price or size differs from the brief after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "products section in the site file",
+      "category tabs script"
+    ],
+    "completion_check": "10 cards show the supplied names, prices and sizes; clicking each of the 5 category tabs shows the right count (10, 3, 3, 2, 2).",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "style guide, usable section",
+    "style_guide": true,
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "whatsapp-order",
+    "name": "WhatsApp order buttons",
+    "covers": [
+      7
+    ],
+    "fixes": [],
+    "purpose": "Shoppers cannot order from the site.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 1,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any button href lacks the 910000011111 number or its product name after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "order script and button styles in the site file"
+    ],
+    "completion_check": "Each of the 10 buttons has an href starting https://wa.me/910000011111?text= containing its product's URL-encoded name.",
+    "dependencies": [
+      "catalogue"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "earthy-theme",
+    "name": "Earthy elegant theme",
+    "covers": [
+      9
+    ],
+    "fixes": [],
+    "purpose": "The site has no earthy, elegant look and no mobile-first styling.",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 1,
+      "time_limit_minutes": 5,
+      "retry_limit": 1,
+      "stop_loss": "Stop if horizontal scroll appears at 360px or 1280px after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "theme CSS and viewport tag in the site file"
+    ],
+    "completion_check": "Viewport meta tag is present, heading font is a serif, and there is no horizontal scroll at 360px or 1280px.",
+    "dependencies": [
+      "catalogue"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section and head tags",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "name-hero",
+    "name": "Shop name, Pune and single h1",
+    "covers": [
+      1
+    ],
+    "fixes": [],
+    "purpose": "Page shows no visible Thread & Loom name and no mention of Pune; there is no h1.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 1,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the page has zero or more than one h1, or Pune is not visible, after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "hero section with the single h1 in the site file"
+    ],
+    "completion_check": "Page has exactly one h1 containing Thread & Loom, the word Pune is visible, and the product line names kurtas, sarees, cotton shirts and dupattas.",
+    "dependencies": [
+      "catalogue"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "filters",
+    "name": "Size and price filters",
+    "covers": [
+      4
+    ],
+    "fixes": [],
+    "purpose": "No size or price control exists, so visitors cannot narrow the 10 products.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 1,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if a size or price choice gives a wrong card count, or free-size items vanish from the size filter, after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "filter controls and script in the site file"
+    ],
+    "completion_check": "Choosing a size or price range changes the visible card count correctly; Sarees and Dupattas still show under any size choice; no JS errors.",
+    "dependencies": [
+      "catalogue"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section",
+    "version": 5
+  },
+  {
+    "id": "W-6",
+    "proposal_id": "site-hygiene",
+    "name": "Responsive and link hygiene",
+    "covers": [
+      14
+    ],
+    "fixes": [],
+    "purpose": "Item 14 (viewport, no overflow, no JS errors, no broken links) is built but unpaid.",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 1,
+      "time_limit_minutes": 5,
+      "retry_limit": 1,
+      "stop_loss": "Stop if horizontal scroll appears at 360px or 1280px, or any in-page link is broken, after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "responsive rules and in-page nav links in the site file"
+    ],
+    "completion_check": "Viewport tag present; no horizontal overflow at 360px or 1280px; zero JS errors; zero broken in-page links.",
+    "dependencies": [
+      "catalogue"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-6",
+    "revises": null,
+    "agent": "W-6 Builder",
+    "last_check": "usable section",
+    "version": 6
+  }
+]

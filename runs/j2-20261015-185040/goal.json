@@ -1,0 +1,70 @@
+{
+  "statement": "A one-page, phone-friendly website for Brew Lab, a specialty coffee shop in Indiranagar, Bengaluru, showing the menu with prices, opening hours, location and contact details, and letting visitors pre-order for pickup with no online payment. Target: 30 pre-orders per week.",
+  "site_name": "Brew Lab",
+  "audience": "Coffee lovers and office staff near Indiranagar, Bengaluru",
+  "standards": [
+    "One page only, plain HTML, CSS and JavaScript in one file",
+    "Readable and usable on phones (360px wide) and desktop (1280px wide)",
+    "All shop facts shown exactly as given, none invented"
+  ],
+  "rules": [
+    "No online payment of any kind; customers pay at pickup",
+    "Pre-order form collects name, phone, items and pickup time and sends the order to hello@brewlab.example",
+    "No facts beyond those supplied by the Requester"
+  ],
+  "done_when": [
+    "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+    "The menu lists all seven items with their prices in rupees: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+    "The opening hours show Monday to Saturday 7:30 am to 9:00 pm and Sunday 8:30 am to 6:00 pm",
+    "The phone +91 98450 12345 and the email hello@brewlab.example are shown",
+    "A pre-order form has name, phone, items and pickup time fields, sends the order to hello@brewlab.example, works when submitted, and states that payment is at pickup with no payment fields",
+    "A map or map link for the shop location is on the page next to the address",
+    "The file is a single page with a mobile viewport setting and has no horizontal overflow at 360px and 1280px",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ],
+  "business_type": "coffee shop",
+  "visitor_needs": [
+    "See the menu with prices",
+    "See opening hours",
+    "Find the shop (address or map)",
+    "Pre-order a coffee for pickup"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [],
+  "facts": [
+    "Brew Lab",
+    "Indiranagar, Bengaluru",
+    "Filter coffee 90",
+    "Cappuccino 160",
+    "Latte 180",
+    "Cold brew 200",
+    "Masala chai 80",
+    "Almond croissant 140",
+    "Banana bread slice 120",
+    "Monday to Saturday 7:30 am to 9:00 pm",
+    "Sunday 8:30 am to 6:00 pm",
+    "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+    "+91 98450 12345",
+    "hello@brewlab.example"
+  ],
+  "charter_items": [
+    "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+    "The menu lists all seven items with their prices in rupees: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+    "The opening hours show Monday to Saturday 7:30 am to 9:00 pm and Sunday 8:30 am to 6:00 pm",
+    "The phone +91 98450 12345 and the email hello@brewlab.example are shown",
+    "A pre-order form has name, phone, items and pickup time fields, sends the order to hello@brewlab.example, works when submitted, and states that payment is at pickup with no payment fields",
+    "A map or map link for the shop location is on the page next to the address",
+    "The file is a single page with a mobile viewport setting and has no horizontal overflow at 360px and 1280px",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ],
+  "core_items": [
+    "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+    "The menu lists all seven items with their prices in rupees: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+    "The opening hours show Monday to Saturday 7:30 am to 9:00 pm and Sunday 8:30 am to 6:00 pm",
+    "The phone +91 98450 12345 and the email hello@brewlab.example are shown",
+    "A pre-order form has name, phone, items and pickup time fields, sends the order to hello@brewlab.example, works when submitted, and states that payment is at pickup with no payment fields",
+    "A map or map link for the shop location is on the page next to the address",
+    "The file is a single page with a mobile viewport setting and has no horizontal overflow at 360px and 1280px",
+    "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+  ]
+}

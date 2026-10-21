@@ -1,0 +1,102 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "wf-shell",
+    "name": "Page shell, menu, hours, location and gallery",
+    "purpose": "No page exists. Visitors cannot see the menu, hours, address, phone or gallery, and there is no navigation.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 10 or after 1 retry without the completion check passing; report to Coordination."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "header and nav",
+      "menu section",
+      "hours section",
+      "location section",
+      "gallery section with 6 SVG drawings",
+      "base CSS"
+    ],
+    "completion_check": "Menu lists exactly the 6 supplied items and prices. Hours, address and phone match the charter. Gallery shows 6 images with non-empty alt text. No horizontal overflow at 360px and 1280px. No JS errors on load.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "usable section and head tags",
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "wf-farms",
+    "name": "Three coffee farm story blocks",
+    "purpose": "The farms section is missing. The charter needs three separate stories built only from the supplied facts.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 10 or after 1 retry without the completion check passing; report to Coordination."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "farms section with 3 story blocks"
+    ],
+    "completion_check": "Exactly 3 farm blocks, each with name and location and only the supplied facts. The section has an id that the nav links to.",
+    "dependencies": [
+      "wf-shell"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "wf-preorder",
+    "name": "Pickup pre-order form via WhatsApp",
+    "purpose": "Visitors cannot place a pickup order.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 2,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 15 or after 1 retry without the completion check passing; report to Coordination."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "pre-order section",
+      "form JS"
+    ],
+    "completion_check": "Valid submit opens a wa.me/919845000000 URL containing each chosen item, quantity and the name. Invalid submit is blocked with a visible message. Section states payment at pickup and pickup within 15 minutes. No JS errors on load or submit. No horizontal overflow at 360px.",
+    "dependencies": [
+      "wf-shell"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  }
+]

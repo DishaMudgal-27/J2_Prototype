@@ -1,0 +1,542 @@
+{
+  "run": "20261007-184146",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "force_audit_fail": null,
+  "test_lessons": false,
+  "model": "sonnet",
+  "mock": false,
+  "brief": "make a website for my cousin's clothing boutique called Thread & Loom in Pune. it sells handloom kurtas, sarees, cotton shirts and dupattas. people should be able to browse products by category, filter by size and price, see a size guide, check new arrivals, and order on whatsapp. also show a lookbook section with styled outfits, the store timings and location, the return and exchange policy, and a few customer reviews. it should feel earthy and elegant and work well on phones",
+  "change_requests": [],
+  "status": "done",
+  "outcome": "Done: the site is workable. Every done-when item passes with Audit's evidence and the render check is clean.",
+  "budget": {
+    "start": 150,
+    "granted": 150,
+    "used": 141,
+    "raises": []
+  },
+  "ai_calls": 33,
+  "cycles": 2,
+  "questions_to_user": [
+    {
+      "kind": "info",
+      "asked": [
+        "What is the WhatsApp number customers should order on, the full shop address in Pune, and the days and hours the shop is open?",
+        "What does the shop sell, item by item? For each one, please share the name, category (kurta, saree, cotton shirt or dupatta), price, sizes available, and whether it is a new arrival.",
+        "What are the return and exchange rules (for example how many days, and what condition items must be in), and what measurements go in the size guide (chest, waist, length for each size)?",
+        "How should we handle product photos, lookbook outfits and customer reviews?"
+      ],
+      "answer": "Address: 18 FC Road, Shivajinagar, Pune 411005. Phone: +91 20 4000 7788. Instagram: @threadandloom.pune\nTimings: 11am to 9pm, Tuesday to Sunday. Closed on Monday.\nProducts (₹, sizes):\nKurtas: Indigo block-print kurta 1,499 (S-XXL), Mustard handloom kurta 1,699 (S-XL), White chikankari kurta 2,199 (XS-XL)\nSarees: Maheshwari cotton saree 3,499, Chanderi silk-cotton saree 4,999, Ikat handloom saree 3,999 (free size)\nShirts: Khadi cotton shirt 1,299 (S-XXL), Linen-blend shirt 1,599 (M-XXL)\nDupattas: Ajrakh dupatta 899, Bandhani dupatta 1,099 (free size)\nNew arrivals: White chikankari kurta, Ikat handloom saree, Linen-blend shirt.\nSize guide (chest in inches): XS 32, S 34, M 36, L 38, XL 40, XXL 42.\nOrders: WhatsApp +91 98220 33445 with product, size and quantity. Pay on delivery or UPI. Delivery across Pune in 2 days, ₹79 charge, free above ₹2,999.\nReturns: exchange within 7 days if unworn with tags. No returns on sale items.\nReviews: \"Beautiful fabric, fits perfectly\" - Meera K. / \"Fast delivery and lovely packing\" - Arjun S. / \"My go-to for festive kurtas\" - Priya D.\nPhotos: not yet, leave empty photo spots. Lookbook: 3 outfit ideas built from the products above."
+    },
+    {
+      "kind": "limit",
+      "asked": [
+        "What should the department do?"
+      ],
+      "answer": "Option 1",
+      "decision": "continue"
+    }
+  ],
+  "conflicts": [],
+  "validator_rejections": [],
+  "holds": [],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 8,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-11",
+          "item": 11,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-12",
+          "item": 12,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-13",
+          "item": 13,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-14",
+          "item": 14,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-15",
+          "item": 15,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-16",
+          "item": 16,
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-1",
+          "item": "R-1",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-2",
+          "item": "R-2",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-3",
+          "item": "R-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-4",
+          "item": "R-4",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-5",
+          "item": "R-5",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-6",
+          "item": "R-6",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "R-7",
+          "item": "R-7",
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-17",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "version": 10,
+      "all_pass": true,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-11",
+          "item": 11,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-12",
+          "item": 12,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-13",
+          "item": 13,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-14",
+          "item": 14,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-15",
+          "item": 15,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-16",
+          "item": 16,
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-1",
+          "item": "R-1",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-2",
+          "item": "R-2",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-3",
+          "item": "R-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-4",
+          "item": "R-4",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-5",
+          "item": "R-5",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-6",
+          "item": "R-6",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-7",
+          "item": "R-7",
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-17",
+          "item": null,
+          "verdict": "PASS"
+        }
+      ]
+    }
+  ],
+  "site_versions": 10,
+  "workable": [],
+  "to_be_confirmed": [],
+  "dropped_by_requester": [],
+  "workflow_agents": [
+    {
+      "id": "W-1",
+      "agent": "W-1 Builder",
+      "section": "W-1",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-2",
+      "agent": "W-2 Builder",
+      "section": "W-2",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-3",
+      "agent": "W-3 Builder",
+      "section": "W-3",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-4",
+      "agent": "W-4 Builder",
+      "section": "W-4",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-5",
+      "agent": "W-5 Builder",
+      "section": "W-5",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-6",
+      "agent": "W-6 Builder",
+      "section": "W-6",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-7",
+      "agent": "W-7 Builder",
+      "section": "W-7",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-8",
+      "agent": "W-8 Builder",
+      "section": "W-8",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-9",
+      "agent": "W-9 Builder",
+      "section": "W-6",
+      "revises": "W-6",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-10",
+      "agent": "W-10 Builder",
+      "section": "W-1",
+      "revises": "W-1",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    }
+  ],
+  "limits_hit": [
+    "Only you can close what's left: these done-when items are to be confirmed."
+  ],
+  "lessons": {
+    "memory": true,
+    "saved": [
+      "L-20261007-184146-1"
+    ],
+    "used": []
+  },
+  "playbooks": {
+    "saved": "P-20261007-184146",
+    "used": [
+      {
+        "cycle": 1,
+        "playbook": "P-20261007-182425",
+        "changes": "Dropped Animations and Stories, split Core sections into one workflow per section, and put the viewport meta in the scaffold so no separate Viewport fix is needed.",
+        "offered": [
+          "P-20261007-182425",
+          "P-20261007-182403"
+        ]
+      }
+    ]
+  },
+  "business_type": "clothing boutique",
+  "style_guide": true,
+  "rubric": [
+    {
+      "id": "R-1",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-2",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-3",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-4",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-5",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-6",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-7",
+      "pass": true,
+      "verdict": "PASS"
+    }
+  ],
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The site shows all 10 products with name, category, price and size range exactly as supplied: Indigo block-print kurta 1,499 (S-XXL), Mustard handloom kurta 1,699 (S-XL), White chikankari kurta 2,199 (XS-XL), Maheshwari cotton saree 3,499, Chanderi silk-cotton saree 4,999, Ikat handloom saree 3,999, Khadi cotton shirt 1,299 (S-XXL), Linen-blend shirt 1,599 (M-XXL), Ajrakh dupatta 899, Bandhani dupatta 1,099 (sarees and dupattas free size)",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "Visitors can browse by category (kurtas, sarees, shirts, dupattas) using controls in the page that show or hide products",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "Visitors can filter products by size and by price using controls in the page, and the product list updates",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "A size guide shows chest in inches: XS 32, S 34, M 36, L 38, XL 40, XXL 42",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "A new arrivals section lists White chikankari kurta, Ikat handloom saree and Linen-blend shirt",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "Each product has an order button that opens a WhatsApp link to 918822033445 (wa.me) with a message prefilled with product name, size and quantity",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "A lookbook section shows exactly 3 styled outfit ideas, each made only from listed products, with empty photo spots",
+      "pass": true
+    },
+    {
+      "item": 8,
+      "criterion": "Products have empty photo spots, with no stand-in or invented pictures",
+      "pass": true
+    },
+    {
+      "item": 9,
+      "criterion": "A store info section shows address 18 FC Road, Shivajinagar, Pune 411005, phone +91 20 4000 7788, Instagram @threadandloom.pune, and timings 11am to 9pm Tuesday to Sunday, closed Monday",
+      "pass": true
+    },
+    {
+      "item": 10,
+      "criterion": "A map or directions link to the shop address is present",
+      "pass": true
+    },
+    {
+      "item": 11,
+      "criterion": "An ordering and delivery section states WhatsApp ordering with product, size and quantity, pay on delivery or UPI, delivery across Pune in 2 days, Rs 79 charge, free above Rs 2,999",
+      "pass": true
+    },
+    {
+      "item": 12,
+      "criterion": "A return and exchange section states exchange within 7 days if unworn with tags, and no returns on sale items",
+      "pass": true
+    },
+    {
+      "item": 13,
+      "criterion": "A reviews section shows exactly these three reviews with names: \"Beautiful fabric, fits perfectly\" - Meera K.; \"Fast delivery and lovely packing\" - Arjun S.; \"My go-to for festive kurtas\" - Priya D.",
+      "pass": true
+    },
+    {
+      "item": 14,
+      "criterion": "The page has a navigation menu with in-page links to every section, and each link points to an existing section",
+      "pass": true
+    },
+    {
+      "item": 15,
+      "criterion": "The layout has a mobile-first responsive design with a viewport meta tag and no horizontal overflow at 360px and 1280px",
+      "pass": true
+    },
+    {
+      "item": 16,
+      "criterion": "The site is one HTML file with inline CSS and JavaScript, no build step, and the file contains no placeholder text such as lorem ipsum or TBD",
+      "pass": true
+    }
+  ],
+  "route_check_violations": []
+}

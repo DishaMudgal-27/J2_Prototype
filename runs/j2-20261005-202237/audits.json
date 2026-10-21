@@ -1,0 +1,130 @@
+[
+  {
+    "cycle": 1,
+    "version": 2,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The site is a single HTML file with its CSS and JavaScript inline, needing no build step and no server code",
+        "verdict": "PASS",
+        "note": "One file of 12,516 bytes with one inline style block and one inline script; the only external resources are wa.me links; no JS errors.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The file has one page with a menu section listing drinks, each with a price in rupees or a visible TBC tag",
+        "verdict": "PASS",
+        "note": "Six drinks in #menu, each with a '₹ TBC' price tag; the drink names are also tagged TBC as placeholders.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The file has an opening hours section covering every day of the week, with each unknown time shown as a visible TBC tag",
+        "verdict": "PASS",
+        "note": "The #hours table has Monday to Sunday rows, each reading 'Opens TBC – Closes TBC'.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The file has a location section naming Indiranagar, Bengaluru, with the street address and map pin shown as visible TBC tags until supplied",
+        "verdict": "PASS",
+        "note": "#location shows 'Indiranagar, Bengaluru'; street address and map pin are both TBC tags.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The file has a pre-order section where a customer picks items and quantities, enters a name and chooses a pickup slot, and a button opens a WhatsApp link with the order text prefilled",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The form has 6 quantity inputs, a name input and a slot select. refresh() sets the button href to wa.me/<number>?text=encodeURIComponent(order). While the number is TBC, the click handler calls preventDefault and shows a message. Not run with a real number.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The pre-order section states that payment is at pickup and that the order is a request until staff confirm on WhatsApp, and the file contains no payment or card-entry form",
+        "verdict": "PASS",
+        "note": "The note reads 'Pay at pickup. This page takes no payment.' and 'Your order is a request until staff confirm it on WhatsApp'. The only form has number, text and select inputs; nothing for card entry.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "The WhatsApp number in the pre-order link is a visible TBC placeholder, not an invented number",
+        "verdict": "PASS",
+        "note": "WHATSAPP_NUMBER = \"\"; the link falls back to wa.me/TBC; the page shows 'Shop WhatsApp number: TBC'.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The file has a beans and farms section in which every bean origin and farm name is a visible TBC tag and no unsupplied sourcing claim appears",
+        "verdict": "PASS",
+        "note": "#beans has two blocks, each with 'Origin: TBC' and 'Farm: TBC', and a note stating that no sourcing is claimed. No other sourcing text found.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The file has a loyalty card section stating buy 9 coffees, get the 10th free",
+        "verdict": "PASS",
+        "note": "#loyalty reads 'Buy 9 coffees, get the 10th free.' with a 10-stamp card. Which drinks count is shown as a TBC tag.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "Every price, hour, address, map pin, bean origin, farm name and phone number in the file is either marked with a visible TBC tag or removed; none is invented",
+        "verdict": "PASS",
+        "note": "Read the full file: every such fact is a TBC tag. No digits resembling a price, time or phone number appear in the visible copy.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 10,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "mechanical": {
+      "available": true,
+      "bytes": 12516,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://wa.me/",
+        "https://wa.me/TBC"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

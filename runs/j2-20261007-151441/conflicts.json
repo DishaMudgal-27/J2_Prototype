@@ -1,0 +1,89 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 2,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 2",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 30,
+        "text": "@Priority One fix workflow on W-2 only, priced at the fix part, 8. Budget remaining is 5, so it is 3 short and needs a ruling from you or Identity. The W-2 builder will find which two items lack a visible price, since the cause is unknown, and make all six show their charter price. I added no scope for F-4, F-10 or F-11.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 31,
+        "text": "@Adaptation REFUSE for now. The fix part costs 8 and 5 remains. The price is fixed and the workflow is already a single part, so I can't counter with a smaller version. This is the right fix and I would grant it at once if funded. Take it to @Identity as a budget-limit question: the Requester can add at least 3 budget, drop done-when item 2, or ship as is. Resubmit the same workflow once the budget is at 8 or more.",
+        "position": "REFUSE: nothing",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 32,
+        "text": "@Priority Reshaped to fit the 5 left: same W-2 rewrite, priced as one styling part (5) instead of the fix part (8). It is scoped to making all six charter prices visible in the menu, with no change to F-4, F-10 or F-11. Trade-off: styling only covers a presentation cause such as hidden or clipped price text. If the cause is missing markup or data, this fails and the gap goes to Identity for a budget ruling. It would leave 0 budget with no retry funding.",
+        "position": "Menu price visibility fix (5)",
+        "agree": false
+      },
+      {
+        "n": 3,
+        "who": "priority",
+        "msg": 33,
+        "text": "@Adaptation GRANT for the W-2 rewrite at one styling part, cost 5 of the 5 left. It is the only version that fits the budget, and it targets the failing done-when item. Risk I'm accepting: this leaves 0 budget and no retry. If the cause is missing markup or data rather than presentation, the run fails and the gap goes to @Identity for a budget ruling. Keep the run to the six charter prices and nothing else.",
+        "position": "grants Adaptation's revision",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "adaptation",
+    "outcome": "Priority granted Adaptation's revision: Menu price visibility fix (5) goes to the validator.",
+    "priority_final": [],
+    "adaptation_final": [
+      {
+        "id": "wf-menu-price-fix",
+        "name": "Menu price visibility fix",
+        "goal_gap": "Audit F-2: two of the six menu items show no visible price, so done-when item 2 fails.",
+        "expected_outcome": "All six menu items show their charter price in ₹ (Espresso 120, Cappuccino 180, Pour-over 220, Cold brew 200, Croissant 150, Banana bread 130) under Coffee, Cold and Food.",
+        "outputs": [
+          "menu section with all six prices visible"
+        ],
+        "completion_check": "Six menu items each show the exact ₹ price from the charter next to the item; no horizontal overflow at 360px and 1280px; no JS errors.",
+        "dependencies": [
+          "wf-menu"
+        ],
+        "parts": [
+          "styling"
+        ],
+        "revises": "W-2",
+        "estimated_resources": {
+          "money": 5,
+          "calls": 2,
+          "time_minutes": 6
+        },
+        "estimate": 5,
+        "cost": 5
+      }
+    ],
+    "attempts_used": 3,
+    "registered": [
+      "Menu price visibility fix"
+    ]
+  }
+]

@@ -1,0 +1,38 @@
+{
+  "W-1": {
+    "owner": "W-7",
+    "head": "",
+    "body": "## Problem\n\nBrew Lab is a small specialty coffee shop in Indiranagar, Bengaluru. People cannot see the menu or order ahead.\n\nCoffee lovers and office staff near the shop are the people affected. The one-page Brew Lab website described in the rest of the document shows the menu with prices, the opening hours and the shop location, and lets people pre-order a coffee for pickup.",
+    "workflow": "Problem section: label inference, clear P4 wording"
+  },
+  "W-2": {
+    "owner": "W-2",
+    "head": "",
+    "body": "## Users\n\nThe site is for two groups of people near Brew Lab in Indiranagar, Bengaluru: coffee lovers and office staff nearby.\n\n### Coffee lovers\n\nOn the site, coffee lovers can:\n\n- See the menu with prices.\n- See opening hours and where the shop is.\n- Pre-order a coffee for pickup.\n\n### Office staff nearby\n\nOn the site, office staff nearby can:\n\n- See the menu with prices.\n- See opening hours and where the shop is.\n- Pre-order a coffee for pickup.\n\nBoth groups use the same one-page site. Neither group pays online: there is no online payment, and customers pay at pickup.",
+    "workflow": "PRD Users section"
+  },
+  "W-3": {
+    "owner": "W-3",
+    "head": "",
+    "body": "## Goals\n\nThe one-page Brew Lab website has three goals. Together they solve the problem that people cannot see the menu or order ahead, for both coffee lovers and office staff nearby.\n\n- **G1**: Show the menu with prices. The page lists all seven menu items, each with its price in rupees.\n- **G2**: Show the opening hours and where the shop is. The page shows the opening hours for Monday to Saturday and for Sunday, and the shop address in Indiranagar, Bengaluru.\n- **G3**: Let people pre-order a coffee for pickup. A visitor can send a pre-order from the page with their name, phone, items and pickup time, and pays at pickup because there is no online payment.",
+    "workflow": "PRD Goals section"
+  },
+  "W-4": {
+    "owner": "W-10",
+    "head": "",
+    "body": "## Requirements\n\nThe Brew Lab page must meet the requirements below. Coffee lovers and Office staff nearby use the same requirements.\n\n1. **R1**: The page shows a menu with all seven items and their prices in rupees: Filter coffee 90 rupees, Cappuccino 160 rupees, Latte 180 rupees, Cold brew 200 rupees, Masala chai 80 rupees, Almond croissant 140 rupees, Banana bread slice 120 rupees.\n2. **R2**: Each menu item is shown with its own price next to its name, and the page shows no menu item or price other than the seven in R1.\n3. **R3**: The page shows the opening hours for Monday to Saturday 7:30 am to 9:00 pm.\n4. **R4**: The page shows the opening hours for Sunday 8:30 am to 6:00 pm.\n5. **R5**: The page shows the shop address as 12, 100 Feet Road, Indiranagar, Bengaluru 560038.\n6. **R6**: The page shows the shop phone number +91 98450 12345 so customers can call.\n7. **R7**: The page shows the shop email address hello@brewlab.example.\n8. **R8**: The page has a pre-order form where the customer enters name, phone, items and pickup time, and the form has a field for each of these four.\n9. **R9**: When a customer submits the pre-order form, the order is emailed to hello@brewlab.example.\n10. **R10**: The page states \"No online payment, they pay at pickup\" next to the pre-order form, and the form has no payment fields.\n11. **R11**: The website is one page only: the menu, hours, address, contacts and pre-order form are all on that single page, with no second page.\n12. **R12**: The page works on phones: the page has no sideways scrolling and every pre-order form field can be used at a 360 px wide screen. Assumption: a phone screen is 360 px wide.\n13. **R13**: The website takes no online payment: customers pay at pickup.\n14. **R14**: Coffee lovers and Office staff nearby can both use the menu (R1, R2), the opening hours (R3, R4), the location (R5) and the pre-order form (R8, R9, R10) without any difference between the two groups.",
+    "workflow": "Requirements: 360 px label on the R12 line"
+  },
+  "W-5": {
+    "owner": "W-9",
+    "head": "",
+    "body": "## Success metrics\n\nEach metric below names the goal it measures. The one number in this section, 30 pre-orders per week, is the target given in the brief. The other two metrics are checked by reading the page.\n\n| Goal | Metric |\n|------|--------|\n| G1 | The page lists all seven menu items, each with its price in rupees, as given in the Requirements section. |\n| G2 | The page shows the opening hours for Monday to Saturday and for Sunday, and the shop address in Indiranagar, Bengaluru, as given in the Requirements section. |\n| G3 | Brew Lab receives 30 pre-orders per week through the pre-order form. |\n\n- **G3**: The measurement window for the pre-order target is each week.\n\nAssumption: Pre-orders are counted from the order emails received at hello@brewlab.example, because each submitted pre-order is emailed there.",
+    "workflow": "Success metrics: one Assumption line, no closing assumptions section"
+  },
+  "W-6": {
+    "owner": "W-11",
+    "head": "",
+    "body": "## Out of scope\n\nThis version of the Brew Lab website does not include the following.\n\n- **Online payment**: No online payment, they pay at pickup. The pre-order form has no payment fields, and the site takes no payment of any kind.\n- **Additional pages**: The site is one page only. It has no second page, and the menu, opening hours, address, contacts and pre-order form all stay on that single page.\n\nAnything not described in the Requirements section is not part of this version.",
+    "workflow": "Out of scope: end the document with no closing assumptions section"
+  }
+}

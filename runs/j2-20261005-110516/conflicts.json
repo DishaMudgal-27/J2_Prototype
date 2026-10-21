@@ -1,0 +1,136 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 1,
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "proposed": [
+      {
+        "name": "Choose stack and scaffold",
+        "purpose": "Plain HTML/CSS skeleton, no build step",
+        "cost": 15,
+        "outputs": [
+          "index.html"
+        ]
+      },
+      {
+        "name": "Core sections",
+        "purpose": "Hero, departments, doctors, appointment form, contact",
+        "cost": 45,
+        "outputs": [
+          "index.html"
+        ]
+      },
+      {
+        "name": "Patient blog",
+        "purpose": "5 health articles for trust and search",
+        "cost": 30,
+        "outputs": [
+          "blog section"
+        ]
+      },
+      {
+        "name": "Animations",
+        "purpose": "Scroll and hover effects",
+        "cost": 20,
+        "outputs": [
+          "CSS"
+        ]
+      }
+    ],
+    "adaptation_final": [
+      {
+        "name": "Choose stack and scaffold",
+        "purpose": "Plain HTML/CSS skeleton, no build step",
+        "cost": 15,
+        "outputs": [
+          "index.html"
+        ]
+      },
+      {
+        "name": "Core sections",
+        "purpose": "Hero, departments, doctors, appointment form, contact",
+        "cost": 45,
+        "outputs": [
+          "index.html"
+        ]
+      },
+      {
+        "name": "Animations",
+        "purpose": "Scroll and hover effects",
+        "cost": 10,
+        "outputs": [
+          "CSS"
+        ]
+      }
+    ],
+    "priority_final": [
+      {
+        "name": "Choose stack and scaffold",
+        "purpose": "Plain HTML/CSS skeleton, no build step",
+        "cost": 15,
+        "outputs": [
+          "index.html"
+        ]
+      },
+      {
+        "name": "Core sections",
+        "purpose": "Hero, departments, doctors, appointment form, contact",
+        "cost": 45,
+        "outputs": [
+          "index.html"
+        ]
+      },
+      {
+        "name": "Animations",
+        "purpose": "Scroll and hover effects",
+        "cost": 10,
+        "outputs": [
+          "CSS"
+        ]
+      }
+    ],
+    "clause": "standards: calm, trustworthy tone; done_when (no blog item)",
+    "ruling": "split",
+    "adaptation_gets": "One content element (up to 10 units)",
+    "priority_gets": "Reserve kept; no full blog",
+    "decided_by": "identity",
+    "decided": [
+      {
+        "name": "Choose stack and scaffold",
+        "purpose": "Plain HTML/CSS skeleton, no build step",
+        "cost": 15,
+        "outputs": [
+          "index.html"
+        ]
+      },
+      {
+        "name": "Core sections",
+        "purpose": "Hero, departments, doctors, appointment form, contact",
+        "cost": 45,
+        "outputs": [
+          "index.html"
+        ]
+      },
+      {
+        "name": "Animations",
+        "purpose": "Scroll and hover effects",
+        "cost": 10,
+        "outputs": [
+          "CSS"
+        ]
+      },
+      {
+        "name": "Health tips strip",
+        "purpose": "3 short tips",
+        "cost": 10,
+        "outputs": [
+          "index.html"
+        ],
+        "completion_check": "3 tips visible on the home page"
+      }
+    ]
+  }
+]

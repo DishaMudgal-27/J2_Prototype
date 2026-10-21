@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brew Lab</title>
+<!-- J2:W-1 head start (owner W-1) -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Cafe on 100 Feet Road, Indiranagar, Bengaluru</title>
+<meta name="description" content="Brew Lab, a cafe on 100 Feet Road, Indiranagar, Bengaluru. See today's hours, the menu, pre-order by WhatsApp and get directions.">
+<style>
+  :root {
+    --bl-bg: #faf6f0;
+    --bl-card: #ffffff;
+    --bl-ink: #2b1d14;
+    --bl-muted: #6f5f53;
+    --bl-accent: #8a4b22;
+    --bl-accent-dark: #6b3716;
+    --bl-line: #e6dccf;
+    --bl-radius: 12px;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--bl-ink);
+    background: var(--bl-bg);
+    overflow-wrap: break-word;
+  }
+  img, svg, video { max-width: 100%; height: auto; }
+  h1, h2, h3, p { margin-top: 0; }
+  a { color: var(--bl-accent-dark); }
+  /* Shared helpers other sections may reuse */
+  .bl-wrap { width: 100%; max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+  .bl-section { padding: 32px 0; }
+  .bl-section h2 { font-size: 1.5rem; margin-bottom: 8px; }
+  .bl-lead { color: var(--bl-muted); margin-bottom: 20px; }
+  .bl-card {
+    background: var(--bl-card);
+    border: 1px solid var(--bl-line);
+    border-radius: var(--bl-radius);
+    padding: 16px;
+    min-width: 0;
+  }
+  @media (min-width: 768px) {
+    .bl-wrap { padding: 0 24px; }
+    .bl-section { padding: 48px 0; }
+    .bl-section h2 { font-size: 1.875rem; }
+  }
+</style>
+<!-- J2:W-1 head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<style>
+  .bl-hero { background: var(--bl-accent-dark); color: #fff; padding: 28px 0; }
+  .bl-hero h1 { font-size: 2rem; margin-bottom: 4px; letter-spacing: 0.02em; }
+  .bl-hero p { margin: 0; color: #f1e3d6; }
+  .bl-menu-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  .bl-menu-group h3 {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    font-size: 1.125rem;
+    color: var(--bl-accent);
+    border-bottom: 2px solid var(--bl-line);
+  }
+  .bl-menu-list { list-style: none; margin: 0; padding: 0; }
+  .bl-menu-item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    min-width: 0;
+  }
+  .bl-menu-item + .bl-menu-item { border-top: 1px dashed var(--bl-line); }
+  .bl-menu-name { min-width: 0; overflow-wrap: anywhere; }
+  .bl-menu-price { font-weight: 700; white-space: nowrap; color: var(--bl-accent-dark); }
+  @media (min-width: 768px) {
+    .bl-hero { padding: 44px 0; }
+    .bl-hero h1 { font-size: 2.75rem; }
+    .bl-menu-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  }
+</style>
+
+<header class="bl-hero" id="top">
+  <div class="bl-wrap">
+    <h1>Brew Lab</h1>
+    <p>Cafe on 100 Feet Road, Indiranagar, Bengaluru</p>
+  </div>
+</header>
+
+<section class="bl-section" id="menu" aria-labelledby="menu-title">
+  <div class="bl-wrap">
+    <h2 id="menu-title">Menu</h2>
+    <p class="bl-lead">All prices in rupees (₹).</p>
+    <div class="bl-menu-grid">
+      <div class="bl-card bl-menu-group">
+        <h3>Coffee</h3>
+        <ul class="bl-menu-list">
+          <li class="bl-menu-item"><span class="bl-menu-name">Espresso</span><span class="bl-menu-price">₹120</span></li>
+          <li class="bl-menu-item"><span class="bl-menu-name">Cappuccino</span><span class="bl-menu-price">₹180</span></li>
+          <li class="bl-menu-item"><span class="bl-menu-name">Pour-over</span><span class="bl-menu-price">₹220</span></li>
+        </ul>
+      </div>
+      <div class="bl-card bl-menu-group">
+        <h3>Cold</h3>
+        <ul class="bl-menu-list">
+          <li class="bl-menu-item"><span class="bl-menu-name">Cold brew</span><span class="bl-menu-price">₹200</span></li>
+        </ul>
+      </div>
+      <div class="bl-card bl-menu-group">
+        <h3>Food</h3>
+        <ul class="bl-menu-list">
+          <li class="bl-menu-item"><span class="bl-menu-name">Croissant</span><span class="bl-menu-price">₹150</span></li>
+          <li class="bl-menu-item"><span class="bl-menu-name">Banana bread</span><span class="bl-menu-price">₹130</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- J2:W-1 end -->
+<!-- J2:W-2 start (owner W-2) -->
+<style>
+  .bl-hours-card { max-width: 560px; }
+  .bl-hours-list { list-style: none; margin: 0; padding: 0; }
+  .bl-hours-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    padding: 10px 12px;
+    min-width: 0;
+    border-left: 4px solid transparent;
+    border-radius: 6px;
+  }
+  .bl-hours-row + .bl-hours-row { border-top: 1px dashed var(--bl-line); }
+  .bl-hours-day { min-width: 0; font-weight: 600; }
+  .bl-hours-time { color: var(--bl-muted); white-space: nowrap; }
+  .bl-hours-row.bl-today {
+    background: #f6e6d4;
+    border-left-color: var(--bl-accent);
+    border-top-color: transparent;
+  }
+  .bl-hours-row.bl-today + .bl-hours-row { border-top-color: transparent; }
+  .bl-hours-row.bl-today .bl-hours-day,
+  .bl-hours-row.bl-today .bl-hours-time { color: var(--bl-accent-dark); font-weight: 700; }
+  .bl-hours-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--bl-accent);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    vertical-align: middle;
+  }
+</style>
+
+<section class="bl-section" id="hours" aria-labelledby="hours-title">
+  <div class="bl-wrap">
+    <h2 id="hours-title">Opening hours</h2>
+    <p class="bl-lead">Open every day. Today's hours are highlighted.</p>
+    <div class="bl-card bl-hours-card">
+      <ul class="bl-hours-list" id="bl-hours-list">
+        <li class="bl-hours-row" data-day="1"><span class="bl-hours-day">Monday</span><span class="bl-hours-time">8am to 10pm</span></li>
+        <li class="bl-hours-row" data-day="2"><span class="bl-hours-day">Tuesday</span><span class="bl-hours-time">8am to 10pm</span></li>
+        <li class="bl-hours-row" data-day="3"><span class="bl-hours-day">Wednesday</span><span class="bl-hours-time">8am to 10pm</span></li>
+        <li class="bl-hours-row" data-day="4"><span class="bl-hours-day">Thursday</span><span class="bl-hours-time">8am to 10pm</span></li>
+        <li class="bl-hours-row" data-day="5"><span class="bl-hours-day">Friday</span><span class="bl-hours-time">8am to 10pm</span></li>
+        <li class="bl-hours-row" data-day="6"><span class="bl-hours-day">Saturday</span><span class="bl-hours-time">9am to 11pm</span></li>
+        <li class="bl-hours-row" data-day="0"><span class="bl-hours-day">Sunday</span><span class="bl-hours-time">9am to 11pm</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function () {
+    try {
+      var list = document.getElementById('bl-hours-list');
+      if (!list) { return; }
+      var today = String(new Date().getDay()); // 0 = Sunday ... 6 = Saturday
+      var rows = list.querySelectorAll('.bl-hours-row');
+      for (var i = 0; i < rows.length; i++) {
+        if (rows[i].getAttribute('data-day') === today) {
+          rows[i].classList.add('bl-today');
+          rows[i].setAttribute('aria-current', 'date');
+          var dayEl = rows[i].querySelector('.bl-hours-day');
+          if (dayEl) {
+            var badge = document.createElement('span');
+            badge.className = 'bl-hours-badge';
+            badge.textContent = 'Today';
+            dayEl.appendChild(badge);
+          }
+          break;
+        }
+      }
+    } catch (e) {
+      /* highlight is cosmetic; never break the page */
+    }
+  })();
+</script>
+<!-- J2:W-2 end -->
+<!-- J2:W-3 start (owner W-3) -->
+<style>
+  .bl-order-card { max-width: 560px; }
+  .bl-order-list { list-style: none; margin: 0 0 12px; padding: 0; }
+  .bl-order-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    min-width: 0;
+  }
+  .bl-order-row + .bl-order-row { border-top: 1px dashed var(--bl-line); }
+  .bl-order-info { min-width: 0; flex: 1 1 auto; }
+  .bl-order-name { display: block; font-weight: 600; overflow-wrap: anywhere; }
+  .bl-order-price { display: block; color: var(--bl-muted); font-size: 0.9rem; }
+  .bl-order-qty {
+    flex: 0 0 auto;
+    width: 76px;
+    padding: 10px 8px;
+    font: inherit;
+    text-align: center;
+    color: var(--bl-ink);
+    background: #fff;
+    border: 1px solid var(--bl-line);
+    border-radius: 8px;
+  }
+  .bl-order-field { margin: 4px 0 16px; }
+  .bl-order-field label { display: block; font-weight: 600; margin-bottom: 4px; }
+  .bl-order-name-input {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    font: inherit;
+    color: var(--bl-ink);
+    background: #fff;
+    border: 1px solid var(--bl-line);
+    border-radius: 8px;
+  }
+  .bl-order-total {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: #f6e6d4;
+    border-radius: 8px;
+    font-weight: 700;
+    color: var(--bl-accent-dark);
+  }
+  .bl-order-total output { font-size: 1.5rem; white-space: nowrap; }
+  .bl-order-submit {
+    display: block;
+    width: 100%;
+    padding: 14px 16px;
+    font: inherit;
+    font-weight: 700;
+    color: #fff;
+    background: var(--bl-accent-dark);
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .bl-order-submit:hover, .bl-order-submit:focus-visible { background: var(--bl-accent); }
+  .bl-order-msg { min-height: 1.5em; margin: 8px 0 0; color: #a12b1c; font-weight: 600; }
+  .bl-order-note { margin: 12px 0 0; padding: 0; list-style: none; color: var(--bl-muted); font-size: 0.95rem; }
+  .bl-order-note li + li { margin-top: 4px; }
+</style>
+
+<section class="bl-section" id="preorder" aria-labelledby="preorder-title">
+  <div class="bl-wrap">
+    <h2 id="preorder-title">Pre-order for pickup</h2>
+    <p class="bl-lead">Choose your items and send the order on WhatsApp. Prices in rupees (₹).</p>
+    <div class="bl-card bl-order-card">
+      <form id="bl-order-form" novalidate>
+        <ul class="bl-order-list">
+          <li class="bl-order-row">
+            <div class="bl-order-info"><span class="bl-order-name">Espresso</span><span class="bl-order-price">₹120</span></div>
+            <input class="bl-order-qty" type="number" inputmode="numeric" min="0" max="20" step="1" value="0" data-name="Espresso" data-price="120" aria-label="Quantity of Espresso, ₹120 each">
+          </li>
+          <li class="bl-order-row">
+            <div class="bl-order-info"><span class="bl-order-name">Cappuccino</span><span class="bl-order-price">₹180</span></div>
+            <input class="bl-order-qty" type="number" inputmode="numeric" min="0" max="20" step="1" value="0" data-name="Cappuccino" data-price="180" aria-label="Quantity of Cappuccino, ₹180 each">
+          </li>
+          <li class="bl-order-row">
+            <div class="bl-order-info"><span class="bl-order-name">Pour-over</span><span class="bl-order-price">₹220</span></div>
+            <input class="bl-order-qty" type="number" inputmode="numeric" min="0" max="20" step="1" value="0" data-name="Pour-over" data-price="220" aria-label="Quantity of Pour-over, ₹220 each">
+          </li>
+          <li class="bl-order-row">
+            <div class="bl-order-info"><span class="bl-order-name">Cold brew</span><span class="bl-order-price">₹200</span></div>
+            <input class="bl-order-qty" type="number" inputmode="numeric" min="0" max="20" step="1" value="0" data-name="Cold brew" data-price="200" aria-label="Quantity of Cold brew, ₹200 each">
+          </li>
+          <li class="bl-order-row">
+            <div class="bl-order-info"><span class="bl-order-name">Croissant</span><span class="bl-order-price">₹150</span></div>
+            <input class="bl-order-qty" type="number" inputmode="numeric" min="0" max="20" step="1" value="0" data-name="Croissant" data-price="150" aria-label="Quantity of Croissant, ₹150 each">
+          </li>
+          <li class="bl-order-row">
+            <div class="bl-order-info"><span class="bl-order-name">Banana bread</span><span class="bl-order-price">₹130</span></div>
+            <input class="bl-order-qty" type="number" inputmode="numeric" min="0" max="20" step="1" value="0" data-name="Banana bread" data-price="130" aria-label="Quantity of Banana bread, ₹130 each">
+          </li>
+        </ul>
+
+        <div class="bl-order-field">
+          <label for="bl-order-customer">Your name (optional)</label>
+          <input class="bl-order-name-input" id="bl-order-customer" type="text" maxlength="60" autocomplete="name">
+        </div>
+
+        <div class="bl-order-total">
+          <span>Total</span>
+          <output id="bl-order-total" for="bl-order-form" aria-live="polite">₹0</output>
+        </div>
+
+        <button class="bl-order-submit" type="submit">Send order on WhatsApp</button>
+        <p class="bl-order-msg" id="bl-order-msg" role="status" aria-live="polite"></p>
+      </form>
+
+      <ul class="bl-order-note">
+        <li>Pay at pickup.</li>
+        <li>Pickup within 15 minutes of ordering.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function () {
+    try {
+      var form = document.getElementById('bl-order-form');
+      var totalEl = document.getElementById('bl-order-total');
+      var msgEl = document.getElementById('bl-order-msg');
+      var nameEl = document.getElementById('bl-order-customer');
+      if (!form || !totalEl) { return; }
+      var inputs = form.querySelectorAll('.bl-order-qty');
+      var PHONE = '919845000000';
+
+      function qtyOf(input) {
+        var n = parseInt(input.value, 10);
+        if (isNaN(n) || n < 0) { n = 0; }
+        if (n > 20) { n = 20; }
+        return n;
+      }
+
+      function lines() {
+        var out = [];
+        for (var i = 0; i < inputs.length; i++) {
+          var q = qtyOf(inputs[i]);
+          if (q > 0) {
+            var price = parseInt(inputs[i].getAttribute('data-price'), 10);
+            out.push({ name: inputs[i].getAttribute('data-name'), qty: q, price: price, sub: q * price });
+          }
+        }
+        return out;
+      }
+
+      function total(items) {
+        var t = 0;
+        for (var i = 0; i < items.length; i++) { t += items[i].sub; }
+        return t;
+      }
+
+      function update() {
+        totalEl.textContent = '\u20B9' + total(lines());
+        if (msgEl) { msgEl.textContent = ''; }
+      }
+
+      for (var i = 0; i < inputs.length; i++) {
+        inputs[i].addEventListener('input', update);
+        inputs[i].addEventListener('change', function () {
+          // normalise out-of-range or blank values after editing
+          this.value = String(qtyOf(this));
+          update();
+        });
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var items = lines();
+        if (items.length === 0) {
+          if (msgEl) { msgEl.textContent = 'Please choose at least one item.'; }
+          return;
+        }
+        var text = 'Hi Brew Lab, I would like to pre-order for pickup:\n';
+        for (var j = 0; j < items.length; j++) {
+          text += '- ' + items[j].qty + ' x ' + items[j].name + ' (\u20B9' + items[j].sub + ')\n';
+        }
+        text += 'Total: \u20B9' + total(items) + '\n';
+        var who = nameEl ? nameEl.value.replace(/^\s+|\s+$/g, '') : '';
+        if (who) { text += 'Name: ' + who + '\n'; }
+        text += 'Pay at pickup.';
+        var url = 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent(text);
+        var w = null;
+        try { w = window.open(url, '_blank'); } catch (err) { w = null; }
+        if (!w) { window.location.href = url; }
+      });
+
+      update();
+    } catch (err) {
+      /* never break the rest of the page */
+    }
+  })();
+</script>
+<!-- J2:W-3 end -->
+<!-- J2:W-4 start (owner W-4) -->
+<style>
+  .bl-loyalty-card { max-width: 560px; }
+  .bl-loyalty-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+    justify-items: center;
+  }
+  .bl-stamp {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 64px;
+    aspect-ratio: 1 / 1;
+    min-width: 0;
+    border: 2px dashed var(--bl-accent);
+    border-radius: 50%;
+    background: #fff;
+    color: var(--bl-muted);
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1;
+  }
+  .bl-stamp.bl-stamp-free {
+    border-style: solid;
+    border-color: var(--bl-accent-dark);
+    background: var(--bl-accent-dark);
+    color: #fff;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+  }
+  .bl-loyalty-note { margin: 16px 0 0; color: var(--bl-muted); font-size: 0.95rem; }
+  @media (min-width: 768px) {
+    .bl-loyalty-grid { gap: 14px; }
+    .bl-stamp.bl-stamp-free { font-size: 0.95rem; }
+  }
+</style>
+
+<section class="bl-section" id="loyalty" aria-labelledby="loyalty-title">
+  <div class="bl-wrap">
+    <h2 id="loyalty-title">Loyalty card</h2>
+    <p class="bl-lead">Collect stamps on your Brew Lab card. The 10th circle is FREE.</p>
+    <div class="bl-card bl-loyalty-card">
+      <ol class="bl-loyalty-grid" aria-label="Loyalty stamp card, 10 stamps">
+        <li class="bl-stamp" aria-label="Stamp 1">1</li>
+        <li class="bl-stamp" aria-label="Stamp 2">2</li>
+        <li class="bl-stamp" aria-label="Stamp 3">3</li>
+        <li class="bl-stamp" aria-label="Stamp 4">4</li>
+        <li class="bl-stamp" aria-label="Stamp 5">5</li>
+        <li class="bl-stamp" aria-label="Stamp 6">6</li>
+        <li class="bl-stamp" aria-label="Stamp 7">7</li>
+        <li class="bl-stamp" aria-label="Stamp 8">8</li>
+        <li class="bl-stamp" aria-label="Stamp 9">9</li>
+        <li class="bl-stamp bl-stamp-free" aria-label="Stamp 10, FREE">FREE</li>
+      </ol>
+      <p class="bl-loyalty-note">Ask at the counter to get your card stamped.</p>
+    </div>
+  </div>
+</section>
+<!-- J2:W-4 end -->
+</body>
+</html>

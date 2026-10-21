@@ -1,0 +1,307 @@
+{
+  "metrics": {
+    "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): Menu items, categories and prices; Opening hours for each day; Street address and map location; Phone or WhatsApp number and the channel through which pre-orders reach the cafe; Pickup lead time and any order cutoff; Names and locations of the three coffee farms; Story content for each farm (history, people, growing and processing methods); Cafe photos for the gallery and farm photos; Logo, brand colours and tagline, if any.",
+    "brief": "Brew Lab, Indiranagar, Bengaluru. One-page site with menu, hours, location and pre-order for pickup. We want a big photo gallery of the cafe AND a detailed story section about each of our three coffee farms. Keep costs low.",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 2,
+    "ai_calls": 30,
+    "minutes": 17.7,
+    "budget": {
+      "total": 40,
+      "start": 35,
+      "cap": 70,
+      "raises": [
+        {
+          "cycle": 2,
+          "asked": 5,
+          "from": 35,
+          "to": 40,
+          "why": "the Requester chose option 1: 1: Raise the budget from 35 to 40 (+5) and build the pickup-only pre-order form with an order summary. Orders show on the page and reach the cafe only once you supply an order channel."
+        }
+      ],
+      "spent": 40,
+      "rate_card": true
+    },
+    "site_versions": 4,
+    "site_bytes": 33538,
+    "agents": {
+      "identity": {
+        "turns": 6,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 8,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 9,
+        "redirects": 0,
+        "invalid_moves": 1
+      },
+      "coordination": {
+        "turns": 4,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "builder": {
+        "turns": 4,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 5,
+      "grants": 1,
+      "counters": 2,
+      "refuses": 2,
+      "refuses_converted_by_code": 1,
+      "parks": 1
+    },
+    "conflicts": {
+      "total": 2,
+      "settled_by_agents": 2,
+      "resolved_by_identity": 0,
+      "asked_requester": 0,
+      "open": 0,
+      "list": [
+        {
+          "id": "C-1",
+          "cycle": 1,
+          "topic": "proposal",
+          "between": [
+            "adaptation",
+            "priority"
+          ],
+          "attempts": 4,
+          "escalated": false,
+          "resolved_by": "agents",
+          "user_question": null,
+          "user_answer": null,
+          "outcome": "Adaptation accepted Priority's COUNTER: Single-file page: nav, Menu, Hours, Location (10), Large photo gallery with enlarged view (10), Three coffee farm story blocks (10) goes to the validator."
+        },
+        {
+          "id": "C-2",
+          "cycle": 1,
+          "topic": "proposal",
+          "between": [
+            "adaptation",
+            "priority"
+          ],
+          "attempts": 4,
+          "escalated": false,
+          "resolved_by": "agents",
+          "user_question": null,
+          "user_answer": null,
+          "outcome": "Adaptation parked the proposal; nothing registered."
+        }
+      ]
+    },
+    "requester_questions": {
+      "total": 4,
+      "by_kind": {
+        "audit": 1,
+        "question": 3
+      }
+    },
+    "workflows": {
+      "registered": 4,
+      "done": 4,
+      "failed": 0,
+      "held_ever": 0,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "Single-file page: nav, Menu, Hours, Location",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-2",
+          "name": "Large photo gallery with enlarged view",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-3",
+          "name": "Three coffee farm story blocks",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-4",
+          "name": "Pickup-only pre-order form with order summary",
+          "agent_estimate": 10,
+          "charged": 10
+        }
+      ]
+    },
+    "validator_refusals": 0,
+    "role_refusals": 0,
+    "pauses": 4,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 0,
+    "audits": [
+      {
+        "cycle": 1,
+        "version": 3,
+        "all_pass": false,
+        "pass": 9,
+        "warn": 0,
+        "fail": 1,
+        "mechanical": [],
+        "mechanical_ran": true
+      },
+      {
+        "cycle": 2,
+        "version": 4,
+        "all_pass": true,
+        "pass": 10,
+        "warn": 0,
+        "fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      }
+    ],
+    "open_inputs": [
+      "Menu items, categories and prices",
+      "Opening hours for each day",
+      "Street address and map location",
+      "Phone or WhatsApp number and the channel through which pre-orders reach the cafe",
+      "Pickup lead time and any order cutoff",
+      "Names and locations of the three coffee farms",
+      "Story content for each farm (history, people, growing and processing methods)",
+      "Cafe photos for the gallery and farm photos",
+      "Logo, brand colours and tagline, if any"
+    ]
+  },
+  "review": {
+    "verdict": "The department reached 10/10 done-when on site v4 at 40/40 spend, but a Requester-answer parsing failure cost a second cycle and about 20 messages ([24]-[44]), and 'done' means a page structure full of marked placeholders.",
+    "agents": {
+      "identity": {
+        "score": 3,
+        "note": "Stayed in role and closed correctly [54], but did not act on Adaptation's budget question [8] until Audit flagged it [21]. Also stated the raise as done [25] when code had not applied it, and mixed A/B and 1/2 labels across [22], [30], [33]. It asked for the digit only at [41], the fourth ask."
+      },
+      "adaptation": {
+        "score": 4,
+        "note": "Surfaced the 50 vs 35 gap at once [4], revised honestly [6], parked at exchange 4 [38], and invented nothing. Weak point: its first cut was the pre-order form [4], although pre-order is named in the brief. Declining to propose in [40] was sensible cost discipline."
+      },
+      "priority": {
+        "score": 3,
+        "note": "Clear refuse-at-5, grant-at-40 position [37] with measurable stop-loss. But it quoted 35 [5] then corrected to 30 [7], and issued a GRANT of 10 against 5 remaining [27], which code turned into a REFUSE (the one invalid move)."
+      },
+      "coordination": {
+        "score": 4,
+        "note": "Stated its scheduling rule every turn and used the single-writer lock. It added an Audit dependency [10], then removed it because it was not declared [13]. Nothing needed holding."
+      },
+      "audit": {
+        "score": 4,
+        "note": "Correct on item 6 and its routing [21], and the verdicts match the code tally and mechanical checks. Visible evidence is the tally, not file quotes, so how deeply it read the file is unverified."
+      },
+      "builder": {
+        "score": 4,
+        "note": "Each build matched its workflow and reported scope [12][15][18][50]. File is 33.5 KB, under the 60 KB limit, with no JS errors. 'Nothing else changed' is self-reported and only partly checkable via Audit."
+      }
+    },
+    "went_well": [
+      "Funding gap named in the first Adaptation message [4]; no wrong trade of gallery vs farms, as the charter rule required.",
+      "Zero validator refusals, zero held workflows, 4 of 4 workflows done, 2 conflicts settled by agents without Identity.",
+      "Mechanical checks (overflow at 360px and 1280px, JS errors, broken links) ran on both versions and were clean [20][52].",
+      "Budget raise stayed under Requester control and was recorded only after a clear answer [44]."
+    ],
+    "problems": [
+      "Three 'A' replies [24][32][35] did not raise the budget. The first failure has no event or system message; the budget only showed as unchanged when Priority's GRANT was refused [28].",
+      "Adaptation asked about the 5 gap at [8]. Identity first spoke to the Requester at [22], after build and Audit, so the budget question waited about 14 messages.",
+      "Priority funded 30 of 35 and left 5 idle, knowing pre-order needed 10 [7]. That produced a known 9/10 audit in cycle 1.",
+      "Identity never asked the Requester for content at J2.a [2]. All four Requester questions were about budget or the answer format. Menu, hours, farms and photos are all placeholders (9 open inputs).",
+      "All four workflows charged exactly the estimate (10 each), so the run says nothing about whether agents estimate cost well."
+    ],
+    "learnings": [
+      "Test system: accept letter or digit answers, or show one label scheme only; this is the biggest cost driver here ([24] to [44]).",
+      "Test system: post a visible 'applied / not applied' line after every Requester answer that should change state. The silent failure at [24] hid the cause.",
+      "J2 design: if Adaptation raises a budget gap to Identity, require Identity to ask the Requester before the build starts. Test whether that avoids the cycle-2 rework.",
+      "J2 design: Priority should not GRANT contingent on an unrecorded raise [27]; it should COUNTER or hand to Identity. Keep the code budget check.",
+      "Test next: a brief with real menu, hours and farm facts, plus a variant where Identity must ask for content up front. As scored, 'done' is cheap with placeholders.",
+      "Test system: price workflows differently so estimate vs charge can differ; the flat rate card gives no signal.",
+      "Keep: stated scheduling rule, code-run mechanical checks, parking at exchange 4."
+    ]
+  },
+  "events": [
+    {
+      "agent": "adaptation",
+      "type": "dispute",
+      "detail": "C-1: Adaptation vs Priority about what to fund in cycle 1",
+      "msg": 5,
+      "cycle": 1
+    },
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "audit: 2 question(s) for the Requester",
+      "msg": 23,
+      "cycle": 1,
+      "pause": "audit"
+    },
+    {
+      "agent": "adaptation",
+      "type": "dispute",
+      "detail": "C-2: Adaptation vs Priority about what to fund in cycle 1",
+      "msg": 27,
+      "cycle": 1
+    },
+    {
+      "agent": "priority",
+      "type": "invalid_move",
+      "detail": "GRANT of 10 exceeds the remaining budget (5). Treated as REFUSE.",
+      "msg": 28,
+      "cycle": 1
+    },
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "question: 1 question(s) for the Requester",
+      "msg": 31,
+      "cycle": 1,
+      "pause": "question"
+    },
+    {
+      "agent": "identity",
+      "type": "unclear_answer",
+      "detail": "answer to 'Your earlier choice of A was not applied to the budget, so pre-order (cost 10) is still blocked with only 5 left. Please confirm which you want: raise the budget from 35 to 40 so a pickup-only pre-order form with an order summary is built, or keep 35 and leave a marked placeholder in the Pre-order section, meaning the pre-order requirement in your brief is not met.' names no single option",
+      "msg": 33,
+      "cycle": 1
+    },
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "question: 1 question(s) for the Requester",
+      "msg": 34,
+      "cycle": 1,
+      "pause": "question"
+    },
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "question: 1 question(s) for the Requester",
+      "msg": 42,
+      "cycle": 2,
+      "pause": "question"
+    },
+    {
+      "agent": "identity",
+      "type": "budget_raise",
+      "detail": "35 -> 40 (asked +5, cap 70; the Requester chose option 1: 1: Raise the budget from 35 to 40 (+5) and build the pickup-only pre-order form with an order summary. Orders show on the page and reach the cafe only once you supply an order channel.)",
+      "msg": 44,
+      "cycle": 2
+    }
+  ],
+  "made": "2026-10-06 13:45:08"
+}

@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#FFD23F",
+    "secondary": "#6B46FF",
+    "accent": "#FF4D8D",
+    "background": "#120D2E",
+    "surface": "#1E1747",
+    "text": "#FFFFFF",
+    "muted": "#C9C3E8"
+  },
+  "fonts": {
+    "heading": "'Space Grotesk', 'Segoe UI', Arial, sans-serif",
+    "body": "'Inter', 'Segoe UI', Arial, sans-serif",
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Space+Grotesk:wght@700&display=swap"
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "64px"
+  },
+  "radius": "16px",
+  "buttons": {
+    "primary": "display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 28px;background:#FFD23F;color:#120D2E;border:2px solid #FFD23F;border-radius:999px;font-weight:800;text-decoration:none;cursor:pointer",
+    "secondary": "display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 28px;background:transparent;color:#FFFFFF;border:2px solid #FFD23F;border-radius:999px;font-weight:800;text-decoration:none;cursor:pointer"
+  },
+  "card": "background:#1E1747;color:#FFFFFF;border:1px solid #3A2F7A;border-radius:16px;padding:20px",
+  "notes": "A dark violet base with yellow and pink highlights feels like a night-time tech event, and every text and button colour pair passes WCAG AA on phones."
+}

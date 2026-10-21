@@ -1,0 +1,487 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "hero",
+    "name": "Header and intro",
+    "covers": [
+      1
+    ],
+    "fixes": [],
+    "purpose": "The site has no title, header or statement of what the shop sells.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the checked output still lacks Thread & Loom or Pune after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "title tag",
+      "header",
+      "intro section"
+    ],
+    "completion_check": "Title and header contain 'Thread & Loom' and 'Pune', and the intro names all four product types.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "style guide, usable section and head tags",
+    "style_guide": true,
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "catalogue",
+    "name": "Product catalogue by category",
+    "covers": [
+      2,
+      11
+    ],
+    "fixes": [],
+    "purpose": "No products are shown.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 3,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if fewer than 10 correct product cards or any image URL remains after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "catalogue section",
+      "product card markup",
+      "category switching script"
+    ],
+    "completion_check": "All 10 products with supplied names and prices appear, tabs filter by category, every card has an empty photo spot, and there is no img src URL.",
+    "dependencies": [
+      "hero"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "filters",
+    "name": "Size and price filters",
+    "covers": [
+      3
+    ],
+    "fixes": [],
+    "purpose": "Visitors cannot narrow products by size or price.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any filter check fails after 1 retry or a JavaScript error appears."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "filter controls",
+      "filter script"
+    ],
+    "completion_check": "Size S shows only S products, Free size shows only sarees and dupattas, a price range hides others, and clearing restores all 10.",
+    "dependencies": [
+      "catalogue"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "sizeguide",
+    "name": "Size guide",
+    "covers": [
+      4
+    ],
+    "fixes": [],
+    "purpose": "No size guide.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any chest value differs from the supplied list after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "size guide section"
+    ],
+    "completion_check": "Table has 6 rows with the exact supplied chest values.",
+    "dependencies": [
+      "hero"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "newarrivals",
+    "name": "New arrivals",
+    "covers": [
+      5
+    ],
+    "fixes": [],
+    "purpose": "New items are not highlighted.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the section lists anything other than the 3 products after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "new arrivals section"
+    ],
+    "completion_check": "Exactly those 3 products and no others.",
+    "dependencies": [
+      "catalogue"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section",
+    "version": 5
+  },
+  {
+    "id": "W-6",
+    "proposal_id": "order",
+    "name": "WhatsApp order buttons",
+    "covers": [
+      6
+    ],
+    "fixes": [],
+    "purpose": "Visitors cannot order.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 2,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any card lacks a correct link after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "order button script"
+    ],
+    "completion_check": "Every product card has an order link to 910000011111 whose text parameter contains that product's name.",
+    "dependencies": [
+      "catalogue",
+      "newarrivals"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-6",
+    "revises": null,
+    "agent": "W-6 Builder",
+    "last_check": "usable section",
+    "version": 6
+  },
+  {
+    "id": "W-7",
+    "proposal_id": "lookbook",
+    "name": "Lookbook",
+    "covers": [
+      7
+    ],
+    "fixes": [],
+    "purpose": "No styled outfits.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any pairing is wrong or an image URL appears after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "lookbook section"
+    ],
+    "completion_check": "3 cards with exactly the supplied pairings, each with an empty photo spot and no image URLs.",
+    "dependencies": [
+      "hero"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-7",
+    "revises": null,
+    "agent": "W-7 Builder",
+    "last_check": "usable section",
+    "version": 7
+  },
+  {
+    "id": "W-8",
+    "proposal_id": "visit",
+    "name": "Visit us",
+    "covers": [
+      8
+    ],
+    "fixes": [],
+    "purpose": "Location and timings are missing.",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 2,
+      "time_limit_minutes": 6,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any detail differs from the supplied text after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "visit section"
+    ],
+    "completion_check": "Address, timings, Monday closure and shop phone match the supplied text exactly.",
+    "dependencies": [
+      "hero"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-8",
+    "revises": null,
+    "agent": "W-8 Builder",
+    "last_check": "usable section",
+    "version": 8
+  },
+  {
+    "id": "W-9",
+    "proposal_id": "policy",
+    "name": "Returns, exchange and delivery",
+    "covers": [
+      9
+    ],
+    "fixes": [],
+    "purpose": "Policy and delivery terms are missing.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if an unsupplied term is added or a supplied one is missing after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "policy section"
+    ],
+    "completion_check": "Every supplied term is stated and no others are added.",
+    "dependencies": [
+      "hero"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-9",
+    "revises": null,
+    "agent": "W-9 Builder",
+    "last_check": "usable section",
+    "version": 9
+  },
+  {
+    "id": "W-10",
+    "proposal_id": "reviews",
+    "name": "Customer reviews",
+    "covers": [
+      10
+    ],
+    "fixes": [],
+    "purpose": "No social proof.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if wording differs or ratings are invented after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "reviews section"
+    ],
+    "completion_check": "Exactly 3 reviews with supplied wording and names, no invented ratings.",
+    "dependencies": [
+      "hero"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-10",
+    "revises": null,
+    "agent": "W-10 Builder",
+    "last_check": "usable section",
+    "version": 10
+  },
+  {
+    "id": "W-11",
+    "proposal_id": "responsive",
+    "name": "Earthy responsive styling",
+    "covers": [
+      12
+    ],
+    "fixes": [],
+    "purpose": "No mobile layout or earthy visual identity.",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if overflow remains at either width after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "viewport tag",
+      "global CSS"
+    ],
+    "completion_check": "Viewport tag present and scrollWidth equals clientWidth at 360px and 1280px.",
+    "dependencies": [
+      "catalogue",
+      "lookbook"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-11",
+    "revises": null,
+    "agent": "W-11 Builder",
+    "last_check": "usable section and head tags",
+    "version": 11
+  },
+  {
+    "id": "W-12",
+    "proposal_id": "nav",
+    "name": "Navigation and footer anchors",
+    "covers": [
+      13
+    ],
+    "fixes": [],
+    "purpose": "No navigation, and file integrity is unchecked.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any anchor is broken or a JavaScript error remains after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "nav",
+      "footer"
+    ],
+    "completion_check": "Every in-page link resolves to an existing id, no console errors, single HTML file.",
+    "dependencies": [
+      "hero",
+      "catalogue",
+      "sizeguide",
+      "newarrivals",
+      "lookbook",
+      "visit",
+      "policy",
+      "reviews"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-12",
+    "revises": null,
+    "agent": "W-12 Builder",
+    "last_check": "usable section",
+    "version": 13
+  },
+  {
+    "id": "W-13",
+    "proposal_id": "intro-cta",
+    "name": "Intro main action button",
+    "covers": [],
+    "fixes": [
+      "R-4"
+    ],
+    "purpose": "R-4: the intro has no clear main button, and the category chips look like buttons but are not clickable.",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 2,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the intro still lacks exactly one primary button linking to the catalogue id, or the chips still look clickable, after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "intro primary button",
+      "restyled category chips"
+    ],
+    "completion_check": "The intro contains exactly one primary button whose href resolves to the catalogue id, and the non-clickable chips have no button styling and no pointer cursor.",
+    "dependencies": [
+      "hero"
+    ],
+    "status": "done",
+    "cycle": 3,
+    "section": "W-1",
+    "revises": "W-1",
+    "agent": "W-13 Builder",
+    "last_check": "usable section and head tags",
+    "version": 12
+  }
+]

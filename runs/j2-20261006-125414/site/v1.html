@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Cafe in Indiranagar, Bengaluru</title>
+<meta name="description" content="Brew Lab, a cafe in Indiranagar, Bengaluru. Menu, hours, location and pickup pre-order.">
+<style>
+  /* Brand colours are a placeholder until supplied (open input: logo or brand colours). */
+  :root {
+    --bg: #faf6f1;
+    --ink: #2b1d14;
+    --accent: #6b4226;
+    --accent-ink: #fff;
+    --card: #ffffff;
+    --line: #e4d9cc;
+    --ph-bg: #fff3b0;
+    --ph-ink: #5c4a00;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+    color: var(--ink);
+    background: var(--bg);
+  }
+  a { color: var(--accent); }
+
+  /* Placeholder marker: used for every unknown value */
+  .ph {
+    background: var(--ph-bg);
+    color: var(--ph-ink);
+    border: 1px dashed #b89b00;
+    border-radius: 4px;
+    padding: 0 6px;
+    font-style: italic;
+    white-space: normal;
+  }
+
+  /* Nav */
+  .site-nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .site-nav .brand {
+    color: var(--accent-ink);
+    font-weight: 700;
+    margin-right: 12px;
+    white-space: nowrap;
+    text-decoration: none;
+    font-size: 1.1rem;
+  }
+  .site-nav a.link {
+    color: var(--accent-ink);
+    text-decoration: none;
+    padding: 14px 10px;
+    white-space: nowrap;
+    font-size: 0.95rem;
+  }
+  .site-nav a.link:hover, .site-nav a.link:focus { background: rgba(255,255,255,0.15); }
+
+  /* Hero */
+  .hero {
+    padding: 48px 16px 36px;
+    text-align: center;
+    background: linear-gradient(180deg, #efe3d3, var(--bg));
+  }
+  .hero h1 { margin: 0 0 8px; font-size: 2.4rem; }
+  .hero p { margin: 0 auto 12px; max-width: 36rem; }
+
+  /* Sections */
+  main { max-width: 960px; margin: 0 auto; padding: 0 16px 48px; }
+  section { padding: 32px 0 8px; }
+  section h2 { margin: 0 0 16px; font-size: 1.7rem; border-bottom: 2px solid var(--line); padding-bottom: 8px; }
+  .note { font-size: 0.9rem; margin: 0 0 16px; }
+
+  /* Menu */
+  .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .menu-cat {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .menu-cat h3 { margin: 0 0 8px; font-size: 1.15rem; }
+  .menu-cat ul { list-style: none; margin: 0; padding: 0; }
+  .menu-cat li {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 0;
+    border-top: 1px solid var(--line);
+  }
+  .menu-cat li:first-child { border-top: 0; }
+
+  /* Hours */
+  .hours-table {
+    width: 100%;
+    max-width: 480px;
+    border-collapse: collapse;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .hours-table th, .hours-table td {
+    text-align: left;
+    padding: 10px 14px;
+    border-top: 1px solid var(--line);
+  }
+  .hours-table tr:first-child th, .hours-table tr:first-child td { border-top: 0; }
+
+  /* Location */
+  .loc-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .loc-card p { margin: 0 0 10px; }
+  .btn {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--accent-ink);
+    text-decoration: none;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+
+  /* Slots reserved for later workflows */
+  .slot { padding: 16px; border: 1px dashed var(--line); border-radius: 10px; margin-bottom: 8px; }
+
+  footer { text-align: center; padding: 24px 16px 40px; font-size: 0.9rem; border-top: 1px solid var(--line); }
+
+  /* Breakpoints */
+  @media (max-width: 768px) {
+    .menu-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 560px) {
+    .hero { padding: 32px 16px 24px; }
+    .hero h1 { font-size: 1.9rem; }
+    section h2 { font-size: 1.4rem; }
+    .menu-grid { grid-template-columns: 1fr; }
+    .hours-table th, .hours-table td { padding: 8px 10px; }
+    .btn { display: block; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Main">
+  <a class="brand" href="#top">Brew Lab</a>
+  <a class="link" href="#menu">Menu</a>
+  <a class="link" href="#hours">Hours</a>
+  <a class="link" href="#location">Location</a>
+  <a class="link" href="#preorder">Pre-order</a>
+  <a class="link" href="#gallery">Gallery</a>
+  <a class="link" href="#farms">Farms</a>
+</nav>
+
+<header class="hero" id="top">
+  <h1>Brew Lab</h1>
+  <p>A cafe in Indiranagar, Bengaluru. Check the menu and hours, find us, and order ahead for pickup.</p>
+  <p class="note">Logo and brand colours: <span class="ph">placeholder, not yet supplied</span></p>
+</header>
+
+<main>
+
+  <section id="menu">
+    <h2>Menu</h2>
+    <p class="note">Items and prices below are <span class="ph">placeholders</span> until the cafe supplies the real menu.</p>
+    <div class="menu-grid">
+      <div class="menu-cat" data-category="hot-coffee">
+        <h3>Hot coffee <span class="ph">category placeholder</span></h3>
+        <ul>
+          <li data-item="hot-1"><span class="ph">Item name 1</span><span class="ph">Price</span></li>
+          <li data-item="hot-2"><span class="ph">Item name 2</span><span class="ph">Price</span></li>
+          <li data-item="hot-3"><span class="ph">Item name 3</span><span class="ph">Price</span></li>
+        </ul>
+      </div>
+      <div class="menu-cat" data-category="cold-coffee">
+        <h3>Cold coffee <span class="ph">category placeholder</span></h3>
+        <ul>
+          <li data-item="cold-1"><span class="ph">Item name 1</span><span class="ph">Price</span></li>
+          <li data-item="cold-2"><span class="ph">Item name 2</span><span class="ph">Price</span></li>
+          <li data-item="cold-3"><span class="ph">Item name 3</span><span class="ph">Price</span></li>
+        </ul>
+      </div>
+      <div class="menu-cat" data-category="food">
+        <h3>Food and bakes <span class="ph">category placeholder</span></h3>
+        <ul>
+          <li data-item="food-1"><span class="ph">Item name 1</span><span class="ph">Price</span></li>
+          <li data-item="food-2"><span class="ph">Item name 2</span><span class="ph">Price</span></li>
+          <li data-item="food-3"><span class="ph">Item name 3</span><span class="ph">Price</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="hours">
+    <h2>Opening hours</h2>
+    <p class="note">Hours for each day are <span class="ph">placeholders</span> until supplied.</p>
+    <table class="hours-table">
+      <tbody>
+        <tr><th scope="row">Monday</th><td><span class="ph">Opening hours</span></td></tr>
+        <tr><th scope="row">Tuesday</th><td><span class="ph">Opening hours</span></td></tr>
+        <tr><th scope="row">Wednesday</th><td><span class="ph">Opening hours</span></td></tr>
+        <tr><th scope="row">Thursday</th><td><span class="ph">Opening hours</span></td></tr>
+        <tr><th scope="row">Friday</th><td><span class="ph">Opening hours</span></td></tr>
+        <tr><th scope="row">Saturday</th><td><span class="ph">Opening hours</span></td></tr>
+        <tr><th scope="row">Sunday</th><td><span class="ph">Opening hours</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="location">
+    <h2>Location</h2>
+    <div class="loc-card">
+      <p><strong>Brew Lab</strong>, Indiranagar, Bengaluru</p>
+      <p>Street address: <span class="ph">Full street address and PIN code, not yet supplied</span></p>
+      <p>Phone: <span class="ph">Cafe phone number, not yet supplied</span></p>
+      <p>Exact map pin: <span class="ph">Cafe map link, not yet supplied</span></p>
+      <a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Indiranagar+Bengaluru" target="_blank" rel="noopener">Open Indiranagar in Maps</a>
+      <p class="note" style="margin-top:10px">This button searches the neighbourhood only. It will point to the cafe once the exact map link is supplied.</p>
+    </div>
+  </section>
+
+  <!-- W-2 inserts #preorder here -->
+  <!-- W-3 inserts #gallery here -->
+  <!-- W-4 inserts #farms here -->
+
+</main>
+
+<footer>
+  <p>Brew Lab, Indiranagar, Bengaluru</p>
+  <p>Highlighted text like <span class="ph">this</span> marks information not yet supplied.</p>
+</footer>
+
+</body>
+</html>

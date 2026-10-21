@@ -1,0 +1,728 @@
+{
+  "run": "20261013-185235",
+  "output_type": "prd",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "sections": [
+    {
+      "heading": "Problem",
+      "words": 56
+    }
+  ],
+  "conditions": {
+    "met": 3,
+    "total": 8,
+    "warnings": 0,
+    "list": [
+      {
+        "id": "P1",
+        "met": false,
+        "evidence": "missing or empty: Users (missing), Goals (missing), Requirements (missing), Success metrics (missing), Out of scope (missing)"
+      },
+      {
+        "id": "P2",
+        "met": false,
+        "evidence": "no Requirements section"
+      },
+      {
+        "id": "P3",
+        "met": false,
+        "evidence": "missing: ['80% of bookings are made without staff help', 'per term', 'book a slot', 'cancel a slot', 'see availability', 'view all bookings', 'cancel a booking for a student', 'it must work on phones']"
+      },
+      {
+        "id": "P4",
+        "met": true,
+        "evidence": "every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line"
+      },
+      {
+        "id": "P5",
+        "met": true,
+        "evidence": "nothing to be confirmed"
+      },
+      {
+        "id": "P6",
+        "met": false,
+        "evidence": "no G1, G2, ... ids in Goals"
+      },
+      {
+        "id": "P7",
+        "met": false,
+        "evidence": "no requirement and no \"have no actions in this version\" statement for: Students, Lab staff"
+      },
+      {
+        "id": "P8",
+        "met": true,
+        "evidence": "no numeric metrics"
+      }
+    ]
+  },
+  "necessary_conditions": {
+    "met": 3,
+    "total": 8,
+    "warnings": 0,
+    "list": [
+      {
+        "id": "P1",
+        "text": "All six sections are present and not empty",
+        "met": false,
+        "evidence": "missing or empty: Users (missing), Goals (missing), Requirements (missing), Success metrics (missing), Out of scope (missing)"
+      },
+      {
+        "id": "P2",
+        "text": "Requirement ids are unique and sequential (R1, R2, ...)",
+        "met": false,
+        "evidence": "no Requirements section"
+      },
+      {
+        "id": "P3",
+        "text": "Every brief fact appears exactly",
+        "met": false,
+        "evidence": "missing: ['80% of bookings are made without staff help', 'per term', 'book a slot', 'cancel a slot', 'see availability', 'view all bookings', 'cancel a booking for a student', 'it must work on phones']"
+      },
+      {
+        "id": "P4",
+        "text": "No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+        "met": true,
+        "evidence": "every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+        "assumptions": []
+      },
+      {
+        "id": "P5",
+        "text": "Nothing is \"to be confirmed\"",
+        "met": true,
+        "evidence": "nothing to be confirmed"
+      },
+      {
+        "id": "P6",
+        "text": "Every goal has a matching success metric",
+        "met": false,
+        "evidence": "no G1, G2, ... ids in Goals"
+      },
+      {
+        "id": "P7",
+        "text": "Every user group named in the charter appears in Requirements or in a \"no actions in this version\" statement",
+        "met": false,
+        "evidence": "no requirement and no \"have no actions in this version\" statement for: Students, Lab staff"
+      },
+      {
+        "id": "P8",
+        "text": "Each numeric success metric states its measurement window, or says \"measurement window not set\"",
+        "met": true,
+        "evidence": "no numeric metrics",
+        "severity": "warn"
+      }
+    ]
+  },
+  "export": {
+    "file": "prd.docx",
+    "written": true,
+    "note": null
+  },
+  "force_audit_fail": null,
+  "test_lessons": false,
+  "model": "sonnet",
+  "mock": false,
+  "brief": "Write a PRD for a web app where students book lab slots. The users are students and lab staff. The problem: booking is done on paper and slots get double-booked. Must-have features: book a slot, cancel a slot, and see availability. Constraint: it must work on phones. Success measure: 80% of bookings are made without staff help.",
+  "change_requests": [],
+  "status": "done_with_open_items",
+  "outcome": "Done with open items: shipped as is on the Requester's decision (The same failure came back twice in a row, so another cycle would likely repeat it.). Still not workable: done-when item 2 (F-2 NEEDS_REVISION): Users section names both students and lab staff and lists what each group does in LabSlot; done-when item 3 (F-3 NEEDS_REVISION): Goals section states the goal of replacing paper booking and avoiding double-booked slots; done-when item 4 (F-4 NEEDS_REVISION): Requirements section lists book a slot, cancel a slot and see availability for students, and view all bookings and cancel a booking for a student for lab staff; done-when item 5 (F-5 NEEDS_REVISION): Requirements section states that LabSlot must work on phones; done-when item 6 (F-6 NEEDS_REVISION): Success metrics section states that 80% of bookings are made without staff help, counted per term; done-when item 7 (F-7 NEEDS_REVISION): Out of scope section lists what LabSlot does not cover, without adding features beyond the must-have list; document rubric D-1 (NEEDS_REVISION): Every requirement is specific and testable; document rubric D-2 (NEEDS_REVISION): Goals and success metrics are measurable; document rubric D-3 (NEEDS_REVISION): Users and problem are consistent with the requirements; document rubric D-4 (NEEDS_REVISION): Out of scope is explicit; necessary condition P1 not met: All six sections are present and not empty (missing or empty: Users (missing), Goals (missing), Requirements (missing), Success metrics (missing), Out of scope (missing)); necessary condition P2 not met: Requirement ids are unique and sequential (R1, R2, ...) (no Requirements section); necessary condition P3 not met: Every brief fact appears exactly (missing: ['80% of bookings are made without staff help', 'per term', 'book a slot', 'cancel a slot', 'see availability', 'view all bookings', 'cancel a booking for a student', 'it must work on phones']); necessary condition P6 not met: Every goal has a matching success metric (no G1, G2, ... ids in Goals); necessary condition P7 not met: Every user group named in the charter appears in Requirements or in a \"no actions in this version\" statement (no requirement and no \"have no actions in this version\" statement for: Students, Lab staff).",
+  "budget": {
+    "start": 200,
+    "granted": 200,
+    "used": 20,
+    "raises": []
+  },
+  "ai_calls": 24,
+  "cycles": 4,
+  "links": {
+    "identity->requester": 4,
+    "identity->adaptation": 4,
+    "validator->adaptation": 1,
+    "adaptation->priority": 5,
+    "validator->coordination": 1,
+    "coordination->priority": 1,
+    "priority->W": 1,
+    "W->coordination": 1,
+    "adaptation->coordination": 1,
+    "coordination->adaptation": 1,
+    "audit->identity": 4
+  },
+  "verification": {
+    "passed": 0,
+    "failed": 0,
+    "escalated": 1,
+    "could_not_run": 0,
+    "checks_run": 9
+  },
+  "identity_to_requester_decisions": 2,
+  "identity_to_requester_facts": 1,
+  "priority_rulings": {
+    "grant": 1,
+    "counter": 0,
+    "refuse": 0
+  },
+  "questions_to_user": [
+    {
+      "kind": "info",
+      "asked": [
+        "Please send these: What should the app be called? If you don't have a name yet, say so and I'll mark it as still to be decided; Your goal is that 80% of bookings are made without staff help. Over what period should we count that; What do lab staff do in the app? Pick all that apply."
+      ],
+      "answer": "The app is called LabSlot. Count the 80% per term. Lab staff can view all bookings and cancel a booking for a student."
+    },
+    {
+      "kind": "limit",
+      "asked": [
+        "The same problem came back twice. Keep going, leave out the missing parts, or finish as it is?"
+      ],
+      "answer": "option 1",
+      "decision": "continue",
+      "named": [],
+      "dropped": []
+    },
+    {
+      "kind": "limit",
+      "asked": [
+        "The same problem came back twice. Keep going, leave out the missing parts, or finish as it is?"
+      ],
+      "answer": "option 3",
+      "decision": "ship",
+      "named": [],
+      "dropped": []
+    }
+  ],
+  "conflicts": [],
+  "validator_rejections": [],
+  "holds": [
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-2: W-1 (prd-problem) verified: the '## Problem' heading is not in the document and W-1.a1 is escalated"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-3: W-2 (prd-users) done and verified"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-4: W-3 (prd-goals) done and verified"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-5: W-3 (prd-goals) done and verified, and W-4 done so the document order holds"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-6: W-4 (prd-requirements) done and verified"
+    }
+  ],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 3,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-9",
+          "item": null,
+          "verdict": "NEEDS_REVISION"
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "version": 3,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-9",
+          "item": null,
+          "verdict": "NEEDS_REVISION"
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "version": 3,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-9",
+          "item": null,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-10",
+          "item": null,
+          "verdict": "POLICY_CONCERN"
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "version": 3,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-9",
+          "item": null,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-10",
+          "item": null,
+          "verdict": "POLICY_CONCERN"
+        }
+      ]
+    }
+  ],
+  "site_versions": 3,
+  "workable": [
+    "done-when item 2 (F-2 NEEDS_REVISION): Users section names both students and lab staff and lists what each group does in LabSlot",
+    "done-when item 3 (F-3 NEEDS_REVISION): Goals section states the goal of replacing paper booking and avoiding double-booked slots",
+    "done-when item 4 (F-4 NEEDS_REVISION): Requirements section lists book a slot, cancel a slot and see availability for students, and view all bookings and cancel a booking for a student for lab staff",
+    "done-when item 5 (F-5 NEEDS_REVISION): Requirements section states that LabSlot must work on phones",
+    "done-when item 6 (F-6 NEEDS_REVISION): Success metrics section states that 80% of bookings are made without staff help, counted per term",
+    "done-when item 7 (F-7 NEEDS_REVISION): Out of scope section lists what LabSlot does not cover, without adding features beyond the must-have list",
+    "document rubric D-1 (NEEDS_REVISION): Every requirement is specific and testable",
+    "document rubric D-2 (NEEDS_REVISION): Goals and success metrics are measurable",
+    "document rubric D-3 (NEEDS_REVISION): Users and problem are consistent with the requirements",
+    "document rubric D-4 (NEEDS_REVISION): Out of scope is explicit",
+    "necessary condition P1 not met: All six sections are present and not empty (missing or empty: Users (missing), Goals (missing), Requirements (missing), Success metrics (missing), Out of scope (missing))",
+    "necessary condition P2 not met: Requirement ids are unique and sequential (R1, R2, ...) (no Requirements section)",
+    "necessary condition P3 not met: Every brief fact appears exactly (missing: ['80% of bookings are made without staff help', 'per term', 'book a slot', 'cancel a slot', 'see availability', 'view all bookings', 'cancel a booking for a student', 'it must work on phones'])",
+    "necessary condition P6 not met: Every goal has a matching success metric (no G1, G2, ... ids in Goals)",
+    "necessary condition P7 not met: Every user group named in the charter appears in Requirements or in a \"no actions in this version\" statement (no requirement and no \"have no actions in this version\" statement for: Students, Lab staff)"
+  ],
+  "to_be_confirmed": [],
+  "dropped_by_requester": [],
+  "workflow_agents": [
+    {
+      "id": "W-1",
+      "agent": "W-1 Builder",
+      "section": "W-1",
+      "revises": null,
+      "status": "done",
+      "calls": 3,
+      "retries": 0
+    },
+    {
+      "id": "W-2",
+      "agent": "W-2 Builder",
+      "section": "W-2",
+      "revises": null,
+      "status": "held",
+      "calls": 0,
+      "retries": 0
+    },
+    {
+      "id": "W-3",
+      "agent": "W-3 Builder",
+      "section": "W-3",
+      "revises": null,
+      "status": "held",
+      "calls": 0,
+      "retries": 0
+    },
+    {
+      "id": "W-4",
+      "agent": "W-4 Builder",
+      "section": "W-4",
+      "revises": null,
+      "status": "held",
+      "calls": 0,
+      "retries": 0
+    },
+    {
+      "id": "W-5",
+      "agent": "W-5 Builder",
+      "section": "W-5",
+      "revises": null,
+      "status": "held",
+      "calls": 0,
+      "retries": 0
+    },
+    {
+      "id": "W-6",
+      "agent": "W-6 Builder",
+      "section": "W-6",
+      "revises": null,
+      "status": "held",
+      "calls": 0,
+      "retries": 0
+    }
+  ],
+  "limits_hit": [
+    "The same failure came back twice in a row, so another cycle would likely repeat it.",
+    "The same failure came back twice in a row, so another cycle would likely repeat it."
+  ],
+  "lessons": {
+    "memory": false,
+    "saved": [],
+    "used": []
+  },
+  "playbooks": {
+    "saved": null,
+    "used": []
+  },
+  "business_type": "prd",
+  "style_guide": false,
+  "rubric": [
+    {
+      "id": "D-1",
+      "pass": false,
+      "verdict": "NEEDS_REVISION"
+    },
+    {
+      "id": "D-2",
+      "pass": false,
+      "verdict": "NEEDS_REVISION"
+    },
+    {
+      "id": "D-3",
+      "pass": false,
+      "verdict": "NEEDS_REVISION"
+    },
+    {
+      "id": "D-4",
+      "pass": false,
+      "verdict": "NEEDS_REVISION"
+    },
+    {
+      "id": "D-5",
+      "pass": true,
+      "verdict": "PASS_WITH_WARNING"
+    }
+  ],
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "Problem section states that booking is done on paper and slots get double-booked",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "Users section names both students and lab staff and lists what each group does in LabSlot",
+      "pass": false
+    },
+    {
+      "item": 3,
+      "criterion": "Goals section states the goal of replacing paper booking and avoiding double-booked slots",
+      "pass": false
+    },
+    {
+      "item": 4,
+      "criterion": "Requirements section lists book a slot, cancel a slot and see availability for students, and view all bookings and cancel a booking for a student for lab staff",
+      "pass": false
+    },
+    {
+      "item": 5,
+      "criterion": "Requirements section states that LabSlot must work on phones",
+      "pass": false
+    },
+    {
+      "item": 6,
+      "criterion": "Success metrics section states that 80% of bookings are made without staff help, counted per term",
+      "pass": false
+    },
+    {
+      "item": 7,
+      "criterion": "Out of scope section lists what LabSlot does not cover, without adding features beyond the must-have list",
+      "pass": false
+    },
+    {
+      "item": 8,
+      "criterion": "The product name LabSlot is used consistently throughout the document",
+      "pass": true
+    }
+  ],
+  "route_check_violations": [
+    {
+      "agent": "adaptation",
+      "detail": "picked no one, routed to Priority",
+      "msg": 24,
+      "cycle": 1
+    },
+    {
+      "agent": "adaptation",
+      "detail": "picked no one, routed to Priority",
+      "msg": 30,
+      "cycle": 2
+    },
+    {
+      "agent": "adaptation",
+      "detail": "picked no one, routed to Priority",
+      "msg": 40,
+      "cycle": 3
+    },
+    {
+      "agent": "adaptation",
+      "detail": "picked no one, routed to Priority",
+      "msg": 46,
+      "cycle": 4
+    }
+  ]
+}

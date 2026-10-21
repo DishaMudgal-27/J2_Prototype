@@ -1,0 +1,444 @@
+{
+  "metrics": {
+    "outcome": "Done: the site is workable. Every done-when item passes with Audit's evidence and the render check is clean.",
+    "brief": "make a website for our college tech fest called Spark 2026 at Northfield College of Engineering in Pune. students should be able to see the schedule day by day, browse events by category, register for an event with a form, see the sponsors, find the venue, and contact the organisers on whatsapp. it should feel energetic and modern and work well on phones",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 2,
+    "ai_calls": 32,
+    "minutes": 20.5,
+    "budget": {
+      "total": 120,
+      "start": 60,
+      "cap": 120,
+      "raises": [
+        {
+          "cycle": 2,
+          "asked": 60,
+          "from": 60,
+          "to": 120,
+          "why": "the Requester's answer: add 60"
+        }
+      ],
+      "spent": 108,
+      "rate_card": true
+    },
+    "site_versions": 7,
+    "site_bytes": 33083,
+    "agents": {
+      "identity": {
+        "turns": 5,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 4,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 10,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 7,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-1": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-2": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-3": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-4": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-5": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-6": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-7": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 3,
+      "grants": 2,
+      "counters": 1,
+      "refuses": 0,
+      "refuses_converted_by_code": 0,
+      "parks": 0
+    },
+    "conflicts": {
+      "total": 1,
+      "settled_by_agents": 1,
+      "resolved_by_identity": 0,
+      "asked_requester": 0,
+      "open": 0,
+      "list": [
+        {
+          "id": "C-1",
+          "cycle": 2,
+          "topic": "proposal",
+          "between": [
+            "adaptation",
+            "priority"
+          ],
+          "attempts": 2,
+          "escalated": false,
+          "resolved_by": "agents",
+          "user_question": null,
+          "user_answer": null,
+          "outcome": "Adaptation accepted Priority's COUNTER: Day-by-day schedule (10), Events by category with fees (10), Registration form (15), Venue, map and contact (10), Base style, nav and hero (15) goes to the validator."
+        }
+      ]
+    },
+    "requester_questions": {
+      "total": 2,
+      "by_kind": {
+        "info": 1,
+        "limit": 1
+      }
+    },
+    "workflows": {
+      "registered": 7,
+      "done": 7,
+      "failed": 0,
+      "held_ever": 0,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "Day-by-day schedule",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-2",
+          "name": "Events by category with fees",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-3",
+          "name": "Registration form",
+          "agent_estimate": 15,
+          "charged": 15
+        },
+        {
+          "id": "W-4",
+          "name": "Sponsors",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-5",
+          "name": "Venue, map and contact",
+          "agent_estimate": 20,
+          "charged": 20
+        },
+        {
+          "id": "W-6",
+          "name": "Hero, nav and base style",
+          "agent_estimate": 35,
+          "charged": 35
+        },
+        {
+          "id": "W-7",
+          "name": "Schedule day labels fix",
+          "agent_estimate": 8,
+          "charged": 8
+        }
+      ]
+    },
+    "validator_refusals": 11,
+    "role_refusals": 0,
+    "pauses": 2,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 1,
+    "audits": [
+      {
+        "cycle": 2,
+        "version": 3,
+        "all_pass": false,
+        "pass": 3,
+        "warn": 0,
+        "fail": 7,
+        "rubric_fail": 3,
+        "mechanical": [],
+        "mechanical_ran": true
+      },
+      {
+        "cycle": 2,
+        "version": 7,
+        "all_pass": true,
+        "pass": 10,
+        "warn": 0,
+        "fail": 0,
+        "rubric_fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      }
+    ],
+    "to_be_confirmed": [],
+    "workable": [],
+    "lessons": {
+      "memory": false,
+      "saved": [],
+      "used": []
+    }
+  },
+  "review": {
+    "verdict": "The department finished a workable site (all 10 done-when items pass on v7, 108 of 120 spent), but cycle 1 built nothing because of validator refusals, and a Requester budget top-up was needed.",
+    "agents": {
+      "identity": {
+        "score": 4,
+        "note": "Asked the right questions up front [2] and closed on evidence [74-75]. Stretched its role by listing the sections for Adaptation to cover [6]. The budget question to the Requester [46] was cluttered with truncated item text."
+      },
+      "adaptation": {
+        "score": 3,
+        "note": "Cycle 2 proposal registered cleanly [54]. But it accepted a counter it had already priced above [23, 25], which led to two rate-card refusals [26-27]. It also re-added tap-targets checks [52-53] after saying they were dropped [23]."
+      },
+      "priority": {
+        "score": 3,
+        "note": "Warned correctly that 30 would not cover the rest [17]. Its claimed tap-targets swap did not land [18-20]. It cut scope below the rate-card minimum and accepted that [24], which left 7 items unfunded [29]. It also edited checks [17, 53], which is design work. Cycle 2 pricing was right [53]."
+      },
+      "coordination": {
+        "score": 5,
+        "note": "Stated its scheduling rule every time, ordered W-6 after the venue and contact work it depends on [59], and ran the W-7 rewrite alone under the lock [63]. No HOLDs. Hard cases were not tested."
+      },
+      "audit": {
+        "score": 4,
+        "note": "Filed findings to Identity only. Caught the missing h1, nav and invented day dates at v3 [45], and gave measured evidence at v7 [74]. Its '5 of 10 not met' wording does not match the 7 failures in the tally."
+      },
+      "W-1": {
+        "score": 3,
+        "note": "Passed its checks first time [32]. It added per-day dates not in the charter, which the fact check flagged [44], and it wrote the global palette [33] beyond its own section."
+      },
+      "W-2": {
+        "score": 5,
+        "note": "Eight cards with fees and placeholders, plus a category filter. Checks passed first time [36-37]."
+      },
+      "W-3": {
+        "score": 5,
+        "note": "Form has all fields and an 8-event dropdown, and it sends by mailto to the required address [41]."
+      },
+      "W-4": {
+        "score": 5,
+        "note": "Text-only sponsors, no logos [58]."
+      },
+      "W-5": {
+        "score": 5,
+        "note": "Address, map link, WhatsApp and email, with no invented hall [62]."
+      },
+      "W-6": {
+        "score": 5,
+        "note": "One h1, a nav and a single Register action, 10 checks passed first time [69-70]. Cleared N8 and the h1 and nav findings."
+      },
+      "W-7": {
+        "score": 5,
+        "note": "Removed the invented dates in one pass and kept to its envelope [66]."
+      }
+    },
+    "went_well": [
+      "All 7 workflows registered and passed their checks on attempt 1. There were 0 failures, 0 holds, 0 role refusals and 0 redirects.",
+      "Final render check is clean: no overflow at 360px or 1280px, no JS errors, no broken links, 1 h1 [72-74].",
+      "No invented content: no hall name, no logos, no prizes [58, 62].",
+      "The Adaptation and Priority conflict (C-1) settled in 2 attempts with no escalation. Both Requester pauses worked [3, 47-49]."
+    ],
+    "problems": [
+      "Cycle 1 registered nothing [22]. 9 of the 11 validator refusals came here: digits in check text [8, 9, 11], generic selectors [12-14], and the disallowed tap-targets test [18-20].",
+      "A Priority edit said to be applied was still rejected by the validator [17 vs 18-20]. The cause is unverified.",
+      "The underpriced counter [24] and its acceptance [25] meant only 3 of 5 workflows registered. 7 items went unfunded and the Requester was asked for more money [46].",
+      "Adaptation knowingly sent a plan with the N8 gap [15]. v3 then failed N8 and R-3 [43-44].",
+      "The invented dates cost an extra workflow (W-7, 8 credits)."
+    ],
+    "learnings": [
+      "Give Adaptation and Priority the validator rules before cycle 1: allowed check types, no digits in check text, selectors limited to section ids or classes, and the rate-card minimums. All 11 refusals were mechanical rules. Test next: rerun the same brief and aim for 0 refusals in cycle 1.",
+      "Run a code pre-check of every Priority counter against rate-card minimums before it reaches Adaptation [24-27].",
+      "Reword the validator's digit error [8]. 'Says X but expects 1' misled Adaptation three times.",
+      "Either tell Adaptation that the mechanical check covers tap targets (Audit reported 0 small targets [74]) or allow that test.",
+      "Start budget 60 against about 108 needed forced a Requester pause. Keep it if testing the limit path. Use roughly 110 for a normal-path test.",
+      "Keep the mechanical fact check (N6). Decide whether a derivable date such as '15 Feb' counts as invented, since it cost 8 credits.",
+      "Not tested: lessons memory was off (nothing saved or used), the lock was never contested, and estimates equal charged for all 7 workflows. This is one run on one brief, judged without screenshots."
+    ]
+  },
+  "events": [
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "info: 1 question(s) for the Requester",
+      "msg": 3,
+      "cycle": 0,
+      "pause": "info"
+    },
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "Base style and responsive shell: work atom 1: check 3 says 'Exactly one style block with id j2-style' but expects 1",
+      "msg": 8,
+      "cycle": 1
+    },
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "Base style and responsive shell: work atom 1: check 3 says 'The style block #j2-style is present' but expects 1",
+      "msg": 9,
+      "cycle": 1
+    },
+    {
+      "agent": "validator",
+      "type": "plan_gap",
+      "detail": "no workflow builds N8 (A nav reaches every section, and the hero has one obvious main action)",
+      "msg": 10,
+      "cycle": 1
+    },
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "Base style, nav and hero: work atom 1: check 2 says 'Style block j2-style exists' but expects 1; work atom 1: check 3 says 'Nav j2-nav exists' but expects 1",
+      "msg": 11,
+      "cycle": 1
+    },
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "Base style, nav and hero: work atom 1: check 5 element-count targets '#j2-hero .j2-btn': only a section id or class name, never a charter fact, an email or a generic string (use facts-present for those)",
+      "msg": 12,
+      "cycle": 1
+    },
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "Events by category with fees: work atom 1: check 2 element-count targets '#events .j2-card': only a section id or class name, never a charter fact, an email or a generic string (use facts-present for those)",
+      "msg": 13,
+      "cycle": 1
+    },
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "Registration form: work atom 1: check 3 element-count targets '.j2-form select option': only a section id or class name, never a charter fact, an email or a generic string (use facts-present for those)",
+      "msg": 14,
+      "cycle": 1
+    },
+    {
+      "agent": "validator",
+      "type": "plan_gap",
+      "detail": "no workflow builds N8 (A nav reaches every section, and the hero has one obvious main action)",
+      "msg": 15,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "warning",
+      "detail": "The plan still leaves N8 with no workflow. It goes ahead; the necessary-conditions check after the build will show the gap.",
+      "msg": 15,
+      "cycle": 1
+    },
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "Day-by-day schedule: work atom 1: check 4 names test 'tap-targets'; allowed: page-parses, links-resolve, form-has-submit",
+      "msg": 18,
+      "cycle": 1
+    },
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "Venue and map: work atom 1: check 3 names test 'tap-targets'; allowed: page-parses, links-resolve, form-has-submit",
+      "msg": 19,
+      "cycle": 1
+    },
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "WhatsApp and email contact: work atom 1: check 4 names test 'tap-targets'; allowed: page-parses, links-resolve, form-has-submit",
+      "msg": 20,
+      "cycle": 1
+    },
+    {
+      "agent": "adaptation",
+      "type": "dispute",
+      "detail": "C-1: Adaptation vs Priority about what to fund in cycle 2",
+      "msg": 24,
+      "cycle": 2
+    },
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "Venue, map and contact: it costs 10, below the rate-card minimum of 20 for the work it covers (item 6 page_section 10; item 7 page_section 10)",
+      "msg": 26,
+      "cycle": 2
+    },
+    {
+      "agent": "validator",
+      "type": "refused",
+      "detail": "Base style, nav and hero: it costs 15, below the rate-card minimum of 30 for the work it covers (item 1 page_section 10; item 9 form 15; item 10 styling 5)",
+      "msg": 27,
+      "cycle": 2
+    },
+    {
+      "agent": "validator",
+      "type": "unpaid",
+      "detail": "item 8 passes but no workflow covers it",
+      "msg": 45,
+      "cycle": 2
+    },
+    {
+      "agent": "validator",
+      "type": "unpaid",
+      "detail": "item 10 passes but no workflow covers it",
+      "msg": 45,
+      "cycle": 2
+    },
+    {
+      "agent": "system",
+      "type": "limit",
+      "detail": "Priority's ruling leaves out 7 checklist item(s) the budget left can't pay for.",
+      "msg": 46,
+      "cycle": 2
+    },
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "limit: 1 question(s) for the Requester",
+      "msg": 47,
+      "cycle": 2,
+      "pause": "limit"
+    },
+    {
+      "agent": "identity",
+      "type": "budget_raise",
+      "detail": "60 -> 120 (asked +60, cap 120; the Requester's answer: add 60)",
+      "msg": 49,
+      "cycle": 2
+    }
+  ],
+  "made": "2026-10-13 18:29:17"
+}

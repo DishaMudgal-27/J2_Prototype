@@ -1,0 +1,473 @@
+"""J2: the five functions run one department until Identity's goal is met (Native docs, system/department).
+
+  Sutra (Root)  J1: asks the user what they want; J2: stamps the goal, registers workflows
+  Identity      writes the goal + "done when" list; decides when Adaptation and Priority are stuck
+  Adaptation    proposes the next workflows (how to build, which stack, what content)
+  Priority      grants, refuses or counter-offers, protecting the budget
+  Coordination  runs registered workflows one at a time and produces the site
+  Audit         checks the site against the "done when" list
+
+Each function's instructions come from agents/j2/team.md + agents/j2/<function>.md, read fresh on
+every call, so dropping in the official md files changes behaviour without touching code.
+Code only enforces the limits: 4 exchanges / 15-minute time box / budget, max cycles, stamp checks.
+"""
+import json
+import os
+import re
+import threading
+import time
+
+import llm
+import mock_site
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+J2_DIR = os.path.join(HERE, "agents", "j2")
+BUDGET = int(os.getenv("J2_BUDGET", "100"))
+MAX_EXCHANGES = 4          # Adaptation <-> Priority messages before Identity decides (J2 step 3)
+TIME_BOX_S = 15 * 60       # J2 step 3 time box
+MAX_CYCLES = 4             # plan -> build -> audit loops before stopping
+DELAY = 0 if llm.MOCK else float(os.getenv("J2_DELAY", "2"))   # spacing for free-tier rate limits
+
+NAMES = {"sutra": "Sutra", "identity": "Identity", "adaptation": "Adaptation", "priority": "Priority",
+         "coordination": "Coordination", "audit": "Audit", "user": "User", "system": "System"}
+# J2 steps, for the progress strip in the UI
+STEPS = {1: "Identity sets the goal", 2: "Adaptation proposes", 3: "Priority answers", 4: "Identity decides",
+         5: "Sutra registers", 6: "Coordination runs", 7: "Audit checks", 8: "Next move or done"}
+
+
+def system_prompt(fn, reply_format):
+    parts = []
+    for name in ("team.md", f"{fn}.md"):
+        path = os.path.join(J2_DIR, name)
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as f:
+                parts.append(f.read().strip())
+    parts.append(f"You are {NAMES[fn]}.\n\n## Reply format (required)\n{reply_format}")
+    return "\n\n".join(parts)
+
+
+def cost_of(wfs):
+    return sum(int(w.get("cost") or 0) for w in wfs or [])
+
+
+class J2Run:
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.reset()
+
+    # ------------------------------------------------------------------ state
+    def reset(self):
+        self.run_id = time.strftime("%Y%m%d-%H%M%S")
+        self.dir = os.path.join(HERE, "runs", "j2-" + self.run_id)
+        self.chat, self.workflows, self.conflicts, self.audits, self.sites = [], [], [], [], []
+        self.goal, self.stamped, self.asked, self.request = None, False, False, ""
+        self.spent, self.cycle, self.calls, self.step = 0, 0, 0, 0
+        self.status, self.thinking, self.error, self.done = "idle", None, None, False
+        self.feedback = None
+
+    def snapshot(self, since=0):
+        return {"chat": self.chat[since:], "total": len(self.chat), "status": self.status,
+                "thinking": self.thinking, "step": self.step, "steps": STEPS, "goal": self.goal,
+                "stamped": self.stamped, "workflows": self.workflows, "budget": BUDGET, "spent": self.spent,
+                "conflicts": self.conflicts, "audits": self.audits, "versions": len(self.sites),
+                "cycle": self.cycle, "calls": self.calls, "error": self.error, "done": self.done,
+                "mock": llm.MOCK, "model": None if llm.MOCK else llm.MODEL,
+                "placeholders": self._placeholders()}
+
+    def _placeholders(self):
+        out = []
+        for fn in ("team", "sutra", "identity", "adaptation", "priority", "coordination", "audit"):
+            p = os.path.join(J2_DIR, f"{fn}.md")
+            if os.path.exists(p) and "PLACEHOLDER" in open(p, encoding="utf-8").read(300):
+                out.append(fn)
+        return out
+
+    def post(self, who, text, **meta):
+        m = {"id": len(self.chat) + 1, "t": time.strftime("%H:%M:%S"), "who": who, "text": text, **meta}
+        self.chat.append(m)
+        os.makedirs(self.dir, exist_ok=True)
+        with open(os.path.join(self.dir, "chat.jsonl"), "a", encoding="utf-8") as f:
+            f.write(json.dumps(m, ensure_ascii=False) + "\n")
+        return m
+
+    def save(self, name, data):
+        os.makedirs(self.dir, exist_ok=True)
+        with open(os.path.join(self.dir, name), "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+
+    def transcript(self, n=30):
+        return "\n".join(f"{NAMES.get(m['who'], m['who'])}: {m['text']}" for m in self.chat[-n:])
+
+    def context(self):
+        remaining = BUDGET - self.spent
+        wf = [{k: w[k] for k in ("id", "name", "cost", "status")} for w in self.workflows]
+        last_audit = self.audits[-1] if self.audits else None
+        return (f"USER REQUEST: {self.request}\nGOAL: {json.dumps(self.goal, ensure_ascii=False)}\n"
+                f"BUDGET: {BUDGET} units, spent {self.spent}, remaining {remaining}\n"
+                f"WORKFLOWS SO FAR: {json.dumps(wf)}\nLATEST AUDIT: {json.dumps(last_audit)}\n"
+                f"SITE VERSIONS: {len(self.sites)}\n\nCHAT:\n{self.transcript()}")
+
+    def call(self, fn, reply_format, user, mock, max_tokens=900, json_reply=True):
+        if self.calls and DELAY:
+            time.sleep(DELAY)
+        self.calls += 1
+        self.thinking = fn
+        try:
+            raw = llm.ask(system_prompt(fn, reply_format), user, mock, max_tokens=max_tokens,
+                          effort="low" if json_reply else "high", json_mode=json_reply)
+        finally:
+            self.thinking = None
+        if not json_reply:
+            return raw
+        try:
+            return llm.extract_json(raw)
+        except ValueError:
+            return {"say": raw[:400]}
+
+    # ------------------------------------------------------------------ entry
+    def user_says(self, text):
+        with self.lock:
+            if self.status == "running":
+                return False
+            self.post("user", text)
+            if self.done:
+                self.feedback, self.done = text, False
+            self.status = "running"
+            threading.Thread(target=self._run_safe, daemon=True).start()
+            return True
+
+    def _run_safe(self):
+        with self.lock:
+            try:
+                self._run()
+            except Exception as e:  # noqa: BLE001
+                self.error = f"{type(e).__name__}: {str(e)[:300]}"
+                self.post("system", f"Stopped: {self.error}")
+                self.status = "waiting"
+
+    def _run(self):
+        last_user = next(m["text"] for m in reversed(self.chat) if m["who"] == "user")
+        if not self.goal:
+            if not self.asked and "just do it" not in last_user.lower():
+                self.request = last_user
+                self.asked = True
+                self._sutra_asks()
+                self.status = "waiting"
+                return
+            if not self.request:
+                self.request = last_user
+            elif last_user != self.request:
+                self.request += "\nUser's answers: " + last_user
+            self._identity_goal()
+        limit = self.cycle + MAX_CYCLES     # fresh allowance for each user message
+        while self.cycle < limit:
+            self.cycle += 1
+            plan = self._adaptation_proposes()
+            if plan.get("done"):
+                break
+            agreed = self._negotiate(plan)
+            if agreed is None:              # Identity needs the user
+                self.status = "waiting"
+                return
+            self._register(agreed)
+            self._coordinate()
+            self.feedback = None             # the user's change request has now been worked on
+            if self._audit():
+                break
+        self.done = True
+        self.step = 8
+        passed = self.audits[-1]["all_pass"] if self.audits else False
+        self.post("sutra", ("The department met its goal. " if passed else
+                            f"Stopping after {self.cycle} cycles; some criteria are still open (see Audit). ")
+                  + f"Site v{len(self.sites)} is in the preview. Tell me if you want changes.")
+        self.feedback = None
+        self.status = "waiting"
+
+    # ------------------------------------------------------------------ J1 + step 1
+    def _sutra_asks(self):
+        r = self.call("sutra", '{"say": str (2-3 short questions for the user)}',
+                      f"The user wants: {self.request}\nAsk what you need to make the request clear.",
+                      lambda: json.dumps({"say": "Happy to set this up. Three quick questions: 1) What's the "
+                                                 "organisation's name and city? 2) Who is the site mainly for? "
+                                                 "3) What must it do first (bookings, info, contact)? Or say "
+                                                 "\"just do it\" and I'll decide."}))
+        self.post("sutra", r.get("say", ""), j="J1")
+
+    def _identity_goal(self):
+        self.step = 1
+        fmt = ('{"say": str, "goal": {"statement": str, "site_name": str, "audience": str, '
+               '"standards": [str], "done_when": [str]}}')
+
+        def mock():
+            name = "CityCare Hospital"
+            m = re.search(r"([A-Z][\w&]*(?:\s+[A-Z][\w&]*)*\s+Hospital)", self.request)
+            if m:
+                name = m.group(1)
+            return json.dumps({"say": f"Goal set for {name}. Four checks will tell us we're done.",
+                               "goal": {"statement": f"A one-page website for {name} that lets patients find "
+                                                     "care and book a visit", "site_name": name,
+                                        "audience": "Patients and families; people needing emergency help",
+                                        "standards": ["Calm, trustworthy tone", "First screen fast on a phone"],
+                                        "done_when": ["Visitors can request an appointment",
+                                                      "Departments and doctors are listed",
+                                                      "Emergency number visible on every screen",
+                                                      "Layout works on a phone"]}})
+        feedback = ""
+        for attempt in range(2):
+            r = self.call("identity", fmt, f"{self.context()}\n{feedback}\nWrite the department's goal.", mock)
+            self.goal = r.get("goal") or self.goal
+            self.post("identity", r.get("say", ""), artifact="goal")
+            ok, why = self._stamp_check()
+            s = self.call("sutra", '{"say": str, "stamp": bool, "reason": str}',
+                          f"{self.context()}\nCode check: {why}\nStamp Identity's goal or send it back.",
+                          lambda: json.dumps({"say": "Goal is specific and checkable. Stamped; the department "
+                                                     "can start.", "stamp": True, "reason": "clear"}))
+            if ok and s.get("stamp"):
+                self.stamped = True
+                self.post("sutra", s.get("say", ""), stamp=True)
+                self.save("goal.json", self.goal)
+                return
+            feedback = f"Sutra refused to stamp: {s.get('reason') or why}. Fix it."
+            self.post("sutra", s.get("say", "") or feedback, stamp=False)
+        self.stamped = True       # second refusal: proceed with a note rather than loop
+        self.post("system", "Goal stamped after two attempts; Sutra's concerns are on record.")
+        self.save("goal.json", self.goal)
+
+    def _stamp_check(self):
+        g = self.goal or {}
+        if not g.get("statement"):
+            return False, "goal has no statement"
+        if len(g.get("done_when") or []) < 3:
+            return False, "fewer than 3 'done when' criteria"
+        return True, "passes code checks"
+
+    # ------------------------------------------------------------------ steps 2-4
+    WF_FMT = '[{"name": str, "purpose": str, "cost": int, "outputs": [str]}]'
+
+    def _adaptation_proposes(self):
+        self.step = 2
+        gaps = [r["criterion"] for r in (self.audits[-1]["results"] if self.audits else []) if not r["pass"]]
+
+        def mock():
+            if self.feedback:
+                return json.dumps({"say": f"@Priority The user asked: \"{self.feedback}\". One workflow covers it.",
+                                   "done": False, "workflows": [{"name": "User change", "purpose": self.feedback,
+                                                                 "cost": 6, "outputs": ["index.html"]}]})
+            if self.cycle == 1:
+                return json.dumps({"say": "@Priority Proposal for cycle 1: plain HTML/CSS (no framework, fastest on "
+                                          "phones), then the core pages, a patient blog for trust and SEO, and "
+                                          "subtle animations. 110 units total.", "done": False,
+                                   "workflows": [{"name": "Choose stack and scaffold", "purpose": "Plain HTML/CSS "
+                                                  "skeleton, no build step", "cost": 15, "outputs": ["index.html"]},
+                                                 {"name": "Core sections", "purpose": "Hero, departments, doctors, "
+                                                  "appointment form, contact", "cost": 45, "outputs": ["index.html"]},
+                                                 {"name": "Patient blog", "purpose": "5 health articles for trust "
+                                                  "and search", "cost": 30, "outputs": ["blog section"]},
+                                                 {"name": "Animations", "purpose": "Scroll and hover effects",
+                                                  "cost": 20, "outputs": ["CSS"]}]})
+            if gaps:
+                return json.dumps({"say": f"@Priority Audit found {len(gaps)} gap: {gaps[0]}. One small fix closes "
+                                          "it: a sticky emergency bar.", "done": False,
+                                   "workflows": [{"name": "Sticky emergency bar", "purpose": gaps[0], "cost": 8,
+                                                  "outputs": ["index.html"]}]})
+            return json.dumps({"say": "All criteria pass. Nothing left to do.", "done": True, "workflows": []})
+        note = f"\nUSER FEEDBACK TO ADDRESS: {self.feedback}" if self.feedback else ""
+        r = self.call("adaptation", '{"say": str (address @Priority), "done": bool, "workflows": ' + self.WF_FMT + "}",
+                      f"{self.context()}{note}\nOpen gaps: {gaps}\nPropose the next workflows, or done=true "
+                      "if every criterion passes and there is no user feedback.", mock)
+        self.post("adaptation", r.get("say", ""), proposal=r.get("workflows") or [], cycle=self.cycle)
+        if self.feedback:
+            r["done"] = False
+        return r
+
+    def _negotiate(self, plan):
+        table, started, exchanges = plan.get("workflows") or [], time.time(), 0
+        mock_p = [
+            {"say": "@Adaptation Scaffold and core sections: granted (60). The blog serves no 'done when' item, "
+                    "refused. Animations cut to 10. I'm keeping 30 in reserve for Audit fixes.",
+             "decision": "counter", "workflows": [plan["workflows"][0], plan["workflows"][1],
+                                                  {**plan["workflows"][3], "cost": 10}] if len(plan.get("workflows") or []) >= 4 else plan.get("workflows")},
+            {"say": "@Adaptation Still no on the blog. Trust comes from doctors and clear booking, which are in. "
+                    "The reserve stays.", "decision": "counter", "workflows": None},
+        ]
+        mock_a = [
+            {"say": "@Priority The blog is what makes a hospital site feel credible and gets found in search. "
+                    "I can shrink it to 20.", "accept": False,
+             "workflows": None},
+            {"say": "@Priority Without any content beyond listings the site feels empty. I can't accept zero.",
+             "accept": False, "workflows": None},
+        ]
+        round_i = 0
+        while exchanges < MAX_EXCHANGES and time.time() - started < TIME_BOX_S:
+            self.step = 3
+            remaining = BUDGET - self.spent
+
+            def mp(i=round_i):
+                if self.cycle > 1 or len(plan.get("workflows") or []) < 4:
+                    return json.dumps({"say": f"@Adaptation Granted ({cost_of(table)} of {remaining} left).",
+                                       "decision": "grant", "workflows": table})
+                d = dict(mock_p[min(i, 1)])
+                d["workflows"] = d["workflows"] or table
+                return json.dumps(d)
+            p = self.call("priority", '{"say": str (address @Adaptation), "decision": "grant"|"refuse"|"counter", '
+                          '"workflows": ' + self.WF_FMT + ' (what you grant; for counter, your version)}',
+                          f"{self.context()}\nON THE TABLE: {json.dumps(table)} (cost {cost_of(table)}, "
+                          f"remaining budget {remaining}). Exchange {exchanges + 1} of {MAX_EXCHANGES}.", mp)
+            exchanges += 1
+            self.post("priority", p.get("say", ""), decision=p.get("decision"), exchange=exchanges, cycle=self.cycle)
+            if p.get("decision") == "grant" and cost_of(p.get("workflows") or table) <= remaining:
+                return p.get("workflows") or table
+            if p.get("decision") == "counter" and p.get("workflows"):
+                countered = p["workflows"]
+            else:
+                countered = []
+            if exchanges >= MAX_EXCHANGES:
+                break
+
+            def ma(i=round_i):
+                return json.dumps(mock_a[min(i, 1)])
+            a = self.call("adaptation", '{"say": str (address @Priority), "accept": bool, "workflows": '
+                          + self.WF_FMT + ' (your revised proposal if you push back)}',
+                          f"{self.context()}\nPRIORITY OFFERS: {json.dumps(countered)}\nAccept if it still closes "
+                          f"the gap; otherwise push back. Exchange {exchanges + 1} of {MAX_EXCHANGES}.", ma)
+            exchanges += 1
+            self.post("adaptation", a.get("say", ""), accept=bool(a.get("accept")), exchange=exchanges,
+                      cycle=self.cycle)
+            if a.get("accept"):
+                return countered
+            table = a.get("workflows") or countered or table
+            round_i += 1
+        return self._identity_decides(plan, table)
+
+    def _identity_decides(self, plan, table):
+        self.step = 4
+        remaining = BUDGET - self.spent
+        cid = f"C-{len(self.conflicts) + 1}"
+        self.post("sutra", f"@Adaptation and @Priority didn't settle it in {MAX_EXCHANGES} exchanges. "
+                           "@Identity, please decide.", conflict=cid)
+
+        def mock():
+            wf = plan["workflows"]
+            return json.dumps({
+                "say": "Middle ground: no full blog, but a short 'Health tips' strip with 3 tips on the home page "
+                       "(10), so the site isn't just listings. Animations stay at 10. Scaffold and core sections as "
+                       "granted. That's 80, leaving 20 in reserve for Audit.",
+                "needs_user": False, "question": None,
+                "workflows": [wf[0], wf[1], {"name": "Health tips strip", "purpose": "3 short tips for trust",
+                                             "cost": 10, "outputs": ["index.html"]}, {**wf[3], "cost": 10}],
+                "adaptation_gets": "Some content beyond listings", "priority_gets": "20-unit reserve kept"})
+        r = self.call("identity", '{"say": str, "needs_user": bool, "question": str|null, "workflows": '
+                      + self.WF_FMT + ', "adaptation_gets": str, "priority_gets": str}',
+                      f"{self.context()}\nORIGINAL PROPOSAL: {json.dumps(plan.get('workflows'))}\nLAST ON TABLE: "
+                      f"{json.dumps(table)}\nRemaining budget {remaining}. Decide the middle ground that best "
+                      "serves the goal. needs_user=true only if the goal itself must change.", mock)
+        conflict = {"id": cid, "cycle": self.cycle, "between": ["adaptation", "priority"],
+                    "proposed": plan.get("workflows"), "decided": r.get("workflows"),
+                    "adaptation_gets": r.get("adaptation_gets"), "priority_gets": r.get("priority_gets"),
+                    "decided_by": "user" if r.get("needs_user") else "identity"}
+        self.conflicts.append(conflict)
+        self.save("conflicts.json", self.conflicts)
+        self.post("identity", r.get("say", ""), conflict=cid, decision=True)
+        if r.get("needs_user"):
+            self.post("identity", f"@User {r.get('question') or 'Should the goal change?'}", conflict=cid)
+            return None
+        return r.get("workflows") or table
+
+    # ------------------------------------------------------------------ steps 5-7
+    def _register(self, agreed):
+        self.step = 5
+        remaining, registered, refused = BUDGET - self.spent, [], []
+        for w in agreed or []:
+            c = int(w.get("cost") or 0)
+            if c <= 0 or not w.get("outputs") or c > remaining:
+                refused.append(w.get("name", "?"))
+                continue
+            remaining -= c
+            wf = {"id": f"W-{len(self.workflows) + 1}", "name": w.get("name", "workflow"),
+                  "purpose": w.get("purpose", ""), "cost": c, "outputs": w.get("outputs"),
+                  "status": "registered", "cycle": self.cycle}
+            self.workflows.append(wf)
+            registered.append(wf)
+        self.spent = BUDGET - remaining
+        self.save("workflows.json", self.workflows)
+        msg = f"Registered {', '.join(w['id'] + ' ' + w['name'] for w in registered) or 'nothing'}."
+        if refused:
+            msg += f" Refused (no cost/outputs, or over budget): {', '.join(refused)}."
+        self.post("sutra", msg + f" Budget: {self.spent}/{BUDGET} used.", register=True)
+
+    def _coordinate(self):
+        self.step = 6
+        todo = [w for w in self.workflows if w["status"] == "registered"]
+        if not todo:
+            return
+        self.post("coordination", "Running in order: " + " → ".join(f"{w['id']} {w['name']}" for w in todo) + ".")
+        for w in todo:
+            w["status"] = "running"
+            prev = self.sites[-1] if self.sites else ""
+            v = len(self.sites) + 1
+
+            def mock(w=w, v=v):
+                g = self.goal or {}
+                brief = {"site_name": g.get("site_name", "CityCare Hospital"), "purpose": g.get("statement", ""),
+                         "must_have": g.get("done_when", [])}
+                design = {"palette": {"primary": "#0f766e", "secondary": "#1e3a8a", "accent": "#e2553f",
+                                      "background": "#f6faf9", "text": "#10231f"},
+                          "fonts": {"heading": "Merriweather", "body": "Source Sans 3"}}
+                fixes = set()
+                done_names = [x["name"].lower() for x in self.workflows if x["status"] in ("done", "running")]
+                if any("tips" in n or "blog" in n for n in done_names):
+                    fixes.add("testimonials")
+                if any("emergency" in n for n in done_names):
+                    fixes.add("sticky-emergency")
+                if "scaffold" in w["name"].lower():
+                    html = (f"<!doctype html><html><head><meta charset='utf-8'><title>{brief['site_name']}</title>"
+                            "</head><body style='font:16px system-ui;padding:40px'><h1>"
+                            f"{brief['site_name']}</h1><p>Scaffold: sections coming next.</p></body></html>")
+                else:
+                    html = mock_site.build(brief, design, v, fixes)
+                return f"{w['id']} done: {w['name']}.\n```html\n{html}\n```"
+            raw = self.call("coordination", "One short line saying what you changed, then the complete file in "
+                            "a ```html code block.",
+                            f"{self.context()}\nRUN THIS WORKFLOW: {json.dumps(w)}\nPREVIOUS VERSION:\n{prev[:40000]}",
+                            mock, max_tokens=16000, json_reply=False)
+            try:
+                html = llm.extract_html(raw)
+            except ValueError:
+                w["status"] = "failed"
+                self.post("coordination", f"{w['id']} produced no HTML; marked failed.", workflow=w["id"])
+                continue
+            self.sites.append(html)
+            os.makedirs(os.path.join(self.dir, "site"), exist_ok=True)
+            for name in (f"v{len(self.sites)}.html", "index.html"):
+                with open(os.path.join(self.dir, "site", name), "w", encoding="utf-8") as f:
+                    f.write(html)
+            w["status"] = "done"
+            note = raw.split("```")[0].strip() or f"{w['id']} done."
+            self.post("coordination", note, workflow=w["id"], version=len(self.sites))
+        self.save("workflows.json", self.workflows)
+
+    def _audit(self):
+        self.step = 7
+        site = self.sites[-1] if self.sites else ""
+        crit = (self.goal or {}).get("done_when", [])
+
+        def mock():
+            sticky = 'class="ebar"' in site
+            res = [{"criterion": c, "pass": (sticky or "emergency" not in c.lower()),
+                    "note": ("Sticky bar shows the number on every screen" if sticky else
+                             "Number only appears in the contact section at the bottom")
+                    if "emergency" in c.lower() else "Present in the latest version"} for c in crit]
+            ok = all(r["pass"] for r in res)
+            return json.dumps({"say": "All criteria pass." if ok else
+                               f"{sum(not r['pass'] for r in res)} of {len(res)} criteria fail. See results.",
+                               "results": res, "all_pass": ok})
+        r = self.call("audit", '{"say": str, "results": [{"criterion": str, "pass": bool, "note": str}], '
+                      '"all_pass": bool}', f"{self.context()}\nCRITERIA: {json.dumps(crit)}\nSITE v{len(self.sites)}:"
+                      f"\n{site[:40000]}", mock, max_tokens=900)
+        results = r.get("results") or []
+        audit = {"cycle": self.cycle, "version": len(self.sites), "results": results,
+                 "all_pass": bool(results) and all(x.get("pass") for x in results)}
+        self.audits.append(audit)
+        self.save("audits.json", self.audits)
+        self.post("audit", r.get("say", ""), audit=audit["all_pass"], version=len(self.sites))
+        return audit["all_pass"]

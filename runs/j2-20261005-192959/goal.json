@@ -1,0 +1,43 @@
+{
+  "statement": "Build a one-page, single-file website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru. It shows the menu with prices, opening hours and location, lets visitors pre-order a coffee for pickup via a prefilled WhatsApp message, and includes a beans and farms section and a loyalty-card explainer.",
+  "site_name": "Brew Lab",
+  "audience": "Coffee drinkers in and around Indiranagar, Bengaluru, mostly on phones, who want to check the menu, hours and location and pre-order a coffee for pickup.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file; CDN libraries allowed; no build step.",
+    "Warm and modern look; works well on a phone.",
+    "English only.",
+    "No invented facts: unconfirmed prices, hours, address, WhatsApp number and sourcing are visibly marked placeholders or kept generic.",
+    "Total spend stays within the 100 budget; about 80 for the baseline build, about 20 held for two fixes."
+  ],
+  "rules": [
+    "Pre-order opens a prefilled WhatsApp message to the shop; the site stores and sends nothing itself; payment is at pickup.",
+    "The page must say an order is confirmed only when the shop replies.",
+    "The WhatsApp number is a labeled placeholder.",
+    "Prices, opening hours and address are visibly labeled placeholders.",
+    "Beans and farms content stays generic: no invented farm names, origins or claims.",
+    "No Kannada or other extra languages unless later added by a new decision."
+  ],
+  "done_when": [
+    "The site is one HTML file with CSS and JavaScript inline or loaded from CDNs, and it needs no build step.",
+    "The file has separate sections for menu, opening hours, location, beans and farms, loyalty card, and pre-order.",
+    "The menu lists several items, each with a price, and every price is visibly labeled as a placeholder.",
+    "The opening hours and the address (naming Indiranagar, Bengaluru) are present and visibly labeled as placeholders.",
+    "The loyalty section states the rule: buy 9, get the 10th free.",
+    "The pre-order form lets a visitor pick items and quantities and enter a name; its script builds the order text and opens a WhatsApp link (wa.me or api.whatsapp.com) with that text prefilled.",
+    "The WhatsApp number in the link is a labeled placeholder, defined in one clearly marked place in the file.",
+    "Near the pre-order form, the page says payment is at pickup and that the order is confirmed only when the shop replies.",
+    "The beans and farms section uses generic wording and contains no named farm, region or sourcing claim.",
+    "The file has a viewport meta tag and responsive CSS (media queries or fluid layout) so content fits a phone-width screen without sideways scrolling.",
+    "The CSS defines a warm color palette (coffee, cream or earth tones) and a modern font stack.",
+    "All visible text is in English.",
+    "A visible list or note on the page shows which details are still placeholders."
+  ],
+  "open_inputs": [
+    "Real menu items and prices",
+    "Real opening hours",
+    "Real street address and map location",
+    "Shop WhatsApp number for pre-orders",
+    "Real bean details, farm names and sourcing facts",
+    "Whether Kannada or any other language is wanted later"
+  ]
+}

@@ -1,0 +1,3304 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "hero",
+    "name": "Hero and countdown",
+    "covers": [
+      1,
+      11
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The site shows the name CodeSprint Pune 2027, that it is a two-day hackathon in Pune, Saturday 6 March 2027, Sunday 7 March 2027 and the venue Lakeside Tech Hall, 12 Lake Road, Pune 411002",
+      "A countdown counts down to the start of the hackathon"
+    ],
+    "purpose": "No page header, event details or countdown exist.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 4,
+      "time_limit_minutes": 12,
+      "retry_limit": 2,
+      "stop_loss": "Stop if spend reaches 20 or the same check fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#hero",
+      "#countdown"
+    ],
+    "completion_check": "Hero facts are present and the countdown seconds change after a wait.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-1.a1",
+        "goal": "The hero shows the event name, two-day Pune hackathon, both dates and venue, and a countdown to 6 March 2027 10:00am that ticks.",
+        "constraints": [
+          "Invent no facts",
+          "Placeholder for any photo",
+          "One main action button linking to #register"
+        ],
+        "context": [
+          "charter item 1",
+          "charter item 11"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-1 Builder",
+          "steps": "Create section #hero with the h1 CodeSprint Pune 2027, a line saying a two-day hackathon in Pune, the dates and venue, a photo placeholder .photo-placeholder, and one main link .j2-btn to #register. Inside it create #countdown with #cd-days, #cd-hours, #cd-mins and #cd-secs, counting down with JavaScript to 6 March 2027 10:00am and showing zeros after that."
+        },
+        "expected_output": [
+          {
+            "text": "Hero section exists",
+            "kind": "section",
+            "target": "#hero",
+            "met": true
+          },
+          {
+            "text": "Countdown element exists",
+            "kind": "element",
+            "target": "#countdown",
+            "count": 1,
+            "met": true
+          },
+          {
+            "text": "Event facts shown",
+            "kind": "facts",
+            "target": [
+              "CodeSprint Pune 2027",
+              "Saturday 6 March 2027",
+              "Sunday 7 March 2027",
+              "Lakeside Tech Hall, 12 Lake Road, Pune 411002"
+            ],
+            "met": true
+          },
+          {
+            "text": "Countdown seconds change after a wait",
+            "kind": "behavior",
+            "target": "#countdown",
+            "steps": [
+              "scroll-to #hero",
+              "wait 2",
+              "expect-changed #cd-secs"
+            ],
+            "met": true
+          },
+          {
+            "text": "Hero buttons are tappable",
+            "kind": "tap",
+            "target": "#hero",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Event facts present",
+            "type": "facts-present",
+            "target": [
+              "CodeSprint Pune 2027",
+              "Saturday 6 March 2027",
+              "Sunday 7 March 2027",
+              "Lakeside Tech Hall, 12 Lake Road, Pune 411002"
+            ],
+            "expect": true,
+            "item": 3
+          },
+          {
+            "text": "Countdown element exists",
+            "type": "element-count",
+            "target": "#countdown",
+            "expect": 1,
+            "item": 2
+          },
+          {
+            "text": "Hero tap targets at least 44px",
+            "type": "tap-targets",
+            "target": "#hero",
+            "expect": 44,
+            "item": 5
+          },
+          {
+            "text": "Hero section exists",
+            "type": "element-count",
+            "expect": 1,
+            "item": 1,
+            "target": "#hero"
+          },
+          {
+            "text": "Countdown seconds change after a wait",
+            "type": "behavior-steps",
+            "expect": true,
+            "item": 4,
+            "target": [
+              "scroll-to #hero",
+              "wait 2",
+              "expect-changed #cd-secs"
+            ]
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-1.a1",
+            "check": "Event facts present",
+            "type": "facts-present",
+            "target": [
+              "CodeSprint Pune 2027",
+              "Saturday 6 March 2027",
+              "Sunday 7 March 2027",
+              "Lakeside Tech Hall, 12 Lake Road, Pune 411002"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 4 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:48:04",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Countdown element exists",
+            "type": "element-count",
+            "target": "#countdown",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#countdown', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:48:04",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Hero tap targets at least 44px",
+            "type": "tap-targets",
+            "target": "#hero",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 1,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 1 tap target(s) in '#hero' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:48:06",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Hero section exists",
+            "type": "element-count",
+            "target": "#hero",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#hero', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:48:06",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Countdown seconds change after a wait",
+            "type": "behavior-steps",
+            "target": [
+              "scroll-to #hero",
+              "wait 2",
+              "expect-changed #cd-secs"
+            ],
+            "expect": true,
+            "actual": {
+              "steps": 3
+            },
+            "pass": true,
+            "evidence": "all 3 step(s) behaved as expected",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:48:07",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "style guide, usable section",
+    "style_guide": true,
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "tracks",
+    "name": "Track comparison",
+    "covers": [
+      2
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A track comparison shows Web Track, AI Track and Hardware Track with team size, build time and first prize for each"
+    ],
+    "purpose": "Visitors cannot compare the three tracks.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 2,
+      "stop_loss": "Stop if spend reaches 10 or the same check fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#tracks"
+    ],
+    "completion_check": "Three track cards show team size, build time and first prize.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-2.a1",
+        "goal": "The tracks section compares Web, AI and Hardware by team size, build time and first prize.",
+        "constraints": [
+          "Show only the first prize",
+          "Invent no facts"
+        ],
+        "context": [
+          "charter item 2"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-2 Builder",
+          "steps": "Create section #tracks with three cards of class j2-card and track-card, one per track, each showing the track name, the text 'team size 1 to 4' or 'team size 2 to 4', the build time and the first prize exactly as in the facts."
+        },
+        "expected_output": [
+          {
+            "text": "Tracks section exists",
+            "kind": "section",
+            "target": "#tracks",
+            "met": true
+          },
+          {
+            "text": "Three track cards",
+            "kind": "element",
+            "target": ".track-card",
+            "count": 3,
+            "met": true
+          },
+          {
+            "text": "Track facts shown",
+            "kind": "facts",
+            "target": [
+              "Web Track",
+              "AI Track",
+              "Hardware Track",
+              "team size 1 to 4",
+              "team size 2 to 4",
+              "24 hours",
+              "30 hours",
+              "Rs 50000",
+              "Rs 75000",
+              "Rs 60000"
+            ],
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Track facts present",
+            "type": "facts-present",
+            "target": [
+              "Web Track",
+              "AI Track",
+              "Hardware Track",
+              "team size 1 to 4",
+              "team size 2 to 4",
+              "24 hours",
+              "30 hours",
+              "Rs 50000",
+              "Rs 75000",
+              "Rs 60000"
+            ],
+            "expect": true,
+            "item": 3
+          },
+          {
+            "text": "Three track cards",
+            "type": "element-count",
+            "target": ".track-card",
+            "expect": 3,
+            "item": 2
+          },
+          {
+            "text": "Tracks section exists",
+            "type": "element-count",
+            "expect": 1,
+            "item": 1,
+            "target": "#tracks"
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-2.a1",
+            "check": "Track facts present",
+            "type": "facts-present",
+            "target": [
+              "Web Track",
+              "AI Track",
+              "Hardware Track",
+              "team size 1 to 4",
+              "team size 2 to 4",
+              "24 hours",
+              "30 hours",
+              "Rs 50000",
+              "Rs 75000",
+              "Rs 60000"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 10 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:48:34",
+            "by": "code"
+          },
+          {
+            "atom": "W-2.a1",
+            "check": "Three track cards",
+            "type": "element-count",
+            "target": ".track-card",
+            "expect": 3,
+            "actual": 3,
+            "pass": true,
+            "evidence": "3 element(s) match '.track-card', expected 3",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:48:34",
+            "by": "code"
+          },
+          {
+            "atom": "W-2.a1",
+            "check": "Tracks section exists",
+            "type": "element-count",
+            "target": "#tracks",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#tracks', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:48:34",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "calc",
+    "name": "Fee calculator",
+    "covers": [
+      3
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A fee calculator takes ticket type (Student or Professional), number of participants (1 to 4) and number of meal passes, and shows the total using Student Rs 400, Professional Rs 800, meal pass Rs 200, with 10% early-bird off entry fees only for registrations up to 15 February 2027"
+    ],
+    "purpose": "Visitors cannot work out what they will pay.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 4,
+      "time_limit_minutes": 12,
+      "retry_limit": 2,
+      "stop_loss": "Stop if spend reaches 10 or either total check fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 2,
+    "retries_used": 1,
+    "outputs": [
+      "#fees",
+      "#calc-total"
+    ],
+    "completion_check": "Totals match the early-bird and regular rules.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-3.a1",
+        "goal": "The calculator totals entry fees and meal passes, applying 10% off entry fees only when the registration date is on or before 15 February 2027.",
+        "constraints": [
+          "Early-bird never discounts meal passes",
+          "Never rely on today's date"
+        ],
+        "context": [
+          "charter item 3"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-3 Builder",
+          "steps": "Create section #fees with select #calc-ticket (options Student, Professional), number input #calc-people (1 to 4), number input #calc-meals (0 to 4), date input #calc-date (registration date) and output #calc-total. Entry price is Student Rs 400 or Professional Rs 800 per participant, meal pass Rs 200 each, and 10% off the entry part only when #calc-date is on or before 2027-02-15. Show the rule text with the 15 February 2027 date."
+        },
+        "expected_output": [
+          {
+            "text": "Fees section exists",
+            "kind": "section",
+            "target": "#fees",
+            "met": true
+          },
+          {
+            "text": "Price facts shown",
+            "kind": "facts",
+            "target": [
+              "Student Rs 400",
+              "Professional Rs 800",
+              "Rs 200",
+              "10%",
+              "15 February 2027"
+            ],
+            "met": true
+          },
+          {
+            "text": "Early-bird total for 2 students and 1 meal pass",
+            "kind": "behavior",
+            "target": "#fees",
+            "steps": [
+              "set #calc-date 2027-02-01",
+              "set #calc-ticket Student",
+              "set #calc-people 2",
+              "set #calc-meals 1",
+              "expect-number #calc-total 2*400*0.9+200"
+            ],
+            "met": true
+          },
+          {
+            "text": "Regular total after the early-bird date",
+            "kind": "behavior",
+            "target": "#fees",
+            "steps": [
+              "set #calc-date 2027-03-01",
+              "set #calc-ticket Professional",
+              "set #calc-people 3",
+              "set #calc-meals 2",
+              "expect-number #calc-total 3*800+2*200"
+            ],
+            "met": true
+          },
+          {
+            "text": "Calculator fields are tappable",
+            "kind": "tap",
+            "target": "#fees",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Price facts present",
+            "type": "facts-present",
+            "target": [
+              "Student Rs 400",
+              "Professional Rs 800",
+              "Rs 200",
+              "10%",
+              "15 February 2027"
+            ],
+            "expect": true,
+            "item": 2
+          },
+          {
+            "text": "Total output exists",
+            "type": "element-count",
+            "target": "#calc-total",
+            "expect": 1
+          },
+          {
+            "text": "Calculator tap targets at least 44px",
+            "type": "tap-targets",
+            "target": "#fees",
+            "expect": 44,
+            "item": 5
+          },
+          {
+            "text": "Fees section exists",
+            "type": "element-count",
+            "expect": 1,
+            "item": 1,
+            "target": "#fees"
+          },
+          {
+            "text": "Early-bird total for 2 students and 1 meal pass",
+            "type": "behavior-steps",
+            "expect": true,
+            "item": 3,
+            "target": [
+              "set #calc-date 2027-02-01",
+              "set #calc-ticket Student",
+              "set #calc-people 2",
+              "set #calc-meals 1",
+              "expect-number #calc-total 2*400*0.9+200"
+            ]
+          },
+          {
+            "text": "Regular total after the early-bird date",
+            "type": "behavior-steps",
+            "expect": true,
+            "item": 4,
+            "target": [
+              "set #calc-date 2027-03-01",
+              "set #calc-ticket Professional",
+              "set #calc-people 3",
+              "set #calc-meals 2",
+              "expect-number #calc-total 3*800+2*200"
+            ]
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-3.a1",
+            "check": "Price facts present",
+            "type": "facts-present",
+            "target": [
+              "Student Rs 400",
+              "Professional Rs 800",
+              "Rs 200",
+              "10%",
+              "15 February 2027"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 5 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:49:46",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Total output exists",
+            "type": "element-count",
+            "target": "#calc-total",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#calc-total', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:49:46",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Calculator tap targets at least 44px",
+            "type": "tap-targets",
+            "target": "#fees",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 6,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 6 tap target(s) in '#fees' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:49:48",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Fees section exists",
+            "type": "element-count",
+            "target": "#fees",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#fees', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:49:48",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Early-bird total for 2 students and 1 meal pass",
+            "type": "behavior-steps",
+            "target": [
+              "set #calc-date 2027-02-01",
+              "set #calc-ticket Student",
+              "set #calc-people 2",
+              "set #calc-meals 1",
+              "expect-number #calc-total 2*400*0.9+200"
+            ],
+            "expect": true,
+            "actual": {
+              "steps": 5
+            },
+            "pass": true,
+            "evidence": "all 5 step(s) behaved as expected",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:49:49",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Regular total after the early-bird date",
+            "type": "behavior-steps",
+            "target": [
+              "set #calc-date 2027-03-01",
+              "set #calc-ticket Professional",
+              "set #calc-people 3",
+              "set #calc-meals 2",
+              "expect-number #calc-total 3*800+2*200"
+            ],
+            "expect": true,
+            "actual": {
+              "steps": 5
+            },
+            "pass": true,
+            "evidence": "all 5 step(s) behaved as expected",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:49:50",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "reg",
+    "name": "Team registration form",
+    "covers": [
+      4
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A registration form has team name, lead name, lead email, lead phone, track dropdown, ticket type, college name (Student only, required only then), number of participants (1 to 4), meal passes yes/no and dietary preference (only if meals yes), and sends to register@example.com"
+    ],
+    "purpose": "Teams cannot register.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 4,
+      "time_limit_minutes": 15,
+      "retry_limit": 2,
+      "stop_loss": "Stop if spend reaches 15 or the same behavior check fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#register",
+      "#reg-form"
+    ],
+    "completion_check": "College and diet fields appear only when their triggers are set.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-4.a1",
+        "goal": "The registration form collects team details, shows college only for Student and diet only with meal passes, and sends to register@example.com.",
+        "constraints": [
+          "College required only when ticket type is Student",
+          "Initial ticket and meal selections are empty so conditional fields start hidden"
+        ],
+        "context": [
+          "charter item 4"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-4 Builder",
+          "steps": "Create section #register with form #reg-form (action mailto:register@example.com) holding text inputs #reg-team, #reg-lead, #reg-phone, email input #reg-email, select #reg-track (Web Track, AI Track, Hardware Track), select #reg-ticket (blank, Student, Professional), wrapper #reg-college-wrap containing input #reg-college (required only while Student is chosen), number input #reg-people (1 to 4), select #reg-meals (blank, Yes, No), wrapper #reg-diet-wrap containing select #reg-diet (Vegetarian, Non-vegetarian), and submit button #reg-submit. Both wrappers are hidden by default."
+        },
+        "expected_output": [
+          {
+            "text": "Register section exists",
+            "kind": "section",
+            "target": "#register",
+            "met": true
+          },
+          {
+            "text": "Form has a submit control and destination",
+            "kind": "test",
+            "target": "form-has-submit",
+            "met": true
+          },
+          {
+            "text": "Destination shown",
+            "kind": "facts",
+            "target": [
+              "register@example.com"
+            ],
+            "met": true
+          },
+          {
+            "text": "College starts hidden, shows for Student, hides for Professional",
+            "kind": "behavior",
+            "target": "#reg-college-wrap",
+            "steps": [
+              "expect-hidden #reg-college-wrap",
+              "set #reg-ticket Student",
+              "expect-visible #reg-college-wrap",
+              "set #reg-ticket Professional",
+              "expect-hidden #reg-college-wrap"
+            ],
+            "met": true
+          },
+          {
+            "text": "Diet shows only when meal passes is Yes",
+            "kind": "behavior",
+            "target": "#reg-diet-wrap",
+            "steps": [
+              "expect-hidden #reg-diet-wrap",
+              "set #reg-meals Yes",
+              "expect-visible #reg-diet-wrap",
+              "set #reg-meals No",
+              "expect-hidden #reg-diet-wrap"
+            ],
+            "met": true
+          },
+          {
+            "text": "Form fields are tappable",
+            "kind": "tap",
+            "target": "#register",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Form has submit and destination",
+            "type": "named-test",
+            "target": "form-has-submit",
+            "expect": true,
+            "item": 2
+          },
+          {
+            "text": "Email present",
+            "type": "facts-present",
+            "target": [
+              "register@example.com"
+            ],
+            "expect": true,
+            "item": 3
+          },
+          {
+            "text": "One registration form",
+            "type": "element-count",
+            "target": "#reg-form",
+            "expect": 1
+          },
+          {
+            "text": "Form tap targets at least 44px",
+            "type": "tap-targets",
+            "target": "#register",
+            "expect": 44,
+            "item": 6
+          },
+          {
+            "text": "Register section exists",
+            "type": "element-count",
+            "expect": 1,
+            "item": 1,
+            "target": "#register"
+          },
+          {
+            "text": "College starts hidden, shows for Student, hides for Professional",
+            "type": "behavior-steps",
+            "expect": true,
+            "item": 4,
+            "target": [
+              "expect-hidden #reg-college-wrap",
+              "set #reg-ticket Student",
+              "expect-visible #reg-college-wrap",
+              "set #reg-ticket Professional",
+              "expect-hidden #reg-college-wrap"
+            ]
+          },
+          {
+            "text": "Diet shows only when meal passes is Yes",
+            "type": "behavior-steps",
+            "expect": true,
+            "item": 5,
+            "target": [
+              "expect-hidden #reg-diet-wrap",
+              "set #reg-meals Yes",
+              "expect-visible #reg-diet-wrap",
+              "set #reg-meals No",
+              "expect-hidden #reg-diet-wrap"
+            ]
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-4.a1",
+            "check": "Form has submit and destination",
+            "type": "named-test",
+            "target": "form-has-submit",
+            "expect": true,
+            "actual": [
+              1,
+              1
+            ],
+            "pass": true,
+            "evidence": "2 form(s), each with a submit control",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:50:29",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Email present",
+            "type": "facts-present",
+            "target": [
+              "register@example.com"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 1 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:50:29",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "One registration form",
+            "type": "element-count",
+            "target": "#reg-form",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#reg-form', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:50:29",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Form tap targets at least 44px",
+            "type": "tap-targets",
+            "target": "#register",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 9,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 9 tap target(s) in '#register' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:50:30",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Register section exists",
+            "type": "element-count",
+            "target": "#register",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#register', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:50:30",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "College starts hidden, shows for Student, hides for Professional",
+            "type": "behavior-steps",
+            "target": [
+              "expect-hidden #reg-college-wrap",
+              "set #reg-ticket Student",
+              "expect-visible #reg-college-wrap",
+              "set #reg-ticket Professional",
+              "expect-hidden #reg-college-wrap"
+            ],
+            "expect": true,
+            "actual": {
+              "steps": 5
+            },
+            "pass": true,
+            "evidence": "all 5 step(s) behaved as expected",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:50:31",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Diet shows only when meal passes is Yes",
+            "type": "behavior-steps",
+            "target": [
+              "expect-hidden #reg-diet-wrap",
+              "set #reg-meals Yes",
+              "expect-visible #reg-diet-wrap",
+              "set #reg-meals No",
+              "expect-hidden #reg-diet-wrap"
+            ],
+            "expect": true,
+            "actual": {
+              "steps": 5
+            },
+            "pass": true,
+            "evidence": "all 5 step(s) behaved as expected",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:50:32",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "mentor",
+    "name": "Mentor sign-up form",
+    "covers": [
+      5
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A separate mentor form has name, email, area of expertise (Web, AI, Hardware) and availability (Saturday, Sunday or both), and sends to mentors@example.com"
+    ],
+    "purpose": "Mentors cannot sign up.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 4,
+      "time_limit_minutes": 12,
+      "retry_limit": 2,
+      "stop_loss": "Stop if spend reaches 15 or the same check fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#mentor",
+      "#mentor-form"
+    ],
+    "completion_check": "Form has the four fields and a mailto destination.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-5.a1",
+        "goal": "A separate mentor form collects name, email, expertise and availability and sends to mentors@example.com.",
+        "constraints": [
+          "Separate from the registration form"
+        ],
+        "context": [
+          "charter item 5"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-5 Builder",
+          "steps": "Create section #mentor with form #mentor-form (action mailto:mentors@example.com), text input #mentor-name, email input #mentor-email, select #mentor-area (Web, AI, Hardware), select #mentor-when (Saturday, Sunday, Both) and submit button #mentor-submit."
+        },
+        "expected_output": [
+          {
+            "text": "Mentor section exists",
+            "kind": "section",
+            "target": "#mentor",
+            "met": true
+          },
+          {
+            "text": "Form has a submit control and destination",
+            "kind": "test",
+            "target": "form-has-submit",
+            "met": true
+          },
+          {
+            "text": "Destination shown",
+            "kind": "facts",
+            "target": [
+              "mentors@example.com"
+            ],
+            "met": true
+          },
+          {
+            "text": "Submit button is visible",
+            "kind": "behavior",
+            "target": "#mentor",
+            "steps": [
+              "scroll-to #mentor",
+              "expect-visible #mentor-submit"
+            ],
+            "met": true
+          },
+          {
+            "text": "Form fields are tappable",
+            "kind": "tap",
+            "target": "#mentor",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Form has submit and destination",
+            "type": "named-test",
+            "target": "form-has-submit",
+            "expect": true,
+            "item": 2
+          },
+          {
+            "text": "Email present",
+            "type": "facts-present",
+            "target": [
+              "mentors@example.com"
+            ],
+            "expect": true,
+            "item": 3
+          },
+          {
+            "text": "One mentor form",
+            "type": "element-count",
+            "target": "#mentor-form",
+            "expect": 1
+          },
+          {
+            "text": "Mentor tap targets at least 44px",
+            "type": "tap-targets",
+            "target": "#mentor",
+            "expect": 44,
+            "item": 5
+          },
+          {
+            "text": "Mentor section exists",
+            "type": "element-count",
+            "expect": 1,
+            "item": 1,
+            "target": "#mentor"
+          },
+          {
+            "text": "Submit button is visible",
+            "type": "behavior-steps",
+            "expect": true,
+            "item": 4,
+            "target": [
+              "scroll-to #mentor",
+              "expect-visible #mentor-submit"
+            ]
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-5.a1",
+            "check": "Form has submit and destination",
+            "type": "named-test",
+            "target": "form-has-submit",
+            "expect": true,
+            "actual": [
+              1,
+              1,
+              1
+            ],
+            "pass": true,
+            "evidence": "3 form(s), each with a submit control",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:50:54",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "Email present",
+            "type": "facts-present",
+            "target": [
+              "mentors@example.com"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 1 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:50:54",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "One mentor form",
+            "type": "element-count",
+            "target": "#mentor-form",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#mentor-form', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:50:54",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "Mentor tap targets at least 44px",
+            "type": "tap-targets",
+            "target": "#mentor",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 5,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 5 tap target(s) in '#mentor' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:50:55",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "Mentor section exists",
+            "type": "element-count",
+            "target": "#mentor",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#mentor', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:50:55",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "Submit button is visible",
+            "type": "behavior-steps",
+            "target": [
+              "scroll-to #mentor",
+              "expect-visible #mentor-submit"
+            ],
+            "expect": true,
+            "actual": {
+              "steps": 2
+            },
+            "pass": true,
+            "evidence": "all 2 step(s) behaved as expected",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:50:56",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section",
+    "version": 5
+  },
+  {
+    "id": "W-6",
+    "proposal_id": "schedule",
+    "name": "Schedule",
+    "covers": [
+      6
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A schedule shows day one and day two with every listed time and event"
+    ],
+    "purpose": "No schedule on the page.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 2,
+      "stop_loss": "Stop if spend reaches 10 or the same check fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 3,
+    "retries_used": 0,
+    "outputs": [
+      "#schedule"
+    ],
+    "completion_check": "Every listed time and event is shown.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-6.a1",
+        "goal": "The schedule lists every day-one and day-two time and event.",
+        "constraints": [
+          "Invent no times or events"
+        ],
+        "context": [
+          "charter item 6"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-6 Builder",
+          "steps": "Create section #schedule with two lists, #day-one (Saturday 6 March 2027: 9:00am check-in opens, 10:00am opening and kickoff, 1:00pm lunch, 8:00pm mentor round) and #day-two (Sunday 7 March 2027: 10:00am final submissions close, 11:00am demos begin, 3:00pm prize ceremony). Each list is a .j2-card."
+        },
+        "expected_output": [
+          {
+            "text": "Schedule section exists",
+            "kind": "section",
+            "target": "#schedule",
+            "met": true
+          },
+          {
+            "text": "Two day lists",
+            "kind": "element",
+            "target": ".j2-card",
+            "count": 2,
+            "met": true
+          },
+          {
+            "text": "Times and events shown",
+            "kind": "facts",
+            "target": [
+              "9:00am",
+              "10:00am",
+              "1:00pm",
+              "8:00pm",
+              "11:00am",
+              "3:00pm",
+              "check-in opens",
+              "opening and kickoff",
+              "lunch",
+              "mentor round",
+              "final submissions close",
+              "demos begin",
+              "prize ceremony"
+            ],
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Times and events present",
+            "type": "facts-present",
+            "target": [
+              "9:00am",
+              "10:00am",
+              "1:00pm",
+              "8:00pm",
+              "11:00am",
+              "3:00pm",
+              "check-in opens",
+              "opening and kickoff",
+              "lunch",
+              "mentor round",
+              "final submissions close",
+              "demos begin",
+              "prize ceremony"
+            ],
+            "expect": true,
+            "item": 3
+          },
+          {
+            "text": "Schedule section exists",
+            "type": "element-count",
+            "target": "#schedule",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "Day one list exists",
+            "type": "element-count",
+            "target": "#day-one",
+            "expect": 1,
+            "item": 2
+          },
+          {
+            "text": "Day two list exists",
+            "type": "element-count",
+            "target": "#day-two",
+            "expect": 1,
+            "item": 2
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-6.a1",
+            "check": "Times and events present",
+            "type": "facts-present",
+            "target": [
+              "9:00am",
+              "10:00am",
+              "1:00pm",
+              "8:00pm",
+              "11:00am",
+              "3:00pm",
+              "check-in opens",
+              "opening and kickoff",
+              "lunch",
+              "mentor round",
+              "final submissions close",
+              "demos begin",
+              "prize ceremony"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 13 fact(s) on the page",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-14T17:52:02",
+            "by": "code",
+            "recheck": "check corrected by Adaptation"
+          },
+          {
+            "atom": "W-6.a1",
+            "check": "Schedule section exists",
+            "type": "element-count",
+            "target": "#schedule",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#schedule', expected 1",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-14T17:52:02",
+            "by": "code",
+            "recheck": "check corrected by Adaptation"
+          },
+          {
+            "atom": "W-6.a1",
+            "check": "Day one list exists",
+            "type": "element-count",
+            "target": "#day-one",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#day-one', expected 1",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-14T17:52:02",
+            "by": "code",
+            "recheck": "check corrected by Adaptation"
+          },
+          {
+            "atom": "W-6.a1",
+            "check": "Day two list exists",
+            "type": "element-count",
+            "target": "#day-two",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#day-two', expected 1",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-14T17:52:02",
+            "by": "code",
+            "recheck": "check corrected by Adaptation"
+          }
+        ],
+        "attempts": 3,
+        "status": "passed"
+      }
+    ],
+    "section": "W-6",
+    "revises": null,
+    "agent": "W-6 Builder",
+    "last_check": "usable section",
+    "version": 8
+  },
+  {
+    "id": "W-7",
+    "proposal_id": "prizes",
+    "name": "Prizes",
+    "covers": [
+      7
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A prizes section shows the first prize for each of the three tracks"
+    ],
+    "purpose": "Prizes are not shown.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 8,
+      "retry_limit": 2,
+      "stop_loss": "Stop if spend reaches 10 or the same check fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#prizes"
+    ],
+    "completion_check": "Three first prizes are shown.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-7.a1",
+        "goal": "The prizes section shows the first prize for Web, AI and Hardware tracks only.",
+        "constraints": [
+          "No second or third prizes"
+        ],
+        "context": [
+          "charter item 7"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-7 Builder",
+          "steps": "Create section #prizes with three cards of class j2-card and prize-card, each showing a track name and its first prize."
+        },
+        "expected_output": [
+          {
+            "text": "Prizes section exists",
+            "kind": "section",
+            "target": "#prizes",
+            "met": true
+          },
+          {
+            "text": "Three prize cards",
+            "kind": "element",
+            "target": ".prize-card",
+            "count": 3,
+            "met": true
+          },
+          {
+            "text": "Prize facts shown",
+            "kind": "facts",
+            "target": [
+              "Web Track",
+              "AI Track",
+              "Hardware Track",
+              "Rs 50000",
+              "Rs 75000",
+              "Rs 60000"
+            ],
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Prize facts present",
+            "type": "facts-present",
+            "target": [
+              "Web Track",
+              "AI Track",
+              "Hardware Track",
+              "Rs 50000",
+              "Rs 75000",
+              "Rs 60000"
+            ],
+            "expect": true,
+            "item": 3
+          },
+          {
+            "text": "Three prize cards",
+            "type": "element-count",
+            "target": ".prize-card",
+            "expect": 3,
+            "item": 2
+          },
+          {
+            "text": "Prizes section exists",
+            "type": "element-count",
+            "expect": 1,
+            "item": 1,
+            "target": "#prizes"
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-7.a1",
+            "check": "Prize facts present",
+            "type": "facts-present",
+            "target": [
+              "Web Track",
+              "AI Track",
+              "Hardware Track",
+              "Rs 50000",
+              "Rs 75000",
+              "Rs 60000"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 6 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:52:21",
+            "by": "code"
+          },
+          {
+            "atom": "W-7.a1",
+            "check": "Three prize cards",
+            "type": "element-count",
+            "target": ".prize-card",
+            "expect": 3,
+            "actual": 3,
+            "pass": true,
+            "evidence": "3 element(s) match '.prize-card', expected 3",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:52:21",
+            "by": "code"
+          },
+          {
+            "atom": "W-7.a1",
+            "check": "Prizes section exists",
+            "type": "element-count",
+            "target": "#prizes",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#prizes', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:52:21",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-7",
+    "revises": null,
+    "agent": "W-7 Builder",
+    "last_check": "usable section",
+    "version": 9
+  },
+  {
+    "id": "W-8",
+    "proposal_id": "faq",
+    "name": "FAQ",
+    "covers": [
+      8
+    ],
+    "fixes": [],
+    "covers_text": [
+      "An FAQ section answers the six listed questions"
+    ],
+    "purpose": "Common questions are unanswered.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 2,
+      "stop_loss": "Stop if spend reaches 10 or the same check fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#faq"
+    ],
+    "completion_check": "Six questions and answers present, an answer opens on click.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-8.a1",
+        "goal": "The FAQ answers the six listed questions and an answer opens when its question is clicked.",
+        "constraints": [
+          "Answers exactly as in the brief"
+        ],
+        "context": [
+          "charter item 8"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-8 Builder",
+          "steps": "Create section #faq with six accordion items of class faq-item, each a button .faq-q and a panel .faq-a hidden by default. The first button has id #faq-q1 and its panel #faq-a1. Answers: Yes, until 20 February 2027 by email; Yes, free at the north gate; No; Yes; Yes, at the hall; Yes, we will match you with a team on day one."
+        },
+        "expected_output": [
+          {
+            "text": "FAQ section exists",
+            "kind": "section",
+            "target": "#faq",
+            "met": true
+          },
+          {
+            "text": "Six FAQ items",
+            "kind": "element",
+            "target": ".faq-item",
+            "count": 6,
+            "met": true
+          },
+          {
+            "text": "Questions shown",
+            "kind": "facts",
+            "target": [
+              "Can I change my track?",
+              "Is there parking?",
+              "Are refunds available?",
+              "Do I need my own laptop?",
+              "Is there Wi-Fi?",
+              "Can I join without a team?",
+              "20 February 2027"
+            ],
+            "met": true
+          },
+          {
+            "text": "Clicking a question reveals its answer",
+            "kind": "behavior",
+            "target": "#faq",
+            "steps": [
+              "scroll-to #faq",
+              "expect-hidden #faq-a1",
+              "click #faq-q1",
+              "expect-visible #faq-a1"
+            ],
+            "met": true
+          },
+          {
+            "text": "FAQ buttons are tappable",
+            "kind": "tap",
+            "target": "#faq",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Questions present",
+            "type": "facts-present",
+            "target": [
+              "Can I change my track?",
+              "Is there parking?",
+              "Are refunds available?",
+              "Do I need my own laptop?",
+              "Is there Wi-Fi?",
+              "Can I join without a team?",
+              "20 February 2027"
+            ],
+            "expect": true,
+            "item": 3
+          },
+          {
+            "text": "Six FAQ items",
+            "type": "element-count",
+            "target": ".faq-item",
+            "expect": 6,
+            "item": 2
+          },
+          {
+            "text": "FAQ tap targets at least 44px",
+            "type": "tap-targets",
+            "target": "#faq",
+            "expect": 44,
+            "item": 5
+          },
+          {
+            "text": "FAQ section exists",
+            "type": "element-count",
+            "expect": 1,
+            "item": 1,
+            "target": "#faq"
+          },
+          {
+            "text": "Clicking a question reveals its answer",
+            "type": "behavior-steps",
+            "expect": true,
+            "item": 4,
+            "target": [
+              "scroll-to #faq",
+              "expect-hidden #faq-a1",
+              "click #faq-q1",
+              "expect-visible #faq-a1"
+            ]
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-8.a1",
+            "check": "Questions present",
+            "type": "facts-present",
+            "target": [
+              "Can I change my track?",
+              "Is there parking?",
+              "Are refunds available?",
+              "Do I need my own laptop?",
+              "Is there Wi-Fi?",
+              "Can I join without a team?",
+              "20 February 2027"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 7 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:52:46",
+            "by": "code"
+          },
+          {
+            "atom": "W-8.a1",
+            "check": "Six FAQ items",
+            "type": "element-count",
+            "target": ".faq-item",
+            "expect": 6,
+            "actual": 6,
+            "pass": true,
+            "evidence": "6 element(s) match '.faq-item', expected 6",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:52:46",
+            "by": "code"
+          },
+          {
+            "atom": "W-8.a1",
+            "check": "FAQ tap targets at least 44px",
+            "type": "tap-targets",
+            "target": "#faq",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 7,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 7 tap target(s) in '#faq' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:52:47",
+            "by": "code"
+          },
+          {
+            "atom": "W-8.a1",
+            "check": "FAQ section exists",
+            "type": "element-count",
+            "target": "#faq",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#faq', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:52:47",
+            "by": "code"
+          },
+          {
+            "atom": "W-8.a1",
+            "check": "Clicking a question reveals its answer",
+            "type": "behavior-steps",
+            "target": [
+              "scroll-to #faq",
+              "expect-hidden #faq-a1",
+              "click #faq-q1",
+              "expect-visible #faq-a1"
+            ],
+            "expect": true,
+            "actual": {
+              "steps": 4
+            },
+            "pass": true,
+            "evidence": "all 4 step(s) behaved as expected",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:52:49",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-8",
+    "revises": null,
+    "agent": "W-8 Builder",
+    "last_check": "usable section",
+    "version": 10
+  },
+  {
+    "id": "W-9",
+    "proposal_id": "sponsors",
+    "name": "Sponsors",
+    "covers": [
+      9
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A sponsors section shows Gold, Silver and Community tiers with the listed sponsors and logo placeholders"
+    ],
+    "purpose": "Sponsors are not shown.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 3,
+      "time_limit_minutes": 8,
+      "retry_limit": 2,
+      "stop_loss": "Stop if spend reaches 10 or the same check fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#sponsors"
+    ],
+    "completion_check": "Three tiers, four sponsors, four logo placeholders.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-9.a1",
+        "goal": "The sponsors section shows Gold, Silver and Community tiers with each sponsor and a logo placeholder.",
+        "constraints": [
+          "Placeholders only, no real logos"
+        ],
+        "context": [
+          "charter item 9"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-9 Builder",
+          "steps": "Create section #sponsors with three blocks of class sponsor-tier labelled Gold (Northwind Cloud), Silver (Bytecraft Labs, Circuit House) and Community (Pune Coders Club). Each sponsor has a box of class sponsor-logo as a placeholder."
+        },
+        "expected_output": [
+          {
+            "text": "Sponsors section exists",
+            "kind": "section",
+            "target": "#sponsors",
+            "met": true
+          },
+          {
+            "text": "Three tiers",
+            "kind": "element",
+            "target": ".sponsor-tier",
+            "count": 3,
+            "met": true
+          },
+          {
+            "text": "Four logo placeholders",
+            "kind": "element",
+            "target": ".sponsor-logo",
+            "count": 4,
+            "met": true
+          },
+          {
+            "text": "Sponsor facts shown",
+            "kind": "facts",
+            "target": [
+              "Gold",
+              "Silver",
+              "Community",
+              "Northwind Cloud",
+              "Bytecraft Labs",
+              "Circuit House",
+              "Pune Coders Club"
+            ],
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Sponsor facts present",
+            "type": "facts-present",
+            "target": [
+              "Gold",
+              "Silver",
+              "Community",
+              "Northwind Cloud",
+              "Bytecraft Labs",
+              "Circuit House",
+              "Pune Coders Club"
+            ],
+            "expect": true,
+            "item": 4
+          },
+          {
+            "text": "Three tiers",
+            "type": "element-count",
+            "target": ".sponsor-tier",
+            "expect": 3,
+            "item": 2
+          },
+          {
+            "text": "Four logo placeholders",
+            "type": "element-count",
+            "target": ".sponsor-logo",
+            "expect": 4,
+            "item": 3
+          },
+          {
+            "text": "Sponsors section exists",
+            "type": "element-count",
+            "expect": 1,
+            "item": 1,
+            "target": "#sponsors"
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-9.a1",
+            "check": "Sponsor facts present",
+            "type": "facts-present",
+            "target": [
+              "Gold",
+              "Silver",
+              "Community",
+              "Northwind Cloud",
+              "Bytecraft Labs",
+              "Circuit House",
+              "Pune Coders Club"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 7 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:53:09",
+            "by": "code"
+          },
+          {
+            "atom": "W-9.a1",
+            "check": "Three tiers",
+            "type": "element-count",
+            "target": ".sponsor-tier",
+            "expect": 3,
+            "actual": 3,
+            "pass": true,
+            "evidence": "3 element(s) match '.sponsor-tier', expected 3",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:53:09",
+            "by": "code"
+          },
+          {
+            "atom": "W-9.a1",
+            "check": "Four logo placeholders",
+            "type": "element-count",
+            "target": ".sponsor-logo",
+            "expect": 4,
+            "actual": 4,
+            "pass": true,
+            "evidence": "4 element(s) match '.sponsor-logo', expected 4",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:53:09",
+            "by": "code"
+          },
+          {
+            "atom": "W-9.a1",
+            "check": "Sponsors section exists",
+            "type": "element-count",
+            "target": "#sponsors",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#sponsors', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:53:09",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-9",
+    "revises": null,
+    "agent": "W-9 Builder",
+    "last_check": "usable section",
+    "version": 11
+  },
+  {
+    "id": "W-10",
+    "proposal_id": "contact-nav",
+    "name": "Contact and sticky menu",
+    "covers": [
+      10,
+      12
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Contact shows code@example.com and WhatsApp +91 00000 55555",
+      "A menu stays on screen and highlights the section the visitor is in"
+    ],
+    "purpose": "No contact details and no navigation.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 4,
+      "time_limit_minutes": 15,
+      "retry_limit": 2,
+      "stop_loss": "Stop if spend reaches 20 or the same check fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 3,
+    "retries_used": 0,
+    "outputs": [
+      "#contact",
+      "#site-nav"
+    ],
+    "completion_check": "Contact facts present and the menu marks the section in view.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-10.a1",
+        "goal": "Contact shows code@example.com and WhatsApp +91 00000 55555, and a fixed menu links to every section and marks the current one.",
+        "constraints": [
+          "Menu fixed on screen at 360px and 1280px",
+          "WhatsApp link is a well-formed wa.me link"
+        ],
+        "context": [
+          "charter item 10",
+          "charter item 12"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-10 Builder",
+          "steps": "Create section #contact with a mailto link to code@example.com and a wa.me link for +91 00000 55555. Create fixed nav #site-nav with links #nav-hero, #nav-tracks, #nav-fees, #nav-register, #nav-mentor, #nav-schedule, #nav-prizes, #nav-faq, #nav-sponsors and #nav-contact pointing to #hero, #tracks, #fees, #register, #mentor, #schedule, #prizes, #faq, #sponsors and #contact. Use a scroll listener to add class active to the link of the section in view and remove it from the others. On phones the menu scrolls horizontally inside itself without widening the page."
+        },
+        "expected_output": [
+          {
+            "text": "Contact section exists",
+            "kind": "section",
+            "target": "#contact",
+            "met": true
+          },
+          {
+            "text": "Menu exists",
+            "kind": "element",
+            "target": "#site-nav",
+            "count": 1,
+            "met": true
+          },
+          {
+            "text": "Contact facts shown",
+            "kind": "facts",
+            "target": [
+              "code@example.com",
+              "+91 00000 55555"
+            ],
+            "met": true
+          },
+          {
+            "text": "Contact link is active after scrolling to contact",
+            "kind": "behavior",
+            "target": "#site-nav",
+            "steps": [
+              "scroll-to #contact",
+              "wait 1",
+              "expect-class #nav-contact active"
+            ],
+            "met": true
+          },
+          {
+            "text": "Hero link is active after scrolling to hero",
+            "kind": "behavior",
+            "target": "#site-nav",
+            "steps": [
+              "scroll-to #hero",
+              "wait 1",
+              "expect-class #nav-hero active"
+            ],
+            "met": true
+          },
+          {
+            "text": "Menu and contact links are tappable",
+            "kind": "tap",
+            "target": "#site-nav",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Contact facts present",
+            "type": "facts-present",
+            "target": [
+              "code@example.com",
+              "+91 00000 55555"
+            ],
+            "expect": true,
+            "item": 3
+          },
+          {
+            "text": "Menu exists",
+            "type": "element-count",
+            "target": "#site-nav",
+            "expect": 1,
+            "item": 2
+          },
+          {
+            "text": "Links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true
+          },
+          {
+            "text": "Menu tap targets at least 44px",
+            "type": "tap-targets",
+            "target": "#site-nav",
+            "expect": 44,
+            "item": 6
+          },
+          {
+            "text": "Contact section exists",
+            "type": "element-count",
+            "expect": 1,
+            "item": 1,
+            "target": "#contact"
+          },
+          {
+            "text": "Contact link is active after scrolling to contact",
+            "type": "behavior-steps",
+            "expect": true,
+            "item": 4,
+            "target": [
+              "scroll-to #contact",
+              "wait 1",
+              "expect-class #nav-contact active"
+            ]
+          },
+          {
+            "text": "Hero link is active after scrolling to hero",
+            "type": "behavior-steps",
+            "expect": true,
+            "item": 5,
+            "target": [
+              "scroll-to #hero",
+              "wait 1",
+              "expect-class #nav-hero active"
+            ]
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-10.a1",
+            "check": "Contact facts present",
+            "type": "facts-present",
+            "target": [
+              "code@example.com",
+              "+91 00000 55555"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 2 fact(s) on the page",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-14T17:54:54",
+            "by": "code"
+          },
+          {
+            "atom": "W-10.a1",
+            "check": "Menu exists",
+            "type": "element-count",
+            "target": "#site-nav",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#site-nav', expected 1",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-14T17:54:54",
+            "by": "code"
+          },
+          {
+            "atom": "W-10.a1",
+            "check": "Links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true,
+            "actual": [],
+            "pass": true,
+            "evidence": "every in-page link resolves",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-14T17:54:54",
+            "by": "code"
+          },
+          {
+            "atom": "W-10.a1",
+            "check": "Menu tap targets at least 44px",
+            "type": "tap-targets",
+            "target": "#site-nav",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 10,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 10 tap target(s) in '#site-nav' at least 44x44px at 360px",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-14T17:54:56",
+            "by": "code"
+          },
+          {
+            "atom": "W-10.a1",
+            "check": "Contact section exists",
+            "type": "element-count",
+            "target": "#contact",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#contact', expected 1",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-14T17:54:56",
+            "by": "code"
+          },
+          {
+            "atom": "W-10.a1",
+            "check": "Contact link is active after scrolling to contact",
+            "type": "behavior-steps",
+            "target": [
+              "scroll-to #contact",
+              "wait 1",
+              "expect-class #nav-contact active"
+            ],
+            "expect": true,
+            "actual": {
+              "steps": 3
+            },
+            "pass": true,
+            "evidence": "all 3 step(s) behaved as expected",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-14T17:54:57",
+            "by": "code"
+          },
+          {
+            "atom": "W-10.a1",
+            "check": "Hero link is active after scrolling to hero",
+            "type": "behavior-steps",
+            "target": [
+              "scroll-to #hero",
+              "wait 1",
+              "expect-class #nav-hero active"
+            ],
+            "expect": true,
+            "actual": {
+              "steps": 3
+            },
+            "pass": true,
+            "evidence": "all 3 step(s) behaved as expected",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-14T17:54:58",
+            "by": "code"
+          }
+        ],
+        "attempts": 3,
+        "status": "passed"
+      }
+    ],
+    "section": "W-10",
+    "revises": null,
+    "agent": "W-10 Builder",
+    "last_check": "usable section",
+    "version": 14
+  },
+  {
+    "id": "W-11",
+    "proposal_id": "contrast-style",
+    "name": "Contrast mode and global styling",
+    "covers": [
+      13,
+      14
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A high-contrast mode toggle changes the whole page",
+      "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+    ],
+    "purpose": "No high-contrast mode and no shared styling or overflow guard.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 4,
+      "time_limit_minutes": 15,
+      "retry_limit": 2,
+      "stop_loss": "Stop if spend reaches 15 or the same check fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#contrast-toggle",
+      "#site-footer"
+    ],
+    "completion_check": "Toggle changes body and footer background; no overflow at 360px and 1280px.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-11.a1",
+        "goal": "A toggle switches the whole page to high contrast, and the page has no JavaScript errors and no horizontal overflow at 360px or 1280px.",
+        "constraints": [
+          "Define j2-btn and j2-card once for all sections",
+          "Mobile first, no element wider than the viewport",
+          "Energetic but readable palette"
+        ],
+        "context": [
+          "charter item 13",
+          "charter item 14"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-11 Builder",
+          "steps": "Give the body id page-body. Create button #contrast-toggle (class j2-btn) that toggles class hc on #page-body. Create footer section #site-footer with a short copyright line for CodeSprint Pune 2027. Write global CSS: the shared classes j2-btn and j2-card, responsive layout, overflow-x hidden guards, and an .hc theme with black background, white text and yellow links and borders that also overrides every section, form field, card and the menu."
+        },
+        "expected_output": [
+          {
+            "text": "Toggle exists",
+            "kind": "element",
+            "target": "#contrast-toggle",
+            "count": 1,
+            "met": true
+          },
+          {
+            "text": "Footer section exists",
+            "kind": "section",
+            "target": "#site-footer",
+            "met": true
+          },
+          {
+            "text": "Toggle changes body and footer colors",
+            "kind": "behavior",
+            "target": "#contrast-toggle",
+            "steps": [
+              "scroll-to #site-footer",
+              "click #contrast-toggle",
+              "expect-style-changed #page-body background-color",
+              "expect-style-changed #site-footer background-color",
+              "expect-class #page-body hc"
+            ],
+            "met": true
+          },
+          {
+            "text": "Page parses",
+            "kind": "test",
+            "target": "page-parses",
+            "met": true
+          },
+          {
+            "text": "Toggle is tappable",
+            "kind": "tap",
+            "target": "#contrast-toggle",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true,
+            "item": 4
+          },
+          {
+            "text": "Links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true
+          },
+          {
+            "text": "One contrast toggle",
+            "type": "element-count",
+            "target": "#contrast-toggle",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "Toggle tap target at least 44px",
+            "type": "tap-targets",
+            "target": "#contrast-toggle",
+            "expect": 44,
+            "item": 5
+          },
+          {
+            "text": "Footer section exists",
+            "type": "element-count",
+            "expect": 1,
+            "item": 2,
+            "target": "#site-footer"
+          },
+          {
+            "text": "Toggle changes body and footer colors",
+            "type": "behavior-steps",
+            "expect": true,
+            "item": 3,
+            "target": [
+              "scroll-to #site-footer",
+              "click #contrast-toggle",
+              "expect-style-changed #page-body background-color",
+              "expect-style-changed #site-footer background-color",
+              "expect-class #page-body hc"
+            ]
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-11.a1",
+            "check": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true,
+            "actual": {
+              "body": true,
+              "unbalanced": []
+            },
+            "pass": true,
+            "evidence": "page parses, tags balanced",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:56:08",
+            "by": "code"
+          },
+          {
+            "atom": "W-11.a1",
+            "check": "Links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true,
+            "actual": [],
+            "pass": true,
+            "evidence": "every in-page link resolves",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:56:08",
+            "by": "code"
+          },
+          {
+            "atom": "W-11.a1",
+            "check": "One contrast toggle",
+            "type": "element-count",
+            "target": "#contrast-toggle",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#contrast-toggle', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:56:08",
+            "by": "code"
+          },
+          {
+            "atom": "W-11.a1",
+            "check": "Toggle tap target at least 44px",
+            "type": "tap-targets",
+            "target": "#contrast-toggle",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 1,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 1 tap target(s) in '#contrast-toggle' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:56:10",
+            "by": "code"
+          },
+          {
+            "atom": "W-11.a1",
+            "check": "Footer section exists",
+            "type": "element-count",
+            "target": "#site-footer",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#site-footer', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:56:10",
+            "by": "code"
+          },
+          {
+            "atom": "W-11.a1",
+            "check": "Toggle changes body and footer colors",
+            "type": "behavior-steps",
+            "target": [
+              "scroll-to #site-footer",
+              "click #contrast-toggle",
+              "expect-style-changed #page-body background-color",
+              "expect-style-changed #site-footer background-color",
+              "expect-class #page-body hc"
+            ],
+            "expect": true,
+            "actual": {
+              "steps": 5
+            },
+            "pass": true,
+            "evidence": "all 5 step(s) behaved as expected",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:56:11",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-11",
+    "revises": null,
+    "agent": "W-11 Builder",
+    "last_check": "usable section and head tags",
+    "version": 15
+  },
+  {
+    "id": "W-12",
+    "proposal_id": "calc-fix",
+    "name": "Fee calculator: no form, no invented cap",
+    "covers": [],
+    "fixes": [
+      "F-15",
+      "F-16"
+    ],
+    "covers_text": [],
+    "purpose": "F-15: #calc-form has no destination. F-16: the calculator caps meal passes at '0 to 4', which the brief never states.",
+    "cost": 16,
+    "estimate": 16,
+    "envelope": {
+      "money_limit": 16,
+      "model_call_limit": 3,
+      "time_limit_minutes": 12,
+      "retry_limit": 2,
+      "stop_loss": "Stop if spend reaches 16 or the same check fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#fees",
+      "#calc-total"
+    ],
+    "completion_check": "Totals for early-bird, regular and 5 meal passes match the rules, form-has-submit passes, and the price facts are present.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 2,
+    "atoms": [
+      {
+        "id": "W-12.a1",
+        "goal": "The #fees calculator is a form-less group that totals entry fees and meal passes live, applies 10% off entry fees only on or before 15 February 2027, and has no meal-pass cap or other number outside the brief.",
+        "constraints": [
+          "No form element in #fees",
+          "Early-bird never discounts meal passes",
+          "Never rely on today's date",
+          "No visible text or input limit that states a number not in the brief",
+          "Participants stay limited to 1 to 4",
+          "Keep every id the earlier checks use"
+        ],
+        "context": [
+          "charter item 3",
+          "section W-3",
+          "finding F-15",
+          "finding F-16"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-3 Builder",
+          "steps": "Rewrite section #fees. Replace the form with a div of class j2-card that has role group. Keep select #calc-ticket (Student, Professional), number input #calc-people (min 1, max 4), number input #calc-meals, date input #calc-date and output #calc-total, and update the total on every input event. #calc-meals has no max attribute and no visible range text. The script treats an empty or negative meals value as none. Keep the rule text with 15 February 2027, 10% and the Student Rs 400, Professional Rs 800 and Rs 200 prices. Do not add a submit button, an action or any other number."
+        },
+        "expected_output": [
+          {
+            "text": "Fees section exists",
+            "kind": "section",
+            "target": "#fees",
+            "met": true
+          },
+          {
+            "text": "Price facts shown",
+            "kind": "facts",
+            "target": [
+              "Student Rs 400",
+              "Professional Rs 800",
+              "Rs 200",
+              "10%",
+              "15 February 2027"
+            ],
+            "met": true
+          },
+          {
+            "text": "Every form has a submit control and destination",
+            "kind": "test",
+            "target": "form-has-submit",
+            "met": true
+          },
+          {
+            "text": "Early-bird total for 2 students and 1 meal pass",
+            "kind": "behavior",
+            "target": "#fees",
+            "steps": [
+              "set #calc-date 2027-02-01",
+              "set #calc-ticket Student",
+              "set #calc-people 2",
+              "set #calc-meals 1",
+              "expect-number #calc-total 2*400*0.9+200"
+            ],
+            "met": true
+          },
+          {
+            "text": "Regular total after the early-bird date",
+            "kind": "behavior",
+            "target": "#fees",
+            "steps": [
+              "set #calc-date 2027-03-01",
+              "set #calc-ticket Professional",
+              "set #calc-people 3",
+              "set #calc-meals 2",
+              "expect-number #calc-total 3*800+2*200"
+            ],
+            "met": true
+          },
+          {
+            "text": "Five meal passes are accepted with no cap",
+            "kind": "behavior",
+            "target": "#fees",
+            "steps": [
+              "set #calc-date 2027-03-01",
+              "set #calc-ticket Student",
+              "set #calc-people 1",
+              "set #calc-meals 5",
+              "expect-number #calc-total 400+5*200"
+            ],
+            "met": true
+          },
+          {
+            "text": "Calculator fields are tappable",
+            "kind": "tap",
+            "target": "#fees",
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Price facts present",
+            "type": "facts-present",
+            "target": [
+              "Student Rs 400",
+              "Professional Rs 800",
+              "Rs 200",
+              "10%",
+              "15 February 2027"
+            ],
+            "expect": true,
+            "item": 2
+          },
+          {
+            "text": "Every form has a submit control and destination",
+            "type": "named-test",
+            "target": "form-has-submit",
+            "expect": true,
+            "item": 3
+          },
+          {
+            "text": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true
+          },
+          {
+            "text": "Links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true
+          },
+          {
+            "text": "One total output",
+            "type": "element-count",
+            "target": "#calc-total",
+            "expect": 1
+          },
+          {
+            "text": "Fees section exists",
+            "type": "element-count",
+            "target": "#fees",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "Calculator tap targets at least 44px",
+            "type": "tap-targets",
+            "target": "#fees",
+            "expect": 44,
+            "item": 7
+          },
+          {
+            "text": "Early-bird total for 2 students and 1 meal pass",
+            "type": "behavior-steps",
+            "expect": true,
+            "item": 4,
+            "target": [
+              "set #calc-date 2027-02-01",
+              "set #calc-ticket Student",
+              "set #calc-people 2",
+              "set #calc-meals 1",
+              "expect-number #calc-total 2*400*0.9+200"
+            ]
+          },
+          {
+            "text": "Regular total after the early-bird date",
+            "type": "behavior-steps",
+            "expect": true,
+            "item": 5,
+            "target": [
+              "set #calc-date 2027-03-01",
+              "set #calc-ticket Professional",
+              "set #calc-people 3",
+              "set #calc-meals 2",
+              "expect-number #calc-total 3*800+2*200"
+            ]
+          },
+          {
+            "text": "Five meal passes are accepted with no cap",
+            "type": "behavior-steps",
+            "expect": true,
+            "item": 6,
+            "target": [
+              "set #calc-date 2027-03-01",
+              "set #calc-ticket Student",
+              "set #calc-people 1",
+              "set #calc-meals 5",
+              "expect-number #calc-total 400+5*200"
+            ]
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-12.a1",
+            "check": "Price facts present",
+            "type": "facts-present",
+            "target": [
+              "Student Rs 400",
+              "Professional Rs 800",
+              "Rs 200",
+              "10%",
+              "15 February 2027"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 5 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:58:09",
+            "by": "code"
+          },
+          {
+            "atom": "W-12.a1",
+            "check": "Every form has a submit control and destination",
+            "type": "named-test",
+            "target": "form-has-submit",
+            "expect": true,
+            "actual": [
+              1,
+              1
+            ],
+            "pass": true,
+            "evidence": "2 form(s), each with a submit control",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:58:09",
+            "by": "code"
+          },
+          {
+            "atom": "W-12.a1",
+            "check": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true,
+            "actual": {
+              "body": true,
+              "unbalanced": []
+            },
+            "pass": true,
+            "evidence": "page parses, tags balanced",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:58:09",
+            "by": "code"
+          },
+          {
+            "atom": "W-12.a1",
+            "check": "Links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true,
+            "actual": [],
+            "pass": true,
+            "evidence": "every in-page link resolves",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:58:09",
+            "by": "code"
+          },
+          {
+            "atom": "W-12.a1",
+            "check": "One total output",
+            "type": "element-count",
+            "target": "#calc-total",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#calc-total', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:58:09",
+            "by": "code"
+          },
+          {
+            "atom": "W-12.a1",
+            "check": "Fees section exists",
+            "type": "element-count",
+            "target": "#fees",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#fees', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:58:09",
+            "by": "code"
+          },
+          {
+            "atom": "W-12.a1",
+            "check": "Calculator tap targets at least 44px",
+            "type": "tap-targets",
+            "target": "#fees",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 5,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 5 tap target(s) in '#fees' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:58:11",
+            "by": "code"
+          },
+          {
+            "atom": "W-12.a1",
+            "check": "Early-bird total for 2 students and 1 meal pass",
+            "type": "behavior-steps",
+            "target": [
+              "set #calc-date 2027-02-01",
+              "set #calc-ticket Student",
+              "set #calc-people 2",
+              "set #calc-meals 1",
+              "expect-number #calc-total 2*400*0.9+200"
+            ],
+            "expect": true,
+            "actual": {
+              "steps": 5
+            },
+            "pass": true,
+            "evidence": "all 5 step(s) behaved as expected",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:58:12",
+            "by": "code"
+          },
+          {
+            "atom": "W-12.a1",
+            "check": "Regular total after the early-bird date",
+            "type": "behavior-steps",
+            "target": [
+              "set #calc-date 2027-03-01",
+              "set #calc-ticket Professional",
+              "set #calc-people 3",
+              "set #calc-meals 2",
+              "expect-number #calc-total 3*800+2*200"
+            ],
+            "expect": true,
+            "actual": {
+              "steps": 5
+            },
+            "pass": true,
+            "evidence": "all 5 step(s) behaved as expected",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:58:13",
+            "by": "code"
+          },
+          {
+            "atom": "W-12.a1",
+            "check": "Five meal passes are accepted with no cap",
+            "type": "behavior-steps",
+            "target": [
+              "set #calc-date 2027-03-01",
+              "set #calc-ticket Student",
+              "set #calc-people 1",
+              "set #calc-meals 5",
+              "expect-number #calc-total 400+5*200"
+            ],
+            "expect": true,
+            "actual": {
+              "steps": 5
+            },
+            "pass": true,
+            "evidence": "all 5 step(s) behaved as expected",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T17:58:14",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-3",
+    "revises": "W-3",
+    "agent": "W-12 Builder",
+    "last_check": "usable section",
+    "version": 16
+  },
+  {
+    "id": "W-13",
+    "proposal_id": "calc-zero-fix",
+    "name": "Fee calculator: no literal zero",
+    "covers": [],
+    "fixes": [
+      "F-15"
+    ],
+    "covers_text": [],
+    "purpose": "F-15 / N6: the only 0 values on the page are in #calc-meals (value and min) and in #calc-discount and #calc-mealcost, so the no-invented-number check still fails.",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 3,
+      "time_limit_minutes": 10,
+      "retry_limit": 2,
+      "stop_loss": "Stop if spend reaches 8 or the same check fails twice in a row"
+    },
+    "charged": true,
+    "calls_used": 0,
+    "retries_used": 0,
+    "outputs": [
+      "#fees",
+      "#calc-total",
+      "#calc-discount",
+      "#calc-mealcost"
+    ],
+    "completion_check": "All earlier calculator totals still match, the discount and meal cost show a dash when nothing applies, and the price facts are present.",
+    "dependencies": [],
+    "status": "registered",
+    "cycle": 3,
+    "atoms": [
+      {
+        "id": "W-13.a1",
+        "goal": "The #fees calculator shows no literal 0 anywhere, shows a dash for a nothing discount or meal cost, and still totals entry fees and meal passes with 10% off entry fees only on or before 15 February 2027.",
+        "constraints": [
+          "No form element in #fees",
+          "Early-bird never discounts meal passes",
+          "Never rely on today's date",
+          "No meal-pass cap and no number outside the brief",
+          "Participants stay limited to 1 to 4",
+          "Keep every id the earlier checks use",
+          "Touch no other section"
+        ],
+        "context": [
+          "charter item 3",
+          "section W-3",
+          "finding F-15",
+          "necessary condition N6"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-12 Builder",
+          "steps": "Rewrite section #fees in place. Keep div.j2-card with role group, select #calc-ticket (Student, Professional), number input #calc-people (min 1, max 4), date input #calc-date, output #calc-total, and keep the rule text with 15 February 2027, 10%, Student Rs 400, Professional Rs 800 and Rs 200. Number input #calc-meals has no value, min or max attribute and is empty by default; the script treats empty or negative as none. Create outputs #calc-discount and #calc-mealcost: when the amount is nothing, write a dash (-) instead of the digit 0, in the markup and in what the script writes. Update everything on every input event. Do not add a submit button, an action or any other number."
+        },
+        "expected_output": [
+          {
+            "text": "Fees section exists",
+            "kind": "section",
+            "target": "#fees"
+          },
+          {
+            "text": "Price facts shown",
+            "kind": "facts",
+            "target": [
+              "Student Rs 400",
+              "Professional Rs 800",
+              "Rs 200",
+              "10%",
+              "15 February 2027"
+            ]
+          },
+          {
+            "text": "Every form has a submit control and destination",
+            "kind": "test",
+            "target": "form-has-submit"
+          },
+          {
+            "text": "Early-bird total for 2 students and 1 meal pass",
+            "kind": "behavior",
+            "target": "#fees",
+            "steps": [
+              "set #calc-date 2027-02-01",
+              "set #calc-ticket Student",
+              "set #calc-people 2",
+              "set #calc-meals 1",
+              "expect-number #calc-total 2*400*0.9+200"
+            ]
+          },
+          {
+            "text": "Regular total after the early-bird date",
+            "kind": "behavior",
+            "target": "#fees",
+            "steps": [
+              "set #calc-date 2027-03-01",
+              "set #calc-ticket Professional",
+              "set #calc-people 3",
+              "set #calc-meals 2",
+              "expect-number #calc-total 3*800+2*200"
+            ]
+          },
+          {
+            "text": "Five meal passes are accepted with no cap",
+            "kind": "behavior",
+            "target": "#fees",
+            "steps": [
+              "set #calc-date 2027-03-01",
+              "set #calc-ticket Student",
+              "set #calc-people 1",
+              "set #calc-meals 5",
+              "expect-number #calc-total 400+5*200"
+            ]
+          },
+          {
+            "text": "With no early-bird and no meals, discount and meal cost show a dash",
+            "kind": "behavior",
+            "target": "#fees",
+            "steps": [
+              "set #calc-date 2027-03-01",
+              "set #calc-ticket Student",
+              "set #calc-people 1",
+              "expect-text #calc-discount -",
+              "expect-text #calc-mealcost -"
+            ]
+          },
+          {
+            "text": "Calculator fields are tappable",
+            "kind": "tap",
+            "target": "#fees"
+          }
+        ],
+        "verification": [
+          {
+            "text": "Price facts present",
+            "type": "facts-present",
+            "target": [
+              "Student Rs 400",
+              "Professional Rs 800",
+              "Rs 200",
+              "10%",
+              "15 February 2027"
+            ],
+            "expect": true,
+            "item": 2
+          },
+          {
+            "text": "Every form has a submit control and destination",
+            "type": "named-test",
+            "target": "form-has-submit",
+            "expect": true,
+            "item": 3
+          },
+          {
+            "text": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true
+          },
+          {
+            "text": "Links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true
+          },
+          {
+            "text": "One total output",
+            "type": "element-count",
+            "target": "#calc-total",
+            "expect": 1
+          },
+          {
+            "text": "One discount output",
+            "type": "element-count",
+            "target": "#calc-discount",
+            "expect": 1
+          },
+          {
+            "text": "One meal cost output",
+            "type": "element-count",
+            "target": "#calc-mealcost",
+            "expect": 1
+          },
+          {
+            "text": "Fees section exists",
+            "type": "element-count",
+            "target": "#fees",
+            "expect": 1,
+            "item": 1
+          },
+          {
+            "text": "Early-bird total for 2 students and 1 meal pass",
+            "type": "behavior-steps",
+            "expect": true,
+            "item": 4,
+            "target": [
+              "set #calc-date 2027-02-01",
+              "set #calc-ticket Student",
+              "set #calc-people 2",
+              "set #calc-meals 1",
+              "expect-number #calc-total 2*400*0.9+200"
+            ]
+          },
+          {
+            "text": "Regular total after the early-bird date",
+            "type": "behavior-steps",
+            "expect": true,
+            "item": 5,
+            "target": [
+              "set #calc-date 2027-03-01",
+              "set #calc-ticket Professional",
+              "set #calc-people 3",
+              "set #calc-meals 2",
+              "expect-number #calc-total 3*800+2*200"
+            ]
+          },
+          {
+            "text": "Five meal passes are accepted with no cap",
+            "type": "behavior-steps",
+            "expect": true,
+            "item": 6,
+            "target": [
+              "set #calc-date 2027-03-01",
+              "set #calc-ticket Student",
+              "set #calc-people 1",
+              "set #calc-meals 5",
+              "expect-number #calc-total 400+5*200"
+            ]
+          },
+          {
+            "text": "With no early-bird and no meals, discount and meal cost show a dash",
+            "type": "behavior-steps",
+            "expect": true,
+            "item": 7,
+            "target": [
+              "set #calc-date 2027-03-01",
+              "set #calc-ticket Student",
+              "set #calc-people 1",
+              "expect-text #calc-discount -",
+              "expect-text #calc-mealcost -"
+            ]
+          },
+          {
+            "text": "Calculator fields are tappable",
+            "type": "tap-targets",
+            "expect": 44,
+            "item": 8,
+            "target": "#fees"
+          }
+        ]
+      }
+    ],
+    "section": "W-3",
+    "revises": "W-3",
+    "agent": "W-13 Builder"
+  }
+]

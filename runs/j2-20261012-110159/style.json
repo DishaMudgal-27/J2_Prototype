@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#9C3D12",
+    "secondary": "#2F5D3A",
+    "accent": "#E3A72F",
+    "background": "#FFF8EC",
+    "surface": "#FFFFFF",
+    "text": "#2E1F14",
+    "muted": "#6B5646"
+  },
+  "fonts": {
+    "heading": "'Fraunces', Georgia, 'Times New Roman', serif",
+    "body": "'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;600;700&display=swap"
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "64px"
+  },
+  "radius": "12px",
+  "buttons": {
+    "primary": "background:#9C3D12;color:#FFFFFF;border:2px solid #9C3D12;min-height:44px;padding:0 24px;border-radius:999px;font-weight:700;font-size:1rem;cursor:pointer",
+    "secondary": "background:transparent;color:#9C3D12;border:2px solid #9C3D12;min-height:44px;padding:0 24px;border-radius:999px;font-weight:700;font-size:1rem;cursor:pointer"
+  },
+  "card": "background:#FFFFFF;border:1px solid #EAD7B8;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(94,52,20,0.08)",
+  "notes": "Terracotta, banana-leaf green and turmeric on cream feel like a warm South Indian home kitchen; all text pairs pass WCAG AA and buttons are 44px tall for thumbs."
+}

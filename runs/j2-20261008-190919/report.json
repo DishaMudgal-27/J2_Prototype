@@ -1,0 +1,311 @@
+{
+  "metrics": {
+    "outcome": "Done with open items: shipped as is on the Requester's decision (Cycle 1 used 30 turns (the per-cycle cap) without finishing.). Still not workable: .",
+    "brief": "make a website for my friend's south indian restaurant called Kaveri Kitchen in Pune. people should be able to see the menu with prices, filter it by veg and non-veg, see today's specials, book a table on whatsapp, find the address and opening hours, see photos of the dishes, and read a few customer reviews. it should feel warm and homely and work well on phones",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 1,
+    "ai_calls": 26,
+    "minutes": 8.3,
+    "budget": {
+      "total": 200,
+      "start": 200,
+      "cap": 400,
+      "raises": [],
+      "spent": 105,
+      "rate_card": true
+    },
+    "site_versions": 9,
+    "site_bytes": 30919,
+    "agents": {
+      "identity": {
+        "turns": 4,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 10,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 9,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-1": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-2": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-3": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-4": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-5": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-6": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-7": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-8": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-9": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 1,
+      "grants": 1,
+      "counters": 0,
+      "refuses": 0,
+      "refuses_converted_by_code": 0,
+      "parks": 0
+    },
+    "conflicts": {
+      "total": 0,
+      "settled_by_agents": 0,
+      "resolved_by_identity": 0,
+      "asked_requester": 0,
+      "open": 0,
+      "list": []
+    },
+    "requester_questions": {
+      "total": 2,
+      "by_kind": {
+        "info": 1,
+        "limit": 1
+      }
+    },
+    "workflows": {
+      "registered": 9,
+      "done": 9,
+      "failed": 0,
+      "held_ever": 0,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "Page shell, header and navigation",
+          "agent_estimate": 15,
+          "charged": 15
+        },
+        {
+          "id": "W-2",
+          "name": "Priced menu with veg/non-veg filter",
+          "agent_estimate": 20,
+          "charged": 20
+        },
+        {
+          "id": "W-3",
+          "name": "Today's specials",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-4",
+          "name": "WhatsApp table booking",
+          "agent_estimate": 15,
+          "charged": 15
+        },
+        {
+          "id": "W-5",
+          "name": "Dish photo spots",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-6",
+          "name": "Customer reviews",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-7",
+          "name": "Address, hours and phone",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-8",
+          "name": "Footer and content hygiene",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-9",
+          "name": "Warm look and responsive layout",
+          "agent_estimate": 5,
+          "charged": 5
+        }
+      ]
+    },
+    "validator_refusals": 0,
+    "role_refusals": 0,
+    "pauses": 2,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 0,
+    "audits": [
+      {
+        "cycle": 1,
+        "version": 9,
+        "all_pass": true,
+        "pass": 9,
+        "warn": 1,
+        "fail": 0,
+        "rubric_fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      }
+    ],
+    "to_be_confirmed": [],
+    "workable": [],
+    "lessons": {
+      "memory": false,
+      "saved": [],
+      "used": []
+    }
+  },
+  "review": {
+    "verdict": "The department built a site that meets all 10 done-when items with no conflicts, but the 30-turn cap fired after Audit had already found the site workable, so a finished run was labelled unfinished and the Requester got an unneeded question.",
+    "agents": {
+      "identity": {
+        "score": 3,
+        "note": "Good first question [2] and clean charter [6]. But [6] dictates implementation ('one easy-to-edit list'), which its role forbids. [41] offers 'more of the missing parts' when Audit [40] found none missing, and Identity never declared J2.h done itself."
+      },
+      "adaptation": {
+        "score": 4,
+        "note": "One message [8] with nine section-sized workflows, ordered shell first and styling last, all facts from the charter. Stayed in role. Nine may be more than needed (see learnings). Whether the proposals met the required format is not visible in the chat."
+      },
+      "priority": {
+        "score": 4,
+        "note": "Granted all nine in one pass [9] with a reason (rate-card minimum, 95 in reserve). Envelope checks [12] to [36] were in role. It never countered or refused, so its bargaining is untested. 10 turns, 9 of them routine."
+      },
+      "coordination": {
+        "score": 4,
+        "note": "Stated its rule every turn and kept dependency order (W-1 first, W-9 last). No holds were needed. 9 near-identical turns, partly because the single write lock forces one writer at a time."
+      },
+      "audit": {
+        "score": 4,
+        "note": "Checked each item against the file and the mechanical results [39], and named the duplicate <title> and <meta charset> as the one warning [40]. It did not name which section caused it, and the defect shipped."
+      },
+      "W-1": {
+        "score": 5,
+        "note": "Title, viewport, header and six-link nav [13]. Link targets resolved later (no broken links per [39])."
+      },
+      "W-2": {
+        "score": 5,
+        "note": "11 dishes at charter prices; counts All 11, Veg 8, Non-veg 3 [16] match the charter."
+      },
+      "W-3": {
+        "score": 5,
+        "note": "Mysore dosa and Fish curry meal at menu prices, no offer wording [19]."
+      },
+      "W-4": {
+        "score": 5,
+        "note": "wa.me link with prefilled message and '1 to 8 people' [22]. Audit passed it."
+      },
+      "W-5": {
+        "score": 5,
+        "note": "Six empty labelled photo spots, no images [25], as the rules require."
+      },
+      "W-6": {
+        "score": 5,
+        "note": "Exactly the three reviews, no ratings added [28]."
+      },
+      "W-7": {
+        "score": 5,
+        "note": "Address, hours, kitchen close and tel link all match the charter [31]."
+      },
+      "W-8": {
+        "score": 4,
+        "note": "Footer repeats address and hours, which no done-when item asked for. Checked banned words by reading the file [34]."
+      },
+      "W-9": {
+        "score": 5,
+        "note": "Scoped CSS with overflow guards and tap targets [37]. The mechanical check [39] confirms no overflow at 360px or 1280px."
+      }
+    },
+    "went_well": [
+      "Identity collected every missing fact in one round [2][4], so no facts were invented and to_be_confirmed ended empty.",
+      "Zero validator refusals, role refusals, redirects or retries across 34 agent turns.",
+      "The code-run mechanical check [39] gave real evidence (overflow, JS errors, links, 117 contrast checks) after builders admitted they had not run a browser.",
+      "Spend was 105 of 200, and each workflow was charged exactly its estimate."
+    ],
+    "problems": [
+      "The cap event [41] fired after Audit said workable [40]. The outcome text says 'Still not workable: .' with an empty list, which contradicts the audit data (all_pass true).",
+      "The Requester was asked 'keep going or finish' [41] when nothing was missing.",
+      "Duplicate <title> and <meta charset> shipped. The chat does not show whether the cause is W-1 or the assembler.",
+      "Envelope checks report 'model calls 0/N' [12] to [36] although builders ran. Cause not visible; treat as unverified."
+    ],
+    "learnings": [
+      "Fix the turn cap. Turn counts by agent sum to 34 against a cap of 30, and 19 turns were Priority and Coordination envelope checks (9 each, plus the grant). Scale the cap with workflow count, or run routine envelope checks in code and skip counting them. Test: same brief with a cap of 45, expecting a clean finish.",
+      "Do not let the cap override a code-confirmed pass. If Audit is all_pass and mechanical checks are clean, report done. Also fix the outcome string that printed an empty 'Still not workable' list.",
+      "Test fewer workflows. Nine serial workflows cost 18 routine turns for a 31 KB page. Try 4 to 5 (shell, menu and specials, booking and contact, photos and reviews, styling) and compare turns and Audit results. This is a hypothesis; this run cannot show it.",
+      "This brief was too easy to test the design. Conflicts, counters, refusals, holds and lessons were all zero. Next runs: a budget below the 105 estimate, a brief with a missing fact, and one request that breaks a rule.",
+      "Check where the duplicate head tags come from (assembler or W-1) and make the mechanical check fail on them, since Audit only warned.",
+      "Keep the up-front Identity question and the code mechanical check."
+    ]
+  },
+  "events": [
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "info: 1 question(s) for the Requester",
+      "msg": 3,
+      "cycle": 0,
+      "pause": "info"
+    },
+    {
+      "agent": "system",
+      "type": "limit",
+      "detail": "Cycle 1 used 30 turns (the per-cycle cap) without finishing.",
+      "msg": 41,
+      "cycle": 1
+    },
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "limit: 1 question(s) for the Requester",
+      "msg": 42,
+      "cycle": 1,
+      "pause": "limit"
+    }
+  ],
+  "made": "2026-10-08 19:18:54"
+}

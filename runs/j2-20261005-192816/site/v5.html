@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CityCare Hospital, Bengaluru</title>
+<style>
+  :root {
+    --brand: #0b5c7a;
+    --brand-dark: #08425a;
+    --ink: #1a1a1a;
+    --muted: #444;
+    --bg: #f3f7f9;
+    --card: #ffffff;
+    --line: #cfdbe1;
+    --alert: #b00020;
+    --alert-bg: #fdecee;
+    --ok: #2e7d32;
+    --ok-bg: #edf7ee;
+    --gap: 16px;
+    --radius: 8px;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, Helvetica, sans-serif;
+    margin: 0;
+    line-height: 1.6;
+    color: var(--ink);
+    background: var(--bg);
+    font-size: 1rem;
+    overflow-wrap: break-word;
+  }
+  a { color: var(--brand); text-underline-offset: 2px; }
+  a:hover { color: var(--brand-dark); }
+  :focus-visible { outline: 3px solid #f5a623; outline-offset: 2px; }
+
+  header { padding: 20px; background: var(--brand); color: #fff; }
+  header h1 { margin: 0; font-size: 1.75rem; line-height: 1.2; }
+  header p { margin: 4px 0 0; opacity: 0.9; }
+
+  main { padding: var(--gap); max-width: 900px; margin: 0 auto; }
+  section {
+    margin: 0 0 24px;
+    padding: 20px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  section h2 {
+    margin: 0 0 12px;
+    font-size: 1.5rem;
+    line-height: 1.25;
+    color: var(--brand-dark);
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--line);
+  }
+  section h3 { font-size: 1.15rem; line-height: 1.3; }
+  p { margin: 0 0 12px; }
+  ul { padding-left: 22px; margin: 0 0 12px; }
+  li { margin-bottom: 6px; }
+
+  /* Emergency */
+  #emergency { border: 2px solid var(--alert); background: #fffafa; }
+  #emergency h2 { color: var(--alert); border-bottom-color: #f2b8c0; }
+  .numbers { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0 16px; }
+  .numbers p {
+    flex: 1 1 200px;
+    margin: 0;
+    padding: 12px 14px;
+    background: var(--alert-bg);
+    border: 1px solid #f2b8c0;
+    border-radius: var(--radius);
+  }
+  .numbers a {
+    display: inline-block;
+    font-size: 1.9rem;
+    font-weight: bold;
+    line-height: 1.2;
+    color: var(--alert);
+    padding: 2px 4px;
+  }
+
+  /* Placeholders and labels */
+  .placeholder {
+    background: #fff3b0;
+    border: 1px dashed #8a6d00;
+    padding: 1px 6px;
+    font-style: italic;
+    overflow-wrap: anywhere;
+  }
+  .sample-label {
+    display: inline-block;
+    background: #e3f2fd;
+    border: 1px dashed #1565c0;
+    color: #0d47a1;
+    font-size: 0.8rem;
+    font-weight: bold;
+    padding: 1px 8px;
+    border-radius: 3px;
+    vertical-align: middle;
+    font-style: normal;
+  }
+  .notice {
+    border: 1px solid #8a6d00;
+    background: #fffbe6;
+    padding: 10px 12px;
+    margin: 12px 0;
+    border-radius: 6px;
+  }
+
+  /* Form */
+  form .field { margin-bottom: 16px; }
+  form label { display: block; font-weight: bold; margin-bottom: 4px; }
+  form input, form select, form textarea {
+    width: 100%;
+    max-width: 420px;
+    padding: 10px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid #7b8e97;
+    border-radius: 6px;
+    min-height: 44px;
+  }
+  form textarea { max-width: 100%; min-height: 90px; resize: vertical; }
+  form input.invalid, form select.invalid { border: 2px solid var(--alert); }
+  .error { color: var(--alert); font-size: 0.9rem; margin: 4px 0 0; min-height: 1em; }
+  button {
+    padding: 12px 20px;
+    min-height: 44px;
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: bold;
+    cursor: pointer;
+    color: #fff;
+    background: var(--brand);
+    border: 0;
+    border-radius: 6px;
+  }
+  button:hover { background: var(--brand-dark); }
+  #booking-confirmation {
+    border: 1px solid var(--ok);
+    background: var(--ok-bg);
+    padding: 12px 14px;
+    margin-top: 16px;
+    border-radius: var(--radius);
+  }
+  #booking-confirmation h3 { margin-top: 0; }
+  #booking-confirmation[hidden] { display: none; }
+
+  /* Doctors */
+  .doctors { display: flex; flex-wrap: wrap; gap: var(--gap); }
+  .doctor {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: #fbfdfe;
+    padding: 14px;
+    flex: 1 1 240px;
+    min-width: 0;
+  }
+  .doctor h3 { margin: 8px 0 2px; font-size: 1.1rem; }
+  .doctor .specialty { margin: 0 0 8px; font-weight: bold; color: var(--brand-dark); }
+  .doctor p { margin: 0 0 6px; }
+
+  /* Blog */
+  .blog-post { border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; background: #fbfdfe; max-width: 70ch; }
+  .blog-post h3 { margin: 8px 0 4px; font-size: 1.35rem; }
+  .blog-post .byline { margin: 0 0 12px; font-size: 0.9rem; color: var(--muted); }
+  .blog-post h4 { margin: 16px 0 4px; font-size: 1.05rem; color: var(--brand-dark); }
+  .blog-post ul { margin: 6px 0 10px; padding-left: 22px; }
+
+  /* Narrow screens */
+  @media (max-width: 600px) {
+    header { padding: 16px; }
+    header h1 { font-size: 1.45rem; }
+    main { padding: 12px; }
+    section { padding: 14px; margin-bottom: 16px; }
+    section h2 { font-size: 1.3rem; }
+    .numbers a { font-size: 1.7rem; }
+    form input, form select, form textarea { max-width: 100%; }
+    button { width: 100%; }
+    .blog-post { padding: 12px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { scroll-behavior: auto !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>CityCare Hospital</h1>
+  <p>Bengaluru</p>
+</header>
+
+<main>
+  <section id="emergency" aria-labelledby="emergency-heading">
+    <h2 id="emergency-heading">Emergency information</h2>
+    <p><strong>In an emergency, call 108 or 112 now. Do not wait for a reply from this website.</strong></p>
+
+    <div class="numbers">
+      <p><strong>Ambulance:</strong> <a href="tel:108">108</a> (national ambulance number)</p>
+      <p><strong>Emergency:</strong> <a href="tel:112">112</a> (national emergency number)</p>
+    </div>
+
+    <h3>CityCare Hospital emergency details</h3>
+    <p>The details below have not been supplied by the hospital yet. Yellow marked text is a placeholder, not a real hospital fact.</p>
+    <ul>
+      <li><strong>Hospital address:</strong> <span class="placeholder">To be confirmed by CityCare</span></li>
+      <li><strong>Hospital phone:</strong> <span class="placeholder">To be confirmed by CityCare</span></li>
+      <li><strong>Directions:</strong> <span class="placeholder">To be confirmed by CityCare</span></li>
+      <li><strong>Emergency desk:</strong> <span class="placeholder">To be confirmed by CityCare</span></li>
+    </ul>
+  </section>
+
+  <section id="booking" aria-labelledby="booking-heading">
+    <h2 id="booking-heading">Request a visit</h2>
+    <p>This form is for non-urgent visits only. For an emergency, call 108 or 112.</p>
+    <div class="notice">
+      <strong>How this works:</strong> your request is sent by email to the hospital. It is <strong>not a confirmed appointment</strong> until the hospital replies to you.
+      The receiving address is a placeholder: <span class="placeholder">bookings-placeholder@example.com (to be confirmed by CityCare)</span>.
+    </div>
+
+    <form id="booking-form" novalidate>
+      <div class="field">
+        <label for="bf-name">Full name *</label>
+        <input type="text" id="bf-name" name="name" autocomplete="name" required aria-describedby="err-name">
+        <p class="error" id="err-name" aria-live="polite"></p>
+      </div>
+      <div class="field">
+        <label for="bf-phone">Phone number *</label>
+        <input type="tel" id="bf-phone" name="phone" autocomplete="tel" inputmode="tel" placeholder="e.g. 98450 12345" required aria-describedby="err-phone">
+        <p class="error" id="err-phone" aria-live="polite"></p>
+      </div>
+      <div class="field">
+        <label for="bf-email">Email address *</label>
+        <input type="email" id="bf-email" name="email" autocomplete="email" required aria-describedby="err-email">
+        <p class="error" id="err-email" aria-live="polite"></p>
+      </div>
+      <div class="field">
+        <label for="bf-date">Preferred visit date *</label>
+        <input type="date" id="bf-date" name="date" required aria-describedby="err-date">
+        <p class="error" id="err-date" aria-live="polite"></p>
+      </div>
+      <div class="field">
+        <label for="bf-dept">Department (optional)</label>
+        <select id="bf-dept" name="dept">
+          <option value="">Not sure / no preference</option>
+          <option>General medicine</option>
+          <option>Cardiology</option>
+          <option>Paediatrics</option>
+          <option>Orthopaedics</option>
+          <option>Gynaecology</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="bf-reason">Reason for visit (optional)</label>
+        <textarea id="bf-reason" name="reason" rows="3" maxlength="500"></textarea>
+      </div>
+      <button type="submit">Send request by email</button>
+    </form>
+
+    <div id="booking-confirmation" role="status" aria-live="polite" hidden>
+      <h3>Your email request is ready</h3>
+      <p>Your email program should open with the request filled in. Press send there to finish.
+        If nothing opens, <a id="mailto-fallback" href="#">use this email link</a>.</p>
+      <p><strong>This is not a confirmed appointment.</strong> The request is sent by email, and your visit is only confirmed once the hospital replies to you.</p>
+      <p>For questions, call the hospital on <span class="placeholder">To be confirmed by CityCare</span> (phone number not yet supplied by the hospital).</p>
+      <p>In an emergency, call 108 or 112.</p>
+    </div>
+  </section>
+
+  <section id="doctors" aria-labelledby="doctors-heading">
+    <h2 id="doctors-heading">Our doctors <span class="sample-label">Sample content</span></h2>
+    <div class="notice">
+      The profiles below are <strong>sample content</strong> used to show the layout. The names and details are invented and are not real CityCare doctors. The hospital will replace them with real profiles.
+    </div>
+
+    <div class="doctors">
+      <article class="doctor" aria-labelledby="doc1-name">
+        <span class="sample-label">Sample content</span>
+        <h3 id="doc1-name">Dr. Meera Kulkarni</h3>
+        <p class="specialty">General medicine</p>
+        <p>Sample profile: sees adults for everyday illnesses, long-term conditions and health check-ups.</p>
+        <p><strong>Experience:</strong> sample text, not a real figure.</p>
+        <p><strong>Languages:</strong> sample text, not confirmed.</p>
+      </article>
+
+      <article class="doctor" aria-labelledby="doc2-name">
+        <span class="sample-label">Sample content</span>
+        <h3 id="doc2-name">Dr. Arjun Hegde</h3>
+        <p class="specialty">Cardiology</p>
+        <p>Sample profile: focuses on heart health, blood pressure and follow-up care after heart conditions.</p>
+        <p><strong>Experience:</strong> sample text, not a real figure.</p>
+        <p><strong>Languages:</strong> sample text, not confirmed.</p>
+      </article>
+
+      <article class="doctor" aria-labelledby="doc3-name">
+        <span class="sample-label">Sample content</span>
+        <h3 id="doc3-name">Dr. Farah Sheikh</h3>
+        <p class="specialty">Paediatrics</p>
+        <p>Sample profile: cares for infants, children and teenagers, including vaccinations and growth checks.</p>
+        <p><strong>Experience:</strong> sample text, not a real figure.</p>
+        <p><strong>Languages:</strong> sample text, not confirmed.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="blog" aria-labelledby="blog-heading">
+    <h2 id="blog-heading">Health blog <span class="sample-label">Sample content</span></h2>
+    <div class="notice">
+      The post below is <strong>sample content</strong> used to show the layout. It is general information, not medical advice, and it has not been written or approved by CityCare doctors. The hospital will replace it with approved content.
+    </div>
+
+    <article class="blog-post" aria-labelledby="blog-post-title">
+      <span class="sample-label">Sample content</span>
+      <h3 id="blog-post-title">Simple daily habits that support a healthy heart</h3>
+      <p class="byline">Sample post. Author: sample author, not a real CityCare doctor.</p>
+
+      <p>Looking after your heart does not need big changes. Small habits, repeated every day, add up over the years. Here are five that most people can start this week.</p>
+
+      <h4>1. Move a little every day</h4>
+      <p>A brisk walk on most days of the week is a good place to start. If you are new to exercise, begin with short walks and add time slowly.</p>
+
+      <h4>2. Eat more plants, less salt</h4>
+      <ul>
+        <li>Fill half your plate with vegetables and fruit.</li>
+        <li>Choose whole grains and pulses more often.</li>
+        <li>Cut back on added salt, packaged snacks and deep-fried food.</li>
+      </ul>
+
+      <h4>3. Sleep and rest</h4>
+      <p>Regular sleep helps your body manage blood pressure and stress. Try to keep a steady bedtime and wake-up time.</p>
+
+      <h4>4. Avoid tobacco</h4>
+      <p>If you smoke or chew tobacco, ask a doctor about ways to stop. Quitting helps at any age.</p>
+
+      <h4>5. Get regular check-ups</h4>
+      <p>Blood pressure, blood sugar and cholesterol often have no symptoms. A routine check-up is the only way to know your numbers, especially if heart disease or diabetes runs in your family.</p>
+
+      <div class="notice">
+        <strong>When to get urgent help:</strong> chest pain or pressure, trouble breathing, sudden weakness on one side of the body, or fainting. Call <a href="tel:108">108</a> or <a href="tel:112">112</a> straight away. Do not wait for an online reply.
+      </div>
+    </article>
+  </section>
+</main>
+
+<script>
+(function () {
+  var RECIPIENT = "bookings-placeholder@example.com"; // PLACEHOLDER: replace with the hospital's real address
+  var form = document.getElementById("booking-form");
+  var box = document.getElementById("booking-confirmation");
+  var fallback = document.getElementById("mailto-fallback");
+  var dateInput = document.getElementById("bf-date");
+
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function todayStr() {
+    var d = new Date();
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  }
+  dateInput.min = todayStr();
+
+  function setError(id, msg) {
+    var input = document.getElementById("bf-" + id);
+    document.getElementById("err-" + id).textContent = msg;
+    if (msg) { input.classList.add("invalid"); input.setAttribute("aria-invalid", "true"); }
+    else { input.classList.remove("invalid"); input.removeAttribute("aria-invalid"); }
+  }
+
+  function validate() {
+    var name = form.name.value.trim();
+    var phone = form.phone.value.replace(/[\s-]/g, "");
+    var email = form.email.value.trim();
+    var date = form.date.value;
+    var ok = true, firstBad = null;
+
+    function fail(id, msg) { setError(id, msg); if (!firstBad) firstBad = id; ok = false; }
+
+    if (!name) fail("name", "Please enter your full name.");
+    else if (!/^\p{L}[\p{L} .'\-]{1,79}$/u.test(name)) fail("name", "Please enter a valid name using letters only (2 to 80 characters).");
+    else setError("name", "");
+
+    if (!phone) fail("phone", "Please enter your phone number.");
+    else if (!/^(\+91|91|0)?[6-9]\d{9}$/.test(phone)) fail("phone", "Enter a valid 10 digit Indian mobile number, for example 9845012345.");
+    else setError("phone", "");
+
+    if (!email) fail("email", "Please enter your email address.");
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) fail("email", "Enter a valid email address, for example name@example.com.");
+    else setError("email", "");
+
+    if (!date) fail("date", "Please choose a preferred visit date.");
+    else if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || isNaN(new Date(date).getTime())) fail("date", "Please enter a valid date.");
+    else if (date < todayStr()) fail("date", "The date cannot be in the past.");
+    else setError("date", "");
+
+    if (firstBad) document.getElementById("bf-" + firstBad).focus();
+    return ok;
+  }
+
+  ["name", "phone", "email", "date"].forEach(function (id) {
+    document.getElementById("bf-" + id).addEventListener("input", function () {
+      if (this.classList.contains("invalid")) setError(id, "");
+    });
+  });
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    box.hidden = true;
+    if (!validate()) return;
+
+    var nl = "\r\n";
+    var subject = "Visit request from " + form.name.value.trim();
+    var body =
+      "Visit request (not a confirmed appointment until the hospital replies)" + nl + nl +
+      "Name: " + form.name.value.trim() + nl +
+      "Phone: " + form.phone.value.trim() + nl +
+      "Email: " + form.email.value.trim() + nl +
+      "Preferred date: " + form.date.value + nl +
+      "Department: " + (form.dept.value || "No preference") + nl +
+      "Reason: " + (form.reason.value.trim() || "Not given");
+    var href = "mailto:" + RECIPIENT +
+      "?subject=" + encodeURIComponent(subject) +
+      "&body=" + encodeURIComponent(body);
+
+    fallback.setAttribute("href", href);
+    box.hidden = false;
+    box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    window.location.href = href;
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+{
+  "statement": "Build a single-file, phone-friendly website for Thread & Loom, a handloom clothing boutique in Pune, where visitors can browse and filter products, see sizes, delivery and return details, find the shop, and place orders on WhatsApp.",
+  "site_name": "Thread & Loom",
+  "audience": "Shoppers in and around Pune, mostly on phones, looking for handloom kurtas, sarees, cotton shirts and dupattas, plus people looking for the shop's location and timings.",
+  "standards": [
+    "Earthy and elegant look: natural tones, tasteful type, plenty of space",
+    "Works well on phones first, no sideways scrolling at 360px or 1280px",
+    "Plain HTML, CSS and JavaScript in one file, no build step",
+    "Only facts the Requester supplied; no invented products, prices, photos or reviews"
+  ],
+  "rules": [
+    "Use the Requester's facts exactly as given (names, prices, sizes, hours, numbers, policy)",
+    "Product pictures are placeholders until real photos arrive",
+    "Nothing is currently on sale, so no sale tags or sale prices",
+    "Prices shown in rupees"
+  ],
+  "done_when": [
+    "The site shows the name Thread & Loom and the address 18 FC Road, Shivajinagar, Pune 411005.",
+    "The site shows the WhatsApp order number +91 00000 11111 and the shop phone +91 00000 22222, each as a tappable link (WhatsApp link and tel link).",
+    "The site shows store timings 11am to 9pm, Tuesday to Sunday, closed on Monday.",
+    "All 10 products appear with name, category and price: Indigo block-print kurta 1,499; Mustard handloom kurta 1,699; White chikankari kurta 2,199; Ikat handloom saree 3,499; Khadi silk saree 4,999; Cotton jamdani saree 3,999; Khadi cotton shirt 1,299; Linen-blend shirt 1,599; Block-print dupatta 899; Chanderi dupatta 1,099.",
+    "Each product has an order button that opens a WhatsApp chat to +91 00000 11111 with the product name in the message.",
+    "The page has a viewport setting, an earthy colour palette, and no horizontal overflow at 360px and 1280px.",
+    "The page runs with no JavaScript errors, filters and category browsing work, and every in-page link points to an existing section."
+  ],
+  "business_type": "clothing boutique",
+  "visitor_needs": [
+    "Browse products by category",
+    "Filter by size and price",
+    "See a size guide",
+    "See new arrivals",
+    "Order on WhatsApp",
+    "See a lookbook of styled outfits",
+    "Find store timings and location",
+    "Read the return and exchange policy",
+    "Read customer reviews",
+    "See delivery details"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [],
+  "core_items": [
+    "The site shows the name Thread & Loom and the address 18 FC Road, Shivajinagar, Pune 411005.",
+    "The site shows the WhatsApp order number +91 00000 11111 and the shop phone +91 00000 22222, each as a tappable link (WhatsApp link and tel link).",
+    "The site shows store timings 11am to 9pm, Tuesday to Sunday, closed on Monday.",
+    "All 10 products appear with name, category and price: Indigo block-print kurta 1,499; Mustard handloom kurta 1,699; White chikankari kurta 2,199; Ikat handloom saree 3,499; Khadi silk saree 4,999; Cotton jamdani saree 3,999; Khadi cotton shirt 1,299; Linen-blend shirt 1,599; Block-print dupatta 899; Chanderi dupatta 1,099.",
+    "Each product has an order button that opens a WhatsApp chat to +91 00000 11111 with the product name in the message.",
+    "The page runs with no JavaScript errors, filters and category browsing work, and every in-page link points to an existing section."
+  ],
+  "confirmed_facts": [],
+  "dropped_by_requester": [
+    "Visitors can browse products by category: Kurtas, Sarees, Shirts, Dupattas.",
+    "Visitors can filter products by size and by price. Sizes: Indigo block-print kurta S to XXL; Mustard handloom kurta S to XL; White chikankari kurta XS to XL; Khadi cotton shirt S to XXL; Linen-blend shirt M to XXL; all sarees and dupattas free size.",
+    "A size guide shows chest in inches: XS 32, S 34, M 36, L 38, XL 40, XXL 42.",
+    "A New Arrivals section shows the White chikankari kurta, Ikat handloom saree and Linen-blend shirt.",
+    "A lookbook section shows 3 styled outfits, each built from named products on the site, with placeholder pictures.",
+    "The return and exchange policy is shown: exchange within 7 days if unworn with tags; no returns on sale items.",
+    "Delivery details are shown: Pune in 2 days, Rs 79, free above Rs 2,999, pay on delivery.",
+    "Three customer reviews are shown: \"Beautiful fabric, fits perfectly\" - Meera K.; \"Fast delivery and lovely packing\" - Arjun S.; \"My go-to for festive kurtas\" - Priya D.",
+    "Product and lookbook pictures are clearly marked placeholders, with no invented photos."
+  ],
+  "dropped_reasons": [
+    {
+      "criterion": "Visitors can browse products by category: Kurtas, Sarees, Shirts, Dupattas.",
+      "reason": "The Requester chose to leave it out (Priority's ruling leaves out 10 checklist item(s) the budget left can't pay for.): option 1"
+    },
+    {
+      "criterion": "Visitors can filter products by size and by price. Sizes: Indigo block-print kurta S to XXL; Mustard handloom kurta S to XL; White chikankari kurta XS to XL; Khadi cotton shirt S to XXL; Linen-blend shirt M to XXL; all sarees and dupattas free size.",
+      "reason": "The Requester chose to leave it out (Priority's ruling leaves out 10 checklist item(s) the budget left can't pay for.): option 1"
+    },
+    {
+      "criterion": "A size guide shows chest in inches: XS 32, S 34, M 36, L 38, XL 40, XXL 42.",
+      "reason": "The Requester chose to leave it out (Priority's ruling leaves out 10 checklist item(s) the budget left can't pay for.): option 1"
+    },
+    {
+      "criterion": "A New Arrivals section shows the White chikankari kurta, Ikat handloom saree and Linen-blend shirt.",
+      "reason": "The Requester chose to leave it out (Priority's ruling leaves out 10 checklist item(s) the budget left can't pay for.): option 1"
+    },
+    {
+      "criterion": "A lookbook section shows 3 styled outfits, each built from named products on the site, with placeholder pictures.",
+      "reason": "The Requester chose to leave it out (Priority's ruling leaves out 10 checklist item(s) the budget left can't pay for.): option 1"
+    },
+    {
+      "criterion": "The return and exchange policy is shown: exchange within 7 days if unworn with tags; no returns on sale items.",
+      "reason": "The Requester chose to leave it out (Priority's ruling leaves out 10 checklist item(s) the budget left can't pay for.): option 1"
+    },
+    {
+      "criterion": "Delivery details are shown: Pune in 2 days, Rs 79, free above Rs 2,999, pay on delivery.",
+      "reason": "The Requester chose to leave it out (Priority's ruling leaves out 10 checklist item(s) the budget left can't pay for.): option 1"
+    },
+    {
+      "criterion": "Three customer reviews are shown: \"Beautiful fabric, fits perfectly\" - Meera K.; \"Fast delivery and lovely packing\" - Arjun S.; \"My go-to for festive kurtas\" - Priya D.",
+      "reason": "The Requester chose to leave it out (Priority's ruling leaves out 10 checklist item(s) the budget left can't pay for.): option 1"
+    },
+    {
+      "criterion": "Product and lookbook pictures are clearly marked placeholders, with no invented photos.",
+      "reason": "The Requester chose to leave it out (Priority's ruling leaves out 10 checklist item(s) the budget left can't pay for.): option 1"
+    }
+  ]
+}

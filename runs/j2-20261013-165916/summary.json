@@ -1,0 +1,560 @@
+{
+  "run": "20261013-165916",
+  "output_type": "prd",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "sections": [
+    {
+      "heading": "Problem",
+      "words": 75
+    },
+    {
+      "heading": "Users",
+      "words": 77
+    },
+    {
+      "heading": "Goals",
+      "words": 82
+    },
+    {
+      "heading": "Requirements",
+      "words": 211
+    },
+    {
+      "heading": "Success metrics",
+      "words": 122
+    },
+    {
+      "heading": "Out of scope",
+      "words": 88
+    }
+  ],
+  "conditions": {
+    "met": 6,
+    "total": 6,
+    "list": [
+      {
+        "id": "P1",
+        "met": true,
+        "evidence": "all 6 sections present, none empty"
+      },
+      {
+        "id": "P2",
+        "met": true,
+        "evidence": "R1 to R5, unique and in order"
+      },
+      {
+        "id": "P3",
+        "met": true,
+        "evidence": "all 10 brief fact(s) appear"
+      },
+      {
+        "id": "P4",
+        "met": true,
+        "evidence": "every number and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "P5",
+        "met": true,
+        "evidence": "nothing to be confirmed"
+      },
+      {
+        "id": "P6",
+        "met": true,
+        "evidence": "each of G1, G2 has a Success metrics entry"
+      }
+    ]
+  },
+  "export": {
+    "file": "prd.docx",
+    "written": true,
+    "note": null
+  },
+  "force_audit_fail": null,
+  "test_lessons": false,
+  "model": "sonnet",
+  "mock": false,
+  "brief": "Write a PRD for a web app where students book lab slots. The users are students and lab staff. The problem: booking is done on paper and slots get double-booked. Must-have features: book a slot, cancel a slot, and see availability. Constraint: it must work on phones. Success measure: 80% of bookings are made without staff help.",
+  "change_requests": [],
+  "status": "done",
+  "outcome": "Done: the PRD is workable. Every done-when item, rubric item and necessary condition passes.",
+  "budget": {
+    "start": 200,
+    "granted": 200,
+    "used": 98,
+    "raises": []
+  },
+  "ai_calls": 32,
+  "cycles": 1,
+  "links": {
+    "identity->requester": 4,
+    "identity->adaptation": 2,
+    "validator->adaptation": 1,
+    "adaptation->priority": 2,
+    "validator->coordination": 2,
+    "coordination->priority": 7,
+    "priority->W": 7,
+    "W->coordination": 7,
+    "audit->identity": 3,
+    "identity->audit": 1,
+    "priority->adaptation": 1
+  },
+  "verification": {
+    "passed": 7,
+    "failed": 0,
+    "escalated": 0,
+    "could_not_run": 0,
+    "checks_run": 23
+  },
+  "identity_to_requester_decisions": 0,
+  "identity_to_requester_facts": 3,
+  "priority_rulings": {
+    "grant": 1,
+    "counter": 1,
+    "refuse": 0
+  },
+  "questions_to_user": [
+    {
+      "kind": "info",
+      "asked": [
+        "What should the app be called?"
+      ],
+      "answer": "LabSlot"
+    },
+    {
+      "kind": "fact",
+      "asked": [
+        "Please send these: How should the document handle double-booked slots? Option A: you give a target, for example how many double-bookings are acceptable, and the document measures it. Option B: no number, and the document just says the app does not allow two people to book the same slot.; Optional: does lab staff do anything in the app, such as viewing bookings or cancelling for a student? If not, the document will say they are not users of the app's booking screens in this version.; A measurable target for double-booked slots. The brief gives none, so any number would be invented. Alternatives: Requester supplies a target, or G2 is stated as covered by the requirement R5 instead of a metric. (checklist item None). If you can't give it yet, say so and it's marked to be confirmed.."
+      ],
+      "answer": "option A",
+      "decision": "continue"
+    },
+    {
+      "kind": "fact",
+      "asked": [
+        "Please send these: You picked the option where you give a number, but no number came through. How many double-bookings are okay, and over what time (for example per week or per term)? If you give one, the document can measure it. If you would rather not, say 'no number' and the document will simply say the app does not let two people book the same slot.; Optional: does lab staff do anything in the app, like seeing bookings or cancelling for a student? If not, say 'nothing' and the document will say staff do not use the booking screens in this version.; A number for acceptable double-booked slots, or confirmation of option B (G2 covered by R5, no metric) (checklist item None). If you can't give it yet, say so and it's marked to be confirmed.."
+      ],
+      "answer": "Zero",
+      "decision": "continue"
+    }
+  ],
+  "conflicts": [
+    {
+      "id": "C-1",
+      "pair": [
+        "adaptation",
+        "priority"
+      ],
+      "topic": "proposal",
+      "subject": "what to fund in cycle 1",
+      "attempts": 2,
+      "escalated": false,
+      "resolved_by": "agents",
+      "repriced": false,
+      "user_question": null,
+      "user_answer": null,
+      "outcome": "Adaptation accepted Priority's COUNTER: Add G2 zero double-booking metric to Success metrics (8) goes to the validator."
+    }
+  ],
+  "validator_rejections": [],
+  "holds": [],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 6,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "verdict": "PASS"
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-9",
+          "item": null,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-10",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "version": 6,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "TO_BE_CONFIRMED"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "verdict": "PASS"
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-9",
+          "item": null,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-10",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "version": 7,
+      "all_pass": true,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "verdict": "PASS"
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "verdict": "PASS"
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-9",
+          "item": null,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    }
+  ],
+  "site_versions": 7,
+  "workable": [],
+  "to_be_confirmed": [],
+  "dropped_by_requester": [],
+  "workflow_agents": [
+    {
+      "id": "W-1",
+      "agent": "W-1 Builder",
+      "section": "W-1",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-2",
+      "agent": "W-2 Builder",
+      "section": "W-2",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-3",
+      "agent": "W-3 Builder",
+      "section": "W-3",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-4",
+      "agent": "W-4 Builder",
+      "section": "W-4",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-5",
+      "agent": "W-5 Builder",
+      "section": "W-5",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-6",
+      "agent": "W-6 Builder",
+      "section": "W-6",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-7",
+      "agent": "W-7 Builder",
+      "section": "W-5",
+      "revises": "W-5",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    }
+  ],
+  "limits_hit": [],
+  "lessons": {
+    "memory": false,
+    "saved": [],
+    "used": []
+  },
+  "playbooks": {
+    "saved": null,
+    "used": []
+  },
+  "business_type": "prd",
+  "style_guide": false,
+  "rubric": [
+    {
+      "id": "D-1",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "D-2",
+      "pass": true,
+      "verdict": "PASS_WITH_WARNING"
+    },
+    {
+      "id": "D-3",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "D-4",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "D-5",
+      "pass": true,
+      "verdict": "PASS_WITH_WARNING"
+    }
+  ],
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "Problem section states that lab slot booking is done on paper and that slots get double-booked",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "Users section names students and lab staff and says what each does with LabSlot",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "Goals section states that LabSlot replaces paper booking and prevents double-booked slots",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "Requirements section lists the three must-have features by name: book a slot, cancel a slot, see availability",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "Requirements section states that LabSlot must work on phones",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "Success metrics section states the target that 80% of bookings are made without staff help",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "Out of scope section lists what LabSlot will not do in this version, without listing any must-have feature",
+      "pass": true
+    },
+    {
+      "item": 8,
+      "criterion": "The product name LabSlot is used throughout and no section says to be confirmed or is left empty",
+      "pass": true
+    }
+  ],
+  "route_check_violations": []
+}

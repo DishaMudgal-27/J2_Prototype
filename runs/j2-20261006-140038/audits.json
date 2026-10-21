@@ -1,0 +1,129 @@
+[
+  {
+    "cycle": 1,
+    "version": 3,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The site is a single HTML file with inline CSS and JS, with no build step; any CDN library is optional and not needed for first render.",
+        "verdict": "PASS",
+        "note": "One file of 13,029 bytes with one inline style block and inline scripts. The only external reference is the Google Maps anchor, which is not fetched on load.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The file contains a viewport meta tag and a layout that adapts to phone widths.",
+        "verdict": "PASS",
+        "note": "meta viewport width=device-width is present, the layout is a 640px-max column, and the check found 0px overflow at 360px and 1280px.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The file has a menu section listing items with a price shown for every item (real or marked placeholder).",
+        "verdict": "PASS",
+        "note": "4 li items in #menu each carry a [PLACEHOLDER] price span.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The file has an hours section covering the days of the week (real or marked placeholder).",
+        "verdict": "PASS",
+        "note": "The #hours table has rows for Monday to Sunday, each with a [PLACEHOLDER] hours span.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The file has a location section naming Indiranagar, Bengaluru, with an address and a map or directions link (real or marked placeholder).",
+        "verdict": "PASS",
+        "note": "The #location card names Brew Lab, Indiranagar, Bengaluru and has a placeholder address. The Get directions link is a Google Maps search URL, and a note marks it as a placeholder.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The file has a pre-order for pickup section where a visitor can pick items, enter a name and a pickup time, and send the order to a stated destination (real or marked placeholder).",
+        "verdict": "PASS",
+        "note": "The form has 4 quantity inputs, a required name, a time input and submit validation. The destination is stated in the page text as [PLACEHOLDER]. While ORDER_DEST is empty it shows a summary and sends nothing, which the page says. I read the code but did not run the submit path.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "The file has a brew video section with a play control and a video element that has preload=\"none\", no autoplay attribute, and no source URL set until the play control is tapped; the video source is a marked placeholder.",
+        "verdict": "PASS",
+        "note": "The video tag has preload=\"none\" and playsinline, with no autoplay and no src. The play button exists, and video.src is set only inside the click handler. The file is marked [PLACEHOLDER].",
+        "severity": "low",
+        "confidence": "high",
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The file loads no video and starts no autoplay media on page load.",
+        "verdict": "PASS",
+        "note": "BREW_VIDEO_SRC is an empty string and no code calls play() outside the click handler. The check found 1 external resource (the map anchor) and no JS errors.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "Any images are lazy-loaded and sized; no external fonts or scripts block first render.",
+        "verdict": "PASS",
+        "note": "There are no img tags, the font stack is system fonts, and the only script is inline at the end of the body.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "Every placeholder is visibly marked as a placeholder in the page text.",
+        "verdict": "PASS",
+        "note": "Each unsupplied fact (item names and prices, hours, address, phone, map link, order destination, pickup rules, video file) is shown in a .ph span with the literal text [PLACEHOLDER].",
+        "severity": "low",
+        "confidence": "high",
+        "item": 10,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "mechanical": {
+      "available": true,
+      "bytes": 13029,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://www.google.com/maps/search/?api=1&amp;query=Brew+Lab+Indiranagar+Bengaluru"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

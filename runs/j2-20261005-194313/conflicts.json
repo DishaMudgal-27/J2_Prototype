@@ -1,0 +1,281 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 3,
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "reason": "Adaptation withdrew after Priority's REFUSE.",
+    "adaptation_final": [
+      {
+        "id": "wf-wording-fix",
+        "name": "Fix 'Request received' wording on the booking form",
+        "goal_gap": "The submit message says 'Request received. Staff will contact you' while a visible notice says requests are not delivered. A patient could believe staff have the request.",
+        "expected_outcome": "The submit message and the draft notice agree. Nothing is claimed as received or sent, and patients are pointed to call the staff number, shown as a marked placeholder.",
+        "outputs": [
+          "Revised submit message and draft notice in citycare.html",
+          "Staff phone number placeholder tagged 'To be confirmed'"
+        ],
+        "completion_check": "File text no longer contains 'Request received'. The submit message says nothing has been sent and shows a .tbc staff number. The file has no fetch, XMLHttpRequest or slot picker, and no horizontal overflow at 360px.",
+        "dependencies": [
+          "wf-booking-form"
+        ],
+        "parts": [
+          "fix"
+        ],
+        "estimated_resources": {
+          "money": 8,
+          "calls": 2,
+          "time_minutes": 15
+        },
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "wf-blog",
+        "name": "Health Blog section with expandable posts",
+        "goal_gap": "#blog holds only a stub line. There are no posts and no expand control.",
+        "expected_outcome": "The Health Blog lists 2 plain-language posts, each opening to its full text, with blog medical review added to #open-items.",
+        "outputs": [
+          "Blog section with 2 posts and an expand/collapse control in citycare.html",
+          "Open-items entry: medical review of blog posts"
+        ],
+        "completion_check": "#blog lists 2 posts. Each has a keyboard-reachable control that expands full text and collapses it. #open-items lists blog medical review. The posts give general wellness advice with no drug doses or invented statistics. No fetch or XMLHttpRequest, and no horizontal overflow at 360px.",
+        "dependencies": [
+          "wf-shell-emergency"
+        ],
+        "parts": [
+          "blog_post",
+          "blog_post",
+          "interactive_feature"
+        ],
+        "estimated_resources": {
+          "money": 30,
+          "calls": 2,
+          "time_minutes": 25
+        },
+        "estimate": 30,
+        "cost": 30
+      },
+      {
+        "id": "wf-lang-switch",
+        "name": "Language switch, translation mechanism, trilingual tag and review notice",
+        "goal_gap": "No language control exists and <html lang> is static. The .tbc tag is English only. There is no native-speaker review notice and no review entry in #open-items.",
+        "expected_outcome": "An English/Kannada/Hindi switch that swaps all text from one in-file string table and updates the html lang attribute (en, kn, hi). The .tbc tag, text keyed for all three languages. A visible native-speaker review notice. Native-speaker review is added to #open-items.",
+        "outputs": [
+          "Language switch in the header, reachable by keyboard",
+          "Translation lookup with English strings keyed for every section, form label, button, blog post and tag",
+          "Visible native-speaker review notice and open-items entry"
+        ],
+        "completion_check": "Switch shows English, ಕನ್ನಡ and हिन्दी. Choosing each sets html lang to en, kn or hi. All visible text is driven by the string table. The review notice is visible and #open-items lists native-speaker review. The emergency bar stays visible in every language. No fetch or XMLHttpRequest, and no horizontal overflow at 360px.",
+        "dependencies": [
+          "wf-blog"
+        ],
+        "parts": [
+          "interactive_feature"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 2,
+          "time_minutes": 25
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "wf-kannada",
+        "name": "Kannada translation of the whole site",
+        "goal_gap": "No Kannada text exists in the file.",
+        "expected_outcome": "Every section, form label, button, notice, .tbc tag, open-items entry and blog post has Kannada text in Kannada script.",
+        "outputs": [
+          "Kannada strings for all keys in citycare.html"
+        ],
+        "completion_check": "With Kannada selected, no visible sentence, label, button or blog post is English apart from proper names and marked placeholders. Text is in Kannada script. The .tbc tag, not-final notice and review notice are in Kannada. No horizontal overflow at 360px.",
+        "dependencies": [
+          "wf-lang-switch"
+        ],
+        "parts": [
+          "extra_language"
+        ],
+        "estimated_resources": {
+          "money": 12,
+          "calls": 2,
+          "time_minutes": 25
+        },
+        "estimate": 12,
+        "cost": 12
+      },
+      {
+        "id": "wf-hindi",
+        "name": "Hindi translation of the whole site",
+        "goal_gap": "No Hindi text exists in the file.",
+        "expected_outcome": "Every section, form label, button, notice, .tbc tag, open-items entry and blog post has Hindi text in Devanagari.",
+        "outputs": [
+          "Hindi strings for all keys in citycare.html"
+        ],
+        "completion_check": "With Hindi selected, no visible sentence, label, button or blog post is English apart from proper names and marked placeholders. Text is in Devanagari. The .tbc tag, not-final notice and review notice are in Hindi. No horizontal overflow at 360px.",
+        "dependencies": [
+          "wf-lang-switch"
+        ],
+        "parts": [
+          "extra_language"
+        ],
+        "estimated_resources": {
+          "money": 12,
+          "calls": 2,
+          "time_minutes": 25
+        },
+        "estimate": 12,
+        "cost": 12
+      }
+    ],
+    "priority_final": [],
+    "clause": "Rules: 'The site must not be published as live until the placeholder medical facts are confirmed' and 'Every page, the blog included, is translated into Kannada and Hindi and flagged as awaiting native-speaker review.' Done-when items 7 to 11 (blog, language switch, complete translations, trilingual tags, review notice) remain open. CEO decision at [25]: option A, fund the remaining scope.",
+    "ruling": "adaptation",
+    "adaptation_gets": "All five workflows (W-4 wording fix 8, W-5 blog 30, W-6 language switch and review notice 10, W-7 Kannada 12, W-8 Hindi 12) are consistent with the charter and inside the CEO's funding. No cut is needed. Language switch and translations stay ahead of the second blog post if funding is later reduced.",
+    "priority_gets": "Each envelope is capped at its rate-card price with no stretching. The 2 uncommitted stay unspent. Priority grants against the CEO's funding and does not lift any cap itself.",
+    "decided_by": "identity",
+    "decided": []
+  },
+  {
+    "id": "C-2",
+    "cycle": 4,
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "reason": "Adaptation withdrew after Priority's REFUSE.",
+    "adaptation_final": [
+      {
+        "id": "W-4",
+        "name": "Fix 'Request received' wording",
+        "goal_gap": "The submit message says 'Request received' while the draft notice says requests are not delivered, so a patient could believe staff have the request.",
+        "expected_outcome": "Submit message and draft notice agree and make no claim that staff received the request.",
+        "outputs": [
+          "Revised submit message and notice in citycare.html"
+        ],
+        "completion_check": "The submit message contains no 'received' or 'will contact you' claim that contradicts the delivery notice; no fetch or XMLHttpRequest in the file.",
+        "dependencies": [
+          "wf-booking-form"
+        ],
+        "parts": [
+          "fix"
+        ],
+        "estimated_resources": {
+          "money": 8,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "W-5",
+        "name": "Health Blog with two posts and expand control",
+        "goal_gap": "#blog holds only a stub; no posts and no expand control.",
+        "expected_outcome": "Blog lists two English posts, each opening to its full text, with a medical-review placeholder tag on each.",
+        "outputs": [
+          "Two blog posts in #blog",
+          "Blog medical review entry in #open-items"
+        ],
+        "completion_check": "#blog lists 2 posts; activating each shows its full text via a keyboard-reachable control; each post carries a .tbc medical-review tag; #open-items lists blog medical review; no horizontal overflow at 360px.",
+        "dependencies": [
+          "wf-shell-emergency"
+        ],
+        "parts": [
+          "blog_post",
+          "blog_post",
+          "interactive_feature"
+        ],
+        "estimated_resources": {
+          "money": 30,
+          "calls": 2,
+          "time_minutes": 20
+        },
+        "estimate": 30,
+        "cost": 30
+      },
+      {
+        "id": "W-6",
+        "name": "Language switch, review notice and keyed strings",
+        "goal_gap": "No language control, static lang attribute, no native-speaker review notice, English-only .tbc tags.",
+        "expected_outcome": "EN/KN/HI switch driven by a string table covering every section, form label, button, tag, notice, open-items entry and blog text, updating the html lang attribute, with a visible review notice.",
+        "outputs": [
+          "Language switch in header",
+          "Keyed translation table with English filled",
+          "Visible native-speaker review notice",
+          "Native-speaker review entry in #open-items"
+        ],
+        "completion_check": "Switch offers English, Kannada and Hindi; choosing one sets <html lang> to en, kn or hi; every visible string is keyed with none hard-coded; review notice and native-speaker review open item are visible; no JS errors.",
+        "dependencies": [
+          "W-4",
+          "W-5"
+        ],
+        "parts": [
+          "interactive_feature"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 2,
+          "time_minutes": 20
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "W-7",
+        "name": "Kannada translation of the whole site",
+        "goal_gap": "No Kannada text anywhere in the file.",
+        "expected_outcome": "Every keyed string, including blog posts and the 'To be confirmed' tag, has Kannada script text.",
+        "outputs": [
+          "Kannada entries in the string table"
+        ],
+        "completion_check": "With Kannada selected, no section, form label, button, tag or blog post is left in English apart from proper names and placeholders; the .tbc tag reads in Kannada; no overflow at 360px.",
+        "dependencies": [
+          "W-6"
+        ],
+        "parts": [
+          "extra_language"
+        ],
+        "estimated_resources": {
+          "money": 12,
+          "calls": 2,
+          "time_minutes": 20
+        },
+        "estimate": 12,
+        "cost": 12
+      },
+      {
+        "id": "W-8",
+        "name": "Hindi translation of the whole site",
+        "goal_gap": "No Devanagari text anywhere in the file.",
+        "expected_outcome": "Every keyed string, including blog posts and the 'To be confirmed' tag, has Hindi Devanagari text.",
+        "outputs": [
+          "Hindi entries in the string table"
+        ],
+        "completion_check": "With Hindi selected, no section, form label, button, tag or blog post is left in English apart from proper names and placeholders; the .tbc tag reads in Hindi; no overflow at 360px.",
+        "dependencies": [
+          "W-6"
+        ],
+        "parts": [
+          "extra_language"
+        ],
+        "estimated_resources": {
+          "money": 12,
+          "calls": 2,
+          "time_minutes": 20
+        },
+        "estimate": 12,
+        "cost": 12
+      }
+    ],
+    "priority_final": [],
+    "clause": "Done-when items 7 to 11 are open and are department work. CEO decision at [25] and [38]: option A, fund the remaining scope. Rule: Identity may not increase an envelope.",
+    "ruling": "adaptation",
+    "adaptation_gets": "The five-workflow plan (W-4 to W-8, 72) is held consistent with the charter and the CEO's funding decision, with no reshaping needed.",
+    "priority_gets": "Envelopes stay capped at rate card per workflow and no envelope is raised. The ledger gap is recorded as a system issue outside Priority's authority.",
+    "decided_by": "identity",
+    "decided": []
+  }
+]

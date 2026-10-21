@@ -1,0 +1,161 @@
+{
+  "run": "20261007-105118",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "model": "sonnet",
+  "mock": false,
+  "brief": "A website for my cafe.",
+  "change_requests": [
+    "can you use vercel?"
+  ],
+  "status": "done",
+  "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): Menu items and prices; Street address and map location; Phone number or other contact; Where pre-orders should go (for example WhatsApp, email or an ordering service) and whether payment is taken online; Pickup rules (earliest slot, lead time); Logo, photos and brand colours if any; Language (English only assumed unless told otherwise).",
+  "budget": {
+    "start": 100,
+    "granted": 100,
+    "used": 70,
+    "raises": []
+  },
+  "ai_calls": 21,
+  "cycles": 2,
+  "questions_to_user": [
+    {
+      "kind": "info",
+      "asked": [
+        "What is the cafe's name, and who is the site mainly for (for example nearby regulars, tourists, remote workers, families)?",
+        "What is the main thing a visitor should be able to do on the site?",
+        "Which sections should the site include?",
+        "Any hard rules on look, tone or content (for example brand colours, language, dietary labels, things to avoid)?"
+      ],
+      "answer": "It's in Bengaluru."
+    },
+    {
+      "kind": "info",
+      "asked": [
+        "What is the main thing a visitor should be able to do on the site?",
+        "Who is the site mainly for?",
+        "Any hard rules on look, tone or content, such as brand colours, language (English, Kannada, both) or dietary labels? Say 'none' if not."
+      ],
+      "answer": "It's called Brew Lab, in Indiranagar. Show the menu with prices, opening hours 8am to 10pm every day, and our location. People should be able to pre-order coffee for pickup. Warm, modern, mobile-first."
+    }
+  ],
+  "conflicts": [],
+  "validator_rejections": [],
+  "holds": [
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-2: W-1 (W1-site-shell) must be done and pass its completion check, which also releases the lock on site/index.html"
+    }
+  ],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 2,
+      "all_pass": true,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    }
+  ],
+  "site_versions": 2,
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The page title and header show the name Brew Lab and mention Indiranagar, Bengaluru",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "A menu section lists items grouped by category, each with a name and a price in ₹; any price not supplied is visibly marked as a placeholder",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "An opening hours section states 8am to 10pm for every day of the week",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "A location section names Indiranagar, Bengaluru and includes a map link or embed; the street address is visibly marked as a placeholder until supplied",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "A pre-order form lets a visitor choose coffee items and quantities, enter a name and a pickup time, see a running total, and submit",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "The file has a viewport meta tag, its base CSS targets small screens, and it uses min-width media queries for larger screens",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "The layout has no horizontal scrolling at 360px width",
+      "pass": true
+    },
+    {
+      "item": 8,
+      "criterion": "The site is a single HTML file with no build step and no local file dependencies",
+      "pass": true
+    },
+    {
+      "item": 9,
+      "criterion": "Every placeholder is visibly marked so it can be told apart from real content",
+      "pass": true
+    }
+  ],
+  "route_check_violations": [
+    {
+      "agent": "adaptation",
+      "detail": "picked Identity, routed to Priority",
+      "msg": 32,
+      "cycle": 2
+    }
+  ]
+}

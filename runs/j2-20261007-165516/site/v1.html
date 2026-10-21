@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Frontend Developer Portfolio</title>
+<!-- J2:W-1 head start (owner W-1) -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Frontend Developer Portfolio</title>
+<style>
+  :root {
+    --bg: #0b0d12;
+    --surface: #141824;
+    --border: #262c3d;
+    --text: #e8eaf0;
+    --muted: #a3a9b8;
+    --accent: #7c9cff;
+    --accent-ink: #0b0d12;
+    --radius: 12px;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  img, svg, video { max-width: 100%; height: auto; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .container { width: min(100% - 2rem, 1100px); margin-inline: auto; }
+</style>
+<!-- J2:W-1 head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<style>
+  #hero { padding: clamp(3rem, 10vw, 7rem) 0; border-bottom: 1px solid var(--border); }
+  #hero .hero-inner { max-width: 760px; }
+  #hero .hero-badge {
+    display: inline-block;
+    margin: 0 0 1.25rem;
+    padding: .3rem .8rem;
+    font-size: .8rem;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+  }
+  #hero h1 {
+    margin: 0 0 1rem;
+    font-size: clamp(2rem, 8vw, 3.75rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+  }
+  #hero .hero-tagline {
+    margin: 0 0 2rem;
+    font-size: clamp(1.05rem, 3.5vw, 1.35rem);
+    color: var(--muted);
+  }
+  #hero .hero-cta {
+    display: inline-block;
+    padding: .85rem 1.6rem;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: var(--radius);
+    transition: transform .15s ease, filter .15s ease;
+  }
+  #hero .hero-cta:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  #hero .hero-note { margin: 1.5rem 0 0; font-size: .85rem; color: var(--muted); }
+</style>
+<header id="hero">
+  <div class="container hero-inner">
+    <p class="hero-badge">Dummy content: replace before launch</p>
+    <h1>[Placeholder Name]</h1>
+    <p class="hero-tagline">I'm a frontend developer available for freelance work, building fast, accessible and polished interfaces.</p>
+    <a class="hero-cta" href="#contact">Hire me for your project</a>
+    <p class="hero-note">The name above is a placeholder until the real one is supplied.</p>
+  </div>
+</header>
+<!-- J2:W-1 end -->
+</body>
+</html>

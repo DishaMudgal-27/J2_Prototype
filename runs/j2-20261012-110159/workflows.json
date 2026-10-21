@@ -1,0 +1,291 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "kk-shell",
+    "name": "Page shell, warm styling, no-offer wording",
+    "covers": [
+      10,
+      11,
+      12
+    ],
+    "fixes": [],
+    "covers_text": [
+      "No offer, discount or deal wording appears anywhere on the site",
+      "No horizontal scrolling at 360px or 1280px width, and the layout uses a warm, homely colour scheme",
+      "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+    ],
+    "purpose": "No page exists yet: no layout, colours, navigation or anchors.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 2,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the file still has a JS error or overflow at 360px after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "HTML skeleton with section anchors",
+      "CSS theme",
+      "nav"
+    ],
+    "completion_check": "No JS errors; no horizontal scroll at 360px and 1280px; every in-page link targets an existing id; no offer, discount, deal or % off text.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "style guide, usable section and head tags",
+    "style_guide": true,
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "kk-info",
+    "name": "Name, address, contacts and opening hours",
+    "covers": [
+      1,
+      2,
+      3
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The site shows the name Kaveri Kitchen and the address 7 Karve Road, Kothrud, Pune 411038",
+      "The site shows the WhatsApp booking number +91 00000 33333 and the restaurant phone +91 00000 44444, and the phone number is tap-to-call",
+      "The site shows opening hours 8am to 10:30pm every day, with the note that the kitchen closes at 10pm"
+    ],
+    "purpose": "Visitors cannot find who and where the restaurant is, when it is open, or how to call.",
+    "cost": 35,
+    "estimate": 35,
+    "envelope": {
+      "money_limit": 35,
+      "model_call_limit": 2,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any supplied fact is missing or altered after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "name and address block",
+      "contact block with tel link",
+      "hours block"
+    ],
+    "completion_check": "Page text has the name, address, both numbers and hours with the kitchen note; phone is an a[href^='tel:'] link.",
+    "dependencies": [
+      "kk-shell"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "kk-menu",
+    "name": "Priced menu with veg and non-veg filter",
+    "covers": [
+      4,
+      5
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The menu lists all 11 dishes with rupee prices under Starters (Medu vada 120, Veg cutlet 140, Chicken 65 260), Mains (Masala dosa 160, Mysore dosa 180, Idli sambar 110, Veg thali 280, Chicken chettinad 340, Fish curry meal 360) and Desserts (Payasam 100, Filter coffee 60)",
+      "A filter with All, Veg and Non-veg works: Veg hides Chicken 65, Chicken chettinad and Fish curry meal; Non-veg shows only those three; each dish is marked veg or non-veg"
+    ],
+    "purpose": "No menu, no prices, no filter.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 2,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if a filter result or a price is wrong after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "menu data object",
+      "menu section",
+      "filter buttons"
+    ],
+    "completion_check": "All shows 11 dishes at stated prices; Veg shows 8; Non-veg shows exactly Chicken 65, Chicken chettinad, Fish curry meal; every dish is marked.",
+    "dependencies": [
+      "kk-shell"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "kk-specials",
+    "name": "Today's specials from menu data",
+    "covers": [
+      6
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A Today's specials section shows Mysore dosa (160... see menu price 180) and Fish curry meal (360), taken from the menu data"
+    ],
+    "purpose": "Visitors cannot see today's specials.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if specials are hard-coded instead of read from the menu data."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "specials section"
+    ],
+    "completion_check": "Lists exactly Mysore dosa at 180 and Fish curry meal at 360 from the menu data; changing the flag changes the section.",
+    "dependencies": [
+      "kk-menu"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "kk-booking",
+    "name": "WhatsApp table booking form",
+    "covers": [
+      7
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A booking form collects name, date, time and number of people (1 to 8) and opens a WhatsApp chat to +91 00000 33333 with those details filled into the message"
+    ],
+    "purpose": "Visitors cannot book a table.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 2,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the generated link is malformed or validation fails after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "booking form",
+      "WhatsApp link builder"
+    ],
+    "completion_check": "Valid submit opens wa.me/910000033333 with name, date, time and party size in the text; empty fields and party sizes outside 1 to 8 are blocked.",
+    "dependencies": [
+      "kk-shell"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section",
+    "version": 5
+  },
+  {
+    "id": "W-6",
+    "proposal_id": "kk-photos",
+    "name": "Dish photo placeholders",
+    "covers": [
+      8
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A dish photos section shows clearly marked empty photo spots"
+    ],
+    "purpose": "No dish photos section, and no real photos exist yet.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any stock or invented image is used."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "photo grid with placeholders"
+    ],
+    "completion_check": "At least 3 visibly labelled empty spots, no fake images, no overflow at 360px.",
+    "dependencies": [
+      "kk-shell"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-6",
+    "revises": null,
+    "agent": "W-6 Builder",
+    "last_check": "usable section",
+    "version": 6
+  },
+  {
+    "id": "W-7",
+    "proposal_id": "kk-reviews",
+    "name": "Customer reviews",
+    "covers": [
+      9
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A reviews section shows three reviews: \"Best dosa in Kothrud\" - Anita R., \"Feels like home\" - Vikram S., \"Great filter coffee\" - Neha P."
+    ],
+    "purpose": "Visitors cannot read what customers say.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any review text or name differs from the brief."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "reviews section"
+    ],
+    "completion_check": "Shows the three supplied quotes with names and nothing else: no extra reviews, ratings or invented text.",
+    "dependencies": [
+      "kk-shell"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-7",
+    "revises": null,
+    "agent": "W-7 Builder",
+    "last_check": "usable section",
+    "version": 7
+  }
+]

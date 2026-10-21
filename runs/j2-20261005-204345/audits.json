@@ -1,0 +1,150 @@
+[
+  {
+    "cycle": 1,
+    "version": 2,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The site is one HTML file with its CSS and JavaScript inline or loaded from CDN, and needs no build step.",
+        "verdict": "PASS",
+        "note": "Single HTML document with one inline style block and one inline script; the only external resource is the Google Fonts CSS (mechanical check lists 3 external URLs, all font related).",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The file shows the name Paws Haven and Mysuru, and has navigation to Home, Adopt, Donate, Volunteer and Success Stories sections.",
+        "verdict": "PASS",
+        "note": "Title, brand and h1 contain 'Paws Haven' and 'Mysuru'. Nav links #home, #adopt, #donate, #volunteer and #stories match section ids; broken_in_page_links is empty.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The Adopt section lists pets, each with name, species, age and a short description, and each has an inquiry button that opens a pre-filled WhatsApp or email message.",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "4 sample pets, each with name, species, age, description and wa/mail buttons. buildLink makes wa.me and mailto URLs, but dispatch() shows the prepared text instead of opening it while CONFIG holds placeholder contacts. This is intended under the placeholder rule and will work once the real numbers are set.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The Donate section shows a UPI QR area and bank details as marked placeholders, and the file contains no payment gateway script, card input or payment form.",
+        "verdict": "PASS",
+        "note": "The .qr box, UPI ID and 4 bank rows all show [PLACEHOLDER]. The only form is the volunteer form, there is no card input, and the single script has no gateway or payment code.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The Volunteer section has a sign-up form with labelled fields (at least name, phone, email, availability) whose submit action opens a pre-filled WhatsApp or email message, and the file has no form action posting to an external service and no data storage code.",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The form has no action attribute. Name, phone, email and availability each have a label with a for attribute. The submit handler calls preventDefault and dispatch(). There is no localStorage, sessionStorage, cookie or fetch use. Same placeholder-contact behaviour as F-3.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The Success Stories section shows at least three stories, each with a pet name and a short text.",
+        "verdict": "PASS",
+        "note": "Three story articles (Tara, Simba, Raja), each with an h3 and text, labelled 'Sample entries'.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "An English/Kannada toggle is present, and every visible text string, including nav, buttons, form labels, placeholders and messages, has a Kannada version that the toggle switches to.",
+        "verdict": "PASS",
+        "note": "A native button #lang-btn is keyboard reachable. Every English key in STR.en has a matching STR.kn key, and all visible text elements carry data-i18n, data-i18n-html, data-i18n-aria or data-i18n-ph. Kannada accuracy cannot be checked here and is covered by the review notice.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "In Kannada mode and in English mode the file shows a visible notice that the Kannada text is pending native-speaker review.",
+        "verdict": "PASS",
+        "note": "The #review-note div sits under the header with no hidden state, and its text is switched by key 'review' in both languages.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The file loads a Kannada-capable font and sets the page lang attribute to match the selected language.",
+        "verdict": "PASS",
+        "note": "Noto Sans Kannada is loaded from fonts.googleapis.com and used in the html:lang(kn) rule. apply() sets document.documentElement.lang to 'kn' or 'en'.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "Every shelter fact not given in the brief (UPI ID, QR image, bank details, phone, WhatsApp number, email, address) appears as a visibly marked placeholder.",
+        "verdict": "PASS",
+        "note": "UPI ID, QR, bank account name, number, bank and IFSC, address, hours, phone, WhatsApp and email all render in .ph spans or the .qr box with [PLACEHOLDER] text. No invented facts were found.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 10,
+        "pass": true
+      },
+      {
+        "id": "F-11",
+        "criterion": "The file has a viewport meta tag and responsive CSS rules for narrow screens.",
+        "verdict": "PASS",
+        "note": "The viewport meta tag is present. There are @media rules at min-width 600px and 900px and max-width 400px. Mechanical check: overflow_px is 0 at 360px and at 1280px.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 11,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-12",
+        "criterion": "Standard: no personal data sent to a third-party service",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Loading Noto Sans Kannada from Google Fonts sends the visitor's IP address and user agent to Google. No form data is sent. The charter allows CDN resources, so this is a note, not a defect. Self-hosting the font would remove it.",
+        "severity": "low",
+        "confidence": "medium"
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 43842,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com",
+        "https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;600;700;800&display=swap",
+        "https://fonts.gstatic.com"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

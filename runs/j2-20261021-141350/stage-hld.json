@@ -1,0 +1,788 @@
+{
+  "stage": "hld",
+  "goal": {
+    "product_name": "Brew Lab",
+    "users": "Coffee lovers and office staff near the shop in Indiranagar, Bengaluru",
+    "problem": "Today customers cannot see the menu or order ahead.",
+    "features": [
+      "Shop name and address shown as text, with no embedded map",
+      "Menu of seven items with prices in rupees",
+      "Opening hours, 7 am to 10 pm, every day",
+      "Pre-order form with the fields name, phone, items and pickup time, sending the order to hello@brewlab.example",
+      "Pickup at the shop, with no online payment",
+      "Works on phones"
+    ],
+    "user_groups": [
+      {
+        "name": "Coffee lovers",
+        "actions": [
+          "Look at the menu with prices",
+          "Check the opening hours",
+          "Find the address",
+          "Place a pre-order for pickup"
+        ]
+      },
+      {
+        "name": "Office staff nearby",
+        "actions": [
+          "Place a quick pre-order on their phone",
+          "Pick the order up on the way to work"
+        ]
+      }
+    ],
+    "constraints": [
+      "The page must work on phones",
+      "The address is shown as text with no embedded map",
+      "No online payment is taken",
+      "Customers collect the order at the shop",
+      "The page does not show a phone number for the shop",
+      "The website is plain HTML, CSS and JavaScript in one file"
+    ],
+    "success_measures": [
+      "20 pre-orders a week within the first month"
+    ],
+    "statement": "An HLD for Brew Lab",
+    "site_name": "Brew Lab",
+    "business_type": "hld",
+    "facts": [
+      "Brew Lab"
+    ],
+    "standards": [
+      "Every item traceable to the PRD"
+    ],
+    "rules": [
+      "No invented facts"
+    ],
+    "done_when": [
+      "The Purpose and scope section is written for Brew Lab",
+      "The Pages section is written for Brew Lab",
+      "The Components section is written for Brew Lab, and names every requirement (R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13) it covers",
+      "The Data flow section is written for Brew Lab",
+      "The Hosting and deployment section is written for Brew Lab",
+      "The Risks section is written for Brew Lab"
+    ],
+    "to_be_confirmed": [],
+    "dropped_from_brief": [],
+    "visitor_needs": [],
+    "chain": {
+      "prd": {
+        "kind": "prd",
+        "requirements": [
+          {
+            "id": "R1",
+            "text": "The page shows the shop name Brew Lab as text."
+          },
+          {
+            "id": "R2",
+            "text": "The page shows the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, so coffee lovers can find the shop."
+          },
+          {
+            "id": "R3",
+            "text": "The page does not contain an embedded map. The address is text only."
+          },
+          {
+            "id": "R4",
+            "text": "The page shows a menu of seven items with prices in rupees, exactly as follows: Filter coffee 90 rupees, Cappuccino 160 rupees, Latte 180 rupees, Cold brew 200 rupees, Masala chai 80 rupees, Almond croissant 140 rupees, Banana bread slice 120 rupees."
+          },
+          {
+            "id": "R5",
+            "text": "The menu shows each item next to its price, so a customer can see what each item costs without placing an order."
+          },
+          {
+            "id": "R6",
+            "text": "The page shows the opening hours as 7 am to 10 pm, every day."
+          },
+          {
+            "id": "R7",
+            "text": "The page has a pre-order form with these fields: name, phone, items and pickup time."
+          },
+          {
+            "id": "R8",
+            "text": "When a customer submits the pre-order form, the order is sent to hello@brewlab.example."
+          },
+          {
+            "id": "R9",
+            "text": "The page states that customers collect the order at the shop, so coffee lovers and office staff nearby know the order is picked up in person."
+          },
+          {
+            "id": "R10",
+            "text": "The page takes no online payment. The pre-order form has no payment fields."
+          },
+          {
+            "id": "R11",
+            "text": "The page works on phones. A customer, including office staff nearby, can read the menu, the opening hours and the address, and fill in and submit the pre-order form, on a phone screen."
+          },
+          {
+            "id": "R12",
+            "text": "The page does not show a phone number for the shop. The form field called phone is for the customer's own number only."
+          },
+          {
+            "id": "R13",
+            "text": "The website is plain HTML, CSS and JavaScript in one file."
+          }
+        ]
+      },
+      "prd_ids": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6",
+        "R7",
+        "R8",
+        "R9",
+        "R10",
+        "R11",
+        "R12",
+        "R13"
+      ],
+      "hld_ids": []
+    },
+    "requester_answers": [
+      "1. We will know the page is working if it gets 20 pre-orders a week within the first month.\n2. Coffee lovers look at the menu with prices, check the opening hours, find the address, and place a pre-order for pickup.\n3. Office staff nearby place a quick pre-order on their phone and pick it up on the way to work.\n4. No, the page does not need to show a phone number for the shop."
+    ],
+    "charter_items": [
+      "The Purpose and scope section is written for Brew Lab",
+      "The Pages section is written for Brew Lab",
+      "The Components section is written for Brew Lab, and names every requirement (R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13) it covers",
+      "The Data flow section is written for Brew Lab",
+      "The Hosting and deployment section is written for Brew Lab",
+      "The Risks section is written for Brew Lab"
+    ],
+    "core_items": [
+      "The Purpose and scope section is written for Brew Lab",
+      "The Pages section is written for Brew Lab",
+      "The Components section is written for Brew Lab, and names every requirement (R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13) it covers",
+      "The Data flow section is written for Brew Lab",
+      "The Hosting and deployment section is written for Brew Lab",
+      "The Risks section is written for Brew Lab"
+    ]
+  },
+  "audits": [
+    {
+      "cycle": 3,
+      "version": 7,
+      "results": [
+        {
+          "id": "F-1",
+          "criterion": "The Purpose and scope section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "The section names Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038. It also has the in-scope and out-of-scope lists traced to R1 to R13, and the 20 pre-orders a week measure.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 1,
+          "pass": true
+        },
+        {
+          "id": "F-2",
+          "criterion": "The Pages section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "The Pages section describes the single Brew Lab page: name, address, all seven menu items with prices, hours of 7 am to 10 pm, the form with 4 fields, and the pickup note.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 2,
+          "pass": true
+        },
+        {
+          "id": "F-3",
+          "criterion": "The Components section is written for Brew Lab, and names every requirement (R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13) it covers",
+          "verdict": "PASS",
+          "note": "C1 to C9 each give one responsibility and list the requirements they cover. The traceability list names R1 to R13 each once, and all seven menu prices appear.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 3,
+          "pass": true
+        },
+        {
+          "id": "F-4",
+          "criterion": "The Data flow section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "The section names the pre-order form, the fields name, phone, items and pickup time, and the email to hello@brewlab.example. It lists what is not sent: payment data and a shop phone number.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 4,
+          "pass": true
+        },
+        {
+          "id": "F-5",
+          "criterion": "The Hosting and deployment section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "The section says the site is one plain file, served as a static page, and gives the steps to ship and update it. The host and web address are labelled Assumption.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 5,
+          "pass": true
+        },
+        {
+          "id": "F-6",
+          "criterion": "The Risks section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "The section lists six risks, each tied to requirements and given a mitigation. It includes the 20 pre-orders a week target, and its two inferred claims are labelled Assumption.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 6,
+          "pass": true
+        }
+      ],
+      "extra_issues": [
+        {
+          "id": "F-7",
+          "criterion": "No invented facts (necessary condition H5)",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "H5 flags 'Header', 'Requester' and 'Single-file'. The first and third are component names (C1 Header, C9 Single-file packaging). 'Requester' appears unlabelled in Risks: 'for the Requester to confirm'. None is a business fact.",
+          "severity": "low",
+          "confidence": "medium",
+          "needs_requester_fact": null
+        }
+      ],
+      "rubric": [
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "criterion": "Every component has one clear responsibility",
+          "verdict": "PASS",
+          "note": "Each of C1 to C9 states one responsibility, for example 'C6 Order sender: ... sends the order to hello@brewlab.example'.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "criterion": "The data flow names every form and integration the pages need",
+          "verdict": "PASS",
+          "note": "Data flow says 'The page has one form and one integration': the pre-order form and the email delivery to hello@brewlab.example.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "criterion": "Hosting, deployment and risks are explicit",
+          "verdict": "PASS",
+          "note": "Hosting gives a static single file with explicit ship and update steps. Risks gives six risks, each with a mitigation.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "criterion": "Consistent with the PRD: every requirement has a component",
+          "verdict": "PASS",
+          "note": "The traceability list maps each of R1 to R13 to a component, and code check H4 is met.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "criterion": "No invented facts: every fact comes from the brief or the Requester's answers or the PRD, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim not in them",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "Unlabelled and not in the brief: component names 'C1 Header' and 'C9 Single-file packaging', and 'for the Requester to confirm' in Risks. These are labels, not facts. All inferred claims elsewhere carry 'Assumption:'.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        }
+      ],
+      "mechanical": {},
+      "screenshot": null,
+      "all_pass": false,
+      "output": "hld",
+      "conditions": [
+        {
+          "id": "H1",
+          "text": "All six sections are present and not empty",
+          "check": "sections-present",
+          "met": true,
+          "evidence": "all 6 sections present, none empty"
+        },
+        {
+          "id": "H2",
+          "text": "Section headings are unique",
+          "check": "headings-unique",
+          "met": true,
+          "evidence": "7 section headings, all unique"
+        },
+        {
+          "id": "H3",
+          "text": "Components have unique sequential ids (C1, C2, ...) and each states its responsibility",
+          "check": [
+            "ids-sequential",
+            "components-have-responsibility"
+          ],
+          "met": true,
+          "evidence": "C1 to C9, unique and in order; each of the 9 component(s) states its responsibility"
+        },
+        {
+          "id": "H4",
+          "text": "Every PRD requirement appears in an HLD component",
+          "check": "chain-ids",
+          "met": true,
+          "evidence": "each of R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13 appears in Components"
+        },
+        {
+          "id": "H5",
+          "text": "No invented facts: every number, email and proper name comes from the charter, the Requester's answers or the PRD, or sits in an Assumption: line",
+          "check": "no-invented-facts",
+          "met": false,
+          "evidence": "not in the charter or the Requester's answers, and not marked Assumption: Header, Requester, Single-file",
+          "assumptions": [
+            "the page's JavaScript hands the order to a way of sending email to hello@brewlab.example. The brief names the destination but not the sending method, so the method is left to the build.",
+            "the page keeps no copy of the order. The order exists only in the email that reaches hello@brewlab.example.",
+            "the brief does not name a hosting provider or a web address, so the choice of a static host and the address of the site are left to the Requester.",
+            "the page is published by copying the single file to the chosen host, and a change goes live when the new copy replaces the old one.",
+            "someone at the shop reads the hello@brewlab.example inbox during opening hours (7 am to 10 pm, every day), so orders are seen before pickup time.",
+            "the number of pre-orders is counted from the order emails received at hello@brewlab.example, because the brief names no other way to count."
+          ]
+        },
+        {
+          "id": "H6",
+          "text": "Nothing is \"to be confirmed\", and every brief fact appears exactly",
+          "check": [
+            "nothing-to-be-confirmed",
+            "facts-present-all"
+          ],
+          "met": true,
+          "evidence": "nothing to be confirmed; all 1 brief fact(s) appear"
+        }
+      ],
+      "read": "Read all of HLD v7: Purpose and scope (about 230 words), Pages (about 230), Components (about 520, with C1 to C9 and the R1 to R13 traceability list), Data flow (about 260), Hosting and deployment (about 250), Risks (about 480), and the Assumptions to confirm list (6 items). I also read the H1 to H6 code results, the brief, the Requester's answers and the rubric."
+    },
+    {
+      "cycle": 4,
+      "version": 9,
+      "results": [
+        {
+          "id": "F-1",
+          "criterion": "The Purpose and scope section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "Names Brew Lab and '12, 100 Feet Road, Indiranagar, Bengaluru 560038', lists in and out of scope traced to R1 to R13, and states the 20 pre-orders a week measure.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 1,
+          "pass": true
+        },
+        {
+          "id": "F-2",
+          "criterion": "The Pages section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "Describes the one Brew Lab page: name, address, all seven items with prices, hours '7 am to 10 pm, every day', the four-field form and the pickup note.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 2,
+          "pass": true
+        },
+        {
+          "id": "F-3",
+          "criterion": "The Components section is written for Brew Lab, and names every requirement (R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13) it covers",
+          "verdict": "PASS",
+          "note": "C1 to C9 each state one responsibility and the requirements covered; traceability lists R1 to R13 once each; all seven menu items and prices appear.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 3,
+          "pass": true
+        },
+        {
+          "id": "F-4",
+          "criterion": "The Data flow section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "Names the pre-order form, the fields name, phone, items and pickup time, and the email to hello@brewlab.example; states no payment data is sent.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 4,
+          "pass": true
+        },
+        {
+          "id": "F-5",
+          "criterion": "The Hosting and deployment section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "Says the site is one plain file served as a static page, with ship and update steps; host and address are on Assumption lines.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 5,
+          "pass": true
+        },
+        {
+          "id": "F-6",
+          "criterion": "The Risks section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "Six risks tied to R8, R7, R11, R10, R12, R4, R5, each with a mitigation, and the '20 pre-orders a week' target; inferred claims are labelled Assumption.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 6,
+          "pass": true
+        }
+      ],
+      "extra_issues": [
+        {
+          "id": "F-7",
+          "criterion": "No invented facts (code check H5)",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "Code flags 'One-file' (C9 name, 'covered by the One-file page') as not in the brief and not marked Assumption; Hosting assumption line still says 'left to the Requester'.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null
+        }
+      ],
+      "rubric": [
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "criterion": "Every component has one clear responsibility",
+          "verdict": "PASS",
+          "note": "Each of C1 to C9 has one stated responsibility, e.g. 'C6 Order sender: ... sends the order to hello@brewlab.example'.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "criterion": "The data flow names every form and integration the pages need",
+          "verdict": "PASS",
+          "note": "Data flow: 'The page has one form and one integration', the pre-order form and the email delivery to hello@brewlab.example.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "criterion": "Hosting, deployment and risks are explicit",
+          "verdict": "PASS",
+          "note": "Hosting gives static-file hosting and ship steps; Risks lists six risks each with a mitigation.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "criterion": "Consistent with the PRD: every requirement has a component",
+          "verdict": "PASS",
+          "note": "Requirement traceability maps R1 to R13 to components; code check H4 met.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "criterion": "No invented facts: every fact comes from the brief or the Requester's answers or the PRD, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim not in them",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "Unlabelled term not in the brief: 'One-file page' (C9 name and R13 line). It is a component label, not a fact. 'Requester' appears only inside Assumption lines.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        }
+      ],
+      "mechanical": {},
+      "screenshot": null,
+      "all_pass": false,
+      "output": "hld",
+      "conditions": [
+        {
+          "id": "H1",
+          "text": "All six sections are present and not empty",
+          "check": "sections-present",
+          "met": true,
+          "evidence": "all 6 sections present, none empty"
+        },
+        {
+          "id": "H2",
+          "text": "Section headings are unique",
+          "check": "headings-unique",
+          "met": true,
+          "evidence": "7 section headings, all unique"
+        },
+        {
+          "id": "H3",
+          "text": "Components have unique sequential ids (C1, C2, ...) and each states its responsibility",
+          "check": [
+            "ids-sequential",
+            "components-have-responsibility"
+          ],
+          "met": true,
+          "evidence": "C1 to C9, unique and in order; each of the 9 component(s) states its responsibility"
+        },
+        {
+          "id": "H4",
+          "text": "Every PRD requirement appears in an HLD component",
+          "check": "chain-ids",
+          "met": true,
+          "evidence": "each of R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13 appears in Components"
+        },
+        {
+          "id": "H5",
+          "text": "No invented facts: every number, email and proper name comes from the charter, the Requester's answers or the PRD, or sits in an Assumption: line",
+          "check": "no-invented-facts",
+          "met": false,
+          "evidence": "not in the charter or the Requester's answers, and not marked Assumption: One-file",
+          "assumptions": [
+            "the page's JavaScript hands the order to a way of sending email to hello@brewlab.example. The brief names the destination but not the sending method, so the method is left to the build.",
+            "the page keeps no copy of the order. The order exists only in the email that reaches hello@brewlab.example.",
+            "the brief does not name a hosting provider or a web address, so the choice of a static host and the address of the site are left to the Requester.",
+            "the page is published by copying the single file to the chosen host, and a change goes live when the new copy replaces the old one.",
+            "someone at the shop reads the hello@brewlab.example inbox during opening hours (7 am to 10 pm, every day), so orders are seen before pickup time.",
+            "the number of pre-orders is counted from the order emails received at hello@brewlab.example, because the brief names no other way to count.",
+            "the host and the web address are to be chosen by the shop owner."
+          ]
+        },
+        {
+          "id": "H6",
+          "text": "Nothing is \"to be confirmed\", and every brief fact appears exactly",
+          "check": [
+            "nothing-to-be-confirmed",
+            "facts-present-all"
+          ],
+          "met": true,
+          "evidence": "nothing to be confirmed; all 1 brief fact(s) appear"
+        }
+      ],
+      "read": "HLD v9 markdown, about 1,800 words: Purpose and scope (about 230 words), Pages (about 260), Components (about 560 incl. 13-line traceability), Data flow (about 250), Hosting and deployment (about 230), Risks (about 450), plus an Assumptions to confirm list. Also read the six code checks H1 to H6, the PRD requirements R1 to R13 and the brief facts."
+    },
+    {
+      "cycle": 5,
+      "version": 11,
+      "results": [
+        {
+          "id": "F-1",
+          "criterion": "The Purpose and scope section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "Names Brew Lab and '12, 100 Feet Road, Indiranagar, Bengaluru 560038', lists in and out of scope traced to R1-R13, and states the 20 pre-orders a week measure.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 1,
+          "pass": true
+        },
+        {
+          "id": "F-2",
+          "criterion": "The Pages section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "Describes the one Brew Lab page: name, address, all seven items with prices, '7 am to 10 pm, every day', the four-field form and the pickup note.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 2,
+          "pass": true
+        },
+        {
+          "id": "F-3",
+          "criterion": "The Components section is written for Brew Lab, and names every requirement (R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13) it covers",
+          "verdict": "PASS",
+          "note": "C1 to C9 each state one responsibility and the requirements covered; traceability lists R1 to R13 once each; all seven menu prices appear.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 3,
+          "pass": true
+        },
+        {
+          "id": "F-4",
+          "criterion": "The Data flow section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "Names the pre-order form, the fields name, phone, items and pickup time, and the email to hello@brewlab.example; states no payment data is sent.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 4,
+          "pass": true
+        },
+        {
+          "id": "F-5",
+          "criterion": "The Hosting and deployment section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "States the site is one plain file served as a static page, with ship and update steps; host and address are on Assumption lines.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 5,
+          "pass": true
+        },
+        {
+          "id": "F-6",
+          "criterion": "The Risks section is written for Brew Lab",
+          "verdict": "PASS",
+          "note": "Six risks tied to R8, R7, R11, R10, R12, R4, R5, each with a mitigation, plus the '20 pre-orders a week' target; inferred claims are labelled Assumption.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 6,
+          "pass": true
+        }
+      ],
+      "extra_issues": [],
+      "rubric": [
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "criterion": "Every component has one clear responsibility",
+          "verdict": "PASS",
+          "note": "C1 to C9 each begin with a single stated responsibility, e.g. 'C6 Order sender: ... sends the order to hello@brewlab.example'.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "criterion": "The data flow names every form and integration the pages need",
+          "verdict": "PASS",
+          "note": "Data flow: 'The page has one form and one integration', the pre-order form and the email delivery to hello@brewlab.example.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "criterion": "Hosting, deployment and risks are explicit",
+          "verdict": "PASS",
+          "note": "Hosting gives 'static host', 'How it ships' steps; Risks lists six risks each with a Mitigation.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "criterion": "Consistent with the PRD: every requirement has a component",
+          "verdict": "PASS",
+          "note": "Traceability maps R1 to R13 each to a component; code check H4 met.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "criterion": "No invented facts: every fact comes from the brief or the Requester's answers or the PRD, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim not in them",
+          "verdict": "PASS",
+          "note": "No unlabelled claims found; all inferred claims (sending method, no stored copy, host choice, inbox monitoring, counting method) sit on 'Assumption:' lines; H5 met.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        }
+      ],
+      "mechanical": {},
+      "screenshot": null,
+      "all_pass": true,
+      "output": "hld",
+      "conditions": [
+        {
+          "id": "H1",
+          "text": "All six sections are present and not empty",
+          "check": "sections-present",
+          "met": true,
+          "evidence": "all 6 sections present, none empty"
+        },
+        {
+          "id": "H2",
+          "text": "Section headings are unique",
+          "check": "headings-unique",
+          "met": true,
+          "evidence": "7 section headings, all unique"
+        },
+        {
+          "id": "H3",
+          "text": "Components have unique sequential ids (C1, C2, ...) and each states its responsibility",
+          "check": [
+            "ids-sequential",
+            "components-have-responsibility"
+          ],
+          "met": true,
+          "evidence": "C1 to C9, unique and in order; each of the 9 component(s) states its responsibility"
+        },
+        {
+          "id": "H4",
+          "text": "Every PRD requirement appears in an HLD component",
+          "check": "chain-ids",
+          "met": true,
+          "evidence": "each of R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13 appears in Components"
+        },
+        {
+          "id": "H5",
+          "text": "No invented facts: every number, email and proper name comes from the charter, the Requester's answers or the PRD, or sits in an Assumption: line",
+          "check": "no-invented-facts",
+          "met": true,
+          "evidence": "every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+          "assumptions": [
+            "the page's JavaScript hands the order to a way of sending email to hello@brewlab.example. The brief names the destination but not the sending method, so the method is left to the build.",
+            "the page keeps no copy of the order. The order exists only in the email that reaches hello@brewlab.example.",
+            "the brief does not name a hosting provider or a web address, so the static host and the address of the site are to be chosen by the shop owner.",
+            "the page is published by copying the single file to the chosen host, and a change goes live when the new copy replaces the old one.",
+            "someone at the shop reads the hello@brewlab.example inbox during opening hours (7 am to 10 pm, every day), so orders are seen before pickup time.",
+            "the number of pre-orders is counted from the order emails received at hello@brewlab.example, because the brief names no other way to count.",
+            "the host and the web address are to be chosen by the shop owner."
+          ]
+        },
+        {
+          "id": "H6",
+          "text": "Nothing is \"to be confirmed\", and every brief fact appears exactly",
+          "check": [
+            "nothing-to-be-confirmed",
+            "facts-present-all"
+          ],
+          "met": true,
+          "evidence": "nothing to be confirmed; all 1 brief fact(s) appear"
+        }
+      ],
+      "read": "HLD v11: Purpose and scope (~230 words), Pages (~250), Components (~520 with C1-C9 and R1-R13 traceability), Data flow (~230), Hosting and deployment (~230), Risks (~420), Assumptions to confirm (7 lines). Also the H1-H6 code evidence, the brief and the Requester's answers."
+    }
+  ],
+  "sections": {
+    "W-9": {
+      "owner": "W-9",
+      "head": "",
+      "body": "## Purpose and scope\n\nThis high-level design describes the one-page website for Brew Lab, a small specialty coffee shop at 12, 100 Feet Road, Indiranagar, Bengaluru 560038. The page is for coffee lovers and office staff near the shop in Indiranagar, Bengaluru. Today these customers cannot see the menu or order ahead. The page fixes this by showing the menu with prices and letting customers pre-order for pickup at the shop.\n\n**In scope** (each item is traced to the PRD):\n- The shop name Brew Lab and the address shown as text (R1, R2).\n- A menu of seven items with prices in rupees, each item shown next to its price (R4, R5).\n- Opening hours of 7 am to 10 pm, every day (R6).\n- A pre-order form with the fields name, phone, items and pickup time, which sends the order to hello@brewlab.example (R7, R8).\n- A statement that customers collect the order at the shop (R9).\n- A layout that works on phones (R11).\n- A website built as plain HTML, CSS and JavaScript in one file (R13).\n\n**Out of scope:**\n- An embedded map. The address is text only (R3).\n- Online payment. The pre-order form has no payment fields (R10).\n- A phone number for the shop. The form field called phone is for the customer's own number only (R12).\n\n**Success measure:** the page is working if it gets 20 pre-orders a week within the first month.",
+      "workflow": "Write HLD Purpose and scope section"
+    },
+    "W-10": {
+      "owner": "W-10",
+      "head": "",
+      "body": "## Pages\n\nBrew Lab has one page, built as a single file of plain HTML, CSS and JavaScript (R13). It is laid out so that coffee lovers and office staff nearby can read everything and place a pre-order on a phone screen (R11). A visitor sees these parts, from top to bottom:\n\n- **Shop name and address:** the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038, both as plain text (R1, R2). There is no embedded map (R3).\n- **Menu:** seven items, each shown next to its price in rupees, so a customer can see the cost without ordering (R4, R5):\n  - Filter coffee 90\n  - Cappuccino 160\n  - Latte 180\n  - Cold brew 200\n  - Masala chai 80\n  - Almond croissant 140\n  - Banana bread slice 120\n- **Opening hours:** 7 am to 10 pm, every day (R6).\n- **Pre-order form:** the fields name, phone, items and pickup time (R7). Submitting it sends the order to hello@brewlab.example (R8). The phone field is for the customer's own number only, and the form has no payment fields (R10, R12).\n- **Pickup note:** a statement that customers collect the order at the shop, and that no online payment is taken (R9, R10).\n\nThe page does not show a phone number for the shop (R12).",
+      "workflow": "Write HLD Pages section"
+    },
+    "W-11": {
+      "owner": "W-17",
+      "head": "",
+      "body": "## Components\n\nThe Brew Lab page is made of the components below. Each has one responsibility, and together they cover every requirement in the PRD, R1 to R13.\n\n- **C1** Shop name: shows the shop name Brew Lab as text at the top of the page. Covers R1.\n- **C2** Address block: shows the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text only, with no embedded map and no phone number for the shop. Covers R2, R3, R12.\n- **C3** Menu list: shows the seven items, each next to its price in rupees, so a customer can see the cost without ordering: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120. Covers R4, R5.\n- **C4** Opening hours: shows the hours as 7 am to 10 pm, every day. Covers R6.\n- **C5** Pre-order form: collects the fields name, phone, items and pickup time. It has no payment fields, and the phone field is for the customer's own number only. Covers R7, R10, R12.\n- **C6** Order sender: when the customer submits the pre-order form, sends the order to hello@brewlab.example. Covers R8.\n- **C7** Pickup note: states that customers collect the order at the shop and that no online payment is taken. Covers R9, R10.\n- **C8** Phone layout: makes the layout fit a phone screen, so a customer, including office staff nearby, can read the menu, the opening hours and the address, and fill in and submit the pre-order form. Covers R11.\n- **C9** Plain HTML, CSS and JavaScript in one file: delivers the whole page as plain HTML, CSS and JavaScript in one file. Covers R13.\n\n### Requirement traceability\n\nEach PRD requirement and the component that covers it:\n\n- **R1** The page shows the shop name Brew Lab as text: covered by the Shop name component.\n- **R2** The page shows the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text: covered by the Address block.\n- **R3** The page has no embedded map: covered by the Address block.\n- **R4** The menu has seven items with prices in rupees (Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120): covered by the Menu list.\n- **R5** Each menu item is shown next to its price: covered by the Menu list.\n- **R6** The opening hours are 7 am to 10 pm, every day: covered by the Opening hours component.\n- **R7** The pre-order form has the fields name, phone, items and pickup time: covered by the Pre-order form.\n- **R8** A submitted order is sent to hello@brewlab.example: covered by the Order sender.\n- **R9** The page states that customers collect the order at the shop: covered by the Pickup note.\n- **R10** The page takes no online payment and the form has no payment fields: covered by the Pre-order form and the Pickup note.\n- **R11** The page works on phones: covered by the Phone layout.\n- **R12** The page shows no phone number for the shop, and the phone field is for the customer's own number only: covered by the Address block and the Pre-order form.\n- **R13** The website is plain HTML, CSS and JavaScript in one file: covered by the Plain HTML, CSS and JavaScript in one file component (C9).",
+      "workflow": "Fix HLD Components C9 name"
+    },
+    "W-12": {
+      "owner": "W-12",
+      "head": "",
+      "body": "## Data flow\n\nThe page has one form and one integration. The form is the pre-order form (R7). The integration is the delivery of a submitted order to the email address hello@brewlab.example (R8). The page uses no map and no payment service (R3, R10).\n\n**How an order moves:**\n- The customer reads the menu and opens the pre-order form on a phone or any other screen (R11).\n- The customer fills in four fields: name, phone, items and pickup time (R7). The phone field holds the customer's own number only (R12).\n- The customer submits the form.\n- The page sends the order, made up of those four fields, to hello@brewlab.example (R8).\n- The customer collects the order at the shop at the pickup time given (R9).\n\n**What is not sent or stored:**\n- No payment data. The form has no payment fields and no online payment is taken (R10).\n- No phone number for the shop. The page does not show one (R12).\n\nAssumption: the page's JavaScript hands the order to a way of sending email to hello@brewlab.example. The brief names the destination but not the sending method, so the method is left to the build.\n\nAssumption: the page keeps no copy of the order. The order exists only in the email that reaches hello@brewlab.example.",
+      "workflow": "Write HLD Data flow section"
+    },
+    "W-13": {
+      "owner": "W-18",
+      "head": "",
+      "body": "## Hosting and deployment\n\nThe Brew Lab website is one file of plain HTML, CSS and JavaScript (R13). It has no build step, so the file that is written is the file that ships. It is served as a static page: the visitor's phone or browser receives the file and runs it directly (R11).\n\n**Where the site lives:** on a web host that serves static files. The page needs no server code of its own. Orders leave the page as an email to hello@brewlab.example (R8), and the page takes no online payment and embeds no map, so it depends on no payment service and no map service (R3, R10).\n\n**How it ships:**\n- The single file is placed on the host as the page that visitors open.\n- Nothing else has to be installed, compiled or bundled before it goes live.\n- To change the menu, the prices or the opening hours, the file is edited and put on the host again.\n\nAssumption: the brief does not name a hosting provider or a web address, so the static host and the address of the site are to be chosen by the shop owner.\n\nAssumption: the page is published by copying the single file to the chosen host, and a change goes live when the new copy replaces the old one.",
+      "workflow": "Fix HLD Hosting assumption wording"
+    },
+    "W-14": {
+      "owner": "W-16",
+      "head": "",
+      "body": "## Risks\n\nEach risk below is tied to the PRD requirement it threatens and has a mitigation. The page is judged successful if it gets 20 pre-orders a week within the first month.\n\n- **Orders do not reach hello@brewlab.example (R8).** If the order email is not delivered, the customer expects a drink that the shop never heard about, and the goal of ordering ahead fails. Mitigation: before the page goes live, submit a test order with all four fields (name, phone, items and pickup time) and confirm it arrives at hello@brewlab.example.\n  - Assumption: someone at the shop reads the hello@brewlab.example inbox during opening hours (7 am to 10 pm, every day), so orders are seen before pickup time.\n\n- **The form is hard to use on a phone (R7, R11).** Coffee lovers and office staff nearby place orders on a phone screen, so a form that is cramped or hard to fill in loses orders. Mitigation: keep the form to the four required fields, and check the menu, the opening hours, the address and the form on a phone-sized screen before the page goes live.\n\n- **Too few pre-orders against the target.** The target is 20 pre-orders a week within the first month, and the page cannot meet it if customers do not find it or do not use the form. Mitigation: put the menu with prices, the opening hours, the address and the pre-order form on one page, so a visitor sees everything needed to order without leaving it.\n  - Assumption: the number of pre-orders is counted from the order emails received at hello@brewlab.example, because the brief names no other way to count.\n\n- **Customers expect online payment or a shop phone number (R10, R12).** Some customers may look for a way to pay on the page or a number to call, and the page offers neither. Mitigation: the page states that customers collect the order at the shop and that no online payment is taken (R9, R10), and the phone field is for the customer's own number only (R12).\n\n- **The menu or prices become out of date (R4, R5).** The seven items and their prices are written into the single file, so a change in the shop is not shown until the file is edited. Mitigation: the menu, prices and opening hours are changed by editing the file and putting it on the host again, as described in Hosting and deployment.\n\n- **The hosting provider and web address are not yet chosen.** Customers cannot use the page until it is live on a host. Mitigation: the single plain file (R13) can be placed on any host that serves static files, as described in Hosting and deployment.\n  - Assumption: the host and the web address are to be chosen by the shop owner.",
+      "workflow": "Fix HLD Risks section wording"
+    }
+  }
+}

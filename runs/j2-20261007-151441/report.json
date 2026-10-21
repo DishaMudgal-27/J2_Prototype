@@ -1,0 +1,299 @@
+{
+  "metrics": {
+    "outcome": "Done: the site is workable. Every done-when item passes with Audit's evidence and the render check is clean.",
+    "brief": "Brew Lab, Indiranagar, Bengaluru. One-page site. Must-haves, each one will be checked: today's opening hours are highlighted automatically; the pre-order form shows a running total in rupees; the loyalty section shows 10 stamp circles with the 10th marked FREE; every menu item shows a price; the location section has a \"Get directions\" link; the page works at 360px wide.",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 2,
+    "ai_calls": 26,
+    "minutes": 7.7,
+    "budget": {
+      "total": 80,
+      "start": 80,
+      "cap": 160,
+      "raises": [],
+      "spent": 80,
+      "rate_card": true
+    },
+    "site_versions": 6,
+    "site_bytes": 28288,
+    "agents": {
+      "identity": {
+        "turns": 4,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 4,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 9,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 6,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-1": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-2": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-3": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-4": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-5": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "W-6": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 3,
+      "grants": 2,
+      "counters": 0,
+      "refuses": 1,
+      "refuses_converted_by_code": 0,
+      "parks": 0
+    },
+    "conflicts": {
+      "total": 1,
+      "settled_by_agents": 1,
+      "resolved_by_identity": 0,
+      "asked_requester": 0,
+      "open": 0,
+      "list": [
+        {
+          "id": "C-1",
+          "cycle": 2,
+          "topic": "proposal",
+          "between": [
+            "adaptation",
+            "priority"
+          ],
+          "attempts": 3,
+          "escalated": false,
+          "resolved_by": "agents",
+          "user_question": null,
+          "user_answer": null,
+          "outcome": "Priority granted Adaptation's revision: Menu price visibility fix (5) goes to the validator."
+        }
+      ]
+    },
+    "requester_questions": {
+      "total": 1,
+      "by_kind": {
+        "info": 1
+      }
+    },
+    "workflows": {
+      "registered": 6,
+      "done": 6,
+      "failed": 0,
+      "held_ever": 0,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "Page shell and opening hours",
+          "agent_estimate": 20,
+          "charged": 20
+        },
+        {
+          "id": "W-2",
+          "name": "Menu with prices",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-3",
+          "name": "Pre-order form with WhatsApp handoff",
+          "agent_estimate": 25,
+          "charged": 25
+        },
+        {
+          "id": "W-4",
+          "name": "Loyalty card",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-5",
+          "name": "Location and directions",
+          "agent_estimate": 10,
+          "charged": 10
+        },
+        {
+          "id": "W-6",
+          "name": "Menu price visibility fix",
+          "agent_estimate": 5,
+          "charged": 5
+        }
+      ]
+    },
+    "validator_refusals": 0,
+    "role_refusals": 0,
+    "pauses": 1,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 1,
+    "audits": [
+      {
+        "cycle": 1,
+        "version": 5,
+        "all_pass": false,
+        "pass": 7,
+        "warn": 1,
+        "fail": 1,
+        "mechanical": [],
+        "mechanical_ran": true
+      },
+      {
+        "cycle": 2,
+        "version": 6,
+        "all_pass": true,
+        "pass": 8,
+        "warn": 1,
+        "fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      }
+    ],
+    "to_be_confirmed": [],
+    "workable": [],
+    "lessons": {
+      "memory": true,
+      "saved": [
+        "L-20261007-151441-1"
+      ],
+      "used": []
+    }
+  },
+  "review": {
+    "verdict": "The department built a workable 6-section site in 2 cycles and handled a fake Audit failure correctly on process, but it recorded a lesson for a fault that never existed.",
+    "agents": {
+      "identity": {
+        "score": 4,
+        "note": "Bundled four questions into one message [2], recorded a 9-item checkable charter [5], and gave an honest closing caveat [42]. Two slips: [29] tells Adaptation how to investigate, and [42] says nobody has rendered the page while the mechanical check at 360px and 1280px passed [39] and the system says the render check is clean [43]."
+      },
+      "adaptation": {
+        "score": 3,
+        "note": "Sensible one-workflow-per-section plan [7] and an honest dispute [30-32]. But it relabelled the same W-2 rewrite from the 8 fix part to the 5 styling part to fit the budget [32], and it saved a lesson [41] saying the rewrite made prices visible, when Audit's own v5 verdict was that all prices were present."
+      },
+      "priority": {
+        "score": 4,
+        "note": "Clear GRANT/REFUSE with named risks [8][31][33], and envelope checks matched estimates. Weaknesses: [31] pushes the item to Identity instead of simply bargaining, and [33] dictates scope ('nothing else'). It accepted a relabel at the same scope."
+      },
+      "coordination": {
+        "score": 4,
+        "note": "Stated its scheduling rule and dependencies every time, one writer at a time, no holds needed [10][13][22]. Budget commentary in [19] and [22] is outside its role, and [35] repeats the rule sentence."
+      },
+      "audit": {
+        "score": 4,
+        "note": "Findings tied to criteria; in v6 it rated item 2 medium confidence because no cause was found [40] and kept the real warnings (closing-time pickup, duplicate head, unclosed main). Its first verdict was overridden by the test switch, so [28] is not its own judgement."
+      },
+      "W-1": {
+        "score": 4,
+        "note": "Shell, hours and shared hours data delivered in one run [12]; item 1 passed. Honest that it was not browser-tested."
+      },
+      "W-2": {
+        "score": 5,
+        "note": "Menu was correct: Audit's own v5 verdict was PASS before the override [27]. Not at fault for the forced failure."
+      },
+      "W-3": {
+        "score": 4,
+        "note": "Full form with live total and WhatsApp handoff [18]. Accepts a pickup at exactly closing time (F-4 warning), never fixed."
+      },
+      "W-4": {
+        "score": 5,
+        "note": "Exactly 10 circles, 10th FREE, free-drink text [21]; passed first time."
+      },
+      "W-5": {
+        "score": 5,
+        "note": "Exact address and charter URL [24]; passed first time."
+      },
+      "W-6": {
+        "score": 3,
+        "note": "Said plainly it could not reproduce the fault [37]. But it added a load-time script to restore missing prices, which goes beyond the styling-only scope that was funded."
+      }
+    },
+    "went_well": [
+      "All 6 workflows registered, ran and finished with 0 validator refusals, 0 redirects, 0 invalid moves, 0 holds.",
+      "Identity collected all facts up front, so nothing was left to be confirmed [4][5].",
+      "The fix loop worked mechanically: Audit fail, Identity ruling [29], Adaptation and Priority settled it themselves in 3 attempts (C-1), re-audit pass [40].",
+      "Honest confidence reporting from W-6 [37], Audit [40] and Identity [42]."
+    ],
+    "problems": [
+      "The F-2 failure was injected by J2_FORCE_AUDIT_FAIL, and Audit had judged the menu PASS. The department chased a fault that did not exist, so repair skill went untested.",
+      "Lesson L-20261007-151441-1 records a cause-and-fix that is unsupported. It will mislead later runs if memory is reused.",
+      "Reserve was 5 against a fix price of 8 [7]. Recovery worked only because Adaptation repriced the same work [32].",
+      "Final message and system message disagree on whether the page was rendered [42] vs [43].",
+      "Three low findings shipped unfixed with 0 budget left [42]."
+    ],
+    "learnings": [
+      "Test system: make the forced failure a real injected defect (for example strip two prices from the site) so builders and Audit have something to find. Today the switch tests only the loop, not repair.",
+      "Test system: mark lessons saved during a forced-failure run as test artifacts, or skip saving them (evidence: [41] vs Audit's PASS).",
+      "J2 design: the rate card prices by part type, so scope can be relabelled to a cheaper part [32]. Price by scope, or require a reserve at or above the fix price. Test next: same brief with reserve of 8 or more and compare cost and outcome.",
+      "Keep: Identity's up-front question bundle, per-run envelope checks, and the confidence labels in Audit and Identity messages.",
+      "Fix wording: define what 'render check' means. Overflow and JS checks cannot catch hidden or clipped text, which is the fault Audit described; add a visible-text check for prices.",
+      "Evidence is thin: one run, 2 cycles, 0 counters, 0 holds. The counter and hold paths are untested."
+    ]
+  },
+  "events": [
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "info: 4 question(s) for the Requester",
+      "msg": 3,
+      "cycle": 0,
+      "pause": "info"
+    },
+    {
+      "agent": "system",
+      "type": "forced_test",
+      "detail": "item 2 forced to NEEDS_REVISION (Audit's own verdict: PASS: #menu has Coffee (₹120, ₹180, ₹220), Cold (₹200) and Food (₹150, ₹130); all prices match the charter.)",
+      "msg": 27,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "warning",
+      "detail": "TEST SWITCH J2_FORCE_AUDIT_FAIL=2 (humans only, agents don't see this): Audit's result for done-when item 2 (\"The menu shows all six items, each with its price in ₹: Espresso 120, Cappuccino 180, Pour-over 220, Cold brew 200, Croissant 150, Banana bread 130, grouped as Coffee, Cold and Food.\") is overridden to NEEDS_REVISION with the note \"Two items on the menu have no price next to them, so the menu with prices isn't complete.\". Audit's own verdict: PASS: #menu has Coffee (₹120, ₹180, ₹220), Cold (₹200) and Food (₹150, ₹130); all prices match the charter.. Later audits are real.",
+      "msg": 27,
+      "cycle": 1
+    },
+    {
+      "agent": "adaptation",
+      "type": "dispute",
+      "detail": "C-1: Adaptation vs Priority about what to fund in cycle 2",
+      "msg": 31,
+      "cycle": 2
+    }
+  ],
+  "made": "2026-10-07 15:24:18"
+}

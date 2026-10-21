@@ -1,0 +1,331 @@
+{
+  "run": "20261008-190919",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "force_audit_fail": null,
+  "test_lessons": false,
+  "model": "sonnet",
+  "mock": false,
+  "brief": "make a website for my friend's south indian restaurant called Kaveri Kitchen in Pune. people should be able to see the menu with prices, filter it by veg and non-veg, see today's specials, book a table on whatsapp, find the address and opening hours, see photos of the dishes, and read a few customer reviews. it should feel warm and homely and work well on phones",
+  "change_requests": [],
+  "status": "done_with_open_items",
+  "outcome": "Done with open items: shipped as is on the Requester's decision (Cycle 1 used 30 turns (the per-cycle cap) without finishing.). Still not workable: .",
+  "budget": {
+    "start": 200,
+    "granted": 200,
+    "used": 105,
+    "raises": []
+  },
+  "ai_calls": 25,
+  "cycles": 1,
+  "questions_to_user": [
+    {
+      "kind": "info",
+      "asked": [
+        "Please send these: What are the WhatsApp number for table bookings, the full address in Pune, and the opening hours (including any closed days); Can you send the menu: dish names, prices, and whether each is veg or non-veg; Do you have real photos of the dishes and a few real customer reviews (reviewer name and what they said); What are today's specials, and how often do they change."
+      ],
+      "answer": "WhatsApp for bookings: +91 00000 33333. Restaurant phone: +91 00000 44444. Address: 7 Karve Road, Kothrud, Pune 411038. Hours: 8am to 10:30pm every day, kitchen closes 10pm. Menu with prices: Starters: Medu vada 120, Veg cutlet 140, Chicken 65 260. Mains: Masala dosa 160, Mysore dosa 180, Idli sambar 110, Veg thali 280, Chicken chettinad 340, Fish curry meal 360. Desserts: Payasam 100, Filter coffee 60. Veg items: all except Chicken 65, Chicken chettinad, Fish curry meal. Today's specials: Mysore dosa and Fish curry meal. Reviews: \"Best dosa in Kothrud\" - Anita R.; \"Feels like home\" - Vikram S.; \"Great filter coffee\" - Neha P. Booking: tables for 1 to 8 people, book by WhatsApp with name, date, time and number of people. Nothing is on offer or discounted right now. Pictures: no photos yet, show empty photo spots."
+    },
+    {
+      "kind": "limit",
+      "asked": [
+        "The team paused after a round of work. Keep going or finish as it is?"
+      ],
+      "answer": "Finish as it is",
+      "decision": "ship"
+    }
+  ],
+  "conflicts": [],
+  "validator_rejections": [],
+  "holds": [],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 9,
+      "all_pass": true,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-1",
+          "item": "R-1",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-2",
+          "item": "R-2",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-3",
+          "item": "R-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-4",
+          "item": "R-4",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-5",
+          "item": "R-5",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-6",
+          "item": "R-6",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-7",
+          "item": "R-7",
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-11",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    }
+  ],
+  "site_versions": 9,
+  "workable": [],
+  "to_be_confirmed": [],
+  "dropped_by_requester": [],
+  "workflow_agents": [
+    {
+      "id": "W-1",
+      "agent": "W-1 Builder",
+      "section": "W-1",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-2",
+      "agent": "W-2 Builder",
+      "section": "W-2",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-3",
+      "agent": "W-3 Builder",
+      "section": "W-3",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-4",
+      "agent": "W-4 Builder",
+      "section": "W-4",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-5",
+      "agent": "W-5 Builder",
+      "section": "W-5",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-6",
+      "agent": "W-6 Builder",
+      "section": "W-6",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-7",
+      "agent": "W-7 Builder",
+      "section": "W-7",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-8",
+      "agent": "W-8 Builder",
+      "section": "W-8",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-9",
+      "agent": "W-9 Builder",
+      "section": "W-9",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    }
+  ],
+  "limits_hit": [
+    "Cycle 1 used 30 turns (the per-cycle cap) without finishing."
+  ],
+  "lessons": {
+    "memory": false,
+    "saved": [],
+    "used": []
+  },
+  "playbooks": {
+    "saved": null,
+    "used": []
+  },
+  "business_type": "restaurant",
+  "style_guide": true,
+  "rubric": [
+    {
+      "id": "R-1",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-2",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-3",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-4",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-5",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-6",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-7",
+      "pass": true,
+      "verdict": "PASS"
+    }
+  ],
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The menu lists exactly these 11 dishes with prices in rupees: Starters: Medu vada 120, Veg cutlet 140, Chicken 65 260. Mains: Masala dosa 160, Mysore dosa 180, Idli sambar 110, Veg thali 280, Chicken chettinad 340, Fish curry meal 360. Desserts: Payasam 100, Filter coffee 60",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "Each dish is marked veg or non-veg (non-veg: Chicken 65, Chicken chettinad, Fish curry meal; all others veg), and All, Veg and Non-veg filter buttons show only the matching dishes",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "A Today's specials section shows Mysore dosa and Fish curry meal",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "A Book a table button opens WhatsApp (wa.me link) for +91 00000 33333 with a prefilled message asking for name, date, time and number of people, and the page says tables are for 1 to 8 people",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "The page shows the address 7 Karve Road, Kothrud, Pune 411038, the hours 8am to 10:30pm every day with kitchen closing at 10pm, and the restaurant phone +91 00000 44444 as a tap-to-call link",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "A dish photo section shows empty labelled photo spots for dishes, with no fake or stock photos",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "A reviews section shows exactly these three: \"Best dosa in Kothrud\" by Anita R., \"Feels like home\" by Vikram S., \"Great filter coffee\" by Neha P.",
+      "pass": true
+    },
+    {
+      "item": 8,
+      "criterion": "The site name Kaveri Kitchen appears in the page title and header, and a navigation lets visitors jump to menu, specials, booking, photos, reviews and contact",
+      "pass": true
+    },
+    {
+      "item": 9,
+      "criterion": "The page has a viewport meta tag and layout rules for narrow screens, with no horizontal overflow at 360px and 1280px",
+      "pass": true
+    },
+    {
+      "item": 10,
+      "criterion": "The file contains no offers or discounts and no placeholder text such as lorem ipsum or TBD",
+      "pass": true
+    }
+  ],
+  "route_check_violations": []
+}

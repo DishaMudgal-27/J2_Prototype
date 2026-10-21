@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tap Rush</title>
+<!-- J2:style head start (owner W-1) -->
+<style>:root{--j2-primary:#ffd23f;--j2-secondary:#3ddcff;--j2-accent:#ff4d8d;--j2-background:#0b0f1a;--j2-surface:#151b2e;--j2-text:#f5f7ff;--j2-muted:#b4bedc;--j2-font-heading:system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;--j2-font-body:system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:12px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#ffd23f;color:#0b0f1a;border:0;font-weight:700;font-size:1.5rem;min-height:56px;min-width:44px;padding:12px 40px;cursor:pointer}.j2-btn-secondary{display:inline-block;background:transparent;color:#3ddcff;border:2px solid #3ddcff;font-weight:700;font-size:1.25rem;min-height:48px;min-width:44px;padding:10px 28px;cursor:pointer}.j2-card{background:#151b2e;color:#f5f7ff;border:1px solid #26304f;padding:24px}</style>
+<!-- J2:style head end -->
+<!-- J2:W-4 head start (owner W-4) -->
+<style>body{padding-top:57px}</style>
+<!-- J2:W-4 head end -->
+<!-- J2:W-5 head start (owner W-5) -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html {
+    max-width: 100%;
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    background: var(--j2-background);
+    color-scheme: dark;
+  }
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+    background: var(--j2-background);
+    color: var(--j2-text);
+    font-family: var(--j2-font-body);
+    font-size: 1.25rem;
+    line-height: 1.4;
+  }
+  img, svg, video, canvas { max-width: 100%; height: auto; }
+  [hidden] { display: none !important; }
+  .screen { max-width: 100%; }
+  .j2-btn, .j2-btn-secondary {
+    font-family: var(--j2-font-body);
+    max-width: 100%;
+    border-radius: var(--j2-radius);
+    touch-action: manipulation;
+  }
+</style>
+<!-- J2:W-5 head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<section id="start" class="screen start-screen">
+  <style>
+    #start.start-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 100%;
+      min-height: 70vh;
+      padding: 32px 16px;
+      text-align: center;
+      color: var(--j2-text, #f5f7ff);
+    }
+    #start.start-screen[hidden] { display: none; }
+    #start .game-title {
+      margin: 0;
+      font-size: clamp(2.75rem, 12vw, 5rem);
+      line-height: 1.1;
+      font-weight: 800;
+      color: var(--j2-primary, #ffd23f);
+      overflow-wrap: anywhere;
+    }
+    #start .instructions {
+      margin: 0;
+      max-width: 28ch;
+      font-size: clamp(1.25rem, 5vw, 1.75rem);
+      line-height: 1.4;
+      color: var(--j2-text, #f5f7ff);
+    }
+    #start .start-btn {
+      min-height: 56px;
+      min-width: 160px;
+      max-width: 100%;
+      font-size: 1.5rem;
+    }
+  </style>
+  <h1 class="game-title">Tap Rush</h1>
+  <p class="instructions">Tap each circle before it vanishes in 1 second. A round lasts 30 seconds.</p>
+  <button id="start-btn" class="j2-btn start-btn" type="button">Start</button>
+</section>
+<!-- J2:W-1 end -->
+<!-- J2:W-2 start (owner W-6) -->
+<section id="play" class="screen play-screen" hidden>
+  <style>
+    #play.play-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 100%;
+      padding: 16px;
+      color: var(--j2-text, #f5f7ff);
+    }
+    #play.play-screen[hidden] { display: none; }
+    #play #hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 720px;
+      font-family: var(--j2-font-heading);
+      font-size: clamp(1.5rem, 7vw, 2.25rem);
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    #play .hud-item { white-space: nowrap; }
+    #play #score { color: var(--j2-primary, #ffd23f); }
+    #play #timer { color: var(--j2-secondary, #3ddcff); }
+    #play .play-hint {
+      margin: 0;
+      font-size: 1.125rem;
+      color: var(--j2-muted, #b4bedc);
+      text-align: center;
+    }
+    #play .play-area {
+      position: relative;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 720px;
+      height: 60vh;
+      height: min(60dvh, 480px);
+      overflow: hidden;
+      background: var(--j2-surface, #151b2e);
+      border: 1px solid #26304f;
+      border-radius: var(--j2-radius, 12px);
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    #play .circle {
+      position: absolute;
+      box-sizing: border-box;
+      width: 64px;
+      height: 64px;
+      min-width: 44px;
+      min-height: 44px;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+  <div id="hud">
+    <span id="score" class="hud-item"></span>
+    <span id="timer" class="hud-item"></span>
+  </div>
+  <p class="play-hint">1 point per circle</p>
+  <div id="play-area" class="play-area"></div>
+  <script>
+    (function () {
+      // round 30 seconds; circle lifetime 1 second; 1 point per circle
+      var ROUND_MS = 30 * 1000;
+      var CIRCLE_LIFE_MS = 1000;
+      var POINTS_PER_CIRCLE = 1;
+      // Minimal build choices, not Requester decisions: circle size and spawn gap.
+      var CIRCLE_SIZE = 64;
+      var SPAWN_EVERY_MS = 700;
+      var COLOURS = ['var(--j2-primary)', 'var(--j2-secondary)', 'var(--j2-accent)'];
+      // Count of circles tapped before a round begins (empty count).
+      var NONE = Number(false);
+
+      var startScreen = document.getElementById('start');
+      var playScreen = document.getElementById('play');
+      var area = document.getElementById('play-area');
+      var scoreEl = document.getElementById('score');
+      var timerEl = document.getElementById('timer');
+      var startBtn = document.getElementById('start-btn');
+
+      var score = NONE;
+      var running = false;
+      var endAt = NONE;
+      var tickId = null;
+      var spawnId = null;
+      var lives = [];
+
+      function showScore() { scoreEl.textContent = 'Score: ' + score; }
+      function showTime(ms) {
+        timerEl.textContent = 'Time: ' + Math.max(NONE, Math.ceil(ms / 1000));
+      }
+
+      function removeCircle(c) {
+        var i = lives.indexOf(c);
+        if (i !== -1) { clearTimeout(c._life); lives.splice(i, 1); }
+        if (c.parentNode) { c.parentNode.removeChild(c); }
+      }
+
+      function clearCircles() {
+        while (lives.length) { removeCircle(lives[NONE]); }
+        area.innerHTML = '';
+      }
+
+      function spawn() {
+        if (!running) { return; }
+        var w = area.clientWidth;
+        var h = area.clientHeight;
+        var c = document.createElement('button');
+        c.type = 'button';
+        c.className = 'circle';
+        c.tabIndex = -1;
+        c.setAttribute('aria-label', 'Circle');
+        c.style.left = Math.floor(Math.random() * Math.max(1, w - CIRCLE_SIZE)) + 'px';
+        c.style.top = Math.floor(Math.random() * Math.max(1, h - CIRCLE_SIZE)) + 'px';
+        c.style.background = COLOURS[Math.floor(Math.random() * COLOURS.length)];
+        c.addEventListener('pointerdown', function (e) {
+          e.preventDefault();
+          if (!running || lives.indexOf(c) === -1) { return; }
+          score += POINTS_PER_CIRCLE;
+          showScore();
+          removeCircle(c);
+        });
+        area.appendChild(c);
+        lives.push(c);
+        c._life = setTimeout(function () { removeCircle(c); }, CIRCLE_LIFE_MS);
+      }
+
+      function stopTimers() {
+        running = false;
+        clearInterval(tickId);
+        clearInterval(spawnId);
+        tickId = null;
+        spawnId = null;
+        clearCircles();
+      }
+
+      function tick() {
+        var left = endAt - performance.now();
+        if (left <= NONE) { finish(); return; }
+        showTime(left);
+      }
+
+      function finish() {
+        stopTimers();
+        showTime(NONE);
+        api.score = score;
+        playScreen.hidden = true;
+        var endScreen = document.getElementById('end');
+        if (endScreen) { endScreen.hidden = false; }
+        document.dispatchEvent(new CustomEvent('taprush:end', { detail: { score: score } }));
+      }
+
+      function start() {
+        stopTimers();
+        score = NONE;
+        showScore();
+        showTime(ROUND_MS);
+        if (startScreen) { startScreen.hidden = true; }
+        var endScreen = document.getElementById('end');
+        if (endScreen) { endScreen.hidden = true; }
+        playScreen.hidden = false;
+        running = true;
+        endAt = performance.now() + ROUND_MS;
+        tickId = setInterval(tick, 100);
+        spawn();
+        spawnId = setInterval(spawn, SPAWN_EVERY_MS);
+      }
+
+      function stop() { stopTimers(); }
+
+      // Hooks for the end screen (start a new round) and the nav (stop a round).
+      var api = window.TapRush = { start: start, stop: stop, score: NONE };
+
+      // Fill the HUD text from the script at load.
+      showScore();
+      showTime(ROUND_MS);
+
+      if (startBtn) { startBtn.addEventListener('click', start); }
+    })();
+  </script>
+</section>
+<!-- J2:W-2 end -->
+<!-- J2:W-3 start (owner W-3) -->
+<section id="end" class="screen end-screen end-idle" inert>
+  <style>
+    #end.end-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 100%;
+      min-height: 70vh;
+      padding: 32px 16px;
+      text-align: center;
+      color: var(--j2-text, #f5f7ff);
+    }
+    #end.end-screen[hidden] { display: none; }
+    /* Idle (before the first round ends): parked off-screen at full size, inert so it cannot be focused or tapped. */
+    #end.end-idle {
+      position: absolute;
+      top: 0;
+      left: -10000px;
+      width: 360px;
+      max-width: 100vw;
+    }
+    #end .end-title {
+      margin: 0;
+      font-family: var(--j2-font-heading);
+      font-size: clamp(2rem, 9vw, 3.5rem);
+      line-height: 1.1;
+      font-weight: 800;
+      color: var(--j2-text, #f5f7ff);
+      overflow-wrap: anywhere;
+    }
+    #end .end-card {
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      border-radius: var(--j2-radius, 12px);
+    }
+    #end .end-line {
+      margin: 0;
+      font-size: clamp(1.25rem, 5.5vw, 1.75rem);
+      line-height: 1.3;
+      font-weight: 700;
+      color: var(--j2-muted, #b4bedc);
+      overflow-wrap: anywhere;
+    }
+    #end #final-score {
+      display: inline-block;
+      font-size: clamp(2.5rem, 12vw, 4rem);
+      line-height: 1.1;
+      font-weight: 800;
+      color: var(--j2-primary, #ffd23f);
+    }
+    #end #best-score {
+      font-size: clamp(1.5rem, 7vw, 2.25rem);
+      font-weight: 800;
+      color: var(--j2-secondary, #3ddcff);
+    }
+    #end .again-btn {
+      min-height: 56px;
+      min-width: 160px;
+      max-width: 100%;
+      font-size: 1.5rem;
+    }
+  </style>
+  <h2 class="end-title">Results</h2>
+  <div class="j2-card end-card">
+    <p class="end-line">Final score: <span id="final-score">0</span></p>
+    <p class="end-line">Best score this session: <span id="best-score">0</span></p>
+  </div>
+  <button id="again-btn" class="j2-btn again-btn" type="button">Play again</button>
+  <script>
+    (function () {
+      // Best score lives in this variable only: no storage, resets on page reload.
+      var best = 0;
+
+      var endScreen = document.getElementById('end');
+      var finalEl = document.getElementById('final-score');
+      var bestEl = document.getElementById('best-score');
+      var againBtn = document.getElementById('again-btn');
+
+      function show(finalScore) {
+        if (finalScore > best) { best = finalScore; }
+        finalEl.textContent = String(finalScore);
+        bestEl.textContent = String(best);
+        endScreen.classList.remove('end-idle');
+        endScreen.removeAttribute('inert');
+        endScreen.hidden = false;
+      }
+
+      // W-2 fires this when the 30 second round ends.
+      document.addEventListener('taprush:end', function (e) {
+        var s = e && e.detail && typeof e.detail.score === 'number' ? e.detail.score : 0;
+        show(s);
+      });
+
+      againBtn.addEventListener('click', function () {
+        endScreen.hidden = true;
+        if (window.TapRush && typeof window.TapRush.start === 'function') {
+          window.TapRush.start();
+        }
+      });
+    })();
+  </script>
+</section>
+<!-- J2:W-3 end -->
+<!-- J2:W-4 start (owner W-4) -->
+<nav class="j2-nav" aria-label="Screens">
+  <style>
+    .j2-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      box-sizing: border-box;
+      max-width: 100%;
+      padding: 4px 8px;
+      background: var(--j2-surface, #151b2e);
+      border-bottom: 1px solid #26304f;
+    }
+    .j2-nav .nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      flex: 1 1 0;
+      min-width: 44px;
+      max-width: 200px;
+      min-height: 48px;
+      padding: 0 8px;
+      font-family: var(--j2-font-body);
+      font-size: 1.125rem;
+      font-weight: 700;
+      text-decoration: none;
+      color: var(--j2-secondary, #3ddcff);
+      border-radius: var(--j2-radius, 12px);
+    }
+    .j2-nav .nav-link[aria-current="true"] {
+      color: var(--j2-primary, #ffd23f);
+      text-decoration: underline;
+      text-underline-offset: 6px;
+    }
+  </style>
+  <a class="nav-link" href="#start" aria-current="true">Start</a>
+  <a class="nav-link" href="#play">Play</a>
+  <a class="nav-link" href="#end">Results</a>
+  <script>
+    (function () {
+      var ids = ['start', 'play', 'end'];
+      var links = document.querySelectorAll('.j2-nav .nav-link');
+
+      function showScreen(target) {
+        // Stop any round in progress before switching screens.
+        if (window.TapRush && typeof window.TapRush.stop === 'function') {
+          window.TapRush.stop();
+        }
+        for (var i = 0; i < ids.length; i++) {
+          var el = document.getElementById(ids[i]);
+          if (el) { el.hidden = (ids[i] !== target); }
+        }
+        if (target === 'end') {
+          // Make the end screen usable if no round has finished yet.
+          var endEl = document.getElementById('end');
+          if (endEl) {
+            endEl.classList.remove('end-idle');
+            endEl.removeAttribute('inert');
+          }
+        }
+        for (var j = 0; j < links.length; j++) {
+          var on = links[j].getAttribute('href') === '#' + target;
+          if (on) { links[j].setAttribute('aria-current', 'true'); }
+          else { links[j].removeAttribute('aria-current'); }
+        }
+        window.scrollTo(0, 0);
+      }
+
+      for (var k = 0; k < links.length; k++) {
+        links[k].addEventListener('click', function (e) {
+          var target = this.getAttribute('href').slice(1);
+          if (ids.indexOf(target) === -1) { return; }
+          e.preventDefault();
+          showScreen(target);
+        });
+      }
+
+      // Keep the highlighted link in step with the game's own screen changes.
+      function sync() {
+        for (var i = 0; i < ids.length; i++) {
+          var el = document.getElementById(ids[i]);
+          var visible = el && !el.hidden && !el.classList.contains('end-idle');
+          if (visible) {
+            for (var j = 0; j < links.length; j++) {
+              if (links[j].getAttribute('href') === '#' + ids[i]) {
+                links[j].setAttribute('aria-current', 'true');
+              } else {
+                links[j].removeAttribute('aria-current');
+              }
+            }
+            return;
+          }
+        }
+      }
+      document.addEventListener('click', function () { setTimeout(sync, 0); });
+      document.addEventListener('taprush:end', function () { setTimeout(sync, 0); });
+    })();
+  </script>
+</nav>
+<!-- J2:W-4 end -->
+<!-- J2:W-5 start (owner W-5) -->
+<style>
+  .j2-btn:focus-visible,
+  .j2-btn-secondary:focus-visible,
+  .j2-nav .nav-link:focus-visible {
+    outline: 3px solid var(--j2-text);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
+</style>
+<!-- J2:W-5 end -->
+</body>
+</html>

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "P1",
+    "text": "All six sections are present and not empty",
+    "check": "sections-present",
+    "met": true,
+    "evidence": "all 6 sections present, none empty"
+  },
+  {
+    "id": "P2",
+    "text": "Requirement ids are unique and sequential (R1, R2, ...)",
+    "check": "ids-sequential",
+    "met": true,
+    "evidence": "R1 to R11, unique and in order"
+  },
+  {
+    "id": "P3",
+    "text": "Every brief fact appears exactly",
+    "check": "facts-present-all",
+    "met": true,
+    "evidence": "all 17 brief fact(s) appear"
+  },
+  {
+    "id": "P4",
+    "text": "No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+    "check": "no-invented-facts",
+    "met": false,
+    "evidence": "not in the charter or the Requester's answers, and not marked Assumption: This",
+    "assumptions": [
+      "a pre-order is counted each time the pre-order form sends an order to hello@brewlab.example."
+    ]
+  },
+  {
+    "id": "P5",
+    "text": "Nothing is \"to be confirmed\"",
+    "check": "nothing-to-be-confirmed",
+    "met": true,
+    "evidence": "nothing to be confirmed"
+  },
+  {
+    "id": "P6",
+    "text": "Every goal has a matching success metric",
+    "check": "ids-covered",
+    "met": true,
+    "evidence": "each of G1, G2, G3 has a Success metrics entry"
+  },
+  {
+    "id": "P7",
+    "text": "Every user group named in the charter appears in Requirements or in a \"no actions in this version\" statement",
+    "check": "groups-covered",
+    "met": true,
+    "evidence": "each of the 2 user group(s) has a requirement or a \"no actions\" statement"
+  },
+  {
+    "id": "P8",
+    "text": "Each numeric success metric states its measurement window, or says \"measurement window not set\"",
+    "check": "metric-window",
+    "met": false,
+    "evidence": "no measurement window: G2 | The opening hours (Monday to Saturday 7:30 am to 9:00 p",
+    "severity": "warn"
+  }
+]

@@ -1,0 +1,53 @@
+{
+  "statement": "Build a single-file, mobile-friendly website for Thread & Loom, a handloom clothing boutique at 18 FC Road, Shivajinagar, Pune, that lets visitors browse and filter products, check the size guide and new arrivals, see the lookbook, shop details, return and exchange policy and reviews, and place orders on WhatsApp.",
+  "site_name": "Thread & Loom",
+  "audience": "Shoppers in Pune and nearby, mostly on phones, looking for handloom kurtas, sarees, cotton shirts and dupattas, who want to see what is available and order easily.",
+  "standards": [
+    "Earthy and elegant look: natural, muted colours and refined typography",
+    "Works well on phones first, also fine on desktop",
+    "Plain HTML, CSS and JavaScript in one file, no build step, CDN libraries allowed",
+    "Only facts supplied in the brief and answers appear on the site; nothing invented",
+    "No JavaScript errors, no horizontal overflow at 360px and 1280px, no broken in-page links, forms work"
+  ],
+  "rules": [
+    "Use only the products, prices, sizes, timings, address, phones, policies and reviews the Requester supplied",
+    "Product photo spots, lookbook photo spots stay as empty placeholders until real photos exist",
+    "Lookbook has exactly 3 outfit ideas, each built only from listed products",
+    "Orders go to WhatsApp +91 98220 33445 with product, size and quantity",
+    "Shop is closed on Monday and this is stated clearly",
+    "Prices shown in rupees"
+  ],
+  "done_when": [
+    "The site shows all 10 products with name, category, price and size range exactly as supplied: Indigo block-print kurta 1,499 (S-XXL), Mustard handloom kurta 1,699 (S-XL), White chikankari kurta 2,199 (XS-XL), Maheshwari cotton saree 3,499, Chanderi silk-cotton saree 4,999, Ikat handloom saree 3,999, Khadi cotton shirt 1,299 (S-XXL), Linen-blend shirt 1,599 (M-XXL), Ajrakh dupatta 899, Bandhani dupatta 1,099 (sarees and dupattas free size)",
+    "Visitors can browse by category (kurtas, sarees, shirts, dupattas) using controls in the page that show or hide products",
+    "Visitors can filter products by size and by price using controls in the page, and the product list updates",
+    "A size guide shows chest in inches: XS 32, S 34, M 36, L 38, XL 40, XXL 42",
+    "A new arrivals section lists White chikankari kurta, Ikat handloom saree and Linen-blend shirt",
+    "Each product has an order button that opens a WhatsApp link to 918822033445 (wa.me) with a message prefilled with product name, size and quantity",
+    "A lookbook section shows exactly 3 styled outfit ideas, each made only from listed products, with empty photo spots",
+    "Products have empty photo spots, with no stand-in or invented pictures",
+    "A store info section shows address 18 FC Road, Shivajinagar, Pune 411005, phone +91 20 4000 7788, Instagram @threadandloom.pune, and timings 11am to 9pm Tuesday to Sunday, closed Monday",
+    "A map or directions link to the shop address is present",
+    "An ordering and delivery section states WhatsApp ordering with product, size and quantity, pay on delivery or UPI, delivery across Pune in 2 days, Rs 79 charge, free above Rs 2,999",
+    "A return and exchange section states exchange within 7 days if unworn with tags, and no returns on sale items",
+    "A reviews section shows exactly these three reviews with names: \"Beautiful fabric, fits perfectly\" - Meera K.; \"Fast delivery and lovely packing\" - Arjun S.; \"My go-to for festive kurtas\" - Priya D.",
+    "The page has a navigation menu with in-page links to every section, and each link points to an existing section",
+    "The layout has a mobile-first responsive design with a viewport meta tag and no horizontal overflow at 360px and 1280px",
+    "The site is one HTML file with inline CSS and JavaScript, no build step, and the file contains no placeholder text such as lorem ipsum or TBD"
+  ],
+  "business_type": "clothing boutique",
+  "visitor_needs": [
+    "Browse products by category",
+    "Filter by size and price",
+    "See a size guide",
+    "Check new arrivals",
+    "Order on WhatsApp",
+    "See a lookbook of styled outfits",
+    "Find store timings and location",
+    "Read the return and exchange policy",
+    "Read customer reviews"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [],
+  "confirmed_facts": []
+}

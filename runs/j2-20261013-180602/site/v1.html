@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spark 2026</title>
+<!-- J2:style head start (owner W-1) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap"><style>:root{--j2-primary:#FFC83D;--j2-secondary:#7C5CFF;--j2-accent:#22D3EE;--j2-background:#0F0A2A;--j2-surface:#1B1445;--j2-text:#F5F3FF;--j2-muted:#B8B3D9;--j2-font-heading:'Space Grotesk', 'Segoe UI', system-ui, sans-serif;--j2-font-body:'Inter', 'Segoe UI', system-ui, sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:12px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#FFC83D;color:#0F0A2A;border:2px solid #FFC83D;min-height:48px;padding:12px 20px;font-weight:700;border-radius:12px;cursor:pointer}.j2-btn-secondary{display:inline-block;background:transparent;color:#F5F3FF;border:2px solid #22D3EE;min-height:48px;padding:12px 20px;font-weight:600;border-radius:12px;cursor:pointer}.j2-card{background:#1B1445;color:#F5F3FF;border:1px solid #3A2F7A;border-radius:12px;padding:16px}</style>
+<!-- J2:style head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<section id="schedule" class="j2-schedule" aria-labelledby="schedule-title">
+  <style>
+    #schedule { padding: 64px 16px; background: var(--j2-background, #0F0A2A); color: var(--j2-text, #F5F3FF); box-sizing: border-box; overflow-x: hidden; }
+    #schedule *, #schedule *::before, #schedule *::after { box-sizing: border-box; }
+    #schedule .j2-sch-wrap { max-width: 880px; margin: 0 auto; }
+    #schedule .j2-sch-title { font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif); font-size: clamp(1.75rem, 6vw, 2.5rem); line-height: 1.15; margin: 0 0 8px; }
+    #schedule .j2-sch-intro { color: var(--j2-muted, #B8B3D9); margin: 0 0 24px; font-size: 1rem; line-height: 1.5; }
+    #schedule .j2-sch-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 24px; }
+    #schedule .j2-daytab { min-height: 56px; min-width: 44px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; line-height: 1.2; font-family: var(--j2-font-body, 'Inter', system-ui, sans-serif); font-size: 1rem; background: transparent; color: var(--j2-text, #F5F3FF); border: 2px solid var(--j2-accent, #22D3EE); }
+    #schedule .j2-daytab .j2-tab-date { font-size: 0.8rem; font-weight: 500; opacity: 0.9; }
+    #schedule .j2-daytab[aria-selected="true"] { background: var(--j2-primary, #FFC83D); color: #0F0A2A; border-color: var(--j2-primary, #FFC83D); }
+    #schedule .j2-daytab:focus-visible { outline: 3px solid var(--j2-text, #F5F3FF); outline-offset: 2px; }
+    #schedule .j2-day[hidden] { display: none; }
+    #schedule .j2-slots { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+    #schedule .j2-slot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; background: var(--j2-surface, #1B1445); border: 1px solid #3A2F7A; border-left: 6px solid var(--j2-accent, #22D3EE); border-radius: var(--j2-radius, 12px); padding: 16px; min-width: 0; }
+    #schedule .j2-slot-time { font-family: var(--j2-font-heading, 'Space Grotesk', system-ui, sans-serif); font-weight: 700; color: var(--j2-primary, #FFC83D); font-size: 1.05rem; flex: 0 0 auto; }
+    #schedule .j2-slot-name { font-weight: 600; font-size: 1.05rem; flex: 1 1 160px; min-width: 0; overflow-wrap: anywhere; }
+    @media (min-width: 768px) {
+      #schedule { padding: 80px 24px; }
+      #schedule .j2-daytab { flex-direction: row; gap: 8px; }
+      #schedule .j2-slot { padding: 20px 24px; }
+      #schedule .j2-slot-time { flex-basis: 150px; }
+    }
+  </style>
+
+  <div class="j2-sch-wrap">
+    <h2 id="schedule-title" class="j2-sch-title">Schedule</h2>
+    <p class="j2-sch-intro">Pick a day to see what is on and when.</p>
+
+    <div class="j2-sch-tabs" role="tablist" aria-label="Festival days">
+      <button type="button" class="j2-btn j2-daytab" role="tab" id="tab-day1" aria-controls="panel-day1" aria-selected="true" data-day="1">Day 1<span class="j2-tab-date">14 Feb</span></button>
+      <button type="button" class="j2-btn j2-daytab" role="tab" id="tab-day2" aria-controls="panel-day2" aria-selected="false" tabindex="-1" data-day="2">Day 2<span class="j2-tab-date">15 Feb</span></button>
+      <button type="button" class="j2-btn j2-daytab" role="tab" id="tab-day3" aria-controls="panel-day3" aria-selected="false" tabindex="-1" data-day="3">Day 3<span class="j2-tab-date">16 Feb</span></button>
+    </div>
+
+    <div class="j2-day" id="panel-day1" role="tabpanel" aria-labelledby="tab-day1">
+      <ul class="j2-slots">
+        <li class="j2-slot"><span class="j2-slot-time">10am-1pm</span><span class="j2-slot-name">Code Sprint</span></li>
+        <li class="j2-slot"><span class="j2-slot-time">2pm-5pm</span><span class="j2-slot-name">Line Follower</span></li>
+        <li class="j2-slot"><span class="j2-slot-time">5:30pm-6:30pm</span><span class="j2-slot-name">AI in Daily Life</span></li>
+      </ul>
+    </div>
+
+    <div class="j2-day" id="panel-day2" role="tabpanel" aria-labelledby="tab-day2" hidden>
+      <ul class="j2-slots">
+        <li class="j2-slot"><span class="j2-slot-time">11am-1pm</span><span class="j2-slot-name">Bug Hunt</span></li>
+        <li class="j2-slot"><span class="j2-slot-time">2pm-4pm</span><span class="j2-slot-name">Poster Jam</span></li>
+      </ul>
+    </div>
+
+    <div class="j2-day" id="panel-day3" role="tabpanel" aria-labelledby="tab-day3" hidden>
+      <ul class="j2-slots">
+        <li class="j2-slot"><span class="j2-slot-time">10am-1pm</span><span class="j2-slot-name">Drone Dash</span></li>
+        <li class="j2-slot"><span class="j2-slot-time">2pm-5pm</span><span class="j2-slot-name">UI Duel</span></li>
+        <li class="j2-slot"><span class="j2-slot-time">5:30pm-6:30pm</span><span class="j2-slot-name">Startup Stories</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var root = document.getElementById('schedule');
+      if (!root) { return; }
+      var tabs = Array.prototype.slice.call(root.querySelectorAll('.j2-daytab'));
+      var panels = Array.prototype.slice.call(root.querySelectorAll('.j2-day'));
+      if (!tabs.length || tabs.length !== panels.length) { return; }
+
+      function show(index, focusTab) {
+        tabs.forEach(function (tab, i) {
+          var on = i === index;
+          tab.setAttribute('aria-selected', on ? 'true' : 'false');
+          tab.setAttribute('tabindex', on ? '0' : '-1');
+          if (on && focusTab) { tab.focus(); }
+        });
+        panels.forEach(function (panel, i) {
+          if (i === index) { panel.removeAttribute('hidden'); }
+          else { panel.setAttribute('hidden', ''); }
+        });
+      }
+
+      tabs.forEach(function (tab, i) {
+        tab.addEventListener('click', function () { show(i, false); });
+        tab.addEventListener('keydown', function (e) {
+          var next = null;
+          if (e.key === 'ArrowRight') { next = (i + 1) % tabs.length; }
+          else if (e.key === 'ArrowLeft') { next = (i - 1 + tabs.length) % tabs.length; }
+          if (next !== null) { e.preventDefault(); show(next, true); }
+        });
+      });
+
+      show(0, false);
+    })();
+  </script>
+</section>
+<!-- J2:W-1 end -->
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#7A3E22",
+    "secondary": "#4E5B31",
+    "accent": "#B8742A",
+    "background": "#FAF5EC",
+    "surface": "#FFFFFF",
+    "text": "#2B2118",
+    "muted": "#6B5B4D"
+  },
+  "fonts": {
+    "heading": "'Cormorant Garamond', Georgia, serif",
+    "body": "'Nunito Sans', system-ui, -apple-system, 'Segoe UI', sans-serif",
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap"
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "64px"
+  },
+  "radius": "12px",
+  "buttons": {
+    "primary": "background:#7A3E22;color:#FFFFFF;border:2px solid #7A3E22;min-height:46px;padding:12px 22px;font-weight:700;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer",
+    "secondary": "background:transparent;color:#7A3E22;border:2px solid #7A3E22;min-height:46px;padding:12px 22px;font-weight:700;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer"
+  },
+  "card": "background:#FFFFFF;border:1px solid #E6D9C3;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(43,33,24,0.06)",
+  "notes": "Terracotta, olive and cream echo natural dyes and handloom cotton, with a refined serif heading and a plain, readable body font for phones."
+}

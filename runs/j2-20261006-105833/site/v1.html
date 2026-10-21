@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sweet Crumbs Bakery, Pune</title>
+<meta name="description" content="Sweet Crumbs Bakery in Pune: menu, cake orders and contact details.">
+<style>
+  :root {
+    --bg: #fff8f1;
+    --card: #ffffff;
+    --ink: #3b2a20;
+    --muted: #7a6657;
+    --accent: #b5532f;
+    --accent-dark: #8f3f22;
+    --line: #ecdccb;
+    --ph-bg: #fff2b8;
+    --ph-ink: #6b4e00;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+  }
+  a { color: var(--accent-dark); }
+  header.site-header {
+    background: var(--accent);
+    color: #fff;
+    padding: 2.5rem 1.25rem 2rem;
+    text-align: center;
+  }
+  header.site-header h1 { margin: 0 0 .25rem; font-size: 2.2rem; letter-spacing: .02em; }
+  header.site-header p { margin: 0; font-size: 1.05rem; opacity: .95; }
+  nav.site-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .5rem 1.25rem;
+    background: var(--accent-dark);
+    padding: .7rem 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  nav.site-nav a { color: #fff; text-decoration: none; font-weight: bold; padding: .25rem .4rem; }
+  nav.site-nav a:hover, nav.site-nav a:focus { text-decoration: underline; }
+  main { max-width: 960px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+  section { margin-top: 2.5rem; scroll-margin-top: 4rem; }
+  section > h2 {
+    margin: 0 0 .25rem;
+    font-size: 1.7rem;
+    color: var(--accent-dark);
+    border-bottom: 2px solid var(--line);
+    padding-bottom: .4rem;
+  }
+  .lede { color: var(--muted); margin: .5rem 0 1.25rem; }
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+  .menu-group, .contact-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1rem 1.25rem 1.1rem;
+  }
+  .menu-group h3 { margin: 0 0 .6rem; font-size: 1.25rem; color: var(--accent); }
+  .menu-group ul { list-style: none; margin: 0; padding: 0; }
+  .menu-group li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: .75rem;
+    padding: .5rem 0;
+    border-top: 1px dashed var(--line);
+  }
+  .menu-group li:first-child { border-top: 0; }
+  .item-name { flex: 1 1 auto; }
+  .item-price { flex: 0 0 auto; text-align: right; font-weight: bold; }
+  .from { font-weight: normal; font-size: .85rem; color: var(--muted); display: block; }
+  .note { font-size: .9rem; color: var(--muted); margin-top: .9rem; }
+  .contact-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+  .contact-card h3 { margin: 0 0 .5rem; font-size: 1.15rem; color: var(--accent); }
+  .contact-card p { margin: .25rem 0; }
+  .btn {
+    display: inline-block;
+    background: #25a244;
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    padding: .65rem 1.1rem;
+    border-radius: 8px;
+    margin-top: .4rem;
+  }
+  .btn:hover, .btn:focus { background: #1d8636; }
+  /* One consistent visible marker for every unknown fact */
+  .ph {
+    background: var(--ph-bg);
+    color: var(--ph-ink);
+    border: 1px dashed #c9a227;
+    border-radius: 4px;
+    padding: 0 .3rem;
+    font-family: Consolas, Menlo, monospace;
+    font-size: .88em;
+    font-weight: normal;
+  }
+  footer {
+    text-align: center;
+    padding: 1.5rem 1rem 2rem;
+    color: var(--muted);
+    font-size: .9rem;
+    border-top: 1px solid var(--line);
+  }
+  @media (max-width: 640px) {
+    header.site-header h1 { font-size: 1.7rem; }
+    main { padding: 1rem .9rem 2.5rem; }
+    .menu-grid, .contact-grid { grid-template-columns: 1fr; }
+    section > h2 { font-size: 1.45rem; }
+    .btn { display: block; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1>Sweet Crumbs Bakery</h1>
+  <p>Fresh bakes and custom cakes in Pune</p>
+</header>
+
+<nav class="site-nav" aria-label="Main">
+  <a href="#menu">Menu</a>
+  <!-- W-2 adds the link to the Cake Orders section here -->
+  <a href="#contact">Contact</a>
+</nav>
+
+<main>
+
+  <section id="menu" aria-labelledby="menu-title">
+    <h2 id="menu-title">Menu</h2>
+    <p class="lede">Cake prices are starting prices; the final price depends on size, flavour and design. Other items are at the fixed price shown.</p>
+
+    <div class="menu-grid">
+
+      <div class="menu-group" id="menu-cakes">
+        <h3>Cakes</h3>
+        <ul>
+          <li>
+            <span class="item-name"><span class="ph">[PLACEHOLDER: cake name 1]</span></span>
+            <span class="item-price"><span class="from">starting from</span><span class="ph">[PLACEHOLDER: starting price]</span></span>
+          </li>
+          <li>
+            <span class="item-name"><span class="ph">[PLACEHOLDER: cake name 2]</span></span>
+            <span class="item-price"><span class="from">starting from</span><span class="ph">[PLACEHOLDER: starting price]</span></span>
+          </li>
+          <li>
+            <span class="item-name"><span class="ph">[PLACEHOLDER: cake name 3]</span></span>
+            <span class="item-price"><span class="from">starting from</span><span class="ph">[PLACEHOLDER: starting price]</span></span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="menu-group" id="menu-other-1">
+        <h3><span class="ph">[PLACEHOLDER: non-cake category 1]</span></h3>
+        <ul>
+          <li>
+            <span class="item-name"><span class="ph">[PLACEHOLDER: item name]</span></span>
+            <span class="item-price"><span class="ph">[PLACEHOLDER: fixed price]</span></span>
+          </li>
+          <li>
+            <span class="item-name"><span class="ph">[PLACEHOLDER: item name]</span></span>
+            <span class="item-price"><span class="ph">[PLACEHOLDER: fixed price]</span></span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="menu-group" id="menu-other-2">
+        <h3><span class="ph">[PLACEHOLDER: non-cake category 2]</span></h3>
+        <ul>
+          <li>
+            <span class="item-name"><span class="ph">[PLACEHOLDER: item name]</span></span>
+            <span class="item-price"><span class="ph">[PLACEHOLDER: fixed price]</span></span>
+          </li>
+          <li>
+            <span class="item-name"><span class="ph">[PLACEHOLDER: item name]</span></span>
+            <span class="item-price"><span class="ph">[PLACEHOLDER: fixed price]</span></span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+    <p class="note">Menu items, categories and prices are waiting for the bakery's details.</p>
+  </section>
+
+  <!-- W-2 inserts the Cake Orders section here -->
+
+  <section id="contact" aria-labelledby="contact-title">
+    <h2 id="contact-title">Contact</h2>
+    <p class="lede">Visit or get in touch with Sweet Crumbs Bakery in Pune.</p>
+
+    <div class="contact-grid">
+
+      <div class="contact-card">
+        <h3>Address</h3>
+        <p><span class="ph">[PLACEHOLDER: bakery street address]</span></p>
+        <p>Pune</p>
+      </div>
+
+      <div class="contact-card">
+        <h3>Phone</h3>
+        <p><span class="ph" id="phone-text">[PLACEHOLDER: bakery phone number]</span></p>
+      </div>
+
+      <div class="contact-card">
+        <h3>WhatsApp</h3>
+        <p>Message us on WhatsApp for questions and orders.</p>
+        <a class="btn" id="whatsapp-link" href="#contact">Chat on WhatsApp</a>
+        <p class="note" id="whatsapp-note"></p>
+      </div>
+
+      <div class="contact-card">
+        <h3>Opening hours</h3>
+        <p><span class="ph">[PLACEHOLDER: opening hours]</span></p>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  &copy; Sweet Crumbs Bakery, Pune
+</footer>
+
+<script>
+  // Single editable value: the bakery WhatsApp number, digits only with country code (for example 91XXXXXXXXXX).
+  // Until the real number is set, the link stays inactive and a marked placeholder is shown.
+  const WHATSAPP_NUMBER = "[PLACEHOLDER: WhatsApp number]";
+
+  (function () {
+    var digits = WHATSAPP_NUMBER.replace(/\D/g, "");
+    var link = document.getElementById("whatsapp-link");
+    var note = document.getElementById("whatsapp-note");
+    if (digits.length >= 10) {
+      link.href = "https://wa.me/" + digits;
+      link.target = "_blank";
+      link.rel = "noopener";
+    } else {
+      note.innerHTML = '<span class="ph">[PLACEHOLDER: WhatsApp number]</span>';
+      link.addEventListener("click", function (e) { e.preventDefault(); });
+      link.setAttribute("aria-disabled", "true");
+    }
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,251 @@
+[
+  {
+    "cycle": 1,
+    "version": 1,
+    "results": [
+      {
+        "criterion": "Single HTML file, CSS and JS inline or CDN, no build step",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "One 17,249 byte file with one inline style block and one inline script. The only external resource is the Google Fonts CSS (CDN). Mechanical check shows 0 JS errors and no build artefacts.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Language switch offers English, Kannada and Hindi, and every section (booking, emergency, doctors, blog) has text in all three",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "The switch has 3 buttons (English, ಕನ್ನಡ, हिन्दी) and toggles all emergency and booking strings in en, kn and hi. The file has no doctors section and no blog section, so 2 of 4 required sections have no text in any language.",
+        "severity": "high"
+      },
+      {
+        "criterion": "Booking request form with name, phone, preferred date, department or doctor, reason, and visible text in all three languages stating it is a request, not a confirmed booking",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The form has f_name, f_phone, f_date, f_dept (select) and f_reason. The v_notice string is present in en ('This is a request only. Your visit is not confirmed.'), kn and hi. The submit result says nothing was sent and that it is a request, not a confirmed booking. Nothing in the text says or implies confirmation.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Emergency section reachable from the top in every language, with a marked placeholder number (not realistic) and a marked placeholder address",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "A sticky top bar has a red link a.sos with href=#emergency, and its label is translated (nav_emergency in en, kn and hi). The number reads 'Not a real number. Hospital to add.' and contains no digits. The address is also marked. Both sit in a dashed red box with a PLACEHOLDER tag, translated in all three languages. No broken in-page links.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Doctor profiles section shows more than one profile, each labelled as a sample, in all three languages",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "The file has no doctors section and no profile content. Only a department dropdown exists, and it is labelled as a sample list.",
+        "severity": "high"
+      },
+      {
+        "criterion": "Health blog section shows more than one article, each labelled as a sample, in all three languages",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "The file has no blog section and no articles.",
+        "severity": "high"
+      },
+      {
+        "criterion": "Kannada and Hindi content carries a visible 'pending native review' label",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The #review paragraph in the yellow banner is always visible. It reads 'Kannada and Hindi text: pending native review.' in English, and the kn and hi strings include '(pending native review)'. The label covers the page as a whole, not each section, which is enough for the current content.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Every placeholder in the file (emergency number, address, contact details, doctors, articles) is visibly marked as a placeholder",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "All placeholders present are marked: emergency number, address, footer contact details ('not added yet'), the sample department list, and the message-service status text. Doctors and articles do not exist yet, so their marking cannot be checked. The same rule must be applied to them when they are added.",
+        "severity": "medium"
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 17249,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com",
+        "https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": false
+  },
+  {
+    "cycle": 2,
+    "version": 3,
+    "results": [
+      {
+        "criterion": "The site is a single HTML file with its CSS and JavaScript inline or loaded from a CDN, and it needs no build step.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Mechanical check: 1 file, 25,771 bytes, 1 form, 1 script, 0 JS errors. CSS is in one inline style block. The only external resource is Google Fonts CSS (CDN). No build artefacts.",
+        "severity": "low"
+      },
+      {
+        "criterion": "A language switch offers English, Kannada and Hindi, and every section (booking, emergency, doctors, blog) has text in all three.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The switch has 3 buttons (English, ಕನ್ನಡ, हिन्दी). Dictionaries en, kn and hi each contain the emergency (em_*), booking (v_*, f_*, d_*), doctors (doc_*, p_*) and blog (blog_*, a_*) keys, with no missing keys across the three.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The booking section has a request form (name, phone, preferred date, department or doctor, reason), and visible text in all three languages states it is a request, not a confirmed booking.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The form has f_name, f_phone, f_date, f_dept and f_reason. v_notice is present in en ('This is a request only. Your visit is not confirmed.'), kn and hi. The submit result ('ok') says nothing was sent and that it is a request, not a confirmed booking, in all three languages. No wording implies confirmation.",
+        "severity": "low"
+      },
+      {
+        "criterion": "An emergency section is reachable from the top of the page in every language and shows a marked placeholder number, which is not a realistic phone number, and a marked placeholder address.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The sticky top bar has a.sos with href=#emergency and a translated label (nav_emergency in en, kn, hi). The number reads 'Not a real number. Hospital to add.' and contains no digits. The address reads 'Hospital address, Bengaluru. Hospital to add.' Both sit in a dashed .ph box with a translated PLACEHOLDER tag. Broken in-page links: none.",
+        "severity": "low"
+      },
+      {
+        "criterion": "A doctor profiles section shows more than one profile, each labelled as a sample, in all three languages.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "#doctors has 3 article.doc profiles (Dr. Sample A, B, C). Each carries a SAMPLE tag and an 'Invented profile' note, and a section notice says they are not real doctors. All strings exist in en, kn and hi.",
+        "severity": "low"
+      },
+      {
+        "criterion": "A health blog section shows more than one article, each labelled as a sample, in all three languages.",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "#blog contains exactly 1 article.post, labelled SAMPLE with a medical review note, in en, kn and hi. The criterion requires more than one. This is the gap Priority and Adaptation accepted (cycle 2: 5 left, a second article costs 10). Identity has not ruled on it.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "Kannada and Hindi content carries a visible 'pending native review' label.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The #review paragraph in the always-visible banner is repeated at the top of the doctors and blog sections. The kn and hi strings include '(pending native review)'.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Every placeholder in the file (emergency number, address, contact details, doctors, articles) is visibly marked as a placeholder.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Emergency number and address carry the PLACEHOLDER tag. The footer contact details carry a PLACEHOLDER tag ('not added yet'). The department list is marked as a sample (d_note). Doctor profiles carry SAMPLE tags and placeholder qualification and bio lines. The article carries a SAMPLE tag, a placeholder author and date, and a 'Medical review: not done' note. The submit message says it is a placeholder service.",
+        "severity": "low"
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 25771,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com",
+        "https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": false
+  },
+  {
+    "cycle": 3,
+    "version": 4,
+    "results": [
+      {
+        "criterion": "The site is a single HTML file with its CSS and JavaScript inline or loaded from a CDN, and it needs no build step.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Mechanical check: 27,497 bytes, 1 form, 1 script, 0 JS errors. CSS is in one inline style block. The only external resource is Google Fonts (CDN).",
+        "severity": "low"
+      },
+      {
+        "criterion": "A language switch offers English, Kannada and Hindi, and every section (booking, emergency, doctors, blog) has text in all three.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "3 buttons (English, ಕನ್ನಡ, हिन्दी). The en, kn and hi dictionaries hold the same keys, including the new a2_title and a2_body. I found no missing key, so the silent fallback in setLang is never triggered.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The booking section has a request form (name, phone, preferred date, department or doctor, reason), and visible text in all three languages states it is a request, not a confirmed booking.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Fields f_name, f_phone, f_date, f_dept and f_reason are present. v_notice states the visit is not confirmed in en, kn and hi. The submit result says nothing was sent and that it is a request, not a confirmed booking, in all three languages.",
+        "severity": "low"
+      },
+      {
+        "criterion": "An emergency section is reachable from the top of the page in every language and shows a marked placeholder number, which is not a realistic phone number, and a marked placeholder address.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The sticky top bar has a.sos with href=#emergency and a translated label. The number reads 'Not a real number. Hospital to add.' and contains no digits. The address is also marked. Both sit in a dashed .ph box with a translated PLACEHOLDER tag.",
+        "severity": "low"
+      },
+      {
+        "criterion": "A doctor profiles section shows more than one profile, each labelled as a sample, in all three languages.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "#doctors has 3 article.doc profiles (Dr. Sample A, B, C), each with a SAMPLE tag and an 'Invented profile' note. A section notice says they are not real doctors. All strings exist in en, kn and hi.",
+        "severity": "low"
+      },
+      {
+        "criterion": "A health blog section shows more than one article, each labelled as a sample, in all three languages.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "#blog has 2 article.post elements, each with a SAMPLE tag, a placeholder author and date (a_meta), and a_review 'Medical review: not done'. The new article's text (a2_body) has no health advice. a2_title and a2_body exist in en, kn and hi.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Kannada and Hindi content carries a visible 'pending native review' label.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The #review paragraph in the top banner is repeated in the doctors and blog sections. The kn and hi strings include '(pending native review)'.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Every placeholder in the file (emergency number, address, contact details, doctors, articles) is visibly marked as a placeholder.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Emergency number, address and footer contact details carry a PLACEHOLDER tag. The department list is marked as a sample (d_note). Doctor profiles and both articles carry SAMPLE tags and placeholder text. The submit message says the message service is a placeholder.",
+        "severity": "low"
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 27497,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com",
+        "https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

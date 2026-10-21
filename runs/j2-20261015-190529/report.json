@@ -1,0 +1,119 @@
+{
+  "metrics": {
+    "outcome": "Paused: Identity is waiting on the Requester (The work you approved doesn't cover everything you asked for. Add more and keep going or leave out what doesn't fit?).",
+    "brief": "A one-page website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru. Visitors see the menu with prices, the opening hours and where to find the shop, and they can pre-order a coffee for pickup. Users: coffee lovers and office staff nearby. Problem: people cannot see the menu or order ahead. Must-have: menu with prices, pre-order form, map or address, opening hours. Constraints: one page only, works on phones, no payment. Success: 30 pre-orders per week.\nItems and prices (rupees): Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120.\nOpen: Monday to Saturday 7:30 am to 9:00 pm, Sunday 8:30 am to 6:00 pm.\nAddress: 12, 100 Feet Road, Indiranagar, Bengaluru 560038.\nContact: show phone +91 98450 12345 and email hello@brewlab.example.\nPre-orders: the customer enters name, phone, items and pickup time, and the order is emailed to hello@brewlab.example. No online payment, they pay at pickup.\nWrite the design docs first.",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 1,
+    "ai_calls": 1,
+    "minutes": 0.3,
+    "budget": {
+      "total": 100,
+      "start": 100,
+      "cap": 200,
+      "raises": [],
+      "spent": 0,
+      "rate_card": true
+    },
+    "site_versions": 0,
+    "site_bytes": 0,
+    "agents": {
+      "identity": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 0,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 0,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 0,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 0,
+      "grants": 0,
+      "counters": 0,
+      "refuses": 0,
+      "refuses_converted_by_code": 0,
+      "parks": 0
+    },
+    "conflicts": {
+      "total": 0,
+      "settled_by_agents": 0,
+      "resolved_by_identity": 0,
+      "asked_requester": 0,
+      "open": 0,
+      "list": []
+    },
+    "requester_questions": {
+      "total": 1,
+      "by_kind": {
+        "limit": 1
+      }
+    },
+    "workflows": {
+      "registered": 0,
+      "done": 0,
+      "failed": 0,
+      "held_ever": 0,
+      "estimate_vs_charged": []
+    },
+    "validator_refusals": 0,
+    "role_refusals": 0,
+    "pauses": 1,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 1,
+    "audits": [],
+    "to_be_confirmed": [],
+    "workable": null,
+    "lessons": {
+      "memory": false,
+      "saved": [],
+      "used": []
+    }
+  },
+  "review": {
+    "verdict": "Paused for the Requester; the reviewer runs when the run ends."
+  },
+  "events": [
+    {
+      "agent": "system",
+      "type": "limit",
+      "detail": "stages hld, lld, website can't be funded: 100 left, 135 short",
+      "msg": 6,
+      "cycle": 1
+    },
+    {
+      "agent": "system",
+      "type": "warning",
+      "detail": "The work credits left (100) can't cover the high-level design, the low-level design and the website. The Requester decides; nothing is skipped.",
+      "msg": 6,
+      "cycle": 1
+    },
+    {
+      "agent": "identity",
+      "type": "pause",
+      "detail": "limit: 1 question(s) for the Requester",
+      "msg": 8,
+      "cycle": 1,
+      "pause": "limit"
+    }
+  ],
+  "made": "2026-10-15 19:06:23"
+}

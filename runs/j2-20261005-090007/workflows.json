@@ -1,0 +1,57 @@
+[
+  {
+    "id": "W-1",
+    "name": "Choose stack and scaffold",
+    "purpose": "Plain HTML/CSS skeleton, no build step",
+    "cost": 15,
+    "outputs": [
+      "index.html"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "name": "Core sections",
+    "purpose": "Hero, departments, doctors, appointment form, contact",
+    "cost": 45,
+    "outputs": [
+      "index.html"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-3",
+    "name": "Health tips strip",
+    "purpose": "3 short tips for trust",
+    "cost": 10,
+    "outputs": [
+      "index.html"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-4",
+    "name": "Animations",
+    "purpose": "Scroll and hover effects",
+    "cost": 10,
+    "outputs": [
+      "CSS"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-5",
+    "name": "Sticky emergency bar",
+    "purpose": "Emergency number visible on every screen",
+    "cost": 8,
+    "outputs": [
+      "index.html"
+    ],
+    "status": "done",
+    "cycle": 2
+  }
+]

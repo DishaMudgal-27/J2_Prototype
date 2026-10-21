@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#7A3B1E",
+    "secondary": "#4F5D2F",
+    "accent": "#B5763A",
+    "background": "#F7F1E8",
+    "surface": "#FFFDF9",
+    "text": "#2B2118",
+    "muted": "#6B5B4D"
+  },
+  "fonts": {
+    "heading": "'Cormorant Garamond', Georgia, serif",
+    "body": "'Nunito Sans', 'Segoe UI', Arial, sans-serif",
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap"
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "64px"
+  },
+  "radius": "12px",
+  "buttons": {
+    "primary": "background:#7A3B1E;color:#FFFDF9;border:2px solid #7A3B1E;min-height:48px;padding:12px 24px;font-weight:700;letter-spacing:0.02em;",
+    "secondary": "background:transparent;color:#4F5D2F;border:2px solid #4F5D2F;min-height:48px;padding:12px 24px;font-weight:700;letter-spacing:0.02em;"
+  },
+  "card": "background:#FFFDF9;border:1px solid #E6DAC8;border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(43,33,24,0.06);",
+  "notes": "Terracotta, olive and cream echo handloom dyes and cotton, with a serif heading for elegance; all text pairs pass WCAG AA and buttons are 48px tall for phones."
+}

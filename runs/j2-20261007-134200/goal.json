@@ -1,0 +1,30 @@
+{
+  "statement": "Build a one-page website for Brew Lab, a cafe on 100 Feet Road, Indiranagar, Bengaluru, that shows its menu, hours, loyalty scheme and location, and lets visitors pre-order for pickup via WhatsApp.",
+  "site_name": "Brew Lab",
+  "audience": "Local coffee drinkers in and around Indiranagar, Bengaluru, mostly on phones, who want to check prices and hours, place a pickup order, and find the cafe.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file, no build step (CDN libraries allowed)",
+    "Mobile first: usable at 360px wide and at 1280px wide",
+    "All prices shown in rupees with the ₹ symbol",
+    "No JavaScript errors in the console on load or on any interaction"
+  ],
+  "rules": [
+    "Use only the facts the Requester supplied: hours, menu, prices, address, maps link, WhatsApp number, loyalty reward",
+    "Payment is at pickup; the site takes no online payment",
+    "Pickup time must fall within opening hours",
+    "Do not invent menu items, prices, offers or contact details"
+  ],
+  "done_when": [
+    "The file lists opening hours for all seven days (Monday to Friday 8am to 10pm, Saturday and Sunday 9am to 11pm, no closed days), and JavaScript reads the current day and highlights today's row automatically",
+    "The menu shows these items, each with its price in ₹: Espresso 120, Cappuccino 180, Pour-over 220, Cold brew 200, Croissant 150, Banana bread 130, grouped as Coffee, Cold, Food",
+    "The pre-order form has fields for name, phone, a quantity for each of the six menu items, and pickup time, and a running total in ₹ that updates in the page as quantities change",
+    "The pickup time field is validated in the code against the opening hours and rejects times outside them",
+    "On submit, the form code opens a WhatsApp link to +91 98450 00000 containing the name, phone, items with quantities, pickup time and total, and shows a confirmation message on the page that says payment is at pickup",
+    "The loyalty section shows exactly 10 stamp circles, the 10th marked FREE, with text saying the 10th stamp gives one free drink of any size",
+    "The location section shows the address 100 Feet Road, Indiranagar, Bengaluru 560038 and a link labelled \"Get directions\" to https://maps.google.com/?q=100+Feet+Road+Indiranagar+Bengaluru+560038",
+    "The file has a mobile viewport meta tag and its CSS causes no horizontal overflow at 360px or 1280px width",
+    "The file has no JavaScript errors, every in-page link points to an existing section id, and it contains no placeholder or to-be-confirmed text"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": []
+}

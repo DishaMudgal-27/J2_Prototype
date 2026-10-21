@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Specialty coffee, Indiranagar, Bengaluru</title>
+<meta name="description" content="Brew Lab is a small specialty coffee shop in Indiranagar, Bengaluru. See the menu and pre-order for pickup.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fbf4ea;
+    --surface: #fffaf3;
+    --surface-alt: #f3e6d3;
+    --text: #2e1d14;
+    --muted: #6d5646;
+    --accent: #9c4a1f;
+    --accent-dark: #7a3612;
+    --accent-ink: #ffffff;
+    --line: #e4d3bd;
+    --ph-bg: #fff0b8;
+    --ph-ink: #5c4300;
+    --ph-line: #d9a900;
+    --radius: 16px;
+    --max: 760px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 1rem;
+    line-height: 1.55;
+    -webkit-text-size-adjust: 100%;
+  }
+  h1, h2, h3 {
+    font-family: "Fraunces", Georgia, "Times New Roman", serif;
+    line-height: 1.15;
+    margin: 0 0 .5rem;
+  }
+  h1 { font-size: clamp(2rem, 8vw, 3rem); }
+  h2 { font-size: clamp(1.5rem, 5.5vw, 2rem); }
+  h3 { font-size: 1.1rem; }
+  p { margin: 0 0 .75rem; }
+  a { color: var(--accent-dark); }
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 0 1.1rem; }
+  section { padding: 2.25rem 0; }
+
+  /* Header */
+  header.site {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+  }
+  header.site .wrap {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; min-height: 64px;
+  }
+  .brand { font-family: "Fraunces", Georgia, serif; font-weight: 700; font-size: 1.4rem; color: var(--text); text-decoration: none; }
+  .brand small { display: block; font-family: "Inter", sans-serif; font-weight: 500; font-size: .7rem; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 48px; padding: 0 1.4rem;
+    background: var(--accent); color: var(--accent-ink);
+    border: 0; border-radius: 999px;
+    font: inherit; font-weight: 600; text-decoration: none; cursor: pointer;
+  }
+  .btn:hover, .btn:focus-visible { background: var(--accent-dark); }
+  .btn:focus-visible, a:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+  .btn.small { min-height: 44px; padding: 0 1.1rem; }
+
+  /* Hero */
+  .hero { padding: 2.5rem 0 2rem; background: linear-gradient(180deg, var(--surface-alt), var(--bg)); }
+  .hero p.lead { font-size: 1.1rem; color: var(--muted); max-width: 34rem; }
+  .hero .actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.25rem; }
+  .btn.ghost { background: transparent; color: var(--accent-dark); box-shadow: inset 0 0 0 2px var(--accent); }
+  .btn.ghost:hover { background: var(--surface-alt); }
+
+  /* Placeholder marker */
+  .ph {
+    display: inline-block;
+    background: var(--ph-bg); color: var(--ph-ink);
+    border: 1px dashed var(--ph-line);
+    border-radius: 6px;
+    padding: 0 .4rem;
+    font-size: .72rem; font-weight: 600; letter-spacing: .03em; text-transform: uppercase;
+    vertical-align: middle;
+  }
+  .ph-block {
+    background: var(--ph-bg); color: var(--ph-ink);
+    border: 1px dashed var(--ph-line);
+    border-radius: 10px; padding: .6rem .8rem; font-size: .92rem;
+  }
+
+  /* Cards and lists */
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem 1.1rem; }
+  .menu-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; }
+  .menu-list li { display: flex; justify-content: space-between; align-items: center; gap: .75rem; min-height: 56px; }
+  .menu-list .name { font-weight: 600; }
+  .menu-list .price { white-space: nowrap; font-weight: 600; }
+  .hours { width: 100%; border-collapse: collapse; }
+  .hours th, .hours td { text-align: left; padding: .65rem .25rem; border-bottom: 1px solid var(--line); }
+  .hours th { font-weight: 600; width: 40%; }
+  .hours tr:last-child th, .hours tr:last-child td { border-bottom: 0; }
+  .map-box {
+    min-height: 160px; display: grid; place-items: center; text-align: center;
+    background: var(--surface-alt); border: 1px dashed var(--ph-line); border-radius: var(--radius);
+    padding: 1rem; margin-top: .75rem;
+  }
+  .grid { display: grid; gap: .9rem; }
+  .eyebrow { color: var(--accent-dark); font-weight: 600; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; margin-bottom: .35rem; }
+  .alt { background: var(--surface-alt); }
+
+  /* Loyalty */
+  .stamps { display: grid; grid-template-columns: repeat(5, 1fr); gap: .5rem; margin: 1rem 0; }
+  .stamp {
+    aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%;
+    background: var(--surface); border: 2px solid var(--accent); color: var(--accent-dark); font-weight: 600;
+  }
+  .stamp.free { background: var(--accent); color: var(--accent-ink); font-size: .8rem; }
+
+  footer { padding: 1.75rem 0 2.5rem; color: var(--muted); font-size: .9rem; border-top: 1px solid var(--line); }
+
+  @media (min-width: 640px) {
+    .grid.two { grid-template-columns: 1fr 1fr; }
+    section { padding: 3rem 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="#top">Brew Lab<small>Indiranagar, Bengaluru</small></a>
+    <a class="btn small" href="#order">Pre-order</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Specialty coffee shop</p>
+      <h1>Your coffee, ready when you walk in.</h1>
+      <p class="lead">Brew Lab is a small specialty coffee shop in Indiranagar, Bengaluru. Pick your coffee, choose a pickup time and pay at pickup.</p>
+      <div class="actions">
+        <a class="btn" href="#order">Pre-order for pickup</a>
+        <a class="btn ghost" href="#menu">See the menu</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ORDER FLOW: comes before beans and loyalty. W-2 inserts the form into #order-form-slot. -->
+  <section id="order">
+    <div class="wrap">
+      <h2>Pre-order for pickup</h2>
+      <p>Pick items from the menu, add your name and a pickup time. Payment is at pickup.</p>
+      <div id="order-form-slot">
+        <!-- W-2: ORDER FORM AND SCRIPT GO HERE -->
+        <p class="ph-block"><span class="ph">Placeholder</span> The order form is added in the next build step.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="menu" class="alt">
+    <div class="wrap">
+      <h2>Menu</h2>
+      <p class="ph-block"><span class="ph">Placeholder</span> Item names and prices below are samples. The shop owner confirms the real menu and prices.</p>
+      <div class="card" style="margin-top:.9rem">
+        <ul class="menu-list" id="menu-list">
+          <li data-item="Espresso" data-price="">
+            <span class="name">Espresso <span class="ph">Placeholder item</span></span>
+            <span class="price">&#8377; ___ <span class="ph">Placeholder price</span></span>
+          </li>
+          <li data-item="Cappuccino" data-price="">
+            <span class="name">Cappuccino <span class="ph">Placeholder item</span></span>
+            <span class="price">&#8377; ___ <span class="ph">Placeholder price</span></span>
+          </li>
+          <li data-item="Flat white" data-price="">
+            <span class="name">Flat white <span class="ph">Placeholder item</span></span>
+            <span class="price">&#8377; ___ <span class="ph">Placeholder price</span></span>
+          </li>
+          <li data-item="Cold brew" data-price="">
+            <span class="name">Cold brew <span class="ph">Placeholder item</span></span>
+            <span class="price">&#8377; ___ <span class="ph">Placeholder price</span></span>
+          </li>
+          <li data-item="Pour over" data-price="">
+            <span class="name">Pour over <span class="ph">Placeholder item</span></span>
+            <span class="price">&#8377; ___ <span class="ph">Placeholder price</span></span>
+          </li>
+        </ul>
+      </div>
+      <p style="margin-top:1rem"><a class="btn" href="#order">Pre-order now</a></p>
+    </div>
+  </section>
+
+  <section id="hours">
+    <div class="wrap">
+      <h2>Opening hours</h2>
+      <p class="ph-block"><span class="ph">Placeholder</span> Hours are not confirmed yet. The shop owner supplies the real times.</p>
+      <div class="card" style="margin-top:.9rem">
+        <table class="hours">
+          <tbody>
+            <tr><th scope="row">Monday to Friday</th><td><span class="ph">Placeholder hours</span></td></tr>
+            <tr><th scope="row">Saturday</th><td><span class="ph">Placeholder hours</span></td></tr>
+            <tr><th scope="row">Sunday</th><td><span class="ph">Placeholder hours</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="location" class="alt">
+    <div class="wrap">
+      <h2>Find us in Indiranagar</h2>
+      <div class="card">
+        <p><strong>Brew Lab</strong><br>
+        <span class="ph">Placeholder street address</span><br>
+        Indiranagar, Bengaluru</p>
+        <div class="map-box">
+          <p><span class="ph">Placeholder map</span><br>The shop owner supplies the map location.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Compact story sections: kept below the order flow by design. -->
+  <section id="beans">
+    <div class="wrap">
+      <p class="eyebrow">Our beans</p>
+      <h2>Beans and the farms they come from</h2>
+      <p class="ph-block"><span class="ph">Placeholder</span> Farm names and sourcing details come from the shop owner. Nothing below is a confirmed claim.</p>
+      <div class="grid two" style="margin-top:.9rem">
+        <div class="card">
+          <h3><span class="ph">Placeholder farm name</span></h3>
+          <p><span class="ph">Placeholder region</span><br><span class="ph">Placeholder sourcing details</span></p>
+        </div>
+        <div class="card">
+          <h3><span class="ph">Placeholder farm name</span></h3>
+          <p><span class="ph">Placeholder region</span><br><span class="ph">Placeholder sourcing details</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="loyalty" class="alt">
+    <div class="wrap">
+      <p class="eyebrow">Loyalty card</p>
+      <h2>Buy 9, get the 10th free</h2>
+      <p>The rule is simple: buy 9, get the 10th free.</p>
+      <div class="stamps" aria-label="Ten boxes on the card. Nine purchases, then the tenth is free.">
+        <div class="stamp">1</div><div class="stamp">2</div><div class="stamp">3</div><div class="stamp">4</div><div class="stamp">5</div>
+        <div class="stamp">6</div><div class="stamp">7</div><div class="stamp">8</div><div class="stamp">9</div><div class="stamp free">FREE</div>
+      </div>
+      <p class="ph-block"><span class="ph">Placeholder</span> Which items count and how the card is stamped: the shop owner confirms.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Brew Lab, Indiranagar, Bengaluru. Contact: <span class="ph">Placeholder WhatsApp number</span> <span class="ph">Placeholder email</span></p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,237 @@
+{
+  "run": "20261006-130411",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "model": "sonnet",
+  "mock": false,
+  "brief": "Brew Lab, Indiranagar, Bengaluru. One-page site with menu, hours, location and pre-order for pickup. We want a big photo gallery of the cafe AND a detailed story section about each of our three coffee farms. Keep costs low.",
+  "change_requests": [],
+  "status": "stuck",
+  "outcome": "Stuck: cycles 3 and 4 both registered nothing, so another cycle would repeat the same blocker. Stopped instead of looping.",
+  "budget": {
+    "start": 35,
+    "granted": 35,
+    "used": 30,
+    "raises": []
+  },
+  "ai_calls": 28,
+  "cycles": 4,
+  "questions_to_user": [
+    {
+      "kind": "audit",
+      "asked": [
+        "Option A (recommended): raise the budget from 35 to about 70 (estimate, to be confirmed by Priority) so Hours and Location, Gallery and Farm stories are built as W2 to W4 and the full brief ships. Option B: keep the budget at 35 and park one section (Gallery, Farm stories, or Hours and Location), which changes the charter rule that neither may be cut. Choose A or B, and if B, name the section to park."
+      ],
+      "answer": "B"
+    },
+    {
+      "kind": "question",
+      "asked": [
+        "Your answer B (keep the budget, park one section) does not fit, because only 5 of the 35 budget is left and the smallest section costs 10. Prices below are from the rate card, confirmed by Priority. Which do you choose?"
+      ],
+      "answer": "option 1"
+    }
+  ],
+  "conflicts": [
+    {
+      "id": "C-1",
+      "pair": [
+        "adaptation",
+        "priority"
+      ],
+      "topic": "proposal",
+      "subject": "what to fund in cycle 1",
+      "attempts": 2,
+      "escalated": false,
+      "resolved_by": "agents",
+      "repriced": false,
+      "user_question": null,
+      "user_answer": null,
+      "outcome": "Adaptation accepted Priority's COUNTER: Page shell, Menu and Pre-order form (30) goes to the validator."
+    },
+    {
+      "id": "C-2",
+      "pair": [
+        "adaptation",
+        "priority"
+      ],
+      "topic": "proposal",
+      "subject": "what to fund in cycle 1",
+      "attempts": 2,
+      "escalated": false,
+      "resolved_by": "agents",
+      "repriced": false,
+      "user_question": null,
+      "user_answer": null,
+      "outcome": "Adaptation parked the proposal; nothing registered."
+    },
+    {
+      "id": "C-3",
+      "pair": [
+        "adaptation",
+        "priority"
+      ],
+      "topic": "proposal",
+      "subject": "what to fund in cycle 2",
+      "attempts": 2,
+      "escalated": false,
+      "resolved_by": "agents",
+      "repriced": false,
+      "user_question": null,
+      "user_answer": null,
+      "outcome": "Adaptation parked the proposal; nothing registered."
+    },
+    {
+      "id": "C-4",
+      "pair": [
+        "adaptation",
+        "priority"
+      ],
+      "topic": "proposal",
+      "subject": "what to fund in cycle 3",
+      "attempts": 2,
+      "escalated": false,
+      "resolved_by": "agents",
+      "repriced": false,
+      "user_question": null,
+      "user_answer": null,
+      "outcome": "Adaptation parked the proposal; nothing registered."
+    },
+    {
+      "id": "C-5",
+      "pair": [
+        "adaptation",
+        "priority"
+      ],
+      "topic": "proposal",
+      "subject": "what to fund in cycle 4",
+      "attempts": 2,
+      "escalated": false,
+      "resolved_by": "agents",
+      "repriced": false,
+      "user_question": null,
+      "user_answer": null,
+      "outcome": "Adaptation parked the proposal; nothing registered."
+    }
+  ],
+  "validator_rejections": [],
+  "holds": [],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 1,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-11",
+          "item": null,
+          "verdict": "POLICY_CONCERN"
+        }
+      ]
+    }
+  ],
+  "site_versions": 1,
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The single HTML file contains separate, linked sections for Menu, Hours, Location, Pre-order, Gallery and Farm stories",
+      "pass": false
+    },
+    {
+      "item": 2,
+      "criterion": "The Menu section lists items in categories, with each price shown or marked as a placeholder",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "The Hours section lists opening times for every day of the week, or marked placeholders",
+      "pass": false
+    },
+    {
+      "item": 4,
+      "criterion": "The Location section shows the cafe name, an Indiranagar, Bengaluru address (or marked placeholder) and an embedded or linked map",
+      "pass": false
+    },
+    {
+      "item": 5,
+      "criterion": "The Pre-order section has a form where a visitor picks menu items and quantities, enters name, phone number and pickup time, and sees an order summary with a total before submitting",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "The Gallery section holds at least 12 image slots with alt text, lazy loading, and a way to view each image larger",
+      "pass": false
+    },
+    {
+      "item": 7,
+      "criterion": "The Farm stories section has three separate entries, one per coffee farm, each with a heading, a multi-paragraph story area, and image slots, with farm names and facts as marked placeholders where unknown",
+      "pass": false
+    },
+    {
+      "item": 8,
+      "criterion": "The page is responsive: it has a viewport meta tag and CSS rules that adapt the layout for narrow screens",
+      "pass": true
+    },
+    {
+      "item": 9,
+      "criterion": "The file needs no build step and loads any external library only from a CDN",
+      "pass": true
+    },
+    {
+      "item": 10,
+      "criterion": "Every unsupplied fact is visibly marked as a placeholder in the page",
+      "pass": true
+    }
+  ],
+  "route_check_violations": []
+}

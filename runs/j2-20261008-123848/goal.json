@@ -1,0 +1,50 @@
+{
+  "statement": "Build a one-file website for Thread & Loom, a handloom clothing boutique in Pune, where visitors can browse and filter the products, check the size guide, and place orders on WhatsApp.",
+  "site_name": "Thread & Loom",
+  "audience": "Shoppers in and around Pune, mostly on phones, looking for handloom kurtas, sarees, cotton shirts and dupattas.",
+  "standards": [
+    "Earthy and elegant look: warm natural colours, calm spacing, a refined serif or similar heading style",
+    "Mobile first: works at 360px wide and at 1280px wide with no sideways scrolling",
+    "Only facts the Requester supplied; no invented prices, products, reviews or contact details",
+    "Plain HTML, CSS and JavaScript in one file, no build step"
+  ],
+  "rules": [
+    "Prices are shown in rupees exactly as supplied",
+    "Products without photos show an empty photo spot, not a stock image",
+    "Sarees and dupattas are free size",
+    "Lookbook outfits use only products from the supplied list",
+    "Orders go to WhatsApp +91 00000 11111; shop phone is +91 00000 22222"
+  ],
+  "done_when": [
+    "The page shows the name Thread & Loom, mentions Pune, and says the shop sells handloom kurtas, sarees, cotton shirts and dupattas.",
+    "All 10 products are listed with name, category, price in rupees and sizes exactly as supplied: Indigo block-print kurta 1,499 (S-XXL), Mustard handloom kurta 1,699 (S-XL), White chikankari kurta 2,199 (XS-XL), Maheshwari cotton saree 3,499, Chanderi silk-cotton saree 4,999, Ikat handloom saree 3,999, Khadi cotton shirt 1,299 (S-XXL), Linen-blend shirt 1,599 (M-XXL), Ajrakh dupatta 899, Bandhani dupatta 1,099 (sarees and dupattas free size).",
+    "Visitors can browse by category (All, Kurtas, Sarees, Shirts, Dupattas) and the product list updates when they pick one.",
+    "Visitors can filter products by size and by price range, and the list updates; free-size items are handled in the size filter.",
+    "A size guide table shows chest in inches: XS 32, S 34, M 36, L 38, XL 40, XXL 42.",
+    "A New Arrivals section shows exactly: White chikankari kurta, Ikat handloom saree, Linen-blend shirt.",
+    "Each product has an order button that opens a WhatsApp link to 910000011111 with the product name prefilled in the message.",
+    "A Lookbook section shows 3 styled outfits, each built only from the listed products.",
+    "A store section shows the address 18 FC Road, Shivajinagar, Pune 411005, the shop phone +91 00000 22222, and the timings 11am to 9pm Tuesday to Sunday, closed Monday.",
+    "The return and exchange policy states: exchange within 7 days if unworn with tags; no returns on sale items.",
+    "A reviews section shows three reviews: \"Beautiful fabric, fits perfectly\" - Meera K., \"Fast delivery and lovely packing\" - Arjun S., \"My go-to for festive kurtas\" - Priya D.",
+    "Delivery information states: across Pune in 2 days, Rs 79, free above Rs 2,999, pay on delivery or UPI.",
+    "Every product card has an empty photo spot, and the page loads no stock photos.",
+    "The page has a mobile viewport tag and responsive layout rules so nothing scrolls sideways at 360px or 1280px, and it has no JavaScript errors and no broken in-page links."
+  ],
+  "business_type": "clothing boutique",
+  "visitor_needs": [
+    "Browse products by category",
+    "Filter by size and price",
+    "See a size guide",
+    "See new arrivals",
+    "Order on WhatsApp",
+    "See a lookbook of styled outfits",
+    "Find store timings and location",
+    "Read the return and exchange policy",
+    "Read customer reviews",
+    "Know delivery cost and payment options"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [],
+  "confirmed_facts": []
+}

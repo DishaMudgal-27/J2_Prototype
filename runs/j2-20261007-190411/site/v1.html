@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Thread &amp; Loom</title>
+<!-- J2:style head start (owner W-1) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Nunito+Sans:wght@400;600;700&amp;display=swap"><style>:root{--j2-primary:#7A3E22;--j2-secondary:#4E5B31;--j2-accent:#B8742A;--j2-background:#FAF5EC;--j2-surface:#FFFFFF;--j2-text:#2B2118;--j2-muted:#6B5B4D;--j2-font-heading:'Cormorant Garamond', Georgia, serif;--j2-font-body:'Nunito Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:12px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#7A3E22;color:#FFFFFF;border:2px solid #7A3E22;min-height:46px;padding:12px 22px;font-weight:700;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-btn-secondary{display:inline-block;background:transparent;color:#7A3E22;border:2px solid #7A3E22;min-height:46px;padding:12px 22px;font-weight:700;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-card{background:#FFFFFF;border:1px solid #E6D9C3;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(43,33,24,0.06)}</style>
+<!-- J2:style head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<div id="shop" class="tl-shop">
+<style>
+#shop{background:var(--j2-background,#FAF5EC);color:var(--j2-text,#2B2118);font-family:var(--j2-font-body,system-ui,sans-serif);padding:48px 16px;overflow-x:hidden}
+#shop *,#shop *::before,#shop *::after{box-sizing:border-box}
+#shop .tl-wrap{max-width:1120px;margin:0 auto}
+#shop .tl-block{margin-bottom:64px;scroll-margin-top:72px}
+#shop .tl-block:last-child{margin-bottom:0}
+#shop h2{font-family:var(--j2-font-heading,Georgia,serif);color:var(--j2-primary,#7A3E22);font-size:clamp(1.7rem,5vw,2.4rem);line-height:1.15;margin:0 0 8px}
+#shop .tl-lead{color:var(--j2-muted,#6B5B4D);margin:0 0 24px;max-width:60ch}
+#shop .tl-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#shop .tl-grid.tl-new{grid-template-columns:minmax(0,1fr)}
+@media(min-width:640px){#shop .tl-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}#shop .tl-grid.tl-new{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:1000px){#shop #tl-products{grid-template-columns:repeat(4,minmax(0,1fr))}}
+#shop .tl-card{display:flex;flex-direction:column;gap:10px;padding:12px;min-width:0}
+#shop .tl-photo{position:relative;aspect-ratio:4/5;width:100%;border:2px dashed var(--j2-accent,#B8742A);border-radius:8px;background:#EFE6D6;color:var(--j2-muted,#6B5B4D);display:flex;align-items:center;justify-content:center;text-align:center;font-size:.85rem;padding:8px}
+#shop .tl-badge{position:absolute;top:8px;left:8px;background:var(--j2-secondary,#4E5B31);color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:999px}
+#shop .tl-cat{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--j2-muted,#6B5B4D);margin:0}
+#shop .tl-name{font-family:var(--j2-font-heading,Georgia,serif);font-size:1.15rem;font-weight:700;line-height:1.2;margin:0;overflow-wrap:anywhere}
+#shop .tl-price{font-weight:700;font-size:1.05rem;margin:0}
+#shop .tl-sizes{font-size:.85rem;color:var(--j2-muted,#6B5B4D);margin:0}
+#shop .tl-card .j2-btn{margin-top:auto;width:100%;text-align:center;padding:10px 12px;font-size:.92rem}
+#shop .tl-filters{display:grid;gap:16px;margin-bottom:20px}
+#shop .tl-chips{display:flex;flex-wrap:wrap;gap:8px}
+#shop .tl-chip{min-height:44px;padding:8px 16px;border-radius:999px;border:2px solid var(--j2-primary,#7A3E22);background:transparent;color:var(--j2-primary,#7A3E22);font:inherit;font-weight:700;cursor:pointer}
+#shop .tl-chip[aria-pressed="true"]{background:var(--j2-primary,#7A3E22);color:#fff}
+#shop .tl-selects{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(min-width:640px){#shop .tl-selects{max-width:520px}}
+#shop label{display:block;font-size:.85rem;font-weight:700;margin-bottom:4px}
+#shop select{width:100%;min-height:44px;padding:8px 10px;border:1px solid #B9A98F;border-radius:8px;background:#fff;color:var(--j2-text,#2B2118);font:inherit}
+#shop .tl-status{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;margin:0 0 16px;color:var(--j2-muted,#6B5B4D);font-size:.9rem}
+#shop .tl-reset{min-height:44px;padding:8px 16px}
+#shop .tl-empty{grid-column:1/-1;text-align:center;padding:32px 16px}
+#shop .tl-empty p{margin:0 0 16px}
+#shop .tl-table-wrap{max-width:440px}
+#shop table{width:100%;border-collapse:collapse;background:var(--j2-surface,#fff);border:1px solid #E6D9C3;border-radius:8px;overflow:hidden}
+#shop caption{text-align:left;color:var(--j2-muted,#6B5B4D);font-size:.9rem;padding-bottom:8px}
+#shop th,#shop td{text-align:left;padding:12px 16px;border-bottom:1px solid #E6D9C3}
+#shop th{background:var(--j2-primary,#7A3E22);color:#fff}
+#shop tbody tr:last-child td{border-bottom:0}
+#shop .tl-note{color:var(--j2-muted,#6B5B4D);font-size:.9rem;margin:12px 0 0}
+</style>
+<div class="tl-wrap">
+
+<div class="tl-block" id="new-arrivals">
+<h2>New Arrivals</h2>
+<p class="tl-lead">Fresh on the racks at Thread &amp; Loom.</p>
+<div class="tl-grid tl-new" id="tl-new"></div>
+</div>
+
+<div class="tl-block" id="products">
+<h2>Shop</h2>
+<p class="tl-lead">Handloom kurtas, sarees, cotton shirts and dupattas. Pick a category, then narrow by size or price.</p>
+<div class="tl-filters">
+<div class="tl-chips" role="group" aria-label="Category">
+<button type="button" class="tl-chip" data-cat="All" aria-pressed="true">All</button>
+<button type="button" class="tl-chip" data-cat="Kurtas" aria-pressed="false">Kurtas</button>
+<button type="button" class="tl-chip" data-cat="Sarees" aria-pressed="false">Sarees</button>
+<button type="button" class="tl-chip" data-cat="Shirts" aria-pressed="false">Shirts</button>
+<button type="button" class="tl-chip" data-cat="Dupattas" aria-pressed="false">Dupattas</button>
+</div>
+<div class="tl-selects">
+<div>
+<label for="tl-size">Size</label>
+<select id="tl-size">
+<option value="All">All sizes</option>
+<option value="XS">XS</option>
+<option value="S">S</option>
+<option value="M">M</option>
+<option value="L">L</option>
+<option value="XL">XL</option>
+<option value="XXL">XXL</option>
+<option value="Free size">Free size</option>
+</select>
+</div>
+<div>
+<label for="tl-price">Price</label>
+<select id="tl-price">
+<option value="All">All prices</option>
+<option value="low">Under ₹1,500</option>
+<option value="mid">₹1,500 to ₹2,999</option>
+<option value="high">₹3,000 and above</option>
+</select>
+</div>
+</div>
+</div>
+<div class="tl-status">
+<span id="tl-count" aria-live="polite" role="status"></span>
+<button type="button" class="j2-btn j2-btn-secondary tl-reset" id="tl-reset">Clear filters</button>
+</div>
+<div class="tl-grid" id="tl-products"></div>
+<p class="tl-note">Sarees and dupattas are free size. Tap Order on WhatsApp on any item to message the shop.</p>
+</div>
+
+<div class="tl-block" id="size-guide">
+<h2>Size Guide</h2>
+<p class="tl-lead">Find your size by chest measurement.</p>
+<div class="tl-table-wrap">
+<table>
+<caption>Chest measurement in inches</caption>
+<thead><tr><th scope="col">Size</th><th scope="col">Chest (inches)</th></tr></thead>
+<tbody>
+<tr><td>XS</td><td>32</td></tr>
+<tr><td>S</td><td>34</td></tr>
+<tr><td>M</td><td>36</td></tr>
+<tr><td>L</td><td>38</td></tr>
+<tr><td>XL</td><td>40</td></tr>
+<tr><td>XXL</td><td>42</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+</div>
+<script>
+(function(){
+  var root=document.getElementById('shop');
+  if(!root){return;}
+  var WA='910000011111';
+  var P=[
+    {name:'Indigo block-print kurta',cat:'Kurtas',price:1499,sizes:['S','M','L','XL','XXL'],label:'S-XXL'},
+    {name:'Mustard handloom kurta',cat:'Kurtas',price:1699,sizes:['S','M','L','XL'],label:'S-XL'},
+    {name:'White chikankari kurta',cat:'Kurtas',price:2199,sizes:['XS','S','M','L','XL'],label:'XS-XL',isNew:true},
+    {name:'Maheshwari cotton saree',cat:'Sarees',price:3499,sizes:['Free size'],label:'Free size'},
+    {name:'Chanderi silk-cotton saree',cat:'Sarees',price:4999,sizes:['Free size'],label:'Free size'},
+    {name:'Ikat handloom saree',cat:'Sarees',price:3999,sizes:['Free size'],label:'Free size',isNew:true},
+    {name:'Khadi cotton shirt',cat:'Shirts',price:1299,sizes:['S','M','L','XL','XXL'],label:'S-XXL'},
+    {name:'Linen-blend shirt',cat:'Shirts',price:1599,sizes:['M','L','XL','XXL'],label:'M-XXL',isNew:true},
+    {name:'Ajrakh dupatta',cat:'Dupattas',price:899,sizes:['Free size'],label:'Free size'},
+    {name:'Bandhani dupatta',cat:'Dupattas',price:1099,sizes:['Free size'],label:'Free size'}
+  ];
+  var state={cat:'All',size:'All',price:'All'};
+  var elProducts=root.querySelector('#tl-products');
+  var elNew=root.querySelector('#tl-new');
+  var elCount=root.querySelector('#tl-count');
+  var elSize=root.querySelector('#tl-size');
+  var elPrice=root.querySelector('#tl-price');
+  var chips=root.querySelectorAll('.tl-chip');
+
+  function money(n){return '\u20B9'+String(n).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
+  function el(tag,cls,text){var e=document.createElement(tag);if(cls){e.className=cls;}if(text!==undefined){e.textContent=text;}return e;}
+  function priceOk(p){
+    if(state.price==='low'){return p.price<1500;}
+    if(state.price==='mid'){return p.price>=1500&&p.price<=2999;}
+    if(state.price==='high'){return p.price>=3000;}
+    return true;
+  }
+  function matches(p){
+    if(state.cat!=='All'&&p.cat!==state.cat){return false;}
+    if(state.size!=='All'&&p.sizes.indexOf(state.size)===-1){return false;}
+    return priceOk(p);
+  }
+  function card(p,showNewBadge){
+    var c=el('article','j2-card tl-card');
+    var ph=el('div','tl-photo','Photo coming soon');
+    ph.setAttribute('role','img');
+    ph.setAttribute('aria-label','Photo of '+p.name+' coming soon');
+    if(showNewBadge&&p.isNew){ph.appendChild(el('span','tl-badge','New'));}
+    c.appendChild(ph);
+    c.appendChild(el('p','tl-cat',p.cat));
+    c.appendChild(el('h3','tl-name',p.name));
+    c.appendChild(el('p','tl-price',money(p.price)));
+    c.appendChild(el('p','tl-sizes','Sizes: '+p.label));
+    var a=el('a','j2-btn','Order on WhatsApp');
+    a.href='https://wa.me/'+WA+'?text='+encodeURIComponent('Hi Thread & Loom, I would like to order: '+p.name);
+    a.target='_blank';
+    a.rel='noopener';
+    c.appendChild(a);
+    return c;
+  }
+  function render(){
+    var list=P.filter(matches);
+    elProducts.textContent='';
+    if(!list.length){
+      var e=el('div','j2-card tl-empty');
+      e.appendChild(el('p','', 'No products match these filters.'));
+      elProducts.appendChild(e);
+    }else{
+      list.forEach(function(p){elProducts.appendChild(card(p,true));});
+    }
+    elCount.textContent='Showing '+list.length+' of '+P.length+' products';
+  }
+  function renderNew(){
+    elNew.textContent='';
+    P.filter(function(p){return p.isNew;}).forEach(function(p){elNew.appendChild(card(p,false));});
+  }
+  chips.forEach(function(b){
+    b.addEventListener('click',function(){
+      state.cat=b.getAttribute('data-cat');
+      chips.forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+      render();
+    });
+  });
+  elSize.addEventListener('change',function(){state.size=elSize.value;render();});
+  elPrice.addEventListener('change',function(){state.price=elPrice.value;render();});
+  root.querySelector('#tl-reset').addEventListener('click',function(){
+    state={cat:'All',size:'All',price:'All'};
+    elSize.value='All';elPrice.value='All';
+    chips.forEach(function(x){x.setAttribute('aria-pressed',x.getAttribute('data-cat')==='All'?'true':'false');});
+    render();
+  });
+  renderNew();
+  render();
+})();
+</script>
+</div>
+<!-- J2:W-1 end -->
+</body>
+</html>

@@ -1,0 +1,93 @@
+[
+  {
+    "cycle": 1,
+    "version": 2,
+    "results": [
+      {
+        "criterion": "One HTML file, inline CSS and JS, no build step; external resources are CDN links",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Mechanical check shows 1 file, 19,566 bytes, 1 script and 0 JS errors. CSS is in one inline style block and JS in one inline script. The only external resources are Google Fonts (fonts.googleapis.com, fonts.gstatic.com), which are CDN links.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Gallery has at least six image slots, each visibly labeled as a placeholder",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The #gallery section has six figure.slot elements (g1 to g6). Each contains a visible label reading 'Placeholder photo 1' through 'Placeholder photo 6'. The section intro also carries a Placeholder tag.",
+        "severity": "low"
+      },
+      {
+        "criterion": "About section copy is visibly marked as sample copy",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The #about section shows 'Sample copy' and 'Replace with real bio' tags above the text. The first paragraph opens 'This is sample copy...' and the portrait slot and signature are tagged Placeholder.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Prominent inquiry section with form (name, email, message, submit) and a placeholder-marked endpoint or mailto target",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "#inquiry contains form#inquiry-form with inputs f-name, f-email, textarea f-message and a 'Send inquiry' submit button. The action is mailto:placeholder-email@example.com. A visible .form-target note reads 'Placeholder: form target.' The form has data-placeholder, and the submit handler blocks sending and shows a notice. The mechanical check found 1 form.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Visible inquiry CTA near the top links to the inquiry section",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The hero has a.btn 'Check your wedding date' with href=#inquiry. The sticky header also has an 'Inquire' link to #inquiry. The mechanical check reports no broken in-page links.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Contact email visible and marked as placeholder",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The contact list shows placeholder-email@example.com next to a 'Placeholder email' tag. The phone line shows '[PLACEHOLDER: phone number]' with a tag. The address uses the reserved example.com domain, so no real address is invented.",
+        "severity": "low"
+      },
+      {
+        "criterion": "CSS sets a light background and a minimal, photo-led layout, with no dark or full-bleed cinematic theme",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "--bg is #fbfaf8 and the about band is #f2efea. All content sits inside .wrap (max-width 1120px), so nothing is full-bleed. There are no dark sections. The mechanical check shows 0 px horizontal overflow at 360 px and 1280 px.",
+        "severity": "low"
+      },
+      {
+        "criterion": "No prices, packages or invented testimonials",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "A read of the full file found no currency amounts, package or tier names, or quotes attributed to people. No invented names, awards or credentials appear.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Every open input is visibly marked as a placeholder where it appears",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "Brand name is tagged in the title, header and footer. Photos are labeled in the hero, gallery and about. Bio, email, phone and form target are all marked. Warning: the hero h1 'Quiet, honest photographs of your day.' has no visible tag, and neither does the 'Selected work' heading. The swap guide lists 'hero copy', but a search for 'PLACEHOLDER' will not find the h1. The text is generic and makes no factual claim, so this is not a failure.",
+        "severity": "low"
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 19566,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com",
+        "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap",
+        "https://fonts.gstatic.com"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

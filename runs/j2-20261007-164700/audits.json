@@ -1,0 +1,118 @@
+[
+  {
+    "cycle": 1,
+    "version": 3,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page title and main heading say Brew Lab, and the text mentions Bengaluru",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "h1 is 'Brew Lab' and Bengaluru appears in the tagline. The head has two <title> tags ('Brew Lab' and 'Brew Lab | Cafe in Indiranagar, Bengaluru') and two <meta charset>; the browser uses the first, which still says Brew Lab.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "A menu section lists exactly these items and prices: Espresso ₹120, Cappuccino ₹180, Cold brew ₹200, Pour-over ₹220, Croissant ₹150, Banana bread ₹130",
+        "verdict": "PASS",
+        "note": "#menu has six li entries: Espresso ₹120, Cappuccino ₹180, Cold brew ₹200, Pour-over ₹220, Croissant ₹150, Banana bread ₹130. No extras.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "A timings section says the cafe is open 8am to 10pm every day and has no closed days",
+        "verdict": "PASS",
+        "note": "#timings reads 'Open every day, 8am to 10pm' and 'No closed days.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "A location section shows the address 100 Feet Road, Indiranagar, Bengaluru 560038, the phone number +91 80 4000 2468 as a tap-to-call link, and a directions link built from the address",
+        "verdict": "PASS",
+        "note": "#location has '100 Feet Road, Indiranagar, Bengaluru 560038', a[href='tel:+918040002468'] showing +91 80 4000 2468, and a Google Maps dir link with the URL-encoded address as destination.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A gallery section has at least 6 empty, labelled photo spots (cafe, food, drinks) ready to be filled in later",
+        "verdict": "PASS",
+        "note": "#gallery has 6 li.bl-photo-spot, each labelled 'Photo placeholder' with category (2 Cafe, 2 Food, 2 Drinks). There are no img tags, and a note says photos are coming soon.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A coffee stories section has three stories: Ratnagiri Estate (Chikmagalur, shade-grown coffee), Kerehaklu (Chikmagalur, coffee grown alongside pepper and cardamom) and Baarbara Estate (Coorg, only ripe cherries hand-picked)",
+        "verdict": "PASS",
+        "note": "#stories has three article cards: Ratnagiri Estate (Chikmagalur, shade-grown), Kerehaklu (Chikmagalur, grown alongside pepper and cardamom), Baarbara Estate (Coorg, hand-picks only ripe cherries). No added facts.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "A navigation menu links to the menu, timings, location, gallery and stories sections, and every in-page link points to an element that exists",
+        "verdict": "PASS",
+        "note": "The nav has #menu, #timings, #location, #gallery and #stories, and all five ids exist in the file. Mechanical check: broken_in_page_links is [].",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The layout has no horizontal overflow at 360px and 1280px widths and the file has no JavaScript errors",
+        "verdict": "PASS",
+        "note": "Mechanical check: overflow_px 0 at 360 and 1280, js_errors []. Confidence is medium because body has overflow-x:hidden, which could hide overflow, though the grids use minmax(0,1fr) and no fixed widths appear.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "mechanical": {
+      "available": true,
+      "bytes": 10348,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://www.google.com/maps/dir/?api=1&amp;destination=100%20Feet%20Road%2C%20Indiranagar%2C%20Bengaluru%20560038"
+      ],
+      "forms": 0,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [],
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

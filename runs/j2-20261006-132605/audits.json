@@ -1,0 +1,256 @@
+[
+  {
+    "cycle": 1,
+    "version": 3,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The site is a single HTML file with inline or CDN-loaded CSS and JavaScript and no build step",
+        "verdict": "PASS",
+        "note": "One file of 25,678 bytes with inline style and one inline script; the only external reference is a Google Maps link.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The file has a navigation linking to sections for Menu, Hours, Location, Pre-order, Gallery and Farms",
+        "verdict": "PASS",
+        "note": "nav has six anchors (#menu, #hours, #location, #preorder, #gallery, #farms), each matching a section id; broken_in_page_links is empty.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The Menu section lists items grouped by category, with each price present or marked as a placeholder",
+        "verdict": "PASS",
+        "note": "Three category blocks with three items each; every category, item and price is a .ph PLACEHOLDER span.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The Hours section lists opening times for all seven days, or marks them as placeholders",
+        "verdict": "PASS",
+        "note": "Hours table has rows Monday to Sunday, each marked PLACEHOLDER: opening hours.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The Location section names Indiranagar, Bengaluru, and has an address (or marked placeholder) and a map link or embed",
+        "verdict": "PASS",
+        "note": "'Brew Lab, Indiranagar, Bengaluru' present; address is a marked placeholder; 'Open in Google Maps' link uses the search URL with no API key.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The Pre-order section has a form with item selection, quantity, customer name, phone and pickup time, and produces an order summary; it offers no delivery option",
+        "verdict": "NEEDS_REVISION",
+        "note": "Mechanical check: forms 0. #preorder contains only a 'PLACEHOLDER: pre-order form ... not built yet' line and a pickup-only note; no inputs and no summary logic. No delivery option appears.",
+        "severity": "high",
+        "confidence": "high",
+        "item": 6,
+        "pass": false
+      },
+      {
+        "id": "F-7",
+        "criterion": "The Gallery section has at least 12 image slots shown in a large grid, each with alt text, and an enlarged view when an image is clicked",
+        "verdict": "PASS",
+        "note": "12 .g-item buttons, each with an img with non-empty alt and loading=lazy, in a 2/3/4-column grid; click handlers open the #lightbox dialog with prev/next/Esc. Slots are placeholders, which the charter allows.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The Farms section has three separate farm blocks, each with a name (or marked placeholder), location, a story of at least three paragraphs or labelled subsections, and an image slot",
+        "verdict": "PASS",
+        "note": "Three article.farm blocks, each with a placeholder name, a location line, three labelled subsections (History, The people, Growing and processing) and a lazy-loaded img with alt. No farm facts are invented.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The layout includes responsive CSS rules for narrow phone screens",
+        "verdict": "PASS",
+        "note": "Viewport meta present; @media (max-width:480px) rules exist; phone 360px overflow is 0 px and desktop 1280px overflow is 0 px.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "Every unsupplied fact in the file is visibly marked as a placeholder, and the file contains no API keys or paid-service dependencies",
+        "verdict": "PASS",
+        "note": "Every unsupplied fact I read (tagline, menu, hours, address, phone, farm details, photo captions) is in a .ph span; no keys or paid services found; JS errors none. Confidence is medium because it is a manual read of the markup.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 10,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "mechanical": {
+      "available": true,
+      "bytes": 25678,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://www.google.com/maps/search/?api=1&amp;query=Brew+Lab+Indiranagar+Bengaluru"
+      ],
+      "forms": 0,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": false
+  },
+  {
+    "cycle": 2,
+    "version": 4,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The site is a single HTML file with inline or CDN-loaded CSS and JavaScript and no build step",
+        "verdict": "PASS",
+        "note": "One 33,538-byte file with one inline style block and one script; the only external resource is a Google Maps link.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The file has a navigation linking to sections for Menu, Hours, Location, Pre-order, Gallery and Farms",
+        "verdict": "PASS",
+        "note": "Six nav anchors (#menu, #hours, #location, #preorder, #gallery, #farms) match section ids; broken_in_page_links is empty.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The Menu section lists items grouped by category, with each price present or marked as a placeholder",
+        "verdict": "PASS",
+        "note": "Three category blocks with three items each; every category, item and price is a .ph PLACEHOLDER span.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The Hours section lists opening times for all seven days, or marks them as placeholders",
+        "verdict": "PASS",
+        "note": "Table rows Monday to Sunday, each marked PLACEHOLDER: opening hours.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The Location section names Indiranagar, Bengaluru, and has an address (or marked placeholder) and a map link or embed",
+        "verdict": "PASS",
+        "note": "'Brew Lab, Indiranagar, Bengaluru' present; address is a marked placeholder; Google Maps search link with no API key.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The Pre-order section has a form with item selection, quantity, customer name, phone and pickup time, and produces an order summary; it offers no delivery option",
+        "verdict": "PASS",
+        "note": "forms=1 (#po-form) with select[name=item], qty, name, tel, time; submit handler fills #po-summary; the word 'delivery' appears nowhere; summary says 'Not sent yet'; JS errors none.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "The Gallery section has at least 12 image slots shown in a large grid, each with alt text, and an enlarged view when an image is clicked",
+        "verdict": "PASS",
+        "note": "12 .g-item buttons, each with an img with non-empty alt and loading=lazy; grid is 2/3/4 columns; click opens the #lightbox dialog with prev/next/Esc.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The Farms section has three separate farm blocks, each with a name (or marked placeholder), location, a story of at least three paragraphs or labelled subsections, and an image slot",
+        "verdict": "PASS",
+        "note": "Three article.farm blocks, each with a placeholder name, a location line, History/The people/Growing and processing subsections, and an img with alt.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The layout includes responsive CSS rules for narrow phone screens",
+        "verdict": "PASS",
+        "note": "Viewport meta and @media (max-width:480px) rules present; overflow is 0 px at 360px and at 1280px.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "Every unsupplied fact in the file is visibly marked as a placeholder, and the file contains no API keys or paid-service dependencies",
+        "verdict": "PASS",
+        "note": "Manual read of the markup: tagline, menu, hours, address, phone, lead time, order channel, farm details and photos are all .ph spans; no keys or paid dependencies found. Medium confidence because it is a manual read.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 10,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "mechanical": {
+      "available": true,
+      "bytes": 33538,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://www.google.com/maps/search/?api=1&amp;query=Brew+Lab+Indiranagar+Bengaluru"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

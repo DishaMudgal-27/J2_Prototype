@@ -1,0 +1,210 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 1,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 1",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 4,
+        "text": "@Priority Full scope priced on the rate card is 60 against a budget of 35, so I am proposing four small workflows in build order (W1 15, W2 15, W3 10, W4 20). My pick within 35 is W1 + W2 + W3 (40) trimmed by Priority, with the gallery lightbox as the first cut, but I want Priority's counter before reshaping. Trade-off: the brief's two headline asks (gallery and farm stories) cost 30 of the 60, and Priority may need to send the over-budget part to Identity.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 5,
+        "text": "@Adaptation COUNTER: I fund W1 + W2 (30 of 35). W3 and W4 (30) do not fit, and no part trim gets all four under 35. The 5 left cannot fund a fix (8), so I am not reserving it. Trade-off: the gallery and farm stories, the brief's two headline asks, stay unfunded this round. If you can reshape W3 or W4 to fit in 5, say so. Otherwise they go to Identity after the exchanges are used. Cost figures are rate-card prices, not measured spend.",
+        "position": "COUNTER: Page shell, hours and location (15), Menu and pickup pre-order form (15)",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 6,
+        "text": "@Identity I accept W1 + W2 (30 of 35); nothing I can build fits in the 5 left, since the cheapest part is styling at 5 and a gallery with lightbox or a farm story needs a page_section (10) or interactive_feature (10) at minimum. Policy question: the charter says keep the gallery and all three farm stories, but they cost 30 more (W3 10, W4 20) against 5 remaining. Please rule whether to ask the Requester to raise the budget to about 65, or to choose which to cut, and I will reshape W3/W4 to match. Trade-off I am accepting: the site ships without its two headline asks until that is decided. Costs are rate-card prices, not measured spend.",
+        "position": "accepts Priority's offer",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "priority",
+    "outcome": "Adaptation accepted Priority's COUNTER: Page shell, hours and location (15), Menu and pickup pre-order form (15) goes to the validator.",
+    "priority_final": [
+      {
+        "id": "w1-shell-info",
+        "name": "Page shell, hours and location",
+        "goal_gap": "No page exists: no Brew Lab name, navigation, hours or location.",
+        "expected_outcome": "Single HTML file with viewport meta, mobile-first CSS, header naming Brew Lab and Indiranagar, Bengaluru, jump-links to each section, a seven-day hours table and an address block with a map link, all unknowns marked as placeholders.",
+        "outputs": [
+          "index.html with shell, nav, hours and location sections"
+        ],
+        "completion_check": "File opens with no build step; nav links jump to every section; all 7 days are listed; address and map link are present; every unknown value is visibly labelled PLACEHOLDER.",
+        "dependencies": [],
+        "parts": [
+          "page_section",
+          "styling"
+        ],
+        "estimated_resources": {
+          "money": 15,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "envelope": {
+          "money_limit": 15,
+          "model_call_limit": 2,
+          "time_limit_minutes": 15,
+          "retry_limit": 1,
+          "stop_loss": "Stop if the second call has not produced a file that opens with working nav links and 7 listed days, or if time exceeds 15 minutes."
+        },
+        "estimate": 15,
+        "cost": 15
+      },
+      {
+        "id": "w2-menu-preorder",
+        "name": "Menu and pickup pre-order form",
+        "goal_gap": "Visitors cannot see the menu or pre-order for pickup.",
+        "expected_outcome": "A form whose item chooser is the menu, grouped by category with placeholder prices, with quantities, name, phone, pickup time, a running total and a submit that builds an order summary and hands off to a marked placeholder destination. No server.",
+        "outputs": [
+          "Menu and pre-order section added to index.html"
+        ],
+        "completion_check": "Items appear grouped by category; changing a quantity updates the total; submit shows an order summary and a destination labelled PLACEHOLDER; no network backend is called.",
+        "dependencies": [
+          "w1-shell-info"
+        ],
+        "parts": [
+          "form"
+        ],
+        "estimated_resources": {
+          "money": 15,
+          "calls": 1,
+          "time_minutes": 15
+        },
+        "envelope": {
+          "money_limit": 15,
+          "model_call_limit": 2,
+          "time_limit_minutes": 20,
+          "retry_limit": 1,
+          "stop_loss": "Stop if the second call still fails to update the total on quantity change or makes any network call, or if time exceeds 20 minutes."
+        },
+        "estimate": 15,
+        "cost": 15
+      }
+    ],
+    "adaptation_final": [
+      {
+        "id": "w1-shell-info",
+        "name": "Page shell, hours and location",
+        "goal_gap": "No page exists: no Brew Lab name, navigation, hours or location.",
+        "expected_outcome": "Single HTML file with viewport meta, mobile-first CSS, header naming Brew Lab and Indiranagar, Bengaluru, jump-links to each section, a seven-day hours table and an address block with a map link, all unknowns marked as placeholders.",
+        "outputs": [
+          "index.html with shell, nav, hours and location sections"
+        ],
+        "completion_check": "File opens with no build step; nav links jump to every section; all 7 days are listed; address and map link are present; every unknown value is visibly labelled PLACEHOLDER.",
+        "dependencies": [],
+        "parts": [
+          "page_section",
+          "styling"
+        ],
+        "estimated_resources": {
+          "money": 15,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "estimate": 15,
+        "cost": 15
+      },
+      {
+        "id": "w2-menu-preorder",
+        "name": "Menu and pickup pre-order form",
+        "goal_gap": "Visitors cannot see the menu or pre-order for pickup.",
+        "expected_outcome": "A form whose item chooser is the menu, grouped by category with placeholder prices, with quantities, name, phone, pickup time, a running total and a submit that builds an order summary and hands off to a marked placeholder destination. No server.",
+        "outputs": [
+          "Menu and pre-order section added to index.html"
+        ],
+        "completion_check": "Items appear grouped by category; changing a quantity updates the total; submit shows an order summary and a destination labelled PLACEHOLDER; no network backend is called.",
+        "dependencies": [
+          "w1-shell-info"
+        ],
+        "parts": [
+          "form"
+        ],
+        "estimated_resources": {
+          "money": 15,
+          "calls": 1,
+          "time_minutes": 15
+        },
+        "estimate": 15,
+        "cost": 15
+      },
+      {
+        "id": "w3-farm-stories",
+        "name": "Three coffee farm stories",
+        "goal_gap": "The page does not tell where the coffee comes from.",
+        "expected_outcome": "Three separate farm sections, each with name, location, multi-paragraph story and key details (altitude, variety, process), all marked as placeholders where unknown.",
+        "outputs": [
+          "Three farm story sections added to index.html"
+        ],
+        "completion_check": "Three distinct farm sections exist, each with name, location, at least 2 paragraphs and the three key details, and every unknown is labelled PLACEHOLDER.",
+        "dependencies": [
+          "w1-shell-info"
+        ],
+        "parts": [
+          "profiles"
+        ],
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "w4-gallery",
+        "name": "Photo gallery with lightbox",
+        "goal_gap": "The brief asks for a big cafe photo gallery; none exists.",
+        "expected_outcome": "Responsive grid of at least 12 lazy-loaded image slots with alt text and clearly marked placeholder images, opening in a lightbox.",
+        "outputs": [
+          "Gallery section and lightbox added to index.html"
+        ],
+        "completion_check": "At least 12 images in a responsive grid; each has non-empty alt text and loading=lazy; each is marked as a placeholder; clicking opens and closes a lightbox.",
+        "dependencies": [
+          "w1-shell-info"
+        ],
+        "parts": [
+          "page_section",
+          "interactive_feature"
+        ],
+        "estimated_resources": {
+          "money": 20,
+          "calls": 1,
+          "time_minutes": 15
+        },
+        "estimate": 20,
+        "cost": 20
+      }
+    ],
+    "attempts_used": 2,
+    "registered": [
+      "Page shell, hours and location",
+      "Menu and pickup pre-order form"
+    ]
+  }
+]

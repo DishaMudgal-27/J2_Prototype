@@ -1,0 +1,184 @@
+[
+  {
+    "cycle": 1,
+    "version": 2,
+    "results": [
+      {
+        "criterion": "The site is a single HTML file with its CSS and JavaScript inline, needing no build step.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "One HTML document with an inline <style> and an inline <script>. The only external resource is the Google Fonts stylesheet link, which falls under the CDN allowance. No build tooling is referenced.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The file has a viewport meta tag and responsive CSS, and the main buttons and form controls are at least 44px tall.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> is present. The CSS uses clamp() type sizes and a @media (min-width:640px) block. Sizes: .btn min-height 48px, .btn.small 44px, stepper buttons 44x44, text and time inputs 48px. The email fallback link uses .btn, so it is 48px.",
+        "severity": "low"
+      },
+      {
+        "criterion": "A visible Pre-order button or link in the header or first section scrolls to or opens the order form.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The sticky header has <a class=\"btn small\" href=\"#order\">Pre-order</a>. The hero has \"Pre-order for pickup\" with href=\"#order\". <section id=\"order\"> exists.",
+        "severity": "low"
+      },
+      {
+        "criterion": "In the file's source order, the order form and menu come before the beans and farms section and the loyalty section.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Source order: hero, #order (contains form#order-form), #menu, #hours, #location, #beans, #loyalty, footer.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The menu lists each item with a price shown in rupees.",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "All 5 menu <li> items show \"&#8377; ___\" with a \"Placeholder price\" marker. The rupee sign is present but no numeric price is, which fits the charter rule that prices are placeholders. Minor inconsistency: the menu note says prices are \"samples\", but none are shown. The order message omits prices because every data-price is empty.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The page has an opening hours section and a location section naming Indiranagar, Bengaluru.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "<section id=\"hours\"> has a table with 3 rows, each marked \"Placeholder hours\". <section id=\"location\"> has the heading \"Find us in Indiranagar\" and the text \"Indiranagar, Bengaluru\".",
+        "severity": "low"
+      },
+      {
+        "criterion": "The order form lets the visitor pick items from the menu, enter a name and a pickup time, and states that payment is at pickup.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The JS builds +/- steppers from #menu-list li, so the picker and the menu use the same items. The form has #cust-name (text) and #pickup-time (time). The page states \"Payment is at pickup\" and \"Payment at pickup. This page takes no payment.\" Validation requires at least one item, a name and a time.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The form's JavaScript builds a pre-filled order message and opens a WhatsApp link (wa.me) with a mailto link as fallback, and the page has no payment fields and no on-screen text claiming the order was placed.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "waUrl() returns \"https://wa.me/\" + WA_NUMBER + \"?text=\" + encodeURIComponent(msg), opened with window.open on submit. mailtoUrl() is used if the pop-up is blocked, and also by the #mail-link click handler. There are no card or payment inputs. Status text reads \"Your message is ready in WhatsApp. Press send there...\", which does not claim the order was placed. Medium confidence because this is a code read, not a run. With empty WA_NUMBER, wa.me/?text= opens a contact picker, which the page discloses.",
+        "severity": "low"
+      },
+      {
+        "criterion": "A beans and farms section exists and contains no farm name or sourcing claim that is not marked as a placeholder.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "<section id=\"beans\"> has 2 cards. Every farm name, region and sourcing detail is wrapped in a .ph \"Placeholder\" span. A note states that nothing there is a confirmed claim.",
+        "severity": "low"
+      },
+      {
+        "criterion": "A loyalty-card section states: buy 9, get the 10th free.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "<section id=\"loyalty\"> has the heading \"Buy 9, get the 10th free\" and the text \"buy 9, get the 10th free\". It also has a 10-box stamp graphic, with boxes 1 to 9 and a FREE box.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Every placeholder value (menu items and prices, hours, address, WhatsApp number, email, farm details) carries a visible on-page placeholder marker, and the file contains no unmarked invented facts.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Markers are present on menu items and prices, hours, street address, map, farm details, WhatsApp number, email (form note and footer), pickup rules, and the order-picker rows (added by JS). The remaining copy is brief-derived or generic marketing text, such as the hero headline. Medium confidence because I found no unmarked fact on a read, but I did not render the page.",
+        "severity": "low"
+      },
+      {
+        "criterion": "CSS variables define a warm colour palette that the page uses for backgrounds, text and buttons.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": ":root defines --bg #fbf4ea, --surface, --surface-alt, --text #2e1d14, --accent #9c4a1f and others. body uses var(--bg) and var(--text), and .btn uses var(--accent) and var(--accent-ink). The only hard-coded colour is the error text #8a1c0f, which is minor.",
+        "severity": "low"
+      }
+    ],
+    "all_pass": true
+  },
+  {
+    "cycle": 2,
+    "version": 3,
+    "results": [
+      {
+        "criterion": "The site is a single HTML file with its CSS and JavaScript inline, needing no build step.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "One document with an inline <style> and <script>. The only external resource is the Google Fonts link, which counts as a CDN.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The file has a viewport meta tag and responsive CSS, and the main buttons and form controls are at least 44px tall.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Viewport meta is present, plus clamp() type sizes and a @media (min-width:640px) block. .btn is 48px, .btn.small is 44px, stepper buttons are 44x44, and text and time inputs are 48px. The new visiting-hours CTA uses .btn.",
+        "severity": "low"
+      },
+      {
+        "criterion": "A visible Pre-order button or link in the header or first section scrolls to or opens the order form.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Header has <a class=\"btn small\" href=\"#order\">Pre-order</a>, the hero has \"Pre-order for pickup\" href=\"#order\", and <section id=\"order\"> exists.",
+        "severity": "low"
+      },
+      {
+        "criterion": "In the file's source order, the order form and menu come before the beans and farms section and the loyalty section.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Source order: hero, #order, #menu, #hours, #visiting-hours, #location, #beans, #loyalty, footer. W-3 did not change the relative order.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The menu lists each item with a price shown in rupees.",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "All 5 menu <li> items show \"&#8377; ___\" with a \"Placeholder price\" marker. The menu note calls the prices \"samples\" but none are shown. The order message omits prices because every data-price is empty.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The page has an opening hours section and a location section naming Indiranagar, Bengaluru.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "#hours has 3 rows, each marked \"Placeholder hours\". #location has the heading \"Find us in Indiranagar\" and the text \"Indiranagar, Bengaluru\". The added #visiting-hours section sits between them and does not disturb either.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The order form lets the visitor pick items from the menu, enter a name and a pickup time, and states that payment is at pickup.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The stepper rows are built from #menu-list li. #cust-name is a text input and #pickup-time is a time input. The page says \"Payment is at pickup\" and \"Payment at pickup. This page takes no payment.\" buildMessage() requires at least one item, a name and a time. Code read only.",
+        "severity": "low"
+      },
+      {
+        "criterion": "The form's JavaScript builds a pre-filled order message and opens a WhatsApp link (wa.me) with a mailto link as fallback, and the page has no payment fields and no on-screen text claiming the order was placed.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "waUrl() returns \"https://wa.me/\" + WA_NUMBER + \"?text=\" + encodeURIComponent(msg), opened with window.open. mailtoUrl() is used if the pop-up is blocked and by the #mail-link click handler. There are no payment inputs. Status text says \"Your message is ready in WhatsApp. Press send there...\", which does not claim the order was placed. The word \"confirmed\" appears only in placeholder notes about hours and farms. Not run, so the pop-up behaviour is unverified.",
+        "severity": "low"
+      },
+      {
+        "criterion": "A beans and farms section exists and contains no farm name or sourcing claim that is not marked as a placeholder.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "#beans has 2 cards. Every farm name, region and sourcing detail is wrapped in a .ph \"Placeholder\" span, and a note says nothing there is a confirmed claim.",
+        "severity": "low"
+      },
+      {
+        "criterion": "A loyalty-card section states: buy 9, get the 10th free.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "#loyalty has the heading \"Buy 9, get the 10th free\" and the text \"The rule is simple: buy 9, get the 10th free.\" It also has a 10-box stamp graphic.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Every placeholder value (menu items and prices, hours, address, WhatsApp number, email, farm details) carries a visible on-page placeholder marker, and the file contains no unmarked invented facts.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Markers cover menu items and prices, hours, the three new visiting-hours rows (Busiest, Quieter, Pickup window), street address, map, farm details, WhatsApp number, email and pickup rules. Remaining copy is generic or brief-derived. I found no unmarked time, address or sourcing claim on a read, but I did not render the page.",
+        "severity": "low"
+      },
+      {
+        "criterion": "CSS variables define a warm colour palette that the page uses for backgrounds, text and buttons.",
+        "verdict": "PASS",
+        "pass": true,
+        "note": ":root defines --bg #fbf4ea, --text #2e1d14 and --accent #9c4a1f among others. body uses var(--bg) and var(--text), .btn uses var(--accent), and the #visiting-hours CSS uses existing variables. The only hard-coded colour is the error text #8a1c0f, which is minor.",
+        "severity": "low"
+      }
+    ],
+    "all_pass": true
+  }
+]

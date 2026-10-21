@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#4A2E1F",
+    "secondary": "#F1E4D3",
+    "accent": "#B4531F",
+    "background": "#FBF6EF",
+    "surface": "#FFFFFF",
+    "text": "#2B1B12",
+    "muted": "#6B5547"
+  },
+  "fonts": {
+    "heading": "'Fraunces', Georgia, serif",
+    "body": "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif",
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "64px"
+  },
+  "radius": "12px",
+  "buttons": {
+    "primary": "background:#4A2E1F;color:#FFFFFF;border:2px solid #4A2E1F;min-height:48px;padding:12px 24px;border-radius:12px;font-weight:600;font-size:1rem;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer",
+    "secondary": "background:transparent;color:#4A2E1F;border:2px solid #4A2E1F;min-height:48px;padding:12px 24px;border-radius:12px;font-weight:600;font-size:1rem;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer"
+  },
+  "card": "background:#FFFFFF;border:1px solid #E6D5C0;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(43,27,18,0.08)",
+  "notes": "Warm espresso browns on cream feel like a specialty cafe, and every text and button pair clears WCAG AA."
+}

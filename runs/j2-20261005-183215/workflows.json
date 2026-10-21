@@ -1,0 +1,81 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "wf-site-core",
+    "name": "Build site core: emergency, language switcher, three-language text",
+    "purpose": "No site file exists (site_versions is 0). The emergency section, language switcher and review notes are missing.",
+    "cost": 3,
+    "estimate": 2,
+    "envelope": {
+      "money_limit": 3,
+      "model_call_limit": 4,
+      "time_limit_minutes": 30,
+      "retry_limit": 1,
+      "stop_loss": "Stop and report if spend exceeds 3 money or 4 calls before the completion check passes, or if the check fails after 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "citycare.html (v1)"
+    ],
+    "completion_check": "Open the file with no build step. Switching among EN, KN and HI changes all visible text. Emergency placeholders and the local-emergency line show at the top in all three languages. The KN and HI views show the review note. A text search finds no phone-number or email-shaped values other than the named placeholder constants.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "wf-site-sections",
+    "name": "Add visit-request form, doctor cards and health blog",
+    "purpose": "The core file has no booking form, doctor profiles or blog, so the visit-request, doctor and blog done-when items are open.",
+    "cost": 4,
+    "estimate": 3,
+    "envelope": {
+      "money_limit": 4,
+      "model_call_limit": 5,
+      "time_limit_minutes": 40,
+      "retry_limit": 1,
+      "stop_loss": "Stop and report if spend exceeds 4 money or 5 calls before the completion check passes, or if v2 breaks any v1 completion check and is not fixed in 1 retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "citycare.html (v2)"
+    ],
+    "completion_check": "Submitting the form builds a wa.me or mailto link containing the entered field values and the placeholder constant, with no network call and nothing stored. The no-live-slots note shows near the form in EN, KN and HI. Every doctor card shows a marked placeholder name and credential. Every blog post shows the general-information label in all three languages. The language switcher still works for the new sections.",
+    "dependencies": [
+      "wf-site-core"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "wf-fix-doctor-line",
+    "name": "Fix preferred doctor line and channel-specific draft note in visit-request message",
+    "purpose": "The prefilled message prints raw option values (doc1, any) instead of readable doctor labels, and the draft note shows when only the unused channel's constant is a placeholder.",
+    "cost": 2,
+    "estimate": 1,
+    "envelope": {
+      "money_limit": 2,
+      "model_call_limit": 3,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop and report actual spend if spend exceeds 2 money or 3 calls before the completion check passes, or if v3 breaks any v1 or v2 check and 1 retry does not fix it."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "citycare.html (v3)"
+    ],
+    "completion_check": "For each of the four doctor choices (three cards and 'any'), the built wa.me and mailto text contains the readable English label and no raw value such as doc1 or any. The draft note shows when the chosen channel's constant is a placeholder and hides when it is not. There is no network call and nothing stored. The EN, KN and HI switcher, the emergency block and all v1 and v2 checks still pass.",
+    "dependencies": [
+      "wf-site-sections"
+    ],
+    "status": "done",
+    "cycle": 2
+  }
+]

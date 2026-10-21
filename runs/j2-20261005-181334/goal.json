@@ -1,0 +1,30 @@
+{
+  "statement": "Build a one-file website for CityCare Hospital in Bengaluru where patients can request a visit and find emergency information.",
+  "site_name": "CityCare Hospital",
+  "audience": "Patients of CityCare Hospital in Bengaluru, including people looking for emergency information.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file; CDN libraries allowed; no build step.",
+    "Emergency information is easy to find and readable at a glance.",
+    "No invented hospital facts: phone numbers, address and ER hours are clearly marked placeholders until the Requester confirms them.",
+    "Public emergency numbers 112 (general) and 108 (ambulance) are shown, with Audit verifying them.",
+    "The booking form collects only name, phone, department and preferred date/time, and nothing else.",
+    "Nothing entered in the form is stored or sent from the page.",
+    "A short privacy notice is shown with the form."
+  ],
+  "rules": [
+    "Booking is a 'Request a visit' form, not a slot picker; no availability is shown.",
+    "After submit, the confirmation states that the hospital will call to confirm; it never implies a held appointment.",
+    "Do not ask for symptoms or medical history.",
+    "Do not invent CityCare phone numbers, address or ER hours.",
+    "Mark the form as a demo that needs a real backend and consent handling before it takes live requests."
+  ],
+  "done_when": [
+    "The site is a single HTML file that opens and works with no build step.",
+    "A 'Request a visit' form with name, phone, department and preferred date/time shows a confirmation that the hospital will call to confirm.",
+    "The form collects no symptoms or history, stores nothing and sends nothing, and a short privacy notice is visible.",
+    "An emergency section shows 112 (general) and 108 (ambulance), and Audit has verified both.",
+    "All CityCare-specific details (phone, address, ER hours) are either clearly marked placeholders or replaced with details confirmed by the Requester.",
+    "Before launch, the Requester has confirmed the real phone numbers, address and ER hours, and the site shows them.",
+    "Audit has checked the site against these standards and rules and found no open material defect."
+  ]
+}

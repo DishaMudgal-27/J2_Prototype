@@ -1,0 +1,41 @@
+{
+  "statement": "Build a one-file website for Sweet Crumbs Bakery in Pune with a menu, a cake order form that opens a prefilled WhatsApp chat, and a contact section.",
+  "site_name": "Sweet Crumbs Bakery",
+  "audience": "Customers in Pune who want to browse the bakery's menu, order a cake, or contact the bakery.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file; CDN libraries allowed; no build step.",
+    "Readable and usable on a phone screen as well as a desktop.",
+    "No invented facts: any figure or detail not given in the brief or the CEO's decisions appears as a visibly marked placeholder.",
+    "The site takes no payment and stores no customer data."
+  ],
+  "rules": [
+    "Cake prices are shown as 'starting from'; all other menu items show fixed prices.",
+    "Cake orders are placed through a form that opens WhatsApp with the details prefilled; every order is confirmed manually by the bakery.",
+    "Fulfilment is pickup or delivery within a named list of Pune areas, kept in one editable block.",
+    "Every placeholder is visibly marked on the page and listed in open_inputs."
+  ],
+  "done_when": [
+    "The file is a single HTML file with its CSS and JavaScript inside it, and needs no build step or server.",
+    "The page names Sweet Crumbs Bakery and Pune, and has three clearly labelled sections: menu, cake orders, contact.",
+    "The menu section lists items in groups; cake entries show a 'starting from' price and non-cake entries show a fixed price; any price not yet known is a visibly marked placeholder.",
+    "The cake order section has a form with fields for cake details (size, flavour, date, message), pickup or delivery choice, delivery area and delivery address.",
+    "Submitting the form opens a WhatsApp link (wa.me) whose message text is built from the form fields; the WhatsApp number is a single marked placeholder value in the script.",
+    "The page states that delivery is available within a named list of Pune areas plus pickup, and the area list is in one editable block; if areas are not yet known the block holds marked placeholders.",
+    "The page states that orders are confirmed by the bakery after the WhatsApp message is sent.",
+    "The contact section shows the bakery's address, phone, WhatsApp link and opening hours; any value not yet known is a visibly marked placeholder.",
+    "The file contains no payment processing, no server calls and no storage of customer data.",
+    "Every placeholder in the file uses one consistent visible marker, and each one corresponds to an entry in open_inputs.",
+    "The file includes a responsive layout rule (viewport meta tag and a small-screen style) so the three sections stack and stay readable on a phone."
+  ],
+  "open_inputs": [
+    "Bakery WhatsApp number for order messages and the contact link.",
+    "Menu items and their categories (cakes and non-cake items).",
+    "'Starting from' prices for cakes and fixed prices for non-cake items.",
+    "Named list of Pune areas for delivery.",
+    "Bakery street address for pickup and the contact section.",
+    "Bakery phone number.",
+    "Opening hours.",
+    "Any logo, photos or brand colours the bakery wants used."
+  ],
+  "dropped_from_brief": []
+}

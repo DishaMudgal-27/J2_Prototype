@@ -1,0 +1,314 @@
+[
+  {
+    "cycle": 1,
+    "version": 5,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The opening hours section lists Monday to Friday 8am to 10pm and Saturday and Sunday 9am to 11pm, with no closed days, and JavaScript highlights today's row automatically based on the current day.",
+        "verdict": "PASS",
+        "note": "Table has 7 rows with the stated hours; highlightToday() adds class 'today' and a Today badge by Asia/Kolkata weekday; no JS errors reported.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The menu shows all six items, each with its price in ₹: Espresso 120, Cappuccino 180, Pour-over 220, Cold brew 200, Croissant 150, Banana bread 130, grouped as Coffee, Cold and Food.",
+        "verdict": "NEEDS_REVISION",
+        "note": "Two items on the menu have no price next to them, so the menu with prices isn't complete.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": false,
+        "forced_test": true,
+        "real_verdict": "PASS: #menu has Coffee (₹120, ₹180, ₹220), Cold (₹200) and Food (₹150, ₹130); all prices match the charter."
+      },
+      {
+        "id": "F-3",
+        "criterion": "The pre-order form offers all six menu items with a quantity control for each, and shows a running total in ₹ that updates as quantities change.",
+        "verdict": "PASS",
+        "note": "buildItems() renders -/+ buttons and a number input for each of the 6 items; updateTotal() writes money(total()) to #bl-order-total on click and input.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The pre-order form collects name, phone and pickup time, and rejects a pickup time outside that day's opening hours.",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "validate() checks name, phone and time, and rejects m < openMin or m > closeMin with a message. A pickup at exactly closing time (10pm or 11pm) is accepted, which is a debatable edge.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "On valid submit, the form opens WhatsApp for +91 98450 00000 with a message containing the name, phone, pickup time, items ordered and the total in ₹, and the form states that payment is at pickup.",
+        "verdict": "PASS",
+        "note": "buildUrl() returns https://wa.me/919845000000?text=... and the message includes Name, Phone, Pickup time, Items, Total in ₹ and 'Payment at pickup.'; the form text says 'Payment is at pickup'. Opened via window.open with a link fallback.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The loyalty section shows exactly 10 stamp circles, with the 10th marked FREE, and text stating the 10th stamp gives one free drink of any size.",
+        "verdict": "PASS",
+        "note": "The ol.bl-stamps list has 10 li.bl-stamp elements, the 10th labelled FREE; the text says 'The 10th stamp gives you one free drink of any size.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "The location section shows the address 100 Feet Road, Indiranagar, Bengaluru 560038 and a link labelled \"Get directions\" pointing to https://maps.google.com/?q=100+Feet+Road+Indiranagar+Bengaluru+560038.",
+        "verdict": "PASS",
+        "note": "The address element reads '100 Feet Road, Indiranagar, Bengaluru 560038'; the link 'Get directions' has an href that matches the charter URL exactly.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "At 360px and 1280px viewport widths the page has no horizontal overflow, and all content and the form remain usable.",
+        "verdict": "PASS",
+        "note": "Mechanical check: overflow_px 0 at both 360 and 1280. Stamps use a 5-column grid below 640px, and the form fields are full width.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The page runs with no JavaScript errors and has no broken in-page links.",
+        "verdict": "PASS",
+        "note": "Mechanical check: js_errors [], broken_in_page_links [], form submit ok with no errors. Nav links #hours, #menu, #preorder, #loyalty and #location all have matching section ids.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-10",
+        "criterion": "Standards: valid single-file HTML",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The head has two <title> and two <meta charset> tags (the shell's, then W-1's block). Browsers use the first title, 'Brew Lab', so the richer W-1 title is ignored.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-11",
+        "criterion": "Standards: valid single-file HTML",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "<main> is opened in W-1's block but never closed; the file goes from the W-5 section straight to </body>. Browsers auto-close it, and layout and the mechanical check are unaffected.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 27748,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://maps.google.com/?q=100+Feet+Road+Indiranagar+Bengaluru+560038"
+      ],
+      "forms": 1,
+      "scripts": 3,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "js_errors": []
+    },
+    "all_pass": false
+  },
+  {
+    "cycle": 2,
+    "version": 6,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The opening hours section lists Monday to Friday 8am to 10pm and Saturday and Sunday 9am to 11pm, with no closed days, and JavaScript highlights today's row automatically based on the current day.",
+        "verdict": "PASS",
+        "note": "7 rows with the stated hours; highlightToday() adds class 'today' and a Today badge by Asia/Kolkata weekday; js_errors is empty.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The menu shows all six items, each with its price in ₹: Espresso 120, Cappuccino 180, Pour-over 220, Cold brew 200, Croissant 150, Banana bread 130, grouped as Coffee, Cold and Food.",
+        "verdict": "PASS",
+        "note": "The W-2 markup has 6 li rows, each with a .bl-item-price span (₹120, ₹180, ₹220, ₹200, ₹150, ₹130) under h3 Coffee, Cold and Food. The price CSS sets visibility visible, opacity 1 and dark ink on a white card. The load-time self-check restores any missing price. I did not see a rendered screenshot, and W-6 could not reproduce the v5 cause.",
+        "severity": "medium",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The pre-order form offers all six menu items with a quantity control for each, and shows a running total in ₹ that updates as quantities change.",
+        "verdict": "PASS",
+        "note": "buildItems() renders -/+ buttons and a number input for each menu item; updateTotal() writes money(total()) to #bl-order-total on click, input and change.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The pre-order form collects name, phone and pickup time, and rejects a pickup time outside that day's opening hours.",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "validate() checks all three fields and rejects m < openMin or m > closeMin. A pickup at exactly closing time (10pm or 11pm) is accepted.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "On valid submit, the form opens WhatsApp for +91 98450 00000 with a message containing the name, phone, pickup time, items ordered and the total in ₹, and the form states that payment is at pickup.",
+        "verdict": "PASS",
+        "note": "buildUrl() returns https://wa.me/919845000000?text=...; the message has Name, Phone, Pickup time, Items, Total in ₹ and 'Payment at pickup.'; the form says 'Payment is at pickup.' The mechanical form submit was ok with no errors.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The loyalty section shows exactly 10 stamp circles, with the 10th marked FREE, and text stating the 10th stamp gives one free drink of any size.",
+        "verdict": "PASS",
+        "note": "ol.bl-stamps has 10 li.bl-stamp elements, the 10th labelled FREE; the text reads 'The 10th stamp gives you one free drink of any size.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "The location section shows the address 100 Feet Road, Indiranagar, Bengaluru 560038 and a link labelled \"Get directions\" pointing to https://maps.google.com/?q=100+Feet+Road+Indiranagar+Bengaluru+560038.",
+        "verdict": "PASS",
+        "note": "The address element reads '100 Feet Road, Indiranagar, Bengaluru 560038'; the 'Get directions' href equals the charter URL exactly.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "At 360px and 1280px viewport widths the page has no horizontal overflow, and all content and the form remain usable.",
+        "verdict": "PASS",
+        "note": "Mechanical check: overflow_px 0 at 360 and at 1280. Stamps use a 5-column grid below 640px, and form fields are full width.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The page runs with no JavaScript errors and has no broken in-page links.",
+        "verdict": "PASS",
+        "note": "Mechanical check: js_errors [], broken_in_page_links [], form submit ok. Nav targets #hours, #menu, #preorder, #loyalty and #location all exist.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-10",
+        "criterion": "Standards: clean single-file HTML",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The head has two <title> tags (Brew Lab, then Brew Lab | Cafe in Indiranagar, Bengaluru) and two <meta charset> tags. Browsers tolerate this, but the first title wins in some cases.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-11",
+        "criterion": "Standards: valid document structure",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "<main> is opened in the W-1 section but there is no </main> before </body>; the comment says an assembler closes it, and none does. Browsers auto-close it, so there is no visible effect.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 28288,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://maps.google.com/?q=100+Feet+Road+Indiranagar+Bengaluru+560038"
+      ],
+      "forms": 1,
+      "scripts": 3,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

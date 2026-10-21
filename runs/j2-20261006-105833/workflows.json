@@ -1,0 +1,82 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "wf-base-menu-contact",
+    "name": "Single-file base page with menu and contact sections",
+    "purpose": "No site file exists. Needed: one HTML file naming Sweet Crumbs Bakery and Pune, with grouped menu and contact sections, responsive on phones.",
+    "cost": 25,
+    "estimate": 25,
+    "envelope": {
+      "money_limit": 25,
+      "model_call_limit": 4,
+      "time_limit_minutes": 25,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the file is not produced after one retry, or if spend exceeds 25."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site.html with header, menu section, contact section, responsive CSS, placeholder markers"
+    ],
+    "completion_check": "The file opens locally without a server. It contains 'Sweet Crumbs Bakery' and 'Pune', a grouped menu section, and a contact section with address, phone, WhatsApp link and hours. Cake entries show 'starting from' and non-cake entries show a fixed price or a [PLACEHOLDER: ...] marker. A viewport meta tag and a small-screen media query are present. No payment code, fetch or XHR calls, or storage use.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "wf-cake-order-whatsapp",
+    "name": "Cake order section with WhatsApp prefilled form",
+    "purpose": "No way to order a cake. Needed: a form that opens a prefilled WhatsApp chat, delivery areas in one editable block, and a manual-confirmation notice.",
+    "cost": 35,
+    "estimate": 35,
+    "envelope": {
+      "money_limit": 35,
+      "model_call_limit": 4,
+      "time_limit_minutes": 30,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the wa.me submit does not build a message from the form fields after one retry, or if spend exceeds 35."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site.html updated with cake orders section, order form, WhatsApp submit script, delivery area block, confirmation notice"
+    ],
+    "completion_check": "The section is labelled for cake orders and has all required form fields. The submit handler builds a wa.me URL from the field values, with the number as one marked placeholder constant. The delivery area list is a single editable block. The page states that orders are confirmed by the bakery after the WhatsApp message. No fetch, XHR, payment code or localStorage/cookie use. The section stacks on small screens.",
+    "dependencies": [
+      "wf-base-menu-contact"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "wf-fix-mobile-overflow",
+    "name": "Fix 360px horizontal overflow in site.html",
+    "purpose": "At 360px the page overflows horizontally by 61px (desktop 1280px has none), so done-when item 11 (readable on a phone) fails.",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 2,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if 360px overflow_px is still above 0 after one retry, or if spend exceeds 8, or if the fix changes any placeholder, form field, wa.me script or area block."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site.html updated with CSS-only fixes for the overflow, e.g. box-sizing: border-box, max-width: 100% and width: 100% on form controls, min-width: 0 on grid and flex children, overflow-wrap: anywhere on .ph and contact text"
+    ],
+    "completion_check": "At a 360px viewport, document scrollWidth equals clientWidth (overflow_px is 0), and desktop 1280px still shows 0 overflow. The viewport meta tag and the max-width: 640px media query are still present. All [PLACEHOLDER] markers, the form fields, the wa.me submit script and the delivery area block are unchanged. No fetch, XHR, storage or payment code is added.",
+    "dependencies": [
+      "wf-base-menu-contact",
+      "wf-cake-order-whatsapp"
+    ],
+    "status": "done",
+    "cycle": 2
+  }
+]

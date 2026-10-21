@@ -1,0 +1,39 @@
+{
+  "statement": "Build a one-page website for Brew Lab, a specialty coffee shop in Indiranagar, Bengaluru, with a menu with prices, opening hours, location, a pre-order for pickup, a section about its beans and farms, and a loyalty card explainer (buy 9, get the 10th free).",
+  "site_name": "Brew Lab",
+  "audience": "Coffee drinkers in and around Indiranagar, Bengaluru who want to see the menu, find the shop, pre-order a coffee for pickup and learn about the loyalty card.",
+  "standards": [
+    "One HTML file with inline CSS and JavaScript; CDN libraries allowed; no build step; no server code",
+    "Plain English copy, readable on phone and desktop",
+    "No invented prices, hours, address, farm names, bean origins or phone numbers; every unknown fact is shown as a visible TBC tag"
+  ],
+  "rules": [
+    "Pre-order reaches the shop as a prefilled WhatsApp message to the shop's number; the page has no backend and stores no customer data",
+    "The page states that a pre-order is a request until staff confirm on WhatsApp",
+    "Payment is at pickup only; the page collects no online payment",
+    "The customer chooses a pickup time slot at order time, labelled as a request, not a promised ready time",
+    "Facts only the Requester can supply are shown as marked TBC placeholders and tracked in open_inputs; they do not block done"
+  ],
+  "done_when": [
+    "The site is a single HTML file with its CSS and JavaScript inline, needing no build step and no server code",
+    "The file has one page with a menu section listing drinks, each with a price in rupees or a visible TBC tag",
+    "The file has an opening hours section covering every day of the week, with each unknown time shown as a visible TBC tag",
+    "The file has a location section naming Indiranagar, Bengaluru, with the street address and map pin shown as visible TBC tags until supplied",
+    "The file has a pre-order section where a customer picks items and quantities, enters a name and chooses a pickup slot, and a button opens a WhatsApp link with the order text prefilled",
+    "The pre-order section states that payment is at pickup and that the order is a request until staff confirm on WhatsApp, and the file contains no payment or card-entry form",
+    "The WhatsApp number in the pre-order link is a visible TBC placeholder, not an invented number",
+    "The file has a beans and farms section in which every bean origin and farm name is a visible TBC tag and no unsupplied sourcing claim appears",
+    "The file has a loyalty card section stating buy 9 coffees, get the 10th free",
+    "Every price, hour, address, map pin, bean origin, farm name and phone number in the file is either marked with a visible TBC tag or removed; none is invented"
+  ],
+  "open_inputs": [
+    "Menu items and the price of each",
+    "Opening hours for each day",
+    "Street address and map pin",
+    "Shop WhatsApp number for pre-orders",
+    "Pickup slot times and the number of orders the shop can take per slot",
+    "Bean origins and farm names for the beans and farms section",
+    "Loyalty card details beyond buy 9, get the 10th free, such as which items count"
+  ],
+  "dropped_from_brief": []
+}

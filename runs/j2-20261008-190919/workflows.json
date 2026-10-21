@@ -1,0 +1,370 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "shell-nav",
+    "name": "Page shell, header and navigation",
+    "covers": [
+      8
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The site name Kaveri Kitchen appears in the page title and header, and a navigation lets visitors jump to menu, specials, booking, photos, reviews and contact"
+    ],
+    "purpose": "No page exists yet: no title, header, viewport tag or navigation.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 2,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the nav has any link without a matching section id after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "head with title and viewport",
+      "header with site name",
+      "nav with six in-page links"
+    ],
+    "completion_check": "Title and header contain 'Kaveri Kitchen'. The nav has six links, each pointing to an existing section id. The viewport meta tag is present.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "style guide, usable section and head tags",
+    "style_guide": true,
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "menu-filter",
+    "name": "Priced menu with veg/non-veg filter",
+    "covers": [
+      1,
+      2
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The menu lists exactly these 11 dishes with prices in rupees: Starters: Medu vada 120, Veg cutlet 140, Chicken 65 260. Mains: Masala dosa 160, Mysore dosa 180, Idli sambar 110, Veg thali 280, Chicken chettinad 340, Fish curry meal 360. Desserts: Payasam 100, Filter coffee 60",
+      "Each dish is marked veg or non-veg (non-veg: Chicken 65, Chicken chettinad, Fish curry meal; all others veg), and All, Veg and Non-veg filter buttons show only the matching dishes"
+    ],
+    "purpose": "Visitors cannot see dishes, prices or veg status, and cannot filter.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 3,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if dish count or filter counts are wrong after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#menu section",
+      "dish data list",
+      "filter buttons and script"
+    ],
+    "completion_check": "Exactly 11 dishes with the charter prices are listed. Veg shows 8 dishes, Non-veg shows 3, All shows 11. No JS errors.",
+    "dependencies": [
+      "shell-nav"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "specials",
+    "name": "Today's specials",
+    "covers": [
+      3
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A Today's specials section shows Mysore dosa and Fish curry meal"
+    ],
+    "purpose": "No specials are shown.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any dish other than the two specials appears after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#specials section",
+      "specials list"
+    ],
+    "completion_check": "#specials shows exactly Mysore dosa and Fish curry meal, with no price cuts or offer wording.",
+    "dependencies": [
+      "shell-nav"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "booking",
+    "name": "WhatsApp table booking",
+    "covers": [
+      4
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A Book a table button opens WhatsApp (wa.me link) for +91 00000 33333 with a prefilled message asking for name, date, time and number of people, and the page says tables are for 1 to 8 people"
+    ],
+    "purpose": "Visitors cannot book a table.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 2,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the wa.me number or message fields are wrong after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#booking section",
+      "wa.me link with encoded message"
+    ],
+    "completion_check": "The button href starts with https://wa.me/910000033333?text=, the message mentions name, date, time and number of people, and the text '1 to 8 people' is on the page.",
+    "dependencies": [
+      "shell-nav"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "photos",
+    "name": "Dish photo spots",
+    "covers": [
+      6
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A dish photo section shows empty labelled photo spots for dishes, with no fake or stock photos"
+    ],
+    "purpose": "No place for dish photos.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any img tag or image URL is added."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#photos section",
+      "labelled empty photo spots"
+    ],
+    "completion_check": "#photos has labelled empty spots and the file has no img tag or external image URL.",
+    "dependencies": [
+      "shell-nav"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section",
+    "version": 5
+  },
+  {
+    "id": "W-6",
+    "proposal_id": "reviews",
+    "name": "Customer reviews",
+    "covers": [
+      7
+    ],
+    "fixes": [],
+    "covers_text": [
+      "A reviews section shows exactly these three: \"Best dosa in Kothrud\" by Anita R., \"Feels like home\" by Vikram S., \"Great filter coffee\" by Neha P."
+    ],
+    "purpose": "No reviews are shown.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any invented review, rating or reviewer appears."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#reviews section"
+    ],
+    "completion_check": "#reviews contains exactly three review cards with the charter text and reviewer names, and nothing else invented.",
+    "dependencies": [
+      "shell-nav"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-6",
+    "revises": null,
+    "agent": "W-6 Builder",
+    "last_check": "usable section",
+    "version": 6
+  },
+  {
+    "id": "W-7",
+    "proposal_id": "contact",
+    "name": "Address, hours and phone",
+    "covers": [
+      5
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The page shows the address 7 Karve Road, Kothrud, Pune 411038, the hours 8am to 10:30pm every day with kitchen closing at 10pm, and the restaurant phone +91 00000 44444 as a tap-to-call link"
+    ],
+    "purpose": "Visitors cannot find where or when.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if address, hours or phone differ from the charter after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "#contact section",
+      "tel link"
+    ],
+    "completion_check": "#contact has the exact address, hours and kitchen-close text, and a tel:+910000044444 link.",
+    "dependencies": [
+      "shell-nav"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-7",
+    "revises": null,
+    "agent": "W-7 Builder",
+    "last_check": "usable section",
+    "version": 7
+  },
+  {
+    "id": "W-8",
+    "proposal_id": "footer-clean",
+    "name": "Footer and content hygiene",
+    "covers": [
+      10
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The file contains no offers or discounts and no placeholder text such as lorem ipsum or TBD"
+    ],
+    "purpose": "Nothing yet guarantees the file stays free of offers, discounts and placeholder text.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any banned word remains after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "footer section"
+    ],
+    "completion_check": "The file has no 'lorem', 'TBD', 'offer', 'discount' or '% off' text, and the footer is present.",
+    "dependencies": [
+      "shell-nav"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-8",
+    "revises": null,
+    "agent": "W-8 Builder",
+    "last_check": "usable section",
+    "version": 8
+  },
+  {
+    "id": "W-9",
+    "proposal_id": "warm-responsive-style",
+    "name": "Warm look and responsive layout",
+    "covers": [
+      9
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The page has a viewport meta tag and layout rules for narrow screens, with no horizontal overflow at 360px and 1280px"
+    ],
+    "purpose": "Sections are unstyled and may overflow on phones.",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 2,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if horizontal overflow remains at 360px or 1280px after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "stylesheet",
+      "media queries"
+    ],
+    "completion_check": "At 360px and 1280px, scrollWidth equals clientWidth, and buttons and links are at least 44px tall.",
+    "dependencies": [
+      "shell-nav",
+      "menu-filter",
+      "specials",
+      "booking",
+      "photos",
+      "reviews",
+      "contact",
+      "footer-clean"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-9",
+    "revises": null,
+    "agent": "W-9 Builder",
+    "last_check": "usable section",
+    "version": 9
+  }
+]

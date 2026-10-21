@@ -1,0 +1,992 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "prd-problem",
+    "name": "Write Problem section",
+    "covers": [
+      1
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Problem section states that lab slot booking is done on paper and that slots get double-booked"
+    ],
+    "purpose": "PRD has no Problem section.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 5,
+      "retry_limit": 1,
+      "stop_loss": "Verification fails again after one retry"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "## Problem"
+    ],
+    "completion_check": "Section ## Problem exists, has at least 40 words, and contains 'paper' and 'double-booked'.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-1.a1",
+        "goal": "The PRD states that lab slot booking is done on paper and that slots get double-booked.",
+        "constraints": [
+          "Use only facts from the brief",
+          "Do not invent numbers or dates",
+          "Use the name LabSlot"
+        ],
+        "context": [
+          "charter item 1",
+          "charter problem"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-1 Builder",
+          "steps": "Write the section '## Problem' in markdown: state that lab slot booking is done on paper and that slots get double-booked. Name LabSlot as the product responding to it."
+        },
+        "verification": [
+          {
+            "text": "Problem heading is present",
+            "type": "heading-present",
+            "target": "Problem",
+            "expect": true
+          },
+          {
+            "text": "Problem section has at least 40 words",
+            "type": "section-not-empty",
+            "target": "Problem",
+            "expect": 40
+          },
+          {
+            "text": "Problem names paper and double-booking",
+            "type": "facts-present",
+            "target": [
+              "paper",
+              "double-booked"
+            ],
+            "expect": true
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-1.a1",
+            "check": "Problem heading is present",
+            "type": "heading-present",
+            "target": "Problem",
+            "expect": true,
+            "actual": true,
+            "pass": true,
+            "evidence": "heading 'Problem' found in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:03:32",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Problem section has at least 40 words",
+            "type": "section-not-empty",
+            "target": "Problem",
+            "expect": 40,
+            "actual": 75,
+            "pass": true,
+            "evidence": "section 'Problem' has 75 word(s), needs 40",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:03:32",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Problem names paper and double-booking",
+            "type": "facts-present",
+            "target": [
+              "paper",
+              "double-booked"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 2 fact(s) in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:03:32",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "usable section",
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "prd-users",
+    "name": "Write Users section",
+    "covers": [
+      2
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Users section names students and lab staff and says what each does with LabSlot"
+    ],
+    "purpose": "PRD has no Users section.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 5,
+      "retry_limit": 1,
+      "stop_loss": "Verification fails again after one retry"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "## Users"
+    ],
+    "completion_check": "Section ## Users exists, has at least 40 words, and contains 'students' and 'lab staff'.",
+    "dependencies": [
+      "prd-problem"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-2.a1",
+        "goal": "The PRD names students and lab staff and says what each does with LabSlot.",
+        "constraints": [
+          "Use only facts from the brief",
+          "Students book and cancel slots and check availability",
+          "Do not invent staff features beyond the brief"
+        ],
+        "context": [
+          "charter item 2",
+          "charter users"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-2 Builder",
+          "steps": "Write the section '## Users' in markdown: students (book and cancel slots, check availability) and lab staff, each with one short description of their use of LabSlot."
+        },
+        "verification": [
+          {
+            "text": "Users heading is present",
+            "type": "heading-present",
+            "target": "Users",
+            "expect": true
+          },
+          {
+            "text": "Users section has at least 40 words",
+            "type": "section-not-empty",
+            "target": "Users",
+            "expect": 40
+          },
+          {
+            "text": "Both user groups are named",
+            "type": "facts-present",
+            "target": [
+              "students",
+              "lab staff"
+            ],
+            "expect": true
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-2.a1",
+            "check": "Users heading is present",
+            "type": "heading-present",
+            "target": "Users",
+            "expect": true,
+            "actual": true,
+            "pass": true,
+            "evidence": "heading 'Users' found in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:03:49",
+            "by": "code"
+          },
+          {
+            "atom": "W-2.a1",
+            "check": "Users section has at least 40 words",
+            "type": "section-not-empty",
+            "target": "Users",
+            "expect": 40,
+            "actual": 77,
+            "pass": true,
+            "evidence": "section 'Users' has 77 word(s), needs 40",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:03:49",
+            "by": "code"
+          },
+          {
+            "atom": "W-2.a1",
+            "check": "Both user groups are named",
+            "type": "facts-present",
+            "target": [
+              "students",
+              "lab staff"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 2 fact(s) in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:03:49",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "prd-goals",
+    "name": "Write Goals section",
+    "covers": [
+      3
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Goals section states that LabSlot replaces paper booking and prevents double-booked slots"
+    ],
+    "purpose": "PRD has no Goals section.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 5,
+      "retry_limit": 1,
+      "stop_loss": "Verification fails again after one retry"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "## Goals"
+    ],
+    "completion_check": "Section ## Goals exists, has at least 30 words, has unique G ids, and contains 'paper' and 'double-booked'.",
+    "dependencies": [
+      "prd-problem"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-3.a1",
+        "goal": "The PRD states that LabSlot replaces paper booking and prevents double-booked slots, as numbered goals.",
+        "constraints": [
+          "Number goals G1, G2, ...",
+          "Each goal traces to the problem",
+          "Do not invent numbers"
+        ],
+        "context": [
+          "charter item 3",
+          "section Problem"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-3 Builder",
+          "steps": "Write the section '## Goals' in markdown with goals numbered G1, G2: G1 LabSlot replaces paper booking; G2 LabSlot prevents double-booked slots."
+        },
+        "verification": [
+          {
+            "text": "Goals heading is present",
+            "type": "heading-present",
+            "target": "Goals",
+            "expect": true
+          },
+          {
+            "text": "Goals section has at least 30 words",
+            "type": "section-not-empty",
+            "target": "Goals",
+            "expect": 30
+          },
+          {
+            "text": "Goal ids G1, G2 are unique",
+            "type": "ids-unique",
+            "target": "G",
+            "expect": true
+          },
+          {
+            "text": "Goals mention paper and double-booked",
+            "type": "facts-present",
+            "target": [
+              "paper",
+              "double-booked"
+            ],
+            "expect": true
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-3.a1",
+            "check": "Goals heading is present",
+            "type": "heading-present",
+            "target": "Goals",
+            "expect": true,
+            "actual": true,
+            "pass": true,
+            "evidence": "heading 'Goals' found in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:04:06",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Goals section has at least 30 words",
+            "type": "section-not-empty",
+            "target": "Goals",
+            "expect": 30,
+            "actual": 82,
+            "pass": true,
+            "evidence": "section 'Goals' has 82 word(s), needs 30",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:04:06",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Goal ids G1, G2 are unique",
+            "type": "ids-unique",
+            "target": "G",
+            "expect": true,
+            "actual": [
+              1,
+              2
+            ],
+            "pass": true,
+            "evidence": "2 unique id(s): G1, G2",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:04:06",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Goals mention paper and double-booked",
+            "type": "facts-present",
+            "target": [
+              "paper",
+              "double-booked"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 2 fact(s) in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:04:06",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "prd-requirements",
+    "name": "Write Requirements section",
+    "covers": [
+      4,
+      5
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Requirements section lists the three must-have features by name: book a slot, cancel a slot, see availability",
+      "Requirements section states that LabSlot must work on phones"
+    ],
+    "purpose": "PRD has no Requirements section.",
+    "cost": 30,
+    "estimate": 30,
+    "envelope": {
+      "money_limit": 30,
+      "model_call_limit": 3,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Verification fails again after one retry"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "## Requirements"
+    ],
+    "completion_check": "Section ## Requirements exists, has at least 60 words, has unique R ids, and contains 'book a slot', 'cancel a slot', 'see availability' and 'phones'.",
+    "dependencies": [
+      "prd-problem",
+      "prd-goals"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-4.a1",
+        "goal": "The PRD lists book a slot, cancel a slot and see availability by name as numbered requirements, and states LabSlot must work on phones.",
+        "constraints": [
+          "Number requirements R1, R2, ...",
+          "Each requirement traces to the problem or a must-have feature",
+          "Do not add features outside the must-have list"
+        ],
+        "context": [
+          "charter items 4 and 5",
+          "charter features",
+          "charter constraints"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-4 Builder",
+          "steps": "Write the section '## Requirements' in markdown: R1 book a slot, R2 cancel a slot, R3 see availability, R4 LabSlot must work on phones. Each requirement notes the problem or feature it traces to."
+        },
+        "verification": [
+          {
+            "text": "Requirements heading is present",
+            "type": "heading-present",
+            "target": "Requirements",
+            "expect": true
+          },
+          {
+            "text": "Requirements section has at least 60 words",
+            "type": "section-not-empty",
+            "target": "Requirements",
+            "expect": 60
+          },
+          {
+            "text": "Requirement ids R1, R2, ... are unique",
+            "type": "ids-unique",
+            "target": "R",
+            "expect": true
+          },
+          {
+            "text": "All three features and the phone constraint appear",
+            "type": "facts-present",
+            "target": [
+              "book a slot",
+              "cancel a slot",
+              "see availability",
+              "phones"
+            ],
+            "expect": true
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-4.a1",
+            "check": "Requirements heading is present",
+            "type": "heading-present",
+            "target": "Requirements",
+            "expect": true,
+            "actual": true,
+            "pass": true,
+            "evidence": "heading 'Requirements' found in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:04:25",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Requirements section has at least 60 words",
+            "type": "section-not-empty",
+            "target": "Requirements",
+            "expect": 60,
+            "actual": 211,
+            "pass": true,
+            "evidence": "section 'Requirements' has 211 word(s), needs 60",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:04:25",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Requirement ids R1, R2, ... are unique",
+            "type": "ids-unique",
+            "target": "R",
+            "expect": true,
+            "actual": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "pass": true,
+            "evidence": "5 unique id(s): R1, R2, R3, R4, R5",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:04:25",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "All three features and the phone constraint appear",
+            "type": "facts-present",
+            "target": [
+              "book a slot",
+              "cancel a slot",
+              "see availability",
+              "phones"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 4 fact(s) in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:04:25",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "prd-metrics",
+    "name": "Write Success metrics section",
+    "covers": [
+      6
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Success metrics section states the target that 80% of bookings are made without staff help"
+    ],
+    "purpose": "PRD has no Success metrics section.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 5,
+      "retry_limit": 1,
+      "stop_loss": "Verification fails again after one retry"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "## Success metrics"
+    ],
+    "completion_check": "Section ## Success metrics exists, has at least 30 words, and contains '80% of bookings are made without staff help'.",
+    "dependencies": [
+      "prd-goals"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-5.a1",
+        "goal": "The PRD states the target that 80% of bookings are made without staff help and names the goal it measures.",
+        "constraints": [
+          "Use only the 80% target from the brief",
+          "Name the goal (G1 or G2) it measures",
+          "Do not invent other metrics or dates"
+        ],
+        "context": [
+          "charter item 6",
+          "charter success_measures",
+          "section Goals"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-5 Builder",
+          "steps": "Write the section '## Success metrics' in markdown: one metric, 80% of bookings are made without staff help, stating which goal (G1) it measures."
+        },
+        "verification": [
+          {
+            "text": "Success metrics heading is present",
+            "type": "heading-present",
+            "target": "Success metrics",
+            "expect": true
+          },
+          {
+            "text": "Success metrics section has at least 30 words",
+            "type": "section-not-empty",
+            "target": "Success metrics",
+            "expect": 30
+          },
+          {
+            "text": "The 80% target appears exactly",
+            "type": "facts-present",
+            "target": [
+              "80% of bookings are made without staff help"
+            ],
+            "expect": true
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-5.a1",
+            "check": "Success metrics heading is present",
+            "type": "heading-present",
+            "target": "Success metrics",
+            "expect": true,
+            "actual": true,
+            "pass": true,
+            "evidence": "heading 'Success metrics' found in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:04:41",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "Success metrics section has at least 30 words",
+            "type": "section-not-empty",
+            "target": "Success metrics",
+            "expect": 30,
+            "actual": 63,
+            "pass": true,
+            "evidence": "section 'Success metrics' has 63 word(s), needs 30",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:04:41",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "The 80% target appears exactly",
+            "type": "facts-present",
+            "target": [
+              "80% of bookings are made without staff help"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 1 fact(s) in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:04:41",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section",
+    "version": 5
+  },
+  {
+    "id": "W-6",
+    "proposal_id": "prd-out-of-scope",
+    "name": "Write Out of scope section",
+    "covers": [
+      7,
+      8
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Out of scope section lists what LabSlot will not do in this version, without listing any must-have feature",
+      "The product name LabSlot is used throughout and no section says to be confirmed or is left empty"
+    ],
+    "purpose": "PRD has no Out of scope section, and nothing yet confirms LabSlot is used throughout with no empty sections.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 2,
+      "time_limit_minutes": 6,
+      "retry_limit": 1,
+      "stop_loss": "Verification fails again after one retry"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "## Out of scope"
+    ],
+    "completion_check": "Section ## Out of scope exists, has at least 30 words, contains 'LabSlot', and does not list book a slot, cancel a slot or see availability.",
+    "dependencies": [
+      "prd-requirements"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-6.a1",
+        "goal": "The PRD lists what LabSlot will not do in this version, excluding every must-have feature, with no section left empty or marked to be confirmed.",
+        "constraints": [
+          "Do not list book a slot, cancel a slot or see availability",
+          "Only list things not in the must-have list",
+          "Do not claim brief facts that were not given",
+          "Use the name LabSlot"
+        ],
+        "context": [
+          "charter items 7 and 8",
+          "section Requirements"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-6 Builder",
+          "steps": "Write the section '## Out of scope' in markdown: a short list of things LabSlot will not do in this version that are not in the must-have list (for example, features beyond booking, cancelling and availability). Use the name LabSlot and leave no placeholder text."
+        },
+        "verification": [
+          {
+            "text": "Out of scope heading is present",
+            "type": "heading-present",
+            "target": "Out of scope",
+            "expect": true
+          },
+          {
+            "text": "Out of scope section has at least 30 words",
+            "type": "section-not-empty",
+            "target": "Out of scope",
+            "expect": 30
+          },
+          {
+            "text": "The product name LabSlot appears",
+            "type": "facts-present",
+            "target": [
+              "LabSlot"
+            ],
+            "expect": true
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-6.a1",
+            "check": "Out of scope heading is present",
+            "type": "heading-present",
+            "target": "Out of scope",
+            "expect": true,
+            "actual": true,
+            "pass": true,
+            "evidence": "heading 'Out of scope' found in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:04:56",
+            "by": "code"
+          },
+          {
+            "atom": "W-6.a1",
+            "check": "Out of scope section has at least 30 words",
+            "type": "section-not-empty",
+            "target": "Out of scope",
+            "expect": 30,
+            "actual": 88,
+            "pass": true,
+            "evidence": "section 'Out of scope' has 88 word(s), needs 30",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:04:56",
+            "by": "code"
+          },
+          {
+            "atom": "W-6.a1",
+            "check": "The product name LabSlot appears",
+            "type": "facts-present",
+            "target": [
+              "LabSlot"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 1 fact(s) in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:04:56",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-6",
+    "revises": null,
+    "agent": "W-6 Builder",
+    "last_check": "usable section",
+    "version": 6
+  },
+  {
+    "id": "W-7",
+    "proposal_id": "prd-metrics-g2",
+    "name": "Add G2 zero double-booking metric to Success metrics",
+    "covers": [],
+    "fixes": [
+      "F-9"
+    ],
+    "covers_text": [],
+    "purpose": "Success metrics covers only G1; G2 has no measurable metric (F-9, which includes D-2 and P6).",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 2,
+      "time_limit_minutes": 5,
+      "retry_limit": 1,
+      "stop_loss": "Verification fails again after one retry"
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "## Success metrics"
+    ],
+    "completion_check": "Section ## Success metrics exists, has at least 30 words, contains '80% of bookings are made without staff help', 'double-booked' and 'zero', and names G1 and G2.",
+    "dependencies": [
+      "prd-goals"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-7.a1",
+        "goal": "The Success metrics section states the G1 80% target and a G2 target of zero double-booked slots, each naming the goal it measures.",
+        "constraints": [
+          "Use only the 80% target from the brief and the Requester's answer of zero",
+          "Do not add a time period, threshold or other metric",
+          "Keep the G1 metric unchanged",
+          "Use the name LabSlot"
+        ],
+        "context": [
+          "charter item 3",
+          "charter item 6",
+          "charter confirmed_facts",
+          "section Goals",
+          "section W-5"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-5 Builder",
+          "steps": "Rewrite the section '## Success metrics' in markdown: keep the G1 metric (80% of bookings are made without staff help) and add a G2 metric stating the target for double-booked slots is zero, naming G2. Add no time period or other numbers."
+        },
+        "verification": [
+          {
+            "text": "Success metrics heading is present",
+            "type": "heading-present",
+            "target": "Success metrics",
+            "expect": true
+          },
+          {
+            "text": "Success metrics section has at least 30 words",
+            "type": "section-not-empty",
+            "target": "Success metrics",
+            "expect": 30
+          },
+          {
+            "text": "The G1 80% target is still present and the G2 zero target and double-booked appear",
+            "type": "facts-present",
+            "target": [
+              "80% of bookings are made without staff help",
+              "double-booked",
+              "zero"
+            ],
+            "expect": true
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-7.a1",
+            "check": "Success metrics heading is present",
+            "type": "heading-present",
+            "target": "Success metrics",
+            "expect": true,
+            "actual": true,
+            "pass": true,
+            "evidence": "heading 'Success metrics' found in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:10:03",
+            "by": "code"
+          },
+          {
+            "atom": "W-7.a1",
+            "check": "Success metrics section has at least 30 words",
+            "type": "section-not-empty",
+            "target": "Success metrics",
+            "expect": 30,
+            "actual": 122,
+            "pass": true,
+            "evidence": "section 'Success metrics' has 122 word(s), needs 30",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:10:03",
+            "by": "code"
+          },
+          {
+            "atom": "W-7.a1",
+            "check": "The G1 80% target is still present and the G2 zero target and double-booked appear",
+            "type": "facts-present",
+            "target": [
+              "80% of bookings are made without staff help",
+              "double-booked",
+              "zero"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 3 fact(s) in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-13T17:10:03",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-5",
+    "revises": "W-5",
+    "agent": "W-7 Builder",
+    "last_check": "usable section",
+    "version": 7
+  }
+]

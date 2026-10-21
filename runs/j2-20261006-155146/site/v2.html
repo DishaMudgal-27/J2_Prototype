@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Coffee in Indiranagar, Bengaluru</title>
+<meta name="description" content="Brew Lab, a coffee shop in Indiranagar, Bengaluru. Menu, opening hours, location and pre-order for pickup.">
+<style>
+:root{
+  --cream:#fbf5ec;
+  --paper:#fffdf9;
+  --espresso:#2e1d14;
+  --roast:#6b3f24;
+  --caramel:#b8692f;
+  --line:#e6d7c3;
+  --mark-bg:#fff0c2;
+  --mark-fg:#6a4a00;
+  --err:#8a1c1c;
+  --ok:#1f5c2e;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:1rem;line-height:1.6;color:var(--espresso);background:var(--cream)}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.2;margin:0 0 .5em}
+h1{font-size:2.2rem}
+h2{font-size:1.7rem}
+h3{font-size:1.15rem;color:var(--roast)}
+p{margin:0 0 1em}
+a{color:var(--roast)}
+.wrap{width:100%;max-width:1040px;margin:0 auto;padding:0 1.25rem}
+section{padding:3rem 0}
+
+/* placeholder marker */
+.ph{background:var(--mark-bg);color:var(--mark-fg);border:1px dashed #c9a227;border-radius:4px;padding:0 .35em;font-weight:600;font-size:.92em}
+
+/* nav */
+header.site{position:sticky;top:0;z-index:10;background:var(--espresso);color:#fff}
+header.site .wrap{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.25rem}
+.brand{font-family:Georgia,serif;font-size:1.3rem;font-weight:700;color:#fff;text-decoration:none;min-height:44px;display:flex;align-items:center}
+nav ul{list-style:none;display:flex;flex-wrap:wrap;gap:.25rem;margin:0;padding:0}
+nav a{display:flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;padding:0 .8rem;color:#f4e6d3;text-decoration:none;border-radius:6px;font-weight:600}
+nav a:hover,nav a:focus-visible{background:var(--caramel);color:#fff}
+
+/* hero */
+.hero{background:linear-gradient(160deg,var(--roast),var(--espresso));color:#fff;padding:3.5rem 0}
+.hero p{max-width:34rem;color:#f4e6d3;font-size:1.1rem}
+.hero .ph{background:#fff0c2;color:#4a3300}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 1.4rem;background:var(--caramel);color:#fff;text-decoration:none;font-weight:700;border-radius:999px}
+.btn:hover,.btn:focus-visible{background:#9a5322}
+
+/* menu */
+.note{font-size:.9rem;color:#5b4636}
+.cats{display:grid;gap:1.25rem;grid-template-columns:1fr}
+.cat{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:1.25rem}
+.cat ul{list-style:none;margin:0;padding:0}
+.cat li{display:flex;justify-content:space-between;align-items:baseline;gap:.75rem;padding:.6rem 0;border-bottom:1px dashed var(--line)}
+.cat li:last-child{border-bottom:0}
+.price{white-space:nowrap;font-weight:700;color:var(--roast)}
+
+/* hours */
+.hours{width:100%;border-collapse:collapse;background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.hours th,.hours td{text-align:left;padding:.8rem 1rem;border-bottom:1px solid var(--line)}
+.hours tr:last-child th,.hours tr:last-child td{border-bottom:0}
+.hours th{font-weight:700;width:40%}
+
+/* location */
+.loc{display:grid;gap:1.25rem;grid-template-columns:1fr}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:1.25rem}
+address{font-style:normal}
+
+/* pre-order */
+.order{display:grid;gap:1.25rem;grid-template-columns:1fr}
+fieldset.card{margin:0;min-width:0}
+fieldset.card legend{font-family:Georgia,serif;font-weight:700;font-size:1.15rem;color:var(--roast);padding:0 .4rem}
+.ogroup{margin:0 0 1rem}
+.ogroup h4{margin:.25rem 0 .4rem;font-size:1rem;color:var(--espresso)}
+.orow{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.5rem 0;border-bottom:1px dashed var(--line)}
+.orow .rn{flex:1;min-width:0}
+.orow .rp{display:block;font-weight:700;color:var(--roast)}
+.qty{display:flex;align-items:center;gap:.25rem;flex:none}
+.qty button{width:44px;height:44px;border:1px solid var(--roast);background:var(--paper);color:var(--roast);font-size:1.4rem;font-weight:700;border-radius:10px;cursor:pointer;line-height:1}
+.qty button:hover,.qty button:focus-visible{background:var(--roast);color:#fff}
+.qty input{width:52px;height:44px;text-align:center;font-size:1rem;border:1px solid var(--roast);border-radius:10px;background:#fff;color:var(--espresso)}
+.field{display:block;margin:0 0 1rem}
+.field span.l{display:block;font-weight:700;margin-bottom:.25rem}
+.field input{width:100%;min-height:44px;padding:.5rem .75rem;font-size:1rem;border:1px solid var(--roast);border-radius:10px;background:#fff;color:var(--espresso)}
+input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--caramel);outline-offset:2px}
+.summary{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:1.25rem}
+.summary ul{margin:0 0 1rem;padding-left:1.1rem}
+.total{display:flex;justify-content:space-between;align-items:baseline;font-size:1.3rem;font-weight:700;border-top:2px solid var(--roast);padding-top:.75rem;margin-bottom:1rem}
+.pay{width:100%;border:0;cursor:pointer;font-size:1rem;font-family:inherit}
+.msg{margin:.75rem 0 0;font-weight:600}
+.msg.err{color:var(--err)}
+.msg.ok{color:var(--ok)}
+
+footer{background:var(--espresso);color:#f4e6d3;padding:2rem 0;font-size:.95rem}
+footer a{color:#f4e6d3}
+footer .ph{background:#fff0c2;color:#4a3300}
+
+@media (min-width:600px){
+  h1{font-size:3rem}
+  h2{font-size:2rem}
+  .cats{grid-template-columns:1fr 1fr}
+  .hero{padding:5rem 0}
+}
+@media (min-width:900px){
+  .cats{grid-template-columns:repeat(3,1fr)}
+  .loc{grid-template-columns:1fr 1fr}
+  .order{grid-template-columns:3fr 2fr;align-items:start}
+  .summary{position:sticky;top:76px}
+  section{padding:4.5rem 0}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="#top">Brew Lab</a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="#menu">Menu</a></li>
+        <li><a href="#preorder">Pre-order</a></li>
+        <li><a href="#hours">Hours</a></li>
+        <li><a href="#location">Location</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <h1>Brew Lab</h1>
+      <p>Coffee in Indiranagar, Bengaluru. <span class="ph">[PLACEHOLDER: tagline / brand voice]</span></p>
+      <a class="btn" href="#menu">See the menu</a>
+    </div>
+  </div>
+
+  <section id="menu" aria-labelledby="menu-h">
+    <div class="wrap">
+      <h2 id="menu-h">Menu</h2>
+      <p class="note">All prices in Indian rupees (₹). <span class="ph">[PLACEHOLDER: menu items and prices to be confirmed by Brew Lab]</span> Categories below are placeholders too.</p>
+      <div class="cats">
+        <article class="cat">
+          <h3>Hot coffee <span class="ph">[PLACEHOLDER: category]</span></h3>
+          <ul>
+            <li><span class="ph">[PLACEHOLDER: item name]</span><span class="price">₹ <span class="ph">[PLACEHOLDER: price]</span></span></li>
+            <li><span class="ph">[PLACEHOLDER: item name]</span><span class="price">₹ <span class="ph">[PLACEHOLDER: price]</span></span></li>
+            <li><span class="ph">[PLACEHOLDER: item name]</span><span class="price">₹ <span class="ph">[PLACEHOLDER: price]</span></span></li>
+          </ul>
+        </article>
+        <article class="cat">
+          <h3>Cold drinks <span class="ph">[PLACEHOLDER: category]</span></h3>
+          <ul>
+            <li><span class="ph">[PLACEHOLDER: item name]</span><span class="price">₹ <span class="ph">[PLACEHOLDER: price]</span></span></li>
+            <li><span class="ph">[PLACEHOLDER: item name]</span><span class="price">₹ <span class="ph">[PLACEHOLDER: price]</span></span></li>
+            <li><span class="ph">[PLACEHOLDER: item name]</span><span class="price">₹ <span class="ph">[PLACEHOLDER: price]</span></span></li>
+          </ul>
+        </article>
+        <article class="cat">
+          <h3>Food and bakes <span class="ph">[PLACEHOLDER: category]</span></h3>
+          <ul>
+            <li><span class="ph">[PLACEHOLDER: item name]</span><span class="price">₹ <span class="ph">[PLACEHOLDER: price]</span></span></li>
+            <li><span class="ph">[PLACEHOLDER: item name]</span><span class="price">₹ <span class="ph">[PLACEHOLDER: price]</span></span></li>
+            <li><span class="ph">[PLACEHOLDER: item name]</span><span class="price">₹ <span class="ph">[PLACEHOLDER: price]</span></span></li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="preorder" aria-labelledby="pre-h">
+    <div class="wrap">
+      <h2 id="pre-h">Pre-order for pickup</h2>
+      <p class="note">Pick your items, choose a pickup time and pay online. <span class="ph">[PLACEHOLDER: pickup rules and slot length]</span></p>
+      <p class="note"><strong>Placeholder prices:</strong> item names and prices are not confirmed yet. Until Brew Lab supplies them, the total below uses a sample price of ₹100 per item so the calculator can be tested. <span class="ph">[PLACEHOLDER: real prices]</span></p>
+
+      <form id="orderForm" class="order" novalidate>
+        <div>
+          <fieldset class="card">
+            <legend>1. Choose items</legend>
+
+            <div class="ogroup">
+              <h4>Hot coffee</h4>
+              <div class="orow" data-label="Hot coffee item 1 (placeholder)">
+                <div class="rn"><span class="ph">[PLACEHOLDER: item name]</span><span class="rp">₹ <span class="ph">[PLACEHOLDER: price]</span></span></div>
+                <div class="qty"><button type="button" data-d="-1" aria-label="Decrease quantity, hot coffee item 1">&minus;</button><input type="number" name="qty1" min="0" max="20" value="0" inputmode="numeric" aria-label="Quantity, hot coffee item 1"><button type="button" data-d="1" aria-label="Increase quantity, hot coffee item 1">+</button></div>
+              </div>
+              <div class="orow" data-label="Hot coffee item 2 (placeholder)">
+                <div class="rn"><span class="ph">[PLACEHOLDER: item name]</span><span class="rp">₹ <span class="ph">[PLACEHOLDER: price]</span></span></div>
+                <div class="qty"><button type="button" data-d="-1" aria-label="Decrease quantity, hot coffee item 2">&minus;</button><input type="number" name="qty2" min="0" max="20" value="0" inputmode="numeric" aria-label="Quantity, hot coffee item 2"><button type="button" data-d="1" aria-label="Increase quantity, hot coffee item 2">+</button></div>
+              </div>
+              <div class="orow" data-label="Hot coffee item 3 (placeholder)">
+                <div class="rn"><span class="ph">[PLACEHOLDER: item name]</span><span class="rp">₹ <span class="ph">[PLACEHOLDER: price]</span></span></div>
+                <div class="qty"><button type="button" data-d="-1" aria-label="Decrease quantity, hot coffee item 3">&minus;</button><input type="number" name="qty3" min="0" max="20" value="0" inputmode="numeric" aria-label="Quantity, hot coffee item 3"><button type="button" data-d="1" aria-label="Increase quantity, hot coffee item 3">+</button></div>
+              </div>
+            </div>
+
+            <div class="ogroup">
+              <h4>Cold drinks</h4>
+              <div class="orow" data-label="Cold drink item 1 (placeholder)">
+                <div class="rn"><span class="ph">[PLACEHOLDER: item name]</span><span class="rp">₹ <span class="ph">[PLACEHOLDER: price]</span></span></div>
+                <div class="qty"><button type="button" data-d="-1" aria-label="Decrease quantity, cold drink item 1">&minus;</button><input type="number" name="qty4" min="0" max="20" value="0" inputmode="numeric" aria-label="Quantity, cold drink item 1"><button type="button" data-d="1" aria-label="Increase quantity, cold drink item 1">+</button></div>
+              </div>
+              <div class="orow" data-label="Cold drink item 2 (placeholder)">
+                <div class="rn"><span class="ph">[PLACEHOLDER: item name]</span><span class="rp">₹ <span class="ph">[PLACEHOLDER: price]</span></span></div>
+                <div class="qty"><button type="button" data-d="-1" aria-label="Decrease quantity, cold drink item 2">&minus;</button><input type="number" name="qty5" min="0" max="20" value="0" inputmode="numeric" aria-label="Quantity, cold drink item 2"><button type="button" data-d="1" aria-label="Increase quantity, cold drink item 2">+</button></div>
+              </div>
+              <div class="orow" data-label="Cold drink item 3 (placeholder)">
+                <div class="rn"><span class="ph">[PLACEHOLDER: item name]</span><span class="rp">₹ <span class="ph">[PLACEHOLDER: price]</span></span></div>
+                <div class="qty"><button type="button" data-d="-1" aria-label="Decrease quantity, cold drink item 3">&minus;</button><input type="number" name="qty6" min="0" max="20" value="0" inputmode="numeric" aria-label="Quantity, cold drink item 3"><button type="button" data-d="1" aria-label="Increase quantity, cold drink item 3">+</button></div>
+              </div>
+            </div>
+
+            <div class="ogroup">
+              <h4>Food and bakes</h4>
+              <div class="orow" data-label="Food item 1 (placeholder)">
+                <div class="rn"><span class="ph">[PLACEHOLDER: item name]</span><span class="rp">₹ <span class="ph">[PLACEHOLDER: price]</span></span></div>
+                <div class="qty"><button type="button" data-d="-1" aria-label="Decrease quantity, food item 1">&minus;</button><input type="number" name="qty7" min="0" max="20" value="0" inputmode="numeric" aria-label="Quantity, food item 1"><button type="button" data-d="1" aria-label="Increase quantity, food item 1">+</button></div>
+              </div>
+              <div class="orow" data-label="Food item 2 (placeholder)">
+                <div class="rn"><span class="ph">[PLACEHOLDER: item name]</span><span class="rp">₹ <span class="ph">[PLACEHOLDER: price]</span></span></div>
+                <div class="qty"><button type="button" data-d="-1" aria-label="Decrease quantity, food item 2">&minus;</button><input type="number" name="qty8" min="0" max="20" value="0" inputmode="numeric" aria-label="Quantity, food item 2"><button type="button" data-d="1" aria-label="Increase quantity, food item 2">+</button></div>
+              </div>
+              <div class="orow" data-label="Food item 3 (placeholder)">
+                <div class="rn"><span class="ph">[PLACEHOLDER: item name]</span><span class="rp">₹ <span class="ph">[PLACEHOLDER: price]</span></span></div>
+                <div class="qty"><button type="button" data-d="-1" aria-label="Decrease quantity, food item 3">&minus;</button><input type="number" name="qty9" min="0" max="20" value="0" inputmode="numeric" aria-label="Quantity, food item 3"><button type="button" data-d="1" aria-label="Increase quantity, food item 3">+</button></div>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="card" style="margin-top:1.25rem">
+            <legend>2. Pickup details</legend>
+            <label class="field"><span class="l">Name</span><input type="text" id="cName" name="name" autocomplete="name" required></label>
+            <label class="field"><span class="l">Phone (10-digit mobile number)</span><input type="tel" id="cPhone" name="phone" autocomplete="tel-national" inputmode="tel" maxlength="14" placeholder="9876543210" required></label>
+            <label class="field"><span class="l">Pickup time</span><input type="time" id="cTime" name="pickup_time" required></label>
+            <p class="note" style="margin:0"><span class="ph">[PLACEHOLDER: earliest and latest pickup time, slot length]</span></p>
+          </fieldset>
+        </div>
+
+        <div class="summary" aria-labelledby="sum-h">
+          <h3 id="sum-h">3. Your order and payment</h3>
+          <ul id="lines" aria-live="polite"><li>No items yet.</li></ul>
+          <div class="total"><span>Total</span><span id="total" aria-live="polite">₹0</span></div>
+          <button type="submit" id="payBtn" class="btn pay">Pay online</button>
+          <p class="note" style="margin:.75rem 0 0">Payment provider: <span class="ph">[PLACEHOLDER: payment provider]</span> Public key: <span class="ph">[PLACEHOLDER: public payment key]</span></p>
+          <p id="formMsg" class="msg" role="status" aria-live="polite"></p>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section id="hours" aria-labelledby="hours-h" style="background:#f3e8d6">
+    <div class="wrap">
+      <h2 id="hours-h">Opening hours</h2>
+      <p class="note"><span class="ph">[PLACEHOLDER: opening hours for each day to be confirmed by Brew Lab]</span></p>
+      <table class="hours">
+        <caption class="note" style="text-align:left;padding-bottom:.5rem">Weekly opening hours</caption>
+        <tbody>
+          <tr><th scope="row">Monday</th><td><span class="ph">[PLACEHOLDER: hours]</span></td></tr>
+          <tr><th scope="row">Tuesday</th><td><span class="ph">[PLACEHOLDER: hours]</span></td></tr>
+          <tr><th scope="row">Wednesday</th><td><span class="ph">[PLACEHOLDER: hours]</span></td></tr>
+          <tr><th scope="row">Thursday</th><td><span class="ph">[PLACEHOLDER: hours]</span></td></tr>
+          <tr><th scope="row">Friday</th><td><span class="ph">[PLACEHOLDER: hours]</span></td></tr>
+          <tr><th scope="row">Saturday</th><td><span class="ph">[PLACEHOLDER: hours]</span></td></tr>
+          <tr><th scope="row">Sunday</th><td><span class="ph">[PLACEHOLDER: hours]</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="location" aria-labelledby="loc-h">
+    <div class="wrap">
+      <h2 id="loc-h">Find us in Indiranagar</h2>
+      <div class="loc">
+        <div class="card">
+          <h3>Brew Lab</h3>
+          <address>
+            <span class="ph">[PLACEHOLDER: full street address]</span><br>
+            Indiranagar, Bengaluru<br>
+            <span class="ph">[PLACEHOLDER: PIN code]</span>
+          </address>
+          <p style="margin-top:1rem">Phone: <span class="ph">[PLACEHOLDER: phone number]</span><br>
+          Email: <span class="ph">[PLACEHOLDER: contact email]</span></p>
+          <a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Indiranagar+Bengaluru" target="_blank" rel="noopener">Open in Google Maps</a>
+          <p class="note" style="margin-top:.75rem">This link opens a general Indiranagar search. <span class="ph">[PLACEHOLDER: exact map pin for Brew Lab]</span></p>
+        </div>
+        <div class="card">
+          <h3>Getting here</h3>
+          <p><span class="ph">[PLACEHOLDER: landmarks, parking and directions]</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>&copy; Brew Lab, Indiranagar, Bengaluru. Placeholder content is marked and will be replaced with real details.</p>
+  </div>
+</footer>
+
+<!-- Payment checkout library (CDN). Razorpay is used as the example provider; the real provider is still to be confirmed. -->
+<script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
+<script>
+(function(){
+  // Public key only. Never put a secret key in this file.
+  var PAYMENT_PUBLIC_KEY = "[PLACEHOLDER: public payment key]";
+  // Used only until real prices are set. Add data-price="NN" to a .orow to override.
+  var SAMPLE_PRICE = 100;
+
+  var form = document.getElementById('orderForm');
+  var rows = [].slice.call(form.querySelectorAll('.orow'));
+  var linesEl = document.getElementById('lines');
+  var totalEl = document.getElementById('total');
+  var payBtn = document.getElementById('payBtn');
+  var msg = document.getElementById('formMsg');
+
+  function setMsg(text, cls){ msg.textContent = text; msg.className = 'msg' + (cls ? ' ' + cls : ''); }
+  function qtyOf(input){
+    var n = parseInt(input.value, 10);
+    if (isNaN(n) || n < 0) n = 0;
+    if (n > 20) n = 20;
+    return n;
+  }
+  function priceOf(row){ return Number(row.getAttribute('data-price')) || SAMPLE_PRICE; }
+
+  function calc(){
+    var total = 0, count = 0;
+    linesEl.textContent = '';
+    rows.forEach(function(r){
+      var q = qtyOf(r.querySelector('input'));
+      if (q){
+        var p = priceOf(r);
+        total += q * p;
+        count += q;
+        var li = document.createElement('li');
+        li.textContent = q + ' x ' + r.getAttribute('data-label') + ' = ₹' + (q * p);
+        linesEl.appendChild(li);
+      }
+    });
+    if (!count){
+      var e = document.createElement('li');
+      e.textContent = 'No items yet.';
+      linesEl.appendChild(e);
+    }
+    totalEl.textContent = '₹' + total;
+    payBtn.textContent = total ? 'Pay ₹' + total + ' online' : 'Pay online';
+    return { total: total, count: count };
+  }
+
+  form.addEventListener('click', function(ev){
+    var b = ev.target.closest ? ev.target.closest('button[data-d]') : null;
+    if (!b) return;
+    var input = b.parentNode.querySelector('input');
+    var n = qtyOf(input) + Number(b.getAttribute('data-d'));
+    input.value = Math.max(0, Math.min(20, n));
+    calc();
+  });
+  form.addEventListener('input', function(ev){
+    if (ev.target.type === 'number') calc();
+  });
+  form.addEventListener('change', function(ev){
+    if (ev.target.type === 'number'){ ev.target.value = qtyOf(ev.target); calc(); }
+  });
+
+  function openCheckout(order){
+    var keyMissing = PAYMENT_PUBLIC_KEY.indexOf('PLACEHOLDER') !== -1;
+    if (keyMissing || typeof window.Razorpay === 'undefined'){
+      setMsg(keyMissing
+        ? 'Details look good, but online payment is not connected yet (public payment key is a placeholder). Nothing was sent or charged.'
+        : 'The payment library could not load. Check your connection and try again. Nothing was charged.', 'err');
+      return;
+    }
+    // Production note: a live setup should also create the order on a server and pass its order_id here.
+    var rzp = new window.Razorpay({
+      key: PAYMENT_PUBLIC_KEY,
+      amount: order.total * 100,
+      currency: 'INR',
+      name: 'Brew Lab',
+      description: 'Pickup order at ' + order.time,
+      prefill: { name: order.name, contact: order.phone },
+      notes: { pickup_time: order.time },
+      theme: { color: '#b8692f' },
+      handler: function(res){
+        setMsg('Payment received. Reference: ' + res.razorpay_payment_id + '. See you at ' + order.time + ', ' + order.name + '.', 'ok');
+      }
+    });
+    rzp.open();
+  }
+
+  form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var o = calc();
+    var name = document.getElementById('cName').value.trim();
+    var phone = document.getElementById('cPhone').value.replace(/[\s-]/g, '').replace(/^(\+91|91|0)(?=\d{10}$)/, '');
+    var time = document.getElementById('cTime').value;
+    if (!o.count){ setMsg('Add at least one item to your order.', 'err'); return; }
+    if (!name){ setMsg('Enter your name.', 'err'); document.getElementById('cName').focus(); return; }
+    if (!/^[6-9]\d{9}$/.test(phone)){ setMsg('Enter a valid 10-digit Indian mobile number.', 'err'); document.getElementById('cPhone').focus(); return; }
+    if (!time){ setMsg('Choose a pickup time.', 'err'); document.getElementById('cTime').focus(); return; }
+    setMsg('Opening payment...', '');
+    openCheckout({ total: o.total, name: name, phone: phone, time: time });
+  });
+
+  calc();
+})();
+</script>
+
+</body>
+</html>

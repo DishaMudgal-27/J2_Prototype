@@ -1,0 +1,19 @@
+{"who": "Engineering", "text": "I need $5,000 or my part of the launch doesn't work. @Sales, you can do more with less.", "stance": "propose", "split": {"Marketing": 2500, "Engineering": 5000, "Sales": 2500}}
+{"who": "Marketing", "text": "I need $5,700 or my part of the launch doesn't work. @Sales, you can do more with less.", "stance": "propose", "split": {"Marketing": 5700, "Engineering": 2150, "Sales": 2150}}
+{"who": "Engineering", "text": "I need $4,400 or my part of the launch doesn't work. @Sales, you can do more with less.", "stance": "propose", "split": {"Marketing": 2800, "Engineering": 4400, "Sales": 2800}}
+{"who": "Sales", "text": "I need $3,100 or my part of the launch doesn't work. @Engineering, you can do more with less.", "stance": "propose", "split": {"Marketing": 3450, "Engineering": 3450, "Sales": 3100}}
+{"who": "Marketing", "text": "I need $4,800 or my part of the launch doesn't work. @Sales, you can do more with less.", "stance": "propose", "split": {"Marketing": 4800, "Engineering": 2600, "Sales": 2600}}
+{"who": "Engineering", "text": "I need $3,500 or my part of the launch doesn't work. @Sales, you can do more with less.", "stance": "propose", "split": {"Marketing": 3250, "Engineering": 3500, "Sales": 3250}}
+{"who": "Marketing", "text": "I need $4,500 or my part of the launch doesn't work. @Sales, you can do more with less.", "stance": "propose", "split": {"Marketing": 4500, "Engineering": 2750, "Sales": 2750}}
+{"who": "Engineering", "text": "I need $3,500 or my part of the launch doesn't work. @Sales, you can do more with less.", "stance": "propose", "split": {"Marketing": 3250, "Engineering": 3500, "Sales": 3250}}
+{"who": "Sales", "text": "I can live with $3,250. @Marketing, can you?", "stance": "accept", "split": null}
+{"who": "Marketing", "text": "I need $4,500 or my part of the launch doesn't work. @Sales, you can do more with less.", "stance": "propose", "split": {"Marketing": 4500, "Engineering": 2750, "Sales": 2750}}
+{"who": "system", "text": "Time box hit after 10 turns. Escalating to the CEO."}
+{"who": "system", "text": "Escalated to the CEO. No agreement after 10 turns (time box)."}
+{"who": "CEO", "text": "Everyone has a point. I'm splitting it in proportion to need, rounded.\n  @Marketing: Report results in 30 days.\n  @Engineering: Report results in 30 days.\n  @Sales: Report results in 30 days.", "split": {"Marketing": 4100, "Engineering": 3300, "Sales": 2600}}
+{"who": "Marketing", "text": "This leaves me under my minimum. Can we revisit?", "stance": "object"}
+{"who": "Engineering", "text": "This leaves me under my minimum. Can we revisit?", "stance": "object"}
+{"who": "Sales", "text": "Understood. I'll make it work.\n  Plan: Spend $2,600 on the highest-impact items first.", "stance": "accept"}
+{"who": "CEO", "text": "Everyone has a point. I'm splitting it in proportion to need, rounded.\n  @Marketing: Report results in 30 days.\n  @Engineering: Report results in 30 days.\n  @Sales: Report results in 30 days.", "split": {"Marketing": 4100, "Engineering": 3300, "Sales": 2600}}
+{"who": "Marketing", "text": "Understood. I'll make it work.\n  Plan: Spend $4,100 on the highest-impact items first.", "stance": "accept"}
+{"who": "Engineering", "text": "Understood. I'll make it work.\n  Plan: Spend $3,300 on the highest-impact items first.", "stance": "accept"}

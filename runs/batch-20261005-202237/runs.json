@@ -1,0 +1,1097 @@
+[
+  {
+    "brief": "A one-page website for Brew Lab, a specialty coffee shop in Indiranaga",
+    "dir": "j2-20261005-202237",
+    "error": null,
+    "metrics": {
+      "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): Menu items and the price of each; Opening hours for each day; Street address and map pin; Shop WhatsApp number for pre-orders; Pickup slot times and the number of orders the shop can take per slot; Bean origins and farm names for the beans and farms section; Loyalty card details beyond buy 9, get the 10th free, such as which items count.",
+      "brief": "A one-page website for Brew Lab, a specialty coffee shop in Indiranagar, Bengaluru: menu with prices, opening hours, location, pre-order a coffee for pickup, a section about our beans and farms, and a loyalty card explainer (buy 9, get the 10th free).",
+      "model": "sonnet",
+      "mock": false,
+      "cycles": 1,
+      "ai_calls": 12,
+      "minutes": 3.1,
+      "budget": {
+        "total": 50,
+        "start": 50,
+        "cap": 100,
+        "raises": [],
+        "spent": 45,
+        "rate_card": true
+      },
+      "site_versions": 2,
+      "site_bytes": 12516,
+      "agents": {
+        "identity": {
+          "turns": 3,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "ceo": {
+          "turns": 1,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "adaptation": {
+          "turns": 1,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "priority": {
+          "turns": 1,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "coordination": {
+          "turns": 2,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "builder": {
+          "turns": 2,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "audit": {
+          "turns": 1,
+          "redirects": 0,
+          "invalid_moves": 0
+        }
+      },
+      "negotiation": {
+        "proposals": 1,
+        "grants": 1,
+        "counters": 0,
+        "refuses": 0,
+        "refuses_converted_by_code": 0,
+        "withdrawals": 0,
+        "conflicts": 0,
+        "ceo_decisions": 3,
+        "resolutions": []
+      },
+      "workflows": {
+        "registered": 2,
+        "done": 2,
+        "failed": 0,
+        "held_ever": 1,
+        "estimate_vs_charged": [
+          {
+            "id": "W-1",
+            "name": "Single file with menu and WhatsApp pre-order",
+            "agent_estimate": 25,
+            "charged": 25
+          },
+          {
+            "id": "W-2",
+            "name": "Hours and location, beans and farms, loyalty card",
+            "agent_estimate": 20,
+            "charged": 20
+          }
+        ]
+      },
+      "ceo_choices": {
+        "made": 3,
+        "picked_shown_first": 1,
+        "picked_identity_first": 1,
+        "note": "options are shuffled before the CEO sees them; shown_first measures position bias, identity_first measures pull toward the option Identity listed first"
+      },
+      "validator_refusals": 0,
+      "role_refusals": 0,
+      "pauses": 0,
+      "stuck": 0,
+      "limit_failures": 0,
+      "warnings": 0,
+      "audits": [
+        {
+          "cycle": 1,
+          "version": 2,
+          "all_pass": true,
+          "pass": 9,
+          "warn": 1,
+          "fail": 0,
+          "mechanical": [],
+          "mechanical_ran": true
+        }
+      ],
+      "open_inputs": [
+        "Menu items and the price of each",
+        "Opening hours for each day",
+        "Street address and map pin",
+        "Shop WhatsApp number for pre-orders",
+        "Pickup slot times and the number of orders the shop can take per slot",
+        "Bean origins and farm names for the beans and farms section",
+        "Loyalty card details beyond buy 9, get the 10th free, such as which items count"
+      ]
+    },
+    "review": {
+      "verdict": "The department finished the site in one cycle (11 calls, 3.1 minutes, 45 of 50 budget, no redirects or validator refusals), but the run was too easy to test its negotiation, ruling or rework paths.",
+      "agents": {
+        "identity": {
+          "score": 4,
+          "note": "Recorded the charter, sent the CEO real decisions and closed with the open inputs listed [2][4][18]. It bundled three questions into one ASK_CEO, and some options were weak: Q2 options 1 and 2 nearly overlap, and Q3 option 1 (invent facts) was a strawman."
+        },
+        "adaptation": {
+          "score": 4,
+          "note": "One turn, named the shortcut and its cost [6]. It proposed the whole site as two workflows at once instead of the smallest testable first. Estimates equal charges exactly, so their accuracy is untested."
+        },
+        "priority": {
+          "score": 3,
+          "note": "Gave resource-based reasons and kept 5 in reserve [7]. But it says a fix costs 8, so a 5 reserve cannot fund one. It also told Adaptation how to structure sections (styling inside sections), which is step design, and called a GRANT with a scope constraint."
+        },
+        "coordination": {
+          "score": 5,
+          "note": "Stated its rule, held W-2 on the shared-file dependency and released it when W-1 finished [9][12]. No role slips."
+        },
+        "audit": {
+          "score": 4,
+          "note": "Honest that the link logic was read, not run [17], and mechanical checks ran at 360px and 1280px [16]. Item 5 passed with a warning even though the button is disabled while the number is TBC, which is lenient against the done-when wording."
+        },
+        "ceo": {
+          "score": 5,
+          "note": "Picked one option per question, gave a one-sentence reason and named the trade-off [3]. The message is long because it echoes the full options."
+        },
+        "builder": {
+          "score": 5,
+          "note": "Ran both workflows in order, kept W-1 content intact and used TBC everywhere [11][14]. File contents were not shown, so I cannot check drink names or slot labels."
+        }
+      },
+      "went_well": [
+        "Clean run: 0 redirects, 0 invalid moves, 0 validator refusals, 0 stuck, 0 failed workflows.",
+        "No invented facts: the CEO chose TBC placeholders [3], the Builder used them [11][14], and Audit passed item 10 [17].",
+        "Single-writer rule on brewlab.html was applied and explained [9][12].",
+        "Identity did not block done on Requester-only facts and listed the 7 open inputs [18][19]."
+      ],
+      "problems": [
+        "Negotiation, conflict, Audit-failure and rework paths were never exercised: 0 counters, 0 refusals, 0 conflicts, 0 findings above warning. The design is only proven for the easy case.",
+        "Cost accuracy is unmeasured: estimate equals charge for both workflows (25/25, 20/20) and rate_card is true.",
+        "Priority's reserve logic is inconsistent: 5 held back against an 8 fix [7].",
+        "The CEO's chosen option 3 says the Requester confirms before done [3], but the charter makes open inputs non-blocking and the run ended Done with none supplied [19]. The site cannot go live yet.",
+        "Item 5 and item 7 pull against each other (button should open a link, number must stay TBC). The WhatsApp flow was never run, so this rests on a code read.",
+        "Mechanical check does not test that TBC tags are visible or scan for stray prices, hours or phone numbers. Items 8 and 10 rest on a code read.",
+        "2 of 11 calls went on Coordination relays for a strictly linear two-step plan.",
+        "CEO position bias cannot be judged from 3 choices (1 shown-first, 1 Identity-first)."
+      ],
+      "learnings": [
+        "Keep: TBC tags plus non-blocking open_inputs. It produced zero invented facts.",
+        "Test next: a tighter budget (for example 30) so Priority must counter or refuse, with variable charges so estimates can diverge.",
+        "Test next: a Requester change request after Done, which this run never reached.",
+        "Add mechanical checks: render and confirm TBC visibility, scan outside TBC tags for digits, rupee signs and phone patterns, and run the order link builder with a dummy number.",
+        "Reword done-when item 5 to say the button builds the link and stays disabled while the number is TBC, so Audit has a clean criterion.",
+        "Change Identity's CEO questions: one decision per ASK_CEO, distinct options, no strawmen, and option text must match the charter on what blocks done.",
+        "Give Priority a stated reserve rule (reserve at least one fix cost) and keep it out of workflow structure."
+      ]
+    },
+    "events": [
+      {
+        "agent": "ceo",
+        "type": "decision",
+        "detail": "charter Q1: option 2 of 3",
+        "msg": 3,
+        "cycle": 0,
+        "shown_pos": 1,
+        "original_pos": 0,
+        "n_options": 3
+      },
+      {
+        "agent": "ceo",
+        "type": "decision",
+        "detail": "charter Q2: option 1 of 3",
+        "msg": 3,
+        "cycle": 0,
+        "shown_pos": 0,
+        "original_pos": 2,
+        "n_options": 3
+      },
+      {
+        "agent": "ceo",
+        "type": "decision",
+        "detail": "charter Q3: option 3 of 3",
+        "msg": 3,
+        "cycle": 0,
+        "shown_pos": 2,
+        "original_pos": 1,
+        "n_options": 3
+      },
+      {
+        "agent": "coordination",
+        "type": "hold",
+        "detail": "W-2: W-1 (wf1-menu-preorder) must finish and output brewlab.html before W-2 can update it",
+        "msg": 9,
+        "cycle": 1
+      }
+    ]
+  },
+  {
+    "brief": "A website for SmileCare Dental Clinic in Pune: book appointments, serv",
+    "dir": "j2-20261005-202654",
+    "error": null,
+    "metrics": {
+      "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): Real 'starting from' price ranges for each service; Real dentist names, qualifications and profile details; Clinic phone number, WhatsApp number and email address for booking requests; Emergency contact number and emergency hours; Review of the Marathi text by the Requester or a named Marathi speaker.",
+      "brief": "A website for SmileCare Dental Clinic in Pune: book appointments, services with prices, dentist profiles, emergency dental contact, patient FAQs, and a Marathi version.",
+      "model": "sonnet",
+      "mock": false,
+      "cycles": 1,
+      "ai_calls": 15,
+      "minutes": 5.8,
+      "budget": {
+        "total": 60,
+        "start": 60,
+        "cap": 120,
+        "raises": [],
+        "spent": 57,
+        "rate_card": true
+      },
+      "site_versions": 3,
+      "site_bytes": 40430,
+      "agents": {
+        "identity": {
+          "turns": 3,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "ceo": {
+          "turns": 1,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "adaptation": {
+          "turns": 2,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "priority": {
+          "turns": 1,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "coordination": {
+          "turns": 3,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "builder": {
+          "turns": 3,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "audit": {
+          "turns": 1,
+          "redirects": 0,
+          "invalid_moves": 0
+        }
+      },
+      "negotiation": {
+        "proposals": 1,
+        "grants": 0,
+        "counters": 1,
+        "refuses": 0,
+        "refuses_converted_by_code": 0,
+        "withdrawals": 0,
+        "conflicts": 0,
+        "ceo_decisions": 3,
+        "resolutions": []
+      },
+      "workflows": {
+        "registered": 3,
+        "done": 3,
+        "failed": 0,
+        "held_ever": 1,
+        "estimate_vs_charged": [
+          {
+            "id": "W-1",
+            "name": "Core English site: booking and services (with one placeholder dentist card)",
+            "agent_estimate": 25,
+            "charged": 25
+          },
+          {
+            "id": "W-2",
+            "name": "Emergency contact and patient FAQ section",
+            "agent_estimate": 10,
+            "charged": 10
+          },
+          {
+            "id": "W-3",
+            "name": "Marathi translation and language toggle",
+            "agent_estimate": 22,
+            "charged": 22
+          }
+        ]
+      },
+      "ceo_choices": {
+        "made": 3,
+        "picked_shown_first": 0,
+        "picked_identity_first": 2,
+        "note": "options are shuffled before the CEO sees them; shown_first measures position bias, identity_first measures pull toward the option Identity listed first"
+      },
+      "validator_refusals": 0,
+      "role_refusals": 0,
+      "pauses": 0,
+      "stuck": 0,
+      "limit_failures": 0,
+      "warnings": 0,
+      "audits": [
+        {
+          "cycle": 1,
+          "version": 3,
+          "all_pass": true,
+          "pass": 7,
+          "warn": 1,
+          "fail": 0,
+          "mechanical": [],
+          "mechanical_ran": true
+        }
+      ],
+      "open_inputs": [
+        "Real 'starting from' price ranges for each service",
+        "Real dentist names, qualifications and profile details",
+        "Clinic phone number, WhatsApp number and email address for booking requests",
+        "Emergency contact number and emergency hours",
+        "Review of the Marathi text by the Requester or a named Marathi speaker"
+      ]
+    },
+    "review": {
+      "verdict": "A clean happy-path run (1 cycle, 14 calls, 57 of 60 budget, no redirects or refusals) that passed all 8 done-when items [21], but the site cannot take a real booking or show a real number until the Requester supplies 5 inputs, and one safety warning was lost at hand-off.",
+      "agents": {
+        "identity": {
+          "score": 3,
+          "note": "Stayed in role and closed correctly [4][21]. The CEO question bundled three decisions, Q3 option 2 has no description, and Q1 option 2 is a strawman [2]. [21] says clinical FAQ review should be tracked as an open input, but the final list in [22] omits it. The done ruling names no charter clause."
+        },
+        "adaptation": {
+          "score": 4,
+          "note": "One proposal, and it accepted Priority's counter within two exchanges [6][8]. It pre-cut styling and said 'Fund W1 and W2 first' [6], which is Priority and Coordination territory. Asking Priority to pick the cut invited the overreach in [7]."
+        },
+        "priority": {
+          "score": 4,
+          "note": "Good opportunity-cost reasoning: no raise, and it named that 3 credits left cannot buy a fix [7]. It overreached by prescribing where the dentist card goes and judging the profiles part low value, which is design and relevance, not envelope. Envelope fields (stop-loss, retry limit, validity) are not visible in chat, so I cannot check them."
+        },
+        "coordination": {
+          "score": 4,
+          "note": "States the scheduling rule and the file lock every time and the order is correct [10][12][15]. The HOLD on W-3 in [12] was true but pointless, since W-2 was running next. It caused a release and recharge of 22 [13][16], net cost zero."
+        },
+        "audit": {
+          "score": 3,
+          "note": "Surfaced two real issues: empty booking recipients and unreviewed clinical advice [20]. But it chose not to route them to Adaptation because only 3 credits were left. That is Priority's call and it hides a correctable finding. Its PASS rests on code reading plus a mechanical check that did not exercise the toggle or the form output [19]."
+        },
+        "ceo": {
+          "score": 4,
+          "note": "Three decisions, each with a reason and a named trade-off [3], and no position bias (shown-first picks 0 of 3). It did not say the brief was silent, though it was silent on all three. The reply repeats full option text and is long."
+        },
+        "builder": {
+          "score": 5,
+          "note": "Ran W-1, W-2 and W-3 in order on one file. Result is 40 KB, 0 external resources, no JS errors, no overflow at 360 or 1280 px [19]. Reports are short and say what changed. The only extra was two nav links in W-2 [14]."
+        }
+      },
+      "went_well": [
+        "Protocol discipline: 0 redirects, 0 invalid moves, 0 validator refusals, 0 role refusals.",
+        "The Adaptation and Priority bargain closed in 2 exchanges with no Identity ruling needed [6][8].",
+        "The honesty rules held: request form with phone confirmation, 'starting from' prices, marked placeholders, Marathi labelled pending review [19][20].",
+        "Coordination stated its ordering rule and single file lock each turn, so no collisions."
+      ],
+      "problems": [
+        "Clinical FAQ and emergency advice review was meant to become an open input [21] but is missing from the final handoff list [22]. This is the one health-safety warning, and the Requester will not see it.",
+        "Audit decided not to route correctable findings because of budget [20]. The 3-credit margin set by Priority [7] left no rework capacity at all.",
+        "'Done' means a template. Booking recipients, emergency number, prices and dentist names are all placeholders. The Requester pause never ran (pauses 0) because the done-when list was written so placeholders count as done [3].",
+        "Dentist profiles ended up as a card inside the services section after Priority's cut [7][8]. Audit passed it, but it is weaker than the charter's 'dentist profiles section' wording.",
+        "The ASK_CEO had a blank option and a strawman option [2], so the CEO's choice was less informed than it looks."
+      ],
+      "learnings": [
+        "Change audit.md: Audit files and routes every correctable finding to Adaptation, and Priority decides funding. Evidence: [20].",
+        "Test next: a brief where the cheap cut does not exist and an audit fails with no budget left. This run never reached Identity conflict rulings, the CEO budget raise (raises: []), validator refusals or rework, so those paths are untested.",
+        "Test next: a brief where a done-when item needs a Requester-only fact, to see whether Identity pauses correctly instead of the item being designed away. Evidence: pauses 0, [3].",
+        "Test system: add a code check that every open input Identity names appears in the final open_inputs list. Evidence: [21] against [22].",
+        "Test system: validate ASK_CEO before sending (every option has text, one decision per question). Evidence: [2].",
+        "Test system: the CEO bias metric is too thin to use. n=3, and the chat shows the picked options as 'Option 3' while the log says original_pos 0 [2][3]. Fix the logging, then rerun with Identity's first option deliberately the weakest.",
+        "Test system: estimate_vs_charged is identical for all three workflows (25/25, 10/10, 22/22) because charges come from a rate card. It does not test Adaptation's estimating, and 57 spent is a charge, not a measurement.",
+        "Consider letting code advance a linear single-file queue. Coordination took 3 of 14 calls with no real decision. This is an estimate from one run, not a measured saving; keep Coordination for holds and parallel work.",
+        "Add a browser-level mechanical check: click the toggle and confirm no English text remains, and read the WhatsApp or email link target. Evidence: [19] covers only overflow, JS errors and links. Marathi quality is unchecked, and I could not see the HTML."
+      ]
+    },
+    "events": [
+      {
+        "agent": "ceo",
+        "type": "decision",
+        "detail": "charter Q1: option 3 of 3",
+        "msg": 3,
+        "cycle": 0,
+        "shown_pos": 2,
+        "original_pos": 0,
+        "n_options": 3
+      },
+      {
+        "agent": "ceo",
+        "type": "decision",
+        "detail": "charter Q2: option 2 of 3",
+        "msg": 3,
+        "cycle": 0,
+        "shown_pos": 1,
+        "original_pos": 2,
+        "n_options": 3
+      },
+      {
+        "agent": "ceo",
+        "type": "decision",
+        "detail": "charter Q3: option 3 of 3",
+        "msg": 3,
+        "cycle": 0,
+        "shown_pos": 2,
+        "original_pos": 0,
+        "n_options": 3
+      },
+      {
+        "agent": "coordination",
+        "type": "hold",
+        "detail": "W-3: W-2 (w2-emergency-faq) must be done before W-3 can run",
+        "msg": 12,
+        "cycle": 1
+      }
+    ]
+  },
+  {
+    "brief": "A portfolio site for Ananya Rao, a wedding photographer in Jaipur: pho",
+    "dir": "j2-20261005-203421",
+    "error": null,
+    "metrics": {
+      "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): Form delivery endpoint (for example an email or form-service address) so enquiries reach Ananya; launch blocker.; Real rate card: package names, inclusions and prices.; Real photos for the gallery.; Real client testimonials and quotes.; A packages and prices section renders multiple packages from one editable list, and each price carries the visible label 'sample, replace before launch'..",
+      "brief": "A portfolio site for Ananya Rao, a wedding photographer in Jaipur: photo gallery, packages and prices, testimonials, and an enquiry form for wedding dates.",
+      "model": "sonnet",
+      "mock": false,
+      "cycles": 1,
+      "ai_calls": 16,
+      "minutes": 4.3,
+      "budget": {
+        "total": 40,
+        "start": 40,
+        "cap": 80,
+        "raises": [],
+        "spent": 35,
+        "rate_card": true
+      },
+      "site_versions": 3,
+      "site_bytes": 20140,
+      "agents": {
+        "identity": {
+          "turns": 4,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "ceo": {
+          "turns": 1,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "adaptation": {
+          "turns": 2,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "priority": {
+          "turns": 1,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "coordination": {
+          "turns": 3,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "builder": {
+          "turns": 3,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "audit": {
+          "turns": 1,
+          "redirects": 0,
+          "invalid_moves": 0
+        }
+      },
+      "negotiation": {
+        "proposals": 1,
+        "grants": 0,
+        "counters": 1,
+        "refuses": 0,
+        "refuses_converted_by_code": 0,
+        "withdrawals": 0,
+        "conflicts": 0,
+        "ceo_decisions": 3,
+        "resolutions": []
+      },
+      "workflows": {
+        "registered": 3,
+        "done": 3,
+        "failed": 0,
+        "held_ever": 0,
+        "estimate_vs_charged": [
+          {
+            "id": "W-1",
+            "name": "Page shell and placeholder gallery",
+            "agent_estimate": 10,
+            "charged": 10
+          },
+          {
+            "id": "W-2",
+            "name": "Enquiry form with validation and endpoint placeholder",
+            "agent_estimate": 15,
+            "charged": 15
+          },
+          {
+            "id": "W-3",
+            "name": "Sample testimonials section",
+            "agent_estimate": 10,
+            "charged": 10
+          }
+        ]
+      },
+      "ceo_choices": {
+        "made": 3,
+        "picked_shown_first": 0,
+        "picked_identity_first": 1,
+        "note": "options are shuffled before the CEO sees them; shown_first measures position bias, identity_first measures pull toward the option Identity listed first"
+      },
+      "validator_refusals": 1,
+      "role_refusals": 0,
+      "pauses": 0,
+      "stuck": 0,
+      "limit_failures": 0,
+      "warnings": 0,
+      "audits": [
+        {
+          "cycle": 1,
+          "version": 3,
+          "all_pass": true,
+          "pass": 4,
+          "warn": 1,
+          "fail": 0,
+          "mechanical": [],
+          "mechanical_ran": true
+        }
+      ],
+      "open_inputs": [
+        "Form delivery endpoint (for example an email or form-service address) so enquiries reach Ananya; launch blocker.",
+        "Real rate card: package names, inclusions and prices.",
+        "Real photos for the gallery.",
+        "Real client testimonials and quotes.",
+        "A packages and prices section renders multiple packages from one editable list, and each price carries the visible label 'sample, replace before launch'."
+      ]
+    },
+    "review": {
+      "verdict": "The department built and passed the three sections it funded cleanly in one cycle, but shipped without the packages and prices section the brief asks for, and a charter edit plus a tight budget let 'Done' hide that.",
+      "agents": {
+        "identity": {
+          "score": 3,
+          "note": "Stayed in role, but [6] says nothing from the brief was dropped while packages left the done-when list. It bundled three questions to the CEO in [2] where the role says one. It never ruled on Adaptation's funding request [10] until [21], and never took the shortfall to the CEO, who can raise the budget. [21] was honest about the gap."
+        },
+        "adaptation": {
+          "score": 3,
+          "note": "Proposed four workflows at 45 against 40 [8] and accepted the counter. It offered no cheaper packages scope. [10] asks Identity for a budget exception, which Identity cannot grant."
+        },
+        "priority": {
+          "score": 4,
+          "note": "Specific counter (35 of 40) with the trade-off and the displaced work named [9]. 'The form I will not cut' edges into goal relevance, though Adaptation had already suggested that order [8]."
+        },
+        "coordination": {
+          "score": 4,
+          "note": "Stated its rule each time, kept the single-writer lock, and did not schedule unregistered W-4 [12][14][16]. [14] repeats [12] and adds a judgement about the form."
+        },
+        "audit": {
+          "score": 5,
+          "note": "Checked all five items, sent the missing packages to Identity as policy, and found the stale banner [20]. It did not repair anything. The F-6 text is not visible, so I could not check its severity."
+        },
+        "ceo": {
+          "score": 4,
+          "note": "Decided on the merits, named the trade-off for each of the three questions, and told Adaptation what to do [3]. Shown-first picks were 0 of 3, so no position bias is visible."
+        },
+        "builder": {
+          "score": 4,
+          "note": "Three workflows in order, 20 KB, mechanical check clean [13][15][17][19]. W-3 added a nav link and a draft-notice line [17]. The static banner Audit flagged may come from that line (inference)."
+        }
+      },
+      "went_well": [
+        "One cycle, 15 calls, 4.3 minutes, 0 redirects, 0 invalid moves, 0 failed workflows.",
+        "The labelled-placeholder pattern worked: all five done-when items pass, with no overflow at 360px or 1280px and no JS errors [19][20].",
+        "The budget bargain closed in three messages [8][9][10].",
+        "Audit exposed the brief gap that the charter no longer covered [20]."
+      ],
+      "problems": [
+        "Packages and prices, one of four asks in [1], is unbuilt, yet the run ends 'Done' [21][22]. dropped_from_brief is empty.",
+        "The validator refusal [5] moved a checkable build item into open_inputs. Likely cause is a keyword hit on 'launch' in 'replace before launch' (inference, not verified). The final open_inputs now lists a build item as a Requester input.",
+        "Adaptation's ruling request [10] got no answer for ten messages, and workflows were registered and run anyway [11].",
+        "The funding route went unused: raises is empty, 5 budget left, cap 80.",
+        "Spend is not measured. Charged equals estimate on all three workflows (10, 15, 10)."
+      ],
+      "learnings": [
+        "Fix the validator first: judge an item by what it checks, not by words inside a quoted label. Test: rerun the same brief with that item reworded without 'launch'. If packages gets built, the cause is confirmed.",
+        "Add a done gate: every ask in the brief must map to a done-when item or a dropped_from_brief entry, and moving an item to open_inputs must count as a drop. Evidence: [6] versus [21].",
+        "Add one line to identity.md: a funding shortfall on a brief deliverable goes to the CEO, who has budget_increase. Test: same brief and the same 40 start, and see whether Identity asks.",
+        "Block scheduling while a blocking question to Identity is open ([10] to [11]). Evidence is one run.",
+        "Log metered calls or tokens per workflow. Rate-card spend cannot show whether estimates are right.",
+        "Word endpoint-note done-when items as 'shown only while unset', to prevent the stale banner (F-5).",
+        "Evidence is thin: one run, three CEO choices, no Requester change round. Draw no conclusion on CEO bias or the change path."
+      ]
+    },
+    "events": [
+      {
+        "agent": "ceo",
+        "type": "decision",
+        "detail": "charter Q1: option 2 of 4",
+        "msg": 3,
+        "cycle": 0,
+        "shown_pos": 1,
+        "original_pos": 3,
+        "n_options": 4
+      },
+      {
+        "agent": "ceo",
+        "type": "decision",
+        "detail": "charter Q2: option 3 of 4",
+        "msg": 3,
+        "cycle": 0,
+        "shown_pos": 2,
+        "original_pos": 2,
+        "n_options": 4
+      },
+      {
+        "agent": "ceo",
+        "type": "decision",
+        "detail": "charter Q3: option 3 of 3",
+        "msg": 3,
+        "cycle": 0,
+        "shown_pos": 2,
+        "original_pos": 0,
+        "n_options": 3
+      },
+      {
+        "agent": "validator",
+        "type": "refused",
+        "detail": "charter: these done-when items can't be checked by reading the site (they depend on the Requester, Audit, verification, approval or launch); move them to open_inputs: [\"A packages and prices section renders multiple packages from one editable list, and each price carries the visible label 'sample, replace before launch'.\"]",
+        "msg": 5,
+        "cycle": 0
+      }
+    ]
+  },
+  {
+    "brief": "An event page for Bengaluru JS Meetup in November: schedule, speakers,",
+    "dir": "j2-20261005-203953",
+    "error": null,
+    "metrics": {
+      "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): Exact event date in November; Speaker names and talk titles; Schedule times and session order; Venue name, full address and exact map coordinates; Sponsor names and logo files; External RSVP page link; Code of conduct text.",
+      "brief": "An event page for Bengaluru JS Meetup in November: schedule, speakers, RSVP, venue and map, code of conduct, and sponsor logos.",
+      "model": "sonnet",
+      "mock": false,
+      "cycles": 1,
+      "ai_calls": 12,
+      "minutes": 3.1,
+      "budget": {
+        "total": 50,
+        "start": 50,
+        "cap": 100,
+        "raises": [],
+        "spent": 45,
+        "rate_card": true
+      },
+      "site_versions": 2,
+      "site_bytes": 12474,
+      "agents": {
+        "identity": {
+          "turns": 3,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "ceo": {
+          "turns": 1,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "adaptation": {
+          "turns": 1,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "priority": {
+          "turns": 1,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "coordination": {
+          "turns": 2,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "builder": {
+          "turns": 2,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "audit": {
+          "turns": 1,
+          "redirects": 0,
+          "invalid_moves": 0
+        }
+      },
+      "negotiation": {
+        "proposals": 1,
+        "grants": 1,
+        "counters": 0,
+        "refuses": 0,
+        "refuses_converted_by_code": 0,
+        "withdrawals": 0,
+        "conflicts": 0,
+        "ceo_decisions": 3,
+        "resolutions": []
+      },
+      "workflows": {
+        "registered": 2,
+        "done": 2,
+        "failed": 0,
+        "held_ever": 0,
+        "estimate_vs_charged": [
+          {
+            "id": "W-1",
+            "name": "Build single-file event page with placeholder sections",
+            "agent_estimate": 35,
+            "charged": 35
+          },
+          {
+            "id": "W-2",
+            "name": "Add Venue section and Leaflet OpenStreetMap map",
+            "agent_estimate": 10,
+            "charged": 10
+          }
+        ]
+      },
+      "ceo_choices": {
+        "made": 3,
+        "picked_shown_first": 1,
+        "picked_identity_first": 1,
+        "note": "options are shuffled before the CEO sees them; shown_first measures position bias, identity_first measures pull toward the option Identity listed first"
+      },
+      "validator_refusals": 0,
+      "role_refusals": 0,
+      "pauses": 0,
+      "stuck": 0,
+      "limit_failures": 0,
+      "warnings": 0,
+      "audits": [
+        {
+          "cycle": 1,
+          "version": 2,
+          "all_pass": true,
+          "pass": 9,
+          "warn": 1,
+          "fail": 0,
+          "mechanical": [],
+          "mechanical_ran": true
+        }
+      ],
+      "open_inputs": [
+        "Exact event date in November",
+        "Speaker names and talk titles",
+        "Schedule times and session order",
+        "Venue name, full address and exact map coordinates",
+        "Sponsor names and logo files",
+        "External RSVP page link",
+        "Code of conduct text"
+      ]
+    },
+    "review": {
+      "verdict": "The department took the happy path cleanly: a sparse but compliant placeholder page, 10 of 10 done-when items passed on v2, 11 calls, 3.1 minutes, no redirects, refusals or retries. The run says little about negotiation, conflict or failure handling because none occurred.",
+      "agents": {
+        "identity": {
+          "score": 4,
+          "note": "Stayed in role with 3 turns: charter question [2], hand-off [4], done verdict [16]. It bundled three decisions into one ASK_CEO although its file says one question. It accepted the unobserved OSM tile warning by inference from the code [16] instead of asking for observed evidence."
+        },
+        "adaptation": {
+          "score": 4,
+          "note": "One turn, two small workflows [6] that map to the done-when items. It sized the plan to the budget, leaving 5 and zero retry, and said so openly. The chat shows only a summary, so the full proposal fields are unverified."
+        },
+        "priority": {
+          "score": 4,
+          "note": "Granted both with a stated trade-off (retry_limit 0) and left Adaptation's grouping alone [7]. It did not question whether 45 of 50 is proportionate for a 12 KB page; its reason was only that nothing competes."
+        },
+        "coordination": {
+          "score": 4,
+          "note": "It stated its rule, respected the W-2 dependency on W-1 and the shared-writer limit on index.html [9][11]. The case was trivial (two sequential workflows), so holds and collisions were never tested."
+        },
+        "audit": {
+          "score": 4,
+          "note": "It checked all 10 items and honestly flagged that tile rendering was confirmed from code, not observed [15]. It did not mark item 7 BLOCKED_BY_EVIDENCE or ask for a rerun, and it checked the final site only."
+        },
+        "ceo": {
+          "score": 4,
+          "note": "Three decisions with one-sentence reasons, each noting that the brief was silent [3]. It also instructed Adaptation, which is outside a charter question, and restated all options at length. Shown-first 1 of 3 and Identity-first 1 of 3 show no position bias, but n=3 is too small to conclude."
+        },
+        "builder": {
+          "score": 5,
+          "note": "It ran both workflows as declared with no scope drift, no retries and a 12 KB file [10][12]. All 10 done-when items passed on its output."
+        }
+      },
+      "went_well": [
+        "Zero redirects, invalid moves, validator refusals, role refusals, pauses or stuck turns. Every hand-off was legal.",
+        "The no-invented-facts rule held end to end: Audit passed item 10 and all seven missing facts were tracked as open inputs [15][17].",
+        "Priority and Identity were disciplined: Priority left design alone [7], Identity used 3 turns and did not manage the work.",
+        "Audit separated what it observed (overflow, JS errors) from what it inferred (tiles) [14][15]."
+      ],
+      "problems": [
+        "Item 7 (map renders with OSM tiles) was never observed. The mechanical check logged no tile.openstreetmap.org request [15], and Identity accepted it on inference [16].",
+        "The 45 spent equals the agent estimates exactly (35, 35, 10, 10), and rate_card is true. It is a billed rate, not measured cost, so estimate accuracy was not tested.",
+        "Adaptation sized its work to fit the budget and left no room for a fix [6][7]. Any failed check would have needed a new decision. It never failed, so the cost of that choice is untested.",
+        "Done-when mostly tests that content is absent. The Requester gets a page with 7 open inputs. The pause-for-Requester rule never triggered because CEO decision 1 [3] made every item closable without them."
+      ],
+      "learnings": [
+        "Test next: a brief or budget that forces a COUNTER, a HOLD or a failed completion check. This run had 0 counters, 0 conflicts, 0 holds and 0 failures, so those paths have no evidence.",
+        "Change the test system: capture network requests in the mechanical check (tile and CDN hosts) so map-style items are observed. Also name the 3 external resources it counts.",
+        "Change the test system: log real tokens or calls next to the rate-card charge, so Priority's estimates can be compared with actual cost.",
+        "Keep: the CEO option shuffle with position logging. Needs many more decisions before it says anything about bias.",
+        "Test whether Identity should send one question per ASK_CEO, or whether the format should allow a bundled list. Evidence is one instance [2]."
+      ]
+    },
+    "events": [
+      {
+        "agent": "ceo",
+        "type": "decision",
+        "detail": "charter Q1: option 2 of 3",
+        "msg": 3,
+        "cycle": 0,
+        "shown_pos": 1,
+        "original_pos": 1,
+        "n_options": 3
+      },
+      {
+        "agent": "ceo",
+        "type": "decision",
+        "detail": "charter Q2: option 1 of 3",
+        "msg": 3,
+        "cycle": 0,
+        "shown_pos": 0,
+        "original_pos": 0,
+        "n_options": 3
+      },
+      {
+        "agent": "ceo",
+        "type": "decision",
+        "detail": "charter Q3: option 2 of 3",
+        "msg": 3,
+        "cycle": 0,
+        "shown_pos": 1,
+        "original_pos": 1,
+        "n_options": 3
+      }
+    ]
+  },
+  {
+    "brief": "A website for Paws Haven animal shelter in Mysuru: pets for adoption, ",
+    "dir": "j2-20261005-204345",
+    "error": null,
+    "metrics": {
+      "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): UPI ID and UPI QR code image; Bank account details for donations; Shelter phone number; Shelter WhatsApp number; Shelter email address; Shelter address and opening hours; Real pet profiles and photos; Real success stories and photos; Native Kannada speaker to review the Kannada text.",
+      "brief": "A website for Paws Haven animal shelter in Mysuru: pets for adoption, donate, volunteer sign-up, success stories, and a Kannada version.",
+      "model": "sonnet",
+      "mock": false,
+      "cycles": 1,
+      "ai_calls": 12,
+      "minutes": 6.1,
+      "budget": {
+        "total": 50,
+        "start": 50,
+        "cap": 100,
+        "raises": [],
+        "spent": 47,
+        "rate_card": true
+      },
+      "site_versions": 2,
+      "site_bytes": 43842,
+      "agents": {
+        "identity": {
+          "turns": 3,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "ceo": {
+          "turns": 1,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "adaptation": {
+          "turns": 1,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "priority": {
+          "turns": 1,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "coordination": {
+          "turns": 2,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "builder": {
+          "turns": 2,
+          "redirects": 0,
+          "invalid_moves": 0
+        },
+        "audit": {
+          "turns": 1,
+          "redirects": 0,
+          "invalid_moves": 0
+        }
+      },
+      "negotiation": {
+        "proposals": 1,
+        "grants": 1,
+        "counters": 0,
+        "refuses": 0,
+        "refuses_converted_by_code": 0,
+        "withdrawals": 0,
+        "conflicts": 0,
+        "ceo_decisions": 3,
+        "resolutions": []
+      },
+      "workflows": {
+        "registered": 2,
+        "done": 2,
+        "failed": 0,
+        "held_ever": 0,
+        "estimate_vs_charged": [
+          {
+            "id": "W-1",
+            "name": "English single-page site with all sections",
+            "agent_estimate": 35,
+            "charged": 35
+          },
+          {
+            "id": "W-2",
+            "name": "Kannada version with language toggle",
+            "agent_estimate": 12,
+            "charged": 12
+          }
+        ]
+      },
+      "ceo_choices": {
+        "made": 3,
+        "picked_shown_first": 0,
+        "picked_identity_first": 2,
+        "note": "options are shuffled before the CEO sees them; shown_first measures position bias, identity_first measures pull toward the option Identity listed first"
+      },
+      "validator_refusals": 0,
+      "role_refusals": 0,
+      "pauses": 0,
+      "stuck": 0,
+      "limit_failures": 0,
+      "warnings": 0,
+      "audits": [
+        {
+          "cycle": 1,
+          "version": 2,
+          "all_pass": true,
+          "pass": 9,
+          "warn": 2,
+          "fail": 0,
+          "mechanical": [],
+          "mechanical_ran": true
+        }
+      ],
+      "open_inputs": [
+        "UPI ID and UPI QR code image",
+        "Bank account details for donations",
+        "Shelter phone number",
+        "Shelter WhatsApp number",
+        "Shelter email address",
+        "Shelter address and opening hours",
+        "Real pet profiles and photos",
+        "Real success stories and photos",
+        "Native Kannada speaker to review the Kannada text"
+      ]
+    },
+    "review": {
+      "verdict": "The department met all 11 done-when items in one cycle with no redirects, refusals or rework, but this was a happy-path run that left negotiation, conflict, rework and holds untested.",
+      "agents": {
+        "identity": {
+          "score": 4,
+          "note": "Charter and done verdict were clean and evidence-based [4][16]. It bundled three questions into one CEO ask [2] where the role file says one; the code did not flag it. Q2 and Q3 option 1 read as weak alternatives."
+        },
+        "adaptation": {
+          "score": 4,
+          "note": "Smallest useful split (English site, then Kannada), mapped to done-when, and it named the trade-off and the reserve risk itself [6]. It committed 47 of 50 up front, leaving no room for rework."
+        },
+        "priority": {
+          "score": 3,
+          "note": "Granted both at full estimate and said the 3 reserve is below one fix (8) [7], but did not COUNTER to protect a rework buffer. Its reason (every part maps to a done-when item) is goal relevance, which belongs to Adaptation and Identity. Only one turn, so bargaining is untested."
+        },
+        "coordination": {
+          "score": 4,
+          "note": "Stated its rule, respected the dependency and the file lock, no HOLD needed [9][11]. In [11] it added an acceptance checklist for the Builder, which edges into completion-check and Audit territory."
+        },
+        "audit": {
+          "score": 4,
+          "note": "Used the code check, filed findings per item, and used the right hand-off to Identity [15]. Gaps: no stated Kannada-mode overflow test, and no mention of the charter standards (alt text, contrast, no stored data). It passed 'opens a pre-filled message' items with only a warning."
+        },
+        "ceo": {
+          "score": 4,
+          "note": "Three decisions, each tied to user outcome, risk and reversibility, with trade-offs named [3]. It also ruled that open inputs do not block done, which Identity did not ask. Choices match the charter and caused no pauses."
+        },
+        "builder": {
+          "score": 4,
+          "note": "Executed both workflows as declared, 43.8 KB, no JS errors or overflow per [14]. Reports were short self-claims [10][12]; it did not flag that inquiry buttons cannot open a real chat until numbers exist."
+        }
+      },
+      "went_well": [
+        "All 11 done-when items passed with 0 failures, 0 redirects, 0 invalid moves, 0 validator or role refusals, 11 AI calls, 6.1 minutes.",
+        "The CEO resolved the three real value choices (UPI/bank only, pre-filled WhatsApp/email, full Kannada parity) at charter time [3], and they became rules the validator and Audit could check. No pauses were needed.",
+        "A code-run mechanical check (360px and 1280px overflow, JS errors, broken links) ran before Audit and gave it direct evidence [14].",
+        "Placeholders and sample entries were used instead of invented shelter facts, and the open inputs list is complete and clear [17]."
+      ],
+      "problems": [
+        "Thin test: 1 cycle, 1 proposal, 0 counters, 0 conflicts, 0 rework, 0 holds. The bargaining, Identity ruling, rework and hold paths were never exercised.",
+        "Possible miss on done-when items 3 and 5: Audit says the buttons 'only show the prepared message' until numbers are supplied [15], while the wording is 'opens a pre-filled WhatsApp or email message'. Passed as a warning with no click or link-format check. This is the main conversion path.",
+        "Mechanical check [14] does not say whether Kannada mode was tested at 360px, though the charter requires no overflow in Kannada and the CEO said Audit should test it [3]. Unverified.",
+        "Budget 47 of 50 with the reserve below one fix [6][7]. Any Audit failure would have needed a new proposal.",
+        "Estimate equals charged exactly (35/35, 12/12) with rate_card true, so the run cannot show whether Priority's or Adaptation's estimates were accurate.",
+        "The CEO position-bias metric disagrees with the chat. The log says identity_first 2 of 3 (original_pos 0,1,0), but the CEO's chat picks map to Identity's options 2, 3, 2 [2][3]. Also n=3, too small to read."
+      ],
+      "learnings": [
+        "Keep: escalate the value choices to the CEO at charter time. Evidence: [3], pauses 0, no later policy disputes.",
+        "Change the test system: add a code check that clicks each inquiry and volunteer action and verifies a wa.me or mailto link with pre-filled text, and run the mechanical overflow check in Kannada mode too. Evidence: [14][15].",
+        "Reword done-when items 3 and 5 so they are testable as 'link is built with pre-filled text and a marked placeholder number', so Audit gives PASS or FAIL instead of a warning.",
+        "Test next: a tighter budget (for example 30) or a larger brief so Priority must COUNTER and bargain, and a run with a seeded defect so the Audit to Adaptation rework loop and the reserve rule are exercised. This run cannot say either works.",
+        "Test system: log actual model usage per workflow separately from the rate-card charge. Evidence: estimate equals charged on both workflows.",
+        "Test system: recheck how original_pos and shown_pos are logged against the options the CEO actually saw, and aggregate CEO choices over many runs before drawing any conclusion on bias.",
+        "Design: decide whether Identity may batch charter questions to the CEO. The role file says one, [2] sent three, and no code rule caught it. Enforce it or amend the file.",
+        "Design: Coordination had nothing to decide with two serial workflows (held_ever 0). Test it with independent workflows or a lock collision before judging its scheduling role."
+      ]
+    },
+    "events": [
+      {
+        "agent": "ceo",
+        "type": "decision",
+        "detail": "charter Q1: option 2 of 3",
+        "msg": 3,
+        "cycle": 0,
+        "shown_pos": 1,
+        "original_pos": 0,
+        "n_options": 3
+      },
+      {
+        "agent": "ceo",
+        "type": "decision",
+        "detail": "charter Q2: option 3 of 3",
+        "msg": 3,
+        "cycle": 0,
+        "shown_pos": 2,
+        "original_pos": 1,
+        "n_options": 3
+      },
+      {
+        "agent": "ceo",
+        "type": "decision",
+        "detail": "charter Q3: option 2 of 3",
+        "msg": 3,
+        "cycle": 0,
+        "shown_pos": 1,
+        "original_pos": 0,
+        "n_options": 3
+      }
+    ]
+  }
+]

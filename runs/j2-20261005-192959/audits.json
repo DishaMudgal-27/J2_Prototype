@@ -1,0 +1,100 @@
+[
+  {
+    "cycle": 1,
+    "version": 2,
+    "results": [
+      {
+        "criterion": "One HTML file, inline or CDN CSS and JS, no build step",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Single document with one <style> and one <script>; no external src or href resources; no build references.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Separate sections for menu, hours, location, beans and farms, loyalty, pre-order",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Sections with ids menu, hours, location, beans, loyalty, preorder, each with its own heading and nav link.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Menu lists several items, each with a price labeled as a placeholder",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "7 menu items (Espresso, Americano, Cappuccino, Latte, Pour Over, Cold Brew, Iced Latte), each with a rupee price followed by a 'placeholder price' badge, plus a 'Placeholder menu' block above the list.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Hours and address present, naming Indiranagar, Bengaluru, labeled as placeholders",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Three hours rows each wrapped in a 'placeholder:' badge plus a placeholder block. Address shows 'placeholder: street address', 'Indiranagar, Bengaluru, Karnataka' and 'placeholder: PIN code'. Map box labeled Placeholder.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Loyalty section states buy 9, get the 10th free",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "'Buy 9, get the 10th free.' in the loyalty section, a 10-stamp graphic with '10th free', and the step 'When you buy 9 drinks, your 10th free drink is on us.'",
+        "severity": "low"
+      },
+      {
+        "criterion": "Pre-order form picks items and quantities, takes a name, builds text, opens a wa.me link with prefilled text",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "Seven stepper rows, a name field and a required-name check feed buildMessage(), then url = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(text). Warning: window.open(..., 'noopener') returns null by spec, so the window.location.href fallback runs as well, likely opening a tab and also navigating the current page. Not tested in a browser.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "WhatsApp number is a labeled placeholder defined in one clearly marked place",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "A boxed 'PLACEHOLDER: SHOP WHATSAPP NUMBER (the only place it is set)' comment above var WHATSAPP_NUMBER = '910000000000'. The same literal is repeated as PLACEHOLDER_NUMBER for the preview-only check, so there are two copies of the value. The placeholder list and a placeholder block near the form also label it.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Near the form: payment at pickup and order confirmed only when the shop replies",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "A .notice block directly above the form says 'Payment is at pickup.' and 'Your order is confirmed only when the shop replies.' and that the page stores and sends nothing. The WhatsApp message and success status repeat the point.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Beans and farms section is generic, with no named farm, region or sourcing claim",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "No farm, region or origin is named, and a placeholder block says farm names and sourcing are to be confirmed. Mild unconfirmed statements remain: 'we choose beans with that in mind' and 'ground and brewed to order'.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Viewport meta tag and responsive CSS so content fits a phone width without sideways scrolling",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "Viewport meta present; media queries at 640px and 380px; fluid grids and clamp() headings. Risk: .ph has white-space: nowrap and the hours rows use long badges such as 'placeholder: 8:00 am – 9:00 pm'. By my estimate this exceeds the card width near 320px, and body overflow-x: hidden would clip it, not scroll. Not rendered or measured.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "CSS defines a warm palette and a modern font stack",
+        "verdict": "PASS",
+        "pass": true,
+        "note": ":root variables --espresso #3b2418, --roast #6b4129, --caramel #b9783f, --cream #faf3e8, --latte #efe1cc; --font-body system-ui stack and --font-head Iowan Old Style/Palatino/Georgia.",
+        "severity": "low"
+      },
+      {
+        "criterion": "All visible text is in English",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "html lang='en'; all visible strings, including labels, notices and the noscript text, are English. The only non-English-letter character is the rupee sign.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Visible list or note showing which details are still placeholders",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Section #placeholders 'Details still to be confirmed' lists menu and prices, hours, address and map, bean and farm details, loyalty fine print and the WhatsApp number. It is linked from the nav as 'To confirm'.",
+        "severity": "low"
+      }
+    ],
+    "all_pass": true
+  }
+]

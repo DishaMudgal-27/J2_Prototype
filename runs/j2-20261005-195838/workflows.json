@@ -1,0 +1,108 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "w1-core-emergency-booking",
+    "name": "Core page: emergency, visit request form, language switch",
+    "purpose": "No site file exists. Emergency info, the visit request form and the language switch are missing.",
+    "cost": 35,
+    "estimate": 35,
+    "envelope": {
+      "money_limit": 35,
+      "model_call_limit": 2,
+      "time_limit_minutes": 25,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 35 or the second call still fails the completion check."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "citycare.html"
+    ],
+    "completion_check": "The file opens with no build step. An emergency link at the top jumps to the emergency section. The number and address are visibly marked as placeholders and the number is not a realistic phone number. The form has all 5 fields and states it is a request, not a confirmed booking. The language switch has 3 options and toggles the text of these two sections.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "w2-doctor-profiles",
+    "name": "Doctor profiles section in three languages",
+    "purpose": "citycare.html has no doctors section, so the profiles done-when item and the doctors part of the language switch fail.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 10 or the second call still fails the completion check."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "citycare.html"
+    ],
+    "completion_check": "The file has a doctors section with at least 2 profiles. Each profile shows a visible SAMPLE label. Switching English, Kannada and Hindi changes all profile text, and Kannada and Hindi sit under the pending native review label. No JS errors and no horizontal overflow at 360px.",
+    "dependencies": [
+      "w1-core-emergency-booking"
+    ],
+    "status": "done",
+    "cycle": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "w3-health-blog",
+    "name": "Health blog section with one sample article in three languages",
+    "purpose": "citycare.html has no blog section, so the blog item and four-section language parity fail.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 10 or the second call still fails the completion check."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "citycare.html"
+    ],
+    "completion_check": "The file has a blog section with at least 1 article tagged SAMPLE with a medical review note. Switching English, Kannada and Hindi changes all article text, and Kannada and Hindi sit under the pending native review label. No JS errors and no horizontal overflow at 360px.",
+    "dependencies": [
+      "w2-doctor-profiles"
+    ],
+    "status": "done",
+    "cycle": 2
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "w4-second-blog-article",
+    "name": "Second sample blog article in three languages",
+    "purpose": "citycare.html blog section has 1 article. The done-when item requires more than one, each labelled as a sample, in all three languages.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 10 or the second call still fails the completion check."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "citycare.html"
+    ],
+    "completion_check": "The blog section has exactly 2 article.post elements. Each shows a visible SAMPLE tag, a placeholder author and date, and a 'Medical review: not done' note. Switching English, Kannada and Hindi changes all text of the new article with no missing keys, and the 'pending native review' label shows on the Kannada and Hindi text. The article contains no dosages, treatment claims or statistics. No other section is changed. No JS errors and no horizontal overflow at 360px.",
+    "dependencies": [
+      "w3-health-blog"
+    ],
+    "status": "done",
+    "cycle": 3
+  }
+]

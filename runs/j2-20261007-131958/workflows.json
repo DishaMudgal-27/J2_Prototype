@@ -1,0 +1,163 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "menu",
+    "name": "Menu section",
+    "purpose": "Site has no menu; customers cannot see items or prices.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the section is not valid HTML with all six priced items after 2 model calls."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "menu section in the site file",
+      "base page shell and mobile-first CSS"
+    ],
+    "completion_check": "Section lists Espresso 120, Cappuccino 180, Pour-over 220, Cold brew 200, Croissant 150, Banana bread 130, each with ₹; no horizontal overflow at 360px and 1280px.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "usable section and head tags",
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "hours",
+    "name": "Opening hours with today highlight",
+    "purpose": "Site does not show hours or which day is today.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 2,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the highlight script throws a JS error on load after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "hours section in the site file",
+      "today-highlight script"
+    ],
+    "completion_check": "All seven days listed with correct times; the row matching the browser's current day has a highlight class; no JS errors on load; no overflow at 360px and 1280px.",
+    "dependencies": [
+      "menu"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "preorder",
+    "name": "Pre-order form with running total and WhatsApp",
+    "purpose": "Customers cannot pre-order or see a total.",
+    "cost": 25,
+    "estimate": 25,
+    "envelope": {
+      "money_limit": 25,
+      "model_call_limit": 2,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the total or the wa.me link is wrong after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "pre-order section in the site file",
+      "total and WhatsApp submit script"
+    ],
+    "completion_check": "Changing quantities updates the ₹ total immediately; submit opens a wa.me link to 919845000000 containing the chosen items and total; pay-at-pickup and 15-minute pickup text is visible; no JS errors; no overflow at 360px.",
+    "dependencies": [
+      "menu"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "loyalty",
+    "name": "Loyalty stamp card",
+    "purpose": "No loyalty section exists.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the circle count is not 10 with FREE on the 10th after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "loyalty section in the site file"
+    ],
+    "completion_check": "Exactly 10 stamp circles render; the 10th shows the text FREE; no overflow at 360px (circles wrap).",
+    "dependencies": [
+      "menu"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "location",
+    "name": "Location and directions",
+    "purpose": "No address or directions link.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the address or link href differs from the supplied text after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "location section in the site file"
+    ],
+    "completion_check": "Address text matches exactly; a link labelled Get directions has href https://maps.google.com/?q=100+Feet+Road+Indiranagar+Bengaluru+560038; no overflow at 360px.",
+    "dependencies": [
+      "menu"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section",
+    "version": 5
+  }
+]

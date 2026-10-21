@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#0B3D91",
+    "secondary": "#0B1F3A",
+    "accent": "#FF5A1F",
+    "background": "#F5F7FA",
+    "surface": "#FFFFFF",
+    "text": "#0B1F3A",
+    "muted": "#4A5568"
+  },
+  "fonts": {
+    "heading": "'Barlow Condensed', 'Arial Narrow', Impact, sans-serif",
+    "body": "'Inter', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif",
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "64px"
+  },
+  "radius": "12px",
+  "buttons": {
+    "primary": "display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 28px;background:#FF5A1F;color:#0B1F3A;border:2px solid #0B1F3A;border-radius:999px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;text-decoration:none;cursor:pointer",
+    "secondary": "display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 28px;background:transparent;color:#0B3D91;border:2px solid #0B3D91;border-radius:999px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;text-decoration:none;cursor:pointer"
+  },
+  "card": "background:#FFFFFF;color:#0B1F3A;border:2px solid #0B1F3A;border-radius:12px;padding:24px;box-shadow:6px 6px 0 #0B3D91",
+  "notes": "Deep navy and river blue with a hot orange accent and condensed heavy headings give a sporty, scoreboard feel; orange is only used as a fill with navy text so contrast stays above WCAG AA."
+}

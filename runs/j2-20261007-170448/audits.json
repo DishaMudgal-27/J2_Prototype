@@ -1,0 +1,138 @@
+[
+  {
+    "cycle": 1,
+    "version": 7,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the name Brew Lab and says it is a cafe in Bengaluru",
+        "verdict": "PASS",
+        "note": "h1 'Brew Lab' and tagline 'A cafe in Indiranagar, Bengaluru'; footer repeats it.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "A menu section lists exactly: Espresso ₹120, Cappuccino ₹180, Cold brew ₹200, Pour-over ₹220, Croissant ₹150, Banana bread ₹130",
+        "verdict": "PASS",
+        "note": "#menu has six li items: Espresso ₹120, Cappuccino ₹180, Cold brew ₹200, Pour-over ₹220, Croissant ₹150, Banana bread ₹130; nothing else.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "A timings section states open 8am to 10pm every day, with no closed days",
+        "verdict": "PASS",
+        "note": "#timings: 'Open 8am to 10pm' and 'Every day of the week, with no days off.'; no closed day named.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "A location section shows the address 100 Feet Road, Indiranagar, Bengaluru 560038",
+        "verdict": "PASS",
+        "note": "#location address element reads '100 Feet Road, Indiranagar, Bengaluru 560038'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The phone number +91 80 4000 2468 appears on the page as a tap-to-call link",
+        "verdict": "PASS",
+        "note": "a href='tel:+918040002468' with text '+91 80 4000 2468' in #location.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A photo gallery section contains empty, clearly labelled photo spots with no images",
+        "verdict": "PASS",
+        "note": "#gallery has six dashed li spots labelled 'Empty photo spot 1' to 6; no img elements in the page.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "A coffee stories section has three stories: Ratnagiri Estate (Chikmagalur, shade-grown coffee), Kerehaklu (Chikmagalur, coffee grown alongside pepper and cardamom), Baarbara Estate (Coorg, only ripe cherries hand-picked)",
+        "verdict": "PASS",
+        "note": "#stories has three li: Ratnagiri Estate (Chikmagalur, shade-grown), Kerehaklu (Chikmagalur, pepper and cardamom), Baarbara Estate (Coorg, only ripe cherries hand-picked); no added facts.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "A navigation menu links to each section and every in-page link points to a section that exists",
+        "verdict": "PASS",
+        "note": "Nav hrefs #menu, #timings, #location, #gallery, #stories all have matching ids; footer #top exists; mechanical check: broken_in_page_links is empty.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The page has a mobile viewport setting and layout rules that keep it within the screen width at 360px and 1280px",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Viewport meta present; mechanical check shows overflow_px 0 at 360 and 1280. Warning: body uses overflow-x: clip, which could mask real overflow from that measurement (unverified); sections also use wrapping and min() grids.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "The page has no JavaScript errors and no text such as 'to be confirmed' or 'lorem ipsum'",
+        "verdict": "PASS",
+        "note": "Mechanical check: js_errors empty, 0 scripts; no 'to be confirmed' or 'lorem ipsum' in the source.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "mechanical": {
+      "available": true,
+      "bytes": 11643,
+      "broken_in_page_links": [],
+      "external_resources": [],
+      "forms": 0,
+      "scripts": 0,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [],
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

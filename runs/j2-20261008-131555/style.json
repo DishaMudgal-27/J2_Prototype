@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#6B3A2A",
+    "secondary": "#5B6B4A",
+    "accent": "#B5651D",
+    "background": "#F7F1E8",
+    "surface": "#FFFDF8",
+    "text": "#2E2620",
+    "muted": "#6E6258"
+  },
+  "fonts": {
+    "heading": "'Cormorant Garamond', Georgia, serif",
+    "body": "'Jost', system-ui, -apple-system, 'Segoe UI', sans-serif",
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@400;500;600&display=swap"
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "64px"
+  },
+  "radius": "12px",
+  "buttons": {
+    "primary": "background:#6B3A2A;color:#FFFFFF;border:1.5px solid #6B3A2A;min-height:44px;padding:0 22px;border-radius:999px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer",
+    "secondary": "background:transparent;color:#6B3A2A;border:1.5px solid #6B3A2A;min-height:44px;padding:0 22px;border-radius:999px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer"
+  },
+  "card": "background:#FFFDF8;border:1px solid #E3D6C3;border-radius:12px;box-shadow:0 1px 3px rgba(46,38,32,0.08);overflow:hidden",
+  "notes": "Clay brown, olive and ochre on warm cream suit handloom textiles; a serif heading with a clean sans body reads as elegant and stays legible on phones, and all text pairs meet WCAG AA."
+}

@@ -1,0 +1,101 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "hero-base",
+    "name": "Dark base page, styling and hero",
+    "purpose": "Site v0 has no page structure, dark theme, heading or hiring call-to-action.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 5,
+      "time_limit_minutes": 15,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same completion_check item fails twice in a row or calls exceed 5."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "HTML shell with viewport meta tag",
+      "Dark CSS theme with light text and responsive rules for 360px and 1280px",
+      "Hero section with placeholder name as h1, tagline and CTA button with href=#contact"
+    ],
+    "completion_check": "The file has a viewport meta tag, a CSS dark background with light text, an h1 with a clearly marked placeholder name, a tagline containing 'frontend developer' and 'freelance', and a CTA anchor with href='#contact'. There is no horizontal overflow at 360px or 1280px.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "usable section and head tags",
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "projects-section",
+    "name": "Projects section with 3 placeholder cards",
+    "purpose": "There is no section showing the developer's work.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 4,
+      "time_limit_minutes": 12,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the card count is not 3 after 2 retries or calls exceed 4."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Projects section with id='projects'",
+      "3 project cards with title and one-line description, in a responsive grid"
+    ],
+    "completion_check": "The section id='projects' exists and contains exactly 3 cards, each with a non-empty title and a one-line description. The layout does not overflow horizontally at 360px or 1280px.",
+    "dependencies": [
+      "hero-base"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "contact-section",
+    "name": "Contact section with email and profile links",
+    "purpose": "Visitors have no way to reach the developer, and the hero CTA has no target.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 4,
+      "time_limit_minutes": 12,
+      "retry_limit": 2,
+      "stop_loss": "Stop if a form element appears or a real-looking address or URL is used, or if calls exceed 4."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Contact section with id='contact'",
+      "mailto link on a placeholder address using the reserved example.com domain",
+      "GitHub and LinkedIn links on placeholder URLs"
+    ],
+    "completion_check": "The section id='contact' exists with one a[href^='mailto:'] link and links to GitHub and LinkedIn. The file has no form element, and the hero CTA href='#contact' resolves to this section.",
+    "dependencies": [
+      "hero-base"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 2
+  }
+]

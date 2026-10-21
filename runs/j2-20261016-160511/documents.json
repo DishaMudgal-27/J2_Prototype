@@ -1,0 +1,312 @@
+{
+  "prd": {
+    "file": "prd.md",
+    "docx": "prd.docx",
+    "agent_output": {
+      "kind": "prd",
+      "requirements": [
+        {
+          "id": "R1",
+          "text": "The page shows the menu with prices, so coffee lovers and office staff nearby can see each item and what it costs before they visit."
+        },
+        {
+          "id": "R2",
+          "text": "The page has a pre-order form for pickup, so coffee lovers and office staff nearby can pre-order a coffee and collect it at the shop."
+        },
+        {
+          "id": "R3",
+          "text": "The page shows the shop's map or address, so visitors can find where Brew Lab is in Indiranagar, Bengaluru."
+        },
+        {
+          "id": "R4",
+          "text": "The page shows the opening hours, so visitors can check when Brew Lab is open."
+        },
+        {
+          "id": "R5",
+          "text": "The site is one page only: the menu, pre-order form, map or address and opening hours are all on that single page."
+        },
+        {
+          "id": "R6",
+          "text": "The site works on phones: a visitor on a phone can read the menu with prices, the opening hours and the address, and can fill in and send the pre-order form."
+        },
+        {
+          "id": "R7",
+          "text": "The site has no payment: the pre-order form does not ask for or take any online payment."
+        }
+      ]
+    },
+    "calls": {
+      "from": 1,
+      "to": 28
+    },
+    "workflows": [
+      "W-1",
+      "W-2",
+      "W-3",
+      "W-4",
+      "W-5",
+      "W-6",
+      "W-7",
+      "W-8"
+    ],
+    "atoms": [
+      "W-1.a1",
+      "W-2.a1",
+      "W-3.a1",
+      "W-4.a1",
+      "W-5.a1",
+      "W-6.a1",
+      "W-7.a1",
+      "W-8.a1"
+    ]
+  },
+  "hld": {
+    "file": "hld.md",
+    "docx": "hld.docx",
+    "agent_output": {
+      "kind": "hld",
+      "components": [
+        {
+          "id": "C1",
+          "name": "Menu display",
+          "responsibility": "shows each menu item with its price so visitors can see what things cost before they visit",
+          "covers": [
+            "R1",
+            "R5",
+            "R6"
+          ]
+        },
+        {
+          "id": "C2",
+          "name": "Pre-order form",
+          "responsibility": "lets a visitor pre-order a coffee for pickup and collect it at the shop, and asks for no online payment",
+          "covers": [
+            "R2",
+            "R5",
+            "R6",
+            "R7"
+          ]
+        },
+        {
+          "id": "C3",
+          "name": "Shop address",
+          "responsibility": "shows the shop's map or address so visitors can find Brew Lab in Indiranagar, Bengaluru",
+          "covers": [
+            "R3",
+            "R5",
+            "R6"
+          ]
+        },
+        {
+          "id": "C4",
+          "name": "Opening hours",
+          "responsibility": "shows when Brew Lab is open so visitors can check before they come",
+          "covers": [
+            "R4",
+            "R5",
+            "R6"
+          ]
+        },
+        {
+          "id": "C5",
+          "name": "One-page layout",
+          "responsibility": "holds the menu, pre-order form, map or address and opening hours on one page and keeps them readable and usable on a phone",
+          "covers": [
+            "R5",
+            "R6"
+          ]
+        }
+      ]
+    },
+    "calls": {
+      "from": 29,
+      "to": 55
+    },
+    "workflows": [
+      "W-9",
+      "W-10",
+      "W-11",
+      "W-12",
+      "W-13",
+      "W-14",
+      "W-15",
+      "W-16",
+      "W-17"
+    ],
+    "atoms": [
+      "W-9.a1",
+      "W-10.a1",
+      "W-11.a1",
+      "W-12.a1",
+      "W-13.a1",
+      "W-14.a1",
+      "W-15.a1",
+      "W-16.a1",
+      "W-17.a1"
+    ]
+  },
+  "lld": {
+    "file": "lld.md",
+    "docx": "lld.docx",
+    "agent_output": {
+      "kind": "lld",
+      "sections": [
+        {
+          "id": "S1",
+          "anchor": "menu",
+          "page": "index.html",
+          "implements": [
+            "C1"
+          ]
+        },
+        {
+          "id": "S2",
+          "anchor": "pre-order",
+          "page": "index.html",
+          "implements": [
+            "C2"
+          ],
+          "version": 2
+        },
+        {
+          "id": "S3",
+          "anchor": "shop-address",
+          "page": "index.html",
+          "implements": [
+            "C3"
+          ]
+        },
+        {
+          "id": "S4",
+          "anchor": "opening-hours",
+          "page": "index.html",
+          "implements": [
+            "C4"
+          ]
+        },
+        {
+          "id": "S5",
+          "anchor": "page-layout",
+          "page": "index.html",
+          "implements": [
+            "C5"
+          ]
+        }
+      ],
+      "elements": [
+        {
+          "id": "E1",
+          "section": "S2",
+          "selector": "#po-submit",
+          "trigger": "submit",
+          "behaviour": "the Pre-order form for pickup is sent when every required field is filled in. If a required field is empty or invalid, the form is not sent and the problem is shown beside that field. No payment is asked for or taken"
+        },
+        {
+          "id": "E2",
+          "section": "S2",
+          "selector": "#pre-order-form",
+          "trigger": "change",
+          "behaviour": "that field is checked when the visitor leaves it, and its message is shown beside it. The fields and their rules are listed under Form fields"
+        },
+        {
+          "id": "E3",
+          "section": "S2",
+          "selector": "#po-error",
+          "trigger": "submit",
+          "behaviour": "a message shows that the pre-order for pickup was received, so the visitor knows it went through"
+        },
+        {
+          "id": "E4",
+          "section": "S5",
+          "selector": "#page-nav",
+          "trigger": "click",
+          "behaviour": "each link moves the visitor to `#menu` (S1), `#pre-order` (S2), `#shop-address` (S3) or `#opening-hours` (S4) on the same page"
+        }
+      ],
+      "fields": [
+        {
+          "id": "F1",
+          "section": "S2",
+          "form": "pre-order-form",
+          "name": "customer-name",
+          "type": "text",
+          "required": true,
+          "validation": null
+        },
+        {
+          "id": "F2",
+          "section": "S2",
+          "form": "pre-order-form",
+          "name": "customer-phone",
+          "type": "tel",
+          "required": true,
+          "validation": null
+        },
+        {
+          "id": "F3",
+          "section": "S2",
+          "form": "pre-order-form",
+          "name": "coffee-item",
+          "type": "select",
+          "required": true,
+          "validation": null
+        },
+        {
+          "id": "F4",
+          "section": "S2",
+          "form": "pre-order-form",
+          "name": "quantity",
+          "type": "number",
+          "required": true,
+          "validation": null
+        },
+        {
+          "id": "F5",
+          "section": "S2",
+          "form": "pre-order-form",
+          "name": "pickup-time",
+          "type": "time",
+          "required": true,
+          "validation": null
+        }
+      ],
+      "revisions": [
+        {
+          "section": "S2",
+          "version": 2,
+          "reason": "The LLD slice lists a quantity field, select, number and time field types and ids such as #pre-order-submit, #pre-order-fields and #pre-order-status. The charter and the Requester's answer say four fields (name, phone, items, pickup time) with no quantity, and the atom allows only the #po-* ids. I followed the charter. Mailto cannot confirm receipt, so there is no separate status element.",
+          "changes": {
+            "#pre-order-submit": "#po-submit",
+            "#pre-order-fields": "#pre-order-form",
+            "#pre-order-status": "#po-error"
+          },
+          "by": "W-27"
+        }
+      ]
+    },
+    "calls": {
+      "from": 56,
+      "to": 87
+    },
+    "workflows": [
+      "W-18",
+      "W-19",
+      "W-20",
+      "W-21",
+      "W-22",
+      "W-23",
+      "W-24",
+      "W-25"
+    ],
+    "atoms": [
+      "W-18.a1",
+      "W-19.a1",
+      "W-20.a1",
+      "W-21.a1",
+      "W-22.a1",
+      "W-23.a1",
+      "W-24.a1",
+      "W-25.a1"
+    ]
+  }
+}

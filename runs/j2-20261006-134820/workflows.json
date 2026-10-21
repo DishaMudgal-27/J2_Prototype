@@ -1,0 +1,109 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "w1-shell-info",
+    "name": "Page shell, hours and location",
+    "purpose": "No page exists: no Brew Lab name, navigation, hours or location.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 2,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the second call has not produced a file that opens with working nav links and 7 listed days, or if time exceeds 15 minutes."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "index.html with shell, nav, hours and location sections"
+    ],
+    "completion_check": "File opens with no build step; nav links jump to every section; all 7 days are listed; address and map link are present; every unknown value is visibly labelled PLACEHOLDER.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "w2-menu-preorder",
+    "name": "Menu and pickup pre-order form",
+    "purpose": "Visitors cannot see the menu or pre-order for pickup.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 2,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the second call still fails to update the total on quantity change or makes any network call, or if time exceeds 20 minutes."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Menu and pre-order section added to index.html"
+    ],
+    "completion_check": "Items appear grouped by category; changing a quantity updates the total; submit shows an order summary and a destination labelled PLACEHOLDER; no network backend is called.",
+    "dependencies": [
+      "w1-shell-info"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "w3-phone-fix",
+    "name": "Fix 360px phone overflow",
+    "purpose": "At 360px width the page overflows horizontally by 78px (mechanical check, F-9); desktop is 0.",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 2,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the second call still shows any horizontal overflow at 360px, or if time exceeds 12 minutes."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "index.html with responsive fix for header and nav at phone width"
+    ],
+    "completion_check": "At 360px width the horizontal overflow is 0px; at 1280px it is still 0px; all nav links still jump to their sections; no new JS errors.",
+    "dependencies": [
+      "w2-menu-preorder"
+    ],
+    "status": "done",
+    "cycle": 2
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "w4-farm-stories",
+    "name": "Three coffee farm story sections",
+    "purpose": "Done-when item 8: no farm sections exist; there are no #farm anchors or farm text.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 2,
+      "time_limit_minutes": 25,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the second call still lacks any of the three farm blocks, any required field, or the Farms nav link, if any farm fact is not marked PLACEHOLDER, or if time exceeds 25 minutes."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Farm stories section with three farm profiles added to index.html",
+      "Farms link in nav"
+    ],
+    "completion_check": "Three distinct farm blocks each have a name, location, at least 2 paragraphs and altitude, variety and process fields; every unknown value is visibly labelled PLACEHOLDER; the Farms nav link jumps to the section; no invented facts.",
+    "dependencies": [
+      "w3-phone-fix"
+    ],
+    "status": "done",
+    "cycle": 2
+  }
+]

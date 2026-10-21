@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#FF4F8B",
+    "secondary": "#6C5CE7",
+    "accent": "#FFD23F",
+    "background": "#0F1020",
+    "surface": "#1B1D3A",
+    "text": "#F5F6FF",
+    "muted": "#B8BCE0"
+  },
+  "fonts": {
+    "heading": "'Space Grotesk', 'Segoe UI', system-ui, sans-serif",
+    "body": "'Inter', 'Segoe UI', system-ui, sans-serif",
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap"
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "64px"
+  },
+  "radius": "16px",
+  "buttons": {
+    "primary": "background:#FF4F8B;color:#0F1020;border:2px solid #FF4F8B;min-height:48px;padding:12px 28px;border-radius:999px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;",
+    "secondary": "background:transparent;color:#F5F6FF;border:2px solid #FFD23F;min-height:48px;padding:12px 28px;border-radius:999px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;"
+  },
+  "card": "background:#1B1D3A;color:#F5F6FF;border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:24px;",
+  "notes": "Dark navy with hot pink, electric violet and yellow accents feels energetic and techy for students, and all text pairs pass WCAG AA contrast."
+}

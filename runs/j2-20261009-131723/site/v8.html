@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Thread &amp; Loom</title>
+<!-- J2:style head start (owner W-1) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Nunito+Sans:wght@400;600;700&amp;display=swap"><style>:root{--j2-primary:#7A3E22;--j2-secondary:#4A5A32;--j2-accent:#B8742A;--j2-background:#FAF5EC;--j2-surface:#F1E8D8;--j2-text:#2B2118;--j2-muted:#6A5846;--j2-font-heading:'Cormorant Garamond', Georgia, 'Times New Roman', serif;--j2-font-body:'Nunito Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:10px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#7A3E22;color:#FFFFFF;border:2px solid #7A3E22;min-height:44px;padding:10px 22px;font-weight:700;letter-spacing:.02em;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-btn-secondary{display:inline-block;background:transparent;color:#7A3E22;border:2px solid #7A3E22;min-height:44px;padding:10px 22px;font-weight:700;letter-spacing:.02em;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-card{background:#FFFFFF;border:1px solid #E3D6C0;border-radius:10px;box-shadow:0 2px 10px rgba(43,33,24,.07);overflow:hidden}</style>
+<!-- J2:style head end -->
+<!-- J2:W-1 head start (owner W-1) -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#FAF5EC">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- J2:W-1 head end -->
+<!-- J2:W-2 head start (owner W-8) -->
+<style>
+  /* W-8: the hero (W-2) must lead the page even though its section is written after the shop (W-3) */
+  body { display: flex; flex-direction: column; }
+  body > * { order: 3; }
+  body > .tl-header { order: 0; }
+  body > #tl-hero-wrap { order: 1; }
+  body > #shop { order: 2; }
+</style>
+<!-- J2:W-2 head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 76px; -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    max-width: 100%;
+    overflow-x: clip;
+    background: var(--j2-background, #FAF5EC);
+    color: var(--j2-text, #2B2118);
+    font-family: var(--j2-font-body, 'Nunito Sans', system-ui, sans-serif);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  img, svg, video, iframe { max-width: 100%; }
+  img { height: auto; }
+  h1, h2, h3, h4 {
+    font-family: var(--j2-font-heading, 'Cormorant Garamond', Georgia, serif);
+    color: var(--j2-text, #2B2118);
+    line-height: 1.2;
+    margin: 0 0 .5em;
+    overflow-wrap: anywhere;
+  }
+  h1 { font-size: clamp(2rem, 7vw, 3.25rem); }
+  h2 { font-size: clamp(1.6rem, 5vw, 2.4rem); }
+  p, li, td, th, a { overflow-wrap: anywhere; }
+  a { color: var(--j2-primary, #7A3E22); }
+  section[id], header[id] { scroll-margin-top: 76px; }
+  :focus-visible { outline: 3px solid var(--j2-accent, #B8742A); outline-offset: 2px; }
+  .j2-container { width: 100%; max-width: 1120px; margin: 0 auto; padding-left: 16px; padding-right: 16px; }
+
+  .tl-header {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--j2-background, #FAF5EC);
+    border-bottom: 1px solid #E3D6C0;
+  }
+  .tl-header-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; min-height: 64px;
+  }
+  .tl-brand {
+    font-family: var(--j2-font-heading, 'Cormorant Garamond', Georgia, serif);
+    font-size: 1.6rem; font-weight: 700; letter-spacing: .01em;
+    color: var(--j2-primary, #7A3E22); text-decoration: none;
+    display: inline-flex; align-items: center; min-height: 44px;
+  }
+  .tl-menu-btn {
+    min-height: 44px; min-width: 44px; padding: 8px 14px;
+    background: transparent; color: var(--j2-primary, #7A3E22);
+    border: 2px solid var(--j2-primary, #7A3E22);
+    border-radius: var(--j2-radius, 10px);
+    font: inherit; font-weight: 700; cursor: pointer;
+  }
+  .tl-nav { display: none; }
+  .tl-nav.tl-open {
+    display: block; position: absolute; left: 0; right: 0; top: 100%;
+    background: var(--j2-background, #FAF5EC);
+    border-bottom: 1px solid #E3D6C0;
+    box-shadow: 0 8px 16px rgba(43,33,24,.08);
+  }
+  .tl-nav ul { list-style: none; margin: 0; padding: 8px 16px 16px; }
+  .tl-nav a {
+    display: flex; align-items: center; min-height: 44px; padding: 6px 4px;
+    color: var(--j2-text, #2B2118); text-decoration: none; font-weight: 600;
+    border-bottom: 1px solid #EADFCB;
+  }
+  .tl-nav a:hover { color: var(--j2-primary, #7A3E22); }
+  .tl-nav a[hidden] { display: none; }
+  .tl-nav li:has(a[hidden]) { display: none; }
+
+  @media (min-width: 900px) {
+    .tl-menu-btn { display: none; }
+    .tl-nav, .tl-nav.tl-open { display: block; position: static; border: 0; box-shadow: none; background: transparent; }
+    .tl-nav ul { display: flex; gap: 4px; padding: 0; flex-wrap: wrap; justify-content: flex-end; }
+    .tl-nav a { border-bottom: 0; padding: 6px 12px; border-radius: var(--j2-radius, 10px); }
+    .tl-nav a:hover { background: var(--j2-surface, #F1E8D8); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+</style>
+
+<header class="tl-header" id="top">
+  <div class="j2-container tl-header-inner">
+    <a class="tl-brand" href="#top">Thread &amp; Loom</a>
+    <button class="tl-menu-btn" id="tl-menu-btn" type="button" aria-expanded="false" aria-controls="tl-nav">Menu</button>
+    <nav class="tl-nav" id="tl-nav" aria-label="Main">
+      <ul>
+        <li><a href="#shop" data-alt="catalogue,products,collection">Shop</a></li>
+        <li><a href="#new-arrivals" data-alt="new,arrivals">New Arrivals</a></li>
+        <li><a href="#lookbook" data-alt="look-book,outfits">Lookbook</a></li>
+        <li><a href="#size-guide" data-alt="sizes,size-chart,sizeguide">Size Guide</a></li>
+        <li><a href="#visit" data-alt="visit-us,contact,location,timings,store">Visit Us</a></li>
+        <li><a href="#policies" data-alt="policy,exchange,delivery,returns">Policies</a></li>
+        <li><a href="#reviews" data-alt="testimonials,customer-reviews">Reviews</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+(function () {
+  function init() {
+    try {
+      var btn = document.getElementById('tl-menu-btn');
+      var nav = document.getElementById('tl-nav');
+      if (!btn || !nav) return;
+
+      var links = nav.querySelectorAll('a[href^="#"]');
+      for (var i = 0; i < links.length; i++) {
+        var a = links[i];
+        var id = a.getAttribute('href').slice(1);
+        if (document.getElementById(id)) continue;
+        var alts = (a.getAttribute('data-alt') || '').split(',');
+        var found = null;
+        for (var j = 0; j < alts.length; j++) {
+          var alt = alts[j].trim();
+          if (alt && document.getElementById(alt)) { found = alt; break; }
+        }
+        if (found) { a.setAttribute('href', '#' + found); }
+        else { a.hidden = true; }
+      }
+
+      function setOpen(open) {
+        nav.classList.toggle('tl-open', open);
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        btn.textContent = open ? 'Close' : 'Menu';
+      }
+      btn.addEventListener('click', function () {
+        setOpen(!nav.classList.contains('tl-open'));
+      });
+      nav.addEventListener('click', function (e) {
+        if (e.target && e.target.closest && e.target.closest('a')) setOpen(false);
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') setOpen(false);
+      });
+    } catch (err) { /* nav stays usable without the toggle */ }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+<!-- J2:W-1 end -->
+<!-- J2:W-3 start (owner W-3) -->
+<section id="shop" class="tl-shop" aria-labelledby="tl-shop-title">
+<style>
+  .tl-shop { padding: var(--j2-section, 64px) 0; }
+  .tl-shop [hidden] { display: none !important; }
+  .tl-shop .tl-intro { color: var(--j2-muted); margin: 0 0 24px; max-width: 60ch; }
+  .tl-shop .tl-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; padding: 0; }
+  .tl-shop .tl-tab {
+    min-height: 44px; padding: 8px 16px; font: inherit; font-weight: 700; cursor: pointer;
+    background: transparent; color: var(--j2-primary);
+    border: 2px solid var(--j2-primary); border-radius: var(--j2-radius);
+  }
+  .tl-shop .tl-tab:hover { background: var(--j2-surface); }
+  .tl-shop .tl-tab[aria-pressed="true"] { background: var(--j2-primary); color: #FFFFFF; }
+  .tl-shop .tl-filters {
+    display: grid; grid-template-columns: 1fr; gap: 12px; align-items: end;
+    background: var(--j2-surface); border-radius: var(--j2-radius); padding: 16px; margin: 0 0 16px;
+  }
+  .tl-shop .tl-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .tl-shop .tl-field label { font-weight: 700; font-size: .9rem; color: var(--j2-text); }
+  .tl-shop .tl-field select {
+    width: 100%; min-height: 44px; padding: 8px 12px; font: inherit; font-size: 16px;
+    color: var(--j2-text); background: #FFFFFF;
+    border: 2px solid var(--j2-primary); border-radius: var(--j2-radius);
+  }
+  .tl-shop .tl-status { margin: 0 0 16px; color: var(--j2-muted); font-weight: 600; }
+  .tl-shop .tl-grid {
+    display: grid; gap: 16px; list-style: none; margin: 0; padding: 0;
+    grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
+  }
+  .tl-shop .tl-card { display: flex; flex-direction: column; min-width: 0; }
+  .tl-shop .tl-ph {
+    aspect-ratio: 4 / 5; display: flex; align-items: center; justify-content: center; text-align: center;
+    padding: 12px; background: var(--j2-surface); color: var(--j2-muted);
+    border-bottom: 1px solid #E3D6C0; font-size: .9rem; font-weight: 600;
+  }
+  .tl-shop .tl-card-body { display: flex; flex-direction: column; gap: 4px; padding: 16px; flex: 1; }
+  .tl-shop .tl-cat { margin: 0; font-size: .8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--j2-secondary); }
+  .tl-shop .tl-card h3 { margin: 0; font-size: 1.35rem; }
+  .tl-shop .tl-sizes { margin: 0; color: var(--j2-muted); font-size: .95rem; }
+  .tl-shop .tl-price { margin: 4px 0 12px; font-size: 1.2rem; font-weight: 700; color: var(--j2-primary); }
+  .tl-shop .tl-card .j2-btn { margin-top: auto; width: 100%; text-align: center; }
+  .tl-shop .tl-empty { text-align: center; padding: 32px 16px; background: var(--j2-surface); border-radius: var(--j2-radius); }
+  .tl-shop .tl-empty p { margin: 0 0 16px; }
+  @media (min-width: 560px) {
+    .tl-shop .tl-filters { grid-template-columns: 1fr 1fr auto; }
+  }
+</style>
+
+<div class="j2-container">
+  <h2 id="tl-shop-title">Shop</h2>
+  <p class="tl-intro">Handloom kurtas, sarees, cotton shirts and dupattas. Pick a category, then narrow by size and price. Product photos are placeholders until real photos arrive.</p>
+
+  <div class="tl-tabs" role="group" aria-label="Browse by category">
+    <button type="button" class="tl-tab" data-cat="all" aria-pressed="true">All (10)</button>
+    <button type="button" class="tl-tab" data-cat="kurtas" aria-pressed="false">Kurtas (3)</button>
+    <button type="button" class="tl-tab" data-cat="sarees" aria-pressed="false">Sarees (3)</button>
+    <button type="button" class="tl-tab" data-cat="shirts" aria-pressed="false">Cotton shirts (2)</button>
+    <button type="button" class="tl-tab" data-cat="dupattas" aria-pressed="false">Dupattas (2)</button>
+  </div>
+
+  <div class="tl-filters">
+    <div class="tl-field">
+      <label for="tl-size">Size</label>
+      <select id="tl-size">
+        <option value="all">All sizes</option>
+        <option value="XS">XS</option>
+        <option value="S">S</option>
+        <option value="M">M</option>
+        <option value="L">L</option>
+        <option value="XL">XL</option>
+        <option value="XXL">XXL</option>
+        <option value="FREE">Free size</option>
+      </select>
+    </div>
+    <div class="tl-field">
+      <label for="tl-price">Price</label>
+      <select id="tl-price">
+        <option value="all">Any price</option>
+        <option value="0-1499">Under ₹1,500</option>
+        <option value="1500-2999">₹1,500 to ₹2,999</option>
+        <option value="3000-999999">₹3,000 and above</option>
+      </select>
+    </div>
+    <button type="button" class="j2-btn-secondary tl-reset">Clear filters</button>
+  </div>
+
+  <p class="tl-status" id="tl-status" role="status" aria-live="polite">Showing 10 of 10 products</p>
+
+  <div class="tl-grid" id="tl-grid">
+    <article class="j2-card tl-card" data-cat="kurtas" data-name="Indigo block-print kurta" data-price="1499" data-price-text="1,499" data-sizes="S M L XL XXL">
+      <div class="tl-ph" role="img" aria-label="Placeholder image for Indigo block-print kurta">Placeholder image<br>Photo coming soon</div>
+      <div class="tl-card-body">
+        <p class="tl-cat">Kurtas</p>
+        <h3>Indigo block-print kurta</h3>
+        <p class="tl-sizes">Sizes: S to XXL</p>
+        <p class="tl-price">₹1,499</p>
+        <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order Indigo block-print kurta on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Indigo%20block-print%20kurta%20(Rs%201%2C499).">Order on WhatsApp</a>
+      </div>
+    </article>
+
+    <article class="j2-card tl-card" data-cat="kurtas" data-name="Mustard handloom kurta" data-price="1699" data-price-text="1,699" data-sizes="S M L XL">
+      <div class="tl-ph" role="img" aria-label="Placeholder image for Mustard handloom kurta">Placeholder image<br>Photo coming soon</div>
+      <div class="tl-card-body">
+        <p class="tl-cat">Kurtas</p>
+        <h3>Mustard handloom kurta</h3>
+        <p class="tl-sizes">Sizes: S to XL</p>
+        <p class="tl-price">₹1,699</p>
+        <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order Mustard handloom kurta on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Mustard%20handloom%20kurta%20(Rs%201%2C699).">Order on WhatsApp</a>
+      </div>
+    </article>
+
+    <article class="j2-card tl-card" data-cat="kurtas" data-name="White chikankari kurta" data-price="2199" data-price-text="2,199" data-sizes="XS S M L XL">
+      <div class="tl-ph" role="img" aria-label="Placeholder image for White chikankari kurta">Placeholder image<br>Photo coming soon</div>
+      <div class="tl-card-body">
+        <p class="tl-cat">Kurtas</p>
+        <h3>White chikankari kurta</h3>
+        <p class="tl-sizes">Sizes: XS to XL</p>
+        <p class="tl-price">₹2,199</p>
+        <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order White chikankari kurta on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20White%20chikankari%20kurta%20(Rs%202%2C199).">Order on WhatsApp</a>
+      </div>
+    </article>
+
+    <article class="j2-card tl-card" data-cat="sarees" data-name="Ikat handloom saree" data-price="3499" data-price-text="3,499" data-sizes="FREE">
+      <div class="tl-ph" role="img" aria-label="Placeholder image for Ikat handloom saree">Placeholder image<br>Photo coming soon</div>
+      <div class="tl-card-body">
+        <p class="tl-cat">Sarees</p>
+        <h3>Ikat handloom saree</h3>
+        <p class="tl-sizes">Free size</p>
+        <p class="tl-price">₹3,499</p>
+        <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order Ikat handloom saree on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Ikat%20handloom%20saree%20(Rs%203%2C499).">Order on WhatsApp</a>
+      </div>
+    </article>
+
+    <article class="j2-card tl-card" data-cat="sarees" data-name="Khadi silk saree" data-price="4999" data-price-text="4,999" data-sizes="FREE">
+      <div class="tl-ph" role="img" aria-label="Placeholder image for Khadi silk saree">Placeholder image<br>Photo coming soon</div>
+      <div class="tl-card-body">
+        <p class="tl-cat">Sarees</p>
+        <h3>Khadi silk saree</h3>
+        <p class="tl-sizes">Free size</p>
+        <p class="tl-price">₹4,999</p>
+        <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order Khadi silk saree on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Khadi%20silk%20saree%20(Rs%204%2C999).">Order on WhatsApp</a>
+      </div>
+    </article>
+
+    <article class="j2-card tl-card" data-cat="sarees" data-name="Cotton jamdani saree" data-price="3999" data-price-text="3,999" data-sizes="FREE">
+      <div class="tl-ph" role="img" aria-label="Placeholder image for Cotton jamdani saree">Placeholder image<br>Photo coming soon</div>
+      <div class="tl-card-body">
+        <p class="tl-cat">Sarees</p>
+        <h3>Cotton jamdani saree</h3>
+        <p class="tl-sizes">Free size</p>
+        <p class="tl-price">₹3,999</p>
+        <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order Cotton jamdani saree on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Cotton%20jamdani%20saree%20(Rs%203%2C999).">Order on WhatsApp</a>
+      </div>
+    </article>
+
+    <article class="j2-card tl-card" data-cat="shirts" data-name="Khadi cotton shirt" data-price="1299" data-price-text="1,299" data-sizes="S M L XL XXL">
+      <div class="tl-ph" role="img" aria-label="Placeholder image for Khadi cotton shirt">Placeholder image<br>Photo coming soon</div>
+      <div class="tl-card-body">
+        <p class="tl-cat">Cotton shirts</p>
+        <h3>Khadi cotton shirt</h3>
+        <p class="tl-sizes">Sizes: S to XXL</p>
+        <p class="tl-price">₹1,299</p>
+        <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order Khadi cotton shirt on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Khadi%20cotton%20shirt%20(Rs%201%2C299).">Order on WhatsApp</a>
+      </div>
+    </article>
+
+    <article class="j2-card tl-card" data-cat="shirts" data-name="Linen-blend shirt" data-price="1599" data-price-text="1,599" data-sizes="M L XL XXL">
+      <div class="tl-ph" role="img" aria-label="Placeholder image for Linen-blend shirt">Placeholder image<br>Photo coming soon</div>
+      <div class="tl-card-body">
+        <p class="tl-cat">Cotton shirts</p>
+        <h3>Linen-blend shirt</h3>
+        <p class="tl-sizes">Sizes: M to XXL</p>
+        <p class="tl-price">₹1,599</p>
+        <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order Linen-blend shirt on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Linen-blend%20shirt%20(Rs%201%2C599).">Order on WhatsApp</a>
+      </div>
+    </article>
+
+    <article class="j2-card tl-card" data-cat="dupattas" data-name="Block-print dupatta" data-price="899" data-price-text="899" data-sizes="FREE">
+      <div class="tl-ph" role="img" aria-label="Placeholder image for Block-print dupatta">Placeholder image<br>Photo coming soon</div>
+      <div class="tl-card-body">
+        <p class="tl-cat">Dupattas</p>
+        <h3>Block-print dupatta</h3>
+        <p class="tl-sizes">Free size</p>
+        <p class="tl-price">₹899</p>
+        <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order Block-print dupatta on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Block-print%20dupatta%20(Rs%20899).">Order on WhatsApp</a>
+      </div>
+    </article>
+
+    <article class="j2-card tl-card" data-cat="dupattas" data-name="Chanderi dupatta" data-price="1099" data-price-text="1,099" data-sizes="FREE">
+      <div class="tl-ph" role="img" aria-label="Placeholder image for Chanderi dupatta">Placeholder image<br>Photo coming soon</div>
+      <div class="tl-card-body">
+        <p class="tl-cat">Dupattas</p>
+        <h3>Chanderi dupatta</h3>
+        <p class="tl-sizes">Free size</p>
+        <p class="tl-price">₹1,099</p>
+        <a class="j2-btn tl-order" target="_blank" rel="noopener" aria-label="Order Chanderi dupatta on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Chanderi%20dupatta%20(Rs%201%2C099).">Order on WhatsApp</a>
+      </div>
+    </article>
+  </div>
+
+  <div class="tl-empty" id="tl-empty" hidden>
+    <p>No products match these filters.</p>
+    <button type="button" class="j2-btn tl-reset">Clear filters</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  try {
+    var root = document.getElementById('shop');
+    if (!root) return;
+    var cards = root.querySelectorAll('.tl-card');
+    var tabs = root.querySelectorAll('.tl-tab');
+    var sizeSel = document.getElementById('tl-size');
+    var priceSel = document.getElementById('tl-price');
+    var status = document.getElementById('tl-status');
+    var empty = document.getElementById('tl-empty');
+    var resets = root.querySelectorAll('.tl-reset');
+    var cat = 'all';
+
+    function orderHref(card, size) {
+      var msg = 'Hi Thread & Loom, I would like to order: ' + card.getAttribute('data-name') +
+        ' (Rs ' + card.getAttribute('data-price-text') + ')' +
+        (size && size !== 'all' && size !== 'FREE' ? ', size ' + size : '') + '.';
+      return 'https://wa.me/910000011111?text=' + encodeURIComponent(msg);
+    }
+
+    function apply() {
+      var size = sizeSel.value;
+      var range = priceSel.value;
+      var min = 0, max = Infinity;
+      if (range !== 'all') {
+        var parts = range.split('-');
+        min = parseInt(parts[0], 10);
+        max = parseInt(parts[1], 10);
+      }
+      var shown = 0;
+      for (var i = 0; i < cards.length; i++) {
+        var c = cards[i];
+        var price = parseInt(c.getAttribute('data-price'), 10);
+        var sizes = c.getAttribute('data-sizes').split(' ');
+        var ok = (cat === 'all' || c.getAttribute('data-cat') === cat) &&
+                 (size === 'all' || sizes.indexOf(size) !== -1) &&
+                 (price >= min && price <= max);
+        c.hidden = !ok;
+        if (ok) shown++;
+        var link = c.querySelector('.tl-order');
+        if (link) link.setAttribute('href', orderHref(c, size));
+      }
+      status.textContent = 'Showing ' + shown + ' of ' + cards.length + ' products';
+      empty.hidden = shown !== 0;
+    }
+
+    for (var t = 0; t < tabs.length; t++) {
+      tabs[t].addEventListener('click', function () {
+        cat = this.getAttribute('data-cat');
+        for (var k = 0; k < tabs.length; k++) {
+          tabs[k].setAttribute('aria-pressed', tabs[k] === this ? 'true' : 'false');
+        }
+        apply();
+      });
+    }
+    sizeSel.addEventListener('change', apply);
+    priceSel.addEventListener('change', apply);
+    for (var r = 0; r < resets.length; r++) {
+      resets[r].addEventListener('click', function () {
+        cat = 'all';
+        sizeSel.value = 'all';
+        priceSel.value = 'all';
+        for (var k = 0; k < tabs.length; k++) {
+          tabs[k].setAttribute('aria-pressed', tabs[k].getAttribute('data-cat') === 'all' ? 'true' : 'false');
+        }
+        apply();
+      });
+    }
+    apply();
+  } catch (err) { /* cards are plain HTML, so the catalogue stays readable without filters */ }
+})();
+</script>
+</section>
+<!-- J2:W-3 end -->
+<!-- J2:W-2 start (owner W-8) -->
+<style>
+  .tl-w2 [hidden] { display: none !important; }
+  .tl-w2 .tl-hero {
+    background: var(--j2-surface);
+    padding: calc(var(--j2-section, 64px) * .75) 0;
+    border-bottom: 1px solid #E3D6C0;
+  }
+  .tl-w2 .tl-eyebrow {
+    margin: 0 0 8px; font-size: .85rem; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--j2-secondary);
+  }
+  .tl-w2 .tl-hero h1 { margin: 0 0 12px; color: var(--j2-primary); }
+  .tl-w2 .tl-lead { margin: 0 0 8px; font-size: 1.15rem; max-width: 52ch; }
+  .tl-w2 .tl-place { margin: 0 0 24px; color: var(--j2-muted); font-weight: 600; }
+  .tl-w2 .tl-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .tl-w2 .tl-actions .j2-btn,
+  .tl-w2 .tl-actions .j2-btn-secondary { flex: 1 1 200px; text-align: center; border-radius: var(--j2-radius); }
+
+  .tl-w2 .tl-visit { padding: var(--j2-section, 64px) 0; }
+  .tl-w2 .tl-visit .tl-intro { color: var(--j2-muted); margin: 0 0 24px; max-width: 60ch; }
+  .tl-w2 .tl-visit-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  .tl-w2 .tl-panel { padding: 24px 16px; min-width: 0; }
+  .tl-w2 .tl-panel h3 { margin: 0 0 12px; font-size: 1.5rem; color: var(--j2-primary); }
+  .tl-w2 .tl-address { font-style: normal; margin: 0 0 16px; line-height: 1.7; }
+  .tl-w2 .tl-address strong { display: block; font-size: 1.1rem; }
+  .tl-w2 .tl-contact-list { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 12px; }
+  .tl-w2 .tl-contact-list li { display: flex; flex-direction: column; gap: 4px; }
+  .tl-w2 .tl-label { font-size: .85rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--j2-muted); }
+  .tl-w2 .tl-contact-list .j2-btn,
+  .tl-w2 .tl-contact-list .j2-btn-secondary,
+  .tl-w2 .tl-panel > .j2-btn-secondary { width: 100%; text-align: center; border-radius: var(--j2-radius); }
+  .tl-w2 .tl-hours { width: 100%; border-collapse: collapse; margin: 0 0 16px; }
+  .tl-w2 .tl-hours th, .tl-w2 .tl-hours td {
+    text-align: left; padding: 12px 8px; border-bottom: 1px solid #E3D6C0; vertical-align: top;
+  }
+  .tl-w2 .tl-hours th { font-weight: 700; color: var(--j2-text); width: 45%; }
+  .tl-w2 .tl-hours tr:last-child th, .tl-w2 .tl-hours tr:last-child td { border-bottom: 0; }
+  .tl-w2 .tl-closed td { color: var(--j2-muted); font-weight: 700; }
+  .tl-w2 .tl-hours-note { margin: 0; color: var(--j2-muted); font-size: .95rem; }
+  @media (min-width: 760px) {
+    .tl-w2 .tl-visit-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+    .tl-w2 .tl-panel { padding: 32px 24px; }
+    .tl-w2 .tl-actions .j2-btn,
+    .tl-w2 .tl-actions .j2-btn-secondary { flex: 0 0 auto; }
+    .tl-w2 .tl-contact-list li { flex-direction: row; align-items: center; gap: 12px; }
+    .tl-w2 .tl-contact-list .tl-label { flex: 0 0 120px; }
+    .tl-w2 .tl-contact-list .j2-btn,
+    .tl-w2 .tl-contact-list .j2-btn-secondary { width: auto; flex: 1 1 auto; }
+  }
+</style>
+
+<div class="tl-w2" id="tl-hero-wrap">
+  <section class="tl-hero" id="welcome" aria-labelledby="tl-hero-title">
+    <div class="j2-container">
+      <p class="tl-eyebrow">Handloom boutique, Pune</p>
+      <h1 id="tl-hero-title">Thread &amp; Loom</h1>
+      <p class="tl-lead">Handloom kurtas, sarees, cotton shirts and dupattas.</p>
+      <p class="tl-place">18 FC Road, Shivajinagar, Pune</p>
+      <div class="tl-actions">
+        <a class="j2-btn" href="#shop">Browse the collection</a>
+        <a class="j2-btn-secondary" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20place%20an%20order." target="_blank" rel="noopener">Order on WhatsApp</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="tl-w2">
+  <section class="tl-visit" id="visit" aria-labelledby="tl-visit-title">
+    <div class="j2-container">
+      <h2 id="tl-visit-title">Visit Us</h2>
+      <p class="tl-intro">Drop in at the shop, call us, or send an order on WhatsApp.</p>
+
+      <div class="tl-visit-grid">
+        <div class="j2-card tl-panel">
+          <h3>Find us</h3>
+          <address class="tl-address">
+            <strong>Thread &amp; Loom</strong>
+            18 FC Road, Shivajinagar,<br>Pune 411005
+          </address>
+          <a class="j2-btn-secondary" href="https://www.google.com/maps/search/?api=1&amp;query=18+FC+Road+Shivajinagar+Pune+411005" target="_blank" rel="noopener">Get directions</a>
+
+          <ul class="tl-contact-list">
+            <li>
+              <span class="tl-label">WhatsApp orders</span>
+              <a class="j2-btn" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20place%20an%20order." target="_blank" rel="noopener" aria-label="Order on WhatsApp at +91 00000 11111">+91 00000 11111</a>
+            </li>
+            <li>
+              <span class="tl-label">Shop phone</span>
+              <a class="j2-btn-secondary" href="tel:+910000022222" aria-label="Call the shop on +91 00000 22222">+91 00000 22222</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="j2-card tl-panel">
+          <h3>Store timings</h3>
+          <table class="tl-hours">
+            <caption class="tl-label" style="text-align:left;padding:0 8px 8px;caption-side:top;">Open Tuesday to Sunday</caption>
+            <tbody>
+              <tr><th scope="row">Tuesday to Sunday</th><td>11am to 9pm</td></tr>
+              <tr class="tl-closed"><th scope="row">Monday</th><td>Closed</td></tr>
+            </tbody>
+          </table>
+          <p class="tl-hours-note">11am to 9pm, Tuesday to Sunday. Closed on Monday.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  try {
+    var hero = document.getElementById('tl-hero-wrap');
+    var shop = document.getElementById('shop');
+    if (hero && shop && shop.parentNode &&
+        (shop.compareDocumentPosition(hero) & Node.DOCUMENT_POSITION_FOLLOWING)) {
+      shop.parentNode.insertBefore(hero, shop);
+    }
+  } catch (err) { /* the CSS order rule in the head still puts the hero first */ }
+})();
+</script>
+<!-- J2:W-2 end -->
+<!-- J2:W-4 start (owner W-4) -->
+<section id="size-guide" class="tl-sizeguide" aria-labelledby="tl-sizeguide-title">
+<style>
+  .tl-sizeguide { padding: var(--j2-section, 64px) 0; }
+  .tl-sizeguide .tl-intro { color: var(--j2-muted); margin: 0 0 24px; max-width: 60ch; }
+  .tl-sizeguide .tl-sg-card { max-width: 560px; padding: 8px 16px 16px; }
+  .tl-sizeguide .tl-sg-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .tl-sizeguide .tl-sg-table caption {
+    text-align: left; padding: 16px 8px 8px; font-size: .85rem; font-weight: 700;
+    letter-spacing: .04em; text-transform: uppercase; color: var(--j2-muted);
+  }
+  .tl-sizeguide .tl-sg-table th,
+  .tl-sizeguide .tl-sg-table td {
+    text-align: left; padding: 12px 8px; border-bottom: 1px solid #E3D6C0; vertical-align: middle;
+  }
+  .tl-sizeguide .tl-sg-table thead th {
+    background: var(--j2-surface); color: var(--j2-primary); font-weight: 700;
+    border-bottom: 2px solid var(--j2-primary);
+  }
+  .tl-sizeguide .tl-sg-table tbody th { font-weight: 700; color: var(--j2-text); width: 50%; }
+  .tl-sizeguide .tl-sg-table tbody td { font-weight: 600; color: var(--j2-text); }
+  .tl-sizeguide .tl-sg-table tbody tr:nth-child(even) th,
+  .tl-sizeguide .tl-sg-table tbody tr:nth-child(even) td { background: var(--j2-background); }
+  .tl-sizeguide .tl-sg-table tbody tr:last-child th,
+  .tl-sizeguide .tl-sg-table tbody tr:last-child td { border-bottom: 0; }
+  .tl-sizeguide .tl-sg-note { margin: 16px 0 0; color: var(--j2-muted); font-size: .95rem; }
+  .tl-sizeguide .tl-sg-cta { margin-top: 16px; border-radius: var(--j2-radius); }
+</style>
+
+<div class="j2-container">
+  <h2 id="tl-sizeguide-title">Size Guide</h2>
+  <p class="tl-intro">Find your size by chest measurement, in inches.</p>
+
+  <div class="j2-card tl-sg-card">
+    <table class="tl-sg-table">
+      <caption>Chest size by garment size</caption>
+      <thead>
+        <tr>
+          <th scope="col">Size</th>
+          <th scope="col">Chest (inches)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">XS</th><td>32</td></tr>
+        <tr><th scope="row">S</th><td>34</td></tr>
+        <tr><th scope="row">M</th><td>36</td></tr>
+        <tr><th scope="row">L</th><td>38</td></tr>
+        <tr><th scope="row">XL</th><td>40</td></tr>
+        <tr><th scope="row">XXL</th><td>42</td></tr>
+      </tbody>
+    </table>
+    <p class="tl-sg-note">Sarees and dupattas are free size.</p>
+    <a class="j2-btn-secondary tl-sg-cta" href="#shop">Shop by size</a>
+  </div>
+</div>
+</section>
+<!-- J2:W-4 end -->
+<!-- J2:W-5 start (owner W-5) -->
+<section id="new-arrivals" class="tl-arrivals" aria-labelledby="tl-arrivals-title">
+<style>
+  .tl-arrivals { padding: var(--j2-section, 64px) 0; background: var(--j2-surface); }
+  .tl-arrivals .tl-intro { color: var(--j2-muted); margin: 0 0 24px; max-width: 60ch; }
+  .tl-arrivals .tl-na-grid {
+    display: grid; gap: 16px; list-style: none; margin: 0 0 24px; padding: 0;
+    grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
+  }
+  .tl-arrivals .tl-na-item { display: flex; flex-direction: column; min-width: 0; }
+  .tl-arrivals .tl-na-ph {
+    position: relative; aspect-ratio: 4 / 5; display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 12px; background: var(--j2-background); color: var(--j2-muted);
+    border-bottom: 1px solid #E3D6C0; font-size: .9rem; font-weight: 600;
+  }
+  .tl-arrivals .tl-na-tag {
+    position: absolute; top: 12px; left: 12px; padding: 4px 10px;
+    background: var(--j2-secondary); color: #FFFFFF; border-radius: var(--j2-radius);
+    font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .tl-arrivals .tl-na-body { display: flex; flex-direction: column; gap: 4px; padding: 16px; flex: 1; }
+  .tl-arrivals .tl-na-cat { margin: 0; font-size: .8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--j2-secondary); }
+  .tl-arrivals .tl-na-item h3 { margin: 0; font-size: 1.35rem; }
+  .tl-arrivals .tl-na-sizes { margin: 0; color: var(--j2-muted); font-size: .95rem; }
+  .tl-arrivals .tl-na-price { margin: 4px 0 12px; font-size: 1.2rem; font-weight: 700; color: var(--j2-primary); }
+  .tl-arrivals .tl-na-item .j2-btn { margin-top: auto; width: 100%; text-align: center; border-radius: var(--j2-radius); }
+  .tl-arrivals .tl-na-more { border-radius: var(--j2-radius); }
+</style>
+
+<div class="j2-container">
+  <h2 id="tl-arrivals-title">New Arrivals</h2>
+  <p class="tl-intro">The newest pieces at Thread &amp; Loom. Product photos are placeholders until real photos arrive.</p>
+
+  <ul class="tl-na-grid">
+    <li class="j2-card tl-na-item">
+      <div class="tl-na-ph" role="img" aria-label="Placeholder image for White chikankari kurta">
+        <span class="tl-na-tag">New</span>
+        <span>Placeholder image<br>Photo coming soon</span>
+      </div>
+      <div class="tl-na-body">
+        <p class="tl-na-cat">Kurtas</p>
+        <h3>White chikankari kurta</h3>
+        <p class="tl-na-sizes">Sizes: XS to XL</p>
+        <p class="tl-na-price">₹2,199</p>
+        <a class="j2-btn" target="_blank" rel="noopener" aria-label="Order White chikankari kurta on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20White%20chikankari%20kurta%20(Rs%202%2C199).">Order on WhatsApp</a>
+      </div>
+    </li>
+
+    <li class="j2-card tl-na-item">
+      <div class="tl-na-ph" role="img" aria-label="Placeholder image for Ikat handloom saree">
+        <span class="tl-na-tag">New</span>
+        <span>Placeholder image<br>Photo coming soon</span>
+      </div>
+      <div class="tl-na-body">
+        <p class="tl-na-cat">Sarees</p>
+        <h3>Ikat handloom saree</h3>
+        <p class="tl-na-sizes">Free size</p>
+        <p class="tl-na-price">₹3,499</p>
+        <a class="j2-btn" target="_blank" rel="noopener" aria-label="Order Ikat handloom saree on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Ikat%20handloom%20saree%20(Rs%203%2C499).">Order on WhatsApp</a>
+      </div>
+    </li>
+
+    <li class="j2-card tl-na-item">
+      <div class="tl-na-ph" role="img" aria-label="Placeholder image for Linen-blend shirt">
+        <span class="tl-na-tag">New</span>
+        <span>Placeholder image<br>Photo coming soon</span>
+      </div>
+      <div class="tl-na-body">
+        <p class="tl-na-cat">Cotton shirts</p>
+        <h3>Linen-blend shirt</h3>
+        <p class="tl-na-sizes">Sizes: M to XXL</p>
+        <p class="tl-na-price">₹1,599</p>
+        <a class="j2-btn" target="_blank" rel="noopener" aria-label="Order Linen-blend shirt on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Linen-blend%20shirt%20(Rs%201%2C599).">Order on WhatsApp</a>
+      </div>
+    </li>
+  </ul>
+
+  <a class="j2-btn-secondary tl-na-more" href="#shop">See all products</a>
+</div>
+</section>
+<!-- J2:W-5 end -->
+<!-- J2:W-6 start (owner W-6) -->
+<section id="lookbook" class="tl-lookbook" aria-labelledby="tl-lookbook-title">
+<style>
+  .tl-lookbook { padding: var(--j2-section, 64px) 0; }
+  .tl-lookbook .tl-intro { color: var(--j2-muted); margin: 0 0 24px; max-width: 60ch; }
+  .tl-lookbook .tl-lb-grid {
+    display: grid; gap: 16px; list-style: none; margin: 0 0 24px; padding: 0;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+  }
+  .tl-lookbook .tl-lb-item { display: flex; flex-direction: column; min-width: 0; }
+  .tl-lookbook .tl-lb-ph {
+    aspect-ratio: 4 / 5; display: flex; align-items: center; justify-content: center; text-align: center;
+    padding: 12px; background: var(--j2-surface); color: var(--j2-muted);
+    border-bottom: 1px solid #E3D6C0; font-size: .9rem; font-weight: 600;
+  }
+  .tl-lookbook .tl-lb-body { display: flex; flex-direction: column; gap: 8px; padding: 16px; flex: 1; }
+  .tl-lookbook .tl-lb-num { margin: 0; font-size: .8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--j2-secondary); }
+  .tl-lookbook .tl-lb-item h3 { margin: 0; font-size: 1.5rem; color: var(--j2-primary); }
+  .tl-lookbook .tl-lb-note { margin: 0; color: var(--j2-muted); }
+  .tl-lookbook .tl-lb-pieces { list-style: none; margin: 4px 0 8px; padding: 0; }
+  .tl-lookbook .tl-lb-pieces li {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+    padding: 8px 0; border-bottom: 1px solid #E3D6C0;
+  }
+  .tl-lookbook .tl-lb-pieces li:last-child { border-bottom: 0; }
+  .tl-lookbook .tl-lb-piece { font-weight: 600; min-width: 0; }
+  .tl-lookbook .tl-lb-price { font-weight: 700; color: var(--j2-primary); white-space: nowrap; }
+  .tl-lookbook .tl-lb-item .j2-btn { margin-top: auto; width: 100%; text-align: center; border-radius: var(--j2-radius); }
+  .tl-lookbook .tl-lb-more { border-radius: var(--j2-radius); }
+</style>
+
+<div class="j2-container">
+  <h2 id="tl-lookbook-title">Lookbook</h2>
+  <p class="tl-intro">Three outfits styled from the Thread &amp; Loom collection. Outfit images are placeholders until real photos arrive.</p>
+
+  <ul class="tl-lb-grid">
+    <li class="j2-card tl-lb-item">
+      <div class="tl-lb-ph" role="img" aria-label="Placeholder image for Outfit 1: Mustard handloom kurta with Chanderi dupatta">Placeholder image<br>Outfit photo coming soon</div>
+      <div class="tl-lb-body">
+        <p class="tl-lb-num">Outfit 1</p>
+        <h3>Kurta and dupatta</h3>
+        <p class="tl-lb-note">The Mustard handloom kurta paired with the Chanderi dupatta.</p>
+        <ul class="tl-lb-pieces">
+          <li><span class="tl-lb-piece">Mustard handloom kurta</span><span class="tl-lb-price">₹1,699</span></li>
+          <li><span class="tl-lb-piece">Chanderi dupatta</span><span class="tl-lb-price">₹1,099</span></li>
+        </ul>
+        <a class="j2-btn" target="_blank" rel="noopener" aria-label="Order Outfit 1, Mustard handloom kurta and Chanderi dupatta, on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Mustard%20handloom%20kurta%20(Rs%201%2C699)%20and%20Chanderi%20dupatta%20(Rs%201%2C099).">Order this look on WhatsApp</a>
+      </div>
+    </li>
+
+    <li class="j2-card tl-lb-item">
+      <div class="tl-lb-ph" role="img" aria-label="Placeholder image for Outfit 2: Khadi silk saree">Placeholder image<br>Outfit photo coming soon</div>
+      <div class="tl-lb-body">
+        <p class="tl-lb-num">Outfit 2</p>
+        <h3>The saree look</h3>
+        <p class="tl-lb-note">The Khadi silk saree, worn as a single statement piece.</p>
+        <ul class="tl-lb-pieces">
+          <li><span class="tl-lb-piece">Khadi silk saree</span><span class="tl-lb-price">₹4,999</span></li>
+        </ul>
+        <a class="j2-btn" target="_blank" rel="noopener" aria-label="Order Outfit 2, Khadi silk saree, on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Khadi%20silk%20saree%20(Rs%204%2C999).">Order this look on WhatsApp</a>
+      </div>
+    </li>
+
+    <li class="j2-card tl-lb-item">
+      <div class="tl-lb-ph" role="img" aria-label="Placeholder image for Outfit 3: Indigo block-print kurta with Block-print dupatta">Placeholder image<br>Outfit photo coming soon</div>
+      <div class="tl-lb-body">
+        <p class="tl-lb-num">Outfit 3</p>
+        <h3>Block-print pair</h3>
+        <p class="tl-lb-note">The Indigo block-print kurta matched with the Block-print dupatta.</p>
+        <ul class="tl-lb-pieces">
+          <li><span class="tl-lb-piece">Indigo block-print kurta</span><span class="tl-lb-price">₹1,499</span></li>
+          <li><span class="tl-lb-piece">Block-print dupatta</span><span class="tl-lb-price">₹899</span></li>
+        </ul>
+        <a class="j2-btn" target="_blank" rel="noopener" aria-label="Order Outfit 3, Indigo block-print kurta and Block-print dupatta, on WhatsApp" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20would%20like%20to%20order%3A%20Indigo%20block-print%20kurta%20(Rs%201%2C499)%20and%20Block-print%20dupatta%20(Rs%20899).">Order this look on WhatsApp</a>
+      </div>
+    </li>
+  </ul>
+
+  <a class="j2-btn-secondary tl-lb-more" href="#shop">Shop all products</a>
+</div>
+</section>
+<!-- J2:W-6 end -->
+<!-- J2:W-7 start (owner W-7) -->
+<div class="tl-w7">
+<style>
+  .tl-w7 .tl-pol { padding: var(--j2-section, 64px) 0; background: var(--j2-surface); }
+  .tl-w7 .tl-rev { padding: var(--j2-section, 64px) 0; }
+  .tl-w7 .tl-intro { color: var(--j2-muted); margin: 0 0 24px; max-width: 60ch; }
+  .tl-w7 .tl-pol-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  .tl-w7 .tl-pol-card { padding: 24px 16px; min-width: 0; }
+  .tl-w7 .tl-pol-card h3 { margin: 0 0 12px; font-size: 1.5rem; color: var(--j2-primary); }
+  .tl-w7 .tl-pol-list { list-style: none; margin: 0; padding: 0; }
+  .tl-w7 .tl-pol-list li { padding: 12px 0; border-bottom: 1px solid #E3D6C0; }
+  .tl-w7 .tl-pol-list li:first-child { padding-top: 0; }
+  .tl-w7 .tl-pol-list li:last-child { border-bottom: 0; padding-bottom: 0; }
+  .tl-w7 .tl-pol-label { display: block; font-size: .85rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--j2-secondary); }
+  .tl-w7 .tl-pol-value { display: block; font-weight: 600; font-size: 1.05rem; color: var(--j2-text); }
+  .tl-w7 .tl-pol-cta { margin-top: 24px; border-radius: var(--j2-radius); }
+  .tl-w7 .tl-rev-grid { display: grid; grid-template-columns: 1fr; gap: 16px; list-style: none; margin: 0; padding: 0; }
+  .tl-w7 .tl-rev-card { margin: 0; padding: 24px 16px; display: flex; flex-direction: column; gap: 16px; min-width: 0; height: 100%; }
+  .tl-w7 .tl-rev-card blockquote { margin: 0; font-family: var(--j2-font-heading); font-size: 1.5rem; line-height: 1.3; color: var(--j2-text); }
+  .tl-w7 .tl-rev-card figcaption { margin-top: auto; font-weight: 700; color: var(--j2-primary); }
+  .tl-w7 .tl-rev-card figcaption::before { content: ""; display: block; width: 40px; height: 3px; margin-bottom: 12px; background: var(--j2-accent); border-radius: 2px; }
+  @media (min-width: 760px) {
+    .tl-w7 .tl-pol-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+    .tl-w7 .tl-pol-card { padding: 32px 24px; }
+    .tl-w7 .tl-rev-grid { grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .tl-w7 .tl-rev-card { padding: 32px 24px; }
+  }
+</style>
+
+<section id="policies" class="tl-pol" aria-labelledby="tl-pol-title">
+  <div class="j2-container">
+    <h2 id="tl-pol-title">Exchange and Delivery</h2>
+    <p class="tl-intro">What to know before you order from Thread &amp; Loom.</p>
+
+    <div class="tl-pol-grid">
+      <div class="j2-card tl-pol-card">
+        <h3>Exchange policy</h3>
+        <ul class="tl-pol-list">
+          <li>
+            <span class="tl-pol-label">Exchange window</span>
+            <span class="tl-pol-value">Exchange within 7 days if unworn with tags.</span>
+          </li>
+          <li>
+            <span class="tl-pol-label">Returns</span>
+            <span class="tl-pol-value">No returns on sale items.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="j2-card tl-pol-card">
+        <h3>Delivery</h3>
+        <ul class="tl-pol-list">
+          <li>
+            <span class="tl-pol-label">Where and when</span>
+            <span class="tl-pol-value">Pune in 2 days</span>
+          </li>
+          <li>
+            <span class="tl-pol-label">Delivery charge</span>
+            <span class="tl-pol-value">Rs 79, free above Rs 2,999</span>
+          </li>
+          <li>
+            <span class="tl-pol-label">Payment</span>
+            <span class="tl-pol-value">Pay on delivery</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <a class="j2-btn tl-pol-cta" href="https://wa.me/910000011111?text=Hi%20Thread%20%26%20Loom%2C%20I%20have%20a%20question%20about%20exchange%20or%20delivery." target="_blank" rel="noopener" aria-label="Ask about exchange or delivery on WhatsApp">Ask us on WhatsApp</a>
+  </div>
+</section>
+
+<section id="reviews" class="tl-rev" aria-labelledby="tl-rev-title">
+  <div class="j2-container">
+    <h2 id="tl-rev-title">Customer Reviews</h2>
+    <p class="tl-intro">What our customers say.</p>
+
+    <ul class="tl-rev-grid">
+      <li>
+        <figure class="j2-card tl-rev-card">
+          <blockquote>&ldquo;Beautiful fabric, fits perfectly&rdquo;</blockquote>
+          <figcaption>Meera K.</figcaption>
+        </figure>
+      </li>
+      <li>
+        <figure class="j2-card tl-rev-card">
+          <blockquote>&ldquo;Fast delivery and lovely packing&rdquo;</blockquote>
+          <figcaption>Arjun S.</figcaption>
+        </figure>
+      </li>
+      <li>
+        <figure class="j2-card tl-rev-card">
+          <blockquote>&ldquo;My go-to for festive kurtas&rdquo;</blockquote>
+          <figcaption>Priya D.</figcaption>
+        </figure>
+      </li>
+    </ul>
+  </div>
+</section>
+</div>
+<!-- J2:W-7 end -->
+</body>
+</html>

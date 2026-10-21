@@ -1,0 +1,54 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "wf-site-base",
+    "name": "Brew Lab page shell, content sections and styling",
+    "purpose": "No file exists. Nothing shows menu, hours, location, beans and farms, or loyalty content.",
+    "cost": 55,
+    "estimate": 55,
+    "envelope": {
+      "money_limit": 55,
+      "model_call_limit": 2,
+      "time_limit_minutes": 30,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 55 or 2 model calls are used and the completion check still fails; report the unmet items to Coordination instead of retrying."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "brewlab.html (static sections, inline CSS, placeholder list)"
+    ],
+    "completion_check": "File has separate menu, hours, location, beans and farms, and loyalty sections. Every menu price and the hours and address are labeled placeholders. The loyalty text contains 'buy 9' and '10th free'. The beans section names no farm or region. A viewport meta tag and a media query or fluid layout are present. The CSS defines coffee or cream tones and a font stack. The placeholder list is visible.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "wf-preorder",
+    "name": "Pre-order form with WhatsApp order builder",
+    "purpose": "Visitors cannot pre-order. The file has no form or script to build a WhatsApp message.",
+    "cost": 25,
+    "estimate": 25,
+    "envelope": {
+      "money_limit": 25,
+      "model_call_limit": 2,
+      "time_limit_minutes": 25,
+      "retry_limit": 1,
+      "stop_loss": "Stop if spend reaches 25 or 2 model calls are used and the completion check still fails, or if wf-site-base is not complete; report to Coordination."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "brewlab.html (pre-order section, inline JS, WhatsApp number constant)"
+    ],
+    "completion_check": "Pre-order section has item and quantity inputs and a name field. The script builds order text and opens a wa.me or api.whatsapp.com URL with encoded text. The number is defined once in a marked constant and labeled as a placeholder. Text near the form says payment is at pickup and the order is confirmed only when the shop replies. The page still has no horizontal scroll at phone width.",
+    "dependencies": [
+      "wf-site-base"
+    ],
+    "status": "done",
+    "cycle": 1
+  }
+]

@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Thread &amp; Loom</title>
+<!-- J2:style head start (owner W-1) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Nunito+Sans:wght@400;600;700&amp;display=swap"><style>:root{--j2-primary:#6B3F2A;--j2-secondary:#4F5D3A;--j2-accent:#B5532F;--j2-background:#FAF5EC;--j2-surface:#FFFFFF;--j2-text:#2E2118;--j2-muted:#6F5E50;--j2-font-heading:'Cormorant Garamond', Georgia, serif;--j2-font-body:'Nunito Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:12px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#6B3F2A;color:#FFFFFF;border:1.5px solid #6B3F2A;min-height:44px;padding:0 20px;border-radius:999px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none}.j2-btn-secondary{display:inline-block;background:transparent;color:#6B3F2A;border:1.5px solid #6B3F2A;min-height:44px;padding:0 20px;border-radius:999px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none}.j2-card{background:#FFFFFF;border:1px solid #E3D6C0;border-radius:12px;padding:12px;box-shadow:0 1px 2px rgba(46,33,24,0.06)}</style>
+<!-- J2:style head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<section id="shop" class="cat-section" aria-labelledby="shop-title">
+<style>
+#shop.cat-section{padding:var(--j2-section, 64px) 16px;max-width:1120px;margin:0 auto;box-sizing:border-box}
+#shop *,#shop *::before,#shop *::after{box-sizing:border-box}
+#shop [hidden]{display:none !important}
+#shop .cat-title{font-family:var(--j2-font-heading);font-size:clamp(1.9rem,6vw,2.6rem);line-height:1.15;color:var(--j2-primary);margin:0 0 8px}
+#shop .cat-intro{color:var(--j2-muted);margin:0 0 24px;max-width:60ch}
+#shop .cat-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 32px;padding:0;list-style:none}
+#shop .cat-tab{min-height:44px;padding:0 18px;border-radius:999px;border:1.5px solid var(--j2-primary);background:transparent;color:var(--j2-primary);font:700 1rem var(--j2-font-body);cursor:pointer}
+#shop .cat-tab[aria-pressed="true"]{background:var(--j2-primary);color:#fff}
+#shop .cat-tab:focus-visible{outline:3px solid var(--j2-accent);outline-offset:2px}
+#shop .cat-group{margin:0 0 40px}
+#shop .cat-group-title{font-family:var(--j2-font-heading);font-size:1.6rem;color:var(--j2-secondary);margin:0 0 16px;padding-bottom:8px;border-bottom:1px solid #E3D6C0}
+#shop .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin:0;padding:0;list-style:none}
+@media (min-width:700px){#shop .cat-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}}
+#shop .cat-card{display:flex;flex-direction:column;gap:8px;min-width:0}
+#shop .cat-photo{width:100%;aspect-ratio:4/5;background:#EFE4D0;border-radius:8px}
+#shop .cat-name{font-family:var(--j2-font-heading);font-size:1.2rem;font-weight:700;line-height:1.2;margin:4px 0 0;color:var(--j2-text);overflow-wrap:anywhere}
+#shop .cat-price{font-weight:700;color:var(--j2-accent);margin:0;font-size:1.05rem}
+#shop .cat-sizes{margin:0;color:var(--j2-muted);font-size:.9rem}
+#shop .cat-actions{margin-top:auto;padding-top:4px}
+#shop .cat-empty{padding:24px;border:1px dashed #C9B79B;border-radius:12px;color:var(--j2-muted);text-align:center}
+</style>
+
+<h2 id="shop-title" class="cat-title">Shop the collection</h2>
+<p class="cat-intro">Handloom kurtas, sarees, cotton shirts and dupattas from Thread &amp; Loom, Pune.</p>
+
+<ul class="cat-tabs" aria-label="Product categories">
+  <li><button type="button" class="cat-tab" data-cat="all" aria-pressed="true">All</button></li>
+  <li><button type="button" class="cat-tab" data-cat="Kurtas" aria-pressed="false">Kurtas</button></li>
+  <li><button type="button" class="cat-tab" data-cat="Sarees" aria-pressed="false">Sarees</button></li>
+  <li><button type="button" class="cat-tab" data-cat="Shirts" aria-pressed="false">Shirts</button></li>
+  <li><button type="button" class="cat-tab" data-cat="Dupattas" aria-pressed="false">Dupattas</button></li>
+</ul>
+
+<div class="cat-group" data-group="Kurtas">
+  <h3 class="cat-group-title">Kurtas</h3>
+  <ul class="cat-grid">
+    <li class="cat-card j2-card" data-category="Kurtas" data-name="Indigo block-print kurta" data-price="1499" data-sizes="S,M,L,XL,XXL" data-new="false">
+      <div class="cat-photo" aria-hidden="true"></div>
+      <h4 class="cat-name">Indigo block-print kurta</h4>
+      <p class="cat-price">₹1,499</p>
+      <p class="cat-sizes">Sizes: S to XXL</p>
+      <div class="cat-actions"></div>
+    </li>
+    <li class="cat-card j2-card" data-category="Kurtas" data-name="Mustard handloom kurta" data-price="1699" data-sizes="S,M,L,XL" data-new="false">
+      <div class="cat-photo" aria-hidden="true"></div>
+      <h4 class="cat-name">Mustard handloom kurta</h4>
+      <p class="cat-price">₹1,699</p>
+      <p class="cat-sizes">Sizes: S to XL</p>
+      <div class="cat-actions"></div>
+    </li>
+    <li class="cat-card j2-card" data-category="Kurtas" data-name="White chikankari kurta" data-price="2199" data-sizes="XS,S,M,L,XL" data-new="true">
+      <div class="cat-photo" aria-hidden="true"></div>
+      <h4 class="cat-name">White chikankari kurta</h4>
+      <p class="cat-price">₹2,199</p>
+      <p class="cat-sizes">Sizes: XS to XL</p>
+      <div class="cat-actions"></div>
+    </li>
+  </ul>
+</div>
+
+<div class="cat-group" data-group="Sarees">
+  <h3 class="cat-group-title">Sarees</h3>
+  <ul class="cat-grid">
+    <li class="cat-card j2-card" data-category="Sarees" data-name="Ikat handloom saree" data-price="3499" data-sizes="Free size" data-new="true">
+      <div class="cat-photo" aria-hidden="true"></div>
+      <h4 class="cat-name">Ikat handloom saree</h4>
+      <p class="cat-price">₹3,499</p>
+      <p class="cat-sizes">Size: Free size</p>
+      <div class="cat-actions"></div>
+    </li>
+    <li class="cat-card j2-card" data-category="Sarees" data-name="Khadi silk saree" data-price="4999" data-sizes="Free size" data-new="false">
+      <div class="cat-photo" aria-hidden="true"></div>
+      <h4 class="cat-name">Khadi silk saree</h4>
+      <p class="cat-price">₹4,999</p>
+      <p class="cat-sizes">Size: Free size</p>
+      <div class="cat-actions"></div>
+    </li>
+    <li class="cat-card j2-card" data-category="Sarees" data-name="Cotton jamdani saree" data-price="3999" data-sizes="Free size" data-new="false">
+      <div class="cat-photo" aria-hidden="true"></div>
+      <h4 class="cat-name">Cotton jamdani saree</h4>
+      <p class="cat-price">₹3,999</p>
+      <p class="cat-sizes">Size: Free size</p>
+      <div class="cat-actions"></div>
+    </li>
+  </ul>
+</div>
+
+<div class="cat-group" data-group="Shirts">
+  <h3 class="cat-group-title">Shirts</h3>
+  <ul class="cat-grid">
+    <li class="cat-card j2-card" data-category="Shirts" data-name="Khadi cotton shirt" data-price="1299" data-sizes="S,M,L,XL,XXL" data-new="false">
+      <div class="cat-photo" aria-hidden="true"></div>
+      <h4 class="cat-name">Khadi cotton shirt</h4>
+      <p class="cat-price">₹1,299</p>
+      <p class="cat-sizes">Sizes: S to XXL</p>
+      <div class="cat-actions"></div>
+    </li>
+    <li class="cat-card j2-card" data-category="Shirts" data-name="Linen-blend shirt" data-price="1599" data-sizes="M,L,XL,XXL" data-new="true">
+      <div class="cat-photo" aria-hidden="true"></div>
+      <h4 class="cat-name">Linen-blend shirt</h4>
+      <p class="cat-price">₹1,599</p>
+      <p class="cat-sizes">Sizes: M to XXL</p>
+      <div class="cat-actions"></div>
+    </li>
+  </ul>
+</div>
+
+<div class="cat-group" data-group="Dupattas">
+  <h3 class="cat-group-title">Dupattas</h3>
+  <ul class="cat-grid">
+    <li class="cat-card j2-card" data-category="Dupattas" data-name="Block-print dupatta" data-price="899" data-sizes="Free size" data-new="false">
+      <div class="cat-photo" aria-hidden="true"></div>
+      <h4 class="cat-name">Block-print dupatta</h4>
+      <p class="cat-price">₹899</p>
+      <p class="cat-sizes">Size: Free size</p>
+      <div class="cat-actions"></div>
+    </li>
+    <li class="cat-card j2-card" data-category="Dupattas" data-name="Chanderi dupatta" data-price="1099" data-sizes="Free size" data-new="false">
+      <div class="cat-photo" aria-hidden="true"></div>
+      <h4 class="cat-name">Chanderi dupatta</h4>
+      <p class="cat-price">₹1,099</p>
+      <p class="cat-sizes">Size: Free size</p>
+      <div class="cat-actions"></div>
+    </li>
+  </ul>
+</div>
+
+<p class="cat-empty" id="cat-empty" role="status" hidden>No products match your choices. Try a different size or price.</p>
+
+<script>
+(function () {
+  var root = document.getElementById('shop');
+  if (!root) return;
+  var cards = Array.prototype.slice.call(root.querySelectorAll('.cat-card'));
+  var groups = Array.prototype.slice.call(root.querySelectorAll('.cat-group'));
+  var tabs = Array.prototype.slice.call(root.querySelectorAll('.cat-tab'));
+  var empty = root.querySelector('#cat-empty');
+  var state = { category: 'all' };
+
+  function toProduct(el) {
+    return {
+      el: el,
+      name: el.getAttribute('data-name'),
+      category: el.getAttribute('data-category'),
+      price: Number(el.getAttribute('data-price')),
+      sizes: el.getAttribute('data-sizes').split(','),
+      isNew: el.getAttribute('data-new') === 'true'
+    };
+  }
+
+  var api = window.J2Catalogue = window.J2Catalogue || {};
+  api.products = cards.map(toProduct);
+  api.filter = api.filter || null; // other sections may set: function (product) { return true|false }
+  api.getCategory = function () { return state.category; };
+
+  function render() {
+    var shown = 0;
+    api.products.forEach(function (p) {
+      var ok = state.category === 'all' || p.category === state.category;
+      if (ok && typeof api.filter === 'function') {
+        try { ok = api.filter(p) !== false; } catch (e) { ok = true; }
+      }
+      p.el.hidden = !ok;
+      if (ok) shown++;
+    });
+    groups.forEach(function (g) {
+      g.hidden = !g.querySelector('.cat-card:not([hidden])');
+    });
+    if (empty) empty.hidden = shown > 0;
+    document.dispatchEvent(new CustomEvent('j2:catalogue-rendered', { detail: { shown: shown } }));
+  }
+  api.render = render;
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      state.category = tab.getAttribute('data-cat');
+      tabs.forEach(function (t) {
+        t.setAttribute('aria-pressed', t === tab ? 'true' : 'false');
+      });
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
+</section>
+<!-- J2:W-1 end -->
+</body>
+</html>

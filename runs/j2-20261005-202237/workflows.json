@@ -1,0 +1,54 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "wf1-menu-preorder",
+    "name": "Single file with menu and WhatsApp pre-order",
+    "purpose": "No site file exists. The menu and the pre-order flow are missing.",
+    "cost": 25,
+    "estimate": 25,
+    "envelope": {
+      "money_limit": 25,
+      "model_call_limit": 1,
+      "time_limit_minutes": 20,
+      "retry_limit": 0,
+      "stop_loss": "Stop if the file contains any payment or card-entry input, or any price, number or address not marked TBC; do not spend beyond 25."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "brewlab.html"
+    ],
+    "completion_check": "The file opens with no build step. The menu has each price in rupees or a TBC tag. The form has item quantity, name and pickup slot inputs. The button link is a wa.me URL with encoded order text and a TBC number. The page states pay at pickup and request until staff confirm. No payment or card inputs and no invented prices or numbers.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "wf2-visit-beans-loyalty",
+    "name": "Hours and location, beans and farms, loyalty card",
+    "purpose": "The file has no hours, location, sourcing or loyalty content.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 1,
+      "time_limit_minutes": 20,
+      "retry_limit": 0,
+      "stop_loss": "Stop if any hour, address, farm name, bean origin or sourcing claim appears without a TBC tag; do not spend beyond 20."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "brewlab.html (updated)"
+    ],
+    "completion_check": "Headed blocks exist for hours, location, beans and farms, and loyalty. Hours list Monday to Sunday with TBC or a time. Address and map pin are TBC tags. Beans and farms has only TBC tags for origins and farm names. Loyalty text reads buy 9 coffees, get the 10th free. No invented address, hours, farm name or phone number.",
+    "dependencies": [
+      "wf1-menu-preorder"
+    ],
+    "status": "done",
+    "cycle": 1
+  }
+]

@@ -1,0 +1,254 @@
+[
+  {
+    "cycle": 1,
+    "version": 2,
+    "results": [
+      {
+        "criterion": "1. One HTML file, inline CSS and JS, no build step",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "One <style> block and one <script> block. The only external reference is the Google Fonts <link>, which is a CDN and allowed. Each visitor's browser contacts Google Fonts, but no form data is involved.",
+        "severity": "low"
+      },
+      {
+        "criterion": "2. Five sections, each reachable from visible nav",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "<nav aria-label=\"Main\"> links #home, #book, #emergency, #doctors and #blog. Matching section ids exist for all five.",
+        "severity": "low"
+      },
+      {
+        "criterion": "3. Booking form opens a WhatsApp or tel: link; no external form service, no storage",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "<form id=\"bookForm\"> has no action. The submit handler uses window.open(\"https://wa.me/...\") and window.location.href=\"tel:\"+num. A search of the source found no fetch(, XMLHttpRequest, localStorage, sessionStorage or document.cookie. Warning: CFG holds PLACEHOLDER_* tokens, and the regex /^\\+?\\d{8,15}$/ rejects them, so today the buttons only show #notice. The link-opening path was read but not executed.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "4. Plain text says the hospital confirms by phone and live slots are not offered",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "en book_note: \"The hospital confirms your slot by phone. Live slots are not offered.\" Kannada and Hindi equivalents are present.",
+        "severity": "low"
+      },
+      {
+        "criterion": "5. Emergency number and address as marked placeholders, short numeric layout",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "em_num \"[[emergency number]]\" renders in <p class=\"big\"> as [PLACEHOLDER: ...]. em_addr is likewise marked. There are 3 short steps and 1 warning line. No digits are invented.",
+        "severity": "low"
+      },
+      {
+        "criterion": "6. Doctor cards fully placeholder",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "4 cards built from d_name, d_spec, d_cred and d_photo, all [[...]] tokens. doc_note: \"All profiles below are placeholders.\"",
+        "severity": "low"
+      },
+      {
+        "criterion": "7. Blog posts placeholder, no medical claims",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "3 cards from p_title, p_date and p_sum, all [[...]]. blog_note: \"Posts are placeholders. Nothing here is medical advice.\"",
+        "severity": "low"
+      },
+      {
+        "criterion": "8. Language switch EN/KN/HI; every section has KN and HI text",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Buttons data-l=en, kn and hi. I counted 51 keys in the en dictionary and found the same key set in kn and hi by reading, not by running code. Every data-i18n key used in the markup has a kn and hi entry.",
+        "severity": "low"
+      },
+      {
+        "criterion": "9. Every KN and HI view shows 'pending native review'",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "setLang sets #rev.hidden=(l===\"en\"). The kn and hi rev_banner strings both contain \"pending native review\". The Kannada and Hindi emergency columns also carry a class=\"rev\" line. Visible rendering was not checked in a browser.",
+        "severity": "low"
+      },
+      {
+        "criterion": "10. Emergency English text beside Kannada and Hindi",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "Three .col blocks with data-fix=en, kn and hi sit in .cols{grid-template-columns:repeat(3,1fr)}. @media(max-width:800px){.cols{grid-template-columns:1fr}} stacks them on narrow screens. English still comes first in the same section, but it is not side by side. Many patients will use phones, so this is worth a decision. A cheaper fix is a two-column layout with English on top and the translation next to it.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "11. One consistent placeholder marker; no unmarked phone number or address",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "ph() turns every [[x]] into <span class=\"ph\">[PLACEHOLDER: x]</span>, including in the Kannada and Hindi strings. The source has no phone-length digit sequence and no street address. The tel/WhatsApp targets are the tokens PLACEHOLDER_WHATSAPP_NUMBER and PLACEHOLDER_CALLBACK_NUMBER, which the criterion allows.",
+        "severity": "low"
+      }
+    ],
+    "all_pass": true
+  },
+  {
+    "cycle": 2,
+    "version": 2,
+    "results": [
+      {
+        "criterion": "1. One HTML file, inline CSS and JS, no build step",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "One <style> and one <script> block. The only external reference is the Google Fonts <link> (CDN, allowed).",
+        "severity": "low"
+      },
+      {
+        "criterion": "2. Five sections reachable from visible nav",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "<nav aria-label=\"Main\"> links #home, #book, #emergency, #doctors and #blog, and all five section ids exist.",
+        "severity": "low"
+      },
+      {
+        "criterion": "3. Booking form opens WhatsApp or tel:, no external service, no storage",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "The form has no action. The handler uses window.open('https://wa.me/...') and 'tel:'+num. No fetch(, XMLHttpRequest, localStorage, sessionStorage or document.cookie in the source. With placeholder CFG values the regex /^\\+?\\d{8,15}$/ rejects them and only #notice shows. The link-opening path was read, not executed.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "4. Booking text states phone confirmation and no live slots",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "en book_note: 'The hospital confirms your slot by phone. Live slots are not offered.' kn and hi equivalents are present.",
+        "severity": "low"
+      },
+      {
+        "criterion": "5. Emergency number and address as visibly marked placeholders, short numeric layout",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "em_num:'[[emergency number]]' and em_addr:'[[hospital address and map location]]' render as [PLACEHOLDER: ...]. The string 'Hospital to confirm' appears nowhere in the file. em_warn says 'placeholders until the hospital confirms them', which is not the label the Requester asked to keep. The marker and layout requirement itself is met: 3 short steps, no invented digits.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "6. Doctor cards fully placeholder",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "4 cards built from d_name, d_spec, d_cred and d_photo, all [[...]] tokens in en, kn and hi. doc_note: 'All profiles below are placeholders.'",
+        "severity": "low"
+      },
+      {
+        "criterion": "7. Blog posts placeholder, no medical claims as hospital advice",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "3 cards from p_title, p_date and p_sum, all [[...]]. blog_note: 'Posts are placeholders. Nothing here is medical advice.'",
+        "severity": "low"
+      },
+      {
+        "criterion": "8. Language switch EN/KN/HI, every section has KN and HI text",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Buttons data-l=en, kn and hi. The kn and hi dictionaries carry entries for every data-i18n key in the markup. Checked by reading, not by running code.",
+        "severity": "low"
+      },
+      {
+        "criterion": "9. Every KN and HI view shows 'pending native review'",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "setLang sets #rev.hidden=(l==='en'). kn and hi rev_banner both contain 'pending native review'. The emergency kn and hi columns repeat it. Visible rendering was not checked in a browser.",
+        "severity": "low"
+      },
+      {
+        "criterion": "10. Emergency English text beside Kannada and Hindi",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": ".cols is repeat(3,1fr) above 800 px and 1fr (stacked) at 800 px and below. The Requester has not answered the A/B layout question, so no default is assumed.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "11. One consistent placeholder marker; no unmarked phone number or address",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "ph() wraps every [[x]] as <span class=\"ph\">[PLACEHOLDER: x]</span>, including kn and hi strings. The only digit runs in the file are CSS values, the regex {8,15}, and '25 to 30 KB' in the report comment, none of which are phone numbers. No street address string. The tel/WhatsApp targets are the tokens PLACEHOLDER_WHATSAPP_NUMBER and PLACEHOLDER_CALLBACK_NUMBER. Minor: the draft banner shows a literal '[PLACEHOLDER]' tag outside ph(), which is a label, not a fact.",
+        "severity": "low"
+      }
+    ],
+    "all_pass": false
+  },
+  {
+    "cycle": 3,
+    "version": 3,
+    "results": [
+      {
+        "criterion": "1. One HTML file, inline CSS and JS, no build step",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "One <style> and one <script> block. The only external reference is the Google Fonts <link>, a CDN, which is allowed.",
+        "severity": "low"
+      },
+      {
+        "criterion": "2. Five sections reachable from visible nav",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "<nav aria-label=\"Main\"> links #home, #book, #emergency, #doctors and #blog. All five section ids exist.",
+        "severity": "low"
+      },
+      {
+        "criterion": "3. Booking form opens WhatsApp or tel:, no external service, no storage",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "The form has no action. The handler uses window.open('https://wa.me/...') and 'tel:'+num. No fetch(, XMLHttpRequest, localStorage, sessionStorage or document.cookie appears in the source, including the comments. CFG holds PLACEHOLDER_* tokens that the regex /^\\+?\\d{8,15}$/ rejects, so today only #notice shows. The link-opening path was read, not executed.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "4. Booking text states phone confirmation and no live slots",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "en book_note: 'The hospital confirms your slot by phone. Live slots are not offered.' The kn and hi equivalents are present.",
+        "severity": "low"
+      },
+      {
+        "criterion": "5. Emergency number and address as visibly marked placeholders, short numeric layout",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "en em_num:'[[emergency number, Hospital to confirm]]' and em_addr:'[[hospital address and map location, Hospital to confirm]]' render through ph() as [PLACEHOLDER: ..., Hospital to confirm]. kn and hi carry the same English phrase plus a translation. The layout has 3 short steps and no invented digits. The earlier NEEDS_REVISION is closed.",
+        "severity": "low"
+      },
+      {
+        "criterion": "6. Doctor cards fully placeholder",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "4 cards built from d_name, d_spec, d_cred and d_photo, all [[...]] tokens in en, kn and hi. doc_note: 'All profiles below are placeholders.'",
+        "severity": "low"
+      },
+      {
+        "criterion": "7. Blog posts placeholder, no medical claims as hospital advice",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "3 cards from p_title, p_date and p_sum, all [[...]]. blog_note: 'Posts are placeholders. Nothing here is medical advice.'",
+        "severity": "low"
+      },
+      {
+        "criterion": "8. Language switch EN/KN/HI, every section has KN and HI text",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Buttons data-l=en, kn and hi. I counted 51 keys in the en dictionary and found the same key set in kn and hi, and every data-i18n key in the markup has an entry in all three. Checked by reading, not by running code.",
+        "severity": "low"
+      },
+      {
+        "criterion": "9. Every KN and HI view shows 'pending native review'",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "setLang sets #rev.hidden=(l==='en'). The kn and hi rev_banner strings both contain 'pending native review', and the emergency kn and hi columns repeat it. Visible rendering was not checked in a browser.",
+        "severity": "low"
+      },
+      {
+        "criterion": "10. Emergency English text beside Kannada and Hindi",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": ".cols is repeat(3,1fr) above 800 px. At 800 px and below it becomes 1fr, so the columns stack. The English column is fixed to en whatever language is selected. The Requester has not answered the A/B phone-layout question, so no default is assumed.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "11. One consistent placeholder marker; no unmarked phone number or address",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The 6 new 'Hospital to confirm' strings sit inside [[...]] and contain no digits. The source has no phone-length digit run and no street address. The tel/WhatsApp targets are the tokens PLACEHOLDER_WHATSAPP_NUMBER and PLACEHOLDER_CALLBACK_NUMBER, which the criterion allows. Minor: the draft banner shows a literal '[PLACEHOLDER]' tag outside ph(), which is a label, not a fact.",
+        "severity": "low"
+      }
+    ],
+    "all_pass": true
+  }
+]

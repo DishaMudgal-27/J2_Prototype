@@ -1,0 +1,629 @@
+[
+  {
+    "cycle": 1,
+    "version": 6,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "Problem section states that lab slot booking is done on paper and that slots get double-booked",
+        "verdict": "PASS",
+        "note": "Problem opens: 'Lab slot booking is done on paper, and slots get double-booked.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "Users section names students and lab staff and says what each does with LabSlot",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Students book, cancel and see availability on phones. Lab staff are described only as 'run the labs' and 'affected by double-booking', with no stated action in LabSlot. 'Run the labs' is not in the brief.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": "What lab staff do in LabSlot, if anything beyond being affected by bookings (optional).",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "Goals section states that LabSlot replaces paper booking and prevents double-booked slots",
+        "verdict": "PASS",
+        "note": "G1: 'LabSlot replaces paper booking.' G2: 'LabSlot prevents double-booked slots.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "Requirements section lists the three must-have features by name: book a slot, cancel a slot, see availability",
+        "verdict": "PASS",
+        "note": "R1 Book a slot, R2 Cancel a slot, R3 See availability.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "Requirements section states that LabSlot must work on phones",
+        "verdict": "PASS",
+        "note": "R4: 'LabSlot must work on phones...'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "Success metrics section states the target that 80% of bookings are made without staff help",
+        "verdict": "PASS",
+        "note": "'80% of bookings are made without staff help', with a definition of 'without staff help'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "Out of scope section lists what LabSlot will not do in this version, without listing any must-have feature",
+        "verdict": "PASS",
+        "note": "Six exclusions (payments, reminders, waitlist, native app, extra reports, paper import); none is book, cancel or see availability.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The product name LabSlot is used throughout and no section says to be confirmed or is left empty",
+        "verdict": "PASS",
+        "note": "Title and every section name LabSlot; P1 and P5 met (6 sections, none empty, nothing to be confirmed).",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-9",
+        "criterion": "P6 and rubric D-2: every goal has a matching success metric",
+        "verdict": "NEEDS_REVISION",
+        "note": "Success metrics has only the G1 metric. G2 (prevents double-booked slots) has no metric. The code check P6 reports 'no Success metrics entry for G2'.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": "A measurable target for double-booked slots. The brief gives none, so any number would be invented. Alternatives: Requester supplies a target, or G2 is stated as covered by the requirement R5 instead of a metric."
+      },
+      {
+        "id": "F-10",
+        "criterion": "Rubric D-5 and charter standard: use only facts from the brief",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Beyond the brief: 'Students are the main users', 'Lab staff run the labs', and design behaviours in R1, R2, R5 and G2 (slot shows as unavailable, shows as available again after cancel). These follow from the problem but are not stated by the Requester.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "D-1",
+        "item": "D-1",
+        "criterion": "Every requirement is specific and testable",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "R1, R2, R3 and R5 are testable; R4 'work on phones' has no testable criterion such as a screen width or browser.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "D-2",
+        "item": "D-2",
+        "criterion": "Goals and success metrics are measurable",
+        "verdict": "NEEDS_REVISION",
+        "note": "G1 has a measurable 80% metric; G2 has no metric and the Success metrics section has only one entry.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "D-3",
+        "item": "D-3",
+        "criterion": "Users and problem are consistent with the requirements",
+        "verdict": "PASS",
+        "note": "Problem, Users and R1-R5 all centre on paper booking, double-booking and students on phones.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "D-4",
+        "item": "D-4",
+        "criterion": "Out of scope is explicit",
+        "verdict": "PASS",
+        "note": "Out of scope lists six explicit exclusions and says the Requirements section is the whole version scope.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "D-5",
+        "item": "D-5",
+        "criterion": "No invented facts: every fact comes from the brief or the Requester's answers",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "No invented numbers (P4 met); small unstated claims such as 'main users' and 'run the labs'.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {},
+    "screenshot": null,
+    "all_pass": false,
+    "output": "prd",
+    "conditions": [
+      {
+        "id": "P1",
+        "text": "All six sections are present and not empty",
+        "met": true,
+        "evidence": "all 6 sections present, none empty"
+      },
+      {
+        "id": "P2",
+        "text": "Requirement ids are unique and sequential (R1, R2, ...)",
+        "met": true,
+        "evidence": "R1 to R5, unique and in order"
+      },
+      {
+        "id": "P3",
+        "text": "Every brief fact appears exactly",
+        "met": true,
+        "evidence": "all 10 brief fact(s) appear"
+      },
+      {
+        "id": "P4",
+        "text": "No invented facts: every number and email comes from the charter or the Requester's answers",
+        "met": true,
+        "evidence": "every number and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "P5",
+        "text": "Nothing is \"to be confirmed\"",
+        "met": true,
+        "evidence": "nothing to be confirmed"
+      },
+      {
+        "id": "P6",
+        "text": "Every goal has a matching success metric",
+        "met": false,
+        "evidence": "no Success metrics entry for G2"
+      }
+    ],
+    "read": "Charter and 8 done-when items; code checks P1-P6; the full PRD v6: Problem (about 75 words), Users (about 77), Goals (about 82), Requirements (about 211, R1-R5), Success metrics (about 63, one metric), Out of scope (about 88, 6 exclusions); the brief facts; the chat log. I did not read the run records beyond the check results shown."
+  },
+  {
+    "cycle": 1,
+    "version": 6,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "Problem section states that lab slot booking is done on paper and that slots get double-booked",
+        "verdict": "PASS",
+        "note": "Problem opens: 'Lab slot booking is done on paper, and slots get double-booked.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "Users section names students and lab staff and says what each does with LabSlot",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Students book, cancel and see availability on phones. Lab staff are only 'run the labs' (not in the brief) and 'affected', with no action in LabSlot.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": "Optional: what lab staff do in LabSlot, if anything (unanswered)",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "Goals section states that LabSlot replaces paper booking and prevents double-booked slots",
+        "verdict": "TO_BE_CONFIRMED",
+        "note": "Waiting on the Requester: Target number for acceptable double-booked slots (Requester chose to give a target but did not state one). (Audit's own note: G1: 'LabSlot replaces paper booking.' G2: 'LabSlot prevents double-booked slots.' The missing G2 metric is filed as F-9.)",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": false
+      },
+      {
+        "id": "F-4",
+        "criterion": "Requirements section lists the three must-have features by name: book a slot, cancel a slot, see availability",
+        "verdict": "PASS",
+        "note": "R1 Book a slot, R2 Cancel a slot, R3 See availability.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "Requirements section states that LabSlot must work on phones",
+        "verdict": "PASS",
+        "note": "R4: 'LabSlot must work on phones...'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "Success metrics section states the target that 80% of bookings are made without staff help",
+        "verdict": "PASS",
+        "note": "'G1: 80% of bookings are made without staff help.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "Out of scope section lists what LabSlot will not do in this version, without listing any must-have feature",
+        "verdict": "PASS",
+        "note": "Six exclusions (payments, reminders, waitlist, native app, extra reports, paper import); none is book, cancel or see availability.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The product name LabSlot is used throughout and no section says to be confirmed or is left empty",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Text: title and all 6 sections name LabSlot, none empty, no 'to be confirmed' wording. Code P5 is NOT MET because the charter still lists the G2 target as to be confirmed.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": "Numeric target for acceptable double-booked slots (see F-9)",
+        "item": 8,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-9",
+        "criterion": "P6 and rubric D-2: every goal has a measurable success metric",
+        "verdict": "NEEDS_REVISION",
+        "note": "Success metrics has only G1 (80%). G2 has no metric. The Requester answered 'option A' with no number.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": "A number for acceptable double-booked slots, or confirmation of option B (G2 covered by R5, no metric)"
+      },
+      {
+        "id": "F-10",
+        "criterion": "Rubric D-5 and charter standard: use only facts from the brief and answers",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "'Lab staff run the labs' is not in the brief. The definition of 'without staff help' (student books on their own) is an elaboration, not a stated fact.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "D-1",
+        "item": "D-1",
+        "criterion": "Every requirement is specific and testable",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "R1, R2, R3 and R5 state observable behavior; R4 'must work on phones' has no stated test condition.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "D-2",
+        "item": "D-2",
+        "criterion": "Goals and success metrics are measurable",
+        "verdict": "NEEDS_REVISION",
+        "note": "G1 has a measurable 80% target; G2 has no metric and no number was supplied.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "D-3",
+        "item": "D-3",
+        "criterion": "Users and problem are consistent with the requirements",
+        "verdict": "PASS",
+        "note": "Problem, Users and R1-R5 agree on paper, double-booking, students and phones; every requirement traces to a feature, constraint or goal.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "D-4",
+        "item": "D-4",
+        "criterion": "Out of scope is explicit",
+        "verdict": "PASS",
+        "note": "Out of scope names six specific exclusions and says LabSlot does only what Requirements lists.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "D-5",
+        "item": "D-5",
+        "criterion": "No invented facts: every fact comes from the brief or the Requester's answers",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Two small additions beyond the brief: 'run the labs' and the definition of 'without staff help'.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {},
+    "screenshot": null,
+    "all_pass": false,
+    "output": "prd",
+    "conditions": [
+      {
+        "id": "P1",
+        "text": "All six sections are present and not empty",
+        "met": true,
+        "evidence": "all 6 sections present, none empty"
+      },
+      {
+        "id": "P2",
+        "text": "Requirement ids are unique and sequential (R1, R2, ...)",
+        "met": true,
+        "evidence": "R1 to R5, unique and in order"
+      },
+      {
+        "id": "P3",
+        "text": "Every brief fact appears exactly",
+        "met": true,
+        "evidence": "all 10 brief fact(s) appear"
+      },
+      {
+        "id": "P4",
+        "text": "No invented facts: every number and email comes from the charter or the Requester's answers",
+        "met": true,
+        "evidence": "every number and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "P5",
+        "text": "Nothing is \"to be confirmed\"",
+        "met": false,
+        "evidence": "1 fact(s) still to be confirmed"
+      },
+      {
+        "id": "P6",
+        "text": "Every goal has a matching success metric",
+        "met": false,
+        "evidence": "no Success metrics entry for G2"
+      }
+    ],
+    "read": "Charter (8 done-when items, 1 to-be-confirmed entry), Requester decisions, chat 1-43, code conditions P1-P6, and the full PRD v6: Problem (~75 words), Users (~77), Goals (~82), Requirements (R1-R5, ~211), Success metrics (~63), Out of scope (6 bullets, ~88)."
+  },
+  {
+    "cycle": 1,
+    "version": 7,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "Problem section states that lab slot booking is done on paper and that slots get double-booked",
+        "verdict": "PASS",
+        "note": "Problem opens: 'Lab slot booking is done on paper, and slots get double-booked.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "Users section names students and lab staff and says what each does with LabSlot",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Students book, cancel and see availability on phones. Lab staff 'run the labs' (not in the brief) and are 'affected'; no action in LabSlot is stated.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": "What, if anything, lab staff do in LabSlot (optional; unanswered).",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "Goals section states that LabSlot replaces paper booking and prevents double-booked slots",
+        "verdict": "PASS",
+        "note": "G1: 'LabSlot replaces paper booking.' G2: 'LabSlot prevents double-booked slots.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "Requirements section lists the three must-have features by name: book a slot, cancel a slot, see availability",
+        "verdict": "PASS",
+        "note": "R1 Book a slot, R2 Cancel a slot, R3 See availability.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "Requirements section states that LabSlot must work on phones",
+        "verdict": "PASS",
+        "note": "R4: 'LabSlot must work on phones...'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "Success metrics section states the target that 80% of bookings are made without staff help",
+        "verdict": "PASS",
+        "note": "'G1: 80% of bookings are made without staff help.' is kept unchanged after the W-7 rewrite.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "Out of scope section lists what LabSlot will not do in this version, without listing any must-have feature",
+        "verdict": "PASS",
+        "note": "Six exclusions (payments, reminders, waitlist, native app, reports, paper import); none is book, cancel or see availability.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The product name LabSlot is used throughout and no section says to be confirmed or is left empty",
+        "verdict": "PASS",
+        "note": "Title and all 6 sections name LabSlot; none empty; no 'to be confirmed' wording; P1 and P5 met.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-9",
+        "criterion": "P6 and rubric D-2: every goal has a measurable success metric",
+        "verdict": "PASS",
+        "note": "Success metrics now has 'G2: The target for double-booked slots is zero', matching the Requester's answer 'Zero'. P6 met.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-10",
+        "criterion": "Rubric D-5 and charter standard: use only facts from the brief and answers",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Statements beyond the brief: 'lab staff run the labs'; 'affects ... lab staff'; the definition of 'without staff help'; 'more than one person expects to use the same slot'. No invented numbers (P4 met).",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "D-1",
+        "item": "D-1",
+        "criterion": "Every requirement is specific and testable",
+        "verdict": "PASS",
+        "note": "R1 to R5 each state a checkable behaviour, for example R5: a booked slot shows unavailable and a second booking is not accepted.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "D-2",
+        "item": "D-2",
+        "criterion": "Goals and success metrics are measurable",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "G1 is 80% and G2 is zero, both measurable, but G2 has no measurement window; the Requester gave none, so none was added.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "D-3",
+        "item": "D-3",
+        "criterion": "Users and problem are consistent with the requirements",
+        "verdict": "PASS",
+        "note": "Problem, Users, Goals and Requirements all rest on paper booking, double-booking and student self-service; no staff requirement conflicts with them.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "D-4",
+        "item": "D-4",
+        "criterion": "Out of scope is explicit",
+        "verdict": "PASS",
+        "note": "Out of scope lists six explicit exclusions and states that LabSlot does only what the Requirements section lists.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "D-5",
+        "item": "D-5",
+        "criterion": "No invented facts: every fact comes from the brief or the Requester's answers",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "No invented numbers, but small claims about lab staff and a definition of 'without staff help' go beyond the brief (see F-10).",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {},
+    "screenshot": null,
+    "all_pass": true,
+    "output": "prd",
+    "conditions": [
+      {
+        "id": "P1",
+        "text": "All six sections are present and not empty",
+        "met": true,
+        "evidence": "all 6 sections present, none empty"
+      },
+      {
+        "id": "P2",
+        "text": "Requirement ids are unique and sequential (R1, R2, ...)",
+        "met": true,
+        "evidence": "R1 to R5, unique and in order"
+      },
+      {
+        "id": "P3",
+        "text": "Every brief fact appears exactly",
+        "met": true,
+        "evidence": "all 10 brief fact(s) appear"
+      },
+      {
+        "id": "P4",
+        "text": "No invented facts: every number and email comes from the charter or the Requester's answers",
+        "met": true,
+        "evidence": "every number and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "P5",
+        "text": "Nothing is \"to be confirmed\"",
+        "met": true,
+        "evidence": "nothing to be confirmed"
+      },
+      {
+        "id": "P6",
+        "text": "Every goal has a matching success metric",
+        "met": true,
+        "evidence": "each of G1, G2 has a Success metrics entry"
+      }
+    ],
+    "read": "PRD v7 in full (6 sections: Problem ~75 words, Users ~77, Goals ~82, Requirements ~211, Success metrics ~122, Out of scope ~88). Also the 8 criteria, the P1 to P6 code checks (all met), the D-1 to D-5 rubric, the brief and the Requester's answers (LabSlot, option A, Zero), and the chat through W-7."
+  }
+]

@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brew Lab</title>
+<!-- J2:style head start (owner W-26) -->
+<style>:root{--j2-primary:#3E2415;--j2-secondary:#7A4B2A;--j2-accent:#9A5216;--j2-background:#FBF6EF;--j2-surface:#FFFFFF;--j2-text:#2B1B12;--j2-muted:#6B5646;--j2-font-heading:Georgia, 'Times New Roman', serif;--j2-font-body:system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:12px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#3E2415;color:#FFFFFF;border:2px solid #3E2415;min-height:48px;padding:12px 24px;font-weight:600;}.j2-btn-secondary{display:inline-block;background:transparent;color:#3E2415;border:2px solid #3E2415;min-height:48px;padding:12px 24px;font-weight:600;}.j2-card{background:#FFFFFF;border:1px solid #E6D8C8;box-shadow:0 2px 8px rgba(62,36,21,0.08);padding:24px;}</style>
+<!-- J2:style head end -->
+</head>
+<body>
+<!-- J2:W-26 start (owner W-26) -->
+<section id="menu" aria-labelledby="menu-heading">
+  <style>
+    #menu { padding: 64px 16px; background: var(--j2-background, #FBF6EF); color: var(--j2-text, #2B1B12); }
+    #menu .menu-wrap { max-width: 640px; margin: 0 auto; box-sizing: border-box; }
+    #menu h2 { font-family: var(--j2-font-heading, Georgia, serif); color: var(--j2-primary, #3E2415); font-size: 2rem; line-height: 1.2; margin: 0 0 8px; overflow-wrap: anywhere; }
+    #menu .menu-note { color: var(--j2-muted, #6B5646); margin: 0 0 24px; }
+    #menu .menu-list { list-style: none; margin: 0; padding: 0; }
+    #menu .menu-item { font-family: var(--j2-font-body, system-ui, sans-serif); font-size: 1.125rem; padding: 16px 0; border-bottom: 1px solid #E6D8C8; overflow-wrap: anywhere; }
+    #menu .menu-item:last-child { border-bottom: 0; }
+    @media (max-width: 400px) { #menu { padding: 48px 16px; } #menu h2 { font-size: 1.625rem; } }
+  </style>
+  <div class="menu-wrap j2-card">
+    <h2 id="menu-heading">Menu</h2>
+    <p class="menu-note">Prices in rupees.</p>
+    <ul class="menu-list">
+      <li class="menu-item">Filter coffee 90</li>
+      <li class="menu-item">Cappuccino 160</li>
+      <li class="menu-item">Latte 180</li>
+      <li class="menu-item">Cold brew 200</li>
+      <li class="menu-item">Masala chai 80</li>
+      <li class="menu-item">Almond croissant 140</li>
+      <li class="menu-item">Banana bread slice 120</li>
+    </ul>
+  </div>
+</section>
+<!-- J2:W-26 end -->
+<!-- J2:W-27 start (owner W-27) -->
+<section id="pre-order" aria-labelledby="pre-order-heading">
+  <style>
+    #pre-order { padding: var(--j2-section, 64px) 16px; box-sizing: border-box; scroll-margin-top: 16px; }
+    #pre-order *, #pre-order *::before, #pre-order *::after { box-sizing: border-box; }
+    #pre-order .po-wrap { width: 100%; max-width: 640px; margin: 0 auto; }
+    #pre-order h2 { font-family: var(--j2-font-heading, Georgia, 'Times New Roman', serif); color: var(--j2-primary, #3E2415); margin: 0 0 8px; overflow-wrap: anywhere; }
+    #pre-order .po-intro { color: var(--j2-text, #2B1B12); margin: 0 0 16px; overflow-wrap: anywhere; }
+    #pre-order .po-card { max-width: 100%; }
+    #pre-order .po-row { display: block; margin: 0 0 16px; }
+    #pre-order label { display: block; font-weight: 600; color: var(--j2-text, #2B1B12); margin: 0 0 8px; }
+    #pre-order .po-hint { display: block; font-weight: 400; color: var(--j2-muted, #6B5646); font-size: 0.9rem; margin-top: 4px; }
+    #pre-order .po-field { display: block; width: 100%; max-width: 100%; min-height: 48px; padding: 12px; font: inherit; color: var(--j2-text, #2B1B12); background: var(--j2-surface, #FFFFFF); border: 2px solid var(--j2-secondary, #7A4B2A); border-radius: var(--j2-radius, 12px); }
+    #pre-order textarea.po-field { min-height: 112px; resize: vertical; }
+    #pre-order .po-field:focus { outline: 3px solid var(--j2-accent, #9A5216); outline-offset: 2px; }
+    #pre-order .po-field[aria-invalid="true"] { border-color: var(--j2-accent, #9A5216); }
+    #pre-order #po-submit { min-height: 48px; min-width: 48px; width: 100%; cursor: pointer; font: inherit; font-weight: 600; border-radius: var(--j2-radius, 12px); }
+    #pre-order #po-error { margin: 0 0 16px; padding: 12px; color: var(--j2-text, #2B1B12); background: var(--j2-background, #FBF6EF); border: 2px solid var(--j2-accent, #9A5216); border-radius: var(--j2-radius, 12px); overflow-wrap: anywhere; }
+    #pre-order #po-error[hidden] { display: none; }
+    #pre-order #no-payment-note { margin: 16px 0 0; font-weight: 600; color: var(--j2-primary, #3E2415); overflow-wrap: anywhere; }
+  </style>
+  <div class="po-wrap">
+    <h2 id="pre-order-heading">Pre-order for pickup</h2>
+    <p class="po-intro">Tell us what you would like and when you will collect it. Your email app will open with the order ready to send to the shop.</p>
+    <div class="j2-card po-card">
+      <form id="pre-order-form" action="mailto:hello@brewlab.example" method="post" enctype="text/plain" novalidate>
+        <div id="po-error" role="alert" hidden>Please fill in every field before sending your pre-order.</div>
+        <div class="po-row">
+          <label for="po-name">Name</label>
+          <input class="po-field" type="text" id="po-name" name="customer-name" autocomplete="name" required>
+        </div>
+        <div class="po-row">
+          <label for="po-phone">Phone</label>
+          <input class="po-field" type="tel" id="po-phone" name="customer-phone" autocomplete="tel" inputmode="tel" required>
+        </div>
+        <div class="po-row">
+          <label for="po-items">Items<span class="po-hint">List what you want from the menu, for example Cappuccino and Almond croissant.</span></label>
+          <textarea class="po-field" id="po-items" name="coffee-item" rows="3" required></textarea>
+        </div>
+        <div class="po-row">
+          <label for="po-time">Pickup time<span class="po-hint">Choose the time you will collect, within opening hours.</span></label>
+          <input class="po-field" type="time" id="po-time" name="pickup-time" required>
+        </div>
+        <button type="submit" id="po-submit" class="j2-btn">Send pre-order</button>
+      </form>
+      <p id="no-payment-note">No payment, customers pay at pickup. Nothing is charged on this site.</p>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var form = document.getElementById('pre-order-form');
+      var errorBox = document.getElementById('po-error');
+      if (!form || !errorBox) { return; }
+      var ids = ['po-name', 'po-phone', 'po-items', 'po-time'];
+      var fields = [];
+      ids.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) { fields.push(el); }
+      });
+
+      function isEmpty(el) {
+        return String(el.value || '').replace(/\s+/g, '') === '';
+      }
+
+      function refresh() {
+        var missing = [];
+        fields.forEach(function (el) {
+          var bad = isEmpty(el);
+          el.setAttribute('aria-invalid', bad ? 'true' : 'false');
+          if (bad) {
+            var lab = form.querySelector('label[for="' + el.id + '"]');
+            var text = lab ? (lab.childNodes[0] ? lab.childNodes[0].textContent : lab.textContent) : el.name;
+            missing.push(String(text).trim());
+          }
+        });
+        return missing;
+      }
+
+      form.addEventListener('submit', function (e) {
+        var missing = refresh();
+        if (missing.length > 0) {
+          e.preventDefault();
+          errorBox.textContent = 'Please fill in: ' + missing.join(', ') + '.';
+          errorBox.hidden = false;
+          for (var i = 0; i < fields.length; i++) {
+            if (isEmpty(fields[i])) { try { fields[i].focus(); } catch (err) {} break; }
+          }
+        } else {
+          errorBox.hidden = true;
+        }
+      });
+
+      fields.forEach(function (el) {
+        el.addEventListener('change', function () {
+          var bad = isEmpty(el);
+          el.setAttribute('aria-invalid', bad ? 'true' : 'false');
+          if (!errorBox.hidden && refresh().length === 0) { errorBox.hidden = true; }
+        });
+      });
+    })();
+  </script>
+</section>
+<!-- J2:W-27 end -->
+<!-- J2:W-28 start (owner W-28) -->
+<section id="shop-address" aria-label="Shop address and contact">
+  <style>
+    #shop-address {
+      padding: var(--j2-section, 64px) 16px;
+      background: var(--j2-background, #FBF6EF);
+      color: var(--j2-text, #2B1B12);
+      font-family: var(--j2-font-body, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif);
+      box-sizing: border-box;
+    }
+    #shop-address *, #shop-address *::before, #shop-address *::after { box-sizing: border-box; }
+    #shop-address > .j2-card {
+      max-width: 640px;
+      margin: 0 auto;
+      border-radius: var(--j2-radius, 12px);
+      overflow-wrap: anywhere;
+    }
+    #shop-address h2 {
+      margin: 0 0 8px;
+      font-family: var(--j2-font-heading, Georgia, 'Times New Roman', serif);
+      color: var(--j2-primary, #3E2415);
+      font-size: 1.75rem;
+      line-height: 1.2;
+    }
+    #shop-address h3 {
+      margin: 0 0 16px;
+      font-family: var(--j2-font-heading, Georgia, 'Times New Roman', serif);
+      color: var(--j2-secondary, #7A4B2A);
+      font-size: 1.125rem;
+      font-weight: 400;
+    }
+    #shop-address dl { margin: 0; }
+    #shop-address dt {
+      margin: 16px 0 4px;
+      color: var(--j2-muted, #6B5646);
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    #shop-address dt:first-child { margin-top: 0; }
+    #shop-address dd {
+      margin: 0;
+      font-size: 1.0625rem;
+      line-height: 1.5;
+    }
+    #shop-address address { font-style: normal; }
+    #shop-address .contact-email {
+      display: inline-flex;
+      align-items: center;
+      min-height: 48px;
+      min-width: 48px;
+      color: var(--j2-primary, #3E2415);
+      font-weight: 600;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    #shop-address .contact-email:focus-visible {
+      outline: 3px solid var(--j2-accent, #9A5216);
+      outline-offset: 2px;
+    }
+    @media (min-width: 768px) {
+      #shop-address h2 { font-size: 2rem; }
+    }
+  </style>
+  <div class="j2-card">
+    <h2>Find us</h2>
+    <h3>Brew Lab</h3>
+    <dl>
+      <dt>Address</dt>
+      <dd><address>12, 100 Feet Road, Indiranagar, Bengaluru 560038</address></dd>
+      <dt>Phone</dt>
+      <dd>+91 98450 12345</dd>
+      <dt>Email</dt>
+      <dd><a class="contact-email" href="mailto:hello@brewlab.example">hello@brewlab.example</a></dd>
+    </dl>
+  </div>
+</section>
+<!-- J2:W-28 end -->
+<!-- J2:W-29 start (owner W-29) -->
+<section id="opening-hours" aria-labelledby="opening-hours-heading">
+  <style>
+    #opening-hours {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 64px 16px;
+    }
+    #opening-hours .oh-wrap {
+      box-sizing: border-box;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    #opening-hours .oh-card {
+      box-sizing: border-box;
+      max-width: 100%;
+      border-radius: var(--j2-radius, 12px);
+      overflow-wrap: anywhere;
+    }
+    #opening-hours #opening-hours-heading {
+      margin: 0 0 16px;
+      font-family: var(--j2-font-heading);
+      color: var(--j2-primary);
+      line-height: 1.2;
+    }
+    #opening-hours .oh-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    #opening-hours .oh-list li {
+      margin: 0;
+      padding: 12px 0;
+      font-family: var(--j2-font-body);
+      color: var(--j2-text);
+      font-size: 1.125rem;
+      line-height: 1.4;
+      border-bottom: 1px solid #E6D8C8;
+    }
+    #opening-hours .oh-list li:last-child {
+      border-bottom: 0;
+    }
+    #opening-hours .oh-note {
+      margin: 16px 0 0;
+      font-family: var(--j2-font-body);
+      color: var(--j2-secondary);
+      font-weight: 600;
+      line-height: 1.4;
+    }
+  </style>
+  <div class="oh-wrap">
+    <div class="j2-card oh-card">
+      <h2 id="opening-hours-heading">Opening hours</h2>
+      <ul class="oh-list">
+        <li>Monday to Saturday 7:30 am to 9:00 pm</li>
+        <li>Sunday 8:30 am to 6:00 pm</li>
+      </ul>
+      <p class="oh-note">No closed days</p>
+    </div>
+  </div>
+</section>
+<!-- J2:W-29 end -->
+<!-- J2:W-30 start (owner W-31) -->
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--j2-background, #FBF6EF);
+    color: var(--j2-text, #2B1B12);
+    font-family: var(--j2-font-body, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif);
+    line-height: 1.5;
+    overflow-wrap: break-word;
+  }
+  img, svg, video, iframe { max-width: 100%; height: auto; }
+  h1, h2, h3, p, li, a, dd, dt { overflow-wrap: break-word; }
+  #menu, #pre-order, #shop-address, #opening-hours { scroll-margin-top: 16px; }
+
+  #page-layout { width: 100%; }
+  #page-layout .pl-bar {
+    background: var(--j2-primary, #3E2415);
+    color: #FFFFFF;
+  }
+  #page-layout .pl-bar-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 8px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 24px;
+  }
+  #page-layout .pl-brand {
+    font-family: var(--j2-font-heading, Georgia, 'Times New Roman', serif);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin: 0;
+  }
+  #page-layout #page-nav {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  #page-layout .nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 8px 16px;
+    color: #FFFFFF;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: var(--j2-radius, 12px);
+  }
+  #page-layout .nav-link:hover { background: var(--j2-secondary, #7A4B2A); }
+  #page-layout .nav-link:focus-visible { outline: 3px solid #FFFFFF; outline-offset: 2px; }
+
+  #hero {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 16px;
+  }
+  #hero .hero-title {
+    font-family: var(--j2-font-heading, Georgia, 'Times New Roman', serif);
+    color: var(--j2-primary, #3E2415);
+    font-size: clamp(2rem, 8vw, 3rem);
+    line-height: 1.15;
+    margin: 0 0 16px;
+  }
+  #hero .hero-text {
+    color: var(--j2-text, #2B1B12);
+    font-size: 1.125rem;
+    max-width: 36rem;
+    margin: 0 0 16px;
+  }
+  #hero .hero-goal {
+    color: var(--j2-secondary, #7A4B2A);
+    font-weight: 600;
+    font-size: 1rem;
+    max-width: 36rem;
+    margin: 0 0 24px;
+  }
+  #hero .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    min-width: 48px;
+    text-decoration: none;
+    border-radius: var(--j2-radius, 12px);
+  }
+  #hero .hero-cta:focus-visible { outline: 3px solid var(--j2-accent, #9A5216); outline-offset: 3px; }
+
+  @media (max-width: 480px) {
+    #page-layout .pl-bar-inner { flex-direction: column; align-items: flex-start; }
+    #hero { padding: 32px 16px; }
+    #hero .hero-cta { width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+</style>
+<header id="page-layout">
+  <div class="pl-bar">
+    <div class="pl-bar-inner">
+      <p class="pl-brand">Brew Lab</p>
+      <nav id="site-nav" aria-label="Page sections">
+        <ul id="page-nav">
+          <li><a class="nav-link" href="#menu">Menu</a></li>
+          <li><a class="nav-link" href="#pre-order">Pre-order</a></li>
+          <li><a class="nav-link" href="#shop-address">Find us</a></li>
+          <li><a class="nav-link" href="#opening-hours">Opening hours</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+  <div id="hero">
+    <h1 class="hero-title">Brew Lab</h1>
+    <p class="hero-text">Specialty coffee in Indiranagar, Bengaluru. Pre-order a coffee for pickup.</p>
+    <p class="hero-goal">Our goal: 30 pre-orders per week.</p>
+    <a class="j2-btn hero-cta" href="#pre-order">Pre-order for pickup</a>
+  </div>
+</header>
+<script>
+  (function () {
+    try {
+      var layout = document.getElementById('page-layout');
+      if (layout && layout.parentNode && document.body.firstElementChild !== layout) {
+        document.body.insertBefore(layout, document.body.firstChild);
+      }
+    } catch (e) { /* layout stays where it is */ }
+  })();
+</script>
+<!-- J2:W-30 end -->
+</body>
+</html>

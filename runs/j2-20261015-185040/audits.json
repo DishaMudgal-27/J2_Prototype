@@ -1,0 +1,341 @@
+[
+  {
+    "cycle": 1,
+    "version": 6,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+        "verdict": "PASS",
+        "note": "h1 'Brew Lab' and <address> with the exact text in #location; N5 met (all 14 facts present).",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The menu lists all seven items with their prices in rupees: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120",
+        "verdict": "PASS",
+        "note": "7 .j2-card items in #menu with the correct prices; the rupee sign is added by CSS ::before and is visible in the screenshot (₹90 etc.).",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The opening hours show Monday to Saturday 7:30 am to 9:00 pm and Sunday 8:30 am to 6:00 pm",
+        "verdict": "PASS",
+        "note": "Both lines appear verbatim in the #hours list.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The phone +91 98450 12345 and the email hello@brewlab.example are shown",
+        "verdict": "PASS",
+        "note": "#phone-link (tel:+919845012345) and #email-link (mailto) show both values in #contact; N4 met.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A pre-order form has name, phone, items and pickup time fields, sends the order to hello@brewlab.example, works when submitted, and states that payment is at pickup with no payment fields",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Form has name, phone, items and time fields, an empty-submit guard, and the note 'Payment is at pickup. No online payment.' Mechanical submit ran with no errors. Delivery is action=mailto, so the order only reaches the shop if the visitor's email app opens and they press send. Delivery cannot be verified from code.",
+        "severity": "medium",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A map or map link for the shop location is on the page next to the address",
+        "verdict": "PASS",
+        "note": "#map-link 'Open in Google Maps' sits in the same .w1-panel as the address, with the address as the query.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "The file is a single page with a mobile viewport setting and has no horizontal overflow at 360px and 1280px",
+        "verdict": "PASS",
+        "note": "Viewport meta present; overflow_px 0 at 360 and 1280; 1 file, 1 h1.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "PASS",
+        "note": "js_errors is empty; broken_in_page_links is empty; N2, N3 and N4 met.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-9",
+        "criterion": "Style guide: body font Inter on all controls (R-1)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Measured fonts include Arial. The .j2-btn rule sets no font-family, so the <button> #po-submit falls back to the browser default, while the link buttons use Inter.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-10",
+        "criterion": "Navigation order and alignment (R-1, R-5)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Nav order is Menu, Hours, Find us, but the page order is Find us, Menu, Hours. In the 1280px screenshot the Find us panel starts at x=540 and the Menu at x=500 (960px vs 1040px inner widths).",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Palette, headings, cards and buttons follow the guide; the submit button renders in Arial and the container widths differ (see F-9, F-10).",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "45 text elements checked at both widths, 0 low-contrast.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "1 h1, 0 skipped heading levels; Brew Lab stands out in the screenshot.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "First screen shows one action, 'Pre-order for pickup', a full-width dark button at 360px.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS",
+        "note": "One nav with 5 links reaching all 5 sections, wraps to two rows on the phone with tappable links.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "small_tap_targets count 0, minimum 44px, on phone.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "0 images on the page, so none lack alt text.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 14990,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com",
+        "https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap",
+        "https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&display=swap",
+        "https://fonts.gstatic.com",
+        "https://www.google.com/maps/search/?api=1&amp;query=12%2C+100+Feet+Road%2C+Indiranagar%2C+Bengaluru+560038"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 45,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Fraunces",
+            "Arial"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 7
+          },
+          "first_screen_actions": [
+            "Pre-order for pickup"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 45,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Fraunces",
+            "Arial"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 7
+          },
+          "first_screen_actions": [
+            "Pre-order for pickup"
+          ]
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v6.png",
+    "all_pass": true,
+    "conditions": [
+      {
+        "id": "N1",
+        "text": "The page opens (it parses, tags balanced)",
+        "check": "page-parses",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "text": "No JavaScript errors on load",
+        "check": "no-js-errors",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "text": "No horizontal overflow at 360px and 1280px",
+        "check": "no-overflow",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "text": "Every in-page link resolves; WhatsApp (wa.me) and tel: links are well formed",
+        "check": "links-well-formed",
+        "met": true,
+        "evidence": "all 8 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "text": "Every charter fact appears exactly, and nothing is \"to be confirmed\"",
+        "check": [
+          "facts-present-all",
+          "nothing-to-be-confirmed"
+        ],
+        "met": true,
+        "evidence": "all 14 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "text": "No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers",
+        "check": "no-invented-facts",
+        "met": true,
+        "evidence": "every number, phone and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "N7",
+        "text": "Every form has a submit control and a destination (action or mailto)",
+        "check": "forms-have-destination",
+        "met": true,
+        "evidence": "1 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "text": "A nav reaches every section, and the hero has one obvious main action",
+        "check": "nav-and-main-action",
+        "met": true,
+        "evidence": "the nav reaches all 5 section(s); the hero has 1 main action(s)"
+      }
+    ]
+  }
+]

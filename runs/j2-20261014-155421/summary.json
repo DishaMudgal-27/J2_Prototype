@@ -1,0 +1,675 @@
+{
+  "run": "20261014-155421",
+  "output_type": "website",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "sections": [
+    "style",
+    "W-9",
+    "W-1",
+    "W-3",
+    "W-4",
+    "W-5",
+    "W-6",
+    "W-7",
+    "W-8",
+    "W-2"
+  ],
+  "conditions": {
+    "met": 8,
+    "total": 8,
+    "warnings": 0,
+    "list": [
+      {
+        "id": "N1",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "met": true,
+        "evidence": "all 14 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "met": true,
+        "evidence": "all 1 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "met": true,
+        "evidence": "every number, phone and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "N7",
+        "met": true,
+        "evidence": "2 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "met": true,
+        "evidence": "the nav reaches all 9 section(s); the hero has 1 main action(s)"
+      }
+    ]
+  },
+  "necessary_conditions": {
+    "met": 8,
+    "total": 8,
+    "warnings": 0,
+    "list": [
+      {
+        "id": "N1",
+        "text": "The page opens (it parses, tags balanced)",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "text": "No JavaScript errors on load",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "text": "No horizontal overflow at 360px and 1280px",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "text": "Every in-page link resolves; WhatsApp (wa.me) and tel: links are well formed",
+        "met": true,
+        "evidence": "all 14 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "text": "Every charter fact appears exactly, and nothing is \"to be confirmed\"",
+        "met": true,
+        "evidence": "all 1 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "text": "No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers",
+        "met": true,
+        "evidence": "every number, phone and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "N7",
+        "text": "Every form has a submit control and a destination (action or mailto)",
+        "met": true,
+        "evidence": "2 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "text": "A nav reaches every section, and the hero has one obvious main action",
+        "met": true,
+        "evidence": "the nav reaches all 9 section(s); the hero has 1 main action(s)"
+      }
+    ]
+  },
+  "force_audit_fail": null,
+  "test_lessons": false,
+  "model": "sonnet",
+  "mock": false,
+  "brief": "Make a website for Riverside Run 2027, a city running event in Pune. Runners should be able to compare the three races, work out what they will pay with a fee calculator, register with a form, see the race-day and expo-day schedule, see the route and water stations for each race, read FAQs, and see sponsors by tier. Volunteers should be able to sign up with a separate form. Add a countdown to race day, a menu that stays on screen and shows which section you are in, and a high-contrast mode that works across the whole page. It should feel sporty and clear and work well on phones.\n  Race day: Sunday 14 February 2027. Expo day: Saturday 13 February 2027, 10am to 6pm, at Riverside Grounds, 5 River Road, Pune 411001. Races: 5K (start 7:30am, fee Rs 300, minimum age 12, cutoff 1 hour); 10K (start 6:45am, fee Rs 500, minimum age 16, cutoff 2 hours); Half Marathon (start 6:00am, fee Rs 800, minimum age 18, cutoff 3 hours 30 minutes). Event T-shirt: Rs 250 each, optional. Early-bird: 10% off race fees only (not T-shirts) for registrations up to 31 December 2026. Fee calculator: choose race, number of runners (1 to 10) and number of T-shirts; show the total. Water stations: 5K at 2.5 km; 10K at 2.5, 5 and 7.5 km; Half Marathon every 3 km. Use a placeholder for each route map. Registration form: name, email, phone, date of birth, race (dropdown), T-shirt yes/no, T-shirt size (only shown if T-shirt is yes), emergency contact name and phone, guardian name (only required if the runner is under 18); sends to run@example.com. Volunteer form: name, email, preferred role (Water station, Registration desk, Route marshal), available Saturday / Sunday / both; sends to volunteers@example.com. Schedule: Expo day 10am bib collection opens, 4pm route briefing, 6pm expo closes. Race day 5:00am gates open, 6:00am Half Marathon, 6:45am 10K, 7:30am 5K, 10:00am prize ceremony. FAQs: Can I change my race? Yes, until 31 January 2027 by email. Is there parking? Yes, free at Gate 2. Are refunds available? No. Where do I collect my bib? At the expo on 13 February. Is there a bag drop? Yes, near the start line. Are pacers provided? Yes, for the 10K and Half Marathon. Sponsors: Gold: Meridian Bank; Silver: Trailhead Sports, Aqua Pure; Community: Pune Runners Club. Contact: run@example.com, WhatsApp +91 00000 44444. No photos yet, use placeholders. We are offering S, M, L and XL.",
+  "change_requests": [],
+  "status": "done",
+  "outcome": "Done: the site is workable. Every done-when item passes with Audit's evidence and the render check is clean.",
+  "budget": {
+    "start": 200,
+    "granted": 200,
+    "used": 161,
+    "raises": []
+  },
+  "ai_calls": 35,
+  "cycles": 2,
+  "links": {
+    "identity->adaptation": 2,
+    "validator->adaptation": 1,
+    "adaptation->priority": 2,
+    "validator->coordination": 2,
+    "coordination->priority": 11,
+    "priority->W": 11,
+    "W->coordination": 11,
+    "audit->identity": 2,
+    "identity->requester": 1
+  },
+  "verification": {
+    "passed": 11,
+    "failed": 0,
+    "escalated": 0,
+    "could_not_run": 0,
+    "checks_run": 72
+  },
+  "identity_to_requester_decisions": 0,
+  "identity_to_requester_facts": 0,
+  "priority_rulings": {
+    "grant": 2,
+    "counter": 0,
+    "refuse": 0
+  },
+  "questions_to_user": [],
+  "conflicts": [],
+  "validator_rejections": [
+    {
+      "cycle": 1,
+      "workflow": "Hero with event details and countdown",
+      "reason": "work atom 1: check 3 element-count targets '.j2-cd-unit', which the atom's how or constraints doesn't tell the builder to create"
+    },
+    {
+      "cycle": 2,
+      "workflow": "Hero countdown placeholders without bare zeros",
+      "reason": "work atom 1: check 5 element-count targets '#hero .j2-btn-primary': only a section id or class name, never a charter fact, an email or a generic string (use facts-present for those)"
+    }
+  ],
+  "holds": [
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-2: Runs only after W-1, W-3, W-4, W-5, W-6, W-7 and W-8 have written their sections, so every nav link target exists."
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-2: W-1, W-3, W-4, W-5, W-6, W-7 and W-8 must have written their sections so every nav link target (#races, #calculator, #register, #schedule, #routes, #faq, #sponsors, #volunteer, #contact) exists"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-2: W-3, W-4, W-5, W-6, W-7 and W-8 must have written their sections so every nav target (#races, #calculator, #register, #schedule, #routes, #faq, #sponsors, #volunteer, #contact) exists"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-2: W-4, W-5, W-6, W-7 and W-8 must have written their sections so every nav target (#races, #calculator, #register, #schedule, #routes, #faq, #sponsors, #volunteer, #contact) exists"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-2: W-5, W-6, W-7 and W-8 must have written their sections so every nav target (#races, #calculator, #register, #schedule, #routes, #faq, #sponsors, #volunteer, #contact) exists"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-2: W-6, W-7 and W-8 must have written their sections so every nav target (#races, #calculator, #register, #schedule, #routes, #faq, #sponsors, #volunteer, #contact) exists"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-2: W-7 and W-8 must have written their sections so every nav target (#races, #calculator, #register, #schedule, #routes, #faq, #sponsors, #volunteer, #contact) exists"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-2: W-8 must have written #contact so every nav link target exists"
+    }
+  ],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 10,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-11",
+          "item": 11,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-12",
+          "item": 12,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-13",
+          "item": 13,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-14",
+          "item": 14,
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-1",
+          "item": "R-1",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-2",
+          "item": "R-2",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-3",
+          "item": "R-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-4",
+          "item": "R-4",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-5",
+          "item": "R-5",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-6",
+          "item": "R-6",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-7",
+          "item": "R-7",
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-15",
+          "item": null,
+          "verdict": "NEEDS_REVISION"
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "version": 12,
+      "all_pass": true,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-11",
+          "item": 11,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-12",
+          "item": 12,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-13",
+          "item": 13,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-14",
+          "item": 14,
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-1",
+          "item": "R-1",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-2",
+          "item": "R-2",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-3",
+          "item": "R-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-4",
+          "item": "R-4",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-5",
+          "item": "R-5",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-6",
+          "item": "R-6",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-7",
+          "item": "R-7",
+          "verdict": "PASS"
+        }
+      ]
+    }
+  ],
+  "site_versions": 12,
+  "workable": [],
+  "to_be_confirmed": [],
+  "dropped_by_requester": [],
+  "workflow_agents": [
+    {
+      "id": "W-1",
+      "agent": "W-1 Builder",
+      "section": "W-1",
+      "revises": null,
+      "status": "done",
+      "calls": 2,
+      "retries": 0
+    },
+    {
+      "id": "W-2",
+      "agent": "W-2 Builder",
+      "section": "W-2",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-3",
+      "agent": "W-3 Builder",
+      "section": "W-3",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-4",
+      "agent": "W-4 Builder",
+      "section": "W-4",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-5",
+      "agent": "W-5 Builder",
+      "section": "W-5",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-6",
+      "agent": "W-6 Builder",
+      "section": "W-6",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-7",
+      "agent": "W-7 Builder",
+      "section": "W-7",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-8",
+      "agent": "W-8 Builder",
+      "section": "W-8",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-9",
+      "agent": "W-9 Builder",
+      "section": "W-9",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-10",
+      "agent": "W-10 Builder",
+      "section": "W-1",
+      "revises": "W-1",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-11",
+      "agent": "W-11 Builder",
+      "section": "W-3",
+      "revises": "W-3",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    }
+  ],
+  "limits_hit": [],
+  "lessons": {
+    "memory": false,
+    "saved": [],
+    "used": []
+  },
+  "playbooks": {
+    "saved": null,
+    "used": []
+  },
+  "business_type": "running event",
+  "style_guide": true,
+  "rubric": [
+    {
+      "id": "R-1",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-2",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-3",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-4",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-5",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-6",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-7",
+      "pass": true,
+      "verdict": "PASS"
+    }
+  ],
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The site shows the name Riverside Run 2027, Pune, race day Sunday 14 February 2027, and expo day Saturday 13 February 2027, 10am to 6pm, at Riverside Grounds, 5 River Road, Pune 411001.",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "The site shows the contact details run@example.com and WhatsApp +91 00000 44444.",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "A race comparison shows 5K (start 7:30am, Rs 300, minimum age 12, cutoff 1 hour), 10K (start 6:45am, Rs 500, minimum age 16, cutoff 2 hours) and Half Marathon (start 6:00am, Rs 800, minimum age 18, cutoff 3 hours 30 minutes), and states the T-shirt price of Rs 250 (optional).",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "A fee calculator lets the visitor choose a race, 1 to 10 runners and a number of T-shirts, and shows the total. It takes 10% off race fees only (not T-shirts) for registrations up to 31 December 2026, and the code applies the T-shirt price of Rs 250 each.",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "A registration form has name, email, phone, date of birth, race dropdown, T-shirt yes/no, T-shirt size (S, M, L, XL, shown only when T-shirt is yes), emergency contact name and phone, and guardian name (required only when the runner is under 18), and is set to send to run@example.com.",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "A separate volunteer form has name, email, preferred role (Water station, Registration desk, Route marshal) and availability (Saturday, Sunday or both), and is set to send to volunteers@example.com.",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "A schedule shows Expo day (10am bib collection opens, 4pm route briefing, 6pm expo closes) and Race day (5:00am gates open, 6:00am Half Marathon, 6:45am 10K, 7:30am 5K, 10:00am prize ceremony).",
+      "pass": true
+    },
+    {
+      "item": 8,
+      "criterion": "Each of the three races has a route map placeholder and its water stations: 5K at 2.5 km; 10K at 2.5, 5 and 7.5 km; Half Marathon every 3 km.",
+      "pass": true
+    },
+    {
+      "item": 9,
+      "criterion": "An FAQ section answers: change my race (yes, until 31 January 2027 by email), parking (yes, free at Gate 2), refunds (no), bib collection (at the expo on 13 February), bag drop (yes, near the start line), pacers (yes, for the 10K and Half Marathon).",
+      "pass": true
+    },
+    {
+      "item": 10,
+      "criterion": "A sponsors section shows tiers: Gold (Meridian Bank), Silver (Trailhead Sports, Aqua Pure), Community (Pune Runners Club), with logo placeholders.",
+      "pass": true
+    },
+    {
+      "item": 11,
+      "criterion": "A countdown to race day (14 February 2027) is on the page and updates itself.",
+      "pass": true
+    },
+    {
+      "item": 12,
+      "criterion": "A menu stays on screen while scrolling and highlights the section the visitor is currently in.",
+      "pass": true
+    },
+    {
+      "item": 13,
+      "criterion": "A high-contrast mode toggle changes the colours of the whole page, not only part of it.",
+      "pass": true
+    },
+    {
+      "item": 14,
+      "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+      "pass": true
+    }
+  ],
+  "route_check_violations": []
+}

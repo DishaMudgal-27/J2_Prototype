@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brew Lab</title>
+<!-- J2:style head start (owner W-1) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap"><style>:root{--j2-primary:#4A2E1F;--j2-secondary:#F1E4D3;--j2-accent:#B4531F;--j2-background:#FBF6EF;--j2-surface:#FFFFFF;--j2-text:#2B1B12;--j2-muted:#6B5547;--j2-font-heading:'Fraunces', Georgia, serif;--j2-font-body:'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:12px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#4A2E1F;color:#FFFFFF;border:2px solid #4A2E1F;min-height:48px;padding:12px 24px;border-radius:12px;font-weight:600;font-size:1rem;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-btn-secondary{display:inline-block;background:transparent;color:#4A2E1F;border:2px solid #4A2E1F;min-height:48px;padding:12px 24px;border-radius:12px;font-weight:600;font-size:1rem;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.j2-card{background:#FFFFFF;border:1px solid #E6D5C0;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(43,27,18,0.08)}</style>
+<!-- J2:style head end -->
+<!-- J2:W-1 head start (owner W-1) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+<!-- J2:W-1 head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<style>
+  #top, #location { box-sizing: border-box; font-family: var(--j2-font-body); color: var(--j2-text); }
+  #top *, #location * { box-sizing: border-box; }
+  #top { background: var(--j2-secondary); border-bottom: 1px solid #E6D5C0; padding: 16px 16px 32px; }
+  #top .w1-inner, #location .w1-inner { max-width: 960px; margin: 0 auto; }
+  #top h1 { font-family: var(--j2-font-heading); color: var(--j2-primary); font-size: clamp(2.25rem, 8vw, 3.5rem); line-height: 1.1; margin: 24px 0 8px; overflow-wrap: anywhere; }
+  #top .w1-tagline { color: var(--j2-muted); font-size: 1.125rem; margin: 0 0 24px; }
+  #site-nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  #site-nav a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; padding: 8px 14px; color: var(--j2-primary); font-weight: 600; text-decoration: none; border-radius: var(--j2-radius); border: 1px solid transparent; }
+  #site-nav a:hover, #site-nav a:focus-visible { background: var(--j2-surface); border-color: var(--j2-primary); outline: none; }
+  #top .j2-btn { margin-top: 8px; }
+  #location { padding: var(--j2-section, 64px) 16px; background: var(--j2-background); scroll-margin-top: 16px; }
+  #location h2 { font-family: var(--j2-font-heading); color: var(--j2-primary); font-size: clamp(1.75rem, 5vw, 2.25rem); margin: 0 0 16px; }
+  #location .w1-panel { background: var(--j2-surface); border: 1px solid #E6D5C0; border-radius: var(--j2-radius); padding: 24px; max-width: 520px; }
+  #location address { font-style: normal; font-size: 1.125rem; line-height: 1.5; margin: 0 0 16px; overflow-wrap: anywhere; }
+  #location #map-link { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; min-width: 44px; padding: 12px 24px; background: transparent; color: var(--j2-primary); border: 2px solid var(--j2-primary); border-radius: var(--j2-radius); font-weight: 600; text-decoration: none; text-align: center; }
+  #location #map-link:hover, #location #map-link:focus-visible { background: var(--j2-secondary); }
+  @media (max-width: 480px) {
+    #site-nav a { flex: 1 1 calc(50% - 8px); }
+    #top .j2-btn, #location #map-link { width: 100%; }
+  }
+</style>
+
+<header id="top">
+  <div class="w1-inner">
+    <nav id="site-nav" aria-label="Main">
+      <ul>
+        <li><a href="#menu">Menu</a></li>
+        <li><a href="#hours">Hours</a></li>
+        <li><a href="#location">Find us</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a href="#preorder">Pre-order</a></li>
+      </ul>
+    </nav>
+    <h1>Brew Lab</h1>
+    <p class="w1-tagline">Specialty coffee shop in Indiranagar, Bengaluru</p>
+    <a class="j2-btn" href="#preorder">Pre-order for pickup</a>
+  </div>
+</header>
+
+<section id="location" aria-labelledby="location-heading">
+  <div class="w1-inner">
+    <h2 id="location-heading">Find us</h2>
+    <div class="w1-panel">
+      <address>12, 100 Feet Road, Indiranagar, Bengaluru 560038</address>
+      <a id="map-link" href="https://www.google.com/maps/search/?api=1&amp;query=12%2C+100+Feet+Road%2C+Indiranagar%2C+Bengaluru+560038" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
+    </div>
+  </div>
+</section>
+<!-- J2:W-1 end -->
+</body>
+</html>

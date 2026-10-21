@@ -1,0 +1,558 @@
+[
+  {
+    "cycle": 1,
+    "version": 8,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the name Spark 2026, Northfield College of Engineering, Pune, and the dates 14 to 16 February 2027 near the top",
+        "verdict": "PASS",
+        "note": "Screenshot and the #hero markup show h1 Spark 2026, Northfield College of Engineering, Pune and 14 to 16 February 2027 on the first screen.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "A day-by-day schedule has Day 1, Day 2 and Day 3 with their dates, listing each event with its start and end time: Day 1 Code Sprint 10am-1pm, Line Follower 2pm-5pm, AI in Daily Life 5:30pm-6:30pm; Day 2 Bug Hunt 11am-1pm, Poster Jam 2pm-4pm; Day 3 Drone Dash 10am-1pm, UI Duel 2pm-5pm, Startup Stories 5:30pm-6:30pm",
+        "verdict": "PASS",
+        "note": "#schedule has 3 .schedule-day blocks with dates 14, 15 and 16 February 2027 and 8 .schedule-item cards. All 8 times match the charter.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "Events can be browsed by category (Coding, Robotics, Design, Talks) with a way to filter, and each of the 8 events shows name, category, day, time and price (Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, Poster Jam free, UI Duel Rs 100, AI in Daily Life free, Startup Stories free)",
+        "verdict": "PASS",
+        "note": "8 .event-card elements show name, category, day, time and price. 5 .filter-btn buttons are wired to a script that hides cards through the hidden attribute. Prices match the charter. The filter click was not run by code, so this is a code read.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "A registration form has name, email, college and an event dropdown listing all 8 events, requires the fields before sending, and submitting sends the details by email to spark2026@example.com",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The form has name, email, college and a select with 8 options. Empty fields are blocked with inline errors. Submit opens mailto:spark2026@example.com with the details in the body, and the mechanical check shows the form submits with no errors. The student must still press send in their own email app.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A sponsors section names Nimbus Cloud, Orbit Labs and Pixel Press as text, with no logos",
+        "verdict": "PASS",
+        "note": "#sponsors has 3 .sponsor-name text cards (Nimbus Cloud, Orbit Labs, Pixel Press). The mechanical check found 0 images.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A venue section shows the address 22 University Road, Pune 411007 and a map or map link for it",
+        "verdict": "PASS",
+        "note": "#venue shows 22 University Road, Pune 411007 and one Google Maps search link built from that address.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "A WhatsApp button links to wa.me/910000033333 and the email spark2026@example.com is shown as a contact",
+        "verdict": "PASS",
+        "note": "a.whatsapp-btn href is https://wa.me/910000033333. spark2026@example.com is shown as text and as a mailto button.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The layout has a mobile viewport setting, no horizontal overflow at 360px and 1280px widths, and a navigation that works on a phone",
+        "verdict": "NEEDS_REVISION",
+        "note": "The head contains only meta charset and a title, with no meta name=viewport. Real phones will render the page at desktop width and shrink it. The Menu toggle works and overflow is 0px at 360px and 1280px, but the viewport setting this item requires is missing.",
+        "severity": "high",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": false
+      },
+      {
+        "id": "F-9",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "PASS",
+        "note": "Mechanical check: js_errors is empty, overflow is 0px at 360px and 1280px, and broken_in_page_links is empty.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "The look is energetic and modern: a bold colour palette set once and reused, large headings, and photo areas labelled as placeholders",
+        "verdict": "PASS",
+        "note": "The palette is defined once as :root variables and reused. The h1 is clamp(2.75rem,13vw,6.5rem). The screenshot shows a gradient hero and a dashed photo placeholder labelled 'Photo placeholder: fest photo goes here'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "The same two fonts and the palette variables are used across all sections. Buttons and cards use the shared j2 classes.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "Contrast check: 0 low-contrast items out of 115 on desktop and 110 on phone.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "1 h1, 0 skipped heading levels, and the hero title is clearly the largest element in the screenshot.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "The only first-screen action besides Menu is the yellow 'Register now' button, visible at both widths.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS",
+        "note": "At 360px a Menu button opens links to all 6 sections. At 1280px the links show inline. 9 in-page links, none broken.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "0 tap targets under 44px, but measured at an emulated 360px width. Without the viewport tag, real phones may render smaller (see F-8).",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "The page has 0 img elements, so none lack alt text. The photo placeholder has role=img and an aria-label.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 29123,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&amp;family=Space+Grotesk:wght@700&amp;display=swap",
+        "https://wa.me/910000033333",
+        "https://www.google.com/maps/search/?api=1&amp;query=Northfield%20College%20of%20Engineering%2C%2022%20University%20Road%2C%20Pune%20411007"
+      ],
+      "forms": 1,
+      "scripts": 3,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "design": {
+        "desktop": {
+          "contrast": {
+            "checked": 115,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 9
+          },
+          "first_screen_actions": [
+            "Register now"
+          ]
+        },
+        "phone": {
+          "contrast": {
+            "checked": 110,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 9
+          },
+          "first_screen_actions": [
+            "Menu",
+            "Register now"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        }
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v8.png",
+    "all_pass": false
+  },
+  {
+    "cycle": 2,
+    "version": 9,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the name Spark 2026, Northfield College of Engineering, Pune, and the dates 14 to 16 February 2027 near the top",
+        "verdict": "PASS",
+        "note": "Screenshot and #hero markup show h1 Spark 2026, Northfield College of Engineering, Pune, and 14 to 16 February 2027 on the first screen at both widths.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "A day-by-day schedule has Day 1, Day 2 and Day 3 with their dates, listing each event with its start and end time: Day 1 Code Sprint 10am-1pm, Line Follower 2pm-5pm, AI in Daily Life 5:30pm-6:30pm; Day 2 Bug Hunt 11am-1pm, Poster Jam 2pm-4pm; Day 3 Drone Dash 10am-1pm, UI Duel 2pm-5pm, Startup Stories 5:30pm-6:30pm",
+        "verdict": "PASS",
+        "note": "#schedule has 3 .schedule-day blocks dated 14, 15 and 16 February 2027 and 8 .schedule-item cards; all 8 times match the charter.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "Events can be browsed by category (Coding, Robotics, Design, Talks) with a way to filter, and each of the 8 events shows name, category, day, time and price (Code Sprint Rs 100, Bug Hunt Rs 50, Line Follower Rs 150, Drone Dash Rs 200, Poster Jam free, UI Duel Rs 100, AI in Daily Life free, Startup Stories free)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "8 .event-card elements carry correct prices and categories; 5 .filter-btn buttons call apply(), which sets the hidden attribute, and #events .event-card[hidden]{display:none} backs it. Code read only: no click test was run.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "A registration form has name, email, college and an event dropdown listing all 8 events, requires the fields before sending, and submitting sends the details by email to spark2026@example.com",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Form has name, email, college and a select with 8 .event-option entries; empty fields show inline errors; mechanical check shows 1 of 1 form submitted with no errors; submit opens mailto:spark2026@example.com. The student must still press send.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A sponsors section names Nimbus Cloud, Orbit Labs and Pixel Press as text, with no logos",
+        "verdict": "PASS",
+        "note": "#sponsors has 3 .sponsor-name cards (Nimbus Cloud, Orbit Labs, Pixel Press); mechanical check found 0 images.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A venue section shows the address 22 University Road, Pune 411007 and a map or map link for it",
+        "verdict": "PASS",
+        "note": "#venue shows 22 University Road, Pune 411007 and one Google Maps search link built from that address.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "A WhatsApp button links to wa.me/910000033333 and the email spark2026@example.com is shown as a contact",
+        "verdict": "PASS",
+        "note": "a.whatsapp-btn href is https://wa.me/910000033333; spark2026@example.com appears as a mailto button and as text.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The layout has a mobile viewport setting, no horizontal overflow at 360px and 1280px widths, and a navigation that works on a phone",
+        "verdict": "PASS",
+        "note": "Head now holds one meta.viewport-meta with width=device-width, initial-scale=1; overflow is 0px at 360px and 1280px; the Menu toggle script sets aria-expanded and opens .w1-menu; screenshot shows the Menu button at 360px and inline links at 1280px.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "PASS",
+        "note": "Mechanical check: js_errors is empty, overflow 0px at both widths, broken_in_page_links is empty.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "The look is energetic and modern: a bold colour palette set once and reused, large headings, and photo areas labelled as placeholders",
+        "verdict": "PASS",
+        "note": "Palette is defined once as :root --j2-* variables and reused; h1 is clamp(2.75rem,13vw,6.5rem); screenshot shows the gradient hero and a dashed box labelled 'Photo placeholder: fest photo goes here'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "Same two fonts, palette variables and j2-btn/j2-card classes appear in every section; screenshot matches the style guide.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "Contrast check: 0 low-contrast items of 110 at 360px and 0 of 115 at 1280px.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "1 h1, 0 skipped heading levels at both widths; the h1 is clearly the largest element in the screenshot.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "Yellow 'Register now' button is the single hero action at 1280px, alongside the Menu button at 360px.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS",
+        "note": "1 nav with 9 in-page links; Menu toggle at 360px and inline links at 1280px in the screenshot.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "Re-measured at 360px: small_tap_targets count 0 at a 44px minimum.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "0 img elements and none without alt; the photo placeholder div has role=img and aria-label.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 29214,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&amp;family=Space+Grotesk:wght@700&amp;display=swap",
+        "https://wa.me/910000033333",
+        "https://www.google.com/maps/search/?api=1&amp;query=Northfield%20College%20of%20Engineering%2C%2022%20University%20Road%2C%20Pune%20411007"
+      ],
+      "forms": 1,
+      "scripts": 3,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 110,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 9
+          },
+          "first_screen_actions": [
+            "Menu",
+            "Register now"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 115,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Inter",
+            "Space Grotesk"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 9
+          },
+          "first_screen_actions": [
+            "Register now"
+          ]
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v9.png",
+    "all_pass": true
+  }
+]

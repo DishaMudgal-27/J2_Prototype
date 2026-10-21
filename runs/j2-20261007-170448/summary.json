@@ -1,0 +1,234 @@
+{
+  "run": "20261007-170448",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "force_audit_fail": null,
+  "test_lessons": false,
+  "model": "sonnet",
+  "mock": false,
+  "brief": "make a website for my friend's cafe called Brew Lab in Bengaluru, with the menu, timings, where it is, a photo gallery and some stories about where their coffee comes from",
+  "change_requests": [],
+  "status": "done",
+  "outcome": "Done: the site is workable. Every done-when item passes with Audit's evidence and the render check is clean.",
+  "budget": {
+    "start": 80,
+    "granted": 80,
+    "used": 65,
+    "raises": []
+  },
+  "ai_calls": 20,
+  "cycles": 1,
+  "questions_to_user": [
+    {
+      "kind": "info",
+      "asked": [
+        "What is the cafe's full address, and what are its opening hours on each day of the week?",
+        "What should the menu section show?",
+        "Do you have photos for the gallery and the coffee stories (which farms or regions the beans come from)?",
+        "How should visitors reach the cafe? For example a phone number, Instagram page, or email."
+      ],
+      "answer": "Address: 100 Feet Road, Indiranagar, Bengaluru 560038. Open 8am to 10pm every day, no closed days. Phone: +91 80 4000 2468.\nMenu: Espresso ₹120, Cappuccino ₹180, Cold brew ₹200, Pour-over ₹220, Croissant ₹150, Banana bread ₹130.\nPhotos: not yet, leave empty photo spots to fill in later.\nCoffee stories: Ratnagiri Estate in Chikmagalur grows shade-grown coffee; Kerehaklu in Chikmagalur grows coffee alongside pepper and cardamom; Baarbara Estate in Coorg hand-picks only ripe cherries."
+    }
+  ],
+  "conflicts": [],
+  "validator_rejections": [],
+  "holds": [
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-7: W-5 (gallery-section) and W-6 (stories-section) must finish first"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-7: W-6 (stories-section) must finish first; its other five dependencies are done"
+    }
+  ],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 7,
+      "all_pass": true,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": 9,
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "F-10",
+          "item": 10,
+          "verdict": "PASS"
+        }
+      ]
+    }
+  ],
+  "site_versions": 7,
+  "workable": [],
+  "to_be_confirmed": [],
+  "dropped_by_requester": [],
+  "workflow_agents": [
+    {
+      "id": "W-1",
+      "agent": "W-1 Builder",
+      "section": "W-1",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-2",
+      "agent": "W-2 Builder",
+      "section": "W-2",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-3",
+      "agent": "W-3 Builder",
+      "section": "W-3",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-4",
+      "agent": "W-4 Builder",
+      "section": "W-4",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-5",
+      "agent": "W-5 Builder",
+      "section": "W-5",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-6",
+      "agent": "W-6 Builder",
+      "section": "W-6",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-7",
+      "agent": "W-7 Builder",
+      "section": "W-7",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    }
+  ],
+  "limits_hit": [],
+  "lessons": {
+    "memory": false,
+    "saved": [],
+    "used": []
+  },
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The page shows the name Brew Lab and says it is a cafe in Bengaluru",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "A menu section lists exactly: Espresso ₹120, Cappuccino ₹180, Cold brew ₹200, Pour-over ₹220, Croissant ₹150, Banana bread ₹130",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "A timings section states open 8am to 10pm every day, with no closed days",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "A location section shows the address 100 Feet Road, Indiranagar, Bengaluru 560038",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "The phone number +91 80 4000 2468 appears on the page as a tap-to-call link",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "A photo gallery section contains empty, clearly labelled photo spots with no images",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "A coffee stories section has three stories: Ratnagiri Estate (Chikmagalur, shade-grown coffee), Kerehaklu (Chikmagalur, coffee grown alongside pepper and cardamom), Baarbara Estate (Coorg, only ripe cherries hand-picked)",
+      "pass": true
+    },
+    {
+      "item": 8,
+      "criterion": "A navigation menu links to each section and every in-page link points to a section that exists",
+      "pass": true
+    },
+    {
+      "item": 9,
+      "criterion": "The page has a mobile viewport setting and layout rules that keep it within the screen width at 360px and 1280px",
+      "pass": true
+    },
+    {
+      "item": 10,
+      "criterion": "The page has no JavaScript errors and no text such as 'to be confirmed' or 'lorem ipsum'",
+      "pass": true
+    }
+  ],
+  "route_check_violations": []
+}

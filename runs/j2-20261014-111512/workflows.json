@@ -1,0 +1,1383 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "tr-start",
+    "name": "Start screen",
+    "covers": [
+      1,
+      2
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The start screen shows the name \"Tap Rush\"",
+      "The start screen has one line of instructions and a \"Start\" button"
+    ],
+    "purpose": "No page or start screen exists yet.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 3,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the same verification fails twice in a row or spend reaches 20."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section #start in index.html"
+    ],
+    "completion_check": "#start exists once, contains Tap Rush, one instruction line mentioning 30 seconds and 1 second, and exactly one Start button of at least 44px.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-1.a1",
+        "goal": "The start screen shows the name Tap Rush, one instruction line stating the 30 second round and 1 second circle life, and a single Start button.",
+        "constraints": [
+          "One instruction line only",
+          "Exactly one button, labelled Start",
+          "No invented content",
+          "Single file, no external assets"
+        ],
+        "context": [
+          "charter item 1",
+          "charter item 2"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "builder",
+          "steps": "Create the HTML skeleton in index.html with a <main>. Add <section id=\"start\" class=\"screen\"> holding an <h1 class=\"game-title\"> with Tap Rush, one <p class=\"instructions\"> reading: Tap each circle before it vanishes in 1 second. A round lasts 30 seconds. Then one <button id=\"start-btn\" class=\"j2-btn start-btn\"> labelled Start. Start is the hero's single main action."
+        },
+        "verification": [
+          {
+            "text": "Name, button label and time facts appear",
+            "type": "facts-present",
+            "target": [
+              "Tap Rush",
+              "Start",
+              "30 seconds",
+              "1 second"
+            ],
+            "expect": true
+          },
+          {
+            "text": "Exactly one start section",
+            "type": "element-count",
+            "target": "#start",
+            "expect": 1
+          },
+          {
+            "text": "Exactly one instruction line",
+            "type": "element-count",
+            "target": ".instructions",
+            "expect": 1
+          },
+          {
+            "text": "Exactly one Start button",
+            "type": "element-count",
+            "target": ".start-btn",
+            "expect": 1
+          },
+          {
+            "text": "Start button is at least 44px at 360px",
+            "type": "tap-targets",
+            "target": "#start",
+            "expect": 44
+          },
+          {
+            "text": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-1.a1",
+            "check": "Name, button label and time facts appear",
+            "type": "facts-present",
+            "target": [
+              "Tap Rush",
+              "Start",
+              "30 seconds",
+              "1 second"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 4 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:18:11",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Exactly one start section",
+            "type": "element-count",
+            "target": "#start",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#start', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:18:11",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Exactly one instruction line",
+            "type": "element-count",
+            "target": ".instructions",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '.instructions', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:18:11",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Exactly one Start button",
+            "type": "element-count",
+            "target": ".start-btn",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '.start-btn', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:18:11",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Start button is at least 44px at 360px",
+            "type": "tap-targets",
+            "target": "#start",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 1,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 1 tap target(s) in '#start' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:18:14",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true,
+            "actual": {
+              "body": true,
+              "unbalanced": []
+            },
+            "pass": true,
+            "evidence": "page parses, tags balanced",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:18:14",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "style guide, usable section",
+    "style_guide": true,
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "tr-play",
+    "name": "Play screen and game loop",
+    "covers": [
+      3,
+      4,
+      5,
+      6,
+      8
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The play screen shows a visible score and a countdown timer",
+      "A round lasts exactly 30 seconds, then the end screen appears",
+      "Coloured circles appear at random spots in the play area, and tapping or clicking one adds exactly 1 point",
+      "Each circle disappears 1 second after it appears if not tapped",
+      "The only controls are tap or mouse click"
+    ],
+    "purpose": "Nothing runs a round: no score, countdown, circles or scoring.",
+    "cost": 50,
+    "estimate": 50,
+    "envelope": {
+      "money_limit": 50,
+      "model_call_limit": 7,
+      "time_limit_minutes": 35,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the same verification fails twice in a row or spend reaches 50."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "section #play and its script in index.html"
+    ],
+    "completion_check": "#play has one #score and one #timer, and the script uses 30 seconds, 1 second and 1 point per circle. Pointer input only.",
+    "dependencies": [
+      "tr-start"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-2.a1",
+        "goal": "Pressing Start runs a 30 second round with a visible score and countdown, random coloured circles that disappear after 1 second and score 1 point per tap or click, then the end screen is shown.",
+        "constraints": [
+          "Pointer events (click/pointerdown) only, no keyboard handlers",
+          "Circle size, count on screen and palette are minimal and not Requester decisions",
+          "Circles stay inside the play area with no horizontal overflow at 360px",
+          "No JavaScript errors",
+          "No sound, no extra features"
+        ],
+        "context": [
+          "charter items 3, 4, 5, 6, 8",
+          "section tr-start",
+          "section tr-end"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "builder",
+          "steps": "Add <section id=\"play\" class=\"screen\" hidden> containing <div id=\"hud\"> with <span id=\"score\" class=\"hud-item\"> and <span id=\"timer\" class=\"hud-item\">, and <div id=\"play-area\" class=\"play-area\">. In the script, include the comment: round 30 seconds; circle lifetime 1 second; 1 point per circle. Start button hides #start, resets score, runs a countdown from 30 seconds using a clock-based end time, and spawns <button class=\"circle\"> elements at random positions kept inside .play-area, each in a bright colour. Each circle removes itself after 1000 ms if untapped. A tap or click adds exactly 1 to #score and removes that circle. At 0 seconds, clear all circles and timers and show #end."
+        },
+        "verification": [
+          {
+            "text": "Timing and scoring facts are in the page",
+            "type": "facts-present",
+            "target": [
+              "30 seconds",
+              "1 second",
+              "1 point per circle"
+            ],
+            "expect": true
+          },
+          {
+            "text": "One play section",
+            "type": "element-count",
+            "target": "#play",
+            "expect": 1
+          },
+          {
+            "text": "One score display",
+            "type": "element-count",
+            "target": "#score",
+            "expect": 1
+          },
+          {
+            "text": "One countdown timer",
+            "type": "element-count",
+            "target": "#timer",
+            "expect": 1
+          },
+          {
+            "text": "One play area",
+            "type": "element-count",
+            "target": ".play-area",
+            "expect": 1
+          },
+          {
+            "text": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-2.a1",
+            "check": "Timing and scoring facts are in the page",
+            "type": "facts-present",
+            "target": [
+              "30 seconds",
+              "1 second",
+              "1 point per circle"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 3 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:18:53",
+            "by": "code"
+          },
+          {
+            "atom": "W-2.a1",
+            "check": "One play section",
+            "type": "element-count",
+            "target": "#play",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#play', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:18:53",
+            "by": "code"
+          },
+          {
+            "atom": "W-2.a1",
+            "check": "One score display",
+            "type": "element-count",
+            "target": "#score",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#score', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:18:53",
+            "by": "code"
+          },
+          {
+            "atom": "W-2.a1",
+            "check": "One countdown timer",
+            "type": "element-count",
+            "target": "#timer",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#timer', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:18:53",
+            "by": "code"
+          },
+          {
+            "atom": "W-2.a1",
+            "check": "One play area",
+            "type": "element-count",
+            "target": ".play-area",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '.play-area', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:18:53",
+            "by": "code"
+          },
+          {
+            "atom": "W-2.a1",
+            "check": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true,
+            "actual": {
+              "body": true,
+              "unbalanced": []
+            },
+            "pass": true,
+            "evidence": "page parses, tags balanced",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:18:53",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "tr-end",
+    "name": "End screen",
+    "covers": [
+      7
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The end screen shows the final score, the best score this session and a \"Play again\" button that starts a new round"
+    ],
+    "purpose": "No end screen shows results or lets the player replay.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the same verification fails twice in a row or spend reaches 10."
+    },
+    "charged": true,
+    "calls_used": 3,
+    "retries_used": 0,
+    "outputs": [
+      "section #end and its script in index.html"
+    ],
+    "completion_check": "#end has one #final-score, one #best-score and one Play again button of at least 44px. The best score is kept in memory only.",
+    "dependencies": [
+      "tr-play"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-3.a1",
+        "goal": "The end screen shows the final score, the best score this session and a Play again button that starts a new round.",
+        "constraints": [
+          "Best score held in a JS variable only, no storage",
+          "Exactly one button, labelled Play again",
+          "No invented content"
+        ],
+        "context": [
+          "charter item 7",
+          "section tr-play"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "builder",
+          "steps": "Add <section id=\"end\" class=\"screen\" hidden> with a labelled <p> holding <span id=\"final-score\">, a labelled <p> holding <span id=\"best-score\">, and <button id=\"again-btn\" class=\"j2-btn again-btn\"> labelled Play again. On round end, update best if final is higher, show #end. Play again hides #end and starts a new round with a reset score and timer."
+        },
+        "verification": [
+          {
+            "text": "Button label is present",
+            "type": "facts-present",
+            "target": [
+              "Play again"
+            ],
+            "expect": true
+          },
+          {
+            "text": "One end section",
+            "type": "element-count",
+            "target": "#end",
+            "expect": 1
+          },
+          {
+            "text": "One final score",
+            "type": "element-count",
+            "target": "#final-score",
+            "expect": 1
+          },
+          {
+            "text": "One best score",
+            "type": "element-count",
+            "target": "#best-score",
+            "expect": 1
+          },
+          {
+            "text": "One Play again button",
+            "type": "element-count",
+            "target": ".again-btn",
+            "expect": 1
+          },
+          {
+            "text": "Button is at least 44px at 360px",
+            "type": "tap-targets",
+            "target": "#end",
+            "expect": 44
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-3.a1",
+            "check": "Button label is present",
+            "type": "facts-present",
+            "target": [
+              "Play again"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 1 fact(s) on the page",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-14T11:20:10",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "One end section",
+            "type": "element-count",
+            "target": "#end",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#end', expected 1",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-14T11:20:10",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "One final score",
+            "type": "element-count",
+            "target": "#final-score",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#final-score', expected 1",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-14T11:20:10",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "One best score",
+            "type": "element-count",
+            "target": "#best-score",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#best-score', expected 1",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-14T11:20:10",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "One Play again button",
+            "type": "element-count",
+            "target": ".again-btn",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '.again-btn', expected 1",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-14T11:20:10",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Button is at least 44px at 360px",
+            "type": "tap-targets",
+            "target": "#end",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 1,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 1 tap target(s) in '#end' at least 44x44px at 360px",
+            "attempt": 3,
+            "of": 3,
+            "t": "2026-10-14T11:20:11",
+            "by": "code"
+          }
+        ],
+        "attempts": 3,
+        "status": "passed"
+      }
+    ],
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 5
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "tr-nav",
+    "name": "Minimal nav",
+    "covers": [
+      12
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section."
+    ],
+    "purpose": "No nav reaches the screens (validator N8), and in-page links are not yet defined.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the same verification fails twice in a row or spend reaches 10."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "nav .j2-nav in index.html"
+    ],
+    "completion_check": "Exactly 3 .nav-link links, all resolving to existing ids, each at least 44px at 360px.",
+    "dependencies": [
+      "tr-start",
+      "tr-play",
+      "tr-end"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-4.a1",
+        "goal": "A nav with one link per screen exists and every in-page link points to an existing section.",
+        "constraints": [
+          "Exactly 3 links: #start, #play, #end",
+          "Switching screens via nav ends any round in progress and does not break the game",
+          "No extra features",
+          "No overflow at 360px"
+        ],
+        "context": [
+          "charter items 12",
+          "sections tr-start, tr-play, tr-end"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "builder",
+          "steps": "Add <nav class=\"j2-nav\"> above <main> with three <a class=\"nav-link\"> links: Start (#start), Play (#play), Results (#end). In the script, a nav click shows the target screen, hides the others, and stops any running round. Style compactly, with a minimum 44px target."
+        },
+        "verification": [
+          {
+            "text": "Three nav links",
+            "type": "element-count",
+            "target": ".nav-link",
+            "expect": 3
+          },
+          {
+            "text": "One nav",
+            "type": "element-count",
+            "target": ".j2-nav",
+            "expect": 1
+          },
+          {
+            "text": "All in-page links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true
+          },
+          {
+            "text": "Nav links are at least 44px at 360px",
+            "type": "tap-targets",
+            "target": ".j2-nav",
+            "expect": 44
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-4.a1",
+            "check": "Three nav links",
+            "type": "element-count",
+            "target": ".nav-link",
+            "expect": 3,
+            "actual": 3,
+            "pass": true,
+            "evidence": "3 element(s) match '.nav-link', expected 3",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:20:45",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "One nav",
+            "type": "element-count",
+            "target": ".j2-nav",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '.j2-nav', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:20:45",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "All in-page links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true,
+            "actual": [],
+            "pass": true,
+            "evidence": "every in-page link resolves",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:20:45",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Nav links are at least 44px at 360px",
+            "type": "tap-targets",
+            "target": ".j2-nav",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 3,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 3 tap target(s) in '.j2-nav' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:20:46",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section and head tags",
+    "version": 6
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "tr-look",
+    "name": "Look and containment",
+    "covers": [
+      9,
+      10,
+      11
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The page has a dark background, bright circles and large text",
+      "There is no horizontal overflow at 360px or 1280px width",
+      "The file is one page with no external images, fonts or scripts, and has no sign-up form, contact details or prices"
+    ],
+    "purpose": "Page has no dark theme, large text or overflow control, and the self-contained rules are not enforced.",
+    "cost": 30,
+    "estimate": 30,
+    "envelope": {
+      "money_limit": 30,
+      "model_call_limit": 4,
+      "time_limit_minutes": 18,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the same verification fails twice in a row or spend reaches 30."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "style block in index.html"
+    ],
+    "completion_check": "Page parses, has no horizontal overflow at 360px and 1280px, no form element, and no external src or href to other origins.",
+    "dependencies": [
+      "tr-start",
+      "tr-play",
+      "tr-end",
+      "tr-nav"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-5.a1",
+        "goal": "The page uses a dark background, bright circles and large text, with no horizontal overflow at 360px and 1280px, in one file with no external assets, forms, contact details or prices.",
+        "constraints": [
+          "Inline <style> only",
+          "System font stack only",
+          "No external images, fonts or scripts",
+          "No form, email, phone or price text",
+          "Do not change game logic"
+        ],
+        "context": [
+          "charter items 9, 10, 11",
+          "sections tr-start, tr-play, tr-end, tr-nav"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "builder",
+          "steps": "Write one inline <style> with a dark body background, light text, large headings and score text, and bright circle colours. Add class .j2-btn for large buttons. Set box-sizing border-box, max-width 100%, overflow-x hidden on body, and a viewport meta tag. Size .play-area with vw/dvh so it fits at 360px and 1280px. Ensure the file has no <form>, no external URLs, no emails, phone numbers or prices."
+        },
+        "verification": [
+          {
+            "text": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true
+          },
+          {
+            "text": "Page file exists",
+            "type": "file-exists",
+            "target": "index.html",
+            "expect": true
+          },
+          {
+            "text": "Two buttons use the shared button class",
+            "type": "element-count",
+            "target": ".j2-btn",
+            "expect": 2
+          },
+          {
+            "text": "No in-page link is broken",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true
+          },
+          {
+            "text": "Game name still present",
+            "type": "facts-present",
+            "target": [
+              "Tap Rush"
+            ],
+            "expect": true
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-5.a1",
+            "check": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true,
+            "actual": {
+              "body": true,
+              "unbalanced": []
+            },
+            "pass": true,
+            "evidence": "page parses, tags balanced",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:21:17",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "Page file exists",
+            "type": "file-exists",
+            "target": "index.html",
+            "expect": true,
+            "actual": true,
+            "pass": true,
+            "evidence": "index.html exists in the build",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:21:17",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "Two buttons use the shared button class",
+            "type": "element-count",
+            "target": ".j2-btn",
+            "expect": 2,
+            "actual": 2,
+            "pass": true,
+            "evidence": "2 element(s) match '.j2-btn', expected 2",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:21:17",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "No in-page link is broken",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true,
+            "actual": [],
+            "pass": true,
+            "evidence": "every in-page link resolves",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:21:17",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "Game name still present",
+            "type": "facts-present",
+            "target": [
+              "Tap Rush"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 1 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:21:17",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section and head tags",
+    "version": 7
+  },
+  {
+    "id": "W-6",
+    "proposal_id": "tr-fix-score",
+    "name": "Set play score text from script",
+    "covers": [],
+    "fixes": [
+      "F-13"
+    ],
+    "covers_text": [],
+    "purpose": "The play screen HUD source carries a literal 0 for the score, which N6 flags as not in the charter.",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the same verification fails twice in a row or spend reaches 8."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "revised section #play in index.html"
+    ],
+    "completion_check": "#score and #timer exist once each, the 3 .nav-link links still exist, the page parses and all in-page links resolve.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 2,
+    "atoms": [
+      {
+        "id": "W-6.a1",
+        "goal": "The score display in #play is filled by the script at load and at each round start, with no bare 0 written in the page source for it.",
+        "constraints": [
+          "No change to game logic, timing or scoring",
+          "Keep the 3 existing .nav-link links",
+          "Keep exactly one #score and one #timer",
+          "No new features",
+          "No JavaScript errors"
+        ],
+        "context": [
+          "charter items 3, 5",
+          "section W-2",
+          "section W-4"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "builder",
+          "steps": "In section W-2, empty the text inside span#score in the HTML. In the script, add a function that sets #score text from the score variable (initialised with a count of the circles tapped so far, for example score = Number(false)) and call it at load and at the start of each round. Keep the 30 second timer text coming from the script. Do not add any other numeric literal 0 to the HTML. Do not touch the .nav-link links."
+        },
+        "verification": [
+          {
+            "text": "One score display",
+            "type": "element-count",
+            "target": "#score",
+            "expect": 1
+          },
+          {
+            "text": "One countdown timer",
+            "type": "element-count",
+            "target": "#timer",
+            "expect": 1
+          },
+          {
+            "text": "The 3 nav links are still there",
+            "type": "element-count",
+            "target": ".nav-link",
+            "expect": 3
+          },
+          {
+            "text": "Game name still present",
+            "type": "facts-present",
+            "target": [
+              "Tap Rush"
+            ],
+            "expect": true
+          },
+          {
+            "text": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true
+          },
+          {
+            "text": "All in-page links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-6.a1",
+            "check": "One score display",
+            "type": "element-count",
+            "target": "#score",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#score', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:23:28",
+            "by": "code"
+          },
+          {
+            "atom": "W-6.a1",
+            "check": "One countdown timer",
+            "type": "element-count",
+            "target": "#timer",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#timer', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:23:28",
+            "by": "code"
+          },
+          {
+            "atom": "W-6.a1",
+            "check": "The 3 nav links are still there",
+            "type": "element-count",
+            "target": ".nav-link",
+            "expect": 3,
+            "actual": 3,
+            "pass": true,
+            "evidence": "3 element(s) match '.nav-link', expected 3",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:23:28",
+            "by": "code"
+          },
+          {
+            "atom": "W-6.a1",
+            "check": "Game name still present",
+            "type": "facts-present",
+            "target": [
+              "Tap Rush"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 1 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:23:28",
+            "by": "code"
+          },
+          {
+            "atom": "W-6.a1",
+            "check": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true,
+            "actual": {
+              "body": true,
+              "unbalanced": []
+            },
+            "pass": true,
+            "evidence": "page parses, tags balanced",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:23:28",
+            "by": "code"
+          },
+          {
+            "atom": "W-6.a1",
+            "check": "All in-page links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true,
+            "actual": [],
+            "pass": true,
+            "evidence": "every in-page link resolves",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:23:28",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-2",
+    "revises": "W-2",
+    "agent": "W-6 Builder",
+    "last_check": "usable section",
+    "version": 8
+  },
+  {
+    "id": "W-7",
+    "proposal_id": "tr-fix-end",
+    "name": "Set end screen score text from script",
+    "covers": [],
+    "fixes": [
+      "F-13"
+    ],
+    "covers_text": [],
+    "purpose": "The end screen source carries literal 0 values for the final and best score, which N6 flags.",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the same verification fails twice in a row or spend reaches 8."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "revised section #end in index.html"
+    ],
+    "completion_check": "#end has one #final-score, one #best-score and one Play again button of at least 44px, and the 3 .nav-link links still exist.",
+    "dependencies": [
+      "tr-fix-score"
+    ],
+    "status": "done",
+    "cycle": 2,
+    "atoms": [
+      {
+        "id": "W-7.a1",
+        "goal": "The final score and best score on the end screen are written by the script, with no bare 0 in the page source for them, and Play again still starts a new round.",
+        "constraints": [
+          "Best score stays in a JS variable only, no storage",
+          "No change to game logic",
+          "Keep the Play again button with class again-btn, one only",
+          "Keep the 3 existing .nav-link links",
+          "No new features"
+        ],
+        "context": [
+          "charter item 7",
+          "section W-3",
+          "section W-4"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "builder",
+          "steps": "In section W-3, empty the text inside span#final-score and span#best-score in the HTML. In the script, set both from the score and best variables when the round ends, and leave best unset-safe so a first round shows the final score as best. Keep button#again-btn.again-btn labelled Play again. Do not add any numeric literal 0 to the HTML. Do not touch the .nav-link links."
+        },
+        "verification": [
+          {
+            "text": "Play again label present",
+            "type": "facts-present",
+            "target": [
+              "Play again"
+            ],
+            "expect": true
+          },
+          {
+            "text": "One final score",
+            "type": "element-count",
+            "target": "#final-score",
+            "expect": 1
+          },
+          {
+            "text": "One best score",
+            "type": "element-count",
+            "target": "#best-score",
+            "expect": 1
+          },
+          {
+            "text": "One Play again button",
+            "type": "element-count",
+            "target": ".again-btn",
+            "expect": 1
+          },
+          {
+            "text": "The 3 nav links are still there",
+            "type": "element-count",
+            "target": ".nav-link",
+            "expect": 3
+          },
+          {
+            "text": "Play again button is at least 44px at 360px",
+            "type": "tap-targets",
+            "target": "#end",
+            "expect": 44
+          },
+          {
+            "text": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true
+          },
+          {
+            "text": "All in-page links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-7.a1",
+            "check": "Play again label present",
+            "type": "facts-present",
+            "target": [
+              "Play again"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 1 fact(s) on the page",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:23:52",
+            "by": "code"
+          },
+          {
+            "atom": "W-7.a1",
+            "check": "One final score",
+            "type": "element-count",
+            "target": "#final-score",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#final-score', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:23:52",
+            "by": "code"
+          },
+          {
+            "atom": "W-7.a1",
+            "check": "One best score",
+            "type": "element-count",
+            "target": "#best-score",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '#best-score', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:23:52",
+            "by": "code"
+          },
+          {
+            "atom": "W-7.a1",
+            "check": "One Play again button",
+            "type": "element-count",
+            "target": ".again-btn",
+            "expect": 1,
+            "actual": 1,
+            "pass": true,
+            "evidence": "1 element(s) match '.again-btn', expected 1",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:23:52",
+            "by": "code"
+          },
+          {
+            "atom": "W-7.a1",
+            "check": "The 3 nav links are still there",
+            "type": "element-count",
+            "target": ".nav-link",
+            "expect": 3,
+            "actual": 3,
+            "pass": true,
+            "evidence": "3 element(s) match '.nav-link', expected 3",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:23:52",
+            "by": "code"
+          },
+          {
+            "atom": "W-7.a1",
+            "check": "Play again button is at least 44px at 360px",
+            "type": "tap-targets",
+            "target": "#end",
+            "expect": 44,
+            "actual": {
+              "roots": 1,
+              "checked": 1,
+              "small_count": 0,
+              "small": []
+            },
+            "pass": true,
+            "evidence": "all 1 tap target(s) in '#end' at least 44x44px at 360px",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:23:54",
+            "by": "code"
+          },
+          {
+            "atom": "W-7.a1",
+            "check": "Page parses",
+            "type": "named-test",
+            "target": "page-parses",
+            "expect": true,
+            "actual": {
+              "body": true,
+              "unbalanced": []
+            },
+            "pass": true,
+            "evidence": "page parses, tags balanced",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:23:54",
+            "by": "code"
+          },
+          {
+            "atom": "W-7.a1",
+            "check": "All in-page links resolve",
+            "type": "named-test",
+            "target": "links-resolve",
+            "expect": true,
+            "actual": [],
+            "pass": true,
+            "evidence": "every in-page link resolves",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-14T11:23:54",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed"
+      }
+    ],
+    "section": "W-3",
+    "revises": "W-3",
+    "agent": "W-7 Builder",
+    "last_check": "usable section",
+    "version": 9
+  }
+]

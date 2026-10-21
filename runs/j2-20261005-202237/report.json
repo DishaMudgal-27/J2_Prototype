@@ -1,0 +1,220 @@
+{
+  "metrics": {
+    "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): Menu items and the price of each; Opening hours for each day; Street address and map pin; Shop WhatsApp number for pre-orders; Pickup slot times and the number of orders the shop can take per slot; Bean origins and farm names for the beans and farms section; Loyalty card details beyond buy 9, get the 10th free, such as which items count.",
+    "brief": "A one-page website for Brew Lab, a specialty coffee shop in Indiranagar, Bengaluru: menu with prices, opening hours, location, pre-order a coffee for pickup, a section about our beans and farms, and a loyalty card explainer (buy 9, get the 10th free).",
+    "model": "sonnet",
+    "mock": false,
+    "cycles": 1,
+    "ai_calls": 12,
+    "minutes": 3.1,
+    "budget": {
+      "total": 50,
+      "start": 50,
+      "cap": 100,
+      "raises": [],
+      "spent": 45,
+      "rate_card": true
+    },
+    "site_versions": 2,
+    "site_bytes": 12516,
+    "agents": {
+      "identity": {
+        "turns": 3,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "ceo": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "adaptation": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "priority": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "coordination": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "builder": {
+        "turns": 2,
+        "redirects": 0,
+        "invalid_moves": 0
+      },
+      "audit": {
+        "turns": 1,
+        "redirects": 0,
+        "invalid_moves": 0
+      }
+    },
+    "negotiation": {
+      "proposals": 1,
+      "grants": 1,
+      "counters": 0,
+      "refuses": 0,
+      "refuses_converted_by_code": 0,
+      "withdrawals": 0,
+      "conflicts": 0,
+      "ceo_decisions": 3,
+      "resolutions": []
+    },
+    "workflows": {
+      "registered": 2,
+      "done": 2,
+      "failed": 0,
+      "held_ever": 1,
+      "estimate_vs_charged": [
+        {
+          "id": "W-1",
+          "name": "Single file with menu and WhatsApp pre-order",
+          "agent_estimate": 25,
+          "charged": 25
+        },
+        {
+          "id": "W-2",
+          "name": "Hours and location, beans and farms, loyalty card",
+          "agent_estimate": 20,
+          "charged": 20
+        }
+      ]
+    },
+    "ceo_choices": {
+      "made": 3,
+      "picked_shown_first": 1,
+      "picked_identity_first": 1,
+      "note": "options are shuffled before the CEO sees them; shown_first measures position bias, identity_first measures pull toward the option Identity listed first"
+    },
+    "validator_refusals": 0,
+    "role_refusals": 0,
+    "pauses": 0,
+    "stuck": 0,
+    "limit_failures": 0,
+    "warnings": 0,
+    "audits": [
+      {
+        "cycle": 1,
+        "version": 2,
+        "all_pass": true,
+        "pass": 9,
+        "warn": 1,
+        "fail": 0,
+        "mechanical": [],
+        "mechanical_ran": true
+      }
+    ],
+    "open_inputs": [
+      "Menu items and the price of each",
+      "Opening hours for each day",
+      "Street address and map pin",
+      "Shop WhatsApp number for pre-orders",
+      "Pickup slot times and the number of orders the shop can take per slot",
+      "Bean origins and farm names for the beans and farms section",
+      "Loyalty card details beyond buy 9, get the 10th free, such as which items count"
+    ]
+  },
+  "review": {
+    "verdict": "The department finished the site in one cycle (11 calls, 3.1 minutes, 45 of 50 budget, no redirects or validator refusals), but the run was too easy to test its negotiation, ruling or rework paths.",
+    "agents": {
+      "identity": {
+        "score": 4,
+        "note": "Recorded the charter, sent the CEO real decisions and closed with the open inputs listed [2][4][18]. It bundled three questions into one ASK_CEO, and some options were weak: Q2 options 1 and 2 nearly overlap, and Q3 option 1 (invent facts) was a strawman."
+      },
+      "adaptation": {
+        "score": 4,
+        "note": "One turn, named the shortcut and its cost [6]. It proposed the whole site as two workflows at once instead of the smallest testable first. Estimates equal charges exactly, so their accuracy is untested."
+      },
+      "priority": {
+        "score": 3,
+        "note": "Gave resource-based reasons and kept 5 in reserve [7]. But it says a fix costs 8, so a 5 reserve cannot fund one. It also told Adaptation how to structure sections (styling inside sections), which is step design, and called a GRANT with a scope constraint."
+      },
+      "coordination": {
+        "score": 5,
+        "note": "Stated its rule, held W-2 on the shared-file dependency and released it when W-1 finished [9][12]. No role slips."
+      },
+      "audit": {
+        "score": 4,
+        "note": "Honest that the link logic was read, not run [17], and mechanical checks ran at 360px and 1280px [16]. Item 5 passed with a warning even though the button is disabled while the number is TBC, which is lenient against the done-when wording."
+      },
+      "ceo": {
+        "score": 5,
+        "note": "Picked one option per question, gave a one-sentence reason and named the trade-off [3]. The message is long because it echoes the full options."
+      },
+      "builder": {
+        "score": 5,
+        "note": "Ran both workflows in order, kept W-1 content intact and used TBC everywhere [11][14]. File contents were not shown, so I cannot check drink names or slot labels."
+      }
+    },
+    "went_well": [
+      "Clean run: 0 redirects, 0 invalid moves, 0 validator refusals, 0 stuck, 0 failed workflows.",
+      "No invented facts: the CEO chose TBC placeholders [3], the Builder used them [11][14], and Audit passed item 10 [17].",
+      "Single-writer rule on brewlab.html was applied and explained [9][12].",
+      "Identity did not block done on Requester-only facts and listed the 7 open inputs [18][19]."
+    ],
+    "problems": [
+      "Negotiation, conflict, Audit-failure and rework paths were never exercised: 0 counters, 0 refusals, 0 conflicts, 0 findings above warning. The design is only proven for the easy case.",
+      "Cost accuracy is unmeasured: estimate equals charge for both workflows (25/25, 20/20) and rate_card is true.",
+      "Priority's reserve logic is inconsistent: 5 held back against an 8 fix [7].",
+      "The CEO's chosen option 3 says the Requester confirms before done [3], but the charter makes open inputs non-blocking and the run ended Done with none supplied [19]. The site cannot go live yet.",
+      "Item 5 and item 7 pull against each other (button should open a link, number must stay TBC). The WhatsApp flow was never run, so this rests on a code read.",
+      "Mechanical check does not test that TBC tags are visible or scan for stray prices, hours or phone numbers. Items 8 and 10 rest on a code read.",
+      "2 of 11 calls went on Coordination relays for a strictly linear two-step plan.",
+      "CEO position bias cannot be judged from 3 choices (1 shown-first, 1 Identity-first)."
+    ],
+    "learnings": [
+      "Keep: TBC tags plus non-blocking open_inputs. It produced zero invented facts.",
+      "Test next: a tighter budget (for example 30) so Priority must counter or refuse, with variable charges so estimates can diverge.",
+      "Test next: a Requester change request after Done, which this run never reached.",
+      "Add mechanical checks: render and confirm TBC visibility, scan outside TBC tags for digits, rupee signs and phone patterns, and run the order link builder with a dummy number.",
+      "Reword done-when item 5 to say the button builds the link and stays disabled while the number is TBC, so Audit has a clean criterion.",
+      "Change Identity's CEO questions: one decision per ASK_CEO, distinct options, no strawmen, and option text must match the charter on what blocks done.",
+      "Give Priority a stated reserve rule (reserve at least one fix cost) and keep it out of workflow structure."
+    ]
+  },
+  "events": [
+    {
+      "agent": "ceo",
+      "type": "decision",
+      "detail": "charter Q1: option 2 of 3",
+      "msg": 3,
+      "cycle": 0,
+      "shown_pos": 1,
+      "original_pos": 0,
+      "n_options": 3
+    },
+    {
+      "agent": "ceo",
+      "type": "decision",
+      "detail": "charter Q2: option 1 of 3",
+      "msg": 3,
+      "cycle": 0,
+      "shown_pos": 0,
+      "original_pos": 2,
+      "n_options": 3
+    },
+    {
+      "agent": "ceo",
+      "type": "decision",
+      "detail": "charter Q3: option 3 of 3",
+      "msg": 3,
+      "cycle": 0,
+      "shown_pos": 2,
+      "original_pos": 1,
+      "n_options": 3
+    },
+    {
+      "agent": "coordination",
+      "type": "hold",
+      "detail": "W-2: W-1 (wf1-menu-preorder) must finish and output brewlab.html before W-2 can update it",
+      "msg": 9,
+      "cycle": 1
+    }
+  ],
+  "made": "2026-10-05 20:26:53"
+}

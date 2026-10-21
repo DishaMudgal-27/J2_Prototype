@@ -1,0 +1,60 @@
+[
+  {
+    "id": "P1",
+    "text": "All six sections are present and not empty",
+    "check": "sections-present",
+    "met": false,
+    "evidence": "missing or empty: Users (missing), Goals (missing), Requirements (missing), Success metrics (missing), Out of scope (missing)"
+  },
+  {
+    "id": "P2",
+    "text": "Requirement ids are unique and sequential (R1, R2, ...)",
+    "check": "ids-sequential",
+    "met": false,
+    "evidence": "no Requirements section"
+  },
+  {
+    "id": "P3",
+    "text": "Every brief fact appears exactly",
+    "check": "facts-present-all",
+    "met": false,
+    "evidence": "missing: ['80% of bookings are made without staff help', 'per term', 'book a slot', 'cancel a slot', 'see availability', 'view all bookings', 'cancel a booking for a student', 'it must work on phones']"
+  },
+  {
+    "id": "P4",
+    "text": "No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+    "check": "no-invented-facts",
+    "met": true,
+    "evidence": "every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+    "assumptions": []
+  },
+  {
+    "id": "P5",
+    "text": "Nothing is \"to be confirmed\"",
+    "check": "nothing-to-be-confirmed",
+    "met": true,
+    "evidence": "nothing to be confirmed"
+  },
+  {
+    "id": "P6",
+    "text": "Every goal has a matching success metric",
+    "check": "ids-covered",
+    "met": false,
+    "evidence": "no G1, G2, ... ids in Goals"
+  },
+  {
+    "id": "P7",
+    "text": "Every user group named in the charter appears in Requirements or in a \"no actions in this version\" statement",
+    "check": "groups-covered",
+    "met": false,
+    "evidence": "no requirement and no \"have no actions in this version\" statement for: Students, Lab staff"
+  },
+  {
+    "id": "P8",
+    "text": "Each numeric success metric states its measurement window, or says \"measurement window not set\"",
+    "check": "metric-window",
+    "met": true,
+    "evidence": "no numeric metrics",
+    "severity": "warn"
+  }
+]

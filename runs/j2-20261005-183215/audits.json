@@ -1,0 +1,142 @@
+[
+  {
+    "cycle": 1,
+    "version": 2,
+    "results": [
+      {
+        "criterion": "Single HTML file, inline CSS and JS or CDN, no build step or backend",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "One HTML document with inline <style> and <script>. The only external resource is a Google Fonts CDN link. No build step, and no fetch or XHR calls in the script.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Language switcher offers EN, KN and HI, and every visible section has text in all three",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Three buttons call setLang. Every data-i18n key used in the HTML exists in the en, kn and hi dictionaries, including the emergency, form, status, doctor, blog and footer keys. The prefilled outgoing message is English only, which is not a visible page section.",
+        "severity": "low"
+      },
+      {
+        "criterion": "KN and HI views show a visible pending native-speaker review note",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "#reviewNote sits below the header and is hidden only when the language is en. The kn and hi reviewNote strings state that the translation is pending native-speaker review.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Emergency section at the top with placeholder number and address, plus a local-emergency line, in all three languages",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "section.emergency is the first element in <main>, directly after the header and review note. It has marked placeholders for the number and the address, and the emLocal line in en, kn and hi. It sits outside any menu and is unaffected by language changes.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Visit-request form has name, phone, preferred doctor, date and time, and submitting opens a prefilled WhatsApp or email message",
+        "verdict": "NEEDS_REVISION",
+        "pass": false,
+        "note": "All five fields are present and labeled. Submit builds a wa.me or mailto link and opens it. But buildMessage uses en[f.doctor] with values 'doc1', 'doc2', 'doc3' and 'any', and the keys are docOpt1 to docOpt3 and doctorAny. The lookup is undefined, so the message prints the raw value. Minor: statusDraft shows if either constant is a placeholder, even when the chosen channel's value is real.",
+        "severity": "medium"
+      },
+      {
+        "criterion": "Near the form, text states no live slot availability and staff confirm each visit by hand, in all three languages",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "The p.notice noLive line sits directly under the form intro in en, kn and hi. All three say the form is a request only and staff confirm by hand.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Doctor cards show marked placeholder names and credentials, no invented doctor data",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Three cards, each with a 'Placeholder card' tag, a placeholder name, specialty and credentials, in all three languages. No real-looking names or qualifications appear.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Health blog lists posts, each labeled general information, not medical advice, in all three languages",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Three posts, each with the blogLabel tag. The label exists in en, kn and hi. Titles and bodies are marked placeholders, so no medical claims are present.",
+        "severity": "low"
+      },
+      {
+        "criterion": "WhatsApp number and email are named placeholder constants, and no real-looking contact value appears in the file",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "HOSPITAL_WHATSAPP_PLACEHOLDER and HOSPITAL_EMAIL_PLACEHOLDER are named constants with non-contact-shaped values. A read-through found no phone-number or email-shaped strings. I did not run a regex search, hence medium confidence.",
+        "severity": "low"
+      }
+    ],
+    "all_pass": false
+  },
+  {
+    "cycle": 2,
+    "version": 3,
+    "results": [
+      {
+        "criterion": "Single HTML file, inline or CDN CSS and JS, no build step or backend",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "One document with inline <style> and <script>. The only external resource is the Google Fonts CDN link. The script has no fetch or XHR calls and needs no build.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Language switcher offers EN, KN and HI, and every visible section has text in all three",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Every data-i18n key in the HTML (emergency, form, status, doctor, blog, footer and the nav) exists in the en, kn and hi dictionaries. setLang rewrites text, the page title and the aria-pressed state. v3 did not change this.",
+        "severity": "low"
+      },
+      {
+        "criterion": "KN and HI views show a visible pending native-speaker review note",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "#reviewNote is hidden only when currentLang is en. The kn and hi reviewNote strings state that the translation is pending native-speaker review.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Emergency section at the top with marked placeholders for number and address, plus a local-emergency line, in all three languages",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "section.emergency is the first element in <main>, outside any menu. It has placeholder spans for the number and address, and the emLocal line, in en, kn and hi. Language changes only swap the text.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Visit-request form has name, phone, preferred doctor, date and time, and submitting opens a prefilled WhatsApp or email message",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "All five fields are labeled and required. The submit handler builds a wa.me or mailto link and opens it, with no fetch call and no storage. The earlier doctor-line defect is fixed through DOCTOR_KEYS and en[doctorKey], with a fallback to doctorAny. The message shows '[PLACEHOLDER: doctor N]' until real names are added. The draft note now uses channelIsPlaceholder(channel) only. Not run in a browser.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Near the form, text states no live slot availability and staff confirm each visit by hand, in all three languages",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "p.notice (noLive) sits directly under the form intro. It exists in en, kn and hi and says the form sends a request only and staff confirm by hand.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Doctor cards show marked placeholder names and credentials, no invented doctor data",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Three cards, each with a docTag, and placeholder name, specialty and credentials in all three languages. No real-looking names or qualifications appear.",
+        "severity": "low"
+      },
+      {
+        "criterion": "Health blog lists posts, each labeled general information, not medical advice, in all three languages",
+        "verdict": "PASS",
+        "pass": true,
+        "note": "Three posts, each with a blogLabel tag. The label exists in en, kn and hi. Titles and bodies are placeholders, so there are no medical claims.",
+        "severity": "low"
+      },
+      {
+        "criterion": "WhatsApp number and email are named placeholder constants, and no real-looking contact value appears in the file",
+        "verdict": "PASS_WITH_WARNING",
+        "pass": true,
+        "note": "HOSPITAL_WHATSAPP_PLACEHOLDER and HOSPITAL_EMAIL_PLACEHOLDER hold non-contact-shaped strings. A read-through found no phone-number or email-shaped values. I did not run a regex. The only '@' in the file is 'wght@400;700' in the font URL, which is a false positive for a naive email regex.",
+        "severity": "low"
+      }
+    ],
+    "all_pass": true
+  }
+]

@@ -1,0 +1,134 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "wf-scaffold",
+    "name": "Scaffold and styling",
+    "purpose": "No page exists yet, so the shop name and Jaipur are not shown.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 5,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the page still overflows horizontally at 360px or 1280px after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Base HTML file",
+      "Style guide",
+      "Header and intro section"
+    ],
+    "completion_check": "The page shows Petal & Stem and Jaipur, has a viewport meta tag, and has no horizontal overflow at 360px and 1280px.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "style guide, usable section and head tags",
+    "style_guide": true,
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "wf-bouquets",
+    "name": "Bouquets and prices",
+    "purpose": "Visitors cannot see the bouquets or their prices.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 4,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any bouquet or price differs from the Requester's list after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Bouquets section"
+    ],
+    "completion_check": "Exactly five bouquets appear with prices ₹899, ₹699, ₹999, ₹1,199 and ₹1,499, each with an empty image placeholder.",
+    "dependencies": [
+      "wf-scaffold"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "wf-order",
+    "name": "WhatsApp order form",
+    "purpose": "Visitors cannot place a delivery order.",
+    "cost": 25,
+    "estimate": 25,
+    "envelope": {
+      "money_limit": 25,
+      "model_call_limit": 7,
+      "time_limit_minutes": 15,
+      "retry_limit": 2,
+      "stop_loss": "Stop if the wa.me link is still wrong or a JavaScript error remains after two retries."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Order form section",
+      "WhatsApp submit script"
+    ],
+    "completion_check": "Submitting the form with valid values opens a wa.me link for 919829011223 whose message contains the chosen bouquet, name, phone and address, with no JavaScript errors.",
+    "dependencies": [
+      "wf-scaffold",
+      "wf-bouquets"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "wf-info",
+    "name": "Delivery, timings and location",
+    "purpose": "Visitors cannot see delivery terms, shop hours, or how to find and call the shop.",
+    "cost": 20,
+    "estimate": 20,
+    "envelope": {
+      "money_limit": 20,
+      "model_call_limit": 6,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any fact differs from the Requester's details or a link is broken after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Delivery terms section",
+      "Timings and location section"
+    ],
+    "completion_check": "The page states same day delivery inside Jaipur before 4pm, a ₹99 charge and pay on delivery; shows 9am to 8pm Monday to Saturday and closed Sunday; shows 12 MI Road, near Panch Batti, Jaipur 302001; has a tel:+911414005566 link and a working map link; and has no broken in-page links.",
+    "dependencies": [
+      "wf-scaffold"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  }
+]

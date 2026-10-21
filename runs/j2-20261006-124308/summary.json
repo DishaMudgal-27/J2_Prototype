@@ -1,0 +1,158 @@
+{
+  "run": "20261006-124308",
+  "j2_fixes": 0,
+  "provider": "claude-cli",
+  "model": "sonnet",
+  "mock": false,
+  "brief": "A website for my cafe.",
+  "change_requests": [],
+  "status": "done",
+  "outcome": "Done: Identity confirmed every done-when item holds, with Audit's evidence. Open inputs for the Requester (not blocking): Menu items and their prices; Street address and map pin for the Indiranagar location; Phone number or contact for the cafe; Where pre-orders should be delivered (email, WhatsApp, phone or other); Brand colours, logo and photos, if any.",
+  "budget": {
+    "start": 100,
+    "granted": 100,
+    "used": 70,
+    "raises": []
+  },
+  "ai_calls": 14,
+  "cycles": 1,
+  "questions_to_user": [
+    {
+      "kind": "info",
+      "asked": [
+        "What is the main job of the site?",
+        "Who is the main visitor?",
+        "Which sections must the site include?",
+        "Any hard rules on name, language, look or content (for example cafe name, brand colors, languages, things to avoid)?"
+      ],
+      "answer": "It's in Bengaluru."
+    },
+    {
+      "kind": "info",
+      "asked": [
+        "What is the main job of the site?",
+        "Who is the main visitor?",
+        "Which sections must the site include?",
+        "Any hard rules on cafe name, language (English, Kannada, Hindi), brand colors or things to avoid?"
+      ],
+      "answer": "It's called Brew Lab, in Indiranagar. Show the menu with prices, opening hours 8am to 10pm every day, and our location. People should be able to pre-order coffee for pickup. Warm, modern, mobile-first."
+    }
+  ],
+  "conflicts": [],
+  "validator_rejections": [],
+  "holds": [
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-2: W1-core-page (W-1) must be done and pass its completion check; index.html lock must be free"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-3: W2-menu (W-2) must be done and pass its completion check, since the form reads the menu data array; index.html lock must be free"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-3: W2-menu (W-2) must be done and pass its completion check; the index.html lock must be free"
+    }
+  ],
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 3,
+      "all_pass": true,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": 7,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-8",
+          "item": 8,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-9",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    }
+  ],
+  "site_versions": 3,
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The page title and header show the name Brew Lab",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "A menu section lists drinks, each with a price, and any price or item not supplied is a visibly marked placeholder",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "The page states opening hours as 8am to 10pm, every day",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "A location section names Indiranagar, Bengaluru and includes a map or map link, with the street address marked as a placeholder if not supplied",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "A pre-order form lets a visitor choose menu items and quantities, enter a name and phone number, and pick a pickup time between 8am and 10pm, and shows an order summary on submit",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "The file has a viewport meta tag and mobile-first CSS (base styles for small screens, min-width media queries for larger ones)",
+      "pass": true
+    },
+    {
+      "item": 7,
+      "criterion": "The CSS defines a warm colour palette and the layout has no fixed widths that force horizontal scrolling at 375px",
+      "pass": true
+    },
+    {
+      "item": 8,
+      "criterion": "The site is one HTML file with inline CSS and JavaScript and needs no build step",
+      "pass": true
+    }
+  ],
+  "route_check_violations": []
+}

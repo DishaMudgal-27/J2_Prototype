@@ -1,0 +1,138 @@
+[
+  {
+    "cycle": 1,
+    "version": 4,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The file is a single HTML document with inline or CDN CSS and JS and no build step",
+        "verdict": "PASS",
+        "note": "One document with inline <style> and <script>, 29,677 bytes; the only external reference is the Google Maps link, and there are no build artefacts.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The page has a menu section listing items with a price shown for each (real or marked placeholder)",
+        "verdict": "PASS",
+        "note": "#menu has 6 .menu-row items, each with a .ph 'Price in INR to be added'; a note says the rows are stand-ins.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The page has an opening-hours section with every day of the week listed (real or marked placeholder)",
+        "verdict": "PASS",
+        "note": "#hours table lists Monday to Sunday, each with a .ph 'Hours to be added'.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The page has a where-to-find-us section naming Indiranagar, Bengaluru, with an address and a map link or embed (address marked placeholder if unknown)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "#find-us has 'Indiranagar, Bengaluru', a .ph street address and a Maps search link. The link searches the area, not the shop, and a page note says so.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The page has a pre-order-for-pickup form where a visitor picks items and quantities, enters name, phone and pickup time, and gets an order summary on submit; the order destination is a marked placeholder",
+        "verdict": "PASS",
+        "note": "#orderForm builds qty rows from the menu and has required name, tel and time inputs. The submit handler renders a summary and an 'Order destination' .ph; the mechanical check found no JS errors.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The page has a beans-and-farms section describing the beans and their farms (farm details marked placeholder if unknown)",
+        "verdict": "PASS",
+        "note": "#beans has 3 cards; bean name, roast, farm and region are all .ph, and a note says they are stand-ins.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "The page has a loyalty-card explainer stating buy 9, get the 10th free",
+        "verdict": "PASS",
+        "note": "#loyalty contains the text 'The rule: buy 9, get the 10th free.' and a 10-space card graphic (9 numbered, 1 'Free').",
+        "severity": "low",
+        "confidence": "high",
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "The file has a viewport meta tag and responsive CSS rules with a mobile layout",
+        "verdict": "PASS",
+        "note": "Has <meta name=viewport content='width=device-width, initial-scale=1'>, base mobile-first CSS and an @media (min-width:768px) block.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "Every placeholder is visibly marked in the page text, and none is presented as fact",
+        "verdict": "PASS",
+        "note": "All unknown facts use .ph (dashed amber box with a 'Placeholder:' prefix added by CSS). I found no invented prices, hours, address, contact details or farm names.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "Navigation links to each section work as in-page anchors",
+        "verdict": "PASS",
+        "note": "Mechanical check: broken_in_page_links is empty. Nav hrefs #menu, #hours, #find-us, #beans, #loyalty and #preorder match section ids.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 10,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-11",
+        "criterion": "Standard: mobile-first, usable at 360px width, no horizontal scroll",
+        "verdict": "NEEDS_REVISION",
+        "note": "Mechanical check: phone 360px overflow_px = 10 (desktop 1280px = 0). The cause is not identified, and body overflow-x:hidden may be masking it.",
+        "severity": "medium",
+        "confidence": "high"
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 29677,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://www.google.com/maps/search/?api=1&amp;query=Brew+Lab+Indiranagar+Bengaluru"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 10
+      },
+      "js_errors": []
+    },
+    "all_pass": true
+  }
+]

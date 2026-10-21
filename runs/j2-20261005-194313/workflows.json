@@ -1,0 +1,83 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "wf-shell-emergency",
+    "name": "Site shell, navigation and emergency banner",
+    "purpose": "No file exists. Nothing shows navigation, Home, or emergency information on any view.",
+    "cost": 25,
+    "estimate": 25,
+    "envelope": {
+      "money_limit": 25,
+      "model_call_limit": 2,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the completion check fails after one retry, or if spend passes 25."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "citycare.html with inline CSS and JS",
+      "Placeholder list for emergency details"
+    ],
+    "completion_check": "File opens with no build step; nav links reach all five section anchors; emergency banner with a marked placeholder number is visible at top on desktop and 360px width; viewport meta tag present.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "wf-booking-form",
+    "name": "Book a Visit request form",
+    "purpose": "Patients have no way to request a visit.",
+    "cost": 25,
+    "estimate": 25,
+    "envelope": {
+      "money_limit": 25,
+      "model_call_limit": 2,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the file gains any fetch, XMLHttpRequest or slot picker, or if spend passes 25."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Book a Visit section added to citycare.html"
+    ],
+    "completion_check": "Section contains the five named fields and the staff-confirm-by-phone-or-WhatsApp sentence; file contains no fetch, XMLHttpRequest or slot picker; submit shows a 'request received, staff will contact you' message only.",
+    "dependencies": [
+      "wf-shell-emergency"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "W-3",
+    "name": "Doctors section with placeholder profile cards",
+    "purpose": "#doctors holds only a stub line. There are no profile cards, and doctor names, specialties and qualifications are missing from the open-items list.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 20,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the completion check fails after one retry, if the file gains any fetch or XMLHttpRequest, or if spend passes 10."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "Doctors section in citycare.html with 4 placeholder profile cards",
+      "Open-items list entries for doctor names, qualifications and specialties"
+    ],
+    "completion_check": "#doctors contains at least 3 cards; each card has name, specialty and qualifications fields, each carrying the .tbc 'To be confirmed' tag; no real-looking doctor names appear; #open-items lists doctor names, qualifications and specialties; file still has no fetch or XMLHttpRequest and no horizontal overflow at 360px.",
+    "dependencies": [
+      "wf-shell-emergency"
+    ],
+    "status": "done",
+    "cycle": 2
+  }
+]

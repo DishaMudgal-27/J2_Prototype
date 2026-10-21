@@ -1,0 +1,54 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "W1-core-page",
+    "name": "Core page: nav, menu, hours, location",
+    "purpose": "No page exists. Visitors cannot see the menu with prices, opening hours or location.",
+    "cost": 35,
+    "estimate": 35,
+    "envelope": {
+      "money_limit": 35,
+      "model_call_limit": 2,
+      "time_limit_minutes": 25,
+      "retry_limit": 1,
+      "stop_loss": "Stop if money spent reaches 35 or if the file lacks any of the three section anchors after the second model call."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "brewlab.html"
+    ],
+    "completion_check": "File has viewport meta tag, min-width media queries, nav anchors to menu, hours, location; menu items grouped by category each with ₹ price or marked placeholder; hours listed for all 7 days; location names Indiranagar, Bengaluru with a map link; every missing fact shows as [PLACEHOLDER: ...].",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "W2-preorder-pay",
+    "name": "Pre-order for pickup with payment step",
+    "purpose": "Visitors cannot order for pickup or pay online.",
+    "cost": 25,
+    "estimate": 25,
+    "envelope": {
+      "money_limit": 25,
+      "model_call_limit": 2,
+      "time_limit_minutes": 25,
+      "retry_limit": 1,
+      "stop_loss": "Stop if money spent reaches 25 or if the running total or payment placeholder is still missing after the second model call."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "brewlab.html (pre-order section added)"
+    ],
+    "completion_check": "Form has item and quantity inputs, name, phone and pickup time fields; running total updates on change; payment button or checkout uses a CDN script or link with [PLACEHOLDER: public payment key]; no secrets in the file.",
+    "dependencies": [
+      "W1-core-page"
+    ],
+    "status": "done",
+    "cycle": 1
+  }
+]

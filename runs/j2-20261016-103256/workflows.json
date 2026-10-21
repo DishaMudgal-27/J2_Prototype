@@ -1,0 +1,1711 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "prd-problem",
+    "name": "PRD Problem section",
+    "covers": [
+      1
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Problem section states that people cannot see the menu or order ahead at Brew Lab"
+    ],
+    "purpose": "The PRD has no Problem section.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 5,
+      "retry_limit": 1,
+      "stop_loss": "Stop after one failed retry or if money spent exceeds 10."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "## Problem"
+    ],
+    "completion_check": "Problem heading present, at least 30 words, contains the Brew Lab name and the problem statement.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-1.a1",
+        "goal": "The Problem section states that people cannot see the menu or order ahead at Brew Lab.",
+        "constraints": [
+          "No facts beyond the charter",
+          "Prices in rupees if mentioned"
+        ],
+        "context": [
+          "charter item 1",
+          "charter problem"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-1 Builder",
+          "steps": "Write the section '## Problem' as the first section of the PRD. State that people cannot see the menu or order ahead at Brew Lab, a specialty coffee shop in Indiranagar, Bengaluru. Use only charter facts."
+        },
+        "expected_output": [
+          {
+            "text": "A Problem heading",
+            "kind": "heading",
+            "target": "Problem",
+            "met": true
+          },
+          {
+            "text": "Shop name and problem wording appear",
+            "kind": "facts",
+            "target": [
+              "Brew Lab",
+              "cannot see the menu or order ahead"
+            ],
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Problem heading present",
+            "type": "heading-present",
+            "target": "Problem",
+            "expect": true,
+            "item": 1
+          },
+          {
+            "text": "Problem section has content",
+            "type": "section-not-empty",
+            "target": "Problem",
+            "expect": 30
+          },
+          {
+            "text": "Shop name and problem wording present",
+            "type": "facts-present",
+            "target": [
+              "Brew Lab",
+              "cannot see the menu or order ahead"
+            ],
+            "expect": true,
+            "item": 2
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-1.a1",
+            "check": "Problem heading present",
+            "type": "heading-present",
+            "target": "Problem",
+            "expect": true,
+            "actual": true,
+            "pass": true,
+            "evidence": "heading 'Problem' found in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:14:28",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Problem section has content",
+            "type": "section-not-empty",
+            "target": "Problem",
+            "expect": 30,
+            "actual": 61,
+            "pass": true,
+            "evidence": "section 'Problem' has 61 word(s), needs 30",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:14:28",
+            "by": "code"
+          },
+          {
+            "atom": "W-1.a1",
+            "check": "Shop name and problem wording present",
+            "type": "facts-present",
+            "target": [
+              "Brew Lab",
+              "cannot see the menu or order ahead"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 2 fact(s) in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:14:28",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed",
+        "human_output": {
+          "atom": "W-1.a1",
+          "attempt": 1,
+          "text": "This part explains the problem Brew Lab has today: people cannot see the menu or order ahead."
+        },
+        "agent_output": {
+          "atom": "W-1.a1",
+          "attempt": 1,
+          "receipt": "W-1.a1:1",
+          "files": [
+            "site/v1.md",
+            "prd.md"
+          ],
+          "section": "W-1",
+          "section_names": [
+            "PRD Problem section",
+            "Problem\n\nBrew Lab is a small specialty coffee shop in Indiranagar, Bengaluru. At present, people cannot see the menu or order ahead. Coffee lovers and office staff nearby, the two groups this PRD serves, have no way to see the menu with prices or to pre-order a coffee for pickup. This PRD describes a one-page website that addresses this problem."
+          ],
+          "anchor": null,
+          "ids": [],
+          "selectors": [],
+          "kind": "doc",
+          "file": "prd.md",
+          "checks": [
+            {
+              "check": "Problem heading present",
+              "type": "heading-present",
+              "target": "Problem",
+              "pass": true
+            },
+            {
+              "check": "Problem section has content",
+              "type": "section-not-empty",
+              "target": "Problem",
+              "pass": true
+            },
+            {
+              "check": "Shop name and problem wording present",
+              "type": "facts-present",
+              "target": [
+                "Brew Lab",
+                "cannot see the menu or order ahead"
+              ],
+              "pass": true
+            }
+          ],
+          "conditions": []
+        }
+      }
+    ],
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "usable section",
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "prd-users",
+    "name": "PRD Users section",
+    "covers": [
+      2
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Users section names coffee lovers and office staff nearby and what each does: see the menu, hours and location, and pre-order for pickup"
+    ],
+    "purpose": "The PRD has no Users section.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 5,
+      "retry_limit": 1,
+      "stop_loss": "Stop after one failed retry or if money spent exceeds 10."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "## Users"
+    ],
+    "completion_check": "Users heading present, at least 40 words, both group names present.",
+    "dependencies": [
+      "prd-problem"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-2.a1",
+        "goal": "The Users section names coffee lovers and office staff nearby and what each does.",
+        "constraints": [
+          "No invented personas or numbers",
+          "Follows the Problem section"
+        ],
+        "context": [
+          "charter item 2",
+          "charter user_groups"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-2 Builder",
+          "steps": "Write the section '## Users' after '## Problem'. Name the groups 'Coffee lovers' and 'Office staff nearby'. For each, state they see the menu with prices, see opening hours and where to find the shop, and pre-order a coffee for pickup."
+        },
+        "expected_output": [
+          {
+            "text": "A Users heading",
+            "kind": "heading",
+            "target": "Users",
+            "met": true
+          },
+          {
+            "text": "Both user groups named",
+            "kind": "facts",
+            "target": [
+              "Coffee lovers",
+              "Office staff nearby"
+            ],
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Users heading present",
+            "type": "heading-present",
+            "target": "Users",
+            "expect": true,
+            "item": 1
+          },
+          {
+            "text": "Users section has content",
+            "type": "section-not-empty",
+            "target": "Users",
+            "expect": 40
+          },
+          {
+            "text": "Both groups named",
+            "type": "facts-present",
+            "target": [
+              "Coffee lovers",
+              "Office staff nearby"
+            ],
+            "expect": true,
+            "item": 2
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-2.a1",
+            "check": "Users heading present",
+            "type": "heading-present",
+            "target": "Users",
+            "expect": true,
+            "actual": true,
+            "pass": true,
+            "evidence": "heading 'Users' found in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:14:43",
+            "by": "code"
+          },
+          {
+            "atom": "W-2.a1",
+            "check": "Users section has content",
+            "type": "section-not-empty",
+            "target": "Users",
+            "expect": 40,
+            "actual": 101,
+            "pass": true,
+            "evidence": "section 'Users' has 101 word(s), needs 40",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:14:43",
+            "by": "code"
+          },
+          {
+            "atom": "W-2.a1",
+            "check": "Both groups named",
+            "type": "facts-present",
+            "target": [
+              "Coffee lovers",
+              "Office staff nearby"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 2 fact(s) in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:14:43",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed",
+        "human_output": {
+          "atom": "W-2.a1",
+          "attempt": 1,
+          "text": "This part says who the website is for, coffee lovers and office staff nearby. It spells out that each group can see the menu and prices, check the hours and location, and pre-order a coffee for pickup."
+        },
+        "agent_output": {
+          "atom": "W-2.a1",
+          "attempt": 1,
+          "receipt": "W-2.a1:1",
+          "files": [
+            "site/v2.md",
+            "prd.md"
+          ],
+          "section": "W-2",
+          "section_names": [
+            "PRD Users section",
+            "Users\n\nBrew Lab serves two user groups in Indiranagar, Bengaluru. Both groups are affected by the problem described above: they cannot see the menu or order ahead. Each group has the same three actions on the website.\n\n- **Coffee lovers**: see the menu with prices; see opening hours and where to find the shop; pre-order a coffee for pickup. They pay at pickup, as there is no online payment.\n- **Office staff nearby**: see the menu with prices; see opening hours and where to find the shop; pre-order a coffee for pickup. They pay at pickup, as there is no online payment."
+          ],
+          "anchor": null,
+          "ids": [],
+          "selectors": [],
+          "kind": "doc",
+          "file": "prd.md",
+          "checks": [
+            {
+              "check": "Users heading present",
+              "type": "heading-present",
+              "target": "Users",
+              "pass": true
+            },
+            {
+              "check": "Users section has content",
+              "type": "section-not-empty",
+              "target": "Users",
+              "pass": true
+            },
+            {
+              "check": "Both groups named",
+              "type": "facts-present",
+              "target": [
+                "Coffee lovers",
+                "Office staff nearby"
+              ],
+              "pass": true
+            }
+          ],
+          "conditions": []
+        }
+      }
+    ],
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "prd-goals",
+    "name": "PRD Goals section",
+    "covers": [
+      3
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Goals section states that visitors can see the menu, opening hours and location and pre-order a coffee for pickup"
+    ],
+    "purpose": "The PRD has no Goals section.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 5,
+      "retry_limit": 1,
+      "stop_loss": "Stop after one failed retry or if money spent exceeds 10."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "## Goals"
+    ],
+    "completion_check": "Goals heading present, at least 40 words, unique G ids.",
+    "dependencies": [
+      "prd-users"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-3.a1",
+        "goal": "The Goals section states that visitors can see the menu, opening hours and location and pre-order a coffee for pickup.",
+        "constraints": [
+          "Exactly three goals G1 to G3, one per outcome",
+          "No numbers beyond the charter"
+        ],
+        "context": [
+          "charter item 3",
+          "charter features"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-3 Builder",
+          "steps": "Write the section '## Goals' after '## Users'. G1: visitors see the menu with prices. G2: visitors see opening hours and where to find the shop in Indiranagar, Bengaluru. G3: visitors pre-order a coffee for pickup."
+        },
+        "expected_output": [
+          {
+            "text": "A Goals heading",
+            "kind": "heading",
+            "target": "Goals",
+            "met": true
+          },
+          {
+            "text": "Numbered goals G1, G2, G3",
+            "kind": "ids",
+            "target": "G",
+            "met": true
+          },
+          {
+            "text": "Location wording appears",
+            "kind": "facts",
+            "target": [
+              "Indiranagar, Bengaluru"
+            ],
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Goals heading present",
+            "type": "heading-present",
+            "target": "Goals",
+            "expect": true,
+            "item": 1
+          },
+          {
+            "text": "Goals section has content",
+            "type": "section-not-empty",
+            "target": "Goals",
+            "expect": 40
+          },
+          {
+            "text": "Goal ids unique",
+            "type": "ids-unique",
+            "target": "G",
+            "expect": true,
+            "item": 2
+          },
+          {
+            "text": "Location present",
+            "type": "facts-present",
+            "target": [
+              "Indiranagar, Bengaluru"
+            ],
+            "expect": true,
+            "item": 3
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-3.a1",
+            "check": "Goals heading present",
+            "type": "heading-present",
+            "target": "Goals",
+            "expect": true,
+            "actual": true,
+            "pass": true,
+            "evidence": "heading 'Goals' found in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:14:59",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Goals section has content",
+            "type": "section-not-empty",
+            "target": "Goals",
+            "expect": 40,
+            "actual": 75,
+            "pass": true,
+            "evidence": "section 'Goals' has 75 word(s), needs 40",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:14:59",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Goal ids unique",
+            "type": "ids-unique",
+            "target": "G",
+            "expect": true,
+            "actual": [
+              1,
+              2,
+              3
+            ],
+            "pass": true,
+            "evidence": "3 unique id(s): G1, G2, G3",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:14:59",
+            "by": "code"
+          },
+          {
+            "atom": "W-3.a1",
+            "check": "Location present",
+            "type": "facts-present",
+            "target": [
+              "Indiranagar, Bengaluru"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 1 fact(s) in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:14:59",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed",
+        "human_output": {
+          "atom": "W-3.a1",
+          "attempt": 1,
+          "text": "This part sets out the three things a visitor should be able to do on the Brew Lab page: see the menu and prices, find the hours and the shop, and order a coffee ahead for pickup."
+        },
+        "agent_output": {
+          "atom": "W-3.a1",
+          "attempt": 1,
+          "receipt": "W-3.a1:1",
+          "files": [
+            "site/v3.md",
+            "prd.md"
+          ],
+          "section": "W-3",
+          "section_names": [
+            "PRD Goals section",
+            "Goals\n\nBrew Lab wants coffee lovers and office staff nearby to get what they need from one page. Each goal below is one outcome that a visitor can complete and that can be checked on the page.\n\n- **G1**: Visitors can see the menu with prices in rupees.\n- **G2**: Visitors can see the opening hours and where to find the shop in Indiranagar, Bengaluru.\n- **G3**: Visitors can pre-order a coffee for pickup and pay at pickup."
+          ],
+          "anchor": null,
+          "ids": [],
+          "selectors": [],
+          "kind": "doc",
+          "file": "prd.md",
+          "checks": [
+            {
+              "check": "Goals heading present",
+              "type": "heading-present",
+              "target": "Goals",
+              "pass": true
+            },
+            {
+              "check": "Goals section has content",
+              "type": "section-not-empty",
+              "target": "Goals",
+              "pass": true
+            },
+            {
+              "check": "Goal ids unique",
+              "type": "ids-unique",
+              "target": "G",
+              "pass": true
+            },
+            {
+              "check": "Location present",
+              "type": "facts-present",
+              "target": [
+                "Indiranagar, Bengaluru"
+              ],
+              "pass": true
+            }
+          ],
+          "conditions": []
+        }
+      }
+    ],
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "prd-requirements",
+    "name": "PRD Requirements section",
+    "covers": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Requirements section lists the menu with all seven items and their rupee prices exactly as given",
+      "Requirements section lists the pre-order form with the fields name, phone, items and pickup time, and says the order is emailed to hello@brewlab.example",
+      "Requirements section lists the opening hours for Monday to Saturday and Sunday exactly as given",
+      "Requirements section lists the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as the map or address, and the phone +91 98450 12345 and email hello@brewlab.example as contact details",
+      "Requirements section states the constraints: one page only, works on phones, no online payment (pay at pickup)"
+    ],
+    "purpose": "The PRD has no Requirements section.",
+    "cost": 75,
+    "estimate": 75,
+    "envelope": {
+      "money_limit": 75,
+      "model_call_limit": 3,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop after one failed retry or if money spent exceeds 75."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "## Requirements"
+    ],
+    "completion_check": "Requirements heading present, at least 150 words, unique R ids, all charter facts present exactly.",
+    "dependencies": [
+      "prd-goals"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-4.a1",
+        "goal": "The Requirements section lists menu with prices, pre-order form, hours, address and contact, and constraints, all exactly as given.",
+        "constraints": [
+          "Ids R1, R2, ... sequential and unique",
+          "Prices in rupees exactly as given",
+          "No invented facts",
+          "Nothing to be confirmed"
+        ],
+        "context": [
+          "charter items 4 to 8",
+          "charter facts",
+          "charter constraints",
+          "charter user_groups"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-4 Builder",
+          "steps": "Write the section '## Requirements' after '## Goals', numbered R1, R2, ... Cover: the menu with all seven items and rupee prices; the pre-order form with fields 'name, phone, items and pickup time', emailed to hello@brewlab.example, paid at pickup; opening hours; address as the map or address, plus phone and email contact; constraints (one page only, works on phones, no online payment). Mention that Coffee lovers and Office staff nearby both use these. Tie requirements to goals G1 to G3."
+        },
+        "expected_output": [
+          {
+            "text": "A Requirements heading",
+            "kind": "heading",
+            "target": "Requirements",
+            "met": true
+          },
+          {
+            "text": "Numbered requirements R1, R2, ...",
+            "kind": "ids",
+            "target": "R",
+            "met": true
+          },
+          {
+            "text": "Menu items with prices exactly as given",
+            "kind": "facts",
+            "target": [
+              "Filter coffee 90",
+              "Cappuccino 160",
+              "Latte 180",
+              "Cold brew 200",
+              "Masala chai 80",
+              "Almond croissant 140",
+              "Banana bread slice 120"
+            ],
+            "met": true
+          },
+          {
+            "text": "Pre-order form fields and email",
+            "kind": "facts",
+            "target": [
+              "name, phone, items and pickup time",
+              "hello@brewlab.example"
+            ],
+            "met": true
+          },
+          {
+            "text": "Opening hours exactly as given",
+            "kind": "facts",
+            "target": [
+              "Monday to Saturday 7:30 am to 9:00 pm",
+              "Sunday 8:30 am to 6:00 pm"
+            ],
+            "met": true
+          },
+          {
+            "text": "Address and phone",
+            "kind": "facts",
+            "target": [
+              "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+              "+91 98450 12345"
+            ],
+            "met": true
+          },
+          {
+            "text": "Payment constraint",
+            "kind": "facts",
+            "target": [
+              "No online payment, they pay at pickup"
+            ],
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Requirements heading present",
+            "type": "heading-present",
+            "target": "Requirements",
+            "expect": true,
+            "item": 1
+          },
+          {
+            "text": "Requirements section has content",
+            "type": "section-not-empty",
+            "target": "Requirements",
+            "expect": 150
+          },
+          {
+            "text": "Requirement ids unique",
+            "type": "ids-unique",
+            "target": "R",
+            "expect": true,
+            "item": 2
+          },
+          {
+            "text": "Menu items and prices present",
+            "type": "facts-present",
+            "target": [
+              "Filter coffee 90",
+              "Cappuccino 160",
+              "Latte 180",
+              "Cold brew 200",
+              "Masala chai 80",
+              "Almond croissant 140",
+              "Banana bread slice 120"
+            ],
+            "expect": true,
+            "item": 3
+          },
+          {
+            "text": "Form fields and email present",
+            "type": "facts-present",
+            "target": [
+              "name, phone, items and pickup time",
+              "hello@brewlab.example"
+            ],
+            "expect": true,
+            "item": 4
+          },
+          {
+            "text": "Hours present",
+            "type": "facts-present",
+            "target": [
+              "Monday to Saturday 7:30 am to 9:00 pm",
+              "Sunday 8:30 am to 6:00 pm"
+            ],
+            "expect": true,
+            "item": 5
+          },
+          {
+            "text": "Address and phone present",
+            "type": "facts-present",
+            "target": [
+              "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+              "+91 98450 12345"
+            ],
+            "expect": true,
+            "item": 6
+          },
+          {
+            "text": "Payment constraint present",
+            "type": "facts-present",
+            "target": [
+              "No online payment, they pay at pickup"
+            ],
+            "expect": true,
+            "item": 7
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-4.a1",
+            "check": "Requirements heading present",
+            "type": "heading-present",
+            "target": "Requirements",
+            "expect": true,
+            "actual": true,
+            "pass": true,
+            "evidence": "heading 'Requirements' found in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:15:28",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Requirements section has content",
+            "type": "section-not-empty",
+            "target": "Requirements",
+            "expect": 150,
+            "actual": 379,
+            "pass": true,
+            "evidence": "section 'Requirements' has 379 word(s), needs 150",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:15:28",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Requirement ids unique",
+            "type": "ids-unique",
+            "target": "R",
+            "expect": true,
+            "actual": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11
+            ],
+            "pass": true,
+            "evidence": "11 unique id(s): R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:15:28",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Menu items and prices present",
+            "type": "facts-present",
+            "target": [
+              "Filter coffee 90",
+              "Cappuccino 160",
+              "Latte 180",
+              "Cold brew 200",
+              "Masala chai 80",
+              "Almond croissant 140",
+              "Banana bread slice 120"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 7 fact(s) in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:15:28",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Form fields and email present",
+            "type": "facts-present",
+            "target": [
+              "name, phone, items and pickup time",
+              "hello@brewlab.example"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 2 fact(s) in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:15:28",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Hours present",
+            "type": "facts-present",
+            "target": [
+              "Monday to Saturday 7:30 am to 9:00 pm",
+              "Sunday 8:30 am to 6:00 pm"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 2 fact(s) in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:15:28",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Address and phone present",
+            "type": "facts-present",
+            "target": [
+              "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+              "+91 98450 12345"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 2 fact(s) in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:15:28",
+            "by": "code"
+          },
+          {
+            "atom": "W-4.a1",
+            "check": "Payment constraint present",
+            "type": "facts-present",
+            "target": [
+              "No online payment, they pay at pickup"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 1 fact(s) in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:15:28",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed",
+        "human_output": {
+          "atom": "W-4.a1",
+          "attempt": 1,
+          "text": "This part spells out what the Brew Lab page must show and do: the menu and prices, the pre-order form, opening hours, address and contact details, and the limits of one page, phone friendly, pay at pickup."
+        },
+        "agent_output": {
+          "atom": "W-4.a1",
+          "attempt": 1,
+          "receipt": "W-4.a1:1",
+          "files": [
+            "site/v4.md",
+            "prd.md"
+          ],
+          "section": "W-4",
+          "section_names": [
+            "PRD Requirements section",
+            "Requirements\n\nCoffee lovers and Office staff nearby both use every requirement below. Each requirement serves at least one of the goals G1, G2 and G3 in the Goals section.\n\n1. **R1**: The page shows the menu with all seven items and their prices in rupees, exactly as given: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120. This serves G1.\n2. **R2**: Each menu item is displayed next to its own price, and all seven items are visible on the page without leaving it. This serves G1.\n3. **R3**: The page has a pre-order form with the fields name, phone, items and pickup time, so that a visitor can pre-order a coffee for pickup. This serves G3.\n4. **R4**: When a visitor submits the pre-order form, the order is emailed to hello@brewlab.example and contains the values entered in name, phone, items and pickup time. This serves G3.\n5. **R5**: No online payment, they pay at pickup. The pre-order form has no payment fields, and the page tells visitors they pay at pickup. This serves G3.\n6. **R6**: The page shows the opening hours exactly as given: Monday to Saturday 7:30 am to 9:00 pm, and Sunday 8:30 am to 6:00 pm. This serves G2.\n7. **R7**: The page shows the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as the map or address, so that visitors can find the shop. This serves G2.\n8. **R8**: The page shows the contact details: phone +91 98450 12345 and email hello@brewlab.example. This serves G2.\n9. **R9**: The website is one page only. The menu, pre-order form, opening hours, address and contact details are all on that single page.\n10. **R10**: The page works on phones: a visitor on a phone can view the menu, opening hours, address and contact details, and can fill in and submit the pre-order form.\n11. **R11**: Coffee lovers and Office staff nearby can each see the menu with prices, see the opening hours and where to find the shop, and pre-order a coffee for pickup, with no difference in what either group sees or can do. This serves G1, G2 and G3."
+          ],
+          "anchor": null,
+          "ids": [],
+          "selectors": [],
+          "kind": "doc",
+          "file": "prd.md",
+          "checks": [
+            {
+              "check": "Requirements heading present",
+              "type": "heading-present",
+              "target": "Requirements",
+              "pass": true
+            },
+            {
+              "check": "Requirements section has content",
+              "type": "section-not-empty",
+              "target": "Requirements",
+              "pass": true
+            },
+            {
+              "check": "Requirement ids unique",
+              "type": "ids-unique",
+              "target": "R",
+              "pass": true
+            },
+            {
+              "check": "Menu items and prices present",
+              "type": "facts-present",
+              "target": [
+                "Filter coffee 90",
+                "Cappuccino 160",
+                "Latte 180",
+                "Cold brew 200",
+                "Masala chai 80",
+                "Almond croissant 140",
+                "Banana bread slice 120"
+              ],
+              "pass": true
+            },
+            {
+              "check": "Form fields and email present",
+              "type": "facts-present",
+              "target": [
+                "name, phone, items and pickup time",
+                "hello@brewlab.example"
+              ],
+              "pass": true
+            },
+            {
+              "check": "Hours present",
+              "type": "facts-present",
+              "target": [
+                "Monday to Saturday 7:30 am to 9:00 pm",
+                "Sunday 8:30 am to 6:00 pm"
+              ],
+              "pass": true
+            },
+            {
+              "check": "Address and phone present",
+              "type": "facts-present",
+              "target": [
+                "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+                "+91 98450 12345"
+              ],
+              "pass": true
+            },
+            {
+              "check": "Payment constraint present",
+              "type": "facts-present",
+              "target": [
+                "No online payment, they pay at pickup"
+              ],
+              "pass": true
+            }
+          ],
+          "conditions": []
+        }
+      }
+    ],
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "prd-success",
+    "name": "PRD Success metrics section",
+    "covers": [
+      9
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Success metrics section states 30 pre-orders per week"
+    ],
+    "purpose": "The PRD has no Success metrics section.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 5,
+      "retry_limit": 1,
+      "stop_loss": "Stop after one failed retry or if money spent exceeds 10."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "## Success metrics"
+    ],
+    "completion_check": "Success metrics heading present, at least 40 words, contains '30 pre-orders per week'.",
+    "dependencies": [
+      "prd-requirements"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-5.a1",
+        "goal": "The Success metrics section states 30 pre-orders per week and has one metric for each of G1, G2, G3.",
+        "constraints": [
+          "Each metric names the goal it measures",
+          "No new numbers",
+          "Numeric metric states its window or 'measurement window not set'"
+        ],
+        "context": [
+          "charter item 9",
+          "charter success_measures",
+          "Goals section ids"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-5 Builder",
+          "steps": "Write the section '## Success metrics' after '## Requirements'. Metric for G3: 30 pre-orders per week, with the weekly window stated. Metrics for G1 and G2: qualitative, stating the menu with prices and the hours and address are visible on the page, with no new numbers. Each names its goal."
+        },
+        "expected_output": [
+          {
+            "text": "A Success metrics heading",
+            "kind": "heading",
+            "target": "Success metrics",
+            "met": true
+          },
+          {
+            "text": "The pre-order target",
+            "kind": "facts",
+            "target": [
+              "30 pre-orders per week"
+            ],
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Success metrics heading present",
+            "type": "heading-present",
+            "target": "Success metrics",
+            "expect": true,
+            "item": 1
+          },
+          {
+            "text": "Section has content",
+            "type": "section-not-empty",
+            "target": "Success metrics",
+            "expect": 40
+          },
+          {
+            "text": "Target present",
+            "type": "facts-present",
+            "target": [
+              "30 pre-orders per week"
+            ],
+            "expect": true,
+            "item": 2
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-5.a1",
+            "check": "Success metrics heading present",
+            "type": "heading-present",
+            "target": "Success metrics",
+            "expect": true,
+            "actual": true,
+            "pass": true,
+            "evidence": "heading 'Success metrics' found in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:15:47",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "Section has content",
+            "type": "section-not-empty",
+            "target": "Success metrics",
+            "expect": 40,
+            "actual": 106,
+            "pass": true,
+            "evidence": "section 'Success metrics' has 106 word(s), needs 40",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:15:47",
+            "by": "code"
+          },
+          {
+            "atom": "W-5.a1",
+            "check": "Target present",
+            "type": "facts-present",
+            "target": [
+              "30 pre-orders per week"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 1 fact(s) in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:15:47",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed",
+        "human_output": {
+          "atom": "W-5.a1",
+          "attempt": 1,
+          "text": "This part says how Brew Lab will know the website is working: 30 pre-orders every week, plus the menu, opening hours and address being easy to see on the page."
+        },
+        "agent_output": {
+          "atom": "W-5.a1",
+          "attempt": 1,
+          "receipt": "W-5.a1:1",
+          "files": [
+            "site/v5.md",
+            "prd.md"
+          ],
+          "section": "W-5",
+          "section_names": [
+            "PRD Success metrics section",
+            "Success metrics\n\nEach metric below names the goal it measures in the Goals section. The only numeric target is the one in the brief.\n\n| Goal | Metric |\n|------|--------|\n| G1 | The menu with all seven items and their prices in rupees is visible on the page. |\n| G2 | The opening hours (Monday to Saturday 7:30 am to 9:00 pm, Sunday 8:30 am to 6:00 pm) and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 are visible on the page. |\n| G3 | 30 pre-orders per week, measured per week. |\n\n- Assumption: a pre-order is counted each time the pre-order form sends an order to hello@brewlab.example."
+          ],
+          "anchor": null,
+          "ids": [],
+          "selectors": [],
+          "kind": "doc",
+          "file": "prd.md",
+          "checks": [
+            {
+              "check": "Success metrics heading present",
+              "type": "heading-present",
+              "target": "Success metrics",
+              "pass": true
+            },
+            {
+              "check": "Section has content",
+              "type": "section-not-empty",
+              "target": "Success metrics",
+              "pass": true
+            },
+            {
+              "check": "Target present",
+              "type": "facts-present",
+              "target": [
+                "30 pre-orders per week"
+              ],
+              "pass": true
+            }
+          ],
+          "conditions": []
+        }
+      }
+    ],
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section",
+    "version": 5
+  },
+  {
+    "id": "W-6",
+    "proposal_id": "prd-out-of-scope",
+    "name": "PRD Out of scope section",
+    "covers": [
+      10
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Out of scope section lists online payment and any additional pages"
+    ],
+    "purpose": "The PRD has no Out of scope section.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 5,
+      "retry_limit": 1,
+      "stop_loss": "Stop after one failed retry or if money spent exceeds 10."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "## Out of scope"
+    ],
+    "completion_check": "Out of scope heading present, at least 20 words, mentions online payment and additional pages.",
+    "dependencies": [
+      "prd-success"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "atoms": [
+      {
+        "id": "W-6.a1",
+        "goal": "The Out of scope section lists online payment and any additional pages.",
+        "constraints": [
+          "Nothing out of scope that is not in the brief",
+          "Consistent with the Requirements constraints"
+        ],
+        "context": [
+          "charter item 10",
+          "charter constraints"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-6 Builder",
+          "steps": "Write the section '## Out of scope' as the last section. List online payment (customers pay at pickup) and any additional pages (one page only)."
+        },
+        "expected_output": [
+          {
+            "text": "An Out of scope heading",
+            "kind": "heading",
+            "target": "Out of scope",
+            "met": true
+          },
+          {
+            "text": "Online payment named",
+            "kind": "facts",
+            "target": [
+              "online payment"
+            ],
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Out of scope heading present",
+            "type": "heading-present",
+            "target": "Out of scope",
+            "expect": true,
+            "item": 1
+          },
+          {
+            "text": "Section has content",
+            "type": "section-not-empty",
+            "target": "Out of scope",
+            "expect": 20
+          },
+          {
+            "text": "Online payment named",
+            "type": "facts-present",
+            "target": [
+              "online payment"
+            ],
+            "expect": true,
+            "item": 2
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-6.a1",
+            "check": "Out of scope heading present",
+            "type": "heading-present",
+            "target": "Out of scope",
+            "expect": true,
+            "actual": true,
+            "pass": true,
+            "evidence": "heading 'Out of scope' found in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:16:02",
+            "by": "code"
+          },
+          {
+            "atom": "W-6.a1",
+            "check": "Section has content",
+            "type": "section-not-empty",
+            "target": "Out of scope",
+            "expect": 20,
+            "actual": 61,
+            "pass": true,
+            "evidence": "section 'Out of scope' has 61 word(s), needs 20",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:16:02",
+            "by": "code"
+          },
+          {
+            "atom": "W-6.a1",
+            "check": "Online payment named",
+            "type": "facts-present",
+            "target": [
+              "online payment"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 1 fact(s) in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:16:02",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed",
+        "human_output": {
+          "atom": "W-6.a1",
+          "attempt": 1,
+          "text": "This part states what the Brew Lab website will not do: it will not take online payment, since customers pay at pickup, and it will not have any pages beyond the single page."
+        },
+        "agent_output": {
+          "atom": "W-6.a1",
+          "attempt": 1,
+          "receipt": "W-6.a1:1",
+          "files": [
+            "site/v6.md",
+            "prd.md"
+          ],
+          "section": "W-6",
+          "section_names": [
+            "PRD Out of scope section",
+            "Out of scope\n\nThe following are not part of this version of the Brew Lab website. Each follows from a constraint in the Requirements section.\n\n- Online payment: the website takes no online payment. Customers pay at pickup, and the pre-order form has no payment fields.\n- Any additional pages: the website is one page only. No page other than the single page is built."
+          ],
+          "anchor": null,
+          "ids": [],
+          "selectors": [],
+          "kind": "doc",
+          "file": "prd.md",
+          "checks": [
+            {
+              "check": "Out of scope heading present",
+              "type": "heading-present",
+              "target": "Out of scope",
+              "pass": true
+            },
+            {
+              "check": "Section has content",
+              "type": "section-not-empty",
+              "target": "Out of scope",
+              "pass": true
+            },
+            {
+              "check": "Online payment named",
+              "type": "facts-present",
+              "target": [
+                "online payment"
+              ],
+              "pass": true
+            }
+          ],
+          "conditions": []
+        }
+      }
+    ],
+    "section": "W-6",
+    "revises": null,
+    "agent": "W-6 Builder",
+    "last_check": "usable section",
+    "version": 6
+  },
+  {
+    "id": "W-7",
+    "proposal_id": "prd-success-rev",
+    "name": "PRD Success metrics section, remove extra Assumptions section",
+    "covers": [],
+    "fixes": [
+      "F-11"
+    ],
+    "covers_text": [],
+    "purpose": "The PRD holds an extra 'Assumptions to confirm' section that repeats the pre-order counting claim without the 'Assumption:' label (F-11, D-5, P4), so it has more than the six named sections.",
+    "cost": 8,
+    "estimate": 8,
+    "envelope": {
+      "money_limit": 8,
+      "model_call_limit": 2,
+      "time_limit_minutes": 5,
+      "retry_limit": 1,
+      "stop_loss": "Stop after one failed retry, if money spent exceeds 8, or if the extra block is not found in the W-5 section."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "## Success metrics"
+    ],
+    "completion_check": "Success metrics heading present, at least 40 words, contains '30 pre-orders per week'; no 'Assumptions to confirm' section remains.",
+    "dependencies": [
+      "prd-success"
+    ],
+    "status": "done",
+    "cycle": 2,
+    "atoms": [
+      {
+        "id": "W-7.a1",
+        "goal": "The PRD has exactly the six named sections and the pre-order counting claim appears only as a labelled 'Assumption:' line in Success metrics.",
+        "constraints": [
+          "Invent no new facts, numbers or dates",
+          "Add no measurement window or screen width",
+          "Keep each success metric tied to its goal G1, G2 or G3",
+          "Keep the 30 pre-orders per week target exactly as written"
+        ],
+        "context": [
+          "Charter done-when item 9",
+          "Section W-5",
+          "Audit findings F-11, D-5, P4"
+        ],
+        "how": {
+          "kind": "AI",
+          "agent": "W-5 Builder",
+          "steps": "Rewrite the '## Success metrics' section. Keep the goal-to-metric table for G1, G2 and G3 and the single labelled 'Assumption:' line about how a pre-order is counted. Make sure no '## Assumptions to confirm' heading or unlabelled copy of that claim remains in the PRD. If the extra block is not in the W-5 section, make no edit and report that to Coordination."
+        },
+        "expected_output": [
+          {
+            "text": "Success metrics heading exists",
+            "kind": "heading",
+            "target": "Success metrics",
+            "met": true
+          },
+          {
+            "text": "The 30 pre-orders per week target is stated exactly",
+            "kind": "facts",
+            "target": [
+              "30 pre-orders per week"
+            ],
+            "met": true
+          }
+        ],
+        "verification": [
+          {
+            "text": "Success metrics heading present",
+            "type": "heading-present",
+            "target": "Success metrics",
+            "expect": true,
+            "item": 1
+          },
+          {
+            "text": "Success metrics section has at least 40 words",
+            "type": "section-not-empty",
+            "target": "Success metrics",
+            "expect": 40
+          },
+          {
+            "text": "Target stated exactly",
+            "type": "facts-present",
+            "target": [
+              "30 pre-orders per week"
+            ],
+            "expect": true,
+            "item": 2
+          }
+        ],
+        "results": [
+          {
+            "atom": "W-7.a1",
+            "check": "Success metrics heading present",
+            "type": "heading-present",
+            "target": "Success metrics",
+            "expect": true,
+            "actual": true,
+            "pass": true,
+            "evidence": "heading 'Success metrics' found in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:17:40",
+            "by": "code"
+          },
+          {
+            "atom": "W-7.a1",
+            "check": "Success metrics section has at least 40 words",
+            "type": "section-not-empty",
+            "target": "Success metrics",
+            "expect": 40,
+            "actual": 106,
+            "pass": true,
+            "evidence": "section 'Success metrics' has 106 word(s), needs 40",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:17:40",
+            "by": "code"
+          },
+          {
+            "atom": "W-7.a1",
+            "check": "Target stated exactly",
+            "type": "facts-present",
+            "target": [
+              "30 pre-orders per week"
+            ],
+            "expect": true,
+            "actual": {
+              "missing": []
+            },
+            "pass": true,
+            "evidence": "all 1 fact(s) in the document",
+            "attempt": 1,
+            "of": 3,
+            "t": "2026-10-16T11:17:40",
+            "by": "code"
+          }
+        ],
+        "attempts": 1,
+        "status": "passed",
+        "human_output": {
+          "atom": "W-7.a1",
+          "attempt": 1,
+          "text": "The success metrics part is unchanged, because the extra block Audit flagged is not written in it. It likely comes from the single note about how a pre-order is counted, so that note would have to go to remove the block."
+        },
+        "agent_output": {
+          "atom": "W-7.a1",
+          "attempt": 1,
+          "receipt": "W-7.a1:1",
+          "files": [
+            "site/v7.md",
+            "prd.md"
+          ],
+          "section": "W-5",
+          "section_names": [
+            "PRD Success metrics section, remove extra Assumptions section",
+            "Success metrics\n\nEach metric below names the goal it measures in the Goals section. The only numeric target is the one in the brief.\n\n| Goal | Metric |\n|------|--------|\n| G1 | The menu with all seven items and their prices in rupees is visible on the page. |\n| G2 | The opening hours (Monday to Saturday 7:30 am to 9:00 pm, Sunday 8:30 am to 6:00 pm) and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 are visible on the page. |\n| G3 | 30 pre-orders per week, measured per week. |\n\n- Assumption: a pre-order is counted each time the pre-order form sends an order to hello@brewlab.example."
+          ],
+          "anchor": null,
+          "ids": [],
+          "selectors": [],
+          "kind": "doc",
+          "file": "prd.md",
+          "checks": [
+            {
+              "check": "Success metrics heading present",
+              "type": "heading-present",
+              "target": "Success metrics",
+              "pass": true
+            },
+            {
+              "check": "Success metrics section has at least 40 words",
+              "type": "section-not-empty",
+              "target": "Success metrics",
+              "pass": true
+            },
+            {
+              "check": "Target stated exactly",
+              "type": "facts-present",
+              "target": [
+                "30 pre-orders per week"
+              ],
+              "pass": true
+            }
+          ],
+          "conditions": [
+            {
+              "id": "P1",
+              "met": true
+            },
+            {
+              "id": "P2",
+              "met": true
+            },
+            {
+              "id": "P3",
+              "met": true
+            },
+            {
+              "id": "P4",
+              "met": false
+            },
+            {
+              "id": "P5",
+              "met": true
+            },
+            {
+              "id": "P6",
+              "met": true
+            },
+            {
+              "id": "P7",
+              "met": true
+            },
+            {
+              "id": "P8",
+              "met": false
+            }
+          ]
+        }
+      }
+    ],
+    "section": "W-5",
+    "revises": "W-5",
+    "agent": "W-7 Builder",
+    "last_check": "usable section",
+    "version": 7
+  }
+]

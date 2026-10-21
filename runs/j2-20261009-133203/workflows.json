@@ -1,0 +1,285 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "foundation-style",
+    "name": "Foundation and earthy styling",
+    "covers": [
+      15
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The page has a viewport setting, an earthy colour palette, and no horizontal overflow at 360px and 1280px."
+    ],
+    "purpose": "No page exists; no viewport setting, palette or overflow-safe layout.",
+    "cost": 5,
+    "estimate": 5,
+    "envelope": {
+      "money_limit": 5,
+      "model_call_limit": 2,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the page shell still overflows horizontally at 360px after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "page shell",
+      "CSS variables and base styles"
+    ],
+    "completion_check": "Viewport meta present; earthy palette variables defined; no horizontal overflow at 360px and 1280px.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-1",
+    "revises": null,
+    "agent": "W-1 Builder",
+    "last_check": "style guide, usable section and head tags",
+    "style_guide": true,
+    "version": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "product-catalogue",
+    "name": "Product catalogue",
+    "covers": [
+      4
+    ],
+    "fixes": [],
+    "covers_text": [
+      "All 10 products appear with name, category and price: Indigo block-print kurta 1,499; Mustard handloom kurta 1,699; White chikankari kurta 2,199; Ikat handloom saree 3,499; Khadi silk saree 4,999; Cotton jamdani saree 3,999; Khadi cotton shirt 1,299; Linen-blend shirt 1,599; Block-print dupatta 899; Chanderi dupatta 1,099."
+    ],
+    "purpose": "No products are listed.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any product name, category or price differs from the charter after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "products section",
+      "product data array"
+    ],
+    "completion_check": "10 product cards render with exact names, categories and prices from the charter, and placeholder labels on every picture.",
+    "dependencies": [
+      "foundation-style"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-2",
+    "revises": null,
+    "agent": "W-2 Builder",
+    "last_check": "usable section",
+    "version": 2
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "whatsapp-order-buttons",
+    "name": "Per-product WhatsApp order buttons",
+    "covers": [
+      9
+    ],
+    "fixes": [],
+    "covers_text": [
+      "Each product has an order button that opens a WhatsApp chat to +91 00000 11111 with the product name in the message."
+    ],
+    "purpose": "Visitors cannot order from a product.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if fewer than 10 buttons carry the correct number and product name after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "order buttons",
+      "message builder"
+    ],
+    "completion_check": "All 10 buttons link to wa.me/910000011111 with the URL-encoded product name in the text parameter.",
+    "dependencies": [
+      "product-catalogue"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-3",
+    "revises": null,
+    "agent": "W-3 Builder",
+    "last_check": "usable section",
+    "version": 3
+  },
+  {
+    "id": "W-4",
+    "proposal_id": "shop-identity",
+    "name": "Shop name and address",
+    "covers": [
+      1
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The site shows the name Thread & Loom and the address 18 FC Road, Shivajinagar, Pune 411005."
+    ],
+    "purpose": "The page does not show the shop name or address.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the name or address differs from the charter after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "header with name",
+      "visit block with address"
+    ],
+    "completion_check": "Page text contains Thread & Loom and the exact address 18 FC Road, Shivajinagar, Pune 411005.",
+    "dependencies": [
+      "foundation-style"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-4",
+    "revises": null,
+    "agent": "W-4 Builder",
+    "last_check": "usable section",
+    "version": 4
+  },
+  {
+    "id": "W-5",
+    "proposal_id": "contact-links",
+    "name": "Tappable WhatsApp and phone links",
+    "covers": [
+      2
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The site shows the WhatsApp order number +91 00000 11111 and the shop phone +91 00000 22222, each as a tappable link (WhatsApp link and tel link)."
+    ],
+    "purpose": "The WhatsApp order number +91 00000 11111 and shop phone +91 00000 22222 are not shown as tappable links.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if either number or link target differs from the charter after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "contact block",
+      "wa.me link to 910000011111",
+      "tel link to +910000022222"
+    ],
+    "completion_check": "Page shows +91 00000 11111 as a link to wa.me/910000011111 and +91 00000 22222 as a link to tel:+910000022222.",
+    "dependencies": [
+      "foundation-style"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-5",
+    "revises": null,
+    "agent": "W-5 Builder",
+    "last_check": "usable section",
+    "version": 5
+  },
+  {
+    "id": "W-6",
+    "proposal_id": "store-timings",
+    "name": "Store timings",
+    "covers": [
+      3
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The site shows store timings 11am to 9pm, Tuesday to Sunday, closed on Monday."
+    ],
+    "purpose": "Opening hours are not shown on the page.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 8,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the timings text differs from the charter after one retry."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "timings section"
+    ],
+    "completion_check": "Page text contains '11am to 9pm', 'Tuesday to Sunday' and 'Closed on Monday' exactly as given.",
+    "dependencies": [
+      "foundation-style"
+    ],
+    "status": "done",
+    "cycle": 1,
+    "section": "W-6",
+    "revises": null,
+    "agent": "W-6 Builder",
+    "last_check": "usable section",
+    "version": 6
+  },
+  {
+    "id": "W-7",
+    "proposal_id": "nav-and-integrity",
+    "name": "Section nav and link integrity",
+    "covers": [
+      7
+    ],
+    "fixes": [],
+    "covers_text": [
+      "The page runs with no JavaScript errors, filters and category browsing work, and every in-page link points to an existing section."
+    ],
+    "purpose": "Item 7 has no workflow. The page has no nav, so #contact and #timings are unreachable from the header, and nothing guards against broken in-page links or script errors.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if, after one retry, any nav link target is missing, a JS error appears, or horizontal overflow shows at 360px or 1280px."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "nav bar linking to #products, #visit, #contact and #timings",
+      "link-integrity script"
+    ],
+    "completion_check": "The nav has 4 links, and each href resolves to an existing element id. Each nav link is at least 44px tall at 360px. There are no JS errors and no horizontal overflow at 360px and 1280px. The filters and category parts of item 7 are out of scope per the Requester's drop.",
+    "dependencies": [
+      "foundation-style",
+      "product-catalogue",
+      "shop-identity",
+      "contact-links",
+      "store-timings"
+    ],
+    "status": "done",
+    "cycle": 3,
+    "section": "W-7",
+    "revises": null,
+    "agent": "W-7 Builder",
+    "last_check": "usable section",
+    "version": 7
+  }
+]

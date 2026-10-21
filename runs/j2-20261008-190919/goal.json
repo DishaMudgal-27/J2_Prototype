@@ -1,0 +1,43 @@
+{
+  "statement": "Build a warm, homely, phone-friendly one-file website for Kaveri Kitchen, a South Indian restaurant in Kothrud, Pune, where visitors can see the priced menu with a veg/non-veg filter, today's specials, book a table on WhatsApp, find the address and hours, see dish photo spots and read customer reviews.",
+  "site_name": "Kaveri Kitchen",
+  "audience": "People in and around Pune looking for South Indian food, mostly on phones, deciding what to eat and whether to book a table.",
+  "standards": [
+    "Warm and homely look and tone",
+    "Works well on phones: readable at 360px wide, tap-friendly buttons, no sideways scrolling at 360px or 1280px",
+    "Plain HTML, CSS and JavaScript in one file, no build step",
+    "No JavaScript errors, no broken in-page links",
+    "Only facts supplied by the Requester appear on the site"
+  ],
+  "rules": [
+    "Do not invent dishes, prices, offers, discounts, photos, reviewers or contact details",
+    "No offers or discounts are shown because none exist right now",
+    "Photos are shown as empty labelled photo spots until real pictures exist",
+    "Bookings go through WhatsApp only, for tables of 1 to 8 people"
+  ],
+  "done_when": [
+    "The menu lists exactly these 11 dishes with prices in rupees: Starters: Medu vada 120, Veg cutlet 140, Chicken 65 260. Mains: Masala dosa 160, Mysore dosa 180, Idli sambar 110, Veg thali 280, Chicken chettinad 340, Fish curry meal 360. Desserts: Payasam 100, Filter coffee 60",
+    "Each dish is marked veg or non-veg (non-veg: Chicken 65, Chicken chettinad, Fish curry meal; all others veg), and All, Veg and Non-veg filter buttons show only the matching dishes",
+    "A Today's specials section shows Mysore dosa and Fish curry meal",
+    "A Book a table button opens WhatsApp (wa.me link) for +91 00000 33333 with a prefilled message asking for name, date, time and number of people, and the page says tables are for 1 to 8 people",
+    "The page shows the address 7 Karve Road, Kothrud, Pune 411038, the hours 8am to 10:30pm every day with kitchen closing at 10pm, and the restaurant phone +91 00000 44444 as a tap-to-call link",
+    "A dish photo section shows empty labelled photo spots for dishes, with no fake or stock photos",
+    "A reviews section shows exactly these three: \"Best dosa in Kothrud\" by Anita R., \"Feels like home\" by Vikram S., \"Great filter coffee\" by Neha P.",
+    "The site name Kaveri Kitchen appears in the page title and header, and a navigation lets visitors jump to menu, specials, booking, photos, reviews and contact",
+    "The page has a viewport meta tag and layout rules for narrow screens, with no horizontal overflow at 360px and 1280px",
+    "The file contains no offers or discounts and no placeholder text such as lorem ipsum or TBD"
+  ],
+  "business_type": "restaurant",
+  "visitor_needs": [
+    "See the menu with prices",
+    "Filter the menu by veg and non-veg",
+    "See today's specials",
+    "Book a table on WhatsApp",
+    "Find the address and opening hours",
+    "See photos of the dishes",
+    "Read a few customer reviews"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [],
+  "confirmed_facts": []
+}

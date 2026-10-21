@@ -1,0 +1,226 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 1,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 1",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 51,
+        "text": "@Priority One workflow revises Success metrics: keep the G1 80% metric and add a G2 metric of zero double-booked slots, with no time period or other number. Users stays as is.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 52,
+        "text": "@Adaptation COUNTER: I cut the fix parts from five to one, 40 down to 8. F-3 and P5 were open only because the G2 target was unconfirmed, and the Requester has now confirmed it, so Audit's re-check clears them without a rewrite. P6 and D-2 are the same gap as F-9 (no G2 metric), so one rewrite fixes all three and the rate card allows one fix part for it. Scope, atom and checks are unchanged. Revise on that basis, or give a reason F-3 or P5 needs its own work.",
+        "position": "COUNTER: Add G2 zero double-booking metric to Success metrics (8)",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 53,
+        "text": "@Priority Accepted. One fix part for F-9 (which carries P6 and D-2) at 8 is enough. F-3 and P5 were open only because the G2 target was unconfirmed, and the Requester's 'Zero' now clears them on Audit's re-check. Users stays untouched, so the F-2 warning remains open.",
+        "position": "accepts Priority's offer",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "priority",
+    "outcome": "Adaptation accepted Priority's COUNTER: Add G2 zero double-booking metric to Success metrics (8) goes to the validator.",
+    "priority_final": [
+      {
+        "id": "prd-metrics-g2",
+        "name": "Add G2 zero double-booking metric to Success metrics",
+        "goal_gap": "Success metrics covers only G1; G2 has no measurable metric (F-9, which includes D-2 and P6).",
+        "expected_outcome": "Success metrics section has two metrics: G1 (80% of bookings are made without staff help) and G2 (zero double-booked slots), each naming its goal.",
+        "outputs": [
+          "## Success metrics"
+        ],
+        "completion_check": "Section ## Success metrics exists, has at least 30 words, contains '80% of bookings are made without staff help', 'double-booked' and 'zero', and names G1 and G2.",
+        "dependencies": [
+          "prd-goals"
+        ],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-9"
+        ],
+        "revises": "W-5",
+        "estimated_resources": {
+          "money": 8,
+          "calls": 1,
+          "time_minutes": 5
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The Success metrics section states the G1 80% target and a G2 target of zero double-booked slots, each naming the goal it measures.",
+            "constraints": [
+              "Use only the 80% target from the brief and the Requester's answer of zero",
+              "Do not add a time period, threshold or other metric",
+              "Keep the G1 metric unchanged",
+              "Use the name LabSlot"
+            ],
+            "context": [
+              "charter item 3",
+              "charter item 6",
+              "charter confirmed_facts",
+              "section Goals",
+              "section W-5"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-5 Builder",
+              "steps": "Rewrite the section '## Success metrics' in markdown: keep the G1 metric (80% of bookings are made without staff help) and add a G2 metric stating the target for double-booked slots is zero, naming G2. Add no time period or other numbers."
+            },
+            "verification": [
+              {
+                "text": "Success metrics heading is present",
+                "type": "heading-present",
+                "target": "Success metrics",
+                "expect": true
+              },
+              {
+                "text": "Success metrics section has at least 30 words",
+                "type": "section-not-empty",
+                "target": "Success metrics",
+                "expect": 30
+              },
+              {
+                "text": "The G1 80% target is still present and the G2 zero target and double-booked appear",
+                "type": "facts-present",
+                "target": [
+                  "80% of bookings are made without staff help",
+                  "double-booked",
+                  "zero"
+                ],
+                "expect": true
+              }
+            ],
+            "results": []
+          }
+        ],
+        "envelope": {
+          "money_limit": 8,
+          "model_call_limit": 2,
+          "time_limit_minutes": 5,
+          "retry_limit": 1,
+          "stop_loss": "Verification fails again after one retry"
+        },
+        "estimate": 8,
+        "cost": 8
+      }
+    ],
+    "adaptation_final": [
+      {
+        "id": "prd-metrics-g2",
+        "name": "Add G2 zero double-booking metric to Success metrics",
+        "goal_gap": "Success metrics covers only G1; G2 has no measurable metric (F-9, D-2, P6), and the G2 target is still to be confirmed (F-3, P5).",
+        "expected_outcome": "Success metrics section has two metrics: G1 (80% of bookings are made without staff help) and G2 (zero double-booked slots), each naming its goal.",
+        "outputs": [
+          "## Success metrics"
+        ],
+        "completion_check": "Section ## Success metrics exists, has at least 30 words, contains '80% of bookings are made without staff help', 'double-booked' and 'zero', and names G1 and G2.",
+        "dependencies": [
+          "prd-goals"
+        ],
+        "parts": [
+          "fix",
+          "fix",
+          "fix",
+          "fix",
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-3",
+          "F-9",
+          "D-2",
+          "P5",
+          "P6"
+        ],
+        "revises": "W-5",
+        "estimated_resources": {
+          "money": 40,
+          "calls": 1,
+          "time_minutes": 5
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The Success metrics section states the G1 80% target and a G2 target of zero double-booked slots, each naming the goal it measures.",
+            "constraints": [
+              "Use only the 80% target from the brief and the Requester's answer of zero",
+              "Do not add a time period, threshold or other metric",
+              "Keep the G1 metric unchanged",
+              "Use the name LabSlot"
+            ],
+            "context": [
+              "charter item 3",
+              "charter item 6",
+              "charter confirmed_facts",
+              "section Goals",
+              "section W-5"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W-5 Builder",
+              "steps": "Rewrite the section '## Success metrics' in markdown: keep the G1 metric (80% of bookings are made without staff help) and add a G2 metric stating the target for double-booked slots is zero, naming G2. Add no time period or other numbers."
+            },
+            "verification": [
+              {
+                "text": "Success metrics heading is present",
+                "type": "heading-present",
+                "target": "Success metrics",
+                "expect": true
+              },
+              {
+                "text": "Success metrics section has at least 30 words",
+                "type": "section-not-empty",
+                "target": "Success metrics",
+                "expect": 30
+              },
+              {
+                "text": "The G1 80% target is still present and the G2 zero target and double-booked appear",
+                "type": "facts-present",
+                "target": [
+                  "80% of bookings are made without staff help",
+                  "double-booked",
+                  "zero"
+                ],
+                "expect": true
+              }
+            ]
+          }
+        ],
+        "estimate": 40,
+        "cost": 40
+      }
+    ],
+    "attempts_used": 2,
+    "registered": [
+      "Add G2 zero double-booking metric to Success metrics"
+    ]
+  }
+]

@@ -1,0 +1,124 @@
+[
+  {
+    "requirement": "R1",
+    "component": "C1",
+    "lld_section": "S1",
+    "atoms": [
+      "W-26.a1"
+    ]
+  },
+  {
+    "requirement": "R2",
+    "component": "C2",
+    "lld_section": "S2",
+    "atoms": [
+      "W-27.a1"
+    ]
+  },
+  {
+    "requirement": "R3",
+    "component": "C3",
+    "lld_section": "S3",
+    "atoms": [
+      "W-28.a1"
+    ]
+  },
+  {
+    "requirement": "R4",
+    "component": "C4",
+    "lld_section": "S4",
+    "atoms": [
+      "W-29.a1"
+    ]
+  },
+  {
+    "requirement": "R5",
+    "component": "C1",
+    "lld_section": "S1",
+    "atoms": [
+      "W-26.a1"
+    ]
+  },
+  {
+    "requirement": "R5",
+    "component": "C2",
+    "lld_section": "S2",
+    "atoms": [
+      "W-27.a1"
+    ]
+  },
+  {
+    "requirement": "R5",
+    "component": "C3",
+    "lld_section": "S3",
+    "atoms": [
+      "W-28.a1"
+    ]
+  },
+  {
+    "requirement": "R5",
+    "component": "C4",
+    "lld_section": "S4",
+    "atoms": [
+      "W-29.a1"
+    ]
+  },
+  {
+    "requirement": "R5",
+    "component": "C5",
+    "lld_section": "S5",
+    "atoms": [
+      "W-30.a1",
+      "W-31.a1"
+    ]
+  },
+  {
+    "requirement": "R6",
+    "component": "C1",
+    "lld_section": "S1",
+    "atoms": [
+      "W-26.a1"
+    ]
+  },
+  {
+    "requirement": "R6",
+    "component": "C2",
+    "lld_section": "S2",
+    "atoms": [
+      "W-27.a1"
+    ]
+  },
+  {
+    "requirement": "R6",
+    "component": "C3",
+    "lld_section": "S3",
+    "atoms": [
+      "W-28.a1"
+    ]
+  },
+  {
+    "requirement": "R6",
+    "component": "C4",
+    "lld_section": "S4",
+    "atoms": [
+      "W-29.a1"
+    ]
+  },
+  {
+    "requirement": "R6",
+    "component": "C5",
+    "lld_section": "S5",
+    "atoms": [
+      "W-30.a1",
+      "W-31.a1"
+    ]
+  },
+  {
+    "requirement": "R7",
+    "component": "C2",
+    "lld_section": "S2",
+    "atoms": [
+      "W-27.a1"
+    ]
+  }
+]

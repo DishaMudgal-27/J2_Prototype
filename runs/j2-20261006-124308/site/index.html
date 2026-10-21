@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Cafe in Indiranagar, Bengaluru</title>
+<meta name="description" content="Brew Lab is a cafe in Indiranagar, Bengaluru. Open 8am to 10pm, every day.">
+<style>
+  :root {
+    --cream: #fbf5ec;
+    --sand: #f2e6d3;
+    --espresso: #3b2417;
+    --roast: #5a3a27;
+    --caramel: #c8793a;
+    --caramel-dark: #a35f27;
+    --terracotta: #b4532a;
+    --white: #fffdf9;
+    --radius: 14px;
+    --shadow: 0 6px 20px rgba(59, 36, 23, 0.10);
+  }
+
+  * { box-sizing: border-box; }
+
+  [hidden] { display: none !important; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--espresso);
+    background: var(--cream);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  img, iframe { max-width: 100%; }
+
+  a { color: var(--terracotta); }
+
+  :focus-visible { outline: 3px solid var(--caramel); outline-offset: 2px; }
+
+  .wrap {
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 1.1rem;
+  }
+
+  /* Header */
+  .site-header {
+    background: var(--espresso);
+    color: var(--cream);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .site-header .wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
+  }
+  .brand {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--cream);
+    text-decoration: none;
+  }
+  .brand span { color: var(--caramel); }
+  .nav { display: flex; flex-wrap: wrap; gap: 0.2rem 1rem; }
+  .nav a {
+    color: var(--sand);
+    text-decoration: none;
+    font-size: 0.95rem;
+    padding: 0.4rem 0;
+  }
+  .nav a:hover, .nav a:focus { color: #fff; text-decoration: underline; }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(160deg, var(--roast) 0%, var(--espresso) 70%);
+    color: var(--cream);
+    padding: 2.6rem 0 3rem;
+  }
+  .eyebrow {
+    margin: 0 0 0.5rem;
+    color: var(--caramel);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+  }
+  .hero h1 {
+    margin: 0 0 0.7rem;
+    font-size: 2.4rem;
+    line-height: 1.1;
+  }
+  .hero p { margin: 0 0 1.4rem; color: var(--sand); max-width: 34rem; }
+  .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.8rem; }
+  .badge {
+    display: inline-block;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    background: rgba(255, 253, 249, 0.12);
+    border: 1px solid rgba(255, 253, 249, 0.28);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .badge.open { background: #2f6b3f; border-color: #3f8a52; color: #fff; }
+  .badge.closed { background: #7a3a2a; border-color: #9c4b38; color: #fff; }
+
+  /* Sections */
+  section { padding: 2.4rem 0; }
+  section h2 {
+    margin: 0 0 0.3rem;
+    font-size: 1.7rem;
+    color: var(--espresso);
+  }
+  .lead { margin: 0 0 1.4rem; color: var(--roast); }
+  .alt { background: var(--sand); }
+
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.2rem;
+  }
+
+  /* Menu */
+  .menu-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .menu-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.3rem 1rem;
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--sand);
+  }
+  .menu-list li:first-child { border-top: 0; padding-top: 0; }
+  .menu-list li:last-child { padding-bottom: 0; }
+  .menu-name {
+    flex: 1 1 8rem;
+    min-width: 0;
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+  .menu-price {
+    flex: 0 0 auto;
+    font-weight: 800;
+    color: var(--terracotta);
+  }
+  .menu-note {
+    margin: 1rem 0 0;
+    font-size: 0.92rem;
+    color: var(--roast);
+  }
+
+  /* Hours */
+  .hours-big {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--terracotta);
+    margin: 0 0 0.2rem;
+  }
+  .hours-sub { margin: 0 0 1rem; color: var(--roast); }
+  .hours-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .hours-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.55rem 0;
+    border-top: 1px solid var(--sand);
+  }
+  .hours-list li:first-child { border-top: 0; }
+  .hours-list li.today { font-weight: 700; color: var(--terracotta); }
+
+  /* Location */
+  .loc-grid { display: grid; gap: 1rem; }
+  .loc-card h3 { margin: 0 0 0.3rem; font-size: 1.1rem; }
+  .loc-card p { margin: 0 0 0.9rem; }
+  .placeholder {
+    display: inline-block;
+    background: #fff1c9;
+    border: 1px dashed #c89a1e;
+    color: #6b4e00;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+  .btn {
+    display: inline-block;
+    background: var(--caramel);
+    color: #fff;
+    text-decoration: none;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.8rem 1.3rem;
+    border: 0;
+    border-radius: 999px;
+    min-height: 44px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .btn:hover, .btn:focus { background: var(--caramel-dark); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--terracotta);
+    border: 2px solid var(--terracotta);
+  }
+  .btn-ghost:hover, .btn-ghost:focus { background: var(--terracotta); color: #fff; }
+  .btn-block { display: block; width: 100%; }
+
+  .map-box {
+    border-radius: var(--radius);
+    background: repeating-linear-gradient(45deg, #ead9bf, #ead9bf 12px, #f2e6d3 12px, #f2e6d3 24px);
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1rem;
+    color: var(--roast);
+    font-weight: 600;
+  }
+
+  /* Pre-order */
+  .order-fieldset {
+    border: 0;
+    margin: 0 0 1.2rem;
+    padding: 0;
+    min-width: 0;
+  }
+  .order-fieldset legend, .step-title {
+    font-weight: 800;
+    font-size: 1.05rem;
+    padding: 0;
+    margin: 0 0 0.6rem;
+  }
+  .order-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding: 0.7rem 0;
+    border-top: 1px solid var(--sand);
+  }
+  .order-row:first-child { border-top: 0; }
+  .order-info { flex: 1 1 9rem; min-width: 0; }
+  .order-info .o-name { display: block; font-weight: 700; }
+  .order-info .o-price { display: block; font-size: 0.92rem; color: var(--terracotta); font-weight: 700; }
+  .stepper { display: flex; align-items: center; gap: 0.3rem; flex: 0 0 auto; }
+  .stepper button {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--caramel);
+    background: var(--white);
+    color: var(--caramel-dark);
+    font-size: 1.4rem;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+  }
+  .stepper button:hover { background: var(--sand); }
+  .stepper input {
+    width: 3.2rem;
+    height: 44px;
+    text-align: center;
+    font-size: 1rem;
+    font-family: inherit;
+    border: 1px solid #cdb9a0;
+    border-radius: 10px;
+    background: #fff;
+    color: var(--espresso);
+    padding: 0;
+  }
+  .field-grid { display: grid; gap: 0.9rem; margin-bottom: 1rem; }
+  .field label { display: block; font-weight: 700; margin-bottom: 0.25rem; }
+  .field input {
+    width: 100%;
+    min-height: 46px;
+    padding: 0.55rem 0.8rem;
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--espresso);
+    background: #fff;
+    border: 1px solid #cdb9a0;
+    border-radius: 10px;
+  }
+  .field input[aria-invalid="true"], .stepper input[aria-invalid="true"] { border-color: #b3261e; background: #fff3f1; }
+  .field .hint { display: block; font-size: 0.85rem; color: var(--roast); margin-top: 0.2rem; }
+  .form-error {
+    margin: 0 0 1rem;
+    padding: 0.7rem 0.9rem;
+    border-radius: 10px;
+    background: #fde8e5;
+    border: 1px solid #b3261e;
+    color: #7a1912;
+    font-weight: 600;
+  }
+  .summary:focus { outline: none; }
+  .summary h3 { margin: 0 0 0.2rem; font-size: 1.3rem; color: var(--terracotta); }
+  .summary-list { list-style: none; margin: 0.4rem 0 0.8rem; padding: 0; }
+  .summary-list li {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.2rem 1rem;
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--sand);
+  }
+  .summary dl { margin: 0 0 0.8rem; }
+  .summary dt { font-weight: 700; margin-top: 0.5rem; }
+  .summary dd { margin: 0; overflow-wrap: anywhere; }
+  .summary-total { font-weight: 800; font-size: 1.1rem; margin: 0 0 1rem; }
+  .summary-actions { display: grid; gap: 0.6rem; margin-top: 1rem; }
+
+  /* Footer */
+  footer {
+    background: var(--espresso);
+    color: var(--sand);
+    padding: 1.6rem 0;
+    font-size: 0.9rem;
+  }
+  footer p { margin: 0.2rem 0; }
+
+  /* Larger screens */
+  @media (min-width: 600px) {
+    .wrap { padding: 0 1.6rem; }
+    .hero { padding: 4rem 0 4.4rem; }
+    .hero h1 { font-size: 3.2rem; }
+    .brand { font-size: 1.6rem; }
+    .nav { gap: 0.2rem 1.6rem; }
+    section { padding: 3.2rem 0; }
+    section h2 { font-size: 2rem; }
+    .card { padding: 1.6rem; }
+    .field-grid { grid-template-columns: 1fr 1fr; }
+    .field-time { grid-column: 1 / -1; }
+    .btn-block { display: inline-block; width: auto; min-width: 14rem; }
+    .summary-actions { display: flex; flex-wrap: wrap; }
+  }
+
+  @media (min-width: 860px) {
+    .hero h1 { font-size: 3.8rem; }
+    .loc-grid { grid-template-columns: 1fr 1fr; align-items: stretch; }
+    .map-box { min-height: 100%; }
+    .field-grid { grid-template-columns: 1fr 1fr 1fr; }
+    .field-time { grid-column: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="#top">Brew <span>Lab</span></a>
+    <nav class="nav" aria-label="Main">
+      <a href="#menu">Menu</a>
+      <a href="#hours">Hours</a>
+      <a href="#location">Location</a>
+      <a href="#preorder">Pre-order</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Indiranagar, Bengaluru</p>
+      <h1>Brew Lab</h1>
+      <p>A warm, modern cafe in the heart of Indiranagar. Come in for coffee, or order ahead and pick it up.</p>
+      <div class="hero-actions">
+        <span id="openBadge" class="badge">Open 8am to 10pm, every day</span>
+        <a class="btn" href="#preorder">Pre-order coffee</a>
+      </div>
+    </div>
+  </div>
+
+  <section id="menu">
+    <div class="wrap">
+      <h2>Menu</h2>
+      <p class="lead">Our drinks and prices.</p>
+      <div class="card">
+        <ul class="menu-list" id="menuList" aria-label="Drinks menu"></ul>
+        <p class="menu-note">
+          <span class="placeholder">[Placeholder]</span>
+          Drink names and prices have not been supplied yet. Items marked like this will be replaced with the real menu.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="hours" class="alt">
+    <div class="wrap">
+      <h2>Opening hours</h2>
+      <p class="lead">We are open every day of the week.</p>
+      <div class="card">
+        <p class="hours-big">8am to 10pm</p>
+        <p class="hours-sub">Open every day</p>
+        <ul class="hours-list" id="hoursList">
+          <li data-day="1"><span>Monday</span><span>8am to 10pm</span></li>
+          <li data-day="2"><span>Tuesday</span><span>8am to 10pm</span></li>
+          <li data-day="3"><span>Wednesday</span><span>8am to 10pm</span></li>
+          <li data-day="4"><span>Thursday</span><span>8am to 10pm</span></li>
+          <li data-day="5"><span>Friday</span><span>8am to 10pm</span></li>
+          <li data-day="6"><span>Saturday</span><span>8am to 10pm</span></li>
+          <li data-day="0"><span>Sunday</span><span>8am to 10pm</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="location">
+    <div class="wrap">
+      <h2>Find us</h2>
+      <p class="lead">Brew Lab is in Indiranagar, Bengaluru.</p>
+      <div class="loc-grid">
+        <div class="card loc-card">
+          <h3>Address</h3>
+          <p>Brew Lab<br>
+             <span class="placeholder">[Street address to be added]</span><br>
+             Indiranagar, Bengaluru</p>
+          <h3>Phone</h3>
+          <p><span class="placeholder">[Phone number to be added]</span></p>
+          <a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Indiranagar%2C+Bengaluru" target="_blank" rel="noopener">Open in Google Maps</a>
+        </div>
+        <div class="map-box" role="img" aria-label="Map placeholder for Indiranagar, Bengaluru">
+          <span>Map pin to be added.<br>For now, use the Google Maps link to find Indiranagar.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="preorder" class="alt">
+    <div class="wrap">
+      <h2>Pre-order for pickup</h2>
+      <p class="lead">Pick your drinks and a pickup time between 8am and 10pm. No payment is taken on this page.</p>
+      <div class="card">
+        <form id="orderForm" novalidate>
+          <fieldset class="order-fieldset">
+            <legend>1. Choose your drinks</legend>
+            <div id="orderItems"></div>
+          </fieldset>
+
+          <p class="step-title">2. Your details</p>
+          <div class="field-grid">
+            <div class="field">
+              <label for="custName">Name</label>
+              <input id="custName" name="name" type="text" autocomplete="name" maxlength="60">
+            </div>
+            <div class="field">
+              <label for="custPhone">Phone number</label>
+              <input id="custPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="20">
+            </div>
+            <div class="field field-time">
+              <label for="pickupTime">Pickup time</label>
+              <input id="pickupTime" name="pickup" type="time" min="08:00" max="22:00" step="300">
+              <span class="hint">Between 8:00 am and 10:00 pm</span>
+            </div>
+          </div>
+
+          <p id="formError" class="form-error" role="alert" hidden></p>
+          <button type="submit" class="btn btn-block">Review my order</button>
+        </form>
+
+        <div id="orderSummary" class="summary" tabindex="-1" aria-live="polite" hidden></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Brew Lab</strong> | Indiranagar, Bengaluru</p>
+    <p>Open 8am to 10pm, every day</p>
+  </div>
+</footer>
+
+<script>
+  // Menu data. name: null or price: null means "not supplied yet" and renders as a marked placeholder.
+  // Replace with real items when the Requester supplies them: { id: 'x', name: 'Name', price: 123 } (price in rupees).
+  // The pre-order form reads this same array.
+  var MENU = [
+    { id: 'drink-1', name: null, price: null },
+    { id: 'drink-2', name: null, price: null },
+    { id: 'drink-3', name: null, price: null },
+    { id: 'drink-4', name: null, price: null },
+    { id: 'drink-5', name: null, price: null }
+  ];
+  window.BREWLAB_MENU = MENU;
+
+  (function () {
+    // Render the menu.
+    var list = document.getElementById('menuList');
+    if (list) {
+      MENU.forEach(function (item, i) {
+        var li = document.createElement('li');
+        li.setAttribute('data-item-id', item.id);
+
+        var name = document.createElement('span');
+        name.className = 'menu-name';
+        if (item.name) {
+          name.textContent = item.name;
+        } else {
+          var pn = document.createElement('span');
+          pn.className = 'placeholder';
+          pn.textContent = '[Drink name ' + (i + 1) + ']';
+          name.appendChild(pn);
+        }
+
+        var price = document.createElement('span');
+        price.className = 'menu-price';
+        if (typeof item.price === 'number') {
+          price.textContent = '\u20B9' + item.price;
+        } else {
+          var pp = document.createElement('span');
+          pp.className = 'placeholder';
+          pp.textContent = '[Price]';
+          price.appendChild(pp);
+        }
+
+        li.appendChild(name);
+        li.appendChild(price);
+        list.appendChild(li);
+      });
+    }
+
+    // Highlight today and show an open/closed badge, using India time.
+    try {
+      var parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Kolkata', weekday: 'short', hour: 'numeric', hour12: false
+      }).formatToParts(new Date());
+      var wk = '', hour = 0;
+      parts.forEach(function (p) {
+        if (p.type === 'weekday') wk = p.value;
+        if (p.type === 'hour') hour = parseInt(p.value, 10) % 24;
+      });
+      var map = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+      var day = map[wk];
+      var li = document.querySelector('#hoursList li[data-day="' + day + '"]');
+      if (li) li.classList.add('today');
+      var badge = document.getElementById('openBadge');
+      if (badge) {
+        var isOpen = hour >= 8 && hour < 22;
+        badge.textContent = isOpen ? 'Open now, until 10pm' : 'Closed now, opens 8am';
+        badge.className = 'badge ' + (isOpen ? 'open' : 'closed');
+      }
+    } catch (e) { /* keep the static text */ }
+  })();
+
+  // Pre-order form. Reads window.BREWLAB_MENU. Nothing is sent anywhere: the summary shows on this page only.
+  (function () {
+    var items = window.BREWLAB_MENU || [];
+    var MAX_QTY = 20;
+    var OPEN_MIN = 8 * 60;    // 08:00
+    var CLOSE_MIN = 22 * 60;  // 22:00
+
+    var form = document.getElementById('orderForm');
+    var box = document.getElementById('orderItems');
+    var errBox = document.getElementById('formError');
+    var summary = document.getElementById('orderSummary');
+    var nameIn = document.getElementById('custName');
+    var phoneIn = document.getElementById('custPhone');
+    var timeIn = document.getElementById('pickupTime');
+    if (!form || !box) return;
+
+    var qtyInputs = [];
+
+    function el(tag, cls, text) {
+      var n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text != null) n.textContent = text;
+      return n;
+    }
+    function plainName(item, i) { return item.name || '[Drink name ' + (i + 1) + ']'; }
+    function nameNode(item, i) {
+      var s = el('span', 'o-name');
+      if (item.name) { s.textContent = item.name; }
+      else { s.appendChild(el('span', 'placeholder', '[Drink name ' + (i + 1) + ']')); }
+      return s;
+    }
+    function priceNode(item) {
+      var s = el('span', 'o-price');
+      if (typeof item.price === 'number') { s.textContent = '\u20B9' + item.price; }
+      else { s.appendChild(el('span', 'placeholder', '[Price]')); }
+      return s;
+    }
+    function clampQty(v) {
+      var n = parseInt(v, 10);
+      if (isNaN(n) || n < 0) n = 0;
+      if (n > MAX_QTY) n = MAX_QTY;
+      return n;
+    }
+    function fmtTime(mins) {
+      var h = Math.floor(mins / 60), m = mins % 60;
+      var suffix = h >= 12 ? 'pm' : 'am';
+      var h12 = h % 12 || 12;
+      return h12 + ':' + (m < 10 ? '0' : '') + m + ' ' + suffix;
+    }
+
+    // Build one row per menu item.
+    items.forEach(function (item, i) {
+      var row = el('div', 'order-row');
+      row.setAttribute('data-item-id', item.id);
+
+      var info = el('div', 'order-info');
+      info.appendChild(nameNode(item, i));
+      info.appendChild(priceNode(item));
+
+      var stepper = el('div', 'stepper');
+      var minus = el('button', null, '\u2212');
+      minus.type = 'button';
+      minus.setAttribute('aria-label', 'One less ' + plainName(item, i));
+      var input = document.createElement('input');
+      input.type = 'number';
+      input.id = 'qty-' + item.id;
+      input.min = '0';
+      input.max = String(MAX_QTY);
+      input.step = '1';
+      input.value = '0';
+      input.inputMode = 'numeric';
+      input.setAttribute('aria-label', 'Quantity of ' + plainName(item, i));
+      var plus = el('button', null, '+');
+      plus.type = 'button';
+      plus.setAttribute('aria-label', 'One more ' + plainName(item, i));
+
+      minus.addEventListener('click', function () { input.value = clampQty(clampQty(input.value) - 1); clearError(); });
+      plus.addEventListener('click', function () { input.value = clampQty(clampQty(input.value) + 1); clearError(); });
+      input.addEventListener('change', function () { input.value = clampQty(input.value); });
+
+      stepper.appendChild(minus);
+      stepper.appendChild(input);
+      stepper.appendChild(plus);
+      row.appendChild(info);
+      row.appendChild(stepper);
+      box.appendChild(row);
+      qtyInputs.push(input);
+    });
+
+    function clearError() {
+      errBox.hidden = true;
+      errBox.textContent = '';
+      [nameIn, phoneIn, timeIn].concat(qtyInputs).forEach(function (n) { n.removeAttribute('aria-invalid'); });
+    }
+    function fail(msg, field) {
+      clearError();
+      errBox.textContent = msg;
+      errBox.hidden = false;
+      if (field) { field.setAttribute('aria-invalid', 'true'); field.focus(); }
+      return false;
+    }
+    [nameIn, phoneIn, timeIn].forEach(function (n) { n.addEventListener('input', clearError); });
+
+    function validate() {
+      var lines = [];
+      items.forEach(function (item, i) {
+        var q = clampQty(qtyInputs[i].value);
+        qtyInputs[i].value = q;
+        if (q > 0) lines.push({ item: item, index: i, qty: q });
+      });
+      if (!lines.length) {
+        return fail('Please choose at least one drink.', qtyInputs[0]);
+      }
+
+      var name = nameIn.value.trim();
+      if (name.length < 2) return fail('Please enter your name.', nameIn);
+
+      var phoneRaw = phoneIn.value.trim();
+      var digits = phoneRaw.replace(/\D/g, '');
+      if (!/^\+?[0-9\s\-()]+$/.test(phoneRaw) || digits.length < 10 || digits.length > 13) {
+        return fail('Please enter a valid phone number with 10 digits.', phoneIn);
+      }
+
+      var tv = timeIn.value;
+      if (!/^\d{2}:\d{2}$/.test(tv)) return fail('Please choose a pickup time between 8:00 am and 10:00 pm.', timeIn);
+      var mins = parseInt(tv.slice(0, 2), 10) * 60 + parseInt(tv.slice(3, 5), 10);
+      if (mins < OPEN_MIN || mins > CLOSE_MIN) {
+        return fail('Pickup time must be between 8:00 am and 10:00 pm, when Brew Lab is open.', timeIn);
+      }
+
+      return { lines: lines, name: name, phone: phoneRaw, minutes: mins };
+    }
+
+    function showSummary(order) {
+      summary.textContent = '';
+      summary.appendChild(el('h3', null, 'Your order summary'));
+      summary.appendChild(el('p', null, 'Please check the details below.'));
+
+      var ul = el('ul', 'summary-list');
+      var total = 0, allPriced = true;
+      order.lines.forEach(function (ln) {
+        var li = el('li');
+        var left = el('span');
+        var nm = nameNode(ln.item, ln.index);
+        nm.className = '';
+        left.appendChild(nm);
+        left.appendChild(document.createTextNode(' \u00D7 ' + ln.qty));
+        li.appendChild(left);
+        var right = el('span');
+        if (typeof ln.item.price === 'number') {
+          var line = ln.item.price * ln.qty;
+          total += line;
+          right.textContent = '\u20B9' + line;
+        } else {
+          allPriced = false;
+          right.appendChild(el('span', 'placeholder', '[Price]'));
+        }
+        li.appendChild(right);
+        ul.appendChild(li);
+      });
+      summary.appendChild(ul);
+
+      var tp = el('p', 'summary-total');
+      tp.appendChild(document.createTextNode('Total: '));
+      if (allPriced) { tp.appendChild(document.createTextNode('\u20B9' + total)); }
+      else { tp.appendChild(el('span', 'placeholder', '[Total to be confirmed, prices not supplied yet]')); }
+      summary.appendChild(tp);
+
+      var dl = el('dl');
+      dl.appendChild(el('dt', null, 'Name'));
+      dl.appendChild(el('dd', null, order.name));
+      dl.appendChild(el('dt', null, 'Phone'));
+      dl.appendChild(el('dd', null, order.phone));
+      dl.appendChild(el('dt', null, 'Pickup time'));
+      dl.appendChild(el('dd', null, fmtTime(order.minutes) + ' at Brew Lab, Indiranagar, Bengaluru'));
+      summary.appendChild(dl);
+
+      var note = el('p', 'menu-note');
+      note.appendChild(el('span', 'placeholder', '[Order delivery to the cafe to be added]'));
+      note.appendChild(document.createTextNode(' This order has not been sent to Brew Lab yet. No payment has been taken.'));
+      summary.appendChild(note);
+
+      var actions = el('div', 'summary-actions');
+      var edit = el('button', 'btn btn-ghost', 'Change order');
+      edit.type = 'button';
+      edit.addEventListener('click', function () {
+        summary.hidden = true;
+        form.hidden = false;
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      var fresh = el('button', 'btn', 'Start a new order');
+      fresh.type = 'button';
+      fresh.addEventListener('click', function () {
+        form.reset();
+        qtyInputs.forEach(function (q) { q.value = '0'; });
+        clearError();
+        summary.hidden = true;
+        form.hidden = false;
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      actions.appendChild(edit);
+      actions.appendChild(fresh);
+      summary.appendChild(actions);
+
+      form.hidden = true;
+      summary.hidden = false;
+      summary.focus();
+      summary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var order = validate();
+      if (!order) return;
+      clearError();
+      showSummary(order);
+    });
+  })();
+</script>
+</body>
+</html>

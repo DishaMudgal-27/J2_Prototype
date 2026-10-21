@@ -1,0 +1,81 @@
+[
+  {
+    "id": "W-1",
+    "proposal_id": "W1-core-page",
+    "name": "Single-file mobile page with menu, hours, location",
+    "purpose": "No site file exists. Menu, hours and location sections are missing.",
+    "cost": 35,
+    "estimate": 35,
+    "envelope": {
+      "money_limit": 35,
+      "model_call_limit": 2,
+      "time_limit_minutes": 15,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the completion check still fails after 1 retry, or if spend would exceed 35."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site/index.html"
+    ],
+    "completion_check": "Viewport meta tag present. Every menu item shows a price (real or [PLACEHOLDER]). Hours cover Monday to Sunday. Location names Indiranagar, Bengaluru with an address and map or directions link (real or marked placeholder). No external font or blocking script. No image without lazy loading and size attributes.",
+    "dependencies": [],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-2",
+    "proposal_id": "W2-preorder",
+    "name": "Pickup pre-order form",
+    "purpose": "Visitors cannot order ahead for pickup.",
+    "cost": 15,
+    "estimate": 15,
+    "envelope": {
+      "money_limit": 15,
+      "model_call_limit": 2,
+      "time_limit_minutes": 12,
+      "retry_limit": 1,
+      "stop_loss": "Stop if the completion check still fails after 1 retry, or if spend would exceed 15."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site/index.html (pre-order section)"
+    ],
+    "completion_check": "Section has item selectors, a name field, a pickup time field and a submit control. The destination is stated in the page text and marked [PLACEHOLDER]. Submitting with an empty name or time is blocked. No network request runs on page load.",
+    "dependencies": [
+      "W1-core-page"
+    ],
+    "status": "done",
+    "cycle": 1
+  },
+  {
+    "id": "W-3",
+    "proposal_id": "W3-brew-video",
+    "name": "Tap-to-play brew video",
+    "purpose": "The brew video is not on the page; the charter allows it only as tap-to-play.",
+    "cost": 10,
+    "estimate": 10,
+    "envelope": {
+      "money_limit": 10,
+      "model_call_limit": 2,
+      "time_limit_minutes": 10,
+      "retry_limit": 1,
+      "stop_loss": "Stop if any video data loads or autoplays on page load after 1 retry, or if spend would exceed 10."
+    },
+    "charged": true,
+    "calls_used": 1,
+    "retries_used": 0,
+    "outputs": [
+      "site/index.html (brew video block)"
+    ],
+    "completion_check": "Video element has preload=\"none\", no autoplay attribute and no src or source URL in the initial HTML. A play control exists. The source is assigned only inside the tap handler. The video file is marked [PLACEHOLDER] in the page text.",
+    "dependencies": [
+      "W1-core-page"
+    ],
+    "status": "done",
+    "cycle": 1
+  }
+]

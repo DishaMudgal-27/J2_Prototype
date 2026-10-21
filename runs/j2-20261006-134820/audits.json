@@ -1,0 +1,258 @@
+[
+  {
+    "cycle": 1,
+    "version": 2,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The site is a single HTML file with inline CSS and JS and needs no build step.",
+        "verdict": "PASS",
+        "note": "One <style> and one <script>, no build references; mechanical check: 1 script, 18,808 bytes, only external resources are the Google Maps embed and link.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The page names Brew Lab and Indiranagar, Bengaluru, and has navigation links that jump to each section.",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Title, hero and footer name both; nav links #top, #menu, #preorder, #hours, #location all resolve (broken_in_page_links: []). No gallery or farm sections exist, so no nav links to them.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "A menu section lists items grouped by category, with unknown prices marked as placeholders.",
+        "verdict": "PASS",
+        "note": "MENU array renders 3 category cards; category, item and price each wrapped in .ph, prices labelled 'sample'.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "An hours section lists all seven days, marked as placeholder where unknown.",
+        "verdict": "PASS",
+        "note": "Table has rows data-day 0-6 (Monday to Sunday), each cell a .ph span.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A location section shows the address (placeholder if unknown) and an embedded map or map link for Indiranagar, Bengaluru.",
+        "verdict": "PASS",
+        "note": "Address is a .ph span; iframe embed and a Maps search link for Indiranagar, Bengaluru are present.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A pre-order for pickup form lets the visitor choose menu items and quantities, enter name, phone and pickup time, see a running total, and submit to a marked placeholder destination.",
+        "verdict": "PASS",
+        "note": "Form has qty +/- and number inputs, name, tel, time fields, #total updated by refresh(); submit calls preventDefault, builds summary, shows a .ph destination; no fetch or XHR in code. JS errors: none. Runtime total behaviour read from code, not executed by me.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "A photo gallery section has at least 12 image slots in a responsive grid with a lightbox, alt text on every image, and placeholder images clearly marked.",
+        "verdict": "POLICY_CONCERN",
+        "note": "No gallery section, grid or lightbox in the file. Not funded: budget 30/35 spent, 5 remaining against a 10 minimum for a section.",
+        "severity": "high",
+        "confidence": "high",
+        "item": 7,
+        "pass": false
+      },
+      {
+        "id": "F-8",
+        "criterion": "Three separate farm story sections each have a name, location, multi-paragraph story and key details (such as altitude, variety, process), all marked as placeholders where unknown.",
+        "verdict": "POLICY_CONCERN",
+        "note": "No farm sections in the file; no #farm anchors or farm text. Not funded: 5 budget remaining against an estimated 20.",
+        "severity": "high",
+        "confidence": "high",
+        "item": 8,
+        "pass": false
+      },
+      {
+        "id": "F-9",
+        "criterion": "The file has a viewport meta tag and responsive CSS so it works on a phone-width screen.",
+        "verdict": "NEEDS_REVISION",
+        "note": "Viewport meta and a 700px media query present, but mechanical check shows phone 360px overflows by 78px (desktop 0). Likely cause, unverified: header flex with nowrap nav links and no min-width:0 on nav.",
+        "severity": "medium",
+        "confidence": "high",
+        "item": 9,
+        "pass": false
+      },
+      {
+        "id": "F-10",
+        "criterion": "Every placeholder in the file is visibly marked as a placeholder.",
+        "verdict": "PASS",
+        "note": "All unknowns (hours, address, phone, menu names and prices, order destination, contact) use .ph or .ph-note, with 'PLACEHOLDER:' added by CSS. Checked by reading the markup, not by rendering.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 10,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "mechanical": {
+      "available": true,
+      "bytes": 18808,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://maps.google.com/maps?q=Indiranagar%2C%20Bengaluru&amp;output=embed",
+        "https://www.google.com/maps/search/?api=1&amp;query=Indiranagar%2C+Bengaluru"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 78
+      },
+      "js_errors": []
+    },
+    "all_pass": false
+  },
+  {
+    "cycle": 2,
+    "version": 4,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The site is a single HTML file with inline CSS and JS and needs no build step.",
+        "verdict": "PASS",
+        "note": "Mechanical check: 1 script, 23,328 bytes. One <style> block, and the only external resources are the Google Maps embed and link.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The page names Brew Lab and Indiranagar, Bengaluru, and has navigation links that jump to each section.",
+        "verdict": "PASS",
+        "note": "Title, hero and footer name both. Nav links #top, #menu, #preorder, #farms, #hours and #location all resolve (broken_in_page_links: []).",
+        "severity": "low",
+        "confidence": "high",
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "A menu section lists items grouped by category, with unknown prices marked as placeholders.",
+        "verdict": "PASS",
+        "note": "MENU array renders 3 category cards. Category, item and price are each wrapped in .ph, and prices read 'sample'.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "An hours section lists all seven days, marked as placeholder where unknown.",
+        "verdict": "PASS",
+        "note": "Table has 7 rows, Monday to Sunday (data-day 0-6), each cell a .ph span.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A location section shows the address (placeholder if unknown) and an embedded map or map link for Indiranagar, Bengaluru.",
+        "verdict": "PASS",
+        "note": "Address is a .ph span. The iframe embed and a Maps search link for Indiranagar, Bengaluru are both present.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A pre-order for pickup form lets the visitor choose menu items and quantities, enter name, phone and pickup time, see a running total, and submit to a marked placeholder destination.",
+        "verdict": "PASS",
+        "note": "Code shows qty +/- and number inputs, name, tel and time fields, #total updated by refresh(), and submit calling preventDefault with a .ph destination. No fetch or XHR; JS errors: none. Total behaviour read from code, not executed by me.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "A photo gallery section has at least 12 image slots in a responsive grid with a lightbox, alt text on every image, and placeholder images clearly marked.",
+        "verdict": "POLICY_CONCERN",
+        "note": "No gallery section, grid or lightbox in the file. The Requester chose option 2 (gallery dropped), but the charter still lists this item and its dropped_from_brief is empty.",
+        "severity": "high",
+        "confidence": "high",
+        "item": 7,
+        "pass": false
+      },
+      {
+        "id": "F-8",
+        "criterion": "Three separate farm story sections each have a name, location, multi-paragraph story and key details (such as altitude, variety, process), all marked as placeholders where unknown.",
+        "verdict": "PASS",
+        "note": "article#farm-1, #farm-2 and #farm-3 each have a .ph name, a location, 2 paragraphs and altitude, variety and process fields, all .ph. The Farms nav link resolves.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "The file has a viewport meta tag and responsive CSS so it works on a phone-width screen.",
+        "verdict": "PASS",
+        "note": "Viewport meta present. Mechanical check: overflow 0px at 360px and 0px at 1280px; the @media (max-width:699px) rules are in the file.",
+        "severity": "low",
+        "confidence": "high",
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "Every placeholder in the file is visibly marked as a placeholder.",
+        "verdict": "PASS",
+        "note": "Menu, hours, address, phone, contact, farm fields and order destination all use .ph or .ph-note, and CSS adds the 'PLACEHOLDER:' prefix. Checked by reading markup, not by rendering.",
+        "severity": "low",
+        "confidence": "medium",
+        "item": 10,
+        "pass": true
+      }
+    ],
+    "extra_issues": [],
+    "mechanical": {
+      "available": true,
+      "bytes": 23328,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://maps.google.com/maps?q=Indiranagar%2C%20Bengaluru&amp;output=embed",
+        "https://www.google.com/maps/search/?api=1&amp;query=Indiranagar%2C+Bengaluru"
+      ],
+      "forms": 1,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "all_pass": false
+  }
+]

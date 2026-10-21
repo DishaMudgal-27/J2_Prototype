@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paws Haven | Animal Shelter, Mysuru</title>
+<meta name="description" content="Paws Haven animal shelter in Mysuru: adopt a pet, donate, volunteer and read success stories.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;600;700;800&display=swap">
+<style>
+  :root {
+    --ink: #1f2933;
+    --muted: #4a5561;
+    --bg: #fffaf3;
+    --panel: #ffffff;
+    --brand: #b4440f;
+    --brand-dark: #8a3209;
+    --accent: #2f6f5e;
+    --line: #e4d8c8;
+    --ph-bg: #fff3bf;
+    --ph-ink: #5c4400;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 4.5rem; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans Kannada", "Nirmala UI", "Tunga", sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.55;
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+  }
+  html:lang(kn) body {
+    font-family: "Noto Sans Kannada", "Nirmala UI", "Tunga", "Kedage", "Lohit Kannada", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    line-height: 1.75;
+  }
+  html:lang(kn) h1, html:lang(kn) h2, html:lang(kn) h3 { line-height: 1.4; }
+  a { color: var(--brand-dark); }
+  :focus-visible { outline: 3px solid #1b5fd1; outline-offset: 2px; }
+  .skip {
+    position: absolute; left: -999px; top: 0;
+    background: #000; color: #fff; padding: .6rem 1rem; z-index: 100;
+  }
+  .skip:focus { left: 0; }
+
+  header.site {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+  }
+  .bar {
+    max-width: 1000px; margin: 0 auto; padding: .5rem 1rem;
+    display: flex; flex-wrap: wrap; align-items: center; gap: .25rem 1rem;
+  }
+  .brand { font-weight: 800; font-size: 1.25rem; color: var(--brand-dark); text-decoration: none; }
+  .brand small { display: block; font-weight: 500; font-size: .75rem; color: var(--muted); }
+  nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .1rem .25rem; }
+  nav a {
+    display: inline-block; padding: .5rem .6rem; border-radius: 6px;
+    text-decoration: none; color: var(--ink); font-weight: 600; font-size: .95rem;
+  }
+  nav a:hover { background: #f6e6d5; }
+  .lang-btn {
+    margin-left: auto; cursor: pointer; min-height: 44px; min-width: 44px;
+    padding: .4rem .9rem; border-radius: 8px; border: 2px solid var(--accent);
+    background: #fff; color: #1d4d41; font: inherit; font-weight: 700;
+  }
+  .lang-btn:hover { background: #e6f2ec; }
+
+  .review-note {
+    background: #fff3bf; color: #4a3800; border-bottom: 1px solid #b38b00;
+    padding: .55rem 1rem; font-size: .9rem; font-weight: 600; text-align: center;
+  }
+
+  main { max-width: 1000px; margin: 0 auto; padding: 0 1rem 2rem; }
+  section { padding: 2rem 0 1rem; }
+  h1, h2, h3 { line-height: 1.2; margin: 0 0 .6rem; }
+  h1 { font-size: 1.9rem; }
+  h2 { font-size: 1.5rem; color: var(--brand-dark); }
+  h3 { font-size: 1.15rem; }
+  p { margin: 0 0 .8rem; }
+
+  .hero {
+    background: linear-gradient(135deg, #fde8d3, #e6f2ec);
+    border-radius: 14px; padding: 1.5rem 1.2rem; margin-top: 1rem;
+  }
+  .btn {
+    display: inline-block; border: 0; cursor: pointer;
+    padding: .7rem 1.1rem; border-radius: 8px;
+    font: inherit; font-weight: 700; text-decoration: none;
+    background: var(--brand); color: #fff; min-height: 44px;
+  }
+  .btn:hover { background: var(--brand-dark); }
+  .btn.alt { background: var(--accent); }
+  .btn.alt:hover { background: #235246; }
+  .btn.ghost { background: #fff; color: var(--brand-dark); border: 2px solid var(--brand); }
+  .btn.ghost:hover { background: #fbeee2; }
+  .hero .btn { margin: .2rem .4rem .2rem 0; }
+
+  .ph {
+    background: var(--ph-bg); color: var(--ph-ink);
+    border: 1px dashed #b38b00; border-radius: 4px; padding: 0 .35rem;
+    font-weight: 600;
+  }
+  .sample-tag {
+    display: inline-block; font-size: .75rem; font-weight: 700;
+    background: var(--ph-bg); color: var(--ph-ink);
+    border: 1px solid #b38b00; border-radius: 999px; padding: .1rem .55rem;
+    margin-bottom: .5rem;
+  }
+  .notice {
+    background: #eef5f2; border-left: 4px solid var(--accent);
+    padding: .6rem .8rem; border-radius: 4px; font-size: .92rem; margin: .8rem 0;
+  }
+
+  .grid { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+  .tile {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 12px; padding: 1rem; display: flex; flex-direction: column;
+  }
+  .pet-photo {
+    height: 120px; border-radius: 8px; background: #f3e9dc;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3.5rem; margin-bottom: .6rem;
+  }
+  .facts { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0 0 .6rem; padding: 0; list-style: none; }
+  .facts li { background: #f3efe8; border-radius: 999px; padding: .15rem .65rem; font-size: .88rem; }
+  .actions { margin-top: auto; display: flex; flex-wrap: wrap; gap: .5rem; }
+
+  .donate-box { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+  .qr {
+    border: 2px dashed #b38b00; background: var(--ph-bg); color: var(--ph-ink);
+    border-radius: 12px; min-height: 200px; max-width: 260px; width: 100%;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    padding: 1rem; font-weight: 700;
+  }
+  table.bank { border-collapse: collapse; width: 100%; background: var(--panel); }
+  table.bank th, table.bank td { text-align: left; padding: .55rem .7rem; border: 1px solid var(--line); vertical-align: top; }
+  table.bank th { width: 40%; background: #f8f1e6; font-weight: 700; }
+
+  form.vol { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 1rem; }
+  .field { margin-bottom: .9rem; }
+  label { display: block; font-weight: 700; margin-bottom: .25rem; }
+  input, select, textarea {
+    width: 100%; font: inherit; color: var(--ink);
+    padding: .6rem .7rem; border: 1.5px solid #8a8f98; border-radius: 8px; background: #fff;
+    min-height: 44px;
+  }
+  textarea { min-height: 90px; resize: vertical; }
+  .hint { font-size: .85rem; color: var(--muted); margin-top: .2rem; }
+  .status {
+    margin-top: .8rem; padding: .7rem .8rem; border-radius: 8px;
+    background: #fff; border: 1px solid var(--line); font-size: .92rem; white-space: pre-wrap;
+  }
+  .status:empty { display: none; }
+
+  .story p { margin-bottom: .5rem; }
+
+  footer {
+    border-top: 1px solid var(--line); background: var(--panel);
+    padding: 1.5rem 1rem; font-size: .92rem;
+  }
+  footer .in { max-width: 1000px; margin: 0 auto; }
+  footer ul { list-style: none; padding: 0; margin: 0 0 .8rem; }
+  footer li { margin-bottom: .3rem; }
+
+  @media (min-width: 600px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .donate-box { grid-template-columns: 260px 1fr; align-items: start; }
+    h1 { font-size: 2.3rem; }
+  }
+  @media (min-width: 900px) {
+    .grid.three { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 400px) {
+    h1 { font-size: 1.6rem; }
+    nav a { padding: .45rem .5rem; font-size: .9rem; }
+    .btn { width: 100%; text-align: center; }
+    .actions .btn { flex: 1 1 100%; }
+    table.bank th, table.bank td { display: block; width: 100%; }
+    table.bank th { border-bottom: 0; }
+    .lang-btn { margin-left: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main" data-i18n="skip">Skip to content</a>
+
+<header class="site">
+  <div class="bar">
+    <a class="brand" href="#home">Paws Haven<small data-i18n="brand.sub">Animal shelter, Mysuru</small></a>
+    <nav data-i18n-aria="nav.aria" aria-label="Main">
+      <ul>
+        <li><a href="#home" data-i18n="nav.home">Home</a></li>
+        <li><a href="#adopt" data-i18n="nav.adopt">Adopt</a></li>
+        <li><a href="#donate" data-i18n="nav.donate">Donate</a></li>
+        <li><a href="#volunteer" data-i18n="nav.vol">Volunteer</a></li>
+        <li><a href="#stories" data-i18n="nav.stories">Success Stories</a></li>
+      </ul>
+    </nav>
+    <button type="button" id="lang-btn" class="lang-btn" aria-label="Switch language to Kannada"><span id="lang-btn-text" lang="kn">ಕನ್ನಡ</span></button>
+  </div>
+</header>
+
+<div id="review-note" class="review-note" role="note" data-i18n="review">The Kannada text is machine-drafted and pending review by a native Kannada speaker.</div>
+
+<main id="main">
+
+  <section id="home" aria-labelledby="home-h">
+    <div class="hero">
+      <h1 id="home-h" data-i18n="hero.h1">Paws Haven, Mysuru</h1>
+      <p data-i18n="hero.p">A shelter for animals in Mysuru, looking for loving homes, kind donors and helping hands.</p>
+      <p>
+        <a class="btn" href="#adopt" data-i18n="hero.cta1">Meet our pets</a>
+        <a class="btn alt" href="#donate" data-i18n="hero.cta2">Donate</a>
+        <a class="btn ghost" href="#volunteer" data-i18n="hero.cta3">Volunteer</a>
+      </p>
+    </div>
+    <div class="notice" data-i18n-html="hero.notice">
+      Shelter details marked <span class="ph">[PLACEHOLDER]</span> in yellow are not yet supplied and will be replaced by the shelter. Pets and stories shown here are <strong>sample entries</strong>, not real animals or adopters.
+    </div>
+  </section>
+
+  <section id="adopt" aria-labelledby="adopt-h">
+    <h2 id="adopt-h" data-i18n="adopt.h">Adopt</h2>
+    <p data-i18n="adopt.p">Interested in a pet? Press an inquiry button to open a pre-filled message to the shelter on WhatsApp or by email.</p>
+    <div class="grid">
+      <article class="tile" data-pet="moti">
+        <span class="sample-tag" data-i18n="sample">Sample entry</span>
+        <div class="pet-photo" role="img" data-i18n-aria="alt.dog" aria-label="Sample photo placeholder: a dog">🐕</div>
+        <h3 data-i18n="moti.name">Moti</h3>
+        <ul class="facts"><li data-i18n="moti.sp">Species: Dog</li><li data-i18n="moti.age">Age: 2 years</li></ul>
+        <p data-i18n="moti.desc">Gentle and friendly, Moti enjoys walks and getting along with people. Sample description.</p>
+        <div class="actions">
+          <button type="button" class="btn" data-channel="wa" data-i18n="btn.wa">Ask on WhatsApp</button>
+          <button type="button" class="btn ghost" data-channel="mail" data-i18n="btn.mail">Ask by email</button>
+        </div>
+      </article>
+
+      <article class="tile" data-pet="chinni">
+        <span class="sample-tag" data-i18n="sample">Sample entry</span>
+        <div class="pet-photo" role="img" data-i18n-aria="alt.cat" aria-label="Sample photo placeholder: a cat">🐈</div>
+        <h3 data-i18n="chinni.name">Chinni</h3>
+        <ul class="facts"><li data-i18n="chinni.sp">Species: Cat</li><li data-i18n="chinni.age">Age: 1 year</li></ul>
+        <p data-i18n="chinni.desc">Curious and playful, Chinni likes sunny windows and soft blankets. Sample description.</p>
+        <div class="actions">
+          <button type="button" class="btn" data-channel="wa" data-i18n="btn.wa">Ask on WhatsApp</button>
+          <button type="button" class="btn ghost" data-channel="mail" data-i18n="btn.mail">Ask by email</button>
+        </div>
+      </article>
+
+      <article class="tile" data-pet="bruno">
+        <span class="sample-tag" data-i18n="sample">Sample entry</span>
+        <div class="pet-photo" role="img" data-i18n-aria="alt.puppy" aria-label="Sample photo placeholder: a puppy">🐶</div>
+        <h3 data-i18n="bruno.name">Bruno</h3>
+        <ul class="facts"><li data-i18n="bruno.sp">Species: Dog (puppy)</li><li data-i18n="bruno.age">Age: 4 months</li></ul>
+        <p data-i18n="bruno.desc">Energetic and eager to learn, Bruno needs a family with time for training. Sample description.</p>
+        <div class="actions">
+          <button type="button" class="btn" data-channel="wa" data-i18n="btn.wa">Ask on WhatsApp</button>
+          <button type="button" class="btn ghost" data-channel="mail" data-i18n="btn.mail">Ask by email</button>
+        </div>
+      </article>
+
+      <article class="tile" data-pet="meenu">
+        <span class="sample-tag" data-i18n="sample">Sample entry</span>
+        <div class="pet-photo" role="img" data-i18n-aria="alt.kitten" aria-label="Sample photo placeholder: a kitten">🐱</div>
+        <h3 data-i18n="meenu.name">Meenu</h3>
+        <ul class="facts"><li data-i18n="meenu.sp">Species: Cat (kitten)</li><li data-i18n="meenu.age">Age: 5 months</li></ul>
+        <p data-i18n="meenu.desc">Shy at first, then very affectionate. Meenu would suit a quiet home. Sample description.</p>
+        <div class="actions">
+          <button type="button" class="btn" data-channel="wa" data-i18n="btn.wa">Ask on WhatsApp</button>
+          <button type="button" class="btn ghost" data-channel="mail" data-i18n="btn.mail">Ask by email</button>
+        </div>
+      </article>
+    </div>
+    <div id="adopt-status" class="status" role="status" aria-live="polite"></div>
+  </section>
+
+  <section id="donate" aria-labelledby="donate-h">
+    <h2 id="donate-h" data-i18n="donate.h">Donate</h2>
+    <p data-i18n="donate.p">You can support the animals by transferring money directly with UPI or a bank transfer. This site does not take payments itself.</p>
+    <div class="donate-box">
+      <div class="qr" role="img" data-i18n-aria="qr.aria" aria-label="Placeholder for the shelter's UPI QR code image" data-i18n="qr.text">
+        [PLACEHOLDER] UPI QR code image to be supplied by the shelter
+      </div>
+      <div>
+        <h3 data-i18n="upi.h">UPI</h3>
+        <p data-i18n-html="upi.id">UPI ID: <span class="ph">[PLACEHOLDER: UPI ID]</span></p>
+        <h3 data-i18n="bank.h">Bank transfer</h3>
+        <table class="bank">
+          <caption class="hint" style="text-align:left;padding-bottom:.3rem" data-i18n="bank.cap">Bank details (all placeholders until supplied by the shelter)</caption>
+          <tbody>
+            <tr><th scope="row" data-i18n="bank.name">Account name</th><td><span class="ph" data-i18n="ph">[PLACEHOLDER]</span></td></tr>
+            <tr><th scope="row" data-i18n="bank.no">Account number</th><td><span class="ph" data-i18n="ph">[PLACEHOLDER]</span></td></tr>
+            <tr><th scope="row" data-i18n="bank.bank">Bank and branch</th><td><span class="ph" data-i18n="ph">[PLACEHOLDER]</span></td></tr>
+            <tr><th scope="row" data-i18n="bank.ifsc">IFSC code</th><td><span class="ph" data-i18n="ph">[PLACEHOLDER]</span></td></tr>
+          </tbody>
+        </table>
+        <p class="hint" style="margin-top:.6rem" data-i18n="donate.hint">After donating, you may message the shelter so they can match your donation. This is optional.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="volunteer" aria-labelledby="vol-h">
+    <h2 id="vol-h" data-i18n="vol.h">Volunteer</h2>
+    <p data-i18n="vol.p">Fill in the form and press the button. A pre-filled message opens in WhatsApp or your email app for you to send to the shelter. Nothing is stored or sent until you send that message yourself.</p>
+    <form class="vol" id="vol-form" novalidate>
+      <div class="field">
+        <label for="v-name" data-i18n="f.name">Full name</label>
+        <input id="v-name" name="name" type="text" autocomplete="name" required>
+      </div>
+      <div class="field">
+        <label for="v-phone" data-i18n="f.phone">Phone number</label>
+        <input id="v-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required>
+      </div>
+      <div class="field">
+        <label for="v-email" data-i18n="f.email">Email address</label>
+        <input id="v-email" name="email" type="email" autocomplete="email" required>
+      </div>
+      <div class="field">
+        <label for="v-avail" data-i18n="f.avail">Availability</label>
+        <select id="v-avail" name="availability" required>
+          <option value="" data-i18n="av.none">Choose one</option>
+          <option value="wkm" data-i18n="av.wkm">Weekday mornings</option>
+          <option value="wke" data-i18n="av.wke">Weekday evenings</option>
+          <option value="we" data-i18n="av.we">Weekends</option>
+          <option value="flex" data-i18n="av.flex">Flexible</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="v-note" data-i18n="f.note">How would you like to help? (optional)</label>
+        <textarea id="v-note" name="note" data-i18n-ph="f.noteph" placeholder="For example: dog walking, cleaning, transport, events"></textarea>
+      </div>
+      <div class="actions" style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button type="submit" class="btn" data-channel="wa" data-i18n="vol.wa">Send via WhatsApp</button>
+        <button type="submit" class="btn ghost" data-channel="mail" data-i18n="vol.mail">Send by email</button>
+      </div>
+      <div id="vol-status" class="status" role="status" aria-live="polite"></div>
+    </form>
+  </section>
+
+  <section id="stories" aria-labelledby="stories-h">
+    <h2 id="stories-h" data-i18n="stories.h">Success Stories</h2>
+    <p><span class="sample-tag" data-i18n="stories.tag">Sample entries</span> <span data-i18n="stories.p">These are illustrative examples, not real adopters or animals. Real stories will replace them.</span></p>
+    <div class="grid three">
+      <article class="tile story">
+        <h3 data-i18n="tara.n">Tara</h3>
+        <p data-i18n="tara.t">Sample story: Tara arrived shy and quiet. After a few weeks in a loving home she now greets her family at the door every evening.</p>
+      </article>
+      <article class="tile story">
+        <h3 data-i18n="simba.n">Simba</h3>
+        <p data-i18n="simba.t">Sample story: Simba the cat found a family who gave him a sunny corner and a lot of patience. He now rules the living room.</p>
+      </article>
+      <article class="tile story">
+        <h3 data-i18n="raja.n">Raja</h3>
+        <p data-i18n="raja.t">Sample story: Raja, a senior dog, was adopted by a retired couple who enjoy slow morning walks with him.</p>
+      </article>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="in">
+    <strong data-i18n="foot.name">Paws Haven, Mysuru</strong>
+    <ul>
+      <li data-i18n-html="foot.addr">Address: <span class="ph">[PLACEHOLDER: shelter address]</span></li>
+      <li data-i18n-html="foot.hours">Opening hours: <span class="ph">[PLACEHOLDER: opening hours]</span></li>
+      <li data-i18n-html="foot.phone">Phone: <span class="ph">[PLACEHOLDER: shelter phone number]</span></li>
+      <li data-i18n-html="foot.wa">WhatsApp: <span class="ph">[PLACEHOLDER: shelter WhatsApp number]</span></li>
+      <li data-i18n-html="foot.email">Email: <span class="ph">[PLACEHOLDER: shelter email address]</span></li>
+    </ul>
+    <p class="hint" data-i18n="foot.hint">This site does not store any personal data.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  // PLACEHOLDERS: replace with the shelter's real details.
+  // WhatsApp number: digits only, with country code (for example 91 followed by the number).
+  var CONFIG = {
+    whatsapp: "91XXXXXXXXXX",
+    email: "shelter-email@example.invalid"
+  };
+
+  var PH_EN = "[PLACEHOLDER";
+  var PH_KN = "[ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್";
+
+  var STR = {
+    en: {
+      "title": "Paws Haven | Animal Shelter, Mysuru",
+      "desc": "Paws Haven animal shelter in Mysuru: adopt a pet, donate, volunteer and read success stories.",
+      "skip": "Skip to content",
+      "brand.sub": "Animal shelter, Mysuru",
+      "nav.aria": "Main",
+      "nav.home": "Home", "nav.adopt": "Adopt", "nav.donate": "Donate", "nav.vol": "Volunteer", "nav.stories": "Success Stories",
+      "tog.text": "ಕನ್ನಡ",
+      "tog.aria": "Switch language to Kannada",
+      "review": "The Kannada text is machine-drafted and pending review by a native Kannada speaker.",
+      "hero.h1": "Paws Haven, Mysuru",
+      "hero.p": "A shelter for animals in Mysuru, looking for loving homes, kind donors and helping hands.",
+      "hero.cta1": "Meet our pets", "hero.cta2": "Donate", "hero.cta3": "Volunteer",
+      "hero.notice": "Shelter details marked <span class=\"ph\">[PLACEHOLDER]</span> in yellow are not yet supplied and will be replaced by the shelter. Pets and stories shown here are <strong>sample entries</strong>, not real animals or adopters.",
+      "ph": "[PLACEHOLDER]",
+      "sample": "Sample entry",
+      "adopt.h": "Adopt",
+      "adopt.p": "Interested in a pet? Press an inquiry button to open a pre-filled message to the shelter on WhatsApp or by email.",
+      "alt.dog": "Sample photo placeholder: a dog",
+      "alt.cat": "Sample photo placeholder: a cat",
+      "alt.puppy": "Sample photo placeholder: a puppy",
+      "alt.kitten": "Sample photo placeholder: a kitten",
+      "moti.name": "Moti", "moti.sp": "Species: Dog", "moti.age": "Age: 2 years",
+      "moti.desc": "Gentle and friendly, Moti enjoys walks and getting along with people. Sample description.",
+      "chinni.name": "Chinni", "chinni.sp": "Species: Cat", "chinni.age": "Age: 1 year",
+      "chinni.desc": "Curious and playful, Chinni likes sunny windows and soft blankets. Sample description.",
+      "bruno.name": "Bruno", "bruno.sp": "Species: Dog (puppy)", "bruno.age": "Age: 4 months",
+      "bruno.desc": "Energetic and eager to learn, Bruno needs a family with time for training. Sample description.",
+      "meenu.name": "Meenu", "meenu.sp": "Species: Cat (kitten)", "meenu.age": "Age: 5 months",
+      "meenu.desc": "Shy at first, then very affectionate. Meenu would suit a quiet home. Sample description.",
+      "btn.wa": "Ask on WhatsApp", "btn.mail": "Ask by email",
+      "donate.h": "Donate",
+      "donate.p": "You can support the animals by transferring money directly with UPI or a bank transfer. This site does not take payments itself.",
+      "qr.aria": "Placeholder for the shelter's UPI QR code image",
+      "qr.text": "[PLACEHOLDER] UPI QR code image to be supplied by the shelter",
+      "upi.h": "UPI",
+      "upi.id": "UPI ID: <span class=\"ph\">[PLACEHOLDER: UPI ID]</span>",
+      "bank.h": "Bank transfer",
+      "bank.cap": "Bank details (all placeholders until supplied by the shelter)",
+      "bank.name": "Account name", "bank.no": "Account number", "bank.bank": "Bank and branch", "bank.ifsc": "IFSC code",
+      "donate.hint": "After donating, you may message the shelter so they can match your donation. This is optional.",
+      "vol.h": "Volunteer",
+      "vol.p": "Fill in the form and press the button. A pre-filled message opens in WhatsApp or your email app for you to send to the shelter. Nothing is stored or sent until you send that message yourself.",
+      "f.name": "Full name", "f.phone": "Phone number", "f.email": "Email address", "f.avail": "Availability",
+      "av.none": "Choose one", "av.wkm": "Weekday mornings", "av.wke": "Weekday evenings", "av.we": "Weekends", "av.flex": "Flexible",
+      "f.note": "How would you like to help? (optional)",
+      "f.noteph": "For example: dog walking, cleaning, transport, events",
+      "vol.wa": "Send via WhatsApp", "vol.mail": "Send by email",
+      "stories.h": "Success Stories",
+      "stories.tag": "Sample entries",
+      "stories.p": "These are illustrative examples, not real adopters or animals. Real stories will replace them.",
+      "tara.n": "Tara", "tara.t": "Sample story: Tara arrived shy and quiet. After a few weeks in a loving home she now greets her family at the door every evening.",
+      "simba.n": "Simba", "simba.t": "Sample story: Simba the cat found a family who gave him a sunny corner and a lot of patience. He now rules the living room.",
+      "raja.n": "Raja", "raja.t": "Sample story: Raja, a senior dog, was adopted by a retired couple who enjoy slow morning walks with him.",
+      "foot.name": "Paws Haven, Mysuru",
+      "foot.addr": "Address: <span class=\"ph\">[PLACEHOLDER: shelter address]</span>",
+      "foot.hours": "Opening hours: <span class=\"ph\">[PLACEHOLDER: opening hours]</span>",
+      "foot.phone": "Phone: <span class=\"ph\">[PLACEHOLDER: shelter phone number]</span>",
+      "foot.wa": "WhatsApp: <span class=\"ph\">[PLACEHOLDER: shelter WhatsApp number]</span>",
+      "foot.email": "Email: <span class=\"ph\">[PLACEHOLDER: shelter email address]</span>",
+      "foot.hint": "This site does not store any personal data.",
+      "adopt.subject": "Adoption inquiry: {pet}",
+      "adopt.body": "Hello Paws Haven, I am interested in adopting {pet}. Could you please share the next steps? Thank you.",
+      "vol.subject": "Volunteer sign-up: {name}",
+      "vol.hello": "Hello Paws Haven, I would like to volunteer.",
+      "vol.l.name": "Name", "vol.l.phone": "Phone", "vol.l.email": "Email", "vol.l.avail": "Availability",
+      "vol.l.note": "How I can help",
+      "st.fill": "Please fill in your name, phone, email and availability.",
+      "st.phwa": "The shelter's WhatsApp number is still a placeholder, so no message was opened. Prepared message:",
+      "st.phmail": "The shelter's email address is still a placeholder, so no message was opened. Prepared message:",
+      "st.subj": "Subject",
+      "st.openwa": "Opening your WhatsApp with a pre-filled message. Please press send there.",
+      "st.openmail": "Opening your email app with a pre-filled message. Please press send there."
+    },
+    kn: {
+      "title": "Paws Haven | ಪ್ರಾಣಿ ಆಶ್ರಯ ಕೇಂದ್ರ, ಮೈಸೂರು",
+      "desc": "ಮೈಸೂರಿನ Paws Haven ಪ್ರಾಣಿ ಆಶ್ರಯ ಕೇಂದ್ರ: ಪ್ರಾಣಿಯನ್ನು ದತ್ತು ಪಡೆಯಿರಿ, ದೇಣಿಗೆ ನೀಡಿ, ಸ್ವಯಂಸೇವಕರಾಗಿ ಮತ್ತು ಯಶೋಗಾಥೆಗಳನ್ನು ಓದಿ.",
+      "skip": "ವಿಷಯಕ್ಕೆ ಹೋಗಿ",
+      "brand.sub": "ಪ್ರಾಣಿ ಆಶ್ರಯ ಕೇಂದ್ರ, ಮೈಸೂರು",
+      "nav.aria": "ಮುಖ್ಯ ಮೆನು",
+      "nav.home": "ಮುಖಪುಟ", "nav.adopt": "ದತ್ತು ಪಡೆಯಿರಿ", "nav.donate": "ದೇಣಿಗೆ", "nav.vol": "ಸ್ವಯಂಸೇವೆ", "nav.stories": "ಯಶೋಗಾಥೆಗಳು",
+      "tog.text": "English",
+      "tog.aria": "ಭಾಷೆಯನ್ನು ಇಂಗ್ಲಿಷ್‌ಗೆ ಬದಲಿಸಿ",
+      "review": "ಕನ್ನಡ ಪಠ್ಯವನ್ನು ಯಂತ್ರದ ಮೂಲಕ ಕರಡು ಮಾಡಲಾಗಿದೆ ಮತ್ತು ಕನ್ನಡ ಮಾತೃಭಾಷಿಕರ ಪರಿಶೀಲನೆ ಬಾಕಿ ಇದೆ.",
+      "hero.h1": "ಪಾವ್ಸ್ ಹೆವನ್ (Paws Haven), ಮೈಸೂರು",
+      "hero.p": "ಮೈಸೂರಿನಲ್ಲಿರುವ ಪ್ರಾಣಿಗಳ ಆಶ್ರಯ ಕೇಂದ್ರ. ಪ್ರೀತಿಯ ಮನೆಗಳು, ದಯಾಳು ದಾನಿಗಳು ಮತ್ತು ಸಹಾಯದ ಕೈಗಳನ್ನು ಹುಡುಕುತ್ತಿದ್ದೇವೆ.",
+      "hero.cta1": "ನಮ್ಮ ಪ್ರಾಣಿಗಳನ್ನು ಭೇಟಿಯಾಗಿ", "hero.cta2": "ದೇಣಿಗೆ ನೀಡಿ", "hero.cta3": "ಸ್ವಯಂಸೇವಕರಾಗಿ",
+      "hero.notice": "ಹಳದಿ ಬಣ್ಣದಲ್ಲಿ <span class=\"ph\">[ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್]</span> ಎಂದು ಗುರುತಿಸಿದ ಆಶ್ರಯ ಕೇಂದ್ರದ ವಿವರಗಳನ್ನು ಇನ್ನೂ ಒದಗಿಸಿಲ್ಲ; ಆಶ್ರಯ ಕೇಂದ್ರವೇ ಅವುಗಳನ್ನು ಬದಲಾಯಿಸುತ್ತದೆ. ಇಲ್ಲಿ ತೋರಿಸಿರುವ ಪ್ರಾಣಿಗಳು ಮತ್ತು ಕಥೆಗಳು <strong>ಮಾದರಿ ನಮೂದುಗಳು</strong>, ನಿಜವಾದ ಪ್ರಾಣಿಗಳು ಅಥವಾ ದತ್ತು ಪಡೆದವರಲ್ಲ.",
+      "ph": "[ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್]",
+      "sample": "ಮಾದರಿ ನಮೂದು",
+      "adopt.h": "ದತ್ತು ಪಡೆಯಿರಿ",
+      "adopt.p": "ಯಾವುದಾದರೂ ಪ್ರಾಣಿಯಲ್ಲಿ ಆಸಕ್ತಿ ಇದೆಯೇ? ವಿಚಾರಣೆ ಬಟನ್ ಒತ್ತಿದರೆ ವಾಟ್ಸ್‌ಆ್ಯಪ್ ಅಥವಾ ಇಮೇಲ್‌ನಲ್ಲಿ ಆಶ್ರಯ ಕೇಂದ್ರಕ್ಕೆ ಮೊದಲೇ ಭರ್ತಿ ಮಾಡಿದ ಸಂದೇಶ ತೆರೆಯುತ್ತದೆ.",
+      "alt.dog": "ಮಾದರಿ ಫೋಟೋದ ಸ್ಥಳ: ನಾಯಿ",
+      "alt.cat": "ಮಾದರಿ ಫೋಟೋದ ಸ್ಥಳ: ಬೆಕ್ಕು",
+      "alt.puppy": "ಮಾದರಿ ಫೋಟೋದ ಸ್ಥಳ: ನಾಯಿಮರಿ",
+      "alt.kitten": "ಮಾದರಿ ಫೋಟೋದ ಸ್ಥಳ: ಬೆಕ್ಕಿನ ಮರಿ",
+      "moti.name": "ಮೋತಿ", "moti.sp": "ಜಾತಿ: ನಾಯಿ", "moti.age": "ವಯಸ್ಸು: 2 ವರ್ಷ",
+      "moti.desc": "ಸೌಮ್ಯ ಮತ್ತು ಸ್ನೇಹಪರ ಸ್ವಭಾವದ ಮೋತಿಗೆ ವಾಕಿಂಗ್ ಹೋಗುವುದು ಮತ್ತು ಜನರೊಂದಿಗೆ ಬೆರೆಯುವುದು ಇಷ್ಟ. ಮಾದರಿ ವಿವರಣೆ.",
+      "chinni.name": "ಚಿನ್ನಿ", "chinni.sp": "ಜಾತಿ: ಬೆಕ್ಕು", "chinni.age": "ವಯಸ್ಸು: 1 ವರ್ಷ",
+      "chinni.desc": "ಕುತೂಹಲ ಮತ್ತು ಆಟದ ಸ್ವಭಾವದ ಚಿನ್ನಿಗೆ ಬಿಸಿಲು ಬೀಳುವ ಕಿಟಕಿ ಮತ್ತು ಮೃದುವಾದ ಹೊದಿಕೆಗಳು ಇಷ್ಟ. ಮಾದರಿ ವಿವರಣೆ.",
+      "bruno.name": "ಬ್ರೂನೋ", "bruno.sp": "ಜಾತಿ: ನಾಯಿ (ಮರಿ)", "bruno.age": "ವಯಸ್ಸು: 4 ತಿಂಗಳು",
+      "bruno.desc": "ಚುರುಕು ಮತ್ತು ಕಲಿಯುವ ಉತ್ಸಾಹದ ಬ್ರೂನೋಗೆ ತರಬೇತಿಗೆ ಸಮಯ ನೀಡುವ ಕುಟುಂಬ ಬೇಕು. ಮಾದರಿ ವಿವರಣೆ.",
+      "meenu.name": "ಮೀನು", "meenu.sp": "ಜಾತಿ: ಬೆಕ್ಕು (ಮರಿ)", "meenu.age": "ವಯಸ್ಸು: 5 ತಿಂಗಳು",
+      "meenu.desc": "ಮೊದಲಿಗೆ ನಾಚಿಕೆ, ನಂತರ ತುಂಬಾ ಪ್ರೀತಿಯಿಂದ ಇರುತ್ತದೆ. ಮೀನುಗೆ ಶಾಂತವಾದ ಮನೆ ಸೂಕ್ತ. ಮಾದರಿ ವಿವರಣೆ.",
+      "btn.wa": "ವಾಟ್ಸ್‌ಆ್ಯಪ್‌ನಲ್ಲಿ ಕೇಳಿ", "btn.mail": "ಇಮೇಲ್ ಮೂಲಕ ಕೇಳಿ",
+      "donate.h": "ದೇಣಿಗೆ ನೀಡಿ",
+      "donate.p": "ಯುಪಿಐ ಅಥವಾ ಬ್ಯಾಂಕ್ ವರ್ಗಾವಣೆ ಮೂಲಕ ನೇರವಾಗಿ ಹಣ ಕಳುಹಿಸಿ ಪ್ರಾಣಿಗಳಿಗೆ ಬೆಂಬಲ ನೀಡಬಹುದು. ಈ ವೆಬ್‌ಸೈಟ್ ಸ್ವತಃ ಪಾವತಿಗಳನ್ನು ಸ್ವೀಕರಿಸುವುದಿಲ್ಲ.",
+      "qr.aria": "ಆಶ್ರಯ ಕೇಂದ್ರದ ಯುಪಿಐ ಕ್ಯೂಆರ್ ಕೋಡ್ ಚಿತ್ರದ ಸ್ಥಳ",
+      "qr.text": "[ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್] ಯುಪಿಐ ಕ್ಯೂಆರ್ ಕೋಡ್ ಚಿತ್ರವನ್ನು ಆಶ್ರಯ ಕೇಂದ್ರ ಒದಗಿಸಲಿದೆ",
+      "upi.h": "ಯುಪಿಐ",
+      "upi.id": "ಯುಪಿಐ ಐಡಿ: <span class=\"ph\">[ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್: ಯುಪಿಐ ಐಡಿ]</span>",
+      "bank.h": "ಬ್ಯಾಂಕ್ ವರ್ಗಾವಣೆ",
+      "bank.cap": "ಬ್ಯಾಂಕ್ ವಿವರಗಳು (ಆಶ್ರಯ ಕೇಂದ್ರ ಒದಗಿಸುವವರೆಗೆ ಎಲ್ಲವೂ ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್‌ಗಳು)",
+      "bank.name": "ಖಾತೆದಾರರ ಹೆಸರು", "bank.no": "ಖಾತೆ ಸಂಖ್ಯೆ", "bank.bank": "ಬ್ಯಾಂಕ್ ಮತ್ತು ಶಾಖೆ", "bank.ifsc": "ಐಎಫ್‌ಎಸ್‌ಸಿ ಕೋಡ್",
+      "donate.hint": "ದೇಣಿಗೆ ನೀಡಿದ ನಂತರ, ನಿಮ್ಮ ದೇಣಿಗೆಯನ್ನು ಹೊಂದಿಸಿಕೊಳ್ಳಲು ಆಶ್ರಯ ಕೇಂದ್ರಕ್ಕೆ ಸಂದೇಶ ಕಳುಹಿಸಬಹುದು. ಇದು ಐಚ್ಛಿಕ.",
+      "vol.h": "ಸ್ವಯಂಸೇವೆ",
+      "vol.p": "ಫಾರ್ಮ್ ಭರ್ತಿ ಮಾಡಿ ಬಟನ್ ಒತ್ತಿ. ಆಶ್ರಯ ಕೇಂದ್ರಕ್ಕೆ ಕಳುಹಿಸಲು ವಾಟ್ಸ್‌ಆ್ಯಪ್ ಅಥವಾ ನಿಮ್ಮ ಇಮೇಲ್ ಆ್ಯಪ್‌ನಲ್ಲಿ ಮೊದಲೇ ಭರ್ತಿ ಮಾಡಿದ ಸಂದೇಶ ತೆರೆಯುತ್ತದೆ. ನೀವೇ ಆ ಸಂದೇಶವನ್ನು ಕಳುಹಿಸುವವರೆಗೆ ಏನನ್ನೂ ಸಂಗ್ರಹಿಸುವುದಿಲ್ಲ ಅಥವಾ ಕಳುಹಿಸುವುದಿಲ್ಲ.",
+      "f.name": "ಪೂರ್ಣ ಹೆಸರು", "f.phone": "ಫೋನ್ ಸಂಖ್ಯೆ", "f.email": "ಇಮೇಲ್ ವಿಳಾಸ", "f.avail": "ಲಭ್ಯತೆ",
+      "av.none": "ಒಂದನ್ನು ಆರಿಸಿ", "av.wkm": "ವಾರದ ದಿನಗಳ ಬೆಳಗ್ಗೆ", "av.wke": "ವಾರದ ದಿನಗಳ ಸಂಜೆ", "av.we": "ವಾರಾಂತ್ಯ", "av.flex": "ಹೊಂದಿಕೊಳ್ಳಬಲ್ಲೆ",
+      "f.note": "ನೀವು ಹೇಗೆ ಸಹಾಯ ಮಾಡಲು ಬಯಸುತ್ತೀರಿ? (ಐಚ್ಛಿಕ)",
+      "f.noteph": "ಉದಾಹರಣೆ: ನಾಯಿಗಳನ್ನು ವಾಕಿಂಗ್ ಕರೆದೊಯ್ಯುವುದು, ಸ್ವಚ್ಛತೆ, ಸಾಗಣೆ, ಕಾರ್ಯಕ್ರಮಗಳು",
+      "vol.wa": "ವಾಟ್ಸ್‌ಆ್ಯಪ್ ಮೂಲಕ ಕಳುಹಿಸಿ", "vol.mail": "ಇಮೇಲ್ ಮೂಲಕ ಕಳುಹಿಸಿ",
+      "stories.h": "ಯಶೋಗಾಥೆಗಳು",
+      "stories.tag": "ಮಾದರಿ ನಮೂದುಗಳು",
+      "stories.p": "ಇವು ವಿವರಣೆಗಾಗಿ ಕೊಟ್ಟ ಉದಾಹರಣೆಗಳು; ನಿಜವಾದ ದತ್ತು ಪಡೆದವರು ಅಥವಾ ಪ್ರಾಣಿಗಳಲ್ಲ. ನಿಜವಾದ ಕಥೆಗಳು ಇವುಗಳ ಸ್ಥಾನ ಪಡೆಯುತ್ತವೆ.",
+      "tara.n": "ತಾರಾ", "tara.t": "ಮಾದರಿ ಕಥೆ: ತಾರಾ ನಾಚಿಕೆ ಮತ್ತು ಮೌನದಿಂದ ಬಂದಿತ್ತು. ಪ್ರೀತಿಯ ಮನೆಯಲ್ಲಿ ಕೆಲವು ವಾರಗಳ ನಂತರ ಈಗ ಪ್ರತಿ ಸಂಜೆ ಬಾಗಿಲಲ್ಲೇ ಕುಟುಂಬವನ್ನು ಸ್ವಾಗತಿಸುತ್ತದೆ.",
+      "simba.n": "ಸಿಂಬಾ", "simba.t": "ಮಾದರಿ ಕಥೆ: ಬೆಕ್ಕು ಸಿಂಬಾಗೆ ಬಿಸಿಲಿನ ಮೂಲೆ ಮತ್ತು ಬಹಳಷ್ಟು ತಾಳ್ಮೆ ನೀಡಿದ ಕುಟುಂಬ ಸಿಕ್ಕಿತು. ಈಗ ಅದು ಹಾಲ್‌ನ ರಾಜನಂತೆ ಇದೆ.",
+      "raja.n": "ರಾಜ", "raja.t": "ಮಾದರಿ ಕಥೆ: ಹಿರಿಯ ನಾಯಿ ರಾಜನನ್ನು ನಿವೃತ್ತ ದಂಪತಿ ದತ್ತು ಪಡೆದರು; ಅವರು ಅದರೊಂದಿಗೆ ನಿಧಾನವಾಗಿ ಬೆಳಗಿನ ನಡಿಗೆ ಆನಂದಿಸುತ್ತಾರೆ.",
+      "foot.name": "ಪಾವ್ಸ್ ಹೆವನ್ (Paws Haven), ಮೈಸೂರು",
+      "foot.addr": "ವಿಳಾಸ: <span class=\"ph\">[ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್: ಆಶ್ರಯ ಕೇಂದ್ರದ ವಿಳಾಸ]</span>",
+      "foot.hours": "ತೆರೆಯುವ ವೇಳೆ: <span class=\"ph\">[ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್: ತೆರೆಯುವ ವೇಳೆ]</span>",
+      "foot.phone": "ಫೋನ್: <span class=\"ph\">[ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್: ಆಶ್ರಯ ಕೇಂದ್ರದ ಫೋನ್ ಸಂಖ್ಯೆ]</span>",
+      "foot.wa": "ವಾಟ್ಸ್‌ಆ್ಯಪ್: <span class=\"ph\">[ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್: ಆಶ್ರಯ ಕೇಂದ್ರದ ವಾಟ್ಸ್‌ಆ್ಯಪ್ ಸಂಖ್ಯೆ]</span>",
+      "foot.email": "ಇಮೇಲ್: <span class=\"ph\">[ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್: ಆಶ್ರಯ ಕೇಂದ್ರದ ಇಮೇಲ್ ವಿಳಾಸ]</span>",
+      "foot.hint": "ಈ ವೆಬ್‌ಸೈಟ್ ಯಾವುದೇ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಸಂಗ್ರಹಿಸುವುದಿಲ್ಲ.",
+      "adopt.subject": "ದತ್ತು ವಿಚಾರಣೆ: {pet}",
+      "adopt.body": "ನಮಸ್ಕಾರ ಪಾವ್ಸ್ ಹೆವನ್, ನನಗೆ {pet} ಅನ್ನು ದತ್ತು ಪಡೆಯುವ ಆಸಕ್ತಿ ಇದೆ. ಮುಂದಿನ ಹಂತಗಳನ್ನು ದಯವಿಟ್ಟು ತಿಳಿಸುವಿರಾ? ಧನ್ಯವಾದಗಳು.",
+      "vol.subject": "ಸ್ವಯಂಸೇವಕ ನೋಂದಣಿ: {name}",
+      "vol.hello": "ನಮಸ್ಕಾರ ಪಾವ್ಸ್ ಹೆವನ್, ನನಗೆ ಸ್ವಯಂಸೇವೆ ಮಾಡುವ ಆಸಕ್ತಿ ಇದೆ.",
+      "vol.l.name": "ಹೆಸರು", "vol.l.phone": "ಫೋನ್", "vol.l.email": "ಇಮೇಲ್", "vol.l.avail": "ಲಭ್ಯತೆ",
+      "vol.l.note": "ನಾನು ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಲ್ಲೆ",
+      "st.fill": "ದಯವಿಟ್ಟು ನಿಮ್ಮ ಹೆಸರು, ಫೋನ್, ಇಮೇಲ್ ಮತ್ತು ಲಭ್ಯತೆಯನ್ನು ಭರ್ತಿ ಮಾಡಿ.",
+      "st.phwa": "ಆಶ್ರಯ ಕೇಂದ್ರದ ವಾಟ್ಸ್‌ಆ್ಯಪ್ ಸಂಖ್ಯೆ ಇನ್ನೂ ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್ ಆಗಿದೆ, ಆದ್ದರಿಂದ ಯಾವುದೇ ಸಂದೇಶ ತೆರೆದಿಲ್ಲ. ಸಿದ್ಧಪಡಿಸಿದ ಸಂದೇಶ:",
+      "st.phmail": "ಆಶ್ರಯ ಕೇಂದ್ರದ ಇಮೇಲ್ ವಿಳಾಸ ಇನ್ನೂ ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್ ಆಗಿದೆ, ಆದ್ದರಿಂದ ಯಾವುದೇ ಸಂದೇಶ ತೆರೆದಿಲ್ಲ. ಸಿದ್ಧಪಡಿಸಿದ ಸಂದೇಶ:",
+      "st.subj": "ವಿಷಯ",
+      "st.openwa": "ಮೊದಲೇ ಭರ್ತಿ ಮಾಡಿದ ಸಂದೇಶದೊಂದಿಗೆ ನಿಮ್ಮ ವಾಟ್ಸ್‌ಆ್ಯಪ್ ತೆರೆಯಲಾಗುತ್ತಿದೆ. ದಯವಿಟ್ಟು ಅಲ್ಲಿ ಕಳುಹಿಸಿ ಒತ್ತಿ.",
+      "st.openmail": "ಮೊದಲೇ ಭರ್ತಿ ಮಾಡಿದ ಸಂದೇಶದೊಂದಿಗೆ ನಿಮ್ಮ ಇಮೇಲ್ ಆ್ಯಪ್ ತೆರೆಯಲಾಗುತ್ತಿದೆ. ದಯವಿಟ್ಟು ಅಲ್ಲಿ ಕಳುಹಿಸಿ ಒತ್ತಿ."
+    }
+  };
+
+  var lang = "en";
+
+  function t(key, vars) {
+    var s = STR[lang][key];
+    if (s === undefined) { s = STR.en[key]; }
+    if (s === undefined) { s = key; }
+    if (vars) {
+      Object.keys(vars).forEach(function (k) { s = s.split("{" + k + "}").join(vars[k]); });
+    }
+    return s;
+  }
+
+  var adoptStatus = document.getElementById("adopt-status");
+  var volStatus = document.getElementById("vol-status");
+  var langBtn = document.getElementById("lang-btn");
+  var langBtnText = document.getElementById("lang-btn-text");
+
+  function apply() {
+    document.documentElement.lang = lang === "kn" ? "kn" : "en";
+    document.title = t("title");
+    var md = document.querySelector('meta[name="description"]');
+    if (md) { md.setAttribute("content", t("desc")); }
+
+    document.querySelectorAll("[data-i18n]").forEach(function (el) {
+      el.textContent = t(el.getAttribute("data-i18n"));
+    });
+    document.querySelectorAll("[data-i18n-html]").forEach(function (el) {
+      el.innerHTML = t(el.getAttribute("data-i18n-html"));
+    });
+    document.querySelectorAll("[data-i18n-aria]").forEach(function (el) {
+      el.setAttribute("aria-label", t(el.getAttribute("data-i18n-aria")));
+    });
+    document.querySelectorAll("[data-i18n-ph]").forEach(function (el) {
+      el.setAttribute("placeholder", t(el.getAttribute("data-i18n-ph")));
+    });
+
+    // Toggle shows the name of the other language, in that language's own script.
+    langBtnText.textContent = t("tog.text");
+    langBtnText.setAttribute("lang", lang === "en" ? "kn" : "en");
+    langBtn.setAttribute("aria-label", t("tog.aria"));
+
+    // Old status messages would be in the previous language, so clear them.
+    adoptStatus.textContent = "";
+    volStatus.textContent = "";
+  }
+
+  langBtn.addEventListener("click", function () {
+    lang = lang === "en" ? "kn" : "en";
+    apply();
+  });
+
+  // Dev check: warn in the console if any English key has no Kannada string.
+  Object.keys(STR.en).forEach(function (k) {
+    if (STR.kn[k] === undefined) { console.warn("Missing Kannada string:", k); }
+  });
+
+  function isPlaceholder(v) {
+    return /X{3,}|PLACEHOLDER|example\.invalid/i.test(v);
+  }
+
+  function buildLink(channel, subject, body) {
+    if (channel === "wa") {
+      return "https://wa.me/" + CONFIG.whatsapp + "?text=" + encodeURIComponent(body);
+    }
+    return "mailto:" + CONFIG.email +
+      "?subject=" + encodeURIComponent(subject) +
+      "&body=" + encodeURIComponent(body);
+  }
+
+  // Opens the pre-filled message. If the shelter contact is still a placeholder,
+  // shows the prepared message instead of opening a broken link.
+  function dispatch(channel, subject, body, statusEl) {
+    var url = buildLink(channel, subject, body);
+    var target = channel === "wa" ? CONFIG.whatsapp : CONFIG.email;
+    if (isPlaceholder(target)) {
+      statusEl.textContent =
+        t(channel === "wa" ? "st.phwa" : "st.phmail") + "\n\n" +
+        (channel === "mail" ? t("st.subj") + ": " + subject + "\n" : "") + body;
+      return;
+    }
+    statusEl.textContent = t(channel === "wa" ? "st.openwa" : "st.openmail");
+    if (channel === "wa") {
+      window.open(url, "_blank", "noopener");
+    } else {
+      window.location.href = url;
+    }
+  }
+
+  // Adoption inquiries
+  document.querySelectorAll("#adopt [data-pet] button[data-channel]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var key = btn.closest("[data-pet]").getAttribute("data-pet");
+      var pet = t(key + ".name");
+      dispatch(btn.getAttribute("data-channel"),
+        t("adopt.subject", { pet: pet }),
+        t("adopt.body", { pet: pet }),
+        adoptStatus);
+    });
+  });
+
+  // Volunteer sign-up
+  var form = document.getElementById("vol-form");
+  var channel = "wa";
+  form.querySelectorAll("button[type=submit]").forEach(function (b) {
+    b.addEventListener("click", function () { channel = b.getAttribute("data-channel"); });
+  });
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = form.elements["name"].value.trim();
+    var phone = form.elements["phone"].value.trim();
+    var email = form.elements["email"].value.trim();
+    var avail = form.elements["availability"].value;
+    var note = form.elements["note"].value.trim();
+    if (!name || !phone || !email || !avail) {
+      volStatus.textContent = t("st.fill");
+      return;
+    }
+    var body = t("vol.hello") + "\n" +
+      t("vol.l.name") + ": " + name + "\n" +
+      t("vol.l.phone") + ": " + phone + "\n" +
+      t("vol.l.email") + ": " + email + "\n" +
+      t("vol.l.avail") + ": " + t("av." + avail) +
+      (note ? "\n" + t("vol.l.note") + ": " + note : "");
+    dispatch(channel, t("vol.subject", { name: name }), body, volStatus);
+  });
+
+  apply();
+})();
+</script>
+</body>
+</html>

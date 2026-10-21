@@ -1,0 +1,45 @@
+{
+  "statement": "Build a one-page, mobile-first website for Brew Lab, Indiranagar, Bengaluru, that shows the menu with prices, opening hours and location, and lets visitors pre-order for pickup and pay online. It also has a 5-article blog, an Instagram feed, a photo gallery and lots of animations, in a warm and modern look.",
+  "site_name": "Brew Lab",
+  "audience": "Local customers in and around Indiranagar, Bengaluru, mostly on phones, who want to check the menu, hours and location and pre-order coffee for pickup.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file; CDN libraries allowed; no build step",
+    "Mobile-first: viewport meta tag, base styles for small screens, min-width media queries for larger ones",
+    "Warm and modern look: warm palette, clean type, generous spacing",
+    "Prices shown in INR (₹)",
+    "Animations respect prefers-reduced-motion",
+    "Readable text contrast and tap targets of at least 44px"
+  ],
+  "rules": [
+    "Never invent facts: any missing business detail is shown as a visibly marked placeholder, for example [PLACEHOLDER: opening hours]",
+    "No secret keys, tokens or passwords in the file; only a clearly marked placeholder for a public payment key",
+    "Placeholder images and blog text must be labelled as placeholders, not presented as real"
+  ],
+  "done_when": [
+    "The site is one HTML file with inline or CDN CSS and JS, one page with section anchors and a nav linking to them",
+    "A menu section lists items grouped by category, each with a ₹ price or a marked price placeholder",
+    "An opening hours section shows hours for every day of the week, real or marked placeholder",
+    "A location section names Indiranagar, Bengaluru and has an address (or marked placeholder) and a map link or embed",
+    "A pre-order for pickup form lets the visitor choose items and quantities, enter name, phone and pickup time, and shows a running total",
+    "The pre-order flow includes an online payment step using a CDN checkout or payment link, with a marked placeholder key and no secrets",
+    "A blog section contains 5 articles, each with a title and body text, labelled as placeholder content where facts are unknown",
+    "An Instagram feed section is present, with a marked placeholder handle and a grid of posts or an embed",
+    "A photo gallery section has at least 6 images, marked as placeholders where real photos are missing",
+    "Animations are present: scroll-reveal on sections, hover or press effects on buttons and cards, and a hero entrance, with a prefers-reduced-motion rule",
+    "The file has a viewport meta tag and CSS written mobile-first with min-width media queries",
+    "Every missing business fact appears on the page as a visibly marked placeholder"
+  ],
+  "open_inputs": [
+    "Menu items and prices",
+    "Opening hours for each day",
+    "Full street address and map location",
+    "Pickup time rules and slot length",
+    "Payment provider choice and its public key (or payment link)",
+    "Phone number and contact email",
+    "Instagram handle",
+    "Real photos for the gallery and hero",
+    "Blog topics, or real article text for the 5 articles",
+    "Brand colours, logo and any brand voice notes"
+  ],
+  "dropped_from_brief": []
+}

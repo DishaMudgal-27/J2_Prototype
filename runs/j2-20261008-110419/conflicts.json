@@ -1,0 +1,609 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 1,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 1",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 26,
+        "text": "@Priority Eight workflows cover items 1, 3, 5, 6, 7, 8, 9, 11, 12, 13 and 15 at rate-card minimums, total 121. The two W-2 revisions fix F-1 and R-6 (title, header tap target, nav, script that hides links) and add the order links and sizes. The six new sections each add their own section. The nav fix depends on every new section id, so it runs last. Budget is 0 of 40 left, so the 121 needs Priority's grant and an increase from the Requester via Identity. F-3 to F-13 and F-15 are covered by their items, not priced again as fixes.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 27,
+        "text": "@Adaptation GRANT all eight at rate-card minimums, 121 in total. Each price matches its parts (25, 10, 10, 20, 10, 10, 10, 26), and the nav fix's two fix parts are 8 each, one per finding. Remaining budget is 0, so no run starts until Identity confirms the Requester's Option A top-up of at least 121. Run wf-nav-fix last, and no workflow may spend past its envelope.",
+        "position": "REFUSE: nothing",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 29,
+        "text": "@Priority Reshaped to the bare minimum of 105 by dropping the two fix parts (F-1, R-6) from the nav workflow, so the nav workflow now covers items 1 and 15 only. I can't get below the rate-card minimums for items 1, 3, 5 to 9 and 11 to 15. The remaining budget is 0, so any grant needs Identity to confirm the Requester's Option A top-up of at least 105. The cost of this cut is that the 160x31 header tap target (R-6) stays open as a known warning.",
+        "position": "Sizes and WhatsApp order links (25), Size guide (10), New arrivals (10), Lookbook (20), Return and exchange policy (10), Customer reviews (10), Delivery details (10), Title, navigation and link repair (10)",
+        "agree": false
+      },
+      {
+        "n": 3,
+        "who": "priority",
+        "msg": 30,
+        "text": "@Adaptation COUNTER: the nav workflow is underpriced. Items 1 and 15 need two page_section parts (20), not one (10), so the true minimum for items 1, 3, 5 to 9 and 11 to 13 and 15 is 115, not 105. I also fund the R-6 fix (8) because Audit counts the 160x31 tap target as a workability problem, so the total is 123. No budget remains, so no run starts until @Identity confirms the Requester's Option A top-up of at least 123.",
+        "position": "COUNTER: Sizes and WhatsApp order links (25), Size guide (10), New arrivals (10), Lookbook (20), Return and exchange policy (10), Customer reviews (10), Delivery details (10), Title, navigation and link repair (28)",
+        "agree": false
+      },
+      {
+        "n": 4,
+        "who": "adaptation",
+        "msg": 31,
+        "text": "@Priority Accepted. The 123 is correct (25+10+10+20+10+10+10+28) and covers items 1, 3, 5 to 9, 11 to 13 and 15, and it also fixes R-6. Budget is 0, so please take this to @Identity to confirm a Requester top-up of at least 123 before any run starts. The nav workflow stays last.",
+        "position": "accepts Priority's offer",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "priority",
+    "outcome": "Adaptation accepted Priority's COUNTER: Sizes and WhatsApp order links (25), Size guide (10), New arrivals (10), Lookbook (20), Return and exchange policy (10), Customer reviews (10), Delivery details (10), Title, navigation and link repair (28) goes to the validator.",
+    "priority_final": [
+      {
+        "id": "wf-orders",
+        "name": "Sizes and WhatsApp order links",
+        "goal_gap": "Cards have no WhatsApp order link and size data is unpaid (F-3, F-7).",
+        "expected_outcome": "Every product card has an Order on WhatsApp link to wa.me/910000011111 with the product name pre-filled, and the exact sizes are on the cards.",
+        "outputs": [
+          "10 order links",
+          "size data on cards"
+        ],
+        "completion_check": "10 links point to wa.me/910000011111 with the product name in the text param, and sizes match the brief, including Free for 3 sarees and 2 dupattas.",
+        "dependencies": [
+          "wf-catalogue"
+        ],
+        "parts": [
+          "page_section",
+          "form"
+        ],
+        "covers": [
+          3,
+          7
+        ],
+        "fixes": [],
+        "revises": "W-2",
+        "estimated_resources": {
+          "money": 25,
+          "calls": 2,
+          "time_minutes": 20
+        },
+        "envelope": {
+          "money_limit": 25,
+          "model_call_limit": 2,
+          "time_limit_minutes": 20,
+          "retry_limit": 0,
+          "stop_loss": "Stop if both calls are used and any card lacks a wa.me link or correct sizes."
+        },
+        "estimate": 25,
+        "cost": 25
+      },
+      {
+        "id": "wf-sizeguide",
+        "name": "Size guide",
+        "goal_gap": "No size guide table (F-5).",
+        "expected_outcome": "Section id size-guide with a chest-in-inches table XS 32 to XXL 42.",
+        "outputs": [
+          "size-guide section"
+        ],
+        "completion_check": "Table lists XS 32, S 34, M 36, L 38, XL 40, XXL 42.",
+        "dependencies": [
+          "wf-theme"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          5
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 1,
+          "time_limit_minutes": 10,
+          "retry_limit": 0,
+          "stop_loss": "Stop if the single call does not produce all six size rows."
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "wf-newarrivals",
+        "name": "New arrivals",
+        "goal_gap": "No new-arrivals section (F-6).",
+        "expected_outcome": "Section id new-arrivals showing the White chikankari kurta, Ikat handloom saree and Linen-blend shirt.",
+        "outputs": [
+          "new-arrivals section"
+        ],
+        "completion_check": "Section shows exactly those 3 products with their prices and empty photo spots.",
+        "dependencies": [
+          "wf-theme"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          6
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 1,
+          "time_limit_minutes": 10,
+          "retry_limit": 0,
+          "stop_loss": "Stop if the single call does not produce the 3 products."
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "wf-lookbook",
+        "name": "Lookbook",
+        "goal_gap": "No lookbook (F-8, F-9).",
+        "expected_outcome": "Section id lookbook with 3 outfits built only from the 10 listed products, each with an empty photo spot.",
+        "outputs": [
+          "lookbook section"
+        ],
+        "completion_check": "3 outfits, every item is a listed product, each has an empty photo spot, and there are no img elements.",
+        "dependencies": [
+          "wf-theme"
+        ],
+        "parts": [
+          "page_section",
+          "page_section"
+        ],
+        "covers": [
+          8,
+          9
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 20,
+          "calls": 2,
+          "time_minutes": 15
+        },
+        "envelope": {
+          "money_limit": 20,
+          "model_call_limit": 2,
+          "time_limit_minutes": 15,
+          "retry_limit": 0,
+          "stop_loss": "Stop if both calls are used and fewer than 3 outfits or any non-listed product appears."
+        },
+        "estimate": 20,
+        "cost": 20
+      },
+      {
+        "id": "wf-returns",
+        "name": "Return and exchange policy",
+        "goal_gap": "No returns section (F-11).",
+        "expected_outcome": "Section id returns stating exchange within 7 days if unworn with tags, and no returns on sale items.",
+        "outputs": [
+          "returns section"
+        ],
+        "completion_check": "Both policy statements are present verbatim in meaning.",
+        "dependencies": [
+          "wf-theme"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          11
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 1,
+          "time_limit_minutes": 10,
+          "retry_limit": 0,
+          "stop_loss": "Stop if either policy statement is missing after the single call."
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "wf-reviews",
+        "name": "Customer reviews",
+        "goal_gap": "No reviews section (F-12).",
+        "expected_outcome": "Section id reviews with the three supplied reviews and names.",
+        "outputs": [
+          "reviews section"
+        ],
+        "completion_check": "Meera K., Arjun S. and Priya D. appear with their exact quotes, and no other reviews.",
+        "dependencies": [
+          "wf-theme"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          12
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 1,
+          "time_limit_minutes": 10,
+          "retry_limit": 0,
+          "stop_loss": "Stop if any of the three quotes is missing or an extra review appears."
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "wf-delivery",
+        "name": "Delivery details",
+        "goal_gap": "No delivery section (F-13).",
+        "expected_outcome": "Section id delivery stating 2 days across Pune, ₹79, free above ₹2,999, pay on delivery or UPI.",
+        "outputs": [
+          "delivery section"
+        ],
+        "completion_check": "All four facts are present with the exact amounts.",
+        "dependencies": [
+          "wf-theme"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          13
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 1,
+          "time_limit_minutes": 10,
+          "retry_limit": 0,
+          "stop_loss": "Stop if any of the four delivery facts is missing after the single call."
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "wf-nav-fix",
+        "name": "Title, navigation and link repair",
+        "goal_gap": "The static title lacks Pune, the nav points to 6 missing ids, the script hides those links, and the header logo tap target is 160x31 (F-1, F-15, R-6).",
+        "expected_outcome": "Title and header show Thread & Loom and Pune, the nav links to every new section id, the link-hiding script is removed, and the logo tap target is at least 44x44px at 360px.",
+        "outputs": [
+          "title with Pune",
+          "working nav",
+          "no broken in-page links",
+          "44px logo tap target"
+        ],
+        "completion_check": "The static title contains Thread & Loom and Pune, every nav href matches an existing id, 0 JS errors, and no tap target under 44x44px at 360px.",
+        "dependencies": [
+          "wf-orders",
+          "wf-sizeguide",
+          "wf-newarrivals",
+          "wf-lookbook",
+          "wf-returns",
+          "wf-reviews",
+          "wf-delivery"
+        ],
+        "parts": [
+          "page_section",
+          "page_section",
+          "fix"
+        ],
+        "covers": [
+          1,
+          15
+        ],
+        "fixes": [
+          "R-6"
+        ],
+        "revises": "W-2",
+        "estimated_resources": {
+          "money": 28,
+          "calls": 2,
+          "time_minutes": 15
+        },
+        "envelope": {
+          "money_limit": 28,
+          "model_call_limit": 2,
+          "time_limit_minutes": 15,
+          "retry_limit": 0,
+          "stop_loss": "Stop if both calls are used and any nav href is broken, the title lacks Pune, or the logo tap target is still under 44x44px."
+        },
+        "estimate": 28,
+        "cost": 28
+      }
+    ],
+    "adaptation_final": [
+      {
+        "id": "wf-orders",
+        "name": "Sizes and WhatsApp order links",
+        "goal_gap": "Cards have no WhatsApp order link and size data is unpaid (F-3, F-7).",
+        "expected_outcome": "Every product card has an Order on WhatsApp link to wa.me/910000011111 with the product name pre-filled, and the exact sizes are on the cards.",
+        "outputs": [
+          "10 order links",
+          "size data on cards"
+        ],
+        "completion_check": "10 links point to wa.me/910000011111 with the product name in the text param, and sizes match the brief, including Free for 3 sarees and 2 dupattas.",
+        "dependencies": [
+          "wf-catalogue"
+        ],
+        "parts": [
+          "page_section",
+          "form"
+        ],
+        "covers": [
+          3,
+          7
+        ],
+        "fixes": [],
+        "revises": "W-2",
+        "estimated_resources": {
+          "money": 25,
+          "calls": 2,
+          "time_minutes": 20
+        },
+        "estimate": 25,
+        "cost": 25
+      },
+      {
+        "id": "wf-sizeguide",
+        "name": "Size guide",
+        "goal_gap": "No size guide table (F-5).",
+        "expected_outcome": "Section id size-guide with a chest-in-inches table XS 32 to XXL 42.",
+        "outputs": [
+          "size-guide section"
+        ],
+        "completion_check": "Table lists XS 32, S 34, M 36, L 38, XL 40, XXL 42.",
+        "dependencies": [
+          "wf-theme"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          5
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "wf-newarrivals",
+        "name": "New arrivals",
+        "goal_gap": "No new-arrivals section (F-6).",
+        "expected_outcome": "Section id new-arrivals showing the White chikankari kurta, Ikat handloom saree and Linen-blend shirt.",
+        "outputs": [
+          "new-arrivals section"
+        ],
+        "completion_check": "Section shows exactly those 3 products with their prices and empty photo spots.",
+        "dependencies": [
+          "wf-theme"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          6
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "wf-lookbook",
+        "name": "Lookbook",
+        "goal_gap": "No lookbook (F-8, F-9).",
+        "expected_outcome": "Section id lookbook with 3 outfits built only from the 10 listed products, each with an empty photo spot.",
+        "outputs": [
+          "lookbook section"
+        ],
+        "completion_check": "3 outfits, every item is a listed product, each has an empty photo spot, and there are no img elements.",
+        "dependencies": [
+          "wf-theme"
+        ],
+        "parts": [
+          "page_section",
+          "page_section"
+        ],
+        "covers": [
+          8,
+          9
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 20,
+          "calls": 2,
+          "time_minutes": 15
+        },
+        "estimate": 20,
+        "cost": 20
+      },
+      {
+        "id": "wf-returns",
+        "name": "Return and exchange policy",
+        "goal_gap": "No returns section (F-11).",
+        "expected_outcome": "Section id returns stating exchange within 7 days if unworn with tags, and no returns on sale items.",
+        "outputs": [
+          "returns section"
+        ],
+        "completion_check": "Both policy statements are present verbatim in meaning.",
+        "dependencies": [
+          "wf-theme"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          11
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "wf-reviews",
+        "name": "Customer reviews",
+        "goal_gap": "No reviews section (F-12).",
+        "expected_outcome": "Section id reviews with the three supplied reviews and names.",
+        "outputs": [
+          "reviews section"
+        ],
+        "completion_check": "Meera K., Arjun S. and Priya D. appear with their exact quotes, and no other reviews.",
+        "dependencies": [
+          "wf-theme"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          12
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "wf-delivery",
+        "name": "Delivery details",
+        "goal_gap": "No delivery section (F-13).",
+        "expected_outcome": "Section id delivery stating 2 days across Pune, ₹79, free above ₹2,999, pay on delivery or UPI.",
+        "outputs": [
+          "delivery section"
+        ],
+        "completion_check": "All four facts are present with the exact amounts.",
+        "dependencies": [
+          "wf-theme"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          13
+        ],
+        "fixes": [],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "wf-nav-fix",
+        "name": "Title, navigation and link repair",
+        "goal_gap": "The static title lacks Pune, the nav points to 6 missing ids, and the script hides those links (F-1, F-15).",
+        "expected_outcome": "Title and header show Thread & Loom and Pune, the nav links to every new section id, and the link-hiding script is removed.",
+        "outputs": [
+          "title with Pune",
+          "working nav",
+          "no broken in-page links"
+        ],
+        "completion_check": "The static title contains Thread & Loom and Pune, every nav href matches an existing id, and there are 0 JS errors.",
+        "dependencies": [
+          "wf-orders",
+          "wf-sizeguide",
+          "wf-newarrivals",
+          "wf-lookbook",
+          "wf-returns",
+          "wf-reviews",
+          "wf-delivery"
+        ],
+        "parts": [
+          "page_section"
+        ],
+        "covers": [
+          1,
+          15
+        ],
+        "fixes": [],
+        "revises": "W-2",
+        "estimated_resources": {
+          "money": 10,
+          "calls": 1,
+          "time_minutes": 10
+        },
+        "estimate": 10,
+        "cost": 10
+      }
+    ],
+    "attempts_used": 4,
+    "registered": []
+  }
+]

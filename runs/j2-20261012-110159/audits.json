@@ -1,0 +1,313 @@
+[
+  {
+    "cycle": 1,
+    "version": 7,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The site shows the name Kaveri Kitchen and the address 7 Karve Road, Kothrud, Pune 411038",
+        "verdict": "PASS",
+        "note": "Header brand, h1 and #visit address block show 'Kaveri Kitchen' and '7 Karve Road, Kothrud, Pune 411038'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The site shows the WhatsApp booking number +91 00000 33333 and the restaurant phone +91 00000 44444, and the phone number is tap-to-call",
+        "verdict": "PASS",
+        "note": "#visit shows +91 00000 33333 (wa.me link) and +91 00000 44444, with a.j2-btn href='tel:+910000044444'.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The site shows opening hours 8am to 10:30pm every day, with the note that the kitchen closes at 10pm",
+        "verdict": "PASS",
+        "note": "'8am to 10:30pm, every day' and 'The kitchen closes at 10pm.' are in #visit.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The menu lists all 11 dishes with rupee prices under Starters (Medu vada 120, Veg cutlet 140, Chicken 65 260), Mains (Masala dosa 160, Mysore dosa 180, Idli sambar 110, Veg thali 280, Chicken chettinad 340, Fish curry meal 360) and Desserts (Payasam 100, Filter coffee 60)",
+        "verdict": "PASS",
+        "note": "KK_MENU has 11 dishes; names, categories and prices match the charter exactly; prices render as '₹'+price.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "A filter with All, Veg and Non-veg works: Veg hides Chicken 65, Chicken chettinad and Fish curry meal; Non-veg shows only those three; each dish is marked veg or non-veg",
+        "verdict": "PASS",
+        "note": "The filter matches on dish.veg: Veg gives 8 dishes, Non-veg gives Chicken 65, Chicken chettinad and Fish curry meal. Every dish has a Veg or Non-veg mark. Found by reading the code, not by clicking in a browser.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "A Today's specials section shows Mysore dosa (160... see menu price 180) and Fish curry meal (360), taken from the menu data",
+        "verdict": "PASS",
+        "note": "The specials script filters window.KK_MENU.dishes on special===true. Only Mysore dosa (₹180) and Fish curry meal (₹360) are flagged; nothing is hard-coded.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      },
+      {
+        "id": "F-7",
+        "criterion": "A booking form collects name, date, time and number of people (1 to 8) and opens a WhatsApp chat to +91 00000 33333 with those details filled into the message",
+        "verdict": "PASS",
+        "note": "The form has name, date, time and a 1-8 people select. Submit validates, then opens wa.me/910000033333?text= with the details. Mechanical check: form submitted with no errors.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 7,
+        "pass": true
+      },
+      {
+        "id": "F-8",
+        "criterion": "A dish photos section shows clearly marked empty photo spots",
+        "verdict": "PASS",
+        "note": "#photos has six dashed spots labelled 'Empty photo spot', no img elements, and a 'photos coming soon' note.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 8,
+        "pass": true
+      },
+      {
+        "id": "F-9",
+        "criterion": "A reviews section shows three reviews: \"Best dosa in Kothrud\" - Anita R., \"Feels like home\" - Vikram S., \"Great filter coffee\" - Neha P.",
+        "verdict": "PASS",
+        "note": "#reviews has exactly the three quotes with Anita R., Vikram S. and Neha P., and no ratings or extra text.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 9,
+        "pass": true
+      },
+      {
+        "id": "F-10",
+        "criterion": "No offer, discount or deal wording appears anywhere on the site",
+        "verdict": "PASS",
+        "note": "No 'offer', 'discount', 'deal' or '% off' found in the page text, meta description or the WhatsApp message template. Checked by reading the source.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null,
+        "item": 10,
+        "pass": true
+      },
+      {
+        "id": "F-11",
+        "criterion": "No horizontal scrolling at 360px or 1280px width, and the layout uses a warm, homely colour scheme",
+        "verdict": "PASS",
+        "note": "Mechanical check: overflow_px 0 at both widths. Screenshot shows terracotta, green and turmeric on cream.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 11,
+        "pass": true
+      },
+      {
+        "id": "F-12",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "PASS",
+        "note": "Mechanical check: js_errors [], broken_in_page_links [], overflow 0 at 360px and 1280px.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 12,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-13",
+        "criterion": "R-1 consistent button styling",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The 'Call us' button in #visit shows an underline on the screenshot. The text-decoration:none rule is scoped to .kk-shell, so the button misses it. Other buttons have no underline.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "Fonts, colours and cards follow the style guide; only the Call us button text is underlined, unlike the other buttons.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "Measurements: 114 text pairs checked at both widths, 0 low contrast.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "Measurements: one h1, no skipped heading levels; the hero title and primary button stand out in the screenshot.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS",
+        "note": "Screenshot: filled 'Book a table' button first in the hero, with 'See the menu' as the quieter secondary.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS",
+        "note": "Nav has 6 anchor links that all resolve, and wraps cleanly to two lines at 360px in the screenshot.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "Measurements: min tap target 44px, 0 small targets at phone width.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "No img elements, so none lack alt text; photo spots carry role=img with aria-label and the icons are aria-hidden.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 37625,
+      "broken_in_page_links": [],
+      "external_resources": [
+        "https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&amp;family=Nunito:wght@400;600;700&amp;display=swap",
+        "https://wa.me/910000033333"
+      ],
+      "forms": 1,
+      "scripts": 4,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 114,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Nunito",
+            "Fraunces"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 10
+          },
+          "first_screen_actions": [
+            "Book a table",
+            "See the menu"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 114,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "Nunito",
+            "Fraunces"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 10
+          },
+          "first_screen_actions": [
+            "Book a table",
+            "See the menu",
+            "Call us"
+          ]
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v7.png",
+    "all_pass": true
+  }
+]

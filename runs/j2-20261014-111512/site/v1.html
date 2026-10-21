@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tap Rush</title>
+<!-- J2:style head start (owner W-1) -->
+<style>:root{--j2-primary:#ffd23f;--j2-secondary:#3ddcff;--j2-accent:#ff4d8d;--j2-background:#0b0f1a;--j2-surface:#151b2e;--j2-text:#f5f7ff;--j2-muted:#b4bedc;--j2-font-heading:system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;--j2-font-body:system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:12px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#ffd23f;color:#0b0f1a;border:0;font-weight:700;font-size:1.5rem;min-height:56px;min-width:44px;padding:12px 40px;cursor:pointer}.j2-btn-secondary{display:inline-block;background:transparent;color:#3ddcff;border:2px solid #3ddcff;font-weight:700;font-size:1.25rem;min-height:48px;min-width:44px;padding:10px 28px;cursor:pointer}.j2-card{background:#151b2e;color:#f5f7ff;border:1px solid #26304f;padding:24px}</style>
+<!-- J2:style head end -->
+</head>
+<body>
+<!-- J2:W-1 start (owner W-1) -->
+<section id="start" class="screen start-screen">
+  <style>
+    #start.start-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 100%;
+      min-height: 70vh;
+      padding: 32px 16px;
+      text-align: center;
+      color: var(--j2-text, #f5f7ff);
+    }
+    #start.start-screen[hidden] { display: none; }
+    #start .game-title {
+      margin: 0;
+      font-size: clamp(2.75rem, 12vw, 5rem);
+      line-height: 1.1;
+      font-weight: 800;
+      color: var(--j2-primary, #ffd23f);
+      overflow-wrap: anywhere;
+    }
+    #start .instructions {
+      margin: 0;
+      max-width: 28ch;
+      font-size: clamp(1.25rem, 5vw, 1.75rem);
+      line-height: 1.4;
+      color: var(--j2-text, #f5f7ff);
+    }
+    #start .start-btn {
+      min-height: 56px;
+      min-width: 160px;
+      max-width: 100%;
+      font-size: 1.5rem;
+    }
+  </style>
+  <h1 class="game-title">Tap Rush</h1>
+  <p class="instructions">Tap each circle before it vanishes in 1 second. A round lasts 30 seconds.</p>
+  <button id="start-btn" class="j2-btn start-btn" type="button">Start</button>
+</section>
+<!-- J2:W-1 end -->
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Cafe in Indiranagar, Bengaluru</title>
+<meta name="description" content="Brew Lab is a cafe in Indiranagar, Bengaluru. Open 8am to 10pm, every day.">
+<style>
+  :root {
+    --cream: #fbf5ec;
+    --sand: #f2e6d3;
+    --espresso: #3b2417;
+    --roast: #5a3a27;
+    --caramel: #c8793a;
+    --caramel-dark: #a35f27;
+    --terracotta: #b4532a;
+    --white: #fffdf9;
+    --radius: 14px;
+    --shadow: 0 6px 20px rgba(59, 36, 23, 0.10);
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--espresso);
+    background: var(--cream);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  img, iframe { max-width: 100%; }
+
+  a { color: var(--terracotta); }
+
+  .wrap {
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 1.1rem;
+  }
+
+  /* Header */
+  .site-header {
+    background: var(--espresso);
+    color: var(--cream);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .site-header .wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
+  }
+  .brand {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--cream);
+    text-decoration: none;
+  }
+  .brand span { color: var(--caramel); }
+  .nav { display: flex; gap: 1rem; }
+  .nav a {
+    color: var(--sand);
+    text-decoration: none;
+    font-size: 0.95rem;
+    padding: 0.4rem 0;
+  }
+  .nav a:hover, .nav a:focus { color: #fff; text-decoration: underline; }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(160deg, var(--roast) 0%, var(--espresso) 70%);
+    color: var(--cream);
+    padding: 2.6rem 0 3rem;
+  }
+  .eyebrow {
+    margin: 0 0 0.5rem;
+    color: var(--caramel);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+  }
+  .hero h1 {
+    margin: 0 0 0.7rem;
+    font-size: 2.4rem;
+    line-height: 1.1;
+  }
+  .hero p { margin: 0 0 1.4rem; color: var(--sand); max-width: 34rem; }
+  .badge {
+    display: inline-block;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    background: rgba(255, 253, 249, 0.12);
+    border: 1px solid rgba(255, 253, 249, 0.28);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .badge.open { background: #2f6b3f; border-color: #3f8a52; color: #fff; }
+  .badge.closed { background: #7a3a2a; border-color: #9c4b38; color: #fff; }
+
+  /* Sections */
+  section { padding: 2.4rem 0; }
+  section h2 {
+    margin: 0 0 0.3rem;
+    font-size: 1.7rem;
+    color: var(--espresso);
+  }
+  .lead { margin: 0 0 1.4rem; color: var(--roast); }
+  .alt { background: var(--sand); }
+
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.2rem;
+  }
+
+  /* Hours */
+  .hours-big {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--terracotta);
+    margin: 0 0 0.2rem;
+  }
+  .hours-sub { margin: 0 0 1rem; color: var(--roast); }
+  .hours-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .hours-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.55rem 0;
+    border-top: 1px solid var(--sand);
+  }
+  .hours-list li:first-child { border-top: 0; }
+  .hours-list li.today { font-weight: 700; color: var(--terracotta); }
+
+  /* Location */
+  .loc-grid { display: grid; gap: 1rem; }
+  .loc-card h3 { margin: 0 0 0.3rem; font-size: 1.1rem; }
+  .loc-card p { margin: 0 0 0.9rem; }
+  .placeholder {
+    display: inline-block;
+    background: #fff1c9;
+    border: 1px dashed #c89a1e;
+    color: #6b4e00;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+  }
+  .btn {
+    display: inline-block;
+    background: var(--caramel);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    padding: 0.8rem 1.3rem;
+    border-radius: 999px;
+    min-height: 44px;
+  }
+  .btn:hover, .btn:focus { background: var(--caramel-dark); }
+
+  .map-box {
+    border-radius: var(--radius);
+    background: repeating-linear-gradient(45deg, #ead9bf, #ead9bf 12px, #f2e6d3 12px, #f2e6d3 24px);
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1rem;
+    color: var(--roast);
+    font-weight: 600;
+  }
+
+  /* Footer */
+  footer {
+    background: var(--espresso);
+    color: var(--sand);
+    padding: 1.6rem 0;
+    font-size: 0.9rem;
+  }
+  footer p { margin: 0.2rem 0; }
+
+  /* Larger screens */
+  @media (min-width: 600px) {
+    .wrap { padding: 0 1.6rem; }
+    .hero { padding: 4rem 0 4.4rem; }
+    .hero h1 { font-size: 3.2rem; }
+    .brand { font-size: 1.6rem; }
+    .nav { gap: 1.6rem; }
+    section { padding: 3.2rem 0; }
+    section h2 { font-size: 2rem; }
+    .card { padding: 1.6rem; }
+  }
+
+  @media (min-width: 860px) {
+    .hero h1 { font-size: 3.8rem; }
+    .loc-grid { grid-template-columns: 1fr 1fr; align-items: stretch; }
+    .map-box { min-height: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="#top">Brew <span>Lab</span></a>
+    <nav class="nav" aria-label="Main">
+      <a href="#hours">Hours</a>
+      <a href="#location">Location</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Indiranagar, Bengaluru</p>
+      <h1>Brew Lab</h1>
+      <p>A warm, modern cafe in the heart of Indiranagar. Come in for coffee, or order ahead and pick it up.</p>
+      <span id="openBadge" class="badge">Open 8am to 10pm, every day</span>
+    </div>
+  </div>
+
+  <section id="hours">
+    <div class="wrap">
+      <h2>Opening hours</h2>
+      <p class="lead">We are open every day of the week.</p>
+      <div class="card">
+        <p class="hours-big">8am to 10pm</p>
+        <p class="hours-sub">Open every day</p>
+        <ul class="hours-list" id="hoursList">
+          <li data-day="1"><span>Monday</span><span>8am to 10pm</span></li>
+          <li data-day="2"><span>Tuesday</span><span>8am to 10pm</span></li>
+          <li data-day="3"><span>Wednesday</span><span>8am to 10pm</span></li>
+          <li data-day="4"><span>Thursday</span><span>8am to 10pm</span></li>
+          <li data-day="5"><span>Friday</span><span>8am to 10pm</span></li>
+          <li data-day="6"><span>Saturday</span><span>8am to 10pm</span></li>
+          <li data-day="0"><span>Sunday</span><span>8am to 10pm</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="location" class="alt">
+    <div class="wrap">
+      <h2>Find us</h2>
+      <p class="lead">Brew Lab is in Indiranagar, Bengaluru.</p>
+      <div class="loc-grid">
+        <div class="card loc-card">
+          <h3>Address</h3>
+          <p>Brew Lab<br>
+             <span class="placeholder">[Street address to be added]</span><br>
+             Indiranagar, Bengaluru</p>
+          <h3>Phone</h3>
+          <p><span class="placeholder">[Phone number to be added]</span></p>
+          <a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Indiranagar%2C+Bengaluru" target="_blank" rel="noopener">Open in Google Maps</a>
+        </div>
+        <div class="map-box" role="img" aria-label="Map placeholder for Indiranagar, Bengaluru">
+          <span>Map pin to be added.<br>For now, use the Google Maps link to find Indiranagar.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Brew Lab</strong> | Indiranagar, Bengaluru</p>
+    <p>Open 8am to 10pm, every day</p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    // Highlight today and show an open/closed badge, using India time.
+    try {
+      var parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Kolkata', weekday: 'short', hour: 'numeric', hour12: false
+      }).formatToParts(new Date());
+      var wk = '', hour = 0;
+      parts.forEach(function (p) {
+        if (p.type === 'weekday') wk = p.value;
+        if (p.type === 'hour') hour = parseInt(p.value, 10) % 24;
+      });
+      var map = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+      var day = map[wk];
+      var li = document.querySelector('#hoursList li[data-day="' + day + '"]');
+      if (li) li.classList.add('today');
+      var badge = document.getElementById('openBadge');
+      if (badge) {
+        var isOpen = hour >= 8 && hour < 22;
+        badge.textContent = isOpen ? 'Open now, until 10pm' : 'Closed now, opens 8am';
+        badge.className = 'badge ' + (isOpen ? 'open' : 'closed');
+      }
+    } catch (e) { /* keep the static text */ }
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Lab | Cafe in Indiranagar, Bengaluru</title>
+<meta name="description" content="Brew Lab, a cafe in Indiranagar, Bengaluru. Menu, hours, location and pickup pre-order.">
+<style>
+  /* Brand colours are a placeholder until supplied (open input: logo or brand colours). */
+  :root {
+    --bg: #faf6f1;
+    --ink: #2b1d14;
+    --accent: #6b4226;
+    --accent-ink: #fff;
+    --card: #ffffff;
+    --line: #e4d9cc;
+    --ph-bg: #fff3b0;
+    --ph-ink: #5c4a00;
+    --err: #9b1c1c;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+    color: var(--ink);
+    background: var(--bg);
+  }
+  a { color: var(--accent); }
+
+  /* Placeholder marker: used for every unknown value */
+  .ph {
+    background: var(--ph-bg);
+    color: var(--ph-ink);
+    border: 1px dashed #b89b00;
+    border-radius: 4px;
+    padding: 0 6px;
+    font-style: italic;
+    white-space: normal;
+  }
+
+  /* Nav */
+  .site-nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .site-nav .brand {
+    color: var(--accent-ink);
+    font-weight: 700;
+    margin-right: 12px;
+    white-space: nowrap;
+    text-decoration: none;
+    font-size: 1.1rem;
+  }
+  .site-nav a.link {
+    color: var(--accent-ink);
+    text-decoration: none;
+    padding: 14px 10px;
+    white-space: nowrap;
+    font-size: 0.95rem;
+  }
+  .site-nav a.link:hover, .site-nav a.link:focus { background: rgba(255,255,255,0.15); }
+
+  /* Hero */
+  .hero {
+    padding: 48px 16px 36px;
+    text-align: center;
+    background: linear-gradient(180deg, #efe3d3, var(--bg));
+  }
+  .hero h1 { margin: 0 0 8px; font-size: 2.4rem; }
+  .hero p { margin: 0 auto 12px; max-width: 36rem; }
+
+  /* Sections */
+  main { max-width: 960px; margin: 0 auto; padding: 0 16px 48px; }
+  section { padding: 32px 0 8px; }
+  section h2 { margin: 0 0 16px; font-size: 1.7rem; border-bottom: 2px solid var(--line); padding-bottom: 8px; }
+  .note { font-size: 0.9rem; margin: 0 0 16px; }
+
+  /* Menu */
+  .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .menu-cat {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .menu-cat h3 { margin: 0 0 8px; font-size: 1.15rem; }
+  .menu-cat ul { list-style: none; margin: 0; padding: 0; }
+  .menu-cat li {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 0;
+    border-top: 1px solid var(--line);
+  }
+  .menu-cat li:first-child { border-top: 0; }
+
+  /* Hours */
+  .hours-table {
+    width: 100%;
+    max-width: 480px;
+    border-collapse: collapse;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .hours-table th, .hours-table td {
+    text-align: left;
+    padding: 10px 14px;
+    border-top: 1px solid var(--line);
+  }
+  .hours-table tr:first-child th, .hours-table tr:first-child td { border-top: 0; }
+
+  /* Location */
+  .loc-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .loc-card p { margin: 0 0 10px; }
+  .btn {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--accent-ink);
+    text-decoration: none;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    border: 0;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .btn.secondary { background: #fff; color: var(--accent); border: 1px solid var(--accent); }
+
+  /* Pre-order */
+  .po-layout { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; align-items: start; }
+  .po-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .po-card h3 { margin: 0 0 8px; font-size: 1.15rem; }
+  .po-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 0;
+    border-top: 1px solid var(--line);
+  }
+  .po-row:first-of-type { border-top: 0; }
+  .po-name { flex: 1; min-width: 0; }
+  .po-price { font-size: 0.9rem; margin-right: 4px; }
+  .po-stepper { display: flex; align-items: center; gap: 6px; }
+  .po-stepper button {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid var(--accent);
+    background: #fff;
+    color: var(--accent);
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .po-stepper output { min-width: 24px; text-align: center; font-weight: 600; }
+  .po-field { margin-bottom: 12px; }
+  .po-field label { display: block; font-weight: 600; margin-bottom: 4px; }
+  .po-field input, .po-field textarea {
+    width: 100%;
+    padding: 10px;
+    font: inherit;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+  }
+  .po-list { margin: 0 0 8px; padding-left: 20px; }
+  .po-total { font-weight: 700; margin: 8px 0 12px; }
+  .po-error { color: var(--err); font-weight: 600; min-height: 1.4em; margin: 8px 0 0; }
+  .po-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  #po-summary { min-height: 160px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.9rem; }
+
+  /* Gallery */
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .gallery-item {
+    margin: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .gallery-item img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: var(--line);
+  }
+  .gallery-item figcaption {
+    padding: 8px 10px 10px;
+    font-size: 0.85rem;
+  }
+  .gallery-item figcaption .ph { display: inline-block; margin-bottom: 4px; }
+
+  /* Farm stories */
+  .farm-list { display: grid; gap: 20px; margin: 0; padding: 0; list-style: none; }
+  .farm {
+    display: grid;
+    grid-template-columns: 2fr 3fr;
+    gap: 16px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .farm-photo { margin: 0; align-self: start; }
+  .farm-photo img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 8px;
+    background: var(--line);
+  }
+  .farm-photo figcaption { font-size: 0.85rem; padding-top: 6px; }
+  .farm-photo figcaption .ph { display: inline-block; margin-bottom: 4px; }
+  .farm-body h3 { margin: 0 0 4px; font-size: 1.3rem; }
+  .farm-loc { margin: 0 0 12px; font-size: 0.95rem; }
+  .farm-story p { margin: 0 0 10px; }
+  .farm-facts { margin: 12px 0 0; padding: 0; display: grid; grid-template-columns: max-content 1fr; gap: 6px 12px; font-size: 0.92rem; }
+  .farm-facts dt { font-weight: 600; }
+  .farm-facts dd { margin: 0; }
+
+  footer { text-align: center; padding: 24px 16px 40px; font-size: 0.9rem; border-top: 1px solid var(--line); }
+
+  /* Breakpoints */
+  @media (max-width: 768px) {
+    .menu-grid { grid-template-columns: 1fr 1fr; }
+    .po-layout { grid-template-columns: 1fr; }
+    .gallery-grid { grid-template-columns: repeat(3, 1fr); }
+    .farm { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .hero { padding: 32px 16px 24px; }
+    .hero h1 { font-size: 1.9rem; }
+    section h2 { font-size: 1.4rem; }
+    .menu-grid { grid-template-columns: 1fr; }
+    .hours-table th, .hours-table td { padding: 8px 10px; }
+    .btn { display: block; text-align: center; }
+    .po-actions .btn { width: 100%; }
+    .po-row { flex-wrap: wrap; }
+    .gallery-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .gallery-item figcaption { font-size: 0.8rem; padding: 6px 8px 8px; }
+    .farm { padding: 12px; }
+    .farm-body h3 { font-size: 1.15rem; }
+    .farm-facts { grid-template-columns: 1fr; gap: 2px; }
+    .farm-facts dd { margin-bottom: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Main">
+  <a class="brand" href="#top">Brew Lab</a>
+  <a class="link" href="#menu">Menu</a>
+  <a class="link" href="#hours">Hours</a>
+  <a class="link" href="#location">Location</a>
+  <a class="link" href="#preorder">Pre-order</a>
+  <a class="link" href="#gallery">Gallery</a>
+  <a class="link" href="#farms">Farms</a>
+</nav>
+
+<header class="hero" id="top">
+  <h1>Brew Lab</h1>
+  <p>A cafe in Indiranagar, Bengaluru. Check the menu and hours, find us, and order ahead for pickup.</p>
+  <p class="note">Logo and brand colours: <span class="ph">placeholder, not yet supplied</span></p>
+</header>
+
+<main>
+
+  <section id="menu">
+    <h2>Menu</h2>
+    <p class="note">Items and prices below are <span class="ph">placeholders</span> until the cafe supplies the real menu.</p>
+    <div class="menu-grid">
+      <div class="menu-cat" data-category="hot-coffee">
+        <h3>Hot coffee <span class="ph">category placeholder</span></h3>
+        <ul>
+          <li data-item="hot-1"><span class="ph">Item name 1</span><span class="ph">Price</span></li>
+          <li data-item="hot-2"><span class="ph">Item name 2</span><span class="ph">Price</span></li>
+          <li data-item="hot-3"><span class="ph">Item name 3</span><span class="ph">Price</span></li>
+        </ul>
+      </div>
+      <div class="menu-cat" data-category="cold-coffee">
+        <h3>Cold coffee <span class="ph">category placeholder</span></h3>
+        <ul>
+          <li data-item="cold-1"><span class="ph">Item name 1</span><span class="ph">Price</span></li>
+          <li data-item="cold-2"><span class="ph">Item name 2</span><span class="ph">Price</span></li>
+          <li data-item="cold-3"><span class="ph">Item name 3</span><span class="ph">Price</span></li>
+        </ul>
+      </div>
+      <div class="menu-cat" data-category="food">
+        <h3>Food and bakes <span class="ph">category placeholder</span></h3>
+        <ul>
+          <li data-item="food-1"><span class="ph">Item name 1</span><span class="ph">Price</span></li>
+          <li data-item="food-2"><span class="ph">Item name 2</span><span class="ph">Price</span></li>
+          <li data-item="food-3"><span class="ph">Item name 3</span><span class="ph">Price</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="hours">
+    <h2>Opening hours</h2>
+    <p class="note">Hours for each day are <span class="ph">placeholders</span> until supplied.</p>
+    <table class="hours-table">
+      <tbody>
+        <tr><th scope="row">Monday</th><td><span class="ph">Opening hours</span></td></tr>
+        <tr><th scope="row">Tuesday</th><td><span class="ph">Opening hours</span></td></tr>
+        <tr><th scope="row">Wednesday</th><td><span class="ph">Opening hours</span></td></tr>
+        <tr><th scope="row">Thursday</th><td><span class="ph">Opening hours</span></td></tr>
+        <tr><th scope="row">Friday</th><td><span class="ph">Opening hours</span></td></tr>
+        <tr><th scope="row">Saturday</th><td><span class="ph">Opening hours</span></td></tr>
+        <tr><th scope="row">Sunday</th><td><span class="ph">Opening hours</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="location">
+    <h2>Location</h2>
+    <div class="loc-card">
+      <p><strong>Brew Lab</strong>, Indiranagar, Bengaluru</p>
+      <p>Street address: <span class="ph">Full street address and PIN code, not yet supplied</span></p>
+      <p>Phone: <span class="ph">Cafe phone number, not yet supplied</span></p>
+      <p>Exact map pin: <span class="ph">Cafe map link, not yet supplied</span></p>
+      <a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Indiranagar+Bengaluru" target="_blank" rel="noopener">Open Indiranagar in Maps</a>
+      <p class="note" style="margin-top:10px">This button searches the neighbourhood only. It will point to the cafe once the exact map link is supplied.</p>
+    </div>
+  </section>
+
+  <section id="preorder">
+    <h2>Pre-order for pickup</h2>
+    <p class="note">Pick your items and a pickup time, then generate an order summary to send to the cafe. Nothing is submitted from this page. Item names and prices are <span class="ph">placeholders</span> and match the menu above.</p>
+    <div class="po-layout">
+      <div>
+        <div class="po-card" id="po-items" aria-label="Choose items"></div>
+      </div>
+      <div>
+        <div class="po-card">
+          <h3>Your order</h3>
+          <p id="po-empty" class="note">No items yet. Use the + buttons to add items.</p>
+          <ul class="po-list" id="po-list" aria-live="polite"></ul>
+          <p class="po-total" id="po-total" aria-live="polite">Items: 0</p>
+        </div>
+        <div class="po-card">
+          <h3>Pickup details</h3>
+          <div class="po-field">
+            <label for="po-name">Name for the order</label>
+            <input id="po-name" type="text" autocomplete="name" maxlength="60">
+          </div>
+          <div class="po-field">
+            <label for="po-time">Pickup time</label>
+            <input id="po-time" type="time">
+            <p class="note" style="margin:6px 0 0">Pickup time rules (earliest slot, lead time, closing cutoff): <span class="ph">placeholder, not yet supplied</span>. The cafe confirms the final time.</p>
+          </div>
+          <div class="po-field">
+            <label for="po-notes">Notes (optional)</label>
+            <textarea id="po-notes" rows="2" maxlength="200"></textarea>
+          </div>
+          <button class="btn" type="button" id="po-generate">Generate summary</button>
+          <p class="po-error" id="po-error" role="alert"></p>
+        </div>
+        <div class="po-card" id="po-summary-card" hidden>
+          <h3>Order summary</h3>
+          <textarea id="po-summary" readonly aria-label="Order summary text"></textarea>
+          <div class="po-actions">
+            <button class="btn secondary" type="button" id="po-copy">Copy summary</button>
+            <a class="btn" id="po-send" href="#" target="_blank" rel="noopener" hidden>Send to Brew Lab</a>
+          </div>
+          <p class="note" id="po-send-note" style="margin-top:10px">Send channel (WhatsApp number or email) for receiving pre-orders: <span class="ph">placeholder, not yet supplied</span>. Until it is set, copy the summary and send it to the cafe yourself.</p>
+          <p class="note" id="po-copy-status" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="gallery">
+    <h2>Gallery</h2>
+    <p class="note">Every photo below is a <span class="ph">placeholder</span> until the cafe supplies real photos. The subject under each slot is only a suggestion of what to show. To add a real photo, set the img src to the photo, update the alt text and remove the placeholder label. Photos load only as you scroll to them.</p>
+    <!-- To use a real photo: replace src, edit alt, delete the .ph span and the data-placeholder attribute. Keep loading="lazy". -->
+    <ul class="gallery-grid">
+      <li><figure class="gallery-item" data-placeholder="true">
+        <img loading="lazy" decoding="async" width="400" height="300" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'%3E%3Crect width='4' height='3' fill='%23e4d9cc'/%3E%3C/svg%3E" alt="Placeholder photo slot 1: the Brew Lab entrance and street view">
+        <figcaption><span class="ph">Placeholder photo 1</span><br>Suggested subject: entrance and street view</figcaption>
+      </figure></li>
+      <li><figure class="gallery-item" data-placeholder="true">
+        <img loading="lazy" decoding="async" width="400" height="300" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'%3E%3Crect width='4' height='3' fill='%23e4d9cc'/%3E%3C/svg%3E" alt="Placeholder photo slot 2: the main seating area inside Brew Lab">
+        <figcaption><span class="ph">Placeholder photo 2</span><br>Suggested subject: main seating area</figcaption>
+      </figure></li>
+      <li><figure class="gallery-item" data-placeholder="true">
+        <img loading="lazy" decoding="async" width="400" height="300" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'%3E%3Crect width='4' height='3' fill='%23e4d9cc'/%3E%3C/svg%3E" alt="Placeholder photo slot 3: the coffee bar and espresso machine">
+        <figcaption><span class="ph">Placeholder photo 3</span><br>Suggested subject: coffee bar and espresso machine</figcaption>
+      </figure></li>
+      <li><figure class="gallery-item" data-placeholder="true">
+        <img loading="lazy" decoding="async" width="400" height="300" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'%3E%3Crect width='4' height='3' fill='%23e4d9cc'/%3E%3C/svg%3E" alt="Placeholder photo slot 4: a barista preparing a drink">
+        <figcaption><span class="ph">Placeholder photo 4</span><br>Suggested subject: barista at work</figcaption>
+      </figure></li>
+      <li><figure class="gallery-item" data-placeholder="true">
+        <img loading="lazy" decoding="async" width="400" height="300" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'%3E%3Crect width='4' height='3' fill='%23e4d9cc'/%3E%3C/svg%3E" alt="Placeholder photo slot 5: a close-up of a hot coffee served at Brew Lab">
+        <figcaption><span class="ph">Placeholder photo 5</span><br>Suggested subject: hot coffee close-up</figcaption>
+      </figure></li>
+      <li><figure class="gallery-item" data-placeholder="true">
+        <img loading="lazy" decoding="async" width="400" height="300" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'%3E%3Crect width='4' height='3' fill='%23e4d9cc'/%3E%3C/svg%3E" alt="Placeholder photo slot 6: a cold coffee drink served at Brew Lab">
+        <figcaption><span class="ph">Placeholder photo 6</span><br>Suggested subject: cold coffee close-up</figcaption>
+      </figure></li>
+      <li><figure class="gallery-item" data-placeholder="true">
+        <img loading="lazy" decoding="async" width="400" height="300" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'%3E%3Crect width='4' height='3' fill='%23e4d9cc'/%3E%3C/svg%3E" alt="Placeholder photo slot 7: food and bakes on display">
+        <figcaption><span class="ph">Placeholder photo 7</span><br>Suggested subject: food and bakes</figcaption>
+      </figure></li>
+      <li><figure class="gallery-item" data-placeholder="true">
+        <img loading="lazy" decoding="async" width="400" height="300" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'%3E%3Crect width='4' height='3' fill='%23e4d9cc'/%3E%3C/svg%3E" alt="Placeholder photo slot 8: brewing equipment used at the cafe">
+        <figcaption><span class="ph">Placeholder photo 8</span><br>Suggested subject: brewing equipment</figcaption>
+      </figure></li>
+      <li><figure class="gallery-item" data-placeholder="true">
+        <img loading="lazy" decoding="async" width="400" height="300" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'%3E%3Crect width='4' height='3' fill='%23e4d9cc'/%3E%3C/svg%3E" alt="Placeholder photo slot 9: coffee beans used by Brew Lab">
+        <figcaption><span class="ph">Placeholder photo 9</span><br>Suggested subject: coffee beans</figcaption>
+      </figure></li>
+      <li><figure class="gallery-item" data-placeholder="true">
+        <img loading="lazy" decoding="async" width="400" height="300" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'%3E%3Crect width='4' height='3' fill='%23e4d9cc'/%3E%3C/svg%3E" alt="Placeholder photo slot 10: a wide view of the Brew Lab interior">
+        <figcaption><span class="ph">Placeholder photo 10</span><br>Suggested subject: wide interior view</figcaption>
+      </figure></li>
+      <li><figure class="gallery-item" data-placeholder="true">
+        <img loading="lazy" decoding="async" width="400" height="300" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'%3E%3Crect width='4' height='3' fill='%23e4d9cc'/%3E%3C/svg%3E" alt="Placeholder photo slot 11: customers enjoying their time at Brew Lab">
+        <figcaption><span class="ph">Placeholder photo 11</span><br>Suggested subject: customers at the cafe</figcaption>
+      </figure></li>
+      <li><figure class="gallery-item" data-placeholder="true">
+        <img loading="lazy" decoding="async" width="400" height="300" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'%3E%3Crect width='4' height='3' fill='%23e4d9cc'/%3E%3C/svg%3E" alt="Placeholder photo slot 12: the pickup counter where pre-orders are collected">
+        <figcaption><span class="ph">Placeholder photo 12</span><br>Suggested subject: pickup counter</figcaption>
+      </figure></li>
+    </ul>
+  </section>
+
+  <section id="farms">
+    <h2>Our coffee farms</h2>
+    <p class="note">Everything in this section is a <span class="ph">placeholder</span> until the cafe supplies the real farm names, locations, stories and photos. The prompts inside each story only suggest what to write. To publish a farm, replace each highlighted value with the real text, set the img src to the real photo, update its alt text and remove the placeholder labels.</p>
+    <!-- To fill a farm: edit the name, location, story paragraphs and fact list, then replace the photo src and alt, and delete the .ph spans and data-placeholder attribute. Keep loading="lazy". Keep exactly three entries unless the charter changes. -->
+    <ul class="farm-list">
+      <li><article class="farm" data-farm="1" data-placeholder="true" aria-labelledby="farm-1-name">
+        <figure class="farm-photo">
+          <img loading="lazy" decoding="async" width="400" height="300" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'%3E%3Crect width='4' height='3' fill='%23e4d9cc'/%3E%3C/svg%3E" alt="Placeholder photo slot for coffee farm 1: a view of the farm and its coffee plants">
+          <figcaption><span class="ph">Placeholder farm photo 1</span><br>Suggested subject: the farm and its coffee plants</figcaption>
+        </figure>
+        <div class="farm-body">
+          <h3 id="farm-1-name"><span class="ph">Farm 1 name, not yet supplied</span></h3>
+          <p class="farm-loc">Location: <span class="ph">Farm 1 village, district and state, not yet supplied</span></p>
+          <div class="farm-story">
+            <p><span class="ph">Story paragraph 1, not yet supplied. Suggested content: how Brew Lab came to work with this farm and who runs it.</span></p>
+            <p><span class="ph">Story paragraph 2, not yet supplied. Suggested content: how the coffee is grown and harvested here.</span></p>
+            <p><span class="ph">Story paragraph 3, not yet supplied. Suggested content: what makes this farm's coffee taste the way it does and which Brew Lab drinks use it.</span></p>
+          </div>
+          <dl class="farm-facts">
+            <dt>Altitude</dt><dd><span class="ph">not yet supplied</span></dd>
+            <dt>Coffee variety</dt><dd><span class="ph">not yet supplied</span></dd>
+            <dt>Processing method</dt><dd><span class="ph">not yet supplied</span></dd>
+          </dl>
+        </div>
+      </article></li>
+      <li><article class="farm" data-farm="2" data-placeholder="true" aria-labelledby="farm-2-name">
+        <figure class="farm-photo">
+          <img loading="lazy" decoding="async" width="400" height="300" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'%3E%3Crect width='4' height='3' fill='%23e4d9cc'/%3E%3C/svg%3E" alt="Placeholder photo slot for coffee farm 2: a view of the farm and its coffee plants">
+          <figcaption><span class="ph">Placeholder farm photo 2</span><br>Suggested subject: the farm and its coffee plants</figcaption>
+        </figure>
+        <div class="farm-body">
+          <h3 id="farm-2-name"><span class="ph">Farm 2 name, not yet supplied</span></h3>
+          <p class="farm-loc">Location: <span class="ph">Farm 2 village, district and state, not yet supplied</span></p>
+          <div class="farm-story">
+            <p><span class="ph">Story paragraph 1, not yet supplied. Suggested content: how Brew Lab came to work with this farm and who runs it.</span></p>
+            <p><span class="ph">Story paragraph 2, not yet supplied. Suggested content: how the coffee is grown and harvested here.</span></p>
+            <p><span class="ph">Story paragraph 3, not yet supplied. Suggested content: what makes this farm's coffee taste the way it does and which Brew Lab drinks use it.</span></p>
+          </div>
+          <dl class="farm-facts">
+            <dt>Altitude</dt><dd><span class="ph">not yet supplied</span></dd>
+            <dt>Coffee variety</dt><dd><span class="ph">not yet supplied</span></dd>
+            <dt>Processing method</dt><dd><span class="ph">not yet supplied</span></dd>
+          </dl>
+        </div>
+      </article></li>
+      <li><article class="farm" data-farm="3" data-placeholder="true" aria-labelledby="farm-3-name">
+        <figure class="farm-photo">
+          <img loading="lazy" decoding="async" width="400" height="300" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'%3E%3Crect width='4' height='3' fill='%23e4d9cc'/%3E%3C/svg%3E" alt="Placeholder photo slot for coffee farm 3: a view of the farm and its coffee plants">
+          <figcaption><span class="ph">Placeholder farm photo 3</span><br>Suggested subject: the farm and its coffee plants</figcaption>
+        </figure>
+        <div class="farm-body">
+          <h3 id="farm-3-name"><span class="ph">Farm 3 name, not yet supplied</span></h3>
+          <p class="farm-loc">Location: <span class="ph">Farm 3 village, district and state, not yet supplied</span></p>
+          <div class="farm-story">
+            <p><span class="ph">Story paragraph 1, not yet supplied. Suggested content: how Brew Lab came to work with this farm and who runs it.</span></p>
+            <p><span class="ph">Story paragraph 2, not yet supplied. Suggested content: how the coffee is grown and harvested here.</span></p>
+            <p><span class="ph">Story paragraph 3, not yet supplied. Suggested content: what makes this farm's coffee taste the way it does and which Brew Lab drinks use it.</span></p>
+          </div>
+          <dl class="farm-facts">
+            <dt>Altitude</dt><dd><span class="ph">not yet supplied</span></dd>
+            <dt>Coffee variety</dt><dd><span class="ph">not yet supplied</span></dd>
+            <dt>Processing method</dt><dd><span class="ph">not yet supplied</span></dd>
+          </dl>
+        </div>
+      </article></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  <p>Brew Lab, Indiranagar, Bengaluru</p>
+  <p>Highlighted text like <span class="ph">this</span> marks information not yet supplied.</p>
+</footer>
+
+<script>
+(function () {
+  // Pre-order data. Mirrors the menu above. Replace names and set price to a number
+  // (rupees) once the real menu is supplied. price: null means "not supplied yet".
+  var MENU = [
+    { cat: "Hot coffee", items: [
+      { id: "hot-1", name: "Item name 1", price: null },
+      { id: "hot-2", name: "Item name 2", price: null },
+      { id: "hot-3", name: "Item name 3", price: null } ] },
+    { cat: "Cold coffee", items: [
+      { id: "cold-1", name: "Item name 1", price: null },
+      { id: "cold-2", name: "Item name 2", price: null },
+      { id: "cold-3", name: "Item name 3", price: null } ] },
+    { cat: "Food and bakes", items: [
+      { id: "food-1", name: "Item name 1", price: null },
+      { id: "food-2", name: "Item name 2", price: null },
+      { id: "food-3", name: "Item name 3", price: null } ] }
+  ];
+
+  // Send channel. Not supplied yet, so nothing is sent from here.
+  // Set type to "whatsapp" (value: number with country code, digits only)
+  // or "email" (value: address) once the cafe confirms its channel.
+  var SEND_CHANNEL = { type: null, value: "" };
+
+  var qty = {};      // id -> quantity
+  var lookup = {};   // id -> {cat, item}
+  var $ = function (id) { return document.getElementById(id); };
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function priceText(item) {
+    return item.price == null ? "Price (placeholder)" : "\u20B9" + item.price;
+  }
+
+  function render() {
+    var box = $("po-items");
+    MENU.forEach(function (group) {
+      var h = el("h3", null, group.cat);
+      box.appendChild(h);
+      group.items.forEach(function (item) {
+        lookup[item.id] = { cat: group.cat, item: item };
+        qty[item.id] = 0;
+        var row = el("div", "po-row");
+        var name = el("span", "po-name");
+        var nm = el("span", item.name.indexOf("Item name") === 0 ? "ph" : null, item.name);
+        name.appendChild(nm);
+        var price = el("span", "po-price" + (item.price == null ? " ph" : ""), priceText(item));
+        var step = el("div", "po-stepper");
+        var minus = el("button", null, "\u2212");
+        minus.type = "button";
+        minus.setAttribute("aria-label", "Remove one " + item.name + " (" + group.cat + ")");
+        var out = el("output", null, "0");
+        out.id = "q-" + item.id;
+        var plus = el("button", null, "+");
+        plus.type = "button";
+        plus.setAttribute("aria-label", "Add one " + item.name + " (" + group.cat + ")");
+        minus.addEventListener("click", function () { change(item.id, -1); });
+        plus.addEventListener("click", function () { change(item.id, 1); });
+        step.appendChild(minus); step.appendChild(out); step.appendChild(plus);
+        row.appendChild(name); row.appendChild(price); row.appendChild(step);
+        box.appendChild(row);
+      });
+    });
+  }
+
+  function selected() {
+    var out = [];
+    Object.keys(qty).forEach(function (id) {
+      if (qty[id] > 0) out.push({ id: id, q: qty[id], cat: lookup[id].cat, item: lookup[id].item });
+    });
+    return out;
+  }
+
+  function totalInfo(sel) {
+    var count = 0, sum = 0, allPriced = sel.length > 0;
+    sel.forEach(function (s) {
+      count += s.q;
+      if (typeof s.item.price === "number") sum += s.q * s.item.price; else allPriced = false;
+    });
+    return { count: count, sum: sum, priced: allPriced };
+  }
+
+  function totalLine(t) {
+    if (t.count === 0) return "Items: 0";
+    if (t.priced) return "Items: " + t.count + " | Total: \u20B9" + t.sum;
+    return "Items: " + t.count + " | Total: price placeholder (prices not yet supplied)";
+  }
+
+  function change(id, d) {
+    qty[id] = Math.max(0, Math.min(20, qty[id] + d));
+    $("q-" + id).textContent = qty[id];
+    update();
+  }
+
+  function update() {
+    var sel = selected();
+    var list = $("po-list");
+    list.textContent = "";
+    sel.forEach(function (s) {
+      list.appendChild(el("li", null, s.q + " x " + s.item.name + " (" + s.cat + ")"));
+    });
+    $("po-empty").hidden = sel.length > 0;
+    $("po-total").textContent = totalLine(totalInfo(sel));
+    $("po-error").textContent = "";
+  }
+
+  function buildSummary(sel) {
+    var t = totalInfo(sel);
+    var lines = ["Brew Lab pickup order"];
+    var name = $("po-name").value.trim();
+    lines.push("Name: " + (name || "(not given)"));
+    lines.push("Pickup time: " + $("po-time").value + " (to be confirmed by the cafe)");
+    lines.push("");
+    lines.push("Items:");
+    sel.forEach(function (s) {
+      var p = typeof s.item.price === "number" ? " - \u20B9" + (s.q * s.item.price) : " - price placeholder";
+      lines.push(s.q + " x " + s.item.name + " (" + s.cat + ")" + p);
+    });
+    lines.push("");
+    lines.push(totalLine(t));
+    var notes = $("po-notes").value.trim();
+    if (notes) { lines.push(""); lines.push("Notes: " + notes); }
+    return lines.join("\n");
+  }
+
+  function setupSend(text) {
+    var a = $("po-send"), note = $("po-send-note");
+    var v = SEND_CHANNEL.value;
+    if (SEND_CHANNEL.type === "whatsapp" && v) {
+      a.href = "https://wa.me/" + encodeURIComponent(v) + "?text=" + encodeURIComponent(text);
+      a.hidden = false; note.hidden = true;
+    } else if (SEND_CHANNEL.type === "email" && v) {
+      a.href = "mailto:" + encodeURIComponent(v) + "?subject=" + encodeURIComponent("Brew Lab pickup order") + "&body=" + encodeURIComponent(text);
+      a.hidden = false; note.hidden = true;
+    } else {
+      a.hidden = true; note.hidden = false;
+    }
+  }
+
+  function generate() {
+    var err = $("po-error");
+    var sel = selected();
+    if (sel.length === 0) { err.textContent = "Add at least one item first."; return; }
+    if (!$("po-time").value) { err.textContent = "Choose a pickup time first."; $("po-time").focus(); return; }
+    err.textContent = "";
+    var text = buildSummary(sel);
+    $("po-summary").value = text;
+    $("po-summary-card").hidden = false;
+    $("po-copy-status").textContent = "";
+    setupSend(text);
+    $("po-summary-card").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function copy() {
+    var ta = $("po-summary"), status = $("po-copy-status");
+    function ok() { status.textContent = "Copied. Paste it into your message to the cafe."; }
+    function fallback() {
+      ta.select();
+      try { document.execCommand("copy") ? ok() : (status.textContent = "Select the text and copy it manually."); }
+      catch (e) { status.textContent = "Select the text and copy it manually."; }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(ta.value).then(ok, fallback);
+    } else { fallback(); }
+  }
+
+  render();
+  update();
+  $("po-generate").addEventListener("click", generate);
+  $("po-copy").addEventListener("click", copy);
+})();
+</script>
+
+</body>
+</html>

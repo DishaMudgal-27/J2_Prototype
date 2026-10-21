@@ -1,0 +1,74 @@
+{
+  "statement": "Build a single-file, phone-friendly website for Thread & Loom, a handloom clothing boutique at 18 FC Road, Shivajinagar, Pune. Visitors can browse the 10 products by category, filter by size and price, read the size guide, see new arrivals, and place an order on WhatsApp. The site also shows a lookbook, store timings and location, delivery details, the exchange policy and customer reviews, in an earthy, elegant look.",
+  "site_name": "Thread & Loom",
+  "audience": "Shoppers in and around Pune, mostly on phones, who want handloom kurtas, sarees, cotton shirts and dupattas and prefer to order by WhatsApp or visit the shop.",
+  "standards": [
+    "Plain HTML, CSS and JavaScript in one file, no build step (CDN libraries allowed)",
+    "Earthy, elegant look: natural, muted colours and a refined type pairing",
+    "Designed for phones first; works at 360px and 1280px with no horizontal overflow",
+    "No JavaScript errors on load or when using filters and tabs",
+    "All prices shown in rupees exactly as supplied",
+    "No broken in-page links; every menu link goes to a real section",
+    "Only facts supplied by the Requester are shown; nothing invented"
+  ],
+  "rules": [
+    "Use only the product names, prices, sizes, reviews, address, timings and policies the Requester supplied",
+    "Sarees and dupattas are free size and must still appear correctly when a size filter is used",
+    "Shop is closed on Monday and open 11am to 9pm Tuesday to Sunday",
+    "No returns on sale items; exchange within 7 days if unworn with tags",
+    "Orders are placed through WhatsApp at +91 00000 11111; the shop phone is +91 00000 22222",
+    "The lookbook has exactly 3 outfits, each built only from the listed products"
+  ],
+  "done_when": [
+    "The site shows the name Thread & Loom and a short line describing it as a handloom boutique in Pune",
+    "Products are grouped under four categories: Kurtas, Sarees, Shirts, Dupattas, and a visitor can switch between them or view all",
+    "All 10 products appear with the exact names and prices supplied: Indigo block-print kurta 1,499; Mustard handloom kurta 1,699; White chikankari kurta 2,199; Ikat handloom saree 3,499; Khadi silk saree 4,999; Cotton jamdani saree 3,999; Khadi cotton shirt 1,299; Linen-blend shirt 1,599; Block-print dupatta 899; Chanderi dupatta 1,099",
+    "A size filter limits the list using each item's sizes (Indigo block-print kurta S-XXL; Mustard handloom kurta S-XL; White chikankari kurta XS-XL; Khadi cotton shirt S-XXL; Linen-blend shirt M-XXL; sarees and dupattas free size)",
+    "A price filter limits the list by price range, and it can be combined with the size filter and category",
+    "A visible message appears when the chosen filters match no product, and the filters can be cleared",
+    "A size guide table lists chest in inches: XS 32, S 34, M 36, L 38, XL 40, XXL 42",
+    "Every product has an order button that opens WhatsApp (wa.me link for +91 00000 11111) with a message naming that product",
+    "A general Order on WhatsApp button is visible near the top of the page and opens the same WhatsApp number",
+    "A Visit Us section shows the address 18 FC Road, Shivajinagar, Pune 411005, the shop phone +91 00000 22222, and the timings 11am to 9pm Tuesday to Sunday, closed Monday, with a map link or embedded map",
+    "A Returns and Exchanges section states: exchange within 7 days if unworn with tags, no returns on sale items",
+    "A Delivery section states: Pune in 2 days, Rs 79, free above 2,999, pay on delivery",
+    "A navigation menu links to every section and each link points to an existing section on the page",
+    "No horizontal scrolling at 360px or 1280px width, and no JavaScript errors in the file's code paths",
+    "The colours and fonts are earthy and elegant, defined as a consistent set of colours and fonts in the file's styles"
+  ],
+  "business_type": "clothing boutique",
+  "visitor_needs": [
+    "Browse products by category",
+    "Filter by size and price",
+    "See a size guide",
+    "See new arrivals",
+    "Order on WhatsApp",
+    "See a lookbook of styled outfits",
+    "See store timings and location",
+    "Read the return and exchange policy",
+    "Read customer reviews",
+    "See delivery details"
+  ],
+  "to_be_confirmed": [],
+  "dropped_from_brief": [],
+  "confirmed_facts": [],
+  "dropped_by_requester": [
+    "A New Arrivals section shows exactly: White chikankari kurta, Ikat handloom saree, Linen-blend shirt",
+    "A Lookbook section shows 3 styled outfits, each listing the products used from the catalogue and their prices",
+    "A Reviews section shows the 3 supplied reviews with names: Meera K., Arjun S., Priya D."
+  ],
+  "dropped_reasons": [
+    {
+      "criterion": "A New Arrivals section shows exactly: White chikankari kurta, Ikat handloom saree, Linen-blend shirt",
+      "reason": "The Requester chose to leave it out (Out of budget: 0 of 40 units left, less than the cheapest rate-card part, and the site isn't workable yet.): Add 25 more. Leave out the lookbook, new arrivals and reviews."
+    },
+    {
+      "criterion": "A Lookbook section shows 3 styled outfits, each listing the products used from the catalogue and their prices",
+      "reason": "The Requester chose to leave it out (Out of budget: 0 of 40 units left, less than the cheapest rate-card part, and the site isn't workable yet.): Add 25 more. Leave out the lookbook, new arrivals and reviews."
+    },
+    {
+      "criterion": "A Reviews section shows the 3 supplied reviews with names: Meera K., Arjun S., Priya D.",
+      "reason": "The Requester chose to leave it out (Out of budget: 0 of 40 units left, less than the cheapest rate-card part, and the site isn't workable yet.): Add 25 more. Leave out the lookbook, new arrivals and reviews."
+    }
+  ]
+}

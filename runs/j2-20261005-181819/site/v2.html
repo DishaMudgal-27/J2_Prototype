@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CityCare Hospital, Bengaluru</title>
+<!--
+PLACEHOLDER REGISTER (content of site/placeholder_register.md)
+Marker: every fact not yet supplied renders as [PLACEHOLDER: description] using class "ph".
+Open items, all owned by the Requester unless stated:
+- Emergency number: Emergency section, dictionary key em_num.
+- Hospital address and map location: Emergency section, key em_addr.
+- WhatsApp number for booking: script constant CFG.whatsapp (value PLACEHOLDER_WHATSAPP_NUMBER).
+- Callback phone number for booking: script constant CFG.callback (value PLACEHOLDER_CALLBACK_NUMBER).
+- Doctor list (names, specialties, credentials, photos): keys d_name, d_spec, d_cred, d_photo, four cards.
+- Health blog posts or topics: keys p_title, p_sum, p_date, three cards.
+- Home tagline and outpatient hours: keys home_tag, home_hours.
+- Native review of Kannada and Hindi text (outside source): all kn and hi dictionary entries.
+Until CFG values are real digits, the booking buttons open nothing and show a notice.
+-->
+<!--
+CHECKLIST REPORT (content of site/checklist_report.md)
+Method: source of v1 read line by line. Not executed in a browser. File size is an estimate (25 to 30 KB), not measured.
+Result: 11 PASS, 0 FAIL.
+
+1 | PASS | One file, inline CSS and JS, no build step. Evidence: a style block and a script block in the file; the only external reference is the fonts link "https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada&family=Noto+Sans+Devanagari&display=swap" (CDN, allowed).
+2 | PASS | Nav links <a href="#home">, <a href="#book">, <a href="#emergency">, <a href="#doctors">, <a href="#blog"> inside <nav aria-label="Main">; matching section ids exist for all five.
+3 | PASS | Form is <form id="bookForm"> with no action attribute. Submit handler: window.open("https://wa.me/"+num.replace("+","")+"?text="+encodeURIComponent(msg),"_blank","noopener") and window.location.href="tel:"+num. No external request calls, no XHR, no browser storage or cookie writes found. Caveat: while CFG holds placeholder tokens the handler shows #notice and opens nothing, by design.
+4 | PASS | book_note: "The hospital confirms your slot by phone. Live slots are not offered. This form only prepares a message; this website saves nothing."
+5 | PASS | em_num:"[[emergency number]]" and em_addr:"[[hospital address and map location]]", rendered by ph() as [PLACEHOLDER: ...] in a p with class "big".
+6 | PASS | Four cards built from d_name:"[[doctor name]]", d_spec:"[[specialty]]", d_cred:"[[credentials]]", d_photo:"[[photo]]". doc_note: "All profiles below are placeholders."
+7 | PASS | Three cards built from p_title:"[[post title]]", p_sum:"[[post summary, written and approved by the hospital]]". blog_note: "Posts are placeholders. Nothing here is medical advice."
+8 | PASS | Buttons data-l="en", data-l="kn", data-l="hi". The en, kn and hi dictionaries each hold 51 keys (compared by reading); every section has KN and HI text.
+9 | PASS | document.getElementById("rev").hidden=(l==="en"). kn rev_banner contains "pending native review"; hi rev_banner contains "pending native review". Emergency KN and HI columns also carry a p with class "rev".
+10 | PASS | Three blocks data-fix="en", data-fix="kn", data-fix="hi" in .cols{grid-template-columns:repeat(3,1fr)}. Caveat: below 800 px width they stack vertically instead of sitting side by side.
+11 | PASS | ph() turns [[x]] into <span class="ph">[PLACEHOLDER: x]</span>. No phone-length digit sequence and no street address string in the source. CFG values are the tokens PLACEHOLDER_WHATSAPP_NUMBER and PLACEHOLDER_CALLBACK_NUMBER, which the done-when list allows.
+
+Notes, not done-when failures:
+- The fonts link makes each visitor's browser contact Google Fonts. No form data is involved. If the Requester wants zero third-party calls, remove the link and rely on system fonts (Kannada and Hindi rendering then depends on the device).
+- Both top comments (register and this report) are visible in view-source. Remove them at launch.
+- All real facts are still open and Requester-only: emergency number, address, WhatsApp and callback numbers, doctor list, blog topics. The site is not publishable until they are supplied. Native review of KN and HI is also outstanding.
+-->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada&family=Noto+Sans+Devanagari&display=swap" rel="stylesheet">
+<style>
+:root{--b:#0b5c7a;--bg:#f4f9fb;--ink:#1f2937;--line:#d9e2e8}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.55 system-ui,"Noto Sans Kannada","Noto Sans Devanagari",sans-serif;color:var(--ink);background:var(--bg)}
+header{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);z-index:5}
+.bar{display:flex;flex-wrap:wrap;gap:.4rem 1rem;align-items:center;justify-content:space-between;padding:.5rem 1rem;max-width:1000px;margin:auto}
+.brand{font-weight:700;color:var(--b);font-size:1.1rem}
+nav{display:flex;flex-wrap:wrap;gap:.2rem .8rem}
+nav a{color:var(--ink);text-decoration:none;padding:.25rem .1rem;border-bottom:2px solid transparent}
+nav a:hover,nav a:focus{border-color:var(--b);outline:none}
+.lang button{border:1px solid var(--b);background:#fff;color:var(--b);padding:.25rem .6rem;cursor:pointer;font:inherit}
+.lang button[aria-pressed="true"]{background:var(--b);color:#fff}
+#rev,#draft{text-align:center;padding:.3rem .6rem;font-size:.9rem}
+#rev{background:#fff3b0;color:#7a5c00}
+#draft{background:var(--bg);color:#5b6770}
+#rev[hidden]{display:none}
+section{max-width:1000px;margin:auto;padding:2rem 1rem;scroll-margin-top:8rem}
+h1,h2,h3{color:var(--b);line-height:1.25}
+.ph{background:#fff3b0;color:#7a5c00;border:1px dashed #7a5c00;padding:0 .3rem;border-radius:3px;font-size:.92em}
+.hero{background:#fff;border:1px solid var(--line);border-radius:8px;padding:1.5rem}
+.btn{display:inline-block;background:var(--b);color:#fff;text-decoration:none;border:0;padding:.6rem 1rem;border-radius:5px;font:inherit;cursor:pointer;margin:.3rem .4rem .3rem 0}
+.btn.alt{background:#fff;color:var(--b);border:1px solid var(--b)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem}
+.card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:1rem}
+.photo{height:90px;display:flex;align-items:center;justify-content:center;background:var(--bg);border:1px dashed var(--line);margin-bottom:.6rem}
+form{background:#fff;border:1px solid var(--line);border-radius:8px;padding:1rem;display:grid;gap:.8rem;max-width:620px}
+label{display:grid;gap:.2rem;font-weight:600}
+input,select,textarea{font:inherit;padding:.45rem;border:1px solid #b6c2cb;border-radius:4px;font-weight:400}
+label.chk{display:flex;gap:.5rem;align-items:flex-start;font-weight:400}
+.note{background:#fff;border-left:4px solid var(--b);padding:.6rem .8rem;max-width:620px}
+#notice{background:#fde8e6;border-left:4px solid #b42318;padding:.6rem .8rem;max-width:620px}
+#notice[hidden]{display:none}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.col{background:#fff;border:2px solid #b42318;border-radius:8px;padding:1rem}
+.col h3{color:#b42318;margin-top:0}
+.big{font-size:1.5rem;font-weight:700;margin:.3rem 0}
+.rev{background:#fff3b0;color:#7a5c00;font-size:.85rem;padding:.2rem .4rem;border-radius:3px}
+footer{text-align:center;padding:1.5rem 1rem;color:#5b6770;font-size:.9rem}
+@media(max-width:800px){.cols{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+<div class="bar">
+<div class="brand"><span data-i18n="brand"></span>, <span data-i18n="city"></span></div>
+<nav aria-label="Main">
+<a href="#home" data-i18n="nav_home"></a>
+<a href="#book" data-i18n="nav_book"></a>
+<a href="#emergency" data-i18n="nav_emerg"></a>
+<a href="#doctors" data-i18n="nav_docs"></a>
+<a href="#blog" data-i18n="nav_blog"></a>
+</nav>
+<div class="lang" role="group" aria-label="Language">
+<button type="button" data-l="en" aria-pressed="true">English</button>
+<button type="button" data-l="kn" aria-pressed="false">ಕನ್ನಡ</button>
+<button type="button" data-l="hi" aria-pressed="false">हिन्दी</button>
+</div>
+</div>
+<div id="rev" hidden data-i18n="rev_banner"></div>
+<div id="draft" data-i18n="draft"></div>
+</header>
+
+<main>
+<section id="home">
+<div class="hero">
+<h1 data-i18n="home_h"></h1>
+<p data-i18n="home_p"></p>
+<p data-i18n="home_tag"></p>
+<p data-i18n="home_hours"></p>
+<a class="btn" href="#book" data-i18n="cta_book"></a>
+<a class="btn alt" href="#emergency" data-i18n="cta_emerg"></a>
+</div>
+</section>
+
+<section id="book">
+<h2 data-i18n="book_h"></h2>
+<p class="note" data-i18n="book_note"></p>
+<br>
+<form id="bookForm">
+<label><span data-i18n="f_name"></span><input name="name" required autocomplete="off"></label>
+<label><span data-i18n="f_phone"></span><input name="phone" type="tel" required autocomplete="off"></label>
+<label><span data-i18n="f_date"></span><input name="date" type="date" required></label>
+<label><span data-i18n="f_time"></span>
+<select name="time">
+<option value="Any" data-i18n="t_any"></option>
+<option value="Morning" data-i18n="t_morn"></option>
+<option value="Afternoon" data-i18n="t_aft"></option>
+<option value="Evening" data-i18n="t_eve"></option>
+</select></label>
+<label><span data-i18n="f_spec"></span><input name="spec" autocomplete="off"></label>
+<label><span data-i18n="f_reason"></span><textarea name="reason" rows="3" maxlength="200"></textarea></label>
+<label class="chk"><input type="checkbox" required><span data-i18n="f_consent"></span></label>
+<div>
+<button class="btn" type="submit" name="mode" value="wa" data-i18n="b_wa"></button>
+<button class="btn alt" type="submit" name="mode" value="tel" data-i18n="b_tel"></button>
+</div>
+</form>
+<p id="notice" role="alert" hidden data-i18n="notice_ph"></p>
+</section>
+
+<section id="emergency">
+<h2 data-i18n="nav_emerg"></h2>
+<div class="cols">
+<div class="col" data-fix="en" lang="en">
+<h3 data-i18n="nav_emerg"></h3>
+<p data-i18n="em_call"></p>
+<p class="big" data-i18n="em_num"></p>
+<p><b data-i18n="em_addr_l"></b> <span data-i18n="em_addr"></span></p>
+<ol><li data-i18n="em_s1"></li><li data-i18n="em_s2"></li><li data-i18n="em_s3"></li></ol>
+<p data-i18n="em_warn"></p>
+</div>
+<div class="col" data-fix="kn" lang="kn">
+<h3 data-i18n="nav_emerg"></h3>
+<p data-i18n="em_call"></p>
+<p class="big" data-i18n="em_num"></p>
+<p><b data-i18n="em_addr_l"></b> <span data-i18n="em_addr"></span></p>
+<ol><li data-i18n="em_s1"></li><li data-i18n="em_s2"></li><li data-i18n="em_s3"></li></ol>
+<p data-i18n="em_warn"></p>
+<p class="rev" data-i18n="rev_banner"></p>
+</div>
+<div class="col" data-fix="hi" lang="hi">
+<h3 data-i18n="nav_emerg"></h3>
+<p data-i18n="em_call"></p>
+<p class="big" data-i18n="em_num"></p>
+<p><b data-i18n="em_addr_l"></b> <span data-i18n="em_addr"></span></p>
+<ol><li data-i18n="em_s1"></li><li data-i18n="em_s2"></li><li data-i18n="em_s3"></li></ol>
+<p data-i18n="em_warn"></p>
+<p class="rev" data-i18n="rev_banner"></p>
+</div>
+</div>
+</section>
+
+<section id="doctors">
+<h2 data-i18n="doc_h"></h2>
+<p class="note" data-i18n="doc_note"></p>
+<br>
+<div class="grid" id="docGrid"></div>
+</section>
+
+<section id="blog">
+<h2 data-i18n="blog_h"></h2>
+<p class="note" data-i18n="blog_note"></p>
+<br>
+<div class="grid" id="postGrid"></div>
+</section>
+</main>
+
+<footer data-i18n="foot"></footer>
+
+<script>
+var CFG={whatsapp:"PLACEHOLDER_WHATSAPP_NUMBER",callback:"PLACEHOLDER_CALLBACK_NUMBER"};
+var T={
+en:{
+brand:"CityCare Hospital",city:"Bengaluru",
+nav_home:"Home",nav_book:"Book a Visit",nav_emerg:"Emergency",nav_docs:"Doctors",nav_blog:"Health Blog",
+rev_banner:"Machine-translated, pending native review.",
+draft:"Draft: items tagged [PLACEHOLDER] have not been supplied by the hospital yet.",
+home_h:"Care for you and your family in Bengaluru",
+home_p:"Request a visit, find emergency information, meet our doctors and read our health blog.",
+home_tag:"[[hospital tagline and services]]",
+home_hours:"Outpatient hours: [[opening hours]]",
+cta_book:"Request a visit",cta_emerg:"Emergency information",
+book_h:"Request a Visit",
+book_note:"The hospital confirms your slot by phone. Live slots are not offered. This form only prepares a message; this website saves nothing.",
+f_name:"Full name",f_phone:"Phone number for callback",f_date:"Preferred date",f_time:"Preferred time",
+t_any:"Any time",t_morn:"Morning",t_aft:"Afternoon",t_eve:"Evening",
+f_spec:"Specialty or doctor (optional)",
+f_reason:"Reason for visit (short; do not include sensitive health details)",
+f_consent:"I understand this is a request, not a confirmed booking.",
+b_wa:"Send request on WhatsApp",b_tel:"Call the hospital to request",
+notice_ph:"The hospital's booking number has not been supplied yet [[booking number]]. Nothing was opened or sent.",
+em_call:"Call now:",em_num:"[[emergency number]]",em_addr_l:"Address:",em_addr:"[[hospital address and map location]]",
+em_s1:"Call the number above.",em_s2:"Say where you are.",em_s3:"Stay on the line.",
+em_warn:"The number and address above are placeholders until the hospital confirms them. Until then, call your local emergency service.",
+doc_h:"Our Doctors",
+doc_note:"All profiles below are placeholders. Real names, specialties and credentials will come from the hospital.",
+d_name:"[[doctor name]]",d_spec:"[[specialty]]",d_cred:"[[credentials]]",d_photo:"[[photo]]",
+blog_h:"Health Blog",
+blog_note:"Posts are placeholders. Nothing here is medical advice. Real posts will appear after the hospital approves them.",
+p_title:"[[post title]]",p_sum:"[[post summary, written and approved by the hospital]]",p_date:"[[date]]",
+foot:"CityCare Hospital, Bengaluru. Draft site with placeholders."
+},
+kn:{
+brand:"ಸಿಟಿಕೇರ್ ಆಸ್ಪತ್ರೆ",city:"ಬೆಂಗಳೂರು",
+nav_home:"ಮುಖಪುಟ",nav_book:"ಭೇಟಿ ಬುಕ್ ಮಾಡಿ",nav_emerg:"ತುರ್ತು ಸೇವೆ",nav_docs:"ವೈದ್ಯರು",nav_blog:"ಆರೋಗ್ಯ ಬ್ಲಾಗ್",
+rev_banner:"ಯಂತ್ರ ಅನುವಾದ: pending native review (ಸ್ಥಳೀಯ ಭಾಷಿಕರ ಪರಿಶೀಲನೆ ಬಾಕಿ).",
+draft:"ಕರಡು: [PLACEHOLDER] ಎಂದು ಗುರುತಿಸಿದ ಮಾಹಿತಿಯನ್ನು ಆಸ್ಪತ್ರೆ ಇನ್ನೂ ಒದಗಿಸಿಲ್ಲ.",
+home_h:"ಬೆಂಗಳೂರಿನಲ್ಲಿ ನಿಮಗೂ ನಿಮ್ಮ ಕುಟುಂಬಕ್ಕೂ ಆರೈಕೆ",
+home_p:"ಭೇಟಿಗೆ ಕೋರಿಕೆ ಸಲ್ಲಿಸಿ, ತುರ್ತು ಮಾಹಿತಿ ಪಡೆಯಿರಿ, ನಮ್ಮ ವೈದ್ಯರನ್ನು ಪರಿಚಯಿಸಿಕೊಳ್ಳಿ ಮತ್ತು ನಮ್ಮ ಆರೋಗ್ಯ ಬ್ಲಾಗ್ ಓದಿ.",
+home_tag:"[[ಆಸ್ಪತ್ರೆಯ ಘೋಷವಾಕ್ಯ ಮತ್ತು ಸೇವೆಗಳು]]",
+home_hours:"ಹೊರರೋಗಿ ಸಮಯ: [[ಸಮಯ]]",
+cta_book:"ಭೇಟಿಗೆ ಕೋರಿಕೆ",cta_emerg:"ತುರ್ತು ಮಾಹಿತಿ",
+book_h:"ಭೇಟಿಗೆ ಕೋರಿಕೆ",
+book_note:"ನಿಮ್ಮ ಸಮಯವನ್ನು ಆಸ್ಪತ್ರೆಯು ಫೋನ್ ಮೂಲಕ ದೃಢೀಕರಿಸುತ್ತದೆ. ಲೈವ್ ಸ್ಲಾಟ್‌ಗಳನ್ನು ನೀಡಲಾಗುವುದಿಲ್ಲ. ಈ ಫಾರ್ಮ್ ಸಂದೇಶವನ್ನು ಮಾತ್ರ ಸಿದ್ಧಪಡಿಸುತ್ತದೆ; ಈ ವೆಬ್‌ಸೈಟ್ ಏನನ್ನೂ ಉಳಿಸುವುದಿಲ್ಲ.",
+f_name:"ಪೂರ್ಣ ಹೆಸರು",f_phone:"ಕರೆ ಮಾಡಲು ಫೋನ್ ಸಂಖ್ಯೆ",f_date:"ಇಷ್ಟದ ದಿನಾಂಕ",f_time:"ಇಷ್ಟದ ಸಮಯ",
+t_any:"ಯಾವುದೇ ಸಮಯ",t_morn:"ಬೆಳಿಗ್ಗೆ",t_aft:"ಮಧ್ಯಾಹ್ನ",t_eve:"ಸಂಜೆ",
+f_spec:"ವಿಶೇಷತೆ ಅಥವಾ ವೈದ್ಯರು (ಐಚ್ಛಿಕ)",
+f_reason:"ಭೇಟಿಯ ಕಾರಣ (ಚಿಕ್ಕದಾಗಿ; ಸೂಕ್ಷ್ಮ ಆರೋಗ್ಯ ವಿವರಗಳನ್ನು ಬರೆಯಬೇಡಿ)",
+f_consent:"ಇದು ಕೋರಿಕೆ ಮಾತ್ರ, ದೃಢೀಕೃತ ಬುಕಿಂಗ್ ಅಲ್ಲ ಎಂದು ನನಗೆ ತಿಳಿದಿದೆ.",
+b_wa:"ವಾಟ್ಸಾಪ್‌ನಲ್ಲಿ ಕೋರಿಕೆ ಕಳುಹಿಸಿ",b_tel:"ಕೋರಲು ಆಸ್ಪತ್ರೆಗೆ ಕರೆ ಮಾಡಿ",
+notice_ph:"ಆಸ್ಪತ್ರೆಯ ಬುಕಿಂಗ್ ಸಂಖ್ಯೆಯನ್ನು ಇನ್ನೂ ಒದಗಿಸಿಲ್ಲ [[ಬುಕಿಂಗ್ ಸಂಖ್ಯೆ]]. ಏನನ್ನೂ ತೆರೆಯಲಾಗಿಲ್ಲ ಅಥವಾ ಕಳುಹಿಸಿಲ್ಲ.",
+em_call:"ಈಗ ಕರೆ ಮಾಡಿ:",em_num:"[[ತುರ್ತು ಸಂಖ್ಯೆ]]",em_addr_l:"ವಿಳಾಸ:",em_addr:"[[ಆಸ್ಪತ್ರೆಯ ವಿಳಾಸ ಮತ್ತು ನಕ್ಷೆ ಸ್ಥಳ]]",
+em_s1:"ಮೇಲಿನ ಸಂಖ್ಯೆಗೆ ಕರೆ ಮಾಡಿ.",em_s2:"ನೀವು ಎಲ್ಲಿದ್ದೀರಿ ಎಂದು ಹೇಳಿ.",em_s3:"ಕರೆಯಲ್ಲೇ ಇರಿ.",
+em_warn:"ಮೇಲಿನ ಸಂಖ್ಯೆ ಮತ್ತು ವಿಳಾಸ ಆಸ್ಪತ್ರೆ ದೃಢೀಕರಿಸುವವರೆಗೆ ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್‌ಗಳು. ಅಲ್ಲಿಯವರೆಗೆ ನಿಮ್ಮ ಸ್ಥಳೀಯ ತುರ್ತು ಸೇವೆಗೆ ಕರೆ ಮಾಡಿ.",
+doc_h:"ನಮ್ಮ ವೈದ್ಯರು",
+doc_note:"ಕೆಳಗಿನ ಎಲ್ಲಾ ಪ್ರೊಫೈಲ್‌ಗಳು ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್‌ಗಳು. ನಿಜವಾದ ಹೆಸರು, ವಿಶೇಷತೆ ಮತ್ತು ಅರ್ಹತೆಗಳನ್ನು ಆಸ್ಪತ್ರೆ ಒದಗಿಸುತ್ತದೆ.",
+d_name:"[[ವೈದ್ಯರ ಹೆಸರು]]",d_spec:"[[ವಿಶೇಷತೆ]]",d_cred:"[[ಅರ್ಹತೆಗಳು]]",d_photo:"[[ಫೋಟೋ]]",
+blog_h:"ಆರೋಗ್ಯ ಬ್ಲಾಗ್",
+blog_note:"ಪೋಸ್ಟ್‌ಗಳು ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್‌ಗಳು. ಇಲ್ಲಿರುವುದು ಯಾವುದೂ ವೈದ್ಯಕೀಯ ಸಲಹೆ ಅಲ್ಲ. ಆಸ್ಪತ್ರೆ ಅನುಮೋದಿಸಿದ ನಂತರ ನಿಜವಾದ ಪೋಸ್ಟ್‌ಗಳು ಕಾಣಿಸುತ್ತವೆ.",
+p_title:"[[ಪೋಸ್ಟ್ ಶೀರ್ಷಿಕೆ]]",p_sum:"[[ಆಸ್ಪತ್ರೆ ಬರೆದು ಅನುಮೋದಿಸಿದ ಪೋಸ್ಟ್ ಸಾರಾಂಶ]]",p_date:"[[ದಿನಾಂಕ]]",
+foot:"ಸಿಟಿಕೇರ್ ಆಸ್ಪತ್ರೆ, ಬೆಂಗಳೂರು. ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್‌ಗಳೊಂದಿಗೆ ಕರಡು ಸೈಟ್."
+},
+hi:{
+brand:"सिटीकेयर अस्पताल",city:"बेंगलुरु",
+nav_home:"होम",nav_book:"अपॉइंटमेंट बुक करें",nav_emerg:"आपातकाल",nav_docs:"डॉक्टर",nav_blog:"स्वास्थ्य ब्लॉग",
+rev_banner:"मशीन अनुवाद: pending native review (मूल भाषी की समीक्षा बाकी)।",
+draft:"ड्राफ़्ट: [PLACEHOLDER] चिह्नित जानकारी अस्पताल ने अभी नहीं दी है।",
+home_h:"बेंगलुरु में आपके और आपके परिवार के लिए देखभाल",
+home_p:"विज़िट का अनुरोध करें, आपातकालीन जानकारी देखें, हमारे डॉक्टरों से मिलें और हमारा स्वास्थ्य ब्लॉग पढ़ें।",
+home_tag:"[[अस्पताल का टैगलाइन और सेवाएँ]]",
+home_hours:"ओपीडी समय: [[समय]]",
+cta_book:"विज़िट का अनुरोध",cta_emerg:"आपातकालीन जानकारी",
+book_h:"विज़िट का अनुरोध",
+book_note:"अस्पताल फ़ोन पर आपका स्लॉट पक्का करता है। लाइव स्लॉट उपलब्ध नहीं हैं। यह फ़ॉर्म केवल संदेश तैयार करता है; यह वेबसाइट कुछ भी सहेजती नहीं है।",
+f_name:"पूरा नाम",f_phone:"कॉलबैक के लिए फ़ोन नंबर",f_date:"पसंदीदा तारीख",f_time:"पसंदीदा समय",
+t_any:"कोई भी समय",t_morn:"सुबह",t_aft:"दोपहर",t_eve:"शाम",
+f_spec:"विशेषज्ञता या डॉक्टर (वैकल्पिक)",
+f_reason:"विज़िट का कारण (संक्षेप में; संवेदनशील स्वास्थ्य विवरण न लिखें)",
+f_consent:"मैं समझता/समझती हूँ कि यह केवल अनुरोध है, पक्की बुकिंग नहीं।",
+b_wa:"व्हाट्सऐप पर अनुरोध भेजें",b_tel:"अनुरोध के लिए अस्पताल को कॉल करें",
+notice_ph:"अस्पताल का बुकिंग नंबर अभी उपलब्ध नहीं कराया गया है [[बुकिंग नंबर]]। कुछ भी खोला या भेजा नहीं गया।",
+em_call:"अभी कॉल करें:",em_num:"[[आपातकालीन नंबर]]",em_addr_l:"पता:",em_addr:"[[अस्पताल का पता और मानचित्र स्थान]]",
+em_s1:"ऊपर दिए नंबर पर कॉल करें।",em_s2:"बताएँ कि आप कहाँ हैं।",em_s3:"लाइन पर बने रहें।",
+em_warn:"ऊपर का नंबर और पता अस्पताल की पुष्टि तक प्लेसहोल्डर हैं। तब तक अपनी स्थानीय आपातकालीन सेवा को कॉल करें।",
+doc_h:"हमारे डॉक्टर",
+doc_note:"नीचे की सभी प्रोफ़ाइल प्लेसहोल्डर हैं। असली नाम, विशेषज्ञता और योग्यताएँ अस्पताल देगा।",
+d_name:"[[डॉक्टर का नाम]]",d_spec:"[[विशेषज्ञता]]",d_cred:"[[योग्यताएँ]]",d_photo:"[[फ़ोटो]]",
+blog_h:"स्वास्थ्य ब्लॉग",
+blog_note:"पोस्ट प्लेसहोल्डर हैं। यहाँ कुछ भी चिकित्सीय सलाह नहीं है। अस्पताल की मंज़ूरी के बाद असली पोस्ट दिखेंगी।",
+p_title:"[[पोस्ट का शीर्षक]]",p_sum:"[[अस्पताल द्वारा लिखा और मंज़ूर किया गया पोस्ट सारांश]]",p_date:"[[तारीख]]",
+foot:"सिटीकेयर अस्पताल, बेंगलुरु। प्लेसहोल्डर के साथ ड्राफ़्ट साइट।"
+}};
+
+function ph(s){return s.replace(/\[\[(.+?)\]\]/g,'<span class="ph">[PLACEHOLDER: $1]</span>');}
+
+function cards(){
+var d="",p="",i;
+for(i=0;i<4;i++){d+='<div class="card"><div class="photo" data-i18n="d_photo"></div><h3 data-i18n="d_name"></h3><p data-i18n="d_spec"></p><p data-i18n="d_cred"></p></div>';}
+for(i=0;i<3;i++){p+='<div class="card"><h3 data-i18n="p_title"></h3><p data-i18n="p_date"></p><p data-i18n="p_sum"></p></div>';}
+document.getElementById("docGrid").innerHTML=d;
+document.getElementById("postGrid").innerHTML=p;
+}
+
+var cur="en";
+function setLang(l){
+cur=l;
+document.documentElement.lang=l;
+document.querySelectorAll("[data-i18n]").forEach(function(el){
+var fx=el.closest("[data-fix]");
+var lg=fx?fx.getAttribute("data-fix"):l;
+el.innerHTML=ph(T[lg][el.getAttribute("data-i18n")]);
+});
+document.querySelectorAll(".lang button").forEach(function(b){
+b.setAttribute("aria-pressed",b.getAttribute("data-l")===l?"true":"false");
+});
+document.getElementById("rev").hidden=(l==="en");
+}
+
+cards();
+setLang("en");
+document.querySelectorAll(".lang button").forEach(function(b){
+b.addEventListener("click",function(){setLang(b.getAttribute("data-l"));});
+});
+
+var form=document.getElementById("bookForm");
+form.addEventListener("submit",function(e){
+e.preventDefault();
+var mode=(e.submitter&&e.submitter.value)||"wa";
+var f=new FormData(form);
+var msg="Visit request (CityCare website)\n"+
+"Name: "+f.get("name")+"\n"+
+"Callback phone: "+f.get("phone")+"\n"+
+"Preferred date: "+f.get("date")+"\n"+
+"Preferred time: "+f.get("time")+"\n"+
+"Specialty/doctor: "+(f.get("spec")||"-")+"\n"+
+"Reason: "+(f.get("reason")||"-");
+var num=mode==="tel"?CFG.callback:CFG.whatsapp;
+var note=document.getElementById("notice");
+if(!/^\+?\d{8,15}$/.test(num)){note.hidden=false;return;}
+note.hidden=true;
+if(mode==="tel"){window.location.href="tel:"+num;}
+else{window.open("https://wa.me/"+num.replace("+","")+"?text="+encodeURIComponent(msg),"_blank","noopener");}
+});
+</script>
+</body>
+</html>
