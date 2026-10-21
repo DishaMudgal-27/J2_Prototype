@@ -14,14 +14,18 @@ import re
 import j2_artifacts as A
 
 SCHEMA = "map/1"
-NODE_KINDS = ("person", "function", "engine", "work", "know")      # v1 draws person, engine and work
-EDGE_KINDS = ("handoff", "step", "speaks_to", "draws_on")           # v1 draws handoff and step
-STATUSES = ("filed", "running", "waiting_on_you", "fault", "left_open", "not_made", "idle")
-WORDS = {"filed": "filed and checked", "running": "running now", "waiting_on_you": "waiting on you", "fault": "fault",
+NODE_KINDS = ("person", "function", "engine", "work", "know")      # v2 draws person, function, engine and work
+EDGE_KINDS = ("handoff", "step", "speaks_to", "made", "draws_on")   # v2 draws handoff, step and speaks_to; made is listed, not drawn
+STATUSES = ("filed", "running", "waiting", "waiting_on_you", "fault", "left_open", "not_made", "idle")
+WORDS = {"filed": "filed and checked", "running": "running now", "waiting_on_you": "waiting on you", "waiting": "waiting", "fault": "fault",
          "left_open": "left open", "not_made": "not made", "idle": "idle"}
+FUNCS = ("identity", "adaptation", "priority", "coordination", "audit")
+NAMES = {"identity": "Identity", "adaptation": "Adaptation", "priority": "Priority", "coordination": "Coordination", "audit": "Audit"}
+# the existing tab that shows each function's work (declared here; a box links to it)
+FN_TAB = {"identity": "charter", "adaptation": "workflows", "priority": "conflicts", "coordination": "timeline", "audit": "audit"}
 STEP_VERB = {"doc-sections": "Write", "site-parts": "Build", "send": "Send"}      # what the workflows of that kind do
 LEGEND = [
-    {"key": "function", "label": "function", "drawn": False},
+    {"key": "function", "label": "function", "drawn": True},
     {"key": "engine", "label": "engine", "drawn": True},
     {"key": "work", "label": "work with its version", "drawn": True},
     {"key": "filed", "label": "filed and checked", "drawn": True},
@@ -31,7 +35,7 @@ LEGEND = [
     {"key": "fault", "label": "fault", "drawn": True},
     {"key": "not_made", "label": "not made", "drawn": True},
     {"key": "handoff", "label": "hand-off", "drawn": True},
-    {"key": "speaks_to", "label": "speaks to", "drawn": False},
+    {"key": "speaks_to", "label": "speaks to", "drawn": True},
 ]
 
 
@@ -97,6 +101,59 @@ def _state_line(d, live, atoms, req_waiting):
         return "Waiting on you", "waiting_on_you"
     word = {"done": "Done", "done_with_open_items": "Done with open items", "stopped": "Stopped", "crashed": "Crashed"}.get(s.get("status"))
     return (word, "idle") if word else ("not recorded", "idle")
+
+
+def _functions(chat, calls, snap, requester_waiting, nr):
+    """The five function boxes. A running run: the lanes (working, waiting, blocked, idle). A finished one: the last known
+    state from the chat, never "running": the line says what the function last did. Calls, seconds and tokens come from
+    the call log."""
+    lanes = {x["id"]: x for x in (snap or {}).get("lanes") or []}
+    out = []
+    for fn in FUNCS:
+        mine = [c for c in calls if c.get("fn") == fn]
+        said = [m for m in chat if m.get("who") == fn]
+        last = (said[-1].get("text") or "")[:140] if said else ""
+        node = {"id": f"fn:{fn}", "kind": "function", "row": "functions", "label": NAMES[fn], "status": "idle", "version": None,
+                "tag": None, "color": f"--{fn}", "file": None, "workflows": [], "tab": FN_TAB[fn], "wait_on": None,
+                "calls": len(mine), "seconds": round(sum(c.get("seconds") or 0 for c in mine), 1),
+                "tokens": {"input": sum((c.get("tokens") or {}).get("input", 0) for c in mine),
+                           "output": sum((c.get("tokens") or {}).get("output", 0) for c in mine)}}
+        if snap is not None and fn in lanes:
+            ln = lanes[fn]
+            on = ln.get("on")
+            node["status"] = {"working": "running", "waiting": "waiting", "blocked": "fault"}.get(ln.get("status"), "idle")
+            if node["status"] == "waiting":
+                node["wait_on"] = on
+                if on == "Requester":
+                    node["status"], node["wait_on"] = "waiting_on_you", "you"
+            doing = (ln.get("doing") or "")[:140]
+            node["detail"] = doing if node["status"] != "idle" else (f"last seen: {doing or last}" if (doing or last) else "no message recorded")
+        else:
+            if fn == "identity" and requester_waiting:
+                node["status"], node["wait_on"] = "waiting_on_you", "you"
+            node["detail"] = f"last seen: {last}" if last else "no message recorded"
+        if not said and not snap:
+            nr.append(f"what {NAMES[fn]} did (chat)")
+        out.append(node)
+    return out
+
+
+def _speaks(chat, have):
+    """speaks_to edges with message counts: the Requester to Identity (their messages), Identity to the Requester
+    (messages addressed to them), and function to function (chat who and next)."""
+    edges, n = [], {}
+    you = sum(1 for m in chat if m.get("who") == "user")
+    back = sum(1 for m in chat if m.get("who") == "identity" and m.get("to_user"))
+    for a, b, c in (("person:requester", "fn:identity", you), ("fn:identity", "person:requester", back)):
+        if c:
+            edges.append({"from": a, "to": b, "kind": "speaks_to", "label": None, "n": c, "basis": "recorded"})
+    for m in chat:
+        a, b = m.get("who"), m.get("next")
+        if a in FUNCS and b in FUNCS and a != b:
+            n[(a, b)] = n.get((a, b), 0) + 1
+    edges += [{"from": f"fn:{a}", "to": f"fn:{b}", "kind": "speaks_to", "label": None, "n": c, "basis": "recorded"}
+              for (a, b), c in sorted(n.items(), key=lambda x: (FUNCS.index(x[0][0]), FUNCS.index(x[0][1])))]
+    return edges
 
 
 def build(d, live=None):
@@ -214,6 +271,24 @@ def build(d, live=None):
     if not chat:
         nr.append("chat (messages from the Requester)")
     state, state_status = _state_line(d, live, atoms, waiting)
+    calls = (snap.get("call_log") if live else _jsonl(d, "calls.jsonl")) or []
+    if not calls and not live:
+        nr.append("AI calls per function (calls.jsonl)")
+    funcs = _functions(chat, calls, snap if live else None, waiting, nr)
+    speaks = _speaks(chat, bool(chat))
+    made_edges = []
+    docs = _read(d, "documents.json", {}) or {}
+    for st in steps:      # which functions made a step: only where documents.json recorded the call range
+        k = st["id"].split(">")[1]
+        rng = (docs.get(k) or {}).get("calls")
+        if rng and calls:
+            per = {fn: sum(1 for c in calls if c.get("fn") == fn and rng["from"] <= c.get("id", 0) <= rng["to"]) for fn in FUNCS}
+            per = {fn: n for fn, n in per.items() if n}
+            st["made_by"] = {"calls": rng, "functions": per, "basis": "recorded"}
+            made_edges += [{"from": f"fn:{fn}", "to": st["id"], "kind": "made", "label": None, "n": n, "basis": "recorded"} for fn, n in per.items()]
+        else:
+            st["made_by"] = None
+            nr.append(f"which function made the step into {st['id'].split('>')[1]}")
     if state == "not recorded":
         nr.append("how the run ended (summary.json)")
     # interleave the steps with the boxes in drawing order
@@ -222,7 +297,7 @@ def build(d, live=None):
         order.append(n)
         if i < len(steps):
             order.append(steps[i])
-    out_nodes = [person] + order
+    out_nodes = [person] + funcs + order
     for n in out_nodes:
         n.pop("_atoms", None)
         n.pop("_order", None)
@@ -230,8 +305,8 @@ def build(d, live=None):
     ch = _checks(atoms)
     return {"schema": SCHEMA, "run": os.path.basename(d), "live": bool(live),
             "status": {"state": state, "state_status": state_status, "checks": ch},
-            "nodes": out_nodes, "edges": edges + handoffs, "legend": LEGEND, "built_from": built_from,
-            "not_recorded": list(dict.fromkeys(nr + ["which function made each step (Functions row, later version)",
+            "nodes": out_nodes, "edges": edges + handoffs + speaks + made_edges, "legend": LEGEND, "built_from": built_from,
+            "not_recorded": list(dict.fromkeys(nr + ["messages to and from workflow agents (W-n) are not drawn",
                                                      "what the work draws on (Knows row, later version)"]))}
 
 

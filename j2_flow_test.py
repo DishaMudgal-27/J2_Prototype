@@ -5040,6 +5040,10 @@ def j2_ui_idruns(ids):
     return ", ".join(out)
 
 
+def by_fn(fn, rng, calls):
+    return sum(1 for c in calls if c["fn"] == fn and rng["from"] <= c["id"] <= rng["to"])
+
+
 def map_tab():
     """Map v1 (map/1): map.json written beside atoms.json (additive, after the summary and again after the report), the
     same map from a rebuilt folder, an old run, a live run, /api/map, the SVG for every status (never colour alone), the
@@ -5049,6 +5053,7 @@ def map_tab():
     import threading
     import urllib.error
     import urllib.request
+    import collections
     import html as htmllib
     import j2_map as M
     import j2_server
@@ -5058,9 +5063,9 @@ def map_tab():
     atoms = json.load(open(os.path.join(run.dir, "atoms.json")))["atoms"]
     assert os.path.exists(os.path.join(run.dir, "atoms.json")) and saved["schema"] == "map/1" and saved["run"] == name and not saved["live"]
     # golden structure: the Requester, then the work in order with a step between each pair
-    assert [n["id"] for n in saved["nodes"]] == ["person:requester", "work:charter", "step:charter>prd", "work:prd", "step:prd>hld",
+    assert [n["id"] for n in saved["nodes"]] == ["person:requester", "fn:identity", "fn:adaptation", "fn:priority", "fn:coordination", "fn:audit", "work:charter", "step:charter>prd", "work:prd", "step:prd>hld",
         "work:hld", "step:hld>lld", "work:lld", "step:lld>website", "work:website"], [n["id"] for n in saved["nodes"]]
-    assert [(n["kind"], n["row"]) for n in saved["nodes"]] == [("person", "people")] + [(k, "work") for k in
+    assert [(n["kind"], n["row"]) for n in saved["nodes"]] == [("person", "people")] + [("function", "functions")] * 5 + [(k, "work") for k in
         ("work", "engine", "work", "engine", "work", "engine", "work", "engine", "work")]
     by = {n["id"]: n for n in saved["nodes"]}
     assert [by[f"work:{k}"]["status"] for k in ("charter", "prd", "hld", "lld", "website")] == ["filed"] * 5
@@ -5083,14 +5088,42 @@ def map_tab():
     assert sum(1 for e in saved["edges"] if e["kind"] == "step") == 8
     ck = [x for a in atoms for x in a["verification"] if x["met"] is not None]
     assert saved["status"] == {"state": "Done", "state_status": "idle", "checks": {"passed": sum(x["met"] is True for x in ck), "run": len(ck)}}
-    assert "version of Charter" in saved["not_recorded"] and any("Functions row" in x for x in saved["not_recorded"]) and \
-        any("Knows row" in x for x in saved["not_recorded"]) and not any(n["kind"] in ("function", "know") for n in saved["nodes"])
-    assert [l["key"] for l in saved["legend"] if not l["drawn"]] == ["function", "speaks_to"]
+    assert "version of Charter" in saved["not_recorded"] and "which function made the step into website" in saved["not_recorded"] and \
+        any("Knows row" in x for x in saved["not_recorded"]) and not any("Functions row" in x for x in saved["not_recorded"]) and \
+        not any(n["kind"] == "know" for n in saved["nodes"]) and "messages to and from workflow agents (W-n) are not drawn" in saved["not_recorded"]
+    assert [l["key"] for l in saved["legend"] if not l["drawn"]] == []
     assert saved == M.build(run.dir), "map.json is what the folder builds"
+    # the Functions row, golden: calls, seconds and tokens per function from calls.jsonl; a finished run is never "running"
+    calls = [json.loads(x) for x in open(os.path.join(run.dir, "calls.jsonl"), encoding="utf-8")]
+    chat = [json.loads(x) for x in open(os.path.join(run.dir, "chat.jsonl"), encoding="utf-8")]
+    fnn = [n for n in saved["nodes"] if n["kind"] == "function"]
+    assert [(n["label"], n["tab"], n["color"]) for n in fnn] == [("Identity", "charter", "--identity"), ("Adaptation", "workflows", "--adaptation"),
+        ("Priority", "conflicts", "--priority"), ("Coordination", "timeline", "--coordination"), ("Audit", "audit", "--audit")]
+    for n in fnn:
+        fid, mine = n["id"][3:], [c for c in calls if c["fn"] == n["id"][3:]]
+        said = [m for m in chat if m.get("who") == fid]
+        assert n["calls"] == len(mine) and n["seconds"] == round(sum(c["seconds"] or 0 for c in mine), 1) and n["tokens"] == {
+            "input": sum((c["tokens"] or {}).get("input", 0) for c in mine), "output": sum((c["tokens"] or {}).get("output", 0) for c in mine)}, n["id"]
+        assert n["status"] == "idle" and n["detail"] == "last seen: " + said[-1]["text"][:140], n["id"]
+    assert not any(n["status"] in ("running", "waiting") for n in fnn) and "running" not in json.dumps([n["status"] for n in saved["nodes"] if n["row"] != "work"])
+    ud = [(e["from"], e["to"], e["n"]) for e in saved["edges"] if e["kind"] == "speaks_to"]      # speaks to: counts from the chat
+    want = collections.Counter((m["who"], m["next"]) for m in chat if m.get("who") in ("identity", "adaptation", "priority", "coordination", "audit")
+                               and m.get("next") in ("identity", "adaptation", "priority", "coordination", "audit") and m["who"] != m["next"])
+    assert ud[:2] == [("person:requester", "fn:identity", sum(1 for m in chat if m.get("who") == "user")),
+                      ("fn:identity", "person:requester", sum(1 for m in chat if m.get("who") == "identity" and m.get("to_user")))]
+    assert {(a[3:], b[3:]): c for a, b, c in ud[2:]} == dict(want) and all(a.startswith("fn:") for a, _, _ in ud[2:])
+    docs_rec = json.load(open(os.path.join(run.dir, "documents.json")))      # who made each step: only where documents.json has the call range
+    for k, step in (("prd", "charter>prd"), ("hld", "prd>hld"), ("lld", "hld>lld")):
+        rng, st = docs_rec[k]["calls"], next(n for n in saved["nodes"] if n["id"] == f"step:{step}")
+        per = {f: sum(1 for c in calls if c["fn"] == f and rng["from"] <= c["id"] <= rng["to"]) for f in ("identity", "adaptation", "priority", "coordination", "audit")}
+        assert st["made_by"] == {"calls": rng, "functions": {f: n for f, n in per.items() if n}, "basis": "recorded"}, step
+        assert {(e["from"][3:], e["n"]) for e in saved["edges"] if e["kind"] == "made" and e["to"] == f"step:{step}"} == {(f, n) for f, n in per.items() if n}
+    assert next(n for n in saved["nodes"] if n["id"] == "step:lld>website")["made_by"] is None      # the site: not recorded, never guessed
+    assert not [e for e in saved["edges"] if e["kind"] == "made" and e["to"] == "step:lld>website"]
     assert by["person:requester"]["detail"] == "1 message from you" and by["person:requester"]["status"] == "idle"
     # a plain website run has the Charter and the site only; a PRD-only run has no site
     plain = docs_run(BREW_LAB, 200)
-    assert [n["id"] for n in json.load(open(os.path.join(plain.dir, "map.json")))["nodes"]] == ["person:requester", "work:charter", "step:charter>website", "work:website"]
+    assert [n["id"] for n in json.load(open(os.path.join(plain.dir, "map.json")))["nodes"]] == ["person:requester", "fn:identity", "fn:adaptation", "fn:priority", "fn:coordination", "fn:audit", "work:charter", "step:charter>website", "work:website"]
     # an old run: no artifacts.json, atoms.json or map.json; the same boxes, and the gaps are named
     old = os.path.join(j2.RUNS_DIR, "j2-20200102-000000")
     shutil.copytree(run.dir, old)
@@ -5100,6 +5133,16 @@ def map_tab():
     assert [(n["id"], n["status"], n["version"]) for n in m_old["nodes"]] == [(n["id"], n["status"], n["version"]) for n in saved["nodes"]]
     assert "artifacts.json (rows rebuilt from the folder)" in m_old["not_recorded"] and "atoms.json (atoms rebuilt from workflows.json)" in m_old["not_recorded"]
     assert not any(os.path.exists(os.path.join(old, f)) for f in ("artifacts.json", "atoms.json", "map.json")), "building a map never writes to an old run"
+    os.remove(os.path.join(old, "calls.jsonl"))
+    m2 = M.build(old)
+    assert all(n["calls"] == 0 for n in m2["nodes"] if n["kind"] == "function") and "AI calls per function (calls.jsonl)" in m2["not_recorded"]
+    assert all(n["detail"].startswith("last seen: ") for n in m2["nodes"] if n["kind"] == "function"), "the chat still says what each did"
+    os.remove(os.path.join(old, "chat.jsonl"))
+    m3 = M.build(old)
+    f3 = [n for n in m3["nodes"] if n["kind"] == "function"]
+    assert len(f3) == 5 and all(n["detail"] == "no message recorded" and n["status"] == "idle" for n in f3)
+    assert "what Identity did (chat)" in m3["not_recorded"] and next(n for n in m3["nodes"] if n["id"] == "person:requester")["detail"] == "not recorded"
+    assert not [e for e in m3["edges"] if e["kind"] == "speaks_to"] and not [e for e in m3["edges"] if e["kind"] == "made"]
     assert M.build(None)["nodes"] == [] and M.build(os.path.join(run.dir, "nope"))["not_recorded"] == ["run not found"]
     # statuses: a finished run says "left open", never "running"; fault and not made
     edit = os.path.join(j2.RUNS_DIR, "j2-20200103-000000")
@@ -5131,6 +5174,35 @@ def map_tab():
     ask = M.build(edit, {"snapshot": {**snap, "status": "waiting", "lanes": [], "paused": {"kind": "limit"}}, "stages": [], "stage_words": {}})
     assert ask["status"] == {**ask["status"], "state": "Waiting on you", "state_status": "waiting_on_you"} and \
         {n["id"]: n["status"] for n in ask["nodes"]}["person:requester"] == "waiting_on_you"
+    # live lanes: working = running now, waiting on a function, waiting on you, blocked, idle (last seen)
+    lanes = [{"id": "identity", "name": "Identity", "status": "working", "doing": "writing the charter"},
+             {"id": "adaptation", "name": "Adaptation", "status": "waiting", "on": "Priority", "doing": "proposed three workflows"},
+             {"id": "priority", "name": "Priority", "status": "waiting", "on": "Requester", "doing": "asked a question"},
+             {"id": "coordination", "name": "Coordination", "status": "blocked", "doing": "W-3 is held"},
+             {"id": "audit", "name": "Audit", "status": "idle", "doing": "checked site v2"}]
+    lv = M.build(edit, {"snapshot": {**snap, "status": "running", "lanes": lanes, "paused": None, "call_log": calls, "chat": chat}, "stages": [], "stage_words": {}})
+    f = {n["id"]: n for n in lv["nodes"] if n["kind"] == "function"}
+    assert (f["fn:identity"]["status"], f["fn:identity"]["detail"]) == ("running", "writing the charter") and lv["status"]["state"] == "Identity running"
+    assert (f["fn:adaptation"]["status"], f["fn:adaptation"]["wait_on"]) == ("waiting", "Priority")
+    assert (f["fn:priority"]["status"], f["fn:priority"]["wait_on"]) == ("waiting_on_you", "you")
+    assert (f["fn:coordination"]["status"], f["fn:coordination"]["detail"]) == ("fault", "W-3 is held")
+    assert (f["fn:audit"]["status"], f["fn:audit"]["detail"]) == ("idle", "last seen: checked site v2")
+    assert f["fn:identity"]["calls"] == sum(1 for c in calls if c["fn"] == "identity")
+    pz = M.build(edit, {"snapshot": {**snap, "status": "waiting", "paused": {"kind": "info"}, "call_log": calls, "chat": chat,
+                                     "lanes": [{"id": "identity", "name": "Identity", "status": "waiting", "on": "Requester", "doing": "asked a question"}]},
+                        "stages": [], "stage_words": {}})
+    pf = {n["id"]: n for n in pz["nodes"]}
+    assert pf["fn:identity"]["status"] == "waiting_on_you" and pf["person:requester"]["status"] == "waiting_on_you" and pz["status"]["state"] == "Waiting on you"
+    assert all(pf[f"fn:{x}"]["status"] == "idle" for x in ("adaptation", "priority", "coordination", "audit"))
+    # a saved run that ended on a question: Identity and the Requester say "waiting on you", the rest "last seen"
+    ended = os.path.join(j2.RUNS_DIR, "j2-20200104-000000")
+    shutil.copytree(run.dir, ended)
+    with open(os.path.join(ended, "chat.jsonl"), "a", encoding="utf-8") as fh:
+        fh.write(json.dumps({"id": 9999, "who": "identity", "text": "@Requester Add credits?", "to_user": True, "pause": "limit", "next": "user"}) + "\n")
+    sv = {n["id"]: n for n in M.build(ended)["nodes"]}
+    assert sv["fn:identity"]["status"] == "waiting_on_you" and sv["person:requester"]["status"] == "waiting_on_you" and M.build(ended)["status"]["state"] == "Waiting on you"
+    assert all(sv[f"fn:{x}"]["status"] == "idle" and sv[f"fn:{x}"]["detail"].startswith("last seen: ") for x in ("adaptation", "priority", "coordination", "audit"))
+    shutil.rmtree(ended, ignore_errors=True)
     # /api/map: live (idle run reads its folder), saved, old, missing
     keep, j2_server.RUN = j2_server.RUN, run
     srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
@@ -5160,7 +5232,37 @@ def map_tab():
             nodes.append({"id": f"step:{i}", "kind": "engine", "row": "work", "label": "Write", "status": stt, "version": None, "detail": "3 workflows · 4 of 4 checks passed",
                           "file": None, "tag": None, "color": None, "workflows": []})
     edges = [{"from": "work:t0", "to": "work:t3", "kind": "handoff", "label": "x", "n": 1, "basis": "recorded"}, {"from": "work:t1", "to": "work:t5", "kind": "handoff", "label": "x", "n": 1, "basis": "declared"}]
+    fn = lambda k, label, stt, detail, on=None, calls=3: {"id": f"fn:{k}", "kind": "function", "row": "functions", "label": label, "status": stt, "version": None, "tag": None,
+                                                           "color": f"--{k}", "file": None, "workflows": [], "tab": {"identity": "charter", "adaptation": "workflows", "priority": "conflicts", "coordination": "timeline", "audit": "audit"}[k],
+                                                           "wait_on": on, "detail": detail, "calls": calls, "seconds": 12.5, "tokens": {"input": 100, "output": 20}}
+    fnodes = [fn("identity", "Identity", "running", "writing the charter"), fn("adaptation", "Adaptation", "waiting", "proposed workflows", "Priority"),
+              fn("priority", "Priority", "waiting_on_you", "asked a question", "you", 1), fn("coordination", "Coordination", "fault", "W-3 is held"),
+              fn("audit", "Audit", "idle", "last seen: @Identity all criteria pass; done-when items met", None, 0)]
+    spk = lambda a, b, n: {"from": a, "to": b, "kind": "speaks_to", "label": None, "n": n, "basis": "recorded"}
+    few = [spk("person:requester", "fn:identity", 2), spk("fn:identity", "person:requester", 5), spk("fn:identity", "fn:adaptation", 4), spk("fn:adaptation", "fn:priority", 7)]
     mp = {"schema": "map/1", "status": {"state": "Identity running", "state_status": "running", "checks": {"passed": 3, "run": 4}}, "nodes": nodes, "edges": edges, "legend": saved["legend"], "not_recorded": ["version of Charter"]}
+    mp2 = {**mp, "nodes": [nodes[0], *fnodes, *nodes[1:]], "edges": edges + few}
+    out2 = render_node(snap, docs={"docs": {}, "map": mp2})["map"]
+    svg2 = out2[out2.index("<svg class=\"mapsvg\""):out2.index("</svg>", out2.index("<svg class=\"mapsvg\"")) + 6]
+    fbox = lambda k: svg2.split(f'data-maptab="{ {"identity": "charter", "adaptation": "workflows", "priority": "conflicts", "coordination": "timeline", "audit": "audit"}[k] }"')[1].split("</a>")[0]
+    assert ">FUNCTIONS</text>" in svg2 and svg2.index(">PEOPLE<") < svg2.index(">FUNCTIONS<") < svg2.index(">WORK<") and svg2.count("data-maptab=") == 5
+    assert fbox("identity").count("<rect") == 2 and ">running now<" in fbox("identity") and "writing the charter" in fbox("identity") and ">3 calls<" in fbox("identity")      # double = running now
+    assert 'stroke="var(--validator)" stroke-width="4"' in fbox("adaptation") and ">?</text>" in fbox("adaptation") and ">waiting on Priority<" in fbox("adaptation")
+    assert 'stroke="var(--validator)" stroke-width="4"' in fbox("priority") and ">waiting on you<" in fbox("priority") and ">1 call<" in fbox("priority")
+    assert 'stroke="var(--bad)" stroke-width="4"' in fbox("coordination") and ">!</text>" in fbox("coordination") and ">blocked<" in fbox("coordination")
+    assert 'stroke="var(--line)"' in fbox("audit") and ">idle<" in fbox("audit") and "last seen: " in fbox("audit") and "@Identity" not in fbox("audit") and not re.search(r"done.when", fbox("audit"))
+    assert "<title>Identity, running now, writing the charter, 3 AI calls, 12.5 s, 100 tokens in, 20 out</title>" in fbox("identity")      # the full text and numbers in a tooltip
+    assert "2 from you · 5 to you" in svg2 and svg2.count('stroke-dasharray="1 3"') >= 3 and "Messages between functions" not in out2      # few lines: drawn, no table
+    assert "Identity speaks to Adaptation: 4 messages" in svg2 and "Adaptation speaks to Priority: 7 messages" in svg2
+    many = [spk("fn:identity", "fn:adaptation", 4), spk("fn:adaptation", "fn:priority", 7), spk("fn:priority", "fn:coordination", 2), spk("fn:coordination", "fn:audit", 9), spk("fn:audit", "fn:identity", 1)]
+    out3 = render_node(snap, docs={"docs": {}, "map": {**mp2, "edges": edges + many}})["map"]
+    svg3 = out3[out3.index("<svg class=\"mapsvg\""):out3.index("</svg>", out3.index("<svg class=\"mapsvg\"")) + 6]
+    assert "<caption>Messages between functions (speaks to)</caption>" in out3 and "speaks to Adaptation: 4" not in svg3 and svg3.count('stroke-dasharray="1 3"') == 0, "too many lines go in a table"
+    assert out3.count("<tr><td>") >= 5 and "<td>Coordination</td><td>Audit</td><td>9</td>" in out3
+    cards2 = out2.split('<div class="mapcards">')[1].split('<div class="maplegend"')[0]      # small screens: the functions stacked as cards
+    assert cards2.count('data-node="fn:') == 5 and cards2.count('class="mapcard st-') == 1 + 5 + 6 and "speaks to Adaptation · 4" in cards2 and "speaks to Priority · 7" in cards2
+    assert "waiting on Priority" in cards2 and "blocked" in cards2 and "speaks to Identity · 2" in cards2 and "Identity speaks to you · 5" in cards2 and "<b>?</b>" in cards2
+    assert 'data-maptab="charter"' in cards2 and not re.search(r"envelope|done.when", out2 + out3, re.I)
     out = render_node(snap, docs={"docs": {}, "map": mp})["map"]
     svg = out[out.index("<svg class=\"mapsvg\""):out.index("</svg>", out.index("<svg class=\"mapsvg\"")) + 6]
     assert out.count("data-mapopen=") >= 6 * 2 and 'data-mapopen="f0.md"' in svg and 'aria-label="Open Box 0 with a very long name"' in svg      # linked in the SVG and in the cards
@@ -5188,8 +5290,13 @@ def map_tab():
     empty = render_node(snap, docs={"docs": {}, "map": {"nodes": [], "edges": []}})["map"]
     assert "Nothing to draw yet." in empty
     real = render_node(snap, docs={"docs": {}, "map": saved})["map"]
-    assert real.count("<g><title>") + real.count("<a href") >= 9 and "Product requirements" in real and "v6" in real and "Not recorded (3)" in real
+    assert real.count("<g><title>") + real.count("<a href") >= 9 and "Product requirements" in real and "v6" in real and f"Not recorded ({len(saved['not_recorded'])})" in real
     assert not re.search(r"envelope|done.when", real, re.I)
+    assert real.count('data-maptab=') >= 10 and ">FUNCTIONS</text>" in real and "<caption>Messages between functions (speaks to)</caption>" in real      # six pairs: a table, not crossing lines
+    assert "<caption>Who made each step (calls by function)</caption>" in real and "<td>Low-level design to Website</td><td>not recorded</td>" in real
+    assert "<td>Charter to Product requirements</td><td>%d</td>" % by_fn("identity", docs_rec["prd"]["calls"], calls) in real
+    rc = real.split('<div class="mapcards">')[1].split('<div class="maplegend"')[0]
+    assert "which function made this step: not recorded" in rc and "made by Identity 2, Adaptation 1, Priority 1, Coordination 6, Audit 1" in rc and rc.count('data-node="fn:') == 5
     # a browser: no sideways scroll at 500px, cards shown, SVG hidden; the tab sits after Artifacts and the pane reads plain
     chrome = j2.j2_check.find_chrome()
     if chrome and BROWSER:
@@ -5217,7 +5324,9 @@ def map_tab():
         pane = dom.split('id="pane-map"')[1].split('id="pane-style"')[0]
         text = htmllib.unescape(re.sub(r"<[^>]+>", " ", pane))
         assert "Product requirements" in text and re.search(r"\d+ of \d+ checks passed", text) and "Done" in text, text[:300]
-        assert 'data-mapopen="prd.md"' in pane and not re.search(r"envelope|done.when", text, re.I), "plain words in the Map tab"
+        assert 'data-mapopen="prd.md"' in pane and 'data-maptab="charter"' in pane and "FUNCTIONS" in pane and not re.search(r"envelope|done.when", text, re.I), "plain words in the Map tab"
+        boxes = [x.split("</a>")[0] for x in pane.split('data-maptab="')[1:6]]      # the five function boxes in the page (the legend may say "running now")
+        assert len(boxes) == 5 and all("last seen: " in b and "running now" not in b and ">waiting on" not in b for b in boxes), "a saved run never says running"
         assert dom.index('data-tab="artifacts"') < dom.index('data-tab="map"')
     print("map: map.json written beside atoms.json and equal to the folder's build, golden nodes/edges/statuses, counts from the atoms, "
           "old run rebuilt with its gaps named, left open vs running, fault, not made, waiting on you, /api/map live/saved/old/missing, "
