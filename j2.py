@@ -45,6 +45,7 @@ import threading
 import time
 
 import j2_artifacts
+import j2_board
 import j2_check
 import j2_map
 import j2_schema
@@ -2573,6 +2574,7 @@ class J2Run:
         self.deed_log, self.deed_seen = [], set()      # send deeds done (note, result) and the notices already given
         self.open_docs = []          # documents the Requester accepted as they were, with what was still not right
         self.given = {}              # workflow id -> {"edges": [{atom, why}], "whole": bool}: what its builder's prompt held (atom/1)
+        self.board = j2_board.new_board()   # board/1 (j2_board.py): questions and answers, behind J2_BOARD=1
         self.past_workflows, self.stage_archive, self.site_tag, self.stage_checked = [], [], "", True
         self.blueprint, self.proposed_lld, self.lld_revisions, self.lld_conflicts = None, {}, [], {}   # the LLD as the spec
         self.stage_calls0 = 0         # AI calls before the current stage (a document's call range, for the cost estimate)
@@ -5779,65 +5781,74 @@ class J2Run:
                           "j2-btn-secondary and j2-card. Don't add other colours or fonts.")
             # A failed check buys one more call than the envelope's model_call_limit, so all attempts can run.
             limit = max_calls + attempt - 1
-            got, raw, stop, last_err = None, "", None, None
-            while got is None:
-                if w["calls_used"] >= limit:
-                    stop = f"it used its envelope's model_call_limit ({limit})" + (f"; last problem: {last_err}"
-                                                                                   if last_err else "")
-                    break
-                w["calls_used"] += 1
-                raw = self.call(fn, *(self._doc_prompt(w, brief, sid, mine, attempt, evidence, last_err, prev)
-                                      if self.doc else (
-                                'First line: a JSON object {"say": str (one short line reporting to @Coordination: '
-                                'what you changed; code runs your checks and reports them, so don\'t claim they pass), '
-                                '"human_output": str (1 to 3 plain sentences telling a person what you built; \"done.\" alone is rejected), "atom_human_output": str (1 or 2 plain sentences telling the Requester what this part created, in everyday words: no ids, no selectors, no \"units\"), "next": "Coordination", ' + (self.SPEC_FMT if self.blueprint else '') + self.REASON + '}. '
-                                + ('Then a ```style block with the style guide as JSON: ' + STYLE_FMT + '. ' if first
-                                   else '')
-                                + 'Then, '
-                                'only if your section needs page-head tags, a ```head block (meta, link, style or script '
-                                'tags only). Then a ```section block: your section\'s HTML only, no <html>, <head> or '
-                                '<body> tags (inline <style> and <script> are fine).',
-                                f"YOU ARE {NAMES[fn]}, the agent for one registered workflow.\nYOUR WORKFLOW: "
-                                f"{json.dumps(brief, ensure_ascii=False)}\nYOU OWN SECTION {sid} of the site file. Code "
-                                "puts your head block in the page head and your section in the body, in section order, "
-                                "between markers. Write the whole section each time; don't repeat other sections. Build "
-                                "only the done-when items your workflow covers and fix only its findings; other items "
-                                "belong to other workflows. After you write it, code runs every check in your work atoms' "
-                                f"verification on the whole page ({MAX_CHECK_ATTEMPTS} attempts)." + style_task
-                                + "\nDESIGN RUBRIC (Audit checks every section against it; follow it):\n"
-                                + "\n".join(f"{rid} {txt}" for rid, txt in RUBRIC[:6])
-                                + (f"\nYOUR SECTION NOW (last written by {mine['owner']}):\n```head\n{mine['head']}\n```\n"
-                                   f"```section\n{mine['body']}\n```" if mine else "")
-                                + (f"\nATTEMPT {attempt} OF {MAX_CHECK_ATTEMPTS}. CODE RAN YOUR CHECKS ON YOUR LAST "
-                                   f"ATTEMPT AND THESE FAILED:\n{evidence}\nFix the section so they pass." if evidence
-                                   else "")
-                                + (f"\nYOUR LAST ATTEMPT WAS REJECTED: {last_err}. Fix that." if last_err else "")
-                                + self._page_context(w, prev))),
-                                mock, max_tokens=16000, json_reply=False)
-                try:
-                    parts = parse_doc(raw) if self.doc else parse_section(raw)
-                    guide = parse_style(raw) if first else None
-                    got = parts      # only once both parse: a missing style guide must be retried, not accepted
-                    w["last_check"] = ("style guide, " if first else "") + "usable section" + (" and head tags"
-                                                                                               if got[0] else "")
-                except ValueError as e:
-                    last_err = w["last_check"] = str(e)
-                    if w["retries_used"] >= max_retries:
-                        stop = f"{last_err}, and it used its envelope's retry_limit ({max_retries})"
+
+            def one_call():
+                """One model call for this attempt (retried within the envelope on an unusable reply). Pulled out
+                of line so a board Answer (item 3) can trigger a second pass within the same attempt: resuming A
+                (item 4) is just calling this again once self.board/self.given carry the answer, since _page_context
+                and _doc_prompt already read that state fresh on every call."""
+                got, raw, stop, guide, last_err = None, "", None, None, None
+                while got is None:
+                    if w["calls_used"] >= limit:
+                        stop = f"it used its envelope's model_call_limit ({limit})" + (f"; last problem: {last_err}"
+                                                                                       if last_err else "")
                         break
-                    w["retries_used"] += 1
-                    self.post("system", f"{fn} attempt {w['calls_used']} can't be used: {last_err}. Retry "
-                                        f"{w['retries_used']} of {max_retries} (within its envelope).")
-            head = raw.split("```")[0].strip()
-            try:
-                meta = llm.extract_json(head)
-            except ValueError:
-                meta = {"say": head}
-            log = next((c for c in reversed(self.call_log) if c["fn"] == fn), None)
-            if log:   # the structured part of a workflow agent's reply, for the detail view
-                log["reply"] = {"say": meta.get("say"), "next": meta.get("next"), "check": w.get("last_check"),
-                                "head_chars": len(got[0]) if got else 0, "section_chars": len(got[1]) if got else 0}
-                log["reason"] = meta.get("reason") or (self.MOCK_REASON if llm.MOCK else None)
+                    w["calls_used"] += 1
+                    raw = self.call(fn, *(self._doc_prompt(w, brief, sid, mine, attempt, evidence, last_err, prev)
+                                          if self.doc else (
+                                    'First line: a JSON object {"say": str (one short line reporting to @Coordination: '
+                                    'what you changed; code runs your checks and reports them, so don\'t claim they pass), '
+                                    '"human_output": str (1 to 3 plain sentences telling a person what you built; \"done.\" alone is rejected), "atom_human_output": str (1 or 2 plain sentences telling the Requester what this part created, in everyday words: no ids, no selectors, no \"units\"), "next": "Coordination", ' + (self.SPEC_FMT if self.blueprint else '') + (self.BOARD_FMT if j2_board.enabled() else '') + self.REASON + '}. '
+                                    + ('Then a ```style block with the style guide as JSON: ' + STYLE_FMT + '. ' if first
+                                       else '')
+                                    + 'Then, '
+                                    'only if your section needs page-head tags, a ```head block (meta, link, style or script '
+                                    'tags only). Then a ```section block: your section\'s HTML only, no <html>, <head> or '
+                                    '<body> tags (inline <style> and <script> are fine).',
+                                    f"YOU ARE {NAMES[fn]}, the agent for one registered workflow.\nYOUR WORKFLOW: "
+                                    f"{json.dumps(brief, ensure_ascii=False)}\nYOU OWN SECTION {sid} of the site file. Code "
+                                    "puts your head block in the page head and your section in the body, in section order, "
+                                    "between markers. Write the whole section each time; don't repeat other sections. Build "
+                                    "only the done-when items your workflow covers and fix only its findings; other items "
+                                    "belong to other workflows. After you write it, code runs every check in your work atoms' "
+                                    f"verification on the whole page ({MAX_CHECK_ATTEMPTS} attempts)." + style_task
+                                    + "\nDESIGN RUBRIC (Audit checks every section against it; follow it):\n"
+                                    + "\n".join(f"{rid} {txt}" for rid, txt in RUBRIC[:6])
+                                    + (f"\nYOUR SECTION NOW (last written by {mine['owner']}):\n```head\n{mine['head']}\n```\n"
+                                       f"```section\n{mine['body']}\n```" if mine else "")
+                                    + (f"\nATTEMPT {attempt} OF {MAX_CHECK_ATTEMPTS}. CODE RAN YOUR CHECKS ON YOUR LAST "
+                                       f"ATTEMPT AND THESE FAILED:\n{evidence}\nFix the section so they pass." if evidence
+                                       else "")
+                                    + (f"\nYOUR LAST ATTEMPT WAS REJECTED: {last_err}. Fix that." if last_err else "")
+                                    + self._page_context(w, prev))),
+                                    mock, max_tokens=16000, json_reply=False)
+                    try:
+                        parts = parse_doc(raw) if self.doc else parse_section(raw)
+                        guide = parse_style(raw) if first else None
+                        got = parts      # only once both parse: a missing style guide must be retried, not accepted
+                        w["last_check"] = ("style guide, " if first else "") + "usable section" + (" and head tags"
+                                                                                                   if got[0] else "")
+                    except ValueError as e:
+                        last_err = w["last_check"] = str(e)
+                        if w["retries_used"] >= max_retries:
+                            stop = f"{last_err}, and it used its envelope's retry_limit ({max_retries})"
+                            break
+                        w["retries_used"] += 1
+                        self.post("system", f"{fn} attempt {w['calls_used']} can't be used: {last_err}. Retry "
+                                            f"{w['retries_used']} of {max_retries} (within its envelope).")
+                head = raw.split("```")[0].strip()
+                try:
+                    meta = llm.extract_json(head)
+                except ValueError:
+                    meta = {"say": head}
+                log = next((c for c in reversed(self.call_log) if c["fn"] == fn), None)
+                if log:   # the structured part of a workflow agent's reply, for the detail view
+                    log["reply"] = {"say": meta.get("say"), "next": meta.get("next"), "check": w.get("last_check"),
+                                    "head_chars": len(got[0]) if got else 0, "section_chars": len(got[1]) if got else 0}
+                    log["reason"] = meta.get("reason") or (self.MOCK_REASON if llm.MOCK else None)
+                return got, raw, guide, meta, stop
+
+            got, raw, guide, meta, stop = one_call()
             if got is None:      # code writes the failure report, so the unusable reply isn't route-checked
                 self.write_lock = self.atom = None
                 w["status"] = "failed"
@@ -5846,6 +5857,14 @@ class J2Run:
                 self._event(fn, "limit_fail", f"{fn}: {stop}")
                 self.save("workflows.json", self.workflows)
                 return self._handoff("coordination", kind="schedule")
+            if j2_board.enabled() and isinstance(meta.get("question"), dict) and meta["question"].get("to"):
+                entry = self._ask_board(w, meta["question"], attempt)
+                if entry and entry["status"] == "answered":
+                    got2, raw2, guide2, meta2, stop2 = one_call()
+                    if got2 is not None:      # keep the original reply if the resume reply can't be used
+                        got, raw, guide, meta, stop = got2, raw2, guide2, meta2, stop2
+            if j2_board.enabled():
+                self._credit_board_used(meta)
             if first:     # the style guide goes first in the head, so every section can use its variables and classes
                 self.style = guide
                 self.sections = {"style": {"owner": fn, "head": style_css(guide), "body": "", "workflow": "Style guide"},
@@ -5982,6 +6001,10 @@ class J2Run:
                 'such field, a string gives its new type)} (only when your spec can\'t be built as written; never deviate '
                 'silently), ')
 
+    BOARD_FMT = ('"question": null|{"to": str (an atom id from OTHER SECTIONS or BOARD), "about": str, "text": str} '
+                 '(optional: the one atom that knows; at most one question per atom, never repeat an already-answered '
+                 'question), "board_used": null|[str] (optional: the board ids, e.g. ["Q-1"], whose answer you used), ')
+
     def _hld_summary(self):
         comps = (self.chain.get("hld") or {}).get("components")
         return ("\nHLD SUMMARY (components): " + json.dumps([{k: c[k] for k in ("id", "name", "responsibility")} for c in comps],
@@ -5993,16 +6016,18 @@ class J2Run:
         manifest = ("\nOTHER SECTIONS (their atoms' agent_output; the rest of the page isn't shown): "
                     f"{json.dumps(self._manifest(w), ensure_ascii=False)}")
         lld = bool(self.blueprint and w.get("lld_sections"))
-        self._record_given(w, (self._slice_edges(w) if lld else []) + self._hld_edges() + (self._manifest_edges(w) if slim() else []),
+        self._record_given(w, (self._slice_edges(w) if lld else []) + self._hld_edges()
+                           + (self._manifest_edges(w) if slim() else []) + self._board_edges(),
                            whole=not lld and not slim())
+        board = self._board_context()
         if self.blueprint and w.get("lld_sections"):
             return ("\nYOUR SPEC (the LLD sections you implement: build exactly these ids, selectors and form fields with "
                     "their behaviour; if one can't be built as written, report it in spec_conflict, never deviate "
                     f"silently): {json.dumps(self._lld_slice_for(w), ensure_ascii=False)}" + self._hld_summary()
-                    + (manifest if slim() else ""))
+                    + (manifest if slim() else "") + board)
         if slim():
-            return manifest + self._hld_summary()
-        return f"\nTHE WHOLE SITE FILE NOW (v{len(self.sites)}, read only):\n{prev[:SITE_LIMIT]}" + self._hld_summary()
+            return manifest + self._hld_summary() + board
+        return f"\nTHE WHOLE SITE FILE NOW (v{len(self.sites)}, read only):\n{prev[:SITE_LIMIT]}" + self._hld_summary() + board
 
     # ---- atom/1 edges: what a builder's prompt actually held, recorded where the prompt is made (no prompt changes)
     def _record_given(self, w, edges, whole=False):
@@ -6043,6 +6068,111 @@ class J2Run:
         """J2_SLIM: other atoms' agent_output, short (ids, sections, selectors), so a builder needn't read the page."""
         return [{k: (x.get("agent_output") or {}).get(k) for k in ("atom", "section", "anchor", "selectors")}
                 for o in self.workflows if o["id"] != w["id"] for x in o.get("atoms") or [] if x.get("agent_output")]
+
+    # ---- message board (board/1, j2_board.py): item 5, Reuse. Items 2-4 (Ask, Answer, Resume) are _ask_board below.
+    def _board_context(self):
+        if not j2_board.enabled():
+            return ""
+        answered = [e for e in self.board["entries"] if e["status"] == "answered"]
+        if not answered:
+            return ""
+        return ("\nBOARD (answered questions; check here before asking): "
+                + json.dumps([{"id": e["id"], "to": e["to"], "about": e["about"], "answer": e["answer"]}
+                              for e in answered], ensure_ascii=False))
+
+    def _board_edges(self):
+        """depends_on from every atom a board answer came from, recorded the same way manifest/HLD/LLD edges are:
+        what the prompt held, not whether it was used (used_by only follows a named board_used)."""
+        if not j2_board.enabled():
+            return []
+        return [{"atom": e["to"], "why": f"board {e['id']}"} for e in self.board["entries"] if e["status"] == "answered"]
+
+    def _ask_board(self, w, question, attempt):
+        """Items 2 (Ask) and 3 (Answer). Validates the builder's optional question: the target atom exists and is
+        built, at most one question per atom, never a repeat of an already-answered question; otherwise refused,
+        with the reason posted. A valid question gets one short, uncredited call to the target's builder; if its
+        answer changes its own output, _apply_board_update bumps the site version with an "Updated by Q-n" note."""
+        asking, to = self.atom, question.get("to")
+        about, text = str(question.get("about") or ""), str(question.get("text") or "")
+        atoms_v1 = self._atoms_v1()
+        reason = ("max one question per atom; this atom already asked"
+                      if any(e["atom"] == asking for e in self.board["entries"]) else
+                  "no target atom named" if not to else
+                  "that question is already answered; reuse it instead of asking again"
+                      if any(e["to"] == to and e["about"] == about and e["status"] == "answered"
+                             for e in self.board["entries"]) else
+                  "the target atom isn't in the manifest" if to not in atoms_v1 else
+                  "the target atom isn't built yet" if atoms_v1[to]["status"] != "closed" else None)
+        entry = j2_board.new_entry(f"Q-{len(self.board['entries']) + 1}", w["id"], asking, to, about, text,
+                                   self.cycle, attempt)
+        self.board["entries"].append(entry)
+        if reason:
+            entry["status"] = "refused"
+            j2_board.write(self.dir, self.board)
+            j2_board.log_event(self.dir, {"event": "refused", "id": entry["id"], "reason": reason})
+            self.post("system", f"Board {entry['id']}: {w['id']}'s question to {to} refused — {reason}.")
+            return entry
+        j2_board.write(self.dir, self.board)
+        j2_board.log_event(self.dir, {"event": "asked", "id": entry["id"], "atom": asking, "to": to, "about": about})
+        target_wid = to.split(".")[0]
+        reply = self.call(target_wid,
+                           '{"answer": str (plain words; say "not mine" if this isn\'t your area), "artifact_update": '
+                           'null|{"body": str, "head": str} (only if your own section needs correcting)}',
+                           f"ATOM {asking} ASKS YOU ({to}) ABOUT {about}: {text}\nAnswer only if it's your area; say "
+                           '"not mine" otherwise. No credits are charged for this reply.',
+                           lambda: json.dumps({"answer": "", "artifact_update": None}))
+        answer = str((reply or {}).get("answer") or "").strip()
+        if not answer or answer.lower() in ("not mine", "n/a", "none"):
+            entry["status"] = "unanswered"      # the existing Adaptation path takes it from here, same as any block
+        else:
+            entry["status"], entry["answer"], entry["answered_by"] = "answered", answer, target_wid
+            update = (reply or {}).get("artifact_update")
+            if isinstance(update, dict):
+                entry["artifact_update"] = update
+                self._apply_board_update(target_wid, update, entry["id"])
+        j2_board.write(self.dir, self.board)
+        j2_board.log_event(self.dir, {"event": entry["status"], "id": entry["id"]})
+        return entry
+
+    def _apply_board_update(self, wid, update, entry_id):
+        """An answer's artifact_update that changes the target's own section (website builds only; a document
+        section's update is recorded on the board but not re-applied, and a past stage's atom is out of reach since
+        _wf only finds the current stage's workflows): reassembles the page with the correction, bumping the site
+        version, and notes why on the atom's human_output."""
+        w = self._wf(wid)
+        if not w or self.doc:
+            return
+        sid = w["section"]
+        cur = self.sections.get(sid) or {}
+        body, head = update.get("body", cur.get("body")), update.get("head", cur.get("head"))
+        if body == cur.get("body") and head == cur.get("head"):
+            return
+        self.sections[sid] = {**cur, "body": body, "head": head}
+        title = (self.goal or {}).get("site_name") or "Site"
+        html_out = assemble(title, self.sections)
+        self.sites.append(html_out)
+        os.makedirs(os.path.join(self.dir, "site"), exist_ok=True)
+        with open(os.path.join(self.dir, f"site/v{len(self.sites)}.html"), "w", encoding="utf-8") as f:
+            f.write(html_out)
+        with open(os.path.join(self.dir, "site/index.html"), "w", encoding="utf-8") as f:
+            f.write(html_out)
+        self.save("sections.json", self.sections)
+        for a in w.get("atoms") or []:
+            if a.get("agent_output"):
+                ho = a.get("human_output") or {}
+                a["human_output"] = {**ho, "text": f"{ho.get('text') or ''} Updated by {entry_id}.".strip()}
+        self.save("workflows.json", self.workflows)
+
+    def _credit_board_used(self, meta):
+        """Item 5 (Reuse): used_by is only recorded when the builder's reply names the board id it used."""
+        changed = False
+        for qid in meta.get("board_used") or []:
+            e = next((e for e in self.board["entries"] if e["id"] == qid and e["status"] == "answered"), None)
+            if e and self.atom not in e["used_by"]:
+                e["used_by"].append(self.atom)
+                changed = True
+        if changed:
+            j2_board.write(self.dir, self.board)
 
     def _spec_conflict(self, w, meta):
         """A builder says its LLD slice can't be built as written (spec_conflict). The first time for a section, that
@@ -6133,9 +6263,11 @@ class J2Run:
     def _doc_prompt(self, w, brief, sid, mine, attempt, evidence, last_err, prev):
         """(reply format, task) for a document section's workflow agent: markdown for its own section only."""
         fn = w["id"]
-        self._record_given(w, self._chain_edges() + (self._manifest_edges(w) if slim() else []), whole=not slim())
+        self._record_given(w, self._chain_edges() + (self._manifest_edges(w) if slim() else []) + self._board_edges(),
+                           whole=not slim())
         return ('First line: a JSON object {"say": str (one short line reporting to @Coordination: what you changed; '
                 'code runs your checks and reports them, so don\'t claim they pass), "human_output": str (1 to 3 plain sentences telling a person what you built; \"done.\" alone is rejected), "atom_human_output": str (1 or 2 plain sentences telling the Requester what this part created, in everyday words: no ids, no selectors, no \"units\"), "next": "Coordination", '
+                + (self.BOARD_FMT if j2_board.enabled() else '')
                 + self.REASON + '}. Then a ```markdown block: your section only, starting with its "## <Section>" '
                 'heading. Markdown only, never HTML.',
                 f"YOU ARE {NAMES[fn]}, the agent for one registered workflow.\nYOUR WORKFLOW: "
@@ -6152,7 +6284,8 @@ class J2Run:
                 + (f"\nYOUR LAST ATTEMPT WAS REJECTED: {last_err}. Fix that." if last_err else "")
                 + (f"\nOTHER SECTIONS (their atoms' agent_output; the rest isn't shown): "
                    f"{json.dumps(self._manifest(w), ensure_ascii=False)}" if slim() else
-                   f"\nTHE WHOLE DOCUMENT NOW (v{len(self.sites)}, read only):\n{prev[:SITE_LIMIT]}"))
+                   f"\nTHE WHOLE DOCUMENT NOW (v{len(self.sites)}, read only):\n{prev[:SITE_LIMIT]}")
+                + self._board_context())
 
     def _receipt(self, a, c, attempt, res, **extra):
         """One line of receipts.jsonl: written by code only, never by an agent."""

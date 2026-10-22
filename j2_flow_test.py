@@ -4365,10 +4365,11 @@ def docs_blueprint():
           "atom, Audit compares the page to the LLD, chain recorded, J2_SLIM keeps the manifest ok")
 
 
-def plain_unchanged(checkpoint=None, slim=None):
+def plain_unchanged(checkpoint=None, slim=None, board=None):
     """3: with no document asked for, the website flow is unchanged: same prompts, same page, same result as the
     checkpoint commit (run in a copy of it). checkpoint: the commit to compare with (default PLAIN_CHECKPOINT); slim: set
-    J2_SLIM to this in both runs ("0" = the old whole-page path), else it is left unset (the default)."""
+    J2_SLIM to this in both runs ("0" = the old whole-page path), else it is left unset (the default); board: set
+    J2_BOARD to this in both runs (the checkpoint commit predates j2_board and ignores the env var either way)."""
     checkpoint = checkpoint or PLAIN_CHECKPOINT
     import subprocess
     import shutil
@@ -4406,6 +4407,8 @@ def plain_unchanged(checkpoint=None, slim=None):
             env.pop("J2_SLIM", None)
             if slim is not None:
                 env["J2_SLIM"] = slim
+            if board is not None:
+                env["J2_BOARD"] = board
             r = subprocess.run([sys.executable, "-c", probe], input=BREW_LAB, cwd=cwd, capture_output=True, text=True, env=env, timeout=300)
             assert r.returncode == 0, r.stderr[-800:]
             results.append(json.loads(r.stdout.strip().splitlines()[-1]))
@@ -4416,9 +4419,25 @@ def plain_unchanged(checkpoint=None, slim=None):
         assert not diff, f"prompts differ at calls {diff[:5]}"
         assert a["workflows"] == b["workflows"]
         print(f"plain brief unchanged: {len(b['calls'])} calls, every system prompt and prompt, the page, the sections, the workflows "
-              f"and the outcome are identical to checkpoint {checkpoint}" + (f" with J2_SLIM={slim}" if slim is not None else ""))
+              f"and the outcome are identical to checkpoint {checkpoint}" + (f" with J2_SLIM={slim}" if slim is not None else "")
+              + (f" with J2_BOARD={board}" if board is not None else ""))
     finally:
         shutil.rmtree(old, ignore_errors=True)
+
+
+def board_disabled():
+    """Message board step 1: with J2_BOARD unset (default off), a run writes no board.json or board.jsonl, and
+    artifacts.json has no board row at all (absent, the same way a mock run's missing screenshots produce no row,
+    not a placeholder saying "not recorded")."""
+    import j2_artifacts as A
+    os.environ.pop("J2_BOARD", None)
+    run = docs_run(BREW_LAB, 200)
+    assert run.outcome.startswith("Done"), run.outcome
+    assert not os.path.isfile(os.path.join(run.dir, "board.json"))
+    assert not os.path.isfile(os.path.join(run.dir, "board.jsonl"))
+    rows = A.write(run.dir)["rows"]
+    assert not any(r["type"] == "board" for r in rows), rows
+    print("board disabled: J2_BOARD unset writes no board.json or board.jsonl, artifacts.json has no board row ok")
 
 
 def docs_views():
@@ -5728,6 +5747,8 @@ if __name__ == "__main__":
         docs_intake_and_compare()
         plain_unchanged("f6938b2", slim="0")      # J2_SLIM=0 is the old path, prompt for prompt
         plain_unchanged()                         # the default (slim) path against the commit made right after the flip
+        plain_unchanged(board="0")                 # J2_BOARD=0 explicitly set: still identical, prompt for prompt
+        board_disabled()
         atom_schema()
         docs_blueprint()
         docs_views()

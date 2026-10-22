@@ -32,6 +32,7 @@ def write(run_dir, board):
     """board.json in the run folder. No-op unless J2_BOARD=1."""
     if not enabled():
         return
+    os.makedirs(run_dir, exist_ok=True)
     with open(os.path.join(run_dir, "board.json"), "w", encoding="utf-8") as f:
         json.dump(board, f, indent=2, ensure_ascii=False)
 
@@ -40,5 +41,6 @@ def log_event(run_dir, event):
     """Appends one JSON line to board.jsonl. No-op unless J2_BOARD=1."""
     if not enabled():
         return
+    os.makedirs(run_dir, exist_ok=True)
     with open(os.path.join(run_dir, "board.jsonl"), "a", encoding="utf-8") as f:
         f.write(json.dumps(event, ensure_ascii=False) + "\n")
