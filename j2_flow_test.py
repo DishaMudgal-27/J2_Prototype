@@ -4875,7 +4875,7 @@ def artifact_types():
     # records: every record is a kind record, not a deliverable, with a file pattern; a full run keeps the ones a mock run writes
     recs = [t for t in T["types"] if t["kind"] == "record"]
     assert [t["name"] for t in recs] == ["screenshots", "atoms", "audits", "receipts", "conditions", "chain", "goal", "workflows",
-                                         "summary", "report", "chat"] and not any(t["deliverable"] for t in recs)
+                                         "summary", "report", "chat", "board"] and not any(t["deliverable"] for t in recs)
     # depends_on matches the edges a real chain run records between the documents and the site
     run = docs_run(DESIGN_BRIEF, 900)
     owner = {a: k for k, v in json.load(open(os.path.join(run.dir, "documents.json"))).items() for a in v["atoms"]}
@@ -4895,10 +4895,10 @@ def artifact_types():
     for k in j2.DOC_SET:      # the workflows a row names are the workflows the run recorded for that document
         assert next(r for r in rows if r["type"] == k)["workflows"] == sorted(docs[k]["workflows"], key=lambda x: int(x[2:])), k
     for t in recs:
-        if t["name"] != "screenshots":      # a mock run takes no screenshots
+        if t["name"] not in ("screenshots", "board"):      # a mock run takes no screenshots; board.json only exists under J2_BOARD=1
             assert os.path.isfile(os.path.join(run.dir, t["file"])), t["file"]
     print("artifact types: prd, hld, lld and website match the Python field by field (sections, files, triggers, groups, tags, "
-          "colours, conditions, builder, rates, minimum cost, depends_on); drift on either side fails; 11 record entries ok")
+          "colours, conditions, builder, rates, minimum cost, depends_on); drift on either side fails; 12 record entries ok")
 
 
 def artifacts_tab():
