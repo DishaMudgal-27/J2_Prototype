@@ -177,7 +177,11 @@ the website's essentials are a styling part (5), three page sections (10 each) a
 | PRD, HLD, LLD and website together | 334 |
 
 A fix costs 8 (`fix`). The default start budget is 100 (`J2_BUDGET`) and the cap is twice the start, so a full documents-plus-website
-run needs a start budget of at least 334 to run without a funding question; at the default the founder is asked. The earlier
+run needs a start budget of at least 334 to run without a funding question; at the default the founder is asked. 334 is the floor when every check passes first time. Real runs cost more because of
+revisions and fixes: the reference run `runs/j2-20261016-160511` used all 500 credits (start 500, used 500, `summary.json`) and 114 AI
+calls (`summary.json`; `calls.jsonl` holds 113 records). Charged credits by stage, summed from its `workflows.json`: PRD 172, HLD 122,
+LLD 128, website 78. A figure of about 270 for the HLD stage alone could not be verified and does not match those files. Start at 500
+for a full documents-plus-website run; that run still ended done with open items. The earlier
 notes that gave 65, 65, 55 and 235 are out of date (they predate the 16 Oct recalibration in `rates.json`).
 
 ## How to test
