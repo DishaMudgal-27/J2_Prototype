@@ -148,7 +148,7 @@ Each run is saved under `runs/` (or `J2_RUNS_DIR`): chat log, AI calls, site ver
   `docs/atom-schema.md` (machine form: `docs/atom-schema.json`)
 - the document files of a documents run: `prd.md`, `hld.md`, `lld.md`, and `.docx` copies (needs `python-docx`)
 
-Past runs open read-only from the page. Lessons are kept in `memory/`. Both folders are git-ignored.
+Past runs open read-only from the page. Lessons are kept in `memory/`, which is git-ignored. A few reference runs are tracked; new runs are ignored by git.
 
 ## Troubleshooting
 

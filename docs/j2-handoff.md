@@ -163,8 +163,22 @@ Each run is saved in `runs/j2-<time>/`: `chat.jsonl`, `calls.jsonl`, `summary.js
 `receipts.jsonl`, site versions, screenshots, and the document files of a documents run. Use only fake phone numbers that start
 with +91 00000 in briefs.
 
-Budget guide: the least each stage costs is about PRD 65, HLD 65, LLD 55, website essentials 50 (235 for all four), so a
-documents-plus-website run needs a start budget of about 240. These minimums are from 15 Oct notes and are **unverified** now.
+Budget guide. The least each stage can cost comes from `agents/j2/rates.json` (a placeholder rate card, not an official file),
+worked out by `_stage_cost` in `j2.py`: every document section is a `doc_section` (10) and one is a `requirements_section` (48);
+the website's essentials are a styling part (5), three page sections (10 each) and a form (15); a send deed is 5.
+
+| Stage | Least it can cost |
+|---|---|
+| PRD (6 sections: 5 x 10 + 48) | 98 |
+| HLD (6 sections: 5 x 10 + 48) | 98 |
+| LLD (5 sections: 4 x 10 + 48) | 88 |
+| Website essentials (5 + 10 + 10 + 10 + 15) | 50 |
+| Test email or Slack message | 5 each |
+| PRD, HLD, LLD and website together | 334 |
+
+A fix costs 8 (`fix`). The default start budget is 100 (`J2_BUDGET`) and the cap is twice the start, so a full documents-plus-website
+run needs a start budget of at least 334 to run without a funding question; at the default the founder is asked. The earlier
+notes that gave 65, 65, 55 and 235 are out of date (they predate the 16 Oct recalibration in `rates.json`).
 
 ## How to test
 
@@ -212,7 +226,7 @@ SETUP.md gives about 35 seconds and 8 to 9 minutes for the first two; the suite 
 10. **Artifact types are duplicated.** `artifacts/types.json` and `j2.py` both define them; a test fails if they drift.
 11. **Open question for the product owner:** should a click on a Map node open the view directly, or open the panel first (as now)?
 12. From 15 to 16 Oct notes, **unverified now:** no live run has measured slim mode or documents token cost; Chrome-driven
-    behaviour receipts have only run with the fake driver; HLD and LLD cost minimums (98 and 88) are not measured; the project
+    behaviour receipts have only run with the fake driver; the real cost of a finished HLD or LLD is not measured (`rates.json` says only PRDs were measured; the 98 and 88 minimums above are rate-card arithmetic); the project
     owner's artifact kinds file is still to be shared; the docs say `runs/` is git-ignored but it is tracked (since b2324e2).
 13. Deployment needs a company API key and a hosting account (agreed in principle, not started).
 
