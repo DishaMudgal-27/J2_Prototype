@@ -15,7 +15,8 @@ import j2_artifacts as A
 
 SCHEMA = "map/1"
 NODE_KINDS = ("person", "function", "engine", "work", "know")      # v2 draws person, function, engine and work
-EDGE_KINDS = ("handoff", "step", "speaks_to", "draws_on")           # speaks_to: Requester and Identity, function and function, function and work
+EDGE_KINDS = ("handoff", "step", "speaks_to", "draws_on", "asks", "uses")   # asks/uses: the message board (board/1),
+                                                                            # between deliverables only (J2_BOARD=1)
 STATUSES = ("filed", "running", "waiting", "waiting_on_you", "fault", "left_open", "not_made", "idle")
 WORDS = {"filed": "filed and checked", "running": "running now", "waiting_on_you": "waiting on you", "waiting": "waiting", "fault": "fault",
          "left_open": "left open", "not_made": "not made", "idle": "idle"}
@@ -36,6 +37,8 @@ LEGEND = [
     {"key": "not_made", "label": "not made", "drawn": True},
     {"key": "handoff", "label": "hand-off", "drawn": True},
     {"key": "speaks_to", "label": "speaks to", "drawn": True},
+    {"key": "asks", "label": "asks (board)", "drawn": True},
+    {"key": "uses", "label": "uses (board)", "drawn": True},
 ]
 
 
@@ -294,6 +297,19 @@ def build(d, live=None):
         roots = [n for n in work if n["id"] != "work:charter" and not any(h["to"] == n["id"] for h in handoffs)]
         for n in roots[:1]:
             handoffs.append({"from": "work:charter", "to": n["id"], "kind": "handoff", "label": "built from the charter", "n": 1, "basis": "declared"})
+    # message board (board/1): an "asks" line from the asking deliverable to the answering one, an "uses" line from
+    # each reuser's deliverable to it, labelled with the board id. Recorded data only; a question and its reuse inside
+    # the same deliverable (the usual case for one website) have no line to draw, same as any self-referencing edge.
+    board = ((live or {}).get("board") if live else _read(d, "board.json")) or {}
+    board_edges = []
+    for e in board.get("entries") or []:
+        src, dst = owner.get(e.get("atom")), owner.get(e.get("to"))
+        if src and dst and src != dst and e.get("status") == "answered":
+            board_edges.append({"from": src, "to": dst, "kind": "asks", "label": e["id"], "n": None, "basis": "recorded"})
+            for ra in e.get("used_by") or []:
+                rsrc = owner.get(ra)
+                if rsrc and rsrc != dst:
+                    board_edges.append({"from": rsrc, "to": dst, "kind": "uses", "label": e["id"], "n": None, "basis": "recorded"})
     # the Requester
     chat = _jsonl(d, "chat.jsonl") if not live else (snap.get("chat") or [])
     mine = [m for m in chat if m.get("who") == "user"]
@@ -335,7 +351,7 @@ def build(d, live=None):
     ch = _checks(atoms)
     return {"schema": SCHEMA, "run": os.path.basename(d), "live": bool(live),
             "status": {"state": state, "state_status": state_status, "checks": ch},
-            "nodes": out_nodes, "edges": edges + handoffs + speaks + lines, "legend": LEGEND, "built_from": built_from,
+            "nodes": out_nodes, "edges": edges + handoffs + speaks + lines + board_edges, "legend": LEGEND, "built_from": built_from,
             "not_recorded": list(dict.fromkeys(nr + ["messages to and from workflow agents (W-n) are not drawn",
                                                      "what the work draws on (Knows row, later version)"]))}
 

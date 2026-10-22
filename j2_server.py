@@ -111,7 +111,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
             d = j2.saved_dir(run) if run else RUN.dir
             live = None
             if not run and RUN.status == "running" or (not run and RUN.paused):
-                live = {"snapshot": RUN.snapshot(), "stages": list(RUN.stages), "stage_words": j2.J2Run.STAGE_WORDS}
+                live = {"snapshot": RUN.snapshot(), "stages": list(RUN.stages), "stage_words": j2.J2Run.STAGE_WORDS,
+                        "board": RUN.board}
             return self._send(200, json.dumps(j2_map.build(d if d and os.path.isdir(d) else None, live), ensure_ascii=False))
         if u.path == "/api/artifacts":  # the Artifacts tab: deliverables, then evidence and records (artifacts/types.json)
             d = j2.saved_dir(run) if run else RUN.dir
@@ -126,6 +127,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 data = f.read()
             return self._send(200, data, "image/png") if ext == ".png" else \
                 self._send(200, data, "text/html" if ext == ".html" else "text/plain")
+        if u.path == "/api/board":      # the Board tab: message board entries (board/1), live or saved
+            if not run and RUN.status in ("running", "waiting") or (not run and RUN.paused):
+                return self._send(200, json.dumps(RUN.board, ensure_ascii=False))
+            d = j2.saved_dir(run) if run else RUN.dir
+            out = j2._read(d, "board.json", {}) if d and os.path.isdir(d) else {}
+            return self._send(200, json.dumps(out or {"schema": "board/1", "entries": []}, ensure_ascii=False))
         if u.path == "/api/audits":     # earlier stages' audits, condensed to ids and results, for a revise atom's Fixes line
             d = j2.saved_dir(run) if run else RUN.dir
             d = d if d and os.path.isdir(d) else None                               # a missing run folder: no audits
