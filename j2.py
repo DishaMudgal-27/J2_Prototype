@@ -1476,12 +1476,14 @@ def brief_list(pos):
 
 # ---- mock mode helpers (scripted functions, no model): a generic charter and page built from the text
 BUSINESS_TYPES = (("florist", r"florist|flower|bouquet"), ("photographer", r"photograph"), ("bakery", r"baker|cake"),
-                  ("cafe", r"cafe|coffee|espresso"), ("clinic", r"clinic|dental|doctor|hospital"))
+                  ("cafe", r"cafe|coffee|espresso"), ("clinic", r"clinic|dental|doctor|hospital"),
+                  ("boutique", r"boutique|kurta|saree|dupatta|handloom"))
 NEEDS = {"florist": ["Browse bouquets with prices", "Order for delivery or pickup", "Delivery areas and times"],
          "photographer": ["Portfolio of past work", "Packages and prices", "Booking or enquiry form"],
          "bakery": ["Menu with prices", "Order a cake", "Opening hours and address"],
          "cafe": ["Menu with prices", "Opening hours", "Where to find us"],
-         "clinic": ["Services offered", "Doctors and timings", "Book an appointment"]}
+         "clinic": ["Services offered", "Doctors and timings", "Book an appointment"],
+         "boutique": ["Products shown by category", "Filter products by size and price", "Order on WhatsApp"]}
 
 
 def guess_type(text):
@@ -1493,15 +1495,21 @@ def mock_charter(text):
     t = text.lower()
     m = re.search(r"\b(?:for|called)\s+([A-Z][\w']*(?:\s+[A-Z][\w']*)*)", text)
     name = m.group(1) if m else "Our cafe"
-    items = [d for k, d in (("menu", "The menu with prices is shown"), ("hour", "Opening hours are listed"),
-                            ("where", "The address and a map link are shown"),
-                            ("order", "Visitors can pre-order a coffee for pickup with a form"),
-                            ("bean", "A section about the beans and the farms they come from"),
-                            ("loyalty", "A loyalty-card explainer (buy 9, get the 10th free)"),
-                            ("calculat", "A price calculator shows the total for the chosen items")) if k in t]
-    if len(items) < 2:                    # not a cafe brief: the business type's usual visitor needs
-        items += [f"{n} is on the page" for n in NEEDS.get(guess_type(text), ["What the business offers",
-                                                                             "How to get in touch"])]
+    bt = guess_type(text)
+    if bt == "boutique":
+        items = ["Visitors can browse products by category", "Every product shows its id and price",
+                 "Visitors can filter products by size and price",
+                 "Every product has an order button that opens a WhatsApp link with the product id and price"]
+    else:
+        items = [d for k, d in (("menu", "The menu with prices is shown"), ("hour", "Opening hours are listed"),
+                                ("where", "The address and a map link are shown"),
+                                ("order", "Visitors can pre-order a coffee for pickup with a form"),
+                                ("bean", "A section about the beans and the farms they come from"),
+                                ("loyalty", "A loyalty-card explainer (buy 9, get the 10th free)"),
+                                ("calculat", "A price calculator shows the total for the chosen items")) if k in t]
+        if len(items) < 2:                    # not a cafe brief: the business type's usual visitor needs
+            items += [f"{n} is on the page" for n in NEEDS.get(bt, ["What the business offers",
+                                                                     "How to get in touch"])]
     items.append("Layout works on a phone")
     return {"statement": f"A one-page website for {name} where visitors find what they need and come in",
             "site_name": name, "audience": "Local customers, mostly on phones",
@@ -2502,6 +2510,7 @@ def saved_snapshot(name, since=0):
             "error": None, "done": True, "turn": None, "cycle_turns": 0, "max_turns": MAX_TURNS, "paused": None,
             "mock": head.get("mock"), "model": head.get("model"), "fixes": head.get("j2_fixes", 0), "placeholders": [],
             "force_audit_fail": head.get("force_audit_fail"), "test_lessons": bool(head.get("test_lessons")),
+            "force_question": head.get("force_question"), "has_board": os.path.isfile(os.path.join(d, "board.json")),
             "report": _read(d, "report.json"), "outcome": s.get("outcome"),
             "sections": [{"id": k, "owner": x["owner"], "workflow": x.get("workflow"),
                           "bytes": len((x["head"] + x["body"]).encode("utf-8"))} for k, x in sections.items()],
@@ -2593,6 +2602,10 @@ class J2Run:
         # Test switch, off unless set: in cycle 1, Audit's result for this done-when item is forced to NEEDS_REVISION
         self.force_fail = as_int(os.getenv("J2_FORCE_AUDIT_FAIL"), 0) if os.getenv("J2_FORCE_AUDIT_FAIL") else 0
         self.forced = False
+        # Test switch, off unless set: a workflow id or role word (products|order|filter, matched against its name);
+        # in mock mode, that builder's first attempt asks one question (message board, J2_BOARD=1 only)
+        self.force_question = os.getenv("J2_FORCE_QUESTION") or ""
+        self.question_forced = False
         self.test_lessons = os.getenv("J2_MEMORY_TEST_LESSONS") == "1"   # demo only: J2.b may read test lessons
         self.p_refused = {}         # workflow name -> why: what Priority refused in the current negotiation
         self.rejections = []        # every validator rejection, with its exact reason
@@ -2681,6 +2694,7 @@ class J2Run:
                 "playbook_saved": self.playbook_saved,
                 "mock": llm.MOCK, "model": None if llm.MOCK else llm.MODEL, "fixes": int(self.fixes),
                 "force_audit_fail": self.force_fail or None, "test_lessons": self.test_lessons,
+                "force_question": self.force_question or None, "has_board": bool(self.board["entries"]),
                 "placeholders": self._placeholders(), "report": self.report,
                 "sections": [{"id": k, "owner": x["owner"], "workflow": x.get("workflow"),
                               "bytes": len((x["head"] + x["body"]).encode("utf-8"))} for k, x in self.sections.items()],
@@ -2744,6 +2758,7 @@ class J2Run:
             if m["id"] == 1:   # first line of the file: which mode and model produced this run
                 f.write(json.dumps({"meta": True, "run": self.run_id, "output": self.output, "j2_fixes": int(self.fixes),
                                     "force_audit_fail": self.force_fail or None,
+                                    "force_question": self.force_question or None,
                                     "test_lessons": self.test_lessons or None,
                                     "provider": None if llm.MOCK else llm.PROVIDER, "model": None if llm.MOCK else llm.MODEL,
                                     "mock": llm.MOCK}) + "\n")
@@ -4769,6 +4784,26 @@ class J2Run:
             if others and self.cycle > 1:
                 return json.dumps({"say": "@Priority One fix per failing item.", "act": "PROPOSE", "next": "Priority",
                                    "workflows": others})
+            if self.cycle == 1 and not self.workflows and (self.goal or {}).get("business_type") == "boutique":
+                return json.dumps({"say": "@Priority Proposal for cycle 1: scaffold and styling, products, order "
+                                          "on WhatsApp, and filter.", "act": "PROPOSE", "next": "Priority", "workflows": [
+                                       {"name": "Scaffold and styling", "goal_gap": "No site exists",
+                                        "parts": ["page_section", "styling"], "covers": [self._no(crit[0])],
+                                        "outputs": ["index.html"],
+                                        "completion_check": "index.html loads with a nav to every section and a main "
+                                                            "action in the hero"},
+                                       {"name": "Products", "goal_gap": "Each product's id and price are shown",
+                                        "parts": ["page_section"], "covers": items(r"id and price", {"page_section"}),
+                                        "outputs": ["index.html"],
+                                        "completion_check": "Every product shows its id and price"},
+                                       {"name": "Order on WhatsApp", "goal_gap": "Order button opens a WhatsApp link",
+                                        "parts": ["form"], "covers": items(r"whatsapp", {"form"}),
+                                        "outputs": ["index.html"],
+                                        "completion_check": "The order button opens WhatsApp with the product id "
+                                                            "and price"},
+                                       {"name": "Filter", "goal_gap": "Filter by size and price",
+                                        "parts": ["interactive_feature"], "covers": items(r"filter", {"interactive_feature"}),
+                                        "outputs": ["index.html"], "completion_check": "The filters work together"}]})
             if self.cycle == 1 and not self.workflows:
                 extra = r"bean|farm|loyal|phone"
                 core = [i for i in items(r".", {"page_section"}, extra) if i != self._no(crit[0])][:3] \
@@ -5755,11 +5790,12 @@ class J2Run:
             first = self.style is None and not self.doc      # a document has no style guide
 
             def mock():
+                board_extra = self._mock_board_extra(w, attempt) if j2_board.enabled() else {}
                 if self.doc:
                     return (json.dumps({"say": f"@Coordination {fn} done: {w['name']}. Section {sid} written.",
                                         "human_output": f"I wrote the {w['name']} section ({sid}) of the document.",
                                         "atom_human_output": "This adds a written part of the document that readers can use.",
-                                        "next": "Coordination"})
+                                        "next": "Coordination", **board_extra})
                             + f"\n```markdown\n{self.out['mock_section'](w, self.goal)}```")
                 head, body = mock_section(w, self.goal, self.sections, self._lld_slice_for(w),
                                           [x["anchor"] for x in self.blueprint["sections"]
@@ -5768,7 +5804,7 @@ class J2Run:
                 return (json.dumps({"say": f"@Coordination {fn} done: {w['name']}. Section {sid} written.",
                                     "human_output": f"I built the {w['name']} section ({sid}) of the page.",
                                     "atom_human_output": "This adds a part of the page that visitors can read and use.",
-                                    "next": "Coordination"})
+                                    "next": "Coordination", **board_extra})
                         + (f"\n```style\n{json.dumps(MOCK_STYLE)}\n```" if first else "")
                         + (f"\n```head\n{head}\n```" if head else "") + (f"\n```section\n{body}\n```" if body else ""))
             style_task = ("\nYOU RUN FIRST, SO YOU ALSO WRITE THE STYLE GUIDE for this brief, before your section: "
@@ -6120,7 +6156,7 @@ class J2Run:
                            'null|{"body": str, "head": str} (only if your own section needs correcting)}',
                            f"ATOM {asking} ASKS YOU ({to}) ABOUT {about}: {text}\nAnswer only if it's your area; say "
                            '"not mine" otherwise. No credits are charged for this reply.',
-                           lambda: json.dumps({"answer": "", "artifact_update": None}))
+                           lambda: json.dumps(self._mock_board_answer(target_wid)))
         answer = str((reply or {}).get("answer") or "").strip()
         if not answer or answer.lower() in ("not mine", "n/a", "none"):
             entry["status"] = "unanswered"      # the existing Adaptation path takes it from here, same as any block
@@ -6173,6 +6209,35 @@ class J2Run:
                 changed = True
         if changed:
             j2_board.write(self.dir, self.board)
+
+    def _mock_board_extra(self, w, attempt):
+        """Mock mode only. Ask (item 2, via J2_FORCE_QUESTION): a question only on the matched workflow's first
+        attempt, at most once per run. Reuse (item 5): otherwise, any board id answered by a different atom is
+        named, so later builders reuse it without a real model."""
+        fq = self.force_question
+        if fq and attempt == 1 and not self.question_forced and (fq == w["id"] or fq.lower() in str(w["name"]).lower()):
+            manifest = self._manifest(w)
+            if manifest:
+                self.question_forced = True
+                self.post("system", f"TEST SWITCH J2_FORCE_QUESTION={fq} (humans only, agents don't see this): "
+                                    f"{w['id']} asks {manifest[-1]['atom']} about its data attributes.",
+                          warning=True, test=True)
+                return {"question": {"to": manifest[-1]["atom"], "about": "data attributes",
+                                      "text": "Which attributes hold this item's id and price?"}}
+        used = [e["id"] for e in self.board["entries"] if e["status"] == "answered" and e["asked_by"] != w["id"]]
+        return {"board_used": used} if used else {}
+
+    def _mock_board_answer(self, wid):
+        """Mock mode's Answer (item 3): the target's own section, read for its data-* attributes; "not recorded"
+        when none are found, never invented."""
+        w = self._wf(wid)
+        body = (self.sections.get((w or {}).get("section")) or {}).get("body") or ""
+        attrs = sorted(set(re.findall(r"\bdata-[\w-]+(?==)", body)))
+        if not attrs:
+            return {"answer": "not recorded", "artifact_update": None}
+        note = f"<!-- board: {', '.join(attrs)} confirmed -->"
+        return {"answer": f"This section's items use {', '.join(attrs)}.",
+                "artifact_update": None if note in body else {"body": body.rstrip() + "\n" + note}}
 
     def _spec_conflict(self, w, meta):
         """A builder says its LLD slice can't be built as written (spec_conflict). The first time for a section, that
@@ -6987,6 +7052,7 @@ class J2Run:
             **({"export": {"file": self.out["file"][:-3] + ".docx", "written": not self.export_note,
                            "note": self.export_note}} if self.doc else {}),
             "force_audit_fail": self.force_fail or None, "test_lessons": self.test_lessons,
+            "force_question": self.force_question or None, "has_board": bool(self.board["entries"]),
             "model": None if llm.MOCK else llm.MODEL, "mock": llm.MOCK, "brief": self.request,
             "change_requests": [m["text"] for m in self.chat if m["who"] == "user" and m.get("change")],
             "status": status, "outcome": o,

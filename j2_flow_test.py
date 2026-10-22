@@ -64,6 +64,10 @@ BREW_LAB = ("A one-page website for Brew Lab, a small specialty coffee shop in I
             "see the menu with prices, the opening hours, and where to find us, and be able to pre-order a coffee for "
             "pickup. It should feel warm and modern and work well on a phone. Include a section about our beans and the "
             "farms they come from, and a simple loyalty-card explainer (buy 9, get the 10th free).")
+BOUTIQUE_BRIEF = ("make a website for my cousin's clothing boutique called Thread & Loom in Pune. it sells handloom "
+                  "kurtas, sarees, cotton shirts and dupattas. people should be able to browse products by category, "
+                  "filter by size and price, see a size guide, check new arrivals, and order on whatsapp "
+                  "(+91 00000 11111). it should feel earthy and elegant and work well on phones")
 SHOW = "--chat" in sys.argv
 FAST = "--fast" in sys.argv
 BROWSER = not FAST or "--browser" in sys.argv        # the tests that drive the page in Chrome
@@ -4440,6 +4444,71 @@ def board_disabled():
     print("board disabled: J2_BOARD unset writes no board.json or board.jsonl, artifacts.json has no board row ok")
 
 
+def board_story():
+    """Message board, Part A: the main story. J2_FORCE_QUESTION=order makes the Order workflow's first attempt ask
+    Products one question (item 2); Products answers from its own recorded section, with an artifact_update, and
+    its atom gets "Updated by Q-1" (item 3); Filter and the later Viewport fix reuse Q-1 without asking, recording a
+    depends_on edge (item 5); no Adaptation re-plan follows (exactly the 5 proposed workflows run, no Fix/Cover-item
+    extras). The switch is never in calls.jsonl, and a second question from the same atom is refused."""
+    os.environ["J2_FORCE_QUESTION"] = "order"
+    try:
+        run = docs_run(BOUTIQUE_BRIEF, 200)
+    finally:
+        os.environ.pop("J2_FORCE_QUESTION", None)
+    assert run.outcome.startswith("Done"), run.outcome
+    names = [w["name"] for w in run._all_wfs()]
+    assert names == ["Scaffold and styling", "Products", "Order on WhatsApp", "Filter", "Viewport fix"], names
+    assert len(run.board["entries"]) == 1, run.board["entries"]
+    q1 = run.board["entries"][0]
+    assert q1["asked_by"] == "W-3" and q1["to"] == "W-2.a1" and q1["status"] == "answered", q1
+    assert q1["answer"] and q1["answer"] != "not recorded", q1
+    assert q1["artifact_update"], "Products' answer should have corrected its own section"
+    products = next(w for w in run._all_wfs() if w["id"] == "W-2")
+    assert "Updated by Q-1" in products["atoms"][0]["human_output"]["text"], products["atoms"][0]["human_output"]
+    filt = next(w for w in run._all_wfs() if w["id"] == "W-4")
+    assert any(e["atom"] == "W-2.a1" and e["why"] == "board Q-1" for e in run.given["W-4"]["edges"]), run.given["W-4"]
+    assert "W-4.a1" in q1["used_by"], q1
+    with open(os.path.join(run.dir, "chat.jsonl"), encoding="utf-8") as f:
+        assert json.loads(f.readline())["force_question"] == "order"
+    with open(os.path.join(run.dir, "calls.jsonl"), encoding="utf-8") as f:
+        calls = [json.loads(ln) for ln in f]
+    for c in calls:
+        seen = (c["system"] + c["prompt"]).lower()
+        for bad in ("j2_force_question", "test switch", "forced question"):
+            assert bad not in seen, (c["id"], c["fn"], bad)
+    order_wf = next(w for w in run._all_wfs() if w["id"] == "W-3")
+    run.atom = order_wf["atoms"][0]["id"]        # simulate being inside W-3's own turn again
+    second = run._ask_board(order_wf, {"to": "W-2.a1", "about": "x", "text": "y"}, 1)
+    assert second["status"] == "refused" and "already asked" in (
+        json.loads(open(os.path.join(run.dir, "board.jsonl"), encoding="utf-8").readlines()[-1])["reason"]), second
+    print("board story: J2_FORCE_QUESTION asks once, Products answers with an artifact_update and 'Updated by Q-1', "
+          "Filter and Viewport fix reuse it (depends_on 'board Q-1', used_by), no re-plan, the switch never reaches "
+          "an AI call, and a second question from the same atom is refused ok")
+
+
+def board_not_mine():
+    """Message board, Part A: "not mine" (item 3). The target's reply isn't its area, so the entry is unanswered and
+    the asking workflow continues normally (the existing Adaptation path; no follow-up question, no crash)."""
+    os.environ["J2_FORCE_QUESTION"] = "order"
+
+    def patch(run, orig):
+        def call(fn, fmt, task, mock, **k):
+            if "ASKS YOU" in task:
+                return {"answer": "not mine", "artifact_update": None}
+            return orig(fn, fmt, task, mock, **k)
+        return call
+    try:
+        run = docs_run(BOUTIQUE_BRIEF, 200, patch=patch)
+    finally:
+        os.environ.pop("J2_FORCE_QUESTION", None)
+    assert run.outcome.startswith("Done"), run.outcome
+    assert len(run.board["entries"]) == 1
+    q1 = run.board["entries"][0]
+    assert q1["status"] == "unanswered" and not q1["answer"] or q1["answer"].lower() == "not mine", q1
+    assert q1["artifact_update"] is None and q1["used_by"] == [], q1
+    print("board not mine: an unanswered question leaves the asking workflow on the existing path, no follow-up ok")
+
+
 def docs_views():
     """4: Detailed view: document atoms get the eight-block card with a preview and .md/.docx links. Simple view: plain
     words for the finished set; a plain brief's Simple view is identical to the checkpoint's."""
@@ -5749,6 +5818,10 @@ if __name__ == "__main__":
         plain_unchanged()                         # the default (slim) path against the commit made right after the flip
         plain_unchanged(board="0")                 # J2_BOARD=0 explicitly set: still identical, prompt for prompt
         board_disabled()
+        os.environ["J2_BOARD"] = "1"
+        board_story()
+        board_not_mine()
+        os.environ.pop("J2_BOARD", None)
         atom_schema()
         docs_blueprint()
         docs_views()
