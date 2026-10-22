@@ -229,6 +229,7 @@ body:not(.simple) #dview{display:flex;flex:1;min-height:0}
     <button role="tab" data-tab="charter" aria-selected="false">Charter</button>
     <button role="tab" data-tab="docs" aria-selected="false">Documents</button>
     <button role="tab" data-tab="artifacts" aria-selected="false">Artifacts</button>
+    <button role="tab" id="tab-board" data-tab="board" aria-selected="false" hidden>Board</button>
     <button role="tab" data-tab="style" aria-selected="false">Style guide</button>
     <button role="tab" data-tab="lessons" aria-selected="false">Lessons</button>
     <button role="tab" data-tab="playbooks" aria-selected="false">Playbooks</button>
@@ -252,6 +253,7 @@ body:not(.simple) #dview{display:flex;flex:1;min-height:0}
     <div class="pane" id="pane-charter" hidden></div>
     <div class="pane" id="pane-docs" hidden></div>
     <div class="pane" id="pane-artifacts" hidden></div>
+    <div class="pane" id="pane-board" hidden></div>
     <div class="pane" id="pane-map"></div>
     <div class="pane" id="pane-style" hidden></div>
     <div class="pane" id="pane-lessons" hidden></div>
@@ -492,6 +494,18 @@ function fixesLine(a, w){
     return got.size === 1 && t.every(x => x[1]) ? esc([...got][0]) : t.map(([id, x]) => `${esc(id)} ${x ? esc(x) : '<span class="empty">not recorded</span>'}`).join(", "); };
   return `Fixes: ${fixes.map(esc).join(", ")}. Before: ${show(before)}. After: ${show(after)}.`;
 }
+// "Asked Q-n" / "Answered Q-n" / "Used Q-n" for an atom card, from the Board tab's own data (BOARD), recorded only.
+function boardLine(a, w){
+  const es = BOARD.entries || [];
+  if (!es.length) return "";
+  const asked = es.filter(e => e.atom === a.id), answered = es.filter(e => e.answered_by === w.id && e.to === a.id);
+  const used = es.filter(e => (e.used_by || []).includes(a.id));
+  const parts = [];
+  if (asked.length) parts.push(`Asked ${asked.map(e => esc(e.id)).join(", ")}`);
+  if (answered.length) parts.push(`Answered ${answered.map(e => esc(e.id)).join(", ")}`);
+  if (used.length) parts.push(`Used ${used.map(e => esc(e.id)).join(", ")}`);
+  return parts.join(". ");
+}
 const REFS = {conditions: {}, rubric: {}};   // id -> text, from /api/refs: conditions/*.json and each output type's rubric
 const wfById = id => ((CTX && CTX.workflows) || []).find(x => x.id === id);
 const wfOrigin = w => { const id = w.revises || (w.section && w.section !== w.id ? w.section : null); return id && wfById(id); };
@@ -633,11 +647,13 @@ function atomBlocks(a, w, v){
   const isFile = o => !String(o.ref).includes("#") && /^[\w./-]+\.(md|html|docx|css|js|json)$/.test(o.ref);   // hld.md, site/v9.md: where it is kept, not what it made
   const outs = v ? (v.output || []) : [], made = outs.filter(o => !isFile(o)).sort((x, y) => String(y.ref).includes("#") - String(x.ref).includes("#"));
   const fx = fixesLine(a, w), fxHTML = fx ? `<br><span data-note="fixes">${fx}</span>` : "";
+  const bl = boardLine(a, w), blHTML = bl ? `<br><span data-note="board">${bl}</span>` : "";
   const wout = v ? (made.map(o => `${esc(o.name)} <span class="empty">${esc(o.verb)} · ${esc(NOUN[o.verb] || "")} · ${esc(o.form)} · ${esc(o.ref)}</span>`).join("<br>") || '<span class="empty">Nothing made yet.</span>')
     + fxHTML      // a revise atom's Fixes line sits right under what it made, above Saved in, Depends on and Used by
+    + blHTML
     + (outs.some(isFile) ? `<br><span data-note="saved">Saved in: ${outs.filter(isFile).map(o => esc(o.ref)).join(", ")}</span>` : "")
     + `<br>Depends on: ${edges("dep", v.depends_on)}<br>Used by: ${edges("used", v.used_by)} <button type="button" class="linkbtn" data-link="agent" data-atom="${esc(a.id)}">Workflow output</button>`
-    : '<span class="empty">Built by code when the checks pass.</span>' + fxHTML;
+    : '<span class="empty">Built by code when the checks pass.</span>' + fxHTML + blHTML;
   const mix = mixed(v) ? ' <span class="empty" data-note="mixed">mixed: makes and does</span>' : "";
   return g("1. Particles")
     + blockHTML(a, "goal", "Goal", "What must be true when this is done", atomRow(a, "goal", w), false)
@@ -1050,6 +1066,7 @@ async function poll(){
     $("doclinks").hidden = !(s.doc || (s.docset || []).length) || !(s.files || []).length;
     $("pane-preview").classList.toggle("has-links", !$("doclinks").hidden);
     if (!$("doclinks").hidden) paint($("doclinks"), (s.docset || []).length > 1 ? `<b>Design documents</b> ${docLinks(s)}` : `<b>${esc(s.output_label)}</b> ${fileLinks(s)}`);
+    $("tab-board").hidden = !s.has_board;
     $("forced").hidden = !s.force_audit_fail;
     $("testles").hidden = !s.test_lessons;
     $("forced").textContent = `TEST: J2_FORCE_AUDIT_FAIL=${s.force_audit_fail} (cycle 1 Audit result forced)`;
@@ -1070,6 +1087,7 @@ async function poll(){
     paint($("pane-timeline"), renderTimeline(s)); paint($("pane-lessons"), renderLessons(s));
     paint($("pane-style"), renderStyle(s)); paint($("pane-playbooks"), renderPlaybooks(s));
     const dk = s.total + "|" + (s.docset || []).join(); if (dk !== docsKey){ docsKey = dk; loadDocs(); loadArtifacts(); }
+    if (s.has_board) loadBoard();
     const mk = s.total + "|" + s.status + "|" + (s.turn || "") + "|" + (s.paused ? s.paused.kind : ""); if (mk !== mapKey && Date.now() - mapT > 1500){ mapKey = mk; mapT = Date.now(); loadMap(); }
     renderSimple(s);
     if (!state || state.status !== s.status || state.total !== s.total) quick(s);
@@ -1110,14 +1128,15 @@ const TABHINT = {preview: "What the team has built so far.", goal: "What you ask
   docs: "The design documents the team wrote.", artifacts: "The files and records this run produced.",
   map: "Who worked with whom, and what each made.", style: "The look and feel the team agreed on.",
   lessons: "What the team learned from earlier runs.", playbooks: "Plans reused from earlier runs of the same kind.",
-  report: "A summary of the run.", rundetails: "The agents, the steps and the settings of this run.", runsettings: "What to build, which run to open, and a new run."};
+  report: "A summary of the run.", rundetails: "The agents, the steps and the settings of this run.", runsettings: "What to build, which run to open, and a new run.",
+  board: "Questions asked between builders, answered, and reused (recorded data only)."};
 function showTab(name){
   document.querySelectorAll(".tabs [role=tab]").forEach(x => x.setAttribute("aria-selected", x.dataset.tab === name));
   const tb = document.querySelector(`.tabs [data-tab="${name}"]`);
   $("wtitle").textContent = tb ? tb.textContent.trim() : name; $("wsub").textContent = TABHINT[name] || ""; $("ver").hidden = name !== "preview";
   // the Map has its own heading, so the title bar is only for the other views
   $("backmap").hidden = name === "map"; document.querySelector("#dview .wbar").hidden = name === "map"; if (name !== "map"){ $("railsub").hidden = false; $("internals").setAttribute("aria-expanded", "true"); }
-  ["preview","goal","workflows","conflicts","timeline","audit","charter","docs","artifacts","map","style","lessons","playbooks","report","rundetails","runsettings"].forEach(t => $("pane-"+t).hidden = t !== name);
+  ["preview","goal","workflows","conflicts","timeline","audit","charter","docs","artifacts","board","map","style","lessons","playbooks","report","rundetails","runsettings"].forEach(t => $("pane-"+t).hidden = t !== name);
 }
 document.querySelectorAll(".tabs [role=tab]").forEach(b => b.onclick = () => { if (b.dataset.tab === "workflows" && WFSTEP.length){ WFSTEP = []; if (state) paint($("pane-workflows"), renderWorkflows(state)); } showTab(b.dataset.tab); });
 showTab("map");
@@ -1127,6 +1146,23 @@ $("backmap").onclick = () => showTab("map");
 // Artifacts: read-only list driven by artifacts/types.json (/api/artifacts): deliverables, then evidence and records.
 const ARTS = {deliverables: [], records: []}, ARTTEXT = {};      // ARTTEXT: file -> text already fetched for an open row
 let ARTOPEN = "";
+// Board tab: board/1 entries (j2_board.py), read-only. Shown only when the run has one (tab-board.hidden, set from
+// s.has_board). Recorded data only: every row is a stored board entry, nothing guessed.
+const BOARD = {schema: "board/1", entries: []};
+function boardRow(e){
+  const st = {open: "open", answered: "answered", unanswered: "unanswered", refused: "refused"}[e.status] || e.status;
+  return `<tr data-board="${esc(e.id)}"><td>${esc(e.id)}</td><td>${esc(e.asked_by)}</td><td>${esc(e.to)}</td>`
+    + `<td>${esc(e.question)}</td><td>${e.answer ? esc(e.answer) : '<span class="empty">not recorded</span>'}</td>`
+    + `<td>${esc(st)}</td><td>${e.artifact_update ? "yes" : '<span class="empty">no</span>'}</td>`
+    + `<td>${(e.used_by || []).length ? esc(e.used_by.join(", ")) : '<span class="empty">none</span>'}</td></tr>`;
+}
+const renderBoard = () => !BOARD.entries.length ? '<p class="empty">No questions asked yet.</p>'
+  : `<table class="boardtbl"><thead><tr><th>Q-id</th><th>Asked by</th><th>To</th><th>Question</th><th>Answer</th>`
+    + `<th>Status</th><th>Artifact update</th><th>Used by</th></tr></thead><tbody>${BOARD.entries.map(boardRow).join("")}</tbody></table>`;
+async function loadBoard(){
+  try { const r = await fetch(`/api/board?${runQ().slice(1)}`, {cache:"no-store"}); if (r.ok) Object.assign(BOARD, await r.json()); } catch (e) {}
+  paint($("pane-board"), renderBoard());
+}
 const artUrl = f => `/api/artifact?name=${encodeURIComponent(f)}${runQ()}`;
 function artRow(r){
   const open = ARTOPEN === r.file, made = (r.workflows || []).length ? `made by ${esc(idRuns(r.workflows))}` : "no workflow recorded";

@@ -65,9 +65,9 @@ BREW_LAB = ("A one-page website for Brew Lab, a small specialty coffee shop in I
             "pickup. It should feel warm and modern and work well on a phone. Include a section about our beans and the "
             "farms they come from, and a simple loyalty-card explainer (buy 9, get the 10th free).")
 BOUTIQUE_BRIEF = ("make a website for my cousin's clothing boutique called Thread & Loom in Pune. it sells handloom "
-                  "kurtas, sarees, cotton shirts and dupattas. people should be able to browse products by category, "
-                  "filter by size and price, see a size guide, check new arrivals, and order on whatsapp "
-                  "(+91 00000 11111). it should feel earthy and elegant and work well on phones")
+                  "kurtas (1499, 1699), sarees (3499), cotton shirts (1299) and dupattas (899). people should be able "
+                  "to browse products by category, filter by size and price, see a size guide, check new arrivals, "
+                  "and order on whatsapp (+91 00000 11111). it should feel earthy and elegant and work well on phones")
 SHOW = "--chat" in sys.argv
 FAST = "--fast" in sys.argv
 BROWSER = not FAST or "--browser" in sys.argv        # the tests that drive the page in Chrome
@@ -5567,7 +5567,7 @@ def map_tab():
     # ---- Map and Chat are the whole app: the rail, the Needs you strip, and the Map as the navigation
     rail = ui[ui.index('<nav class="rail tabs"'):ui.index("</nav>", ui.index('<nav class="rail tabs"'))]
     top, inside = rail.split('id="railsub"')
-    old_tabs = ["preview", "goal", "workflows", "conflicts", "timeline", "audit", "charter", "docs", "artifacts", "style", "lessons", "playbooks", "report", "rundetails", "runsettings"]
+    old_tabs = ["preview", "goal", "workflows", "conflicts", "timeline", "audit", "charter", "docs", "artifacts", "board", "style", "lessons", "playbooks", "report", "rundetails", "runsettings"]
     assert re.findall(r'data-tab="(\w+)"', top) == ["map"] and 'id="gochat"' in top and 'id="internals"' in top and re.findall(r"<span>([^<]+)</span>", top) == ["Map", "Chat", "Internals"], "the rail has Map, Chat and one Internals folder"
     assert re.findall(r'data-tab="(\w+)"', inside) == old_tabs, "every other tab is under Internals, in the old order"
     assert top.count("<svg") == 3 and "<svg" not in inside and ' hidden' in rail.split('id="railsub"')[1].split(">")[0], "one small icon each, none in the folder, folder starts collapsed"

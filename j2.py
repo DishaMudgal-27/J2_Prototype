@@ -1484,6 +1484,8 @@ NEEDS = {"florist": ["Browse bouquets with prices", "Order for delivery or picku
          "cafe": ["Menu with prices", "Opening hours", "Where to find us"],
          "clinic": ["Services offered", "Doctors and timings", "Book an appointment"],
          "boutique": ["Products shown by category", "Filter products by size and price", "Order on WhatsApp"]}
+BOUTIQUE_PRODUCTS = (("Kurta, earthy red", 1499), ("Kurta, indigo block print", 1699), ("Saree, handloom cotton", 3499),
+                     ("Shirt, natural dye", 1299), ("Dupatta, block print", 899))      # mock only: fake catalog, fake prices
 
 
 def guess_type(text):
@@ -1637,6 +1639,13 @@ def mock_page(w, goal, sections, anchors=()):
                 "color:#2b211b}section{padding:16px 0;border-top:1px solid #e6dccf}</style>", hero)
     if "viewport" in n or any("phone" in str(t).lower() for t in w.get("covers_text") or []):
         return '<meta name="viewport" content="width=device-width, initial-scale=1">', ""
+    if "product" in n:        # fake catalog, id and price recorded as data-id/data-price so a board answer can name them
+        idx, d = next(((i, d) for i, d in shown if "price" in str(d).lower()), shown[0] if shown else (1, ""))
+        cards = "".join(f'<article class="j2-card" data-id="p{k}" data-price="{p}" style="max-width:100%;'
+                        f'box-sizing:border-box"><h3>{html.escape(name)}</h3><p>Rs {p}</p></article>'
+                        for k, (name, p) in enumerate(BOUTIQUE_PRODUCTS, 1))
+        return "", (hero + f'<section id="item-{idx}" data-item="{idx}"><h2>{html.escape(str(d))}</h2>'
+                   f'<div class="j2-products" style="max-width:100%">{cards}</div></section>')
 
     def item(i, d):
         if item_kind(d) == "form":
@@ -5899,8 +5908,7 @@ class J2Run:
                     got2, raw2, guide2, meta2, stop2 = one_call()
                     if got2 is not None:      # keep the original reply if the resume reply can't be used
                         got, raw, guide, meta, stop = got2, raw2, guide2, meta2, stop2
-            if j2_board.enabled():
-                self._credit_board_used(meta)
+            board_read = self._credit_board_used(meta) if j2_board.enabled() else []
             if first:     # the style guide goes first in the head, so every section can use its variables and classes
                 self.style = guide
                 self.sections = {"style": {"owner": fn, "head": style_css(guide), "body": "", "workflow": "Style guide"},
@@ -5952,8 +5960,9 @@ class J2Run:
         self._atom_outputs(w, meta, attempt)
         w["status"], w["version"] = "done", len(self.sites)
         self.save("workflows.json", self.workflows)
-        self._say(fn, f"@Coordination {human}", nxt, note, workflow=fn, human_output=human, version=len(self.sites), section=sid,
-                  workflow_cost=w["cost"])
+        self._say(fn, f"@Coordination {human}" + (f" [read {', '.join(board_read)}]" if board_read else ""), nxt, note,
+                  workflow=fn, human_output=human, version=len(self.sites), section=sid, workflow_cost=w["cost"],
+                  **({"board_read": board_read} if board_read else {}))
         size = len(html_out.encode("utf-8"))
         if size > SITE_WARN_BYTES:
             self.post("system", f"Warning: site v{len(self.sites)} is {size / 1000:.0f} KB, over builder.md's ~60 KB "
@@ -6151,6 +6160,7 @@ class J2Run:
         j2_board.write(self.dir, self.board)
         j2_board.log_event(self.dir, {"event": "asked", "id": entry["id"], "atom": asking, "to": to, "about": about})
         target_wid = to.split(".")[0]
+        self.post(w["id"], f"@{NAMES.get(target_wid, target_wid)} {entry['id']}: {text}")
         reply = self.call(target_wid,
                            '{"answer": str (plain words; say "not mine" if this isn\'t your area), "artifact_update": '
                            'null|{"body": str, "head": str} (only if your own section needs correcting)}',
@@ -6163,9 +6173,12 @@ class J2Run:
         else:
             entry["status"], entry["answer"], entry["answered_by"] = "answered", answer, target_wid
             update = (reply or {}).get("artifact_update")
-            if isinstance(update, dict):
+            updated = isinstance(update, dict)
+            if updated:
                 entry["artifact_update"] = update
                 self._apply_board_update(target_wid, update, entry["id"])
+            self.post(target_wid, f"@{NAMES.get(w['id'], w['id'])} {entry['id']}: {answer}"
+                                  + (" (updated my section)" if updated else ""))
         j2_board.write(self.dir, self.board)
         j2_board.log_event(self.dir, {"event": entry["status"], "id": entry["id"]})
         return entry
@@ -6200,15 +6213,19 @@ class J2Run:
         self.save("workflows.json", self.workflows)
 
     def _credit_board_used(self, meta):
-        """Item 5 (Reuse): used_by is only recorded when the builder's reply names the board id it used."""
-        changed = False
+        """Item 5 (Reuse): used_by is only recorded when the builder's reply names the board id it used. Returns
+        the ids actually credited, so the caller can tag its own chat message ("read Q-n")."""
+        read, changed = [], False
         for qid in meta.get("board_used") or []:
             e = next((e for e in self.board["entries"] if e["id"] == qid and e["status"] == "answered"), None)
             if e and self.atom not in e["used_by"]:
                 e["used_by"].append(self.atom)
                 changed = True
+            if e:
+                read.append(qid)
         if changed:
             j2_board.write(self.dir, self.board)
+        return read
 
     def _mock_board_extra(self, w, attempt):
         """Mock mode only. Ask (item 2, via J2_FORCE_QUESTION): a question only on the matched workflow's first
