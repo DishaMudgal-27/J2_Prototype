@@ -103,7 +103,7 @@ lines none is shown until a dot is lit. "Messages between functions" and "Who ma
 the drawing, named like "Not recorded".
 
 Every display label comes from one table in the page (`MAPLABEL`): rows (You, Management layer, Team layer, Deliverables),
-functions as "Persona (Function)" (Client Lead (Identity), Planner (Adaptation), Prioritiser (Priority), Project Manager
+functions as "Persona (Function)" (Client Lead (Identity), Planner (Adaptation), Prioritiser (Priority), Scheduler
 (Coordination), Quality Reviewer (Audit)), steps as Drafting, Building or Sending by what the step makes, Specialists for
 the workflow builders and "Checker (automatic)" for the validator. Ids and map.json are unchanged.
 
@@ -111,3 +111,17 @@ the workflow builders and "Checker (automatic)" for the validator. Ids and map.j
 ...", "worked on: ...", "made with: ...", "given to ..." and "made by ..."; no SVG lines). Every deliverable with a `file`
 links to its Open view in the Artifacts tab, from the card and from the panel. All text goes through the Detailed view's
 plain-words helper.
+
+## Home and navigation
+
+The Detailed view's home is the Needs you strip, the Map and the Chat (docked on the right; stacked below 900px). The left
+rail has Map, Chat and one collapsed Internals folder holding every other tab (Preview, Goal, Workflows, Conflicts,
+Timeline, Audit, Charter, Documents, Artifacts, Style guide, Lessons, Playbooks, Report, Run details). Each internal view
+has a "Back to map" link. Needs you lists every open Requester question (the items that make a node "waiting on you"), each
+with a button that scrolls to and focuses that question in the Chat.
+
+A click on a node opens its panel; the panel's Open button goes to: a node waiting on you, its question in the Chat; You,
+the Needs you strip; Client Lead (Identity), the Chat; Quality Reviewer (Audit), the Audit tab; the other functions, the
+two tables under the Map filtered to them; a Drafting, Building or Sending step, the Workflows tab filtered to that step's
+workflows ("Show all" clears it); the Website, the site preview; the Charter, the Charter tab; any other deliverable, its
+document in Artifacts. The page-side state for this (`MAPFILT`, `WFSTEP`) is never stored in map.json.

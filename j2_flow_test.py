@@ -5272,14 +5272,14 @@ def map_tab():
     svg2 = out2[out2.index("<svg class=\"mapsvg\""):out2.index("</svg>", out2.index("<svg class=\"mapsvg\"")) + 6]
     ng = lambda s, i: next(x for x in s.split('<g class="mapnode')[1:] if f'data-id="{htmllib.escape(i)}"' in x)      # one dot: its tooltip, rings and label
     fbox = lambda k: ng(svg2, f"fn:{k}")
-    PN = {"identity": "Client Lead (Identity)", "adaptation": "Planner (Adaptation)", "priority": "Prioritiser (Priority)", "coordination": "Project Manager (Coordination)", "audit": "Quality Reviewer (Audit)"}
+    PN = {"identity": "Client Lead (Identity)", "adaptation": "Planner (Adaptation)", "priority": "Prioritiser (Priority)", "coordination": "Scheduler (Coordination)", "audit": "Quality Reviewer (Audit)"}
     rowl = [">You</text>", ">Management layer</text>", ">Team layer</text>", ">Deliverables</text>"]
     assert all(r in svg2 for r in rowl) and [svg2.index(r) for r in rowl] == sorted(svg2.index(r) for r in rowl) and ">FUNCTIONS<" not in svg2 and ">WORK<" not in svg2 and svg2.count("data-maptab=") == 0, "row names, top to bottom; links live in the panel and the cards"
     assert svg2.count('<g class="mapnode') == 1 + 5 + 5 + 6 and re.findall(r'data-fn="(fn:\w+)"', svg2) == ["fn:" + k for k in PN], "a dot for every node, the five functions in order"
     assert fbox("identity").count("<circle") == 2 and ">Client Lead<" in fbox("identity") and ">(Identity)<" in fbox("identity") and "writing the charter" in fbox("identity").split("</title>")[0] and ">3 calls<" not in fbox("identity")      # double ring = running now; the call count and the state sit in the tooltip
     assert 'stroke="var(--validator)" stroke-width="4"' in fbox("adaptation") and ">?</text>" in fbox("adaptation") and "waiting on Priority" in fbox("adaptation").split("</title>")[0] and ">Planner<" in fbox("adaptation")
     assert 'stroke="var(--validator)" stroke-width="4"' in fbox("priority") and "waiting on you" in fbox("priority").split("</title>")[0] and "1 AI call," in fbox("priority").split("</title>")[0] and ">Prioritiser<" in fbox("priority")
-    assert 'stroke="var(--bad)" stroke-width="4"' in fbox("coordination") and ">!</text>" in fbox("coordination") and "blocked" in fbox("coordination").split("</title>")[0] and ">Project Manager<" in fbox("coordination")
+    assert 'stroke="var(--bad)" stroke-width="4"' in fbox("coordination") and ">!</text>" in fbox("coordination") and "blocked" in fbox("coordination").split("</title>")[0] and ">Scheduler<" in fbox("coordination")
     assert 'stroke="var(--line)"' in fbox("audit") and ", idle, " in fbox("audit") and "last seen: " in fbox("audit") and "@Identity" not in fbox("audit") and not re.search(r"done.when", fbox("audit")) and ">Quality Reviewer<" in fbox("audit")
     assert "<title>Client Lead (Identity), running now, writing the charter, 3 AI calls, 12.5 s, 100 tokens in, 20 out</title>" in fbox("identity")      # the full text and numbers in a tooltip
     assert "2 from you · 5 to you" in svg2 and svg2.count('stroke-dasharray="1 3"') >= 3 and "Messages between functions" not in out2      # few lines: drawn, no table
@@ -5288,7 +5288,7 @@ def map_tab():
     out3 = render_node(snap, docs={"docs": {}, "map": {**mp2, "edges": edges + many}})["map"]
     svg3 = out3[out3.index("<svg class=\"mapsvg\""):out3.index("</svg>", out3.index("<svg class=\"mapsvg\"")) + 6]
     assert '<details class="mapdd"><summary>Messages between functions (speaks to)</summary>' in out3 and "speaks to Planner (Adaptation): 4" not in svg3 and svg3.count('stroke-dasharray="1 3"') == 0, "too many lines go in a table"
-    assert out3.count("<tr><td>") >= 5 and "<td>Project Manager (Coordination)</td><td>Quality Reviewer (Audit)</td><td>9</td>" in out3
+    assert out3.count("<tr><td>") >= 5 and "<td>Scheduler (Coordination)</td><td>Quality Reviewer (Audit)</td><td>9</td>" in out3
     assert not re.search(r'<details class="mapdd"[^>]* open', out3), "the table starts closed, a click opens it"
     cards2 = out2.split('<div class="mapcards">')[1].split('<div class="maplegend"')[0]      # small screens: the functions stacked as cards
     assert cards2.count('data-node="fn:') == 5 and cards2.count('class="mapcard st-') == 1 + 5 + 6 and "speaks to Planner (Adaptation) · 4" in cards2 and "speaks to Prioritiser (Priority) · 7" in cards2
@@ -5314,7 +5314,7 @@ def map_tab():
     ends = [re.search(r'd="M[\d.]+ ([\d.]+) C[^"]* ([\d.]+)"', x).groups() for x in re.findall(r'<path class="mapln[^"]*"[^>]*>', s4)]
     cy, r0 = (lambda g: (float(g.group(1)), float(g.group(2))))(re.search(r'cy="([\d.]+)" r="([\d.]+)"', ng(s4, "work:t0")))
     assert len({a for a, _ in ends}) == 1 and len({b for _, b in ends}) == 1 and float(ends[0][1]) == cy - r0 - 4 and float(ends[0][0]) < cy - r0, "lines start under the function's label and stop just above the deliverable dot"
-    for tip in ("Client Lead (Identity) wrote the Box 0 with a very long name", "Client Lead (Identity) made 2 AI calls on Box 1 with a very long name", "Quality Reviewer (Audit) audited Box 1 with a very long name 1 time", "Project Manager (Coordination) made 4 AI calls on Box 3 with a very long name"):
+    for tip in ("Client Lead (Identity) wrote the Box 0 with a very long name", "Client Lead (Identity) made 2 AI calls on Box 1 with a very long name", "Quality Reviewer (Audit) audited Box 1 with a very long name 1 time", "Scheduler (Coordination) made 4 AI calls on Box 3 with a very long name"):
         assert f"<title>{tip}</title>" in s4, tip
     assert 'class="mapsvg many"' not in s4, "four lines are not many"
     lots = [wk(f"fn:{f}", f"work:t{i}", i + 1) for i in range(5) for f in ("identity", "adaptation", "priority")]      # 15 lines
@@ -5349,7 +5349,7 @@ def map_tab():
     ui = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "j2_ui.html"), encoding="utf-8").read()
     assert "@media (max-width:600px){.mapsvgwrap{display:none}.mapcards{display:block}}" in ui and ".mapcards{display:none}" in ui
     assert ".mapsvg{width:100%;height:auto" in ui and "st-running{border-style:double" in ui and "st-left_open{border-style:dashed" in ui
-    assert ui.index('data-tab="artifacts"') < ui.index('data-tab="map"') < ui.index('data-tab="style"') and ui.index('data-tab="docs"') < ui.index('data-tab="artifacts"')
+    assert ui.index('data-tab="map"') < ui.index('id="railsub"') < ui.index('data-tab="docs"') < ui.index('data-tab="artifacts"') < ui.index('data-tab="style"'), "Map is the first rail entry; every other tab sits in the Internals folder"
     empty = render_node(snap, docs={"docs": {}, "map": {"nodes": [], "edges": []}})["map"]
     assert "Nothing to draw yet." in empty
     real = render_node(snap, docs={"docs": {}, "map": saved})["map"]
@@ -5366,7 +5366,7 @@ def map_tab():
     assert rc.count("which other function worked on this: not recorded") == 1 and "worked on: Charter, " + lab["prd"] + " " + str(by_fn("identity", docs_rec["prd"]["calls"], calls)) in rc
     assert "worked on: " + lab["prd"] + " 1, " + lab["hld"] + " 1, " + lab["lld"] + " 1, " + lab["website"] + " 2" in rc      # Audit
     assert real.split("<svg")[1].split(">")[0].startswith(' class="mapsvg many"') and real.count('<path class="mapln"') == len([x for x in lines]), "17 lines: only on hover or click"
-    assert "which function made this step: not recorded" in rc and "made by Client Lead (Identity) 2, Planner (Adaptation) 1, Prioritiser (Priority) 1, Project Manager (Coordination) 6, Quality Reviewer (Audit) 1" in rc and rc.count('data-node="fn:') == 5
+    assert "which function made this step: not recorded" in rc and "made by Client Lead (Identity) 2, Planner (Adaptation) 1, Prioritiser (Priority) 1, Scheduler (Coordination) 6, Quality Reviewer (Audit) 1" in rc and rc.count('data-node="fn:') == 5
     # a browser: no sideways scroll at 500px, cards shown, SVG hidden; the tab sits after Artifacts and the pane reads plain
     chrome = j2.j2_check.find_chrome()
     if chrome and BROWSER:
@@ -5429,7 +5429,7 @@ def map_tab():
         assert 'data-mapopen="prd.md"' in pane and 'data-maptab="charter"' in pane and "Management layer" in pane and "Drafting" in pane and not re.search(r"envelope|done.when", text, re.I), "plain words in the Map tab"
         boxes = re.findall(r'<g class="mapnode mapfn.*?(?=<g class="mapnode)', pane, re.S)[:5]      # the five function dots in the page (the legend may say "running now")
         assert len(boxes) == 5 and all("last seen: " in b and "running now" not in b and "waiting on" not in b for b in boxes), "a saved run never says running"
-        assert dom.index('data-tab="artifacts"') < dom.index('data-tab="map"')
+        assert dom.index('data-tab="map"') < dom.index('id="railsub"') < dom.index('data-tab="artifacts"')
     # "given to": each hand-off line ends on the step that was given the document, never on a later document box
     rg = render_node(snap, docs={"docs": {}, "map": saved})
     gv, byid = rg["given"], {n["id"]: n for n in saved["nodes"]}
@@ -5473,6 +5473,109 @@ def map_tab():
             assert f">{want}<" in ng(svg_t, n["id"]) and f"Specialists {want.lower()} Deliverable {tgt} (2 workflows)" in ng(svg_t, n["id"]), (order, n["id"], want)
             assert f"Specialists {want.lower()} Deliverable {tgt} (2 workflows)" in out_t.split('class="mapcards"')[1], "the cards use the same words"
         assert ">Write<" not in svg_t and ">Build<" not in svg_t and ">Send<" not in svg_t
+    # ---- Map and Chat are the whole app: the rail, the Needs you strip, and the Map as the navigation
+    rail = ui[ui.index('<nav class="rail tabs"'):ui.index("</nav>", ui.index('<nav class="rail tabs"'))]
+    top, inside = rail.split('id="railsub"')
+    old_tabs = ["preview", "goal", "workflows", "conflicts", "timeline", "audit", "charter", "docs", "artifacts", "style", "lessons", "playbooks", "report", "rundetails"]
+    assert re.findall(r'data-tab="(\w+)"', top) == ["map"] and 'id="gochat"' in top and 'id="internals"' in top and re.findall(r"<span>([^<]+)</span>", top) == ["Map", "Chat", "Internals"], "the rail has Map, Chat and one Internals folder"
+    assert re.findall(r'data-tab="(\w+)"', inside) == old_tabs, "every other tab is under Internals, in the old order"
+    assert top.count("<svg") == 3 and "<svg" not in inside and ' hidden' in rail.split('id="railsub"')[1].split(">")[0], "one small icon each, none in the folder, folder starts collapsed"
+    dvh = ui[ui.index('<div id="dview">'):ui.index('<dialog id="detail">')]
+    panes = re.findall(r'<div class="pane[^"]*" id="pane-(\w+)"( hidden)?', dvh)
+    assert [n for n, h in panes if not h] == ["map"] and {n for n, _ in panes} == set(old_tabs) | {"map"}, "the home shows only the Map pane; every old pane still exists"
+    assert dvh.index('id="needs"') < dvh.index('<section class="work">') < dvh.index('<section class="chat">'), "Needs you, then the Map, then the Chat"
+    assert "@media (max-width:900px){#dview .dcol{overflow:auto}#dview main{grid-template-columns:minmax(0,1fr)" in ui and "@media (max-width:600px){.mapsvgwrap{display:none}.mapcards{display:block}}" in ui, "stacked below 900px; map cards at 600px"
+    # Needs you: every open question, a plain line each, a button into the Chat; nothing waiting says so
+    n0 = render_node(snap, docs={"docs": {}, "map": saved})
+    assert n0["needcount"] == 0 and "Nothing needs you right now." in n0["needs"] and 'id="needcount">0<' in n0["needs"] and "data-needmsg" not in n0["needs"]
+    qs = [{"question": "Add 25 more credits?", "options": ["Yes", "No"]}, {"question": "Leave out the lookbook?", "options": []}]
+    ask = {"id": 9001, "who": "identity", "text": "@Requester Add credits? Leave out the lookbook?", "to_user": True, "pause": "limit", "next": "user"}
+    n1 = render_node({**snap, "paused": {"kind": "limit", "label": "credits", "msg": 9001, "questions": qs}, "chat": snap["chat"] + [ask]}, docs={"docs": {}, "map": saved})
+    assert n1["needcount"] == 2 and 'id="needcount">2<' in n1["needs"] and n1["needs"].count('data-needmsg="9001"') == 2 and ">Add 25 more credits?<" in n1["needs"] and ">Leave out the lookbook?<" in n1["needs"] and "Nothing needs you" not in n1["needs"]
+    n2 = render_node({**snap, "paused": {"kind": "info", "label": "one fact", "msg": 9001, "questions": []}, "chat": snap["chat"] + [ask]}, docs={"docs": {}, "map": saved})
+    assert n2["needcount"] == 1 and ">one fact<" in n2["needs"] and 'data-needmsg="9001"' in n2["needs"]
+    n3 = render_node({**snap, "paused": None, "chat": snap["chat"] + [ask]}, docs={"docs": {}, "map": saved})      # a saved run that ended on a question: the same item a "waiting on you" node comes from
+    assert n3["needcount"] == 1 and "Add credits? Leave out the lookbook?" in n3["needs"] and "@Requester" not in n3["needs"] and 'data-needmsg="9001"' in n3["needs"]
+    assert not re.search(r"envelope|done.when", n1["needs"] + n3["needs"], re.I)
+    # the Open button of every kind of node says where it goes
+    want = {"person:requester": "Show what needs you", "fn:identity": "Open Chat", "fn:adaptation": "Show messages and calls", "fn:audit": "Open Audit findings", "step:prd>hld": "Open these workflows",
+            "work:prd": "Open the document", "work:website": "Open the site preview", "work:charter": "Open the Charter"}
+    for i, lab in want.items():
+        o = render_node(snap, docs={"docs": {}, "map": saved, "mappin": i})["map"]
+        assert f'data-mapgo="{htmllib.escape(i)}">{lab}</button>' in o and o.count("data-mapgo=") == 1, (i, lab)
+    for i in ("fn:priority", "person:requester"):      # a node that waits on you goes to its question in the Chat
+        o = render_node(snap, docs={"docs": {}, "map": mp2, "mappin": i})["map"]
+        assert f'data-mapgo="{i}">Answer in Chat</button>' in o, i
+    # a step opens the Workflows view filtered to its workflows; a function opens the tables under the Map filtered to it
+    stp = by["step:prd>hld"]
+    wf_all = [w["id"] for w in snap["workflows"]]
+    fw = render_node(snap, docs={"docs": {}, "map": saved, "wfstep": stp["workflows"]})["workflows"]
+    assert "data-stepfilter" in fw and "data-wfclear" in fw and all(f'data-key="wf-{w}"' in fw for w in stp["workflows"]) and not any(f'data-key="wf-{w}"' in fw for w in wf_all if w not in stp["workflows"]), "only that step's workflows"
+    fa = render_node(snap, docs={"docs": {}, "map": saved})["workflows"]
+    assert "data-stepfilter" not in fa and all(f'data-key="wf-{w}"' in fa for w in wf_all), "no filter: every workflow"
+    fo = render_node(snap, docs={"docs": {}, "map": saved, "mapfilt": "fn:adaptation"})["map"]
+    blk = fo.split("<summary>Messages between functions (speaks to)</summary>")[1].split("</details>")[0]
+    rws = re.findall(r"<tr><td>([^<]*)</td><td>([^<]*)</td>", blk)
+    assert "Showing messages and calls for Planner (Adaptation)." in fo and "data-mapfiltclear" in fo and fo.count('<details class="mapdd" open>') == 2 and rws and all("Planner (Adaptation)" in (a, b) for a, b in rws), rws
+    assert "<th>Planner (Adaptation)</th>" in fo and "<th>Prioritiser (Priority)</th>" not in fo, "the calls table keeps only that function"
+    assert "data-mapfiltclear" not in real and '<details class="mapdd" open>' not in real, "unfiltered: both tables closed"
+    # the real page: a saved run that ended on a question, and a plain saved run
+    if chrome and BROWSER:
+        import subprocess
+        ended = os.path.join(j2.RUNS_DIR, "j2-20200105-000000")
+        shutil.copytree(run.dir, ended)
+        os.remove(os.path.join(ended, "map.json"))
+        with open(os.path.join(ended, "chat.jsonl"), "a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"id": 9999, "who": "identity", "text": "@Requester Add credits?", "to_user": True, "pause": "limit", "next": "user"}) + "\n")
+        def home_probe(run_name, js):
+            tmp = tempfile.mkdtemp(prefix="j2-home-")
+            open(os.path.join(tmp, "j2_ui.html"), "w", encoding="utf-8").write(ui.replace("</body>", "<script>setTimeout(() => { const r = {}; try { " + js + " } catch (e) { r.error = String(e); } document.body.setAttribute('data-r', JSON.stringify(r)); }, 4500)</script></body>"))
+            keep_here, j2_server.HERE = j2_server.HERE, tmp
+            keep, j2_server.RUN = j2_server.RUN, run
+            srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+            threading.Thread(target=srv.serve_forever, daemon=True).start()
+            try:
+                dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--window-size=1280,900", "--virtual-time-budget=12000", "--dump-dom",
+                                      f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={run_name}"], capture_output=True, text=True, timeout=180).stdout
+            finally:
+                j2_server.HERE, j2_server.RUN = keep_here, keep
+                srv.shutdown()
+            got = json.loads(htmllib.unescape(re.search(r'data-r="([^"]*)"', dom).group(1)))
+            assert "error" not in got, got
+            return got
+        base_js = ("const q = s => [...document.querySelectorAll(s)], vis = () => q('#dview .pane').filter(p => !p.hidden).map(p => p.id.slice(5)).join(','), rect = s => document.querySelector(s).getBoundingClientRect(),"
+                   "click = id => { document.querySelector('.mapnode[data-id=\"' + id + '\"]').dispatchEvent(new MouseEvent('click', {bubbles: true})); document.querySelector('[data-mapgo]').click(); };")
+        try:
+            a = home_probe("j2-20200105-000000", base_js +
+                "r.home = vis(); r.needs = document.getElementById('needs').innerText.replace(/\\s+/g, ' '); r.count = document.getElementById('needcount').textContent;"
+                "r.layout = [rect('#needs').bottom <= rect('#pane-map').top + 1, rect('#dview .chat').left >= rect('#dview .work').right - 1, rect('#dview .chat').height > 200];"
+                "r.rail = q('.rail.tabs > button').map(b => b.textContent.trim()); r.sub = document.getElementById('railsub').hidden; r.back0 = document.getElementById('backmap').hidden;"
+                "document.querySelector('[data-needmsg]').click(); const f = document.activeElement; r.focus = f.classList.contains('msg') + '|' + f.dataset.id;"
+                "r.tabs = {}; q('#railsub [data-tab]').forEach(b => { b.click(); r.tabs[b.dataset.tab] = vis() + '|' + document.getElementById('backmap').hidden + '|' + document.getElementById('railsub').hidden; });"
+                "document.getElementById('backmap').click(); r.back = vis() + '|' + document.getElementById('backmap').hidden;"
+                "let asked = []; const fq = focusQuestion; focusQuestion = id => { asked.push(String(id)); return fq(id); }; r.nodes = {};"
+                "for (const id of ['person:requester', 'fn:identity', 'fn:adaptation', 'fn:audit', 'step:prd>hld', 'work:prd', 'work:website', 'work:charter']) { showTab('map'); asked = []; click(id);"
+                " r.nodes[id] = {pane: vis(), asked: asked.join(','), wf: WFSTEP.join(','), filt: MAPFILT, art: ARTOPEN}; }"
+                "showTab('workflows'); r.wfnote = !!document.querySelector('[data-stepfilter]'); document.querySelector('[data-wfclear]').click(); r.wfcleared = !document.querySelector('[data-stepfilter]') && WFSTEP.length;")
+            b = home_probe(name, base_js +
+                "let chats = 0; const fc = focusChat; focusChat = () => { chats++; return fc(); }; r.none = document.getElementById('needs').innerText.replace(/\\s+/g, ' ') + '|' + document.getElementById('needcount').textContent;"
+                "click('person:requester'); r.person = document.activeElement.id; showTab('map'); click('fn:identity'); r.chats = chats; r.pane = vis();"
+                "showTab('map'); document.getElementById('gochat').click(); r.railchat = chats; document.getElementById('internals').click(); r.toggled = document.getElementById('railsub').hidden;")
+        finally:
+            shutil.rmtree(ended, ignore_errors=True)
+        assert a["home"] == "map" and a["count"] == "1" and "Needs you" in a["needs"] and "Add credits?" in a["needs"] and "Answer in Chat" in a["needs"], a
+        assert a["layout"] == [True, True, True] and a["rail"] == ["Map", "Chat", "Internals"] and a["sub"] is True and a["back0"] is True, a      # strip above the map, chat docked on the right, no Back link on the home
+        assert a["focus"] == "true|9999", a      # the strip's button focuses the question in the Chat
+        assert a["tabs"] == {t: f"{t}|false|false" for t in old_tabs}, a      # every old tab opens from Internals, with a Back to map link
+        assert a["back"] == "map|true", a
+        sw = by["step:prd>hld"]["workflows"]
+        n = a["nodes"]
+        assert n["person:requester"]["asked"] == "9999" and n["fn:identity"]["asked"] == "9999", n      # waiting on you: straight to the question in the Chat
+        assert n["fn:adaptation"] == {"pane": "map", "asked": "", "wf": "", "filt": "fn:adaptation", "art": ""}, n      # the other functions: the tables under the Map, filtered to them
+        assert n["fn:audit"]["pane"] == "audit" and n["step:prd>hld"]["pane"] == "workflows" and n["step:prd>hld"]["wf"] == ",".join(sw), n
+        assert n["work:prd"]["pane"] == "artifacts" and n["work:prd"]["art"] == "prd.md" and n["work:website"]["pane"] == "preview" and n["work:charter"]["pane"] == "charter", n
+        assert a["wfnote"] is True and a["wfcleared"] == 0, a      # "Show all" clears the step filter
+        assert b["none"] == "Needs you 0 Nothing needs you right now.|0" and b["person"] == "needs" and b["chats"] == 1 and b["railchat"] == 2 and b["toggled"] is False, b
     print("map: map.json written beside atoms.json and equal to the folder's build, golden nodes/edges/statuses, counts from the atoms, "
           "old run rebuilt with its gaps named, left open vs running, fault, not made, waiting on you, /api/map live/saved/old/missing, "
           "SVG shapes and marks per status, links to Artifacts, tooltips, plain words, cards for small screens ok")
