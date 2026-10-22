@@ -1,0 +1,340 @@
+{
+  "prd": {
+    "file": "prd.md",
+    "docx": "prd.docx",
+    "agent_output": {
+      "kind": "prd",
+      "requirements": [
+        {
+          "id": "R1",
+          "text": "The page shows the name Brew Lab as text."
+        },
+        {
+          "id": "R2",
+          "text": "The page shows the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, so customers can view the shop name and address."
+        },
+        {
+          "id": "R3",
+          "text": "The page has no embedded map. The address is the only location information on the page."
+        },
+        {
+          "id": "R4",
+          "text": "The menu lists exactly seven items: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140 and Banana bread slice 120."
+        },
+        {
+          "id": "R5",
+          "text": "Every menu price is in rupees and matches the number given in R4, so customers can read the menu and prices."
+        },
+        {
+          "id": "R6",
+          "text": "The page has a pre-order form with the fields name, phone, items and pickup time, and no other fields."
+        },
+        {
+          "id": "R7",
+          "text": "When the person ordering submits the pre-order form, the order is sent to hello@brewlab.example, where the Shop team receives it."
+        },
+        {
+          "id": "R8",
+          "text": "Customers collect the order at the shop."
+        },
+        {
+          "id": "R9",
+          "text": "No online payment is taken. The page has no payment fields."
+        },
+        {
+          "id": "R10",
+          "text": "The page works on phones, with no horizontal overflow at 360px width."
+        },
+        {
+          "id": "R11",
+          "text": "The page does not show opening hours or a shop phone number."
+        },
+        {
+          "id": "R12",
+          "text": "The page is one file of plain HTML, CSS and JavaScript with no build step, and it contains the same facts as the PRD, HLD and LLD with no contradictions."
+        }
+      ]
+    },
+    "calls": {
+      "from": 1,
+      "to": 40
+    },
+    "workflows": [
+      "W-1",
+      "W-2",
+      "W-3",
+      "W-4",
+      "W-5",
+      "W-6",
+      "W-7"
+    ],
+    "atoms": [
+      "W-1.a1",
+      "W-2.a1",
+      "W-3.a1",
+      "W-4.a1",
+      "W-5.a1",
+      "W-6.a1",
+      "W-7.a1"
+    ]
+  },
+  "hld": {
+    "file": "hld.md",
+    "docx": "hld.docx",
+    "agent_output": {
+      "kind": "hld",
+      "components": [
+        {
+          "id": "C1",
+          "name": "Shop identity block",
+          "responsibility": "shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map, so the address is the only location information",
+          "covers": [
+            "R1",
+            "R2",
+            "R3"
+          ]
+        },
+        {
+          "id": "C2",
+          "name": "Menu list",
+          "responsibility": "shows exactly seven items with prices in rupees: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140 and Banana bread slice 120",
+          "covers": [
+            "R4",
+            "R5"
+          ]
+        },
+        {
+          "id": "C3",
+          "name": "Pre-order form",
+          "responsibility": "collects the fields name, phone, items and pickup time, and no other fields",
+          "covers": [
+            "R6"
+          ]
+        },
+        {
+          "id": "C4",
+          "name": "Order delivery",
+          "responsibility": "sends the submitted pre-order to hello@brewlab.example, where the Shop team receives it",
+          "covers": [
+            "R7"
+          ]
+        },
+        {
+          "id": "C5",
+          "name": "Pickup and payment notice",
+          "responsibility": "tells the person ordering that the order is collected at the shop and that no online payment is taken, so the page has no payment fields",
+          "covers": [
+            "R8",
+            "R9"
+          ]
+        },
+        {
+          "id": "C6",
+          "name": "Phone layout",
+          "responsibility": "arranges the page so it works on phones, with no horizontal overflow at 360px width",
+          "covers": [
+            "R10"
+          ]
+        },
+        {
+          "id": "C7",
+          "name": "page content check",
+          "responsibility": "keeps opening hours and a shop phone number off the page. The phone field in C3 belongs to the person ordering and is not a shop phone number",
+          "covers": [
+            "R11"
+          ]
+        },
+        {
+          "id": "C8",
+          "name": "single package file",
+          "responsibility": "delivers the page as one file of plain HTML, CSS and JavaScript with no build step, with the same facts as the PRD, HLD and LLD",
+          "covers": [
+            "R12"
+          ]
+        }
+      ]
+    },
+    "calls": {
+      "from": 41,
+      "to": 90
+    },
+    "workflows": [
+      "W-8",
+      "W-9",
+      "W-10",
+      "W-11",
+      "W-12",
+      "W-13",
+      "W-14",
+      "W-15",
+      "W-16"
+    ],
+    "atoms": [
+      "W-8.a1",
+      "W-9.a1",
+      "W-10.a1",
+      "W-11.a1",
+      "W-12.a1",
+      "W-13.a1",
+      "W-14.a1",
+      "W-15.a1",
+      "W-16.a1"
+    ]
+  },
+  "lld": {
+    "file": "lld.md",
+    "docx": "lld.docx",
+    "agent_output": {
+      "kind": "lld",
+      "sections": [
+        {
+          "id": "S1",
+          "anchor": "shop-identity",
+          "page": "index.html",
+          "implements": [
+            "C1"
+          ]
+        },
+        {
+          "id": "S2",
+          "anchor": "menu",
+          "page": "index.html",
+          "implements": [
+            "C2"
+          ]
+        },
+        {
+          "id": "S3",
+          "anchor": "pre-order",
+          "page": "index.html",
+          "implements": [
+            "C3",
+            "C4"
+          ],
+          "version": 2
+        },
+        {
+          "id": "S4",
+          "anchor": "pickup-payment-notice",
+          "page": "index.html",
+          "implements": [
+            "C5"
+          ]
+        },
+        {
+          "id": "S5",
+          "anchor": "page",
+          "page": "index.html",
+          "implements": [
+            "C6",
+            "C7",
+            "C8"
+          ]
+        }
+      ],
+      "elements": [
+        {
+          "id": "E1",
+          "section": "S3",
+          "selector": "#pre-order-form",
+          "trigger": "submit, when every field is valid",
+          "behaviour": "the page builds one order message from the four fields (name, phone, items and pickup time) and sends it to hello@brewlab.example, where the shop team receives it (implements C3, C4). The message states that the order is collected at the shop. No payment is requested. After sending, the status text area shows a short confirmation that the order was sent for pickup at the shop"
+        },
+        {
+          "id": "E2",
+          "section": "S3",
+          "selector": "form[id=\"pre-order-form\"]",
+          "trigger": "submit, when any field is empty or invalid under the rules in the Form fields section",
+          "behaviour": "the page does not send the order, shows a short message in the status text area naming each field to fix, and moves focus to the first invalid field (implements C3)"
+        }
+      ],
+      "fields": [
+        {
+          "id": "F1",
+          "section": "S3",
+          "form": "order-name",
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "validation": null
+        },
+        {
+          "id": "F2",
+          "section": "S3",
+          "form": "order-phone",
+          "name": "phone",
+          "type": "tel",
+          "required": true,
+          "validation": null
+        },
+        {
+          "id": "F3",
+          "section": "S3",
+          "form": "order-items",
+          "name": "items",
+          "type": "multi",
+          "required": true,
+          "validation": null
+        },
+        {
+          "id": "F4",
+          "section": "S3",
+          "form": "order-pickup-time",
+          "name": "pickup time",
+          "type": "time",
+          "required": true,
+          "validation": null
+        }
+      ],
+      "revisions": [
+        {
+          "section": "S3",
+          "version": 2,
+          "reason": "E1 and E2 give selectors '#pre-order form' and 'form[id=\"pre-order-form\"]'. The form is built as #pre-order-form inside #pre-order, so both match it, but the slice check reports neither on the page.",
+          "changes": {
+            "#pre-order form": "#pre-order-form"
+          },
+          "by": "W-34"
+        }
+      ]
+    },
+    "calls": {
+      "from": 91,
+      "to": 159
+    },
+    "workflows": [
+      "W-17",
+      "W-18",
+      "W-19",
+      "W-20",
+      "W-21",
+      "W-22",
+      "W-23",
+      "W-24",
+      "W-25",
+      "W-26",
+      "W-27",
+      "W-28",
+      "W-29",
+      "W-30",
+      "W-31"
+    ],
+    "atoms": [
+      "W-17.a1",
+      "W-18.a1",
+      "W-19.a1",
+      "W-20.a1",
+      "W-21.a1",
+      "W-22.a1",
+      "W-23.a1",
+      "W-24.a1",
+      "W-25.a1",
+      "W-26.a1",
+      "W-27.a1",
+      "W-28.a1",
+      "W-29.a1",
+      "W-30.a1",
+      "W-31.a1"
+    ]
+  }
+}

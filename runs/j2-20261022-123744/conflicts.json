@@ -1,0 +1,520 @@
+[
+  {
+    "id": "C-1",
+    "cycle": 4,
+    "topic": "proposal",
+    "between": [
+      "adaptation",
+      "priority"
+    ],
+    "about": null,
+    "subject": "what to fund in cycle 4",
+    "detail": null,
+    "attempts": [
+      {
+        "n": 0,
+        "who": "adaptation",
+        "msg": 58,
+        "text": "@Priority HLD and LLD are proposed as two new sections, each fixing F-11 and built from the PRD facts only. The website is not proposed: this run's output is a markdown document, not HTML.",
+        "position": "opening proposal",
+        "agree": null
+      },
+      {
+        "n": 1,
+        "who": "priority",
+        "msg": 59,
+        "text": "@Adaptation COUNTER: I changed the parts, not the scope. The HLD and LLD are new document sections, not fixes to an existing section, so each is priced as one doc_section part at 10, not as a fix part at 8. Total 20 of the 740 left. Both keep F-11 and your atoms. Add the envelope below to each.",
+        "position": "COUNTER: High-level design section (10), Low-level design section (10)",
+        "agree": false
+      },
+      {
+        "n": 2,
+        "who": "adaptation",
+        "msg": 60,
+        "text": "I accept the counter: HLD and LLD at 10 each, same scope and atoms, with the envelopes you set. The website is still not proposed, since this run produces a markdown document.",
+        "position": "accepts Priority's offer",
+        "agree": true
+      }
+    ],
+    "status": "settled",
+    "escalated": false,
+    "attempts_before_escalation": null,
+    "resolved_by": "agents",
+    "identity": [],
+    "escalated_to_user": false,
+    "user_question": null,
+    "user_answer": null,
+    "winner": "priority",
+    "outcome": "Adaptation accepted Priority's COUNTER: High-level design section (10), Low-level design section (10) goes to the validator.",
+    "priority_final": [
+      {
+        "id": "hld",
+        "name": "High-level design section",
+        "goal_gap": "F-11: the HLD does not exist, though the brief asks for it after the PRD.",
+        "expected_outcome": "A High-level design section that shows the page structure and how the pre-order is sent, using only PRD facts.",
+        "outputs": [
+          "## High-level design"
+        ],
+        "completion_check": "High-level design heading is present, has at least 80 words and contains the brief facts exactly.",
+        "dependencies": [
+          "prd-scope"
+        ],
+        "parts": [
+          "doc_section"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-11"
+        ],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 2,
+          "time_minutes": 8
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The High-level design section describes the one-page structure and the pre-order flow and agrees with the PRD.",
+            "constraints": [
+              "No opening hours",
+              "No shop phone number",
+              "No embedded map",
+              "No online payment",
+              "No invented details"
+            ],
+            "context": [
+              "charter facts",
+              "PRD sections Requirements and Out of scope"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W Builder",
+              "steps": "Write the section heading '## High-level design'. Describe the page parts: name and address text, menu of seven items, pre-order form sent to hello@brewlab.example, pickup at the shop, layout for phones. Use only PRD facts."
+            },
+            "expected_output": [
+              {
+                "text": "The High-level design heading exists",
+                "kind": "heading",
+                "target": "High-level design"
+              },
+              {
+                "text": "The brief facts appear exactly",
+                "kind": "facts",
+                "target": [
+                  "Brew Lab",
+                  "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+                  "Filter coffee 90",
+                  "Cappuccino 160",
+                  "Latte 180",
+                  "Cold brew 200",
+                  "Masala chai 80",
+                  "Almond croissant 140",
+                  "Banana bread slice 120",
+                  "name, phone, items and pickup time",
+                  "hello@brewlab.example",
+                  "Customers collect the order at the shop",
+                  "No online payment is taken"
+                ]
+              }
+            ],
+            "verification": [
+              {
+                "text": "High-level design heading is present",
+                "type": "heading-present",
+                "target": "High-level design",
+                "expect": true,
+                "item": 1
+              },
+              {
+                "text": "High-level design section has at least 80 words",
+                "type": "section-not-empty",
+                "target": "High-level design",
+                "expect": 80
+              },
+              {
+                "text": "Brief facts appear exactly",
+                "type": "facts-present",
+                "target": [
+                  "Brew Lab",
+                  "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+                  "Filter coffee 90",
+                  "Cappuccino 160",
+                  "Latte 180",
+                  "Cold brew 200",
+                  "Masala chai 80",
+                  "Almond croissant 140",
+                  "Banana bread slice 120",
+                  "name, phone, items and pickup time",
+                  "hello@brewlab.example",
+                  "Customers collect the order at the shop",
+                  "No online payment is taken"
+                ],
+                "expect": true,
+                "item": 2
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 2,
+          "time_limit_minutes": 8,
+          "retry_limit": 1,
+          "stop_loss": "Stop if the section still lacks the heading, 80 words or any brief fact, or shows opening hours or a shop phone number, after one retry."
+        },
+        "estimate": 10,
+        "cost": 10
+      },
+      {
+        "id": "lld",
+        "name": "Low-level design section",
+        "goal_gap": "F-11: the LLD does not exist, though the brief asks for it after the HLD.",
+        "expected_outcome": "A Low-level design section that gives the form fields, the menu list and the phone layout rule, matching the HLD and PRD.",
+        "outputs": [
+          "## Low-level design"
+        ],
+        "completion_check": "Low-level design heading is present, has at least 80 words and contains the brief facts exactly.",
+        "dependencies": [
+          "hld"
+        ],
+        "parts": [
+          "doc_section"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-11"
+        ],
+        "revises": null,
+        "estimated_resources": {
+          "money": 10,
+          "calls": 2,
+          "time_minutes": 8
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The Low-level design section gives the detail of the menu, form and phone layout and agrees with the HLD and PRD.",
+            "constraints": [
+              "No opening hours",
+              "No shop phone number",
+              "No embedded map",
+              "No online payment",
+              "No invented details"
+            ],
+            "context": [
+              "charter facts",
+              "PRD Requirements R1 to R12",
+              "HLD section"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W Builder",
+              "steps": "Write the section heading '## Low-level design'. List the seven menu items with rupee prices, the four form fields, the email recipient, pickup at the shop, and no horizontal overflow at 360px width. Use only PRD facts."
+            },
+            "expected_output": [
+              {
+                "text": "The Low-level design heading exists",
+                "kind": "heading",
+                "target": "Low-level design"
+              },
+              {
+                "text": "The brief facts appear exactly",
+                "kind": "facts",
+                "target": [
+                  "Brew Lab",
+                  "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+                  "Filter coffee 90",
+                  "Cappuccino 160",
+                  "Latte 180",
+                  "Cold brew 200",
+                  "Masala chai 80",
+                  "Almond croissant 140",
+                  "Banana bread slice 120",
+                  "name, phone, items and pickup time",
+                  "hello@brewlab.example",
+                  "Customers collect the order at the shop",
+                  "No online payment is taken"
+                ]
+              }
+            ],
+            "verification": [
+              {
+                "text": "Low-level design heading is present",
+                "type": "heading-present",
+                "target": "Low-level design",
+                "expect": true,
+                "item": 1
+              },
+              {
+                "text": "Low-level design section has at least 80 words",
+                "type": "section-not-empty",
+                "target": "Low-level design",
+                "expect": 80
+              },
+              {
+                "text": "Brief facts appear exactly",
+                "type": "facts-present",
+                "target": [
+                  "Brew Lab",
+                  "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+                  "Filter coffee 90",
+                  "Cappuccino 160",
+                  "Latte 180",
+                  "Cold brew 200",
+                  "Masala chai 80",
+                  "Almond croissant 140",
+                  "Banana bread slice 120",
+                  "name, phone, items and pickup time",
+                  "hello@brewlab.example",
+                  "Customers collect the order at the shop",
+                  "No online payment is taken"
+                ],
+                "expect": true,
+                "item": 2
+              }
+            ]
+          }
+        ],
+        "envelope": {
+          "money_limit": 10,
+          "model_call_limit": 2,
+          "time_limit_minutes": 8,
+          "retry_limit": 1,
+          "stop_loss": "Stop if the section still lacks the heading, 80 words or any brief fact, or shows opening hours or a shop phone number, after one retry."
+        },
+        "estimate": 10,
+        "cost": 10
+      }
+    ],
+    "adaptation_final": [
+      {
+        "id": "hld",
+        "name": "High-level design section",
+        "goal_gap": "F-11: the HLD does not exist, though the brief asks for it after the PRD.",
+        "expected_outcome": "A High-level design section that shows the page structure and how the pre-order is sent, using only PRD facts.",
+        "outputs": [
+          "## High-level design"
+        ],
+        "completion_check": "High-level design heading is present, has at least 80 words and contains the brief facts exactly.",
+        "dependencies": [
+          "prd-scope"
+        ],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-11"
+        ],
+        "revises": null,
+        "estimated_resources": {
+          "money": 8,
+          "calls": 2,
+          "time_minutes": 8
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The High-level design section describes the one-page structure and the pre-order flow and agrees with the PRD.",
+            "constraints": [
+              "No opening hours",
+              "No shop phone number",
+              "No embedded map",
+              "No online payment",
+              "No invented details"
+            ],
+            "context": [
+              "charter facts",
+              "PRD sections Requirements and Out of scope"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W Builder",
+              "steps": "Write the section heading '## High-level design'. Describe the page parts: name and address text, menu of seven items, pre-order form sent to hello@brewlab.example, pickup at the shop, layout for phones. Use only PRD facts."
+            },
+            "expected_output": [
+              {
+                "text": "The High-level design heading exists",
+                "kind": "heading",
+                "target": "High-level design"
+              },
+              {
+                "text": "The brief facts appear exactly",
+                "kind": "facts",
+                "target": [
+                  "Brew Lab",
+                  "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+                  "Filter coffee 90",
+                  "Cappuccino 160",
+                  "Latte 180",
+                  "Cold brew 200",
+                  "Masala chai 80",
+                  "Almond croissant 140",
+                  "Banana bread slice 120",
+                  "name, phone, items and pickup time",
+                  "hello@brewlab.example",
+                  "Customers collect the order at the shop",
+                  "No online payment is taken"
+                ]
+              }
+            ],
+            "verification": [
+              {
+                "text": "High-level design heading is present",
+                "type": "heading-present",
+                "target": "High-level design",
+                "expect": true,
+                "item": 1
+              },
+              {
+                "text": "High-level design section has at least 80 words",
+                "type": "section-not-empty",
+                "target": "High-level design",
+                "expect": 80
+              },
+              {
+                "text": "Brief facts appear exactly",
+                "type": "facts-present",
+                "target": [
+                  "Brew Lab",
+                  "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+                  "Filter coffee 90",
+                  "Cappuccino 160",
+                  "Latte 180",
+                  "Cold brew 200",
+                  "Masala chai 80",
+                  "Almond croissant 140",
+                  "Banana bread slice 120",
+                  "name, phone, items and pickup time",
+                  "hello@brewlab.example",
+                  "Customers collect the order at the shop",
+                  "No online payment is taken"
+                ],
+                "expect": true,
+                "item": 2
+              }
+            ]
+          }
+        ],
+        "estimate": 8,
+        "cost": 8
+      },
+      {
+        "id": "lld",
+        "name": "Low-level design section",
+        "goal_gap": "F-11: the LLD does not exist, though the brief asks for it after the HLD.",
+        "expected_outcome": "A Low-level design section that gives the form fields, the menu list and the phone layout rule, matching the HLD and PRD.",
+        "outputs": [
+          "## Low-level design"
+        ],
+        "completion_check": "Low-level design heading is present, has at least 80 words and contains the brief facts exactly.",
+        "dependencies": [
+          "hld"
+        ],
+        "parts": [
+          "fix"
+        ],
+        "covers": [],
+        "fixes": [
+          "F-11"
+        ],
+        "revises": null,
+        "estimated_resources": {
+          "money": 8,
+          "calls": 2,
+          "time_minutes": 8
+        },
+        "atoms": [
+          {
+            "id": "a1",
+            "goal": "The Low-level design section gives the detail of the menu, form and phone layout and agrees with the HLD and PRD.",
+            "constraints": [
+              "No opening hours",
+              "No shop phone number",
+              "No embedded map",
+              "No online payment",
+              "No invented details"
+            ],
+            "context": [
+              "charter facts",
+              "PRD Requirements R1 to R12",
+              "HLD section"
+            ],
+            "how": {
+              "kind": "AI",
+              "agent": "W Builder",
+              "steps": "Write the section heading '## Low-level design'. List the seven menu items with rupee prices, the four form fields, the email recipient, pickup at the shop, and no horizontal overflow at 360px width. Use only PRD facts."
+            },
+            "expected_output": [
+              {
+                "text": "The Low-level design heading exists",
+                "kind": "heading",
+                "target": "Low-level design"
+              },
+              {
+                "text": "The brief facts appear exactly",
+                "kind": "facts",
+                "target": [
+                  "Brew Lab",
+                  "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+                  "Filter coffee 90",
+                  "Cappuccino 160",
+                  "Latte 180",
+                  "Cold brew 200",
+                  "Masala chai 80",
+                  "Almond croissant 140",
+                  "Banana bread slice 120",
+                  "name, phone, items and pickup time",
+                  "hello@brewlab.example",
+                  "Customers collect the order at the shop",
+                  "No online payment is taken"
+                ]
+              }
+            ],
+            "verification": [
+              {
+                "text": "Low-level design heading is present",
+                "type": "heading-present",
+                "target": "Low-level design",
+                "expect": true,
+                "item": 1
+              },
+              {
+                "text": "Low-level design section has at least 80 words",
+                "type": "section-not-empty",
+                "target": "Low-level design",
+                "expect": 80
+              },
+              {
+                "text": "Brief facts appear exactly",
+                "type": "facts-present",
+                "target": [
+                  "Brew Lab",
+                  "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+                  "Filter coffee 90",
+                  "Cappuccino 160",
+                  "Latte 180",
+                  "Cold brew 200",
+                  "Masala chai 80",
+                  "Almond croissant 140",
+                  "Banana bread slice 120",
+                  "name, phone, items and pickup time",
+                  "hello@brewlab.example",
+                  "Customers collect the order at the shop",
+                  "No online payment is taken"
+                ],
+                "expect": true,
+                "item": 2
+              }
+            ]
+          }
+        ],
+        "estimate": 8,
+        "cost": 8
+      }
+    ],
+    "attempts_used": 2,
+    "registered": []
+  }
+]

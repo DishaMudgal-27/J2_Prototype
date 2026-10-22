@@ -157,7 +157,7 @@ view" from there. The choice is remembered in the browser, and `?view=simple` / 
 picks one. The Simple view only changes how the run is shown; the agents and `j2.py` behave the same in both.
 
 You type the brief as the Requester. The flow follows `docs/j2-flow.jpg` and the
-[J2 page](https://sankalpasawa.github.io/asawa-site/native/system/department.html) (J2.a to J2.h). Only Identity
+[J2 page](https://<owner-github-username>.github.io/<owner-site>/native/system/department.html) (J2.a to J2.h). Only Identity
 talks to you. The run pauses until you answer.
 
 | Participant | File | Job |

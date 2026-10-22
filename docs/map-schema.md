@@ -83,31 +83,49 @@ In a finished run the page says "left open", never "running".
 
 ## The page
 
-The Map is a calm graph drawn in inline SVG, with fixed rows and a fixed left-to-right order (no physics, no random
-positions: the same map always draws the same). Rows from the top: You, Management layer (the five functions), Team layer
-(one small circle per step) and Deliverables. Every node is a circle with its name under it; the version, status word,
-calls, last seen and the rest are in the tooltip and in a click panel. Status is never colour alone: solid ring = filed
-and checked, dashed = left open, double = running now, thick red plus "!" = fault, thick amber plus "?" = waiting,
-hollow and faint = not made.
+The Map is a calm graph drawn in inline SVG, laid out the same way every time (no physics, no random positions). From the
+top: You, the Management layer (the five functions), then the work as a tree down the middle. Charter is the root; below
+it, each deliverable sits under the team persona that made it. Every node is a circle with its name beside or under it;
+the version, status word, calls, last seen and the rest are in the tooltip and in a click panel. Status is never colour
+alone: solid ring = filed and checked, dashed = left open, double = running now, thick red plus "!" = fault, thick amber
+plus "?" = waiting, hollow and faint = not made.
 
-Lines are thin and grey. Hand-off (a deliverable to the step and on to the next deliverable) is solid, "speaks to" is
-dotted, and "given to" is a faint curve. A "given to" curve ends on the step circle that consumed the document (the step
-that leads to the deliverable the hand-off recorded), never on a later document. If the map has no such step the line
-stays on the box and the gap is listed under "Not recorded". The wording stays "given to": the run records what was given,
-not proof of use.
+Lines are thin and grey. Hand-off (down the spine, deliverable to persona to deliverable) is solid, "speaks to" is dotted,
+and "given to" is a faint loop beside the spine. A "given to" loop ends on the persona that consumed the document (the step
+that leads to the deliverable the hand-off recorded), never on a later document, so a deliverable that feeds more than one
+step branches. If the map has no such step the loop ends on the box and the gap is listed under "Not recorded". The wording
+stays "given to": the run records what was given, not proof of use.
 
-Function-to-deliverable lines are faint, drawn under the nodes, and stop at the top of a dot. Hovering or focusing a dot
-(or pressing Enter) lights it, the lines that touch it and the dots at their other ends, and fades the rest. A click opens
-the panel for that dot and keeps it lit until the next click, Close or Esc. With more than 12 function-to-deliverable
-lines none is shown until a dot is lit. "Messages between functions" and "Who made each step" are closed dropdowns under
-the drawing, named like "Not recorded".
+No two drawn lines cross. Loops that would interleave go on opposite sides of the spine; the code then checks every pair of
+lines for a crossing. A line that cannot be placed without one is drawn round the outside and listed under "Not recorded"
+as "could not be drawn without crossing". Function-to-function lines that would cross another go in the "Messages between
+functions" table instead. Function-to-deliverable lines are never drawn by default: hovering or focusing a dot lights it, the
+lines that touch it and the dots at their other ends, and fades the rest; a click opens the panel and keeps it lit until the
+next click, Close or Esc.
 
-Every display label comes from one table in the page (`MAPLABEL`): rows (You, Management layer, Team layer, Deliverables),
-functions as "Persona (Function)" (Client Lead (Identity), Planner (Adaptation), Prioritiser (Priority), Project Manager
-(Coordination), Quality Reviewer (Audit)), steps as Drafting, Building or Sending by what the step makes, Specialists for
-the workflow builders and "Checker (automatic)" for the validator. Ids and map.json are unchanged.
+Every display label comes from one table in the page (`MAPLABEL`): rows (You, Management layer, Team layer and
+deliverables), functions as "Persona (Function)" (Client Lead (Identity), Strategist (Adaptation), Prioritiser (Priority),
+Scheduler (Coordination), Quality Reviewer (Audit)), team personas chosen from the step's output type (drafting a PRD:
+Product Analyst; an HLD: Solution Architect; an LLD: Technical Designer; any other document: Specialist; building the
+website: Web Developer; sending: Messenger) with a small line "drafting, building or sending, N workflows", and
+"Checker (automatic)" for the validator. Ids and map.json are unchanged.
 
 `renderMap(map)` is one pure function: SVG at wide widths and a card list at 600px and under (the same words: "speaks to
 ...", "worked on: ...", "made with: ...", "given to ..." and "made by ..."; no SVG lines). Every deliverable with a `file`
 links to its Open view in the Artifacts tab, from the card and from the panel. All text goes through the Detailed view's
 plain-words helper.
+
+## Home and navigation
+
+The Detailed view's home is the department name, the Needs you strip (with one plain outcome line and a See report link), the Map and the Chat (docked on the right; stacked below 900px). The left
+rail has Map, Chat and one collapsed Internals folder holding every other tab (Preview, Goal, Workflows, Conflicts,
+Timeline, Audit, Charter, Documents, Artifacts, Style guide, Lessons, Playbooks, Report, Run details, Run settings). Run settings holds what
+to build, the saved-run selector, New run and Back to simple view; the full outcome banner is at the top of the Report. Each internal view
+has a "Back to map" link. Needs you lists every open Requester question (the items that make a node "waiting on you"), each
+with a button that scrolls to and focuses that question in the Chat.
+
+A click on a node opens its panel; the panel's Open button goes to: a node waiting on you, its question in the Chat; You,
+the Needs you strip; Client Lead (Identity), the Chat; Quality Reviewer (Audit), the Audit tab; the other functions, the
+two tables under the Map filtered to them; a team persona's step, the Workflows tab filtered to that step's
+workflows ("Show all" clears it); the Website, the site preview; the Charter, the Charter tab; any other deliverable, its
+document in Artifacts. The page-side state for this (`MAPFILT`, `WFSTEP`) is never stored in map.json.

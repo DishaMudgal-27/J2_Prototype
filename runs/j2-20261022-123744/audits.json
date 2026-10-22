@@ -1,0 +1,980 @@
+[
+  {
+    "cycle": 18,
+    "version": 8,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map.",
+        "verdict": "PASS",
+        "note": "#shop-name h1 'Brew Lab' and #shop-address hold the full address as text; no iframe or map in the HTML.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The page lists all seven menu items with their rupee prices: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120.",
+        "verdict": "PASS",
+        "note": "#menu has 7 .menu-item entries with the exact names and prices (90, 160, 180, 200, 80, 140, 120 rupees); the screenshot shows them.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The page has a pre-order form with the fields name, phone, items and pickup time, and the form sends the order to hello@brewlab.example.",
+        "verdict": "PASS",
+        "note": "#pre-order-form has the four fields, action mailto:hello@brewlab.example and a submit button; the mechanical form test submitted with no errors.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The page says customers collect the order at the shop and that no online payment is taken.",
+        "verdict": "PASS",
+        "note": "#pickup-payment-notice says 'Customers collect the order at the shop.' and 'No online payment is taken.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The page shows no opening hours and no shop phone number.",
+        "verdict": "PASS",
+        "note": "No hours or shop number in the HTML; the only phone field is the customer's own input, and N6 found no invented numbers.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "PASS",
+        "note": "Mechanical check: js_errors empty, overflow 0px at 360 and 1280, broken_in_page_links empty (4 links).",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-7",
+        "criterion": "Necessary condition N8 / design: nav reachable and one obvious main action in the hero",
+        "verdict": "NEEDS_REVISION",
+        "note": "N8 not met: no link or button in the hero. first_screen_actions is empty at both widths. #page-header with #site-nav is the last element in the body, so the screenshot shows no header or nav at the top.",
+        "severity": "medium",
+        "confidence": "high",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-8",
+        "criterion": "Charter standard: website agrees with the LLD (S3)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "LLD comparison: S1, S2, S4 and S5 match; S3 mismatches on E2 form[id=\"pre-order-form\"] and on F3 (items is a textarea, spec says multi). The form itself works.",
+        "severity": "low",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "The screenshot shows the style guide palette, Georgia headings, system-ui body and 12px-radius white cards on both widths.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "Contrast measured on 34 elements at both widths, 0 low.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "One h1 (Brew Lab), no skipped heading levels; h2 'Menu' follows.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "NEEDS_REVISION",
+        "note": "No link or button in the hero; first_screen_actions is empty and the Pre-order link is only in the header at the end of the page.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "NEEDS_REVISION",
+        "note": "The nav is last in the DOM and not on the first screen in the screenshot, so a visitor can't reach sections from the top.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": false
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "0 tap targets under 44px at 360px.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "The page has 0 images, so none lack alt text.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 16277,
+      "broken_in_page_links": [],
+      "external_resources": [],
+      "forms": 1,
+      "scripts": 1,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 34,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "system-ui",
+            "Georgia",
+            "Arial"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 4
+          },
+          "first_screen_actions": [],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 34,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "system-ui",
+            "Georgia",
+            "Arial"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 4
+          },
+          "first_screen_actions": []
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v8.png",
+    "all_pass": false,
+    "conditions": [
+      {
+        "id": "N1",
+        "text": "The page opens (it parses, tags balanced)",
+        "check": "page-parses",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "text": "No JavaScript errors on load",
+        "check": "no-js-errors",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "text": "No horizontal overflow at 360px and 1280px",
+        "check": "no-overflow",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "text": "Every in-page link resolves; WhatsApp (wa.me) and tel: links are well formed",
+        "check": "links-well-formed",
+        "met": true,
+        "evidence": "all 4 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "text": "Every charter fact appears exactly, and nothing is \"to be confirmed\"",
+        "check": [
+          "facts-present-all",
+          "nothing-to-be-confirmed"
+        ],
+        "met": true,
+        "evidence": "all 10 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "text": "No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers",
+        "check": "no-invented-facts",
+        "met": true,
+        "evidence": "every number, phone and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "N7",
+        "text": "Every form has a submit control and a destination (action or mailto)",
+        "check": "forms-have-destination",
+        "met": true,
+        "evidence": "1 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "text": "A nav reaches every section, and the hero has one obvious main action",
+        "check": "nav-and-main-action",
+        "met": false,
+        "evidence": "no link or button in the hero"
+      }
+    ],
+    "lld": {
+      "matches": [
+        "S1",
+        "S2",
+        "S4",
+        "S5"
+      ],
+      "mismatches": [
+        {
+          "section": "S3",
+          "evidence": "E2 form[id=\"pre-order-form\"] isn't on the page; F3 field items is type text, the spec says multi"
+        }
+      ],
+      "dropped": []
+    }
+  },
+  {
+    "cycle": 19,
+    "version": 11,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map.",
+        "verdict": "PASS",
+        "note": "#shop-name h1 'Brew Lab' and #shop-address hold the full address; the screenshot shows both; no iframe or map in the HTML.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The page lists all seven menu items with their rupee prices: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120.",
+        "verdict": "PASS",
+        "note": "#menu has 7 .menu-item entries with 90, 160, 180, 200, 80, 140 and 120 rupees and the exact names.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The page has a pre-order form with the fields name, phone, items and pickup time, and the form sends the order to hello@brewlab.example.",
+        "verdict": "PASS",
+        "note": "#pre-order-form has name, phone, items (textarea) and pickup time fields, action mailto:hello@brewlab.example, and a submit button; the mechanical form test submitted with no errors.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The page says customers collect the order at the shop and that no online payment is taken.",
+        "verdict": "PASS",
+        "note": "#pickup-payment-notice says 'Customers collect the order at the shop.' and 'No online payment is taken.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The page shows no opening hours and no shop phone number.",
+        "verdict": "PASS",
+        "note": "No hours or shop number in the HTML; the only phone field is the customer's own input; N6 found no invented numbers.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "PASS",
+        "note": "Mechanical check: js_errors empty, overflow 0px at 360 and 1280, broken_in_page_links empty.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-7",
+        "criterion": "Necessary condition N8: a nav reaches every section, and the hero has one obvious main action",
+        "verdict": "NEEDS_REVISION",
+        "note": "Code N8 reports 'no link or button in the hero'. The screenshot shows a Pre-order button (#hero-preorder) in the top card and the header at the top, and the code finds Pre-order in the first-screen actions. In the HTML the header is last in the body and a script moves it to the top.",
+        "severity": "medium",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-8",
+        "criterion": "Charter standard: the website agrees with the LLD (S3)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "LLD check: S1, S2, S4 and S5 match; S3 mismatches on E2 form[id=\"pre-order-form\"] and on items type text vs multi. #order-pickup is an input type=time, while the spec says text. The form works as built.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "The screenshot shows the same serif headings, brown buttons, white cards and cream background throughout.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "Contrast measured on 35 elements at both widths, 0 low.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "One h1, no skipped heading levels; the large Brew Lab title stands out in the screenshot.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The screenshot shows a filled Pre-order button in the top card and a highlighted Pre-order nav link; code N8 still reports no hero action.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The nav at the top has 4 links that resolve and are usable at 360px and 1280px; it depends on a script to move the header, since it is last in the HTML source.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "0 tap targets under 44px at 360px.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "The page has 0 images, so none lack alt text.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 16756,
+      "broken_in_page_links": [],
+      "external_resources": [],
+      "forms": 1,
+      "scripts": 2,
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "design": {
+        "phone": {
+          "contrast": {
+            "checked": 35,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "system-ui",
+            "Georgia",
+            "Arial"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 5
+          },
+          "first_screen_actions": [
+            "Pre-order",
+            "Pre-order"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        },
+        "desktop": {
+          "contrast": {
+            "checked": 35,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "system-ui",
+            "Georgia",
+            "Arial"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 5
+          },
+          "first_screen_actions": [
+            "Pre-order",
+            "Pre-order"
+          ]
+        }
+      },
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v11.png",
+    "all_pass": false,
+    "conditions": [
+      {
+        "id": "N1",
+        "text": "The page opens (it parses, tags balanced)",
+        "check": "page-parses",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "text": "No JavaScript errors on load",
+        "check": "no-js-errors",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "text": "No horizontal overflow at 360px and 1280px",
+        "check": "no-overflow",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "text": "Every in-page link resolves; WhatsApp (wa.me) and tel: links are well formed",
+        "check": "links-well-formed",
+        "met": true,
+        "evidence": "all 5 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "text": "Every charter fact appears exactly, and nothing is \"to be confirmed\"",
+        "check": [
+          "facts-present-all",
+          "nothing-to-be-confirmed"
+        ],
+        "met": true,
+        "evidence": "all 10 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "text": "No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers",
+        "check": "no-invented-facts",
+        "met": true,
+        "evidence": "every number, phone and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "N7",
+        "text": "Every form has a submit control and a destination (action or mailto)",
+        "check": "forms-have-destination",
+        "met": true,
+        "evidence": "1 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "text": "A nav reaches every section, and the hero has one obvious main action",
+        "check": "nav-and-main-action",
+        "met": false,
+        "evidence": "no link or button in the hero"
+      }
+    ],
+    "lld": {
+      "matches": [
+        "S1",
+        "S2",
+        "S4",
+        "S5"
+      ],
+      "mismatches": [
+        {
+          "section": "S3",
+          "evidence": "E2 form[id=\"pre-order-form\"] isn't on the page; F3 field items is type text, the spec says multi"
+        }
+      ],
+      "dropped": []
+    }
+  },
+  {
+    "cycle": 20,
+    "version": 13,
+    "results": [
+      {
+        "id": "F-1",
+        "criterion": "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map.",
+        "verdict": "PASS",
+        "note": "#shop-name h1 holds 'Brew Lab' and #shop-address holds '12, 100 Feet Road, Indiranagar, Bengaluru 560038'. No iframe or map in the HTML, and both show in the screenshot.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 1,
+        "pass": true
+      },
+      {
+        "id": "F-2",
+        "criterion": "The page lists all seven menu items with their rupee prices: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120.",
+        "verdict": "PASS",
+        "note": "#menu has 7 .menu-item entries: 90, 160, 180, 200, 80, 140 and 120 rupees, with the exact names.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 2,
+        "pass": true
+      },
+      {
+        "id": "F-3",
+        "criterion": "The page has a pre-order form with the fields name, phone, items and pickup time, and the form sends the order to hello@brewlab.example.",
+        "verdict": "PASS",
+        "note": "#pre-order-form has the four required fields, action mailto:hello@brewlab.example and a submit button. The script builds a mailto link on a valid submit. The mechanical form test submitted with no errors.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 3,
+        "pass": true
+      },
+      {
+        "id": "F-4",
+        "criterion": "The page says customers collect the order at the shop and that no online payment is taken.",
+        "verdict": "PASS",
+        "note": "#pickup-payment-notice reads 'Customers collect the order at the shop.' and 'No online payment is taken.'",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 4,
+        "pass": true
+      },
+      {
+        "id": "F-5",
+        "criterion": "The page shows no opening hours and no shop phone number.",
+        "verdict": "PASS",
+        "note": "No hours or shop number in the HTML. The only phone field is the customer's own input, and N6 found no invented numbers.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 5,
+        "pass": true
+      },
+      {
+        "id": "F-6",
+        "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+        "verdict": "PASS",
+        "note": "Mechanical check: js_errors empty, overflow 0px at 360 and 1280, broken_in_page_links empty (5 links).",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null,
+        "item": 6,
+        "pass": true
+      }
+    ],
+    "extra_issues": [
+      {
+        "id": "F-7",
+        "criterion": "Necessary condition N8 (nav reaches every section, hero has one obvious main action)",
+        "verdict": "NEEDS_REVISION",
+        "note": "The N8 code check fails with 'no link or button in the hero'. In the source, <header id=\"page-header\"> with #site-nav is the last element in <body> and only CSS (body flex, #page-header order:-1) moves it to the top. #hero-preorder is a link to #pre-order inside #shop-identity, so the check may not be reading the hero. The W-40 completion check ('first in the body') is not met in the HTML.",
+        "severity": "medium",
+        "confidence": "medium",
+        "needs_requester_fact": null
+      },
+      {
+        "id": "F-8",
+        "criterion": "Charter standard: website agrees with the LLD (S3)",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The LLD comparison shows S3 mismatching: E2 form[id=\"pre-order-form\"] not found, F3 items is a text area but the spec says multi, and F4 pickup time is in #order-pickup but the spec names #order-pickup-time. The form works. Either the LLD S3 or the page needs to change so they agree.",
+        "severity": "low",
+        "confidence": "high",
+        "needs_requester_fact": null
+      }
+    ],
+    "rubric": [
+      {
+        "id": "R-1",
+        "item": "R-1",
+        "criterion": "Consistent styling: the whole page follows the style guide (same fonts, colours, button and card styles)",
+        "verdict": "PASS",
+        "note": "The screenshot shows the style-guide browns, cream background, Georgia headings, and the same buttons and cards throughout.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-2",
+        "item": "R-2",
+        "criterion": "Readable contrast: text is easy to read against its background (WCAG AA)",
+        "verdict": "PASS",
+        "note": "Measured: 36 elements checked at both widths, 0 low-contrast.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-3",
+        "item": "R-3",
+        "criterion": "Clear hierarchy: one main heading, headings in order, the most important things stand out",
+        "verdict": "PASS",
+        "note": "One h1, no skipped heading levels, and a large Brew Lab title stands out in the screenshot.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-4",
+        "item": "R-4",
+        "criterion": "One obvious main action: a visitor can tell at once what to do next",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The screenshot shows a Pre-order button in the top card and the highlighted Pre-order nav button. The N8 code check still reports no link or button in the hero.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-5",
+        "item": "R-5",
+        "criterion": "Easy navigation: a visitor can reach every section quickly, on a phone too",
+        "verdict": "PASS_WITH_WARNING",
+        "note": "The screenshot shows the nav at the top at 360px and 1280px with four links that resolve. In the HTML the header is last in the source, which is why N8 fails.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-6",
+        "item": "R-6",
+        "criterion": "Tap targets are big enough on phones (at least 44x44px)",
+        "verdict": "PASS",
+        "note": "Measured at 360px: 0 tap targets under 44px.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      },
+      {
+        "id": "R-7",
+        "item": "R-7",
+        "criterion": "Images have alt text",
+        "verdict": "PASS",
+        "note": "The page has 0 images, so none lack alt text.",
+        "rubric": true,
+        "severity": "medium",
+        "pass": true
+      }
+    ],
+    "mechanical": {
+      "available": true,
+      "bytes": 16634,
+      "broken_in_page_links": [],
+      "external_resources": [],
+      "forms": 1,
+      "scripts": 1,
+      "desktop": {
+        "width": 1280,
+        "overflow_px": 0
+      },
+      "design": {
+        "desktop": {
+          "contrast": {
+            "checked": 36,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "system-ui",
+            "Georgia",
+            "Arial"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 5
+          },
+          "first_screen_actions": [
+            "Pre-order",
+            "Pre-order"
+          ]
+        },
+        "phone": {
+          "contrast": {
+            "checked": 36,
+            "low_count": 0,
+            "low": []
+          },
+          "headings": {
+            "h1": 1,
+            "skipped_levels": 0
+          },
+          "images_without_alt": [],
+          "images": 0,
+          "fonts": [
+            "system-ui",
+            "Georgia",
+            "Arial"
+          ],
+          "nav": {
+            "nav_elements": 1,
+            "in_page_links": 5
+          },
+          "first_screen_actions": [
+            "Pre-order",
+            "Pre-order"
+          ],
+          "small_tap_targets": {
+            "min_px": 44,
+            "count": 0,
+            "examples": []
+          }
+        }
+      },
+      "phone": {
+        "width": 360,
+        "overflow_px": 0
+      },
+      "form_results": [
+        {
+          "index": 1,
+          "has_submit": true,
+          "submitted": true,
+          "invalid": [],
+          "errors_during": [],
+          "ok": true
+        }
+      ],
+      "js_errors": []
+    },
+    "screenshot": "site/shots/v13.png",
+    "all_pass": false,
+    "conditions": [
+      {
+        "id": "N1",
+        "text": "The page opens (it parses, tags balanced)",
+        "check": "page-parses",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "text": "No JavaScript errors on load",
+        "check": "no-js-errors",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "text": "No horizontal overflow at 360px and 1280px",
+        "check": "no-overflow",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "text": "Every in-page link resolves; WhatsApp (wa.me) and tel: links are well formed",
+        "check": "links-well-formed",
+        "met": true,
+        "evidence": "all 5 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "text": "Every charter fact appears exactly, and nothing is \"to be confirmed\"",
+        "check": [
+          "facts-present-all",
+          "nothing-to-be-confirmed"
+        ],
+        "met": true,
+        "evidence": "all 10 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "text": "No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers",
+        "check": "no-invented-facts",
+        "met": true,
+        "evidence": "every number, phone and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "N7",
+        "text": "Every form has a submit control and a destination (action or mailto)",
+        "check": "forms-have-destination",
+        "met": true,
+        "evidence": "1 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "text": "A nav reaches every section, and the hero has one obvious main action",
+        "check": "nav-and-main-action",
+        "met": false,
+        "evidence": "no link or button in the hero"
+      }
+    ],
+    "lld": {
+      "matches": [
+        "S1",
+        "S2",
+        "S4",
+        "S5"
+      ],
+      "mismatches": [
+        {
+          "section": "S3",
+          "evidence": "E2 form[id=\"pre-order-form\"] isn't on the page; F3 field items is type text, the spec says multi; F4 field pickup time isn't in #order-pickup-time"
+        }
+      ],
+      "dropped": []
+    }
+  }
+]

@@ -11,11 +11,15 @@ __pycache__/
 .pytest_cache/
 
 # Local run output and state (runs/ holds chat logs and AI calls; memory/ holds lessons)
-
+# Runs already committed stay tracked; this only stops new run folders from being added.
+runs/
 memory/
 _backup/
 projects/
 *.log
+
+# Files the assistant writes for the developer
+Claude outputs/
 
 # Local tool state
 .claude/

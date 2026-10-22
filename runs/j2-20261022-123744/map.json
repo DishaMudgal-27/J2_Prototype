@@ -1,0 +1,768 @@
+{
+  "schema": "map/1",
+  "run": "j2-20261022-123744",
+  "live": false,
+  "status": {
+    "state": "Done with open items",
+    "state_status": "idle",
+    "checks": {
+      "passed": 173,
+      "run": 175
+    }
+  },
+  "nodes": [
+    {
+      "id": "person:requester",
+      "kind": "person",
+      "row": "people",
+      "label": "You",
+      "status": "idle",
+      "version": null,
+      "tag": null,
+      "color": "--user",
+      "file": null,
+      "detail": "7 messages from you",
+      "workflows": []
+    },
+    {
+      "id": "fn:identity",
+      "kind": "function",
+      "row": "functions",
+      "label": "Identity",
+      "status": "idle",
+      "version": null,
+      "tag": null,
+      "color": "--identity",
+      "file": null,
+      "workflows": [],
+      "tab": "charter",
+      "wait_on": null,
+      "calls": 36,
+      "seconds": 297.3,
+      "tokens": {
+        "input": 1115690,
+        "output": 19979
+      },
+      "detail": "last seen: @Requester Got it, we'll finish with the site as it is now. It shows the shop name and address, the menu with prices, the pre-order form and"
+    },
+    {
+      "id": "fn:adaptation",
+      "kind": "function",
+      "row": "functions",
+      "label": "Adaptation",
+      "status": "idle",
+      "version": null,
+      "tag": null,
+      "color": "--adaptation",
+      "file": null,
+      "workflows": [],
+      "tab": "workflows",
+      "wait_on": null,
+      "calls": 32,
+      "seconds": 559.5,
+      "tokens": {
+        "input": 975901,
+        "output": 71120
+      },
+      "detail": "last seen: @Coordination The build matches the goal: #order-pickup is a text input, items is a text area, and the form is #pre-order-form. The S3 slice"
+    },
+    {
+      "id": "fn:priority",
+      "kind": "function",
+      "row": "functions",
+      "label": "Priority",
+      "status": "idle",
+      "version": null,
+      "tag": null,
+      "color": "--priority",
+      "file": null,
+      "workflows": [],
+      "tab": "conflicts",
+      "wait_on": null,
+      "calls": 17,
+      "seconds": 305.6,
+      "tokens": {
+        "input": 500065,
+        "output": 48847
+      },
+      "detail": "last seen: @W-41 Builder Envelope check for W-41: within limits (money 8, model calls 0/2, retries 0/1). Budget 716/1000 used. Runs now."
+    },
+    {
+      "id": "fn:coordination",
+      "kind": "function",
+      "row": "functions",
+      "label": "Coordination",
+      "status": "idle",
+      "version": null,
+      "tag": null,
+      "color": "--coordination",
+      "file": null,
+      "workflows": [],
+      "tab": "timeline",
+      "wait_on": null,
+      "calls": 41,
+      "seconds": 257.9,
+      "tokens": {
+        "input": 1160727,
+        "output": 11650
+      },
+      "detail": "last seen: @Priority W-41 is the only registered workflow left. It is funded (8), has no dependencies, and W-40 is done, so the site file write lock is"
+    },
+    {
+      "id": "fn:audit",
+      "kind": "function",
+      "row": "functions",
+      "label": "Audit",
+      "status": "idle",
+      "version": null,
+      "tag": null,
+      "color": "--audit",
+      "file": null,
+      "workflows": [],
+      "tab": "audit",
+      "wait_on": null,
+      "calls": 18,
+      "seconds": 287.7,
+      "tokens": {
+        "input": 704935,
+        "output": 35300
+      },
+      "detail": "last seen: @Identity All six done-when items pass on the code and the screenshot. Two extra issues remain. N8 still fails: the header and nav are the l"
+    },
+    {
+      "id": "work:charter",
+      "kind": "work",
+      "row": "work",
+      "label": "Charter",
+      "tag": "Charter",
+      "color": "--charter",
+      "status": "filed",
+      "version": null,
+      "detail": "the plan every workflow reads",
+      "file": "goal.json",
+      "workflows": []
+    },
+    {
+      "id": "step:charter>prd",
+      "kind": "engine",
+      "row": "work",
+      "label": "Write",
+      "status": "filed",
+      "version": null,
+      "detail": "7 workflows · 23 of 23 checks passed",
+      "file": null,
+      "workflows": [
+        "W-1",
+        "W-2",
+        "W-3",
+        "W-4",
+        "W-5",
+        "W-6",
+        "W-7"
+      ],
+      "tag": null,
+      "color": null,
+      "made_by": {
+        "calls": {
+          "from": 1,
+          "to": 40
+        },
+        "functions": {
+          "identity": 6,
+          "adaptation": 7,
+          "priority": 3,
+          "coordination": 7,
+          "audit": 3
+        },
+        "basis": "recorded"
+      }
+    },
+    {
+      "id": "work:prd",
+      "kind": "work",
+      "row": "work",
+      "label": "Product requirements",
+      "tag": "PRD",
+      "color": "--prd",
+      "status": "filed",
+      "version": 7,
+      "detail": "7 work atoms",
+      "file": "prd.md",
+      "workflows": [
+        "W-1",
+        "W-2",
+        "W-3",
+        "W-4",
+        "W-5",
+        "W-6",
+        "W-7"
+      ]
+    },
+    {
+      "id": "step:prd>hld",
+      "kind": "engine",
+      "row": "work",
+      "label": "Write",
+      "status": "filed",
+      "version": null,
+      "detail": "9 workflows · 30 of 30 checks passed",
+      "file": null,
+      "workflows": [
+        "W-8",
+        "W-9",
+        "W-10",
+        "W-11",
+        "W-12",
+        "W-13",
+        "W-14",
+        "W-15",
+        "W-16"
+      ],
+      "tag": null,
+      "color": null,
+      "made_by": {
+        "calls": {
+          "from": 41,
+          "to": 90
+        },
+        "functions": {
+          "identity": 13,
+          "adaptation": 9,
+          "priority": 4,
+          "coordination": 9,
+          "audit": 5
+        },
+        "basis": "recorded"
+      }
+    },
+    {
+      "id": "work:hld",
+      "kind": "work",
+      "row": "work",
+      "label": "High-level design",
+      "tag": "HLD",
+      "color": "--hld",
+      "status": "filed",
+      "version": 10,
+      "detail": "9 work atoms",
+      "file": "hld.md",
+      "workflows": [
+        "W-8",
+        "W-9",
+        "W-10",
+        "W-11",
+        "W-12",
+        "W-13",
+        "W-14",
+        "W-15",
+        "W-16"
+      ]
+    },
+    {
+      "id": "step:hld>lld",
+      "kind": "engine",
+      "row": "work",
+      "label": "Write",
+      "status": "filed",
+      "version": null,
+      "detail": "15 workflows · 56 of 56 checks passed",
+      "file": null,
+      "workflows": [
+        "W-17",
+        "W-18",
+        "W-19",
+        "W-20",
+        "W-21",
+        "W-22",
+        "W-23",
+        "W-24",
+        "W-25",
+        "W-26",
+        "W-27",
+        "W-28",
+        "W-29",
+        "W-30",
+        "W-31"
+      ],
+      "tag": null,
+      "color": null,
+      "made_by": {
+        "calls": {
+          "from": 91,
+          "to": 159
+        },
+        "functions": {
+          "identity": 10,
+          "adaptation": 9,
+          "priority": 7,
+          "coordination": 15,
+          "audit": 7
+        },
+        "basis": "recorded"
+      }
+    },
+    {
+      "id": "work:lld",
+      "kind": "work",
+      "row": "work",
+      "label": "Low-level design",
+      "tag": "LLD",
+      "color": "--lld",
+      "status": "filed",
+      "version": 16,
+      "detail": "15 work atoms",
+      "file": "lld.md",
+      "workflows": [
+        "W-17",
+        "W-18",
+        "W-19",
+        "W-20",
+        "W-21",
+        "W-22",
+        "W-23",
+        "W-24",
+        "W-25",
+        "W-26",
+        "W-27",
+        "W-28",
+        "W-29",
+        "W-30",
+        "W-31"
+      ]
+    },
+    {
+      "id": "step:lld>website",
+      "kind": "engine",
+      "row": "work",
+      "label": "Build",
+      "status": "filed",
+      "version": null,
+      "detail": "8 workflows · 49 of 49 checks passed",
+      "file": null,
+      "workflows": [
+        "W-32",
+        "W-33",
+        "W-35",
+        "W-36",
+        "W-37",
+        "W-38",
+        "W-40",
+        "W-41"
+      ],
+      "tag": null,
+      "color": null,
+      "made_by": null
+    },
+    {
+      "id": "work:website",
+      "kind": "work",
+      "row": "work",
+      "label": "Website",
+      "tag": "Site",
+      "color": "--site",
+      "status": "filed",
+      "version": 13,
+      "detail": "8 work atoms",
+      "file": "site/index.html",
+      "workflows": [
+        "W-32",
+        "W-33",
+        "W-35",
+        "W-36",
+        "W-37",
+        "W-38",
+        "W-40",
+        "W-41"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "work:charter",
+      "to": "step:charter>prd",
+      "kind": "step",
+      "label": null,
+      "n": 7,
+      "basis": "recorded"
+    },
+    {
+      "from": "step:charter>prd",
+      "to": "work:prd",
+      "kind": "step",
+      "label": null,
+      "n": 7,
+      "basis": "recorded"
+    },
+    {
+      "from": "work:prd",
+      "to": "step:prd>hld",
+      "kind": "step",
+      "label": null,
+      "n": 9,
+      "basis": "recorded"
+    },
+    {
+      "from": "step:prd>hld",
+      "to": "work:hld",
+      "kind": "step",
+      "label": null,
+      "n": 9,
+      "basis": "recorded"
+    },
+    {
+      "from": "work:hld",
+      "to": "step:hld>lld",
+      "kind": "step",
+      "label": null,
+      "n": 15,
+      "basis": "recorded"
+    },
+    {
+      "from": "step:hld>lld",
+      "to": "work:lld",
+      "kind": "step",
+      "label": null,
+      "n": 15,
+      "basis": "recorded"
+    },
+    {
+      "from": "work:lld",
+      "to": "step:lld>website",
+      "kind": "step",
+      "label": null,
+      "n": 8,
+      "basis": "recorded"
+    },
+    {
+      "from": "step:lld>website",
+      "to": "work:website",
+      "kind": "step",
+      "label": null,
+      "n": 8,
+      "basis": "recorded"
+    },
+    {
+      "from": "work:prd",
+      "to": "work:hld",
+      "kind": "handoff",
+      "label": "the PRD's requirements were in this builder's prompt (charter)",
+      "n": 1,
+      "basis": "recorded"
+    },
+    {
+      "from": "work:prd",
+      "to": "work:lld",
+      "kind": "handoff",
+      "label": "the PRD's requirements were in this builder's prompt (charter)",
+      "n": 1,
+      "basis": "recorded"
+    },
+    {
+      "from": "work:hld",
+      "to": "work:lld",
+      "kind": "handoff",
+      "label": "the HLD's components were in this builder's prompt (charter)",
+      "n": 1,
+      "basis": "recorded"
+    },
+    {
+      "from": "work:lld",
+      "to": "work:website",
+      "kind": "handoff",
+      "label": "LLD slice S1: its pages and sections were in this builder's prompt",
+      "n": 1,
+      "basis": "recorded"
+    },
+    {
+      "from": "work:hld",
+      "to": "work:website",
+      "kind": "handoff",
+      "label": "the HLD component summary was in this builder's prompt",
+      "n": 1,
+      "basis": "recorded"
+    },
+    {
+      "from": "work:charter",
+      "to": "work:prd",
+      "kind": "handoff",
+      "label": "built from the charter",
+      "n": 1,
+      "basis": "declared"
+    },
+    {
+      "from": "person:requester",
+      "to": "fn:identity",
+      "kind": "speaks_to",
+      "label": null,
+      "n": 7,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:identity",
+      "to": "person:requester",
+      "kind": "speaks_to",
+      "label": null,
+      "n": 14,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:identity",
+      "to": "fn:adaptation",
+      "kind": "speaks_to",
+      "label": null,
+      "n": 24,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:adaptation",
+      "to": "fn:identity",
+      "kind": "speaks_to",
+      "label": null,
+      "n": 3,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:adaptation",
+      "to": "fn:priority",
+      "kind": "speaks_to",
+      "label": null,
+      "n": 20,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:adaptation",
+      "to": "fn:coordination",
+      "kind": "speaks_to",
+      "label": null,
+      "n": 3,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:priority",
+      "to": "fn:adaptation",
+      "kind": "speaks_to",
+      "label": null,
+      "n": 1,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:coordination",
+      "to": "fn:priority",
+      "kind": "speaks_to",
+      "label": null,
+      "n": 41,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:audit",
+      "to": "fn:identity",
+      "kind": "speaks_to",
+      "label": null,
+      "n": 18,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:identity",
+      "to": "work:charter",
+      "kind": "speaks_to",
+      "label": "wrote the charter",
+      "n": null,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:identity",
+      "to": "work:prd",
+      "kind": "speaks_to",
+      "label": "calls",
+      "n": 6,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:adaptation",
+      "to": "work:prd",
+      "kind": "speaks_to",
+      "label": "calls",
+      "n": 7,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:priority",
+      "to": "work:prd",
+      "kind": "speaks_to",
+      "label": "calls",
+      "n": 3,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:coordination",
+      "to": "work:prd",
+      "kind": "speaks_to",
+      "label": "calls",
+      "n": 7,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:audit",
+      "to": "work:prd",
+      "kind": "speaks_to",
+      "label": "calls",
+      "n": 3,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:identity",
+      "to": "work:hld",
+      "kind": "speaks_to",
+      "label": "calls",
+      "n": 13,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:adaptation",
+      "to": "work:hld",
+      "kind": "speaks_to",
+      "label": "calls",
+      "n": 9,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:priority",
+      "to": "work:hld",
+      "kind": "speaks_to",
+      "label": "calls",
+      "n": 4,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:coordination",
+      "to": "work:hld",
+      "kind": "speaks_to",
+      "label": "calls",
+      "n": 9,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:audit",
+      "to": "work:hld",
+      "kind": "speaks_to",
+      "label": "calls",
+      "n": 5,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:identity",
+      "to": "work:lld",
+      "kind": "speaks_to",
+      "label": "calls",
+      "n": 10,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:adaptation",
+      "to": "work:lld",
+      "kind": "speaks_to",
+      "label": "calls",
+      "n": 9,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:priority",
+      "to": "work:lld",
+      "kind": "speaks_to",
+      "label": "calls",
+      "n": 7,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:coordination",
+      "to": "work:lld",
+      "kind": "speaks_to",
+      "label": "calls",
+      "n": 15,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:audit",
+      "to": "work:lld",
+      "kind": "speaks_to",
+      "label": "calls",
+      "n": 7,
+      "basis": "recorded"
+    },
+    {
+      "from": "fn:audit",
+      "to": "work:website",
+      "kind": "speaks_to",
+      "label": "audits",
+      "n": 3,
+      "basis": "recorded"
+    }
+  ],
+  "legend": [
+    {
+      "key": "function",
+      "label": "function",
+      "drawn": true
+    },
+    {
+      "key": "engine",
+      "label": "engine",
+      "drawn": true
+    },
+    {
+      "key": "work",
+      "label": "work with its version",
+      "drawn": true
+    },
+    {
+      "key": "filed",
+      "label": "filed and checked",
+      "drawn": true
+    },
+    {
+      "key": "running",
+      "label": "running now",
+      "drawn": true
+    },
+    {
+      "key": "left_open",
+      "label": "left open",
+      "drawn": true
+    },
+    {
+      "key": "waiting_on_you",
+      "label": "waiting on you",
+      "drawn": true
+    },
+    {
+      "key": "fault",
+      "label": "fault",
+      "drawn": true
+    },
+    {
+      "key": "not_made",
+      "label": "not made",
+      "drawn": true
+    },
+    {
+      "key": "handoff",
+      "label": "hand-off",
+      "drawn": true
+    },
+    {
+      "key": "speaks_to",
+      "label": "speaks to",
+      "drawn": true
+    }
+  ],
+  "built_from": [
+    "artifacts.json",
+    "atoms.json"
+  ],
+  "not_recorded": [
+    "version of Charter",
+    "which other function worked on Website (only Audit is recorded)",
+    "messages to and from workflow agents (W-n) are not drawn",
+    "what the work draws on (Knows row, later version)"
+  ]
+}

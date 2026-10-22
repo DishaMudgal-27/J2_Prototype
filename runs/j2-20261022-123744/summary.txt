@@ -1,0 +1,13 @@
+Messages 1-345
+- **Brief:** Brew Lab, 12, 100 Feet Road, Indiranagar, Bengaluru 560038. Name and address as text, no map. Seven menu items in rupees. Pre-order form (name, phone, items, pickup time) to hello@brewlab.example. Pickup at shop, no online payment. Works on phones. No opening hours, no shop phone, no invented details.
+- **Documents:** PRD v7 (10/10), HLD v10, LLD v16 (L1 to L6 met) exported as prd.docx, hld.docx, lld.docx.
+- **Audit v16:** 9 PASS; D-5 and F-6 PASS_WITH_WARNING (unlabelled design choices; leftover "Assumptions to confirm" list and dangling "below" references). Left unresolved.
+- **Rejection settled earlier:** Shell/nav workflow rejected for referencing `#pre-order-form` before it existed; Adaptation [299] fixed ordering (form id created in pre-order workflow, shell last).
+- **Done:** W-32 identity, W-33 menu (seven items), W-35 pickup/payment notice (attempt 1), W-36 shell/nav (passed on attempt 2 after adding the `#page` anchor).
+- **Scheduling conflict:** W-34 was escalated after failing S3 checks (F4: `#order-pickup-time` in spec vs `#order-pickup` as built), yet Coordination [328] treated it as done and released W-36. Discrepancy between state list and chat not formally resolved.
+- **Audit of site v8:** Mechanical checks clean (no overflow at 360/1280px, no JS errors, no broken links, 16 KB). N8 NOT MET: no link or button in hero, header/nav at end of HTML. 11 PASS, 2 NEEDS_REVISION (R-4, R-5), F-7 NEEDS_REVISION, F-8 PASS_WITH_WARNING. Workable: no.
+- **Requester decision:** Asked to keep going or finish; chose Option 1 (keep going) at [341].
+- **Identity to Adaptation [343]:** Fix (1) hero "Pre-order" button to #pre-order, (2) header/nav moved to top with four links resolving, (3) pre-order form aligned with LLD S3 (E2 selector, items field) or LLD corrected to say text area. No hours, phone, map or new facts.
+- **Adaptation [344]:** Three revisions: W-32 hero button, W-36 header/nav move, W-34 form re-check with items as text area.
+- **Priority [345]:** Granted all three fixes at 8 each, 24 total, from 324 left; priced by rate card, not bundled.
+- **Open:** Three fix workflows pending; site needs re-audit; F4 field-id mismatch still unconfirmed as fixed; PRD/audit warnings D-5 and F-6 unresolved.
