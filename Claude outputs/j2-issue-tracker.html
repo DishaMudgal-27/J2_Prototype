@@ -1,0 +1,153 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}</style></head><body>
+<title>J2 Issue Tracker</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one calm column, summary bar on top, then one row per issue that expands for detail. */
+:root{
+  --bg:#f6f7f5; --surface:#ffffff; --fg:#1d2420; --muted:#5d6862; --line:#dde2de;
+  --accent:#2f6f62; --accent-soft:#e3efeb; --warn:#9a6a12; --warn-soft:#f6ecd8; --done:#3f7d4e;
+  --display:"Source Serif 4",Georgia,serif; --body:"Public Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#151a18; --surface:#1c2220; --fg:#e4e9e6; --muted:#9aa5a0; --line:#2c3431;
+  --accent:#7cc2b2; --accent-soft:#1f3330; --warn:#e0b25c; --warn-soft:#3a3020; --done:#82c493; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#151a18; --surface:#1c2220; --fg:#e4e9e6; --muted:#9aa5a0; --line:#2c3431;
+  --accent:#7cc2b2; --accent-soft:#1f3330; --warn:#e0b25c; --warn-soft:#3a3020; --done:#82c493; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:860px;margin:0 auto;padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:24px}
+h1{font-family:var(--display);font-weight:600;font-size:30px;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0}
+.summary{display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.count{font-family:var(--display);font-size:26px;font-weight:600;font-variant-numeric:tabular-nums}
+.bar{flex:1 1 220px;height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filters button{font:inherit;font-size:13px;border:1px solid var(--line);background:transparent;color:var(--muted);padding:4px 10px;border-radius:99px;cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--accent-soft);color:var(--fg);border-color:var(--accent)}
+.save{font-size:13px;color:var(--muted);min-height:1.2em}
+ol{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+li.item{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+li.item.done .ttl{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+.row{display:grid;grid-template-columns:auto auto 1fr auto;gap:12px;align-items:center;padding:12px 14px}
+.row input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);cursor:pointer;margin:0}
+.num{font-family:var(--mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ttl{font-weight:600;min-width:0}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.tag{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--fg);white-space:nowrap}
+.tag.w{background:var(--warn-soft);color:var(--warn)}
+.tag.ok{background:transparent;color:var(--done);border:1px solid var(--done)}
+details{border-top:1px solid var(--line)}
+summary{cursor:pointer;padding:8px 14px 8px 50px;font-size:13px;color:var(--muted);list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"\25B8  "}
+details[open] summary::before{content:"\25BE  "}
+.body{padding:0 14px 14px 50px;display:grid;gap:10px}
+.body dl{margin:0;display:grid;grid-template-columns:110px 1fr;gap:6px 14px}
+.body dt{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding-top:2px}
+.body dd{margin:0;min-width:0}
+textarea{font:inherit;font-size:14px;width:100%;box-sizing:border-box;min-height:60px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);resize:vertical}
+.when{font-size:12px;color:var(--done)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.foot{font-size:13px;color:var(--muted)}
+@media (max-width:560px){
+  .row{grid-template-columns:auto auto 1fr}
+  .tags{grid-column:3;justify-content:flex-start}
+  summary,.body{padding-left:14px}
+  .body dl{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){.bar>i{transition:none}}
+</style>
+<div class="wrap" id="app"></div>
+<script type="application/json" id="state">{"items":[
+{"id":1,"title":"No proof the builders used the documents","tags":["Core claim","Needs approval","Needs credits"],"why":"The main goal is building the site from the docs. Today we cannot show it happened.","evidence":"Edges record what was given, not what was used.","fix":"Builders cite the LLD section they followed; code checks the citation exists.","done":false,"doneAt":"","note":""},
+{"id":2,"title":"False \"invented facts\" flags (P4 / H5 / D-5)","tags":["Quick win","Needs approval"],"why":"Good documents fail. The reference run ended \"done with open items\" only because of this.","evidence":"Detector flags sentence-starting words such as \"Give\" and \"This\".","fix":"Skip sentence-initial words, add a test list, replay on saved runs.","done":false,"doneAt":"","note":""},
+{"id":3,"title":"Atom checks are shallow","tags":["Question for owner"],"why":"Atoms pass on heading and word count, then the document fails later. That costs revise atoms and credits.","evidence":"W-13 passed, then W-15 had to fix it.","fix":"Run the cheap fact check at atom level too.","done":false,"doneAt":"","note":""},
+{"id":4,"title":"Budget runs out on a full run","tags":["Needs credits"],"why":"Documents plus website used all 500 credits in 114 calls. HLD alone used about 270 against a minimum of 98.","evidence":"Saved run j2-20261016-160511.","fix":"Measure real costs and reset rates.json minimums. Slim prompts (about -22%) not yet measured live.","done":false,"doneAt":"","note":""},
+{"id":5,"title":"Pauses even when every check passes","tags":["Quick win","Question for owner"],"why":"An extra Requester question each round. It feels broken.","evidence":"Seen in live runs.","fix":"Skip the keep going / finish / stop question when nothing failed.","done":false,"doneAt":"","note":""},
+{"id":6,"title":"Page-wide parts may have no owner","tags":["Unverified"],"why":"Nav and the hero main action might never get built or checked.","evidence":"Hypothesis, not yet checked.","fix":"Check atoms on a saved run for nav and hero ownership.","done":false,"doneAt":"","note":""},
+{"id":7,"title":"Revisions do not record which finding they fix","tags":["Quick win"],"why":"The Fixes line is matched by audit cycle, not a stored link, so it can be wrong.","evidence":"Seen on W-13 and W-15.","fix":"Store the finding id on the revise atom.","done":false,"doneAt":"","note":""},
+{"id":8,"title":"Send deeds not real yet","tags":["Needs credits"],"why":"Email and Slack only run in dry-run or mock. No live receipt has been produced.","evidence":"Phase 2 not built.","fix":"Build Phase 2 with a confirmation question; test sends to yourself only.","done":false,"doneAt":"","note":""},
+{"id":9,"title":"Map gaps","tags":["Later"],"why":"No Knows row; no versions for Charter and deeds; site and deed steps have no function call ranges.","evidence":"Map v2 shows these as \"not recorded\".","fix":"Record them in j2_map.py.","done":false,"doneAt":"","note":""},
+{"id":10,"title":"Artifact types are hard-coded","tags":["Later"],"why":"Adding a new artifact type means editing Python dicts as well as types.json.","evidence":"Loader step deferred as risky.","fix":"A loader that reads types.json only.","done":false,"doneAt":"","note":""}
+]}</script>
+<script id="main">
+(function(){
+  var stateEl=document.getElementById('state');
+  var state=JSON.parse(stateEl.textContent);
+  var filter='all', art=null, saving=false, pending=false;
+  var app=document.getElementById('app');
+  var warnTags={'Needs approval':1,'Needs credits':1,'Unverified':1};
+
+  function el(tag,attrs,kids){var e=document.createElement(tag);if(attrs)for(var k in attrs){if(k==='text')e.textContent=attrs[k];else e.setAttribute(k,attrs[k]);}(kids||[]).forEach(function(c){if(c)e.appendChild(c);});return e;}
+
+  function render(){
+    var open={};app.querySelectorAll('details[open]').forEach(function(d){open[d.dataset.id]=1;});
+    var f=document.activeElement&&document.activeElement.id;
+    app.textContent='';
+    var done=state.items.filter(function(i){return i.done;}).length, total=state.items.length;
+    app.appendChild(el('header',null,[el('h1',{text:'J2 Issue Tracker'}),el('p',{class:'sub',text:'Known issues in the prototype, ranked by how much they affect trust in the output. Tick one off when it is solved.'})]));
+    var bar=el('div',{class:'bar',role:'progressbar','aria-valuemin':'0','aria-valuemax':String(total),'aria-valuenow':String(done)},[el('i',{style:'width:'+(total?done/total*100:0)+'%'})]);
+    var fl=el('div',{class:'filters'});
+    [['all','All'],['open','Open'],['done','Solved']].forEach(function(p){var b=el('button',{type:'button',id:'f-'+p[0],'aria-pressed':String(filter===p[0]),text:p[1]});b.onclick=function(){filter=p[0];render();};fl.appendChild(b);});
+    app.appendChild(el('section',{class:'summary'},[el('span',{class:'count',text:done+' of '+total+' solved'}),bar,fl]));
+    app.appendChild(el('div',{class:'save',id:'save','aria-live':'polite',text:art?'Ticks and notes save to this page.':''}));
+    var ol=el('ol');
+    state.items.forEach(function(it){
+      if(filter==='open'&&it.done)return; if(filter==='done'&&!it.done)return;
+      var cb=el('input',{type:'checkbox',id:'cb-'+it.id,'aria-label':'Mark issue '+it.id+' solved'});cb.checked=it.done;
+      cb.onchange=function(){it.done=cb.checked;it.doneAt=cb.checked?new Date().toISOString().slice(0,10):'';save();};
+      var tags=el('div',{class:'tags'});
+      if(it.done)tags.appendChild(el('span',{class:'tag ok',text:'Solved'+(it.doneAt?' '+it.doneAt:'')}));
+      it.tags.forEach(function(t){tags.appendChild(el('span',{class:'tag'+(warnTags[t]?' w':''),text:t}));});
+      var lab=el('label',{class:'ttl',for:'cb-'+it.id,text:it.title});
+      var row=el('div',{class:'row'},[cb,el('span',{class:'num',text:'#'+it.id}),lab,tags]);
+      var ta=el('textarea',{id:'note-'+it.id,placeholder:'Notes: what you tried, the commit, what he said'});ta.value=it.note;
+      ta.onchange=function(){it.note=ta.value;save();};
+      var dl=el('dl',null,[el('dt',{text:'Why it matters'}),el('dd',{text:it.why}),el('dt',{text:'Evidence'}),el('dd',{text:it.evidence}),el('dt',{text:'Fix direction'}),el('dd',{text:it.fix})]);
+      var det=el('details',{'data-id':String(it.id)},[el('summary',{text:'Details and notes'}),el('div',{class:'body'},[dl,ta])]);
+      if(open[it.id])det.open=true;
+      ol.appendChild(el('li',{class:'item'+(it.done?' done':'')},[row,det]));
+    });
+    app.appendChild(ol);
+    app.appendChild(el('p',{class:'foot',text:'Recommended first: #1 and #2 together. #2 is a cheap, contained fix that turns the reference run green; #1 is the core claim of the prototype.'}));
+    if(f){var x=document.getElementById(f);if(x)x.focus();}
+  }
+
+  function setMsg(t){var s=document.getElementById('save');if(s)s.textContent=t;}
+
+  function buildDoc(){
+    var json=JSON.stringify(state).replace(/</g,'\\u003c');
+    var head='<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body>';
+    var t=document.querySelector('title').outerHTML;
+    var m='<meta name="claude:viewport-fit-sides" content="cover">';
+    var link=document.querySelector('link[rel=stylesheet]').outerHTML;
+    var styles=document.querySelectorAll('style'); var mine=styles[styles.length-1];
+    var style='<style>'+mine.textContent+'</style>';
+    var main=document.getElementById('main');
+    return head+t+'\n'+m+'\n'+link+'\n'+style+'\n<div class="wrap" id="app"></div>\n<script type="application/json" id="state">'+json+'<\/script>\n<script id="main">'+main.textContent+'<\/script></body></html>';
+  }
+
+  var timer=null;
+  function save(){render();
+    if(!art){try{localStorage.setItem('j2-issues',JSON.stringify(state));}catch(e){}setMsg('Saved in this browser.');return;}
+    clearTimeout(timer);timer=setTimeout(doPublish,600);setMsg('Saving...');
+  }
+  function doPublish(){
+    if(saving){pending=true;return;} saving=true;
+    art.publish(buildDoc()).then(function(){setMsg('Saved.');}).catch(function(e){
+      var c=e&&e.code;
+      if(c==='conflict')setMsg('Someone else saved first; the page is reloading to their version.');
+      else if(c==='not_granted'||c==='not_writer')setMsg('You can view this tracker but not save changes.');
+      else setMsg('Could not save. Try the tick again.');
+    }).then(function(){saving=false;if(pending){pending=false;doPublish();}});
+  }
+
+  try{var ls=JSON.parse(localStorage.getItem('j2-issues')||'null');if(ls&&ls.items)state=ls;}catch(e){}
+  render();
+  if(window.claude&&window.claude.use){window.claude.use('artifact').then(function(a){art=a;if(!a){try{var s=JSON.parse(localStorage.getItem('j2-issues')||'null');if(s&&s.items)state=s;}catch(e){}}render();});}
+})();
+</script>
+
+</body></html>

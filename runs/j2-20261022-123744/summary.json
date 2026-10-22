@@ -1,0 +1,1368 @@
+{
+  "run": "20261022-123744",
+  "output_type": "website",
+  "j2_fixes": 0,
+  "design_documents": {
+    "requested": [
+      "prd",
+      "hld",
+      "lld"
+    ],
+    "stages": [
+      "prd",
+      "hld",
+      "lld",
+      "website"
+    ],
+    "files": {
+      "prd": "prd.md",
+      "hld": "hld.md",
+      "lld": "lld.md"
+    },
+    "chain": [
+      {
+        "requirement": "R1",
+        "component": "C1",
+        "lld_section": "S1",
+        "atoms": [
+          "W-32.a1",
+          "W-37.a1"
+        ]
+      },
+      {
+        "requirement": "R2",
+        "component": "C1",
+        "lld_section": "S1",
+        "atoms": [
+          "W-32.a1",
+          "W-37.a1"
+        ]
+      },
+      {
+        "requirement": "R3",
+        "component": "C1",
+        "lld_section": "S1",
+        "atoms": [
+          "W-32.a1",
+          "W-37.a1"
+        ]
+      },
+      {
+        "requirement": "R4",
+        "component": "C2",
+        "lld_section": "S2",
+        "atoms": [
+          "W-33.a1"
+        ]
+      },
+      {
+        "requirement": "R5",
+        "component": "C2",
+        "lld_section": "S2",
+        "atoms": [
+          "W-33.a1"
+        ]
+      },
+      {
+        "requirement": "R6",
+        "component": "C3",
+        "lld_section": "S3",
+        "atoms": [
+          "W-34.a1",
+          "W-39.a1",
+          "W-41.a1"
+        ]
+      },
+      {
+        "requirement": "R7",
+        "component": "C4",
+        "lld_section": "S3",
+        "atoms": [
+          "W-34.a1",
+          "W-39.a1",
+          "W-41.a1"
+        ]
+      },
+      {
+        "requirement": "R8",
+        "component": "C5",
+        "lld_section": "S4",
+        "atoms": [
+          "W-35.a1"
+        ]
+      },
+      {
+        "requirement": "R9",
+        "component": "C5",
+        "lld_section": "S4",
+        "atoms": [
+          "W-35.a1"
+        ]
+      },
+      {
+        "requirement": "R10",
+        "component": "C6",
+        "lld_section": "S5",
+        "atoms": [
+          "W-36.a1",
+          "W-38.a1",
+          "W-40.a1"
+        ]
+      },
+      {
+        "requirement": "R11",
+        "component": "C7",
+        "lld_section": "S5",
+        "atoms": [
+          "W-36.a1",
+          "W-38.a1",
+          "W-40.a1"
+        ]
+      },
+      {
+        "requirement": "R12",
+        "component": "C8",
+        "lld_section": "S5",
+        "atoms": [
+          "W-36.a1",
+          "W-38.a1",
+          "W-40.a1"
+        ]
+      }
+    ],
+    "lld_revisions": [
+      {
+        "section": "S3",
+        "version": 2,
+        "reason": "E1 and E2 give selectors '#pre-order form' and 'form[id=\"pre-order-form\"]'. The form is built as #pre-order-form inside #pre-order, so both match it, but the slice check reports neither on the page.",
+        "changes": {
+          "#pre-order form": "#pre-order-form"
+        },
+        "by": "W-34"
+      }
+    ],
+    "lld_compare": {
+      "matches": [
+        "S1",
+        "S2",
+        "S4",
+        "S5"
+      ],
+      "mismatches": [
+        {
+          "section": "S3",
+          "evidence": "E2 form[id=\"pre-order-form\"] isn't on the page; F3 field items is type text, the spec says multi; F4 field pickup time isn't in #order-pickup-time"
+        }
+      ],
+      "dropped": []
+    }
+  },
+  "provider": "claude-cli",
+  "sections": [
+    "style",
+    "W-32",
+    "W-33",
+    "W-34",
+    "W-35",
+    "W-36"
+  ],
+  "conditions": {
+    "met": 7,
+    "total": 8,
+    "warnings": 0,
+    "list": [
+      {
+        "id": "N1",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "met": true,
+        "evidence": "all 5 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "met": true,
+        "evidence": "all 10 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "met": true,
+        "evidence": "every number, phone and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "N7",
+        "met": true,
+        "evidence": "1 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "met": false,
+        "evidence": "no link or button in the hero"
+      }
+    ]
+  },
+  "necessary_conditions": {
+    "met": 7,
+    "total": 8,
+    "warnings": 0,
+    "list": [
+      {
+        "id": "N1",
+        "text": "The page opens (it parses, tags balanced)",
+        "met": true,
+        "evidence": "page parses, tags balanced"
+      },
+      {
+        "id": "N2",
+        "text": "No JavaScript errors on load",
+        "met": true,
+        "evidence": "no JS errors on load"
+      },
+      {
+        "id": "N3",
+        "text": "No horizontal overflow at 360px and 1280px",
+        "met": true,
+        "evidence": "no horizontal overflow at 360px and 1280px"
+      },
+      {
+        "id": "N4",
+        "text": "Every in-page link resolves; WhatsApp (wa.me) and tel: links are well formed",
+        "met": true,
+        "evidence": "all 5 in-page, tel: and wa.me link(s) resolve and are well formed"
+      },
+      {
+        "id": "N5",
+        "text": "Every charter fact appears exactly, and nothing is \"to be confirmed\"",
+        "met": true,
+        "evidence": "all 10 brief fact(s) appear; nothing to be confirmed"
+      },
+      {
+        "id": "N6",
+        "text": "No invented content: every number, email and phone number on the page comes from the charter or the Requester's answers",
+        "met": true,
+        "evidence": "every number, phone and email comes from the charter or the Requester's answers"
+      },
+      {
+        "id": "N7",
+        "text": "Every form has a submit control and a destination (action or mailto)",
+        "met": true,
+        "evidence": "1 form(s), each with a submit control and a destination"
+      },
+      {
+        "id": "N8",
+        "text": "A nav reaches every section, and the hero has one obvious main action",
+        "met": false,
+        "evidence": "no link or button in the hero"
+      }
+    ]
+  },
+  "force_audit_fail": null,
+  "test_lessons": false,
+  "model": "sonnet",
+  "mock": false,
+  "brief": "Create the design documents and then build the website for Brew Lab, a small specialty coffee shop at 12, 100 Feet Road, Indiranagar, Bengaluru 560038.\n\nThe page shows the name Brew Lab and the address as text, with no embedded map.\n\nThe menu has seven items with prices in rupees: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120.\n\nThe page has a pre-order form with the fields name, phone, items and pickup time. The form sends the order to hello@brewlab.example. Customers collect the order at the shop. No online payment is taken.\n\nThe opening hours are not decided yet, and the shop has no phone number. Do not show opening hours or a shop phone number, and do not make any other detail up.\n\nThe page must work on phones. The documents and the website must agree with each other.",
+  "change_requests": [],
+  "status": "done_with_open_items",
+  "outcome": "Done with open items: shipped as is on the Requester's decision (The same failure came back twice in a row, so another cycle would likely repeat it.). Still not workable: the product requirements; the high-level design; necessary condition N8 not met: A nav reaches every section, and the hero has one obvious main action (no link or button in the hero).",
+  "budget": {
+    "start": 1000,
+    "granted": 1000,
+    "used": 716,
+    "raises": []
+  },
+  "ai_calls": 207,
+  "cycles": 20,
+  "links": {
+    "identity->adaptation": 24,
+    "validator->adaptation": 4,
+    "adaptation->priority": 20,
+    "validator->coordination": 15,
+    "coordination->priority": 41,
+    "priority->W": 41,
+    "W->coordination": 41,
+    "audit->identity": 18,
+    "priority->adaptation": 1,
+    "identity->requester": 9,
+    "adaptation->identity": 3,
+    "adaptation->coordination": 3
+  },
+  "verification": {
+    "passed": 39,
+    "failed": 0,
+    "escalated": 2,
+    "could_not_run": 0,
+    "checks_run": 235
+  },
+  "identity_to_requester_decisions": 6,
+  "identity_to_requester_facts": 0,
+  "priority_rulings": {
+    "grant": 16,
+    "counter": 1,
+    "refuse": 0
+  },
+  "questions_to_user": [
+    {
+      "kind": "limit",
+      "asked": [
+        "The team needs your decision. Keep going, finish as it is, or stop the whole run here?"
+      ],
+      "answer": "option 2",
+      "decision": "ship",
+      "named": [],
+      "dropped": []
+    },
+    {
+      "kind": "limit",
+      "asked": [
+        "The team paused after a round of work. Keep going, finish as it is, or stop the whole run here?"
+      ],
+      "answer": "option 1",
+      "decision": "continue",
+      "named": [],
+      "dropped": []
+    },
+    {
+      "kind": "limit",
+      "asked": [
+        "The team needs your decision. Keep going, finish as it is, or stop the whole run here?"
+      ],
+      "answer": "option 2",
+      "decision": "ship",
+      "named": [],
+      "dropped": []
+    },
+    {
+      "kind": "limit",
+      "asked": [
+        "The team paused after a round of work. Keep going, finish as it is, or stop the whole run here?"
+      ],
+      "answer": "option 1",
+      "decision": "continue",
+      "named": [],
+      "dropped": []
+    },
+    {
+      "kind": "limit",
+      "asked": [
+        "The team paused after a round of work. Keep going or finish as it is?"
+      ],
+      "answer": "option 1",
+      "decision": "continue",
+      "named": [],
+      "dropped": []
+    },
+    {
+      "kind": "limit",
+      "asked": [
+        "The same problem came back twice. Keep going or finish as it is?"
+      ],
+      "answer": "option 2",
+      "decision": "ship",
+      "named": [],
+      "dropped": []
+    }
+  ],
+  "conflicts": [
+    {
+      "id": "C-1",
+      "pair": [
+        "adaptation",
+        "priority"
+      ],
+      "topic": "proposal",
+      "subject": "what to fund in cycle 4",
+      "attempts": 2,
+      "escalated": false,
+      "resolved_by": "agents",
+      "repriced": false,
+      "user_question": null,
+      "user_answer": null,
+      "outcome": "Adaptation accepted Priority's COUNTER: High-level design section (10), Low-level design section (10) goes to the validator."
+    }
+  ],
+  "validator_rejections": [
+    {
+      "cycle": 4,
+      "workflow": "High-level design section",
+      "reason": "a fix is priced as a fix: it needs 1 'fix' part(s) (F-11), but its parts are ['doc_section']"
+    },
+    {
+      "cycle": 4,
+      "workflow": "Low-level design section",
+      "reason": "a fix is priced as a fix: it needs 1 'fix' part(s) (F-11), but its parts are ['doc_section']"
+    },
+    {
+      "cycle": 7,
+      "workflow": "HLD Components section revision 2",
+      "reason": "a fix is priced as a fix: it needs 2 'fix' part(s) (F-7, H5), but its parts are ['fix']"
+    },
+    {
+      "cycle": 12,
+      "workflow": "LLD File structure section revision",
+      "reason": "work atom 1: its goal names a time, price, number or email but no check is facts-present or a named test"
+    },
+    {
+      "cycle": 12,
+      "workflow": "LLD File structure section revision 2",
+      "reason": "work atom 1: expected output item 2 facts-present lists ['index.html'], not found in the charter or the Requester's answers"
+    },
+    {
+      "cycle": 18,
+      "workflow": "Page shell, nav and responsive styling",
+      "reason": "work atom 1: expected output item 7 behavior step 2 targets '#pre-order-form', which the atom's how or constraints doesn't tell the builder to create"
+    }
+  ],
+  "holds": [
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-3: W-2 (prd-users) must be done first"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-4: W-3 (prd-goals) must be done first"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-5: W-4 (prd-requirements) must be done first"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-6: W-5 (prd-metrics) must be done first"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-4: W-3 (prd-goals) must be done first"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-5: W-4 (prd-requirements) must be done first"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-6: W-5 (prd-metrics) must be done first"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-5: W-4 (prd-requirements) must be done first"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-6: W-5 (prd-metrics) must be done first"
+    },
+    {
+      "cycle": 1,
+      "by": "coordination",
+      "detail": "W-6: W-5 (prd-metrics) must be done first"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-9: W-8 (hld-purpose) must be done first"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-10: W-9 (hld-pages) must be done first"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-11: W-10 (hld-components) must be done first"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-12: W-11 (hld-dataflow) must be done first"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-13: W-12 (hld-hosting) must be done first"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-10: W-9 (hld-pages) must be done first"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-11: W-10 (hld-components) must be done first"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-12: W-11 (hld-dataflow) must be done first"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-13: W-12 (hld-hosting) must be done first"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-11: W-10 (hld-components) must be done first"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-12: W-11 (hld-dataflow) must be done first"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-13: W-12 (hld-hosting) must be done first"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-12: W-11 (hld-dataflow) must be done first"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-13: W-12 (hld-hosting) must be done first"
+    },
+    {
+      "cycle": 5,
+      "by": "coordination",
+      "detail": "W-13: W-12 (hld-hosting) must be done first"
+    },
+    {
+      "cycle": 6,
+      "by": "coordination",
+      "detail": "W-15: W-14 must finish first, because only one workflow may write the HLD file at a time"
+    },
+    {
+      "cycle": 11,
+      "by": "coordination",
+      "detail": "W-18: W-17 (lld-pages) must be done first"
+    },
+    {
+      "cycle": 11,
+      "by": "coordination",
+      "detail": "W-19: W-18 (lld-interactive) must be done first"
+    },
+    {
+      "cycle": 11,
+      "by": "coordination",
+      "detail": "W-20: W-19 (lld-form) must be done first"
+    },
+    {
+      "cycle": 11,
+      "by": "coordination",
+      "detail": "W-21: W-20 (lld-files) must be done first"
+    },
+    {
+      "cycle": 11,
+      "by": "coordination",
+      "detail": "W-19: W-18 (lld-interactive) must be done first"
+    },
+    {
+      "cycle": 11,
+      "by": "coordination",
+      "detail": "W-20: W-19 (lld-form) must be done first"
+    },
+    {
+      "cycle": 11,
+      "by": "coordination",
+      "detail": "W-21: W-20 (lld-files) must be done first"
+    },
+    {
+      "cycle": 11,
+      "by": "coordination",
+      "detail": "W-20: W-19 (lld-form) must be done first"
+    },
+    {
+      "cycle": 11,
+      "by": "coordination",
+      "detail": "W-21: W-20 (lld-files) must be done first"
+    },
+    {
+      "cycle": 11,
+      "by": "coordination",
+      "detail": "W-21: W-20 (lld-files) must be done first"
+    },
+    {
+      "cycle": 12,
+      "by": "coordination",
+      "detail": "W-23: W-22 must finish first, because only one workflow may write the LLD file at a time"
+    },
+    {
+      "cycle": 12,
+      "by": "coordination",
+      "detail": "W-24: W-23 must finish first, because only one workflow may write the LLD file at a time"
+    },
+    {
+      "cycle": 12,
+      "by": "coordination",
+      "detail": "W-24: W-23 must finish first, because only one workflow may write the LLD file at a time"
+    },
+    {
+      "cycle": 13,
+      "by": "coordination",
+      "detail": "W-26: W-25 must finish first, because only one workflow may write the LLD file at a time"
+    },
+    {
+      "cycle": 13,
+      "by": "coordination",
+      "detail": "W-27: W-25 (which rewrites lld-files) and W-26 must finish first, because only one workflow may write the LLD file at a time"
+    },
+    {
+      "cycle": 13,
+      "by": "coordination",
+      "detail": "W-27: W-26 must finish first, because only one workflow may write the LLD file at a time"
+    },
+    {
+      "cycle": 18,
+      "by": "coordination",
+      "detail": "W-36: W-33, W-34 and W-35 must be done first (it depends on site-identity, menu-section, pre-order-form and pickup-notice; site-identity is done)"
+    },
+    {
+      "cycle": 18,
+      "by": "coordination",
+      "detail": "W-36: W-34 (pre-order-form) and W-35 (pickup-notice) must be done first; site-identity and menu-section are done"
+    },
+    {
+      "cycle": 18,
+      "by": "coordination",
+      "detail": "W-36: W-35 (pickup-notice) must be done, and W-34 (pre-order-form) is escalated after 3 failed attempts, so it must be fixed and done first"
+    }
+  ],
+  "audits": [
+    {
+      "cycle": 18,
+      "version": 8,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-1",
+          "item": "R-1",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-2",
+          "item": "R-2",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-3",
+          "item": "R-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-4",
+          "item": "R-4",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "R-5",
+          "item": "R-5",
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "R-6",
+          "item": "R-6",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-7",
+          "item": "R-7",
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": null,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-8",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    },
+    {
+      "cycle": 19,
+      "version": 11,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-1",
+          "item": "R-1",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-2",
+          "item": "R-2",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-3",
+          "item": "R-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-4",
+          "item": "R-4",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "R-5",
+          "item": "R-5",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "R-6",
+          "item": "R-6",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-7",
+          "item": "R-7",
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": null,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-8",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    },
+    {
+      "cycle": 20,
+      "version": 13,
+      "all_pass": false,
+      "verdicts": [
+        {
+          "id": "F-1",
+          "item": 1,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-2",
+          "item": 2,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-3",
+          "item": 3,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-4",
+          "item": 4,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-5",
+          "item": 5,
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-6",
+          "item": 6,
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-1",
+          "item": "R-1",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-2",
+          "item": "R-2",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-3",
+          "item": "R-3",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-4",
+          "item": "R-4",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "R-5",
+          "item": "R-5",
+          "verdict": "PASS_WITH_WARNING"
+        },
+        {
+          "id": "R-6",
+          "item": "R-6",
+          "verdict": "PASS"
+        },
+        {
+          "id": "R-7",
+          "item": "R-7",
+          "verdict": "PASS"
+        },
+        {
+          "id": "F-7",
+          "item": null,
+          "verdict": "NEEDS_REVISION"
+        },
+        {
+          "id": "F-8",
+          "item": null,
+          "verdict": "PASS_WITH_WARNING"
+        }
+      ]
+    }
+  ],
+  "site_versions": 13,
+  "workable": [
+    "necessary condition N8 not met: A nav reaches every section, and the hero has one obvious main action (no link or button in the hero)"
+  ],
+  "to_be_confirmed": [],
+  "dropped_by_requester": [],
+  "workflow_agents": [
+    {
+      "id": "W-1",
+      "agent": "W-1 Builder",
+      "section": "W-1",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-2",
+      "agent": "W-2 Builder",
+      "section": "W-2",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-3",
+      "agent": "W-3 Builder",
+      "section": "W-3",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-4",
+      "agent": "W-4 Builder",
+      "section": "W-4",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-5",
+      "agent": "W-5 Builder",
+      "section": "W-5",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-6",
+      "agent": "W-6 Builder",
+      "section": "W-6",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-7",
+      "agent": "W-7 Builder",
+      "section": "W-4",
+      "revises": "W-4",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-8",
+      "agent": "W-8 Builder",
+      "section": "W-8",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-9",
+      "agent": "W-9 Builder",
+      "section": "W-9",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-10",
+      "agent": "W-10 Builder",
+      "section": "W-10",
+      "revises": null,
+      "status": "done",
+      "calls": 2,
+      "retries": 0
+    },
+    {
+      "id": "W-11",
+      "agent": "W-11 Builder",
+      "section": "W-11",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-12",
+      "agent": "W-12 Builder",
+      "section": "W-12",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-13",
+      "agent": "W-13 Builder",
+      "section": "W-13",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-14",
+      "agent": "W-14 Builder",
+      "section": "W-10",
+      "revises": "W-10",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-15",
+      "agent": "W-15 Builder",
+      "section": "W-13",
+      "revises": "W-13",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-16",
+      "agent": "W-16 Builder",
+      "section": "W-10",
+      "revises": "W-14",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-17",
+      "agent": "W-17 Builder",
+      "section": "W-17",
+      "revises": null,
+      "status": "done",
+      "calls": 2,
+      "retries": 0
+    },
+    {
+      "id": "W-18",
+      "agent": "W-18 Builder",
+      "section": "W-18",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-19",
+      "agent": "W-19 Builder",
+      "section": "W-19",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-20",
+      "agent": "W-20 Builder",
+      "section": "W-20",
+      "revises": null,
+      "status": "done",
+      "calls": 2,
+      "retries": 1
+    },
+    {
+      "id": "W-21",
+      "agent": "W-21 Builder",
+      "section": "W-21",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-22",
+      "agent": "W-22 Builder",
+      "section": "W-18",
+      "revises": "W-18",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-23",
+      "agent": "W-23 Builder",
+      "section": "W-19",
+      "revises": "W-19",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-24",
+      "agent": "W-24 Builder",
+      "section": "W-21",
+      "revises": "W-21",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-25",
+      "agent": "W-25 Builder",
+      "section": "W-20",
+      "revises": "W-20",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-26",
+      "agent": "W-26 Builder",
+      "section": "W-19",
+      "revises": "W-23",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-27",
+      "agent": "W-27 Builder",
+      "section": "W-21",
+      "revises": "W-24",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-28",
+      "agent": "W-28 Builder",
+      "section": "W-18",
+      "revises": "W-22",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-29",
+      "agent": "W-29 Builder",
+      "section": "W-18",
+      "revises": "W-28",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-30",
+      "agent": "W-30 Builder",
+      "section": "W-18",
+      "revises": "W-29",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-31",
+      "agent": "W-31 Builder",
+      "section": "W-18",
+      "revises": "W-30",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-32",
+      "agent": "W-32 Builder",
+      "section": "W-32",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-33",
+      "agent": "W-33 Builder",
+      "section": "W-33",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-34",
+      "agent": "W-34 Builder",
+      "section": "W-34",
+      "revises": null,
+      "status": "done",
+      "calls": 3,
+      "retries": 0
+    },
+    {
+      "id": "W-35",
+      "agent": "W-35 Builder",
+      "section": "W-35",
+      "revises": null,
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-36",
+      "agent": "W-36 Builder",
+      "section": "W-36",
+      "revises": null,
+      "status": "done",
+      "calls": 2,
+      "retries": 0
+    },
+    {
+      "id": "W-37",
+      "agent": "W-37 Builder",
+      "section": "W-32",
+      "revises": "W-32",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-38",
+      "agent": "W-38 Builder",
+      "section": "W-36",
+      "revises": "W-36",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-39",
+      "agent": "W-39 Builder",
+      "section": "W-34",
+      "revises": "W-34",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-40",
+      "agent": "W-40 Builder",
+      "section": "W-36",
+      "revises": "W-38",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    },
+    {
+      "id": "W-41",
+      "agent": "W-41 Builder",
+      "section": "W-34",
+      "revises": "W-39",
+      "status": "done",
+      "calls": 1,
+      "retries": 0
+    }
+  ],
+  "limits_hit": [
+    "Cycles 3 and 4 both registered nothing, so another cycle would repeat the same blocker.",
+    "The department used its 6 cycles (J2_MAX_CYCLES) and the site isn't workable yet.",
+    "Cycles 9 and 10 both registered nothing, so another cycle would repeat the same blocker.",
+    "The department used its 6 cycles (J2_MAX_CYCLES) and the site isn't workable yet.",
+    "The department used its 6 cycles (J2_MAX_CYCLES) and the site isn't workable yet.",
+    "The same failure came back twice in a row, so another cycle would likely repeat it."
+  ],
+  "lessons": {
+    "memory": false,
+    "saved": [],
+    "used": []
+  },
+  "playbooks": {
+    "saved": null,
+    "used": []
+  },
+  "business_type": "coffee shop",
+  "style_guide": true,
+  "rubric": [
+    {
+      "id": "R-1",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-2",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-3",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-4",
+      "pass": true,
+      "verdict": "PASS_WITH_WARNING"
+    },
+    {
+      "id": "R-5",
+      "pass": true,
+      "verdict": "PASS_WITH_WARNING"
+    },
+    {
+      "id": "R-6",
+      "pass": true,
+      "verdict": "PASS"
+    },
+    {
+      "id": "R-7",
+      "pass": true,
+      "verdict": "PASS"
+    }
+  ],
+  "done_when": [
+    {
+      "item": 1,
+      "criterion": "The page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map.",
+      "pass": true
+    },
+    {
+      "item": 2,
+      "criterion": "The page lists all seven menu items with their rupee prices: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120.",
+      "pass": true
+    },
+    {
+      "item": 3,
+      "criterion": "The page has a pre-order form with the fields name, phone, items and pickup time, and the form sends the order to hello@brewlab.example.",
+      "pass": true
+    },
+    {
+      "item": 4,
+      "criterion": "The page says customers collect the order at the shop and that no online payment is taken.",
+      "pass": true
+    },
+    {
+      "item": 5,
+      "criterion": "The page shows no opening hours and no shop phone number.",
+      "pass": true
+    },
+    {
+      "item": 6,
+      "criterion": "The page has no JavaScript errors, no horizontal overflow at 360px and 1280px, and every in-page link points to an existing section.",
+      "pass": true
+    }
+  ],
+  "route_check_violations": []
+}

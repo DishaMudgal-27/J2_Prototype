@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brew Lab</title>
+<!-- J2:style head start (owner W-32) -->
+<style>:root{--j2-primary:#5a3825;--j2-secondary:#2f4a3a;--j2-accent:#9a4a14;--j2-background:#faf5ee;--j2-surface:#ffffff;--j2-text:#2b1d14;--j2-muted:#6b5646;--j2-font-heading:Georgia, 'Times New Roman', serif;--j2-font-body:system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;--j2-space:8px;--j2-section:64px;--j2-radius:12px;}body{margin:0;font-family:var(--j2-font-body);color:var(--j2-text);background:var(--j2-background)}h1,h2,h3,h4{font-family:var(--j2-font-heading)}.j2-btn{display:inline-block;background:#5a3825;color:#ffffff;border:2px solid #5a3825;min-height:48px;padding:12px 24px;font-weight:600;font-size:1rem;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none}.j2-btn-secondary{display:inline-block;background:transparent;color:#5a3825;border:2px solid #5a3825;min-height:48px;padding:12px 24px;font-weight:600;font-size:1rem;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none}.j2-card{background:#ffffff;border:1px solid #e6d9c8;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(43,29,20,0.08)}</style>
+<!-- J2:style head end -->
+</head>
+<body>
+<!-- J2:W-32 start (owner W-32) -->
+<section id="shop-identity" aria-labelledby="shop-name">
+  <style>
+    #shop-identity {
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 100%;
+      padding: 48px 16px;
+      background: var(--j2-background, #faf5ee);
+      color: var(--j2-text, #2b1d14);
+      font-family: var(--j2-font-body, system-ui, sans-serif);
+      text-align: center;
+    }
+    #shop-identity .shop-identity-inner {
+      box-sizing: border-box;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 32px 20px;
+      background: var(--j2-surface, #ffffff);
+      border: 1px solid #e6d9c8;
+      border-radius: var(--j2-radius, 12px);
+      box-shadow: 0 2px 8px rgba(43, 29, 20, 0.08);
+    }
+    #shop-identity .shop-kicker {
+      margin: 0 0 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--j2-accent, #9a4a14);
+    }
+    #shop-identity #shop-name {
+      margin: 0 0 16px;
+      font-family: var(--j2-font-heading, Georgia, serif);
+      font-size: clamp(2.25rem, 8vw, 3.5rem);
+      line-height: 1.1;
+      color: var(--j2-primary, #5a3825);
+      overflow-wrap: anywhere;
+    }
+    #shop-identity #shop-address {
+      margin: 0;
+      font-size: 1.125rem;
+      line-height: 1.5;
+      color: var(--j2-text, #2b1d14);
+      overflow-wrap: anywhere;
+    }
+    @media (min-width: 768px) {
+      #shop-identity { padding: 64px 24px; }
+      #shop-identity .shop-identity-inner { padding: 48px 32px; }
+    }
+  </style>
+  <div class="shop-identity-inner">
+    <p class="shop-kicker">Specialty coffee shop</p>
+    <h1 id="shop-name">Brew Lab</h1>
+    <p id="shop-address">12, 100 Feet Road, Indiranagar, Bengaluru 560038</p>
+  </div>
+</section>
+<!-- J2:W-32 end -->
+<!-- J2:W-33 start (owner W-33) -->
+<section id="menu" aria-labelledby="menu-heading">
+  <style>
+    #menu {
+      padding: var(--j2-section, 64px) 16px;
+      color: var(--j2-text);
+    }
+    #menu .menu-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      min-width: 0;
+    }
+    #menu h2 {
+      font-family: var(--j2-font-heading);
+      color: var(--j2-primary);
+      font-size: 1.75rem;
+      line-height: 1.2;
+      margin: 0 0 16px;
+    }
+    #menu .menu-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    #menu .menu-item {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid #e6d9c8;
+      min-width: 0;
+    }
+    #menu .menu-item:first-child {
+      padding-top: 0;
+    }
+    #menu .menu-item:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+    #menu .menu-name {
+      font-size: 1.0625rem;
+      font-weight: 600;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+    #menu .menu-price {
+      font-weight: 700;
+      color: var(--j2-accent);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    @media (min-width: 768px) {
+      #menu h2 { font-size: 2.125rem; }
+      #menu .menu-name { font-size: 1.125rem; }
+    }
+  </style>
+  <div class="menu-inner">
+    <h2 id="menu-heading">Menu</h2>
+    <div class="j2-card">
+      <ul class="menu-list">
+        <li class="menu-item"><span class="menu-name">Filter coffee</span> <span class="menu-price">90 rupees</span></li>
+        <li class="menu-item"><span class="menu-name">Cappuccino</span> <span class="menu-price">160 rupees</span></li>
+        <li class="menu-item"><span class="menu-name">Latte</span> <span class="menu-price">180 rupees</span></li>
+        <li class="menu-item"><span class="menu-name">Cold brew</span> <span class="menu-price">200 rupees</span></li>
+        <li class="menu-item"><span class="menu-name">Masala chai</span> <span class="menu-price">80 rupees</span></li>
+        <li class="menu-item"><span class="menu-name">Almond croissant</span> <span class="menu-price">140 rupees</span></li>
+        <li class="menu-item"><span class="menu-name">Banana bread slice</span> <span class="menu-price">120 rupees</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+<!-- J2:W-33 end -->
+</body>
+</html>

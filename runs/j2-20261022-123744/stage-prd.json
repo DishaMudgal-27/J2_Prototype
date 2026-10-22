@@ -1,0 +1,862 @@
+{
+  "stage": "prd",
+  "goal": {
+    "statement": "A one-page mobile-friendly website for Brew Lab, a specialty coffee shop, that shows the name, address, menu and prices and takes pre-orders for pickup. It is built from a PRD, an HLD and an LLD that agree with each other and with the site.",
+    "product_name": "Brew Lab",
+    "users": "Customers who want to see the menu and pre-order for pickup. The shop team receives the orders by email.",
+    "problem": "Customers of Brew Lab have no easy way to see the menu and prices or to order ahead and collect at the shop. The shop has no online page that shows its name and address.",
+    "features": [
+      "Page shows the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map",
+      "Menu of seven items with prices in rupees",
+      "Pre-order form with fields name, phone, items and pickup time, sent to hello@brewlab.example",
+      "Pickup at the shop, with no online payment",
+      "Layout that works on phones"
+    ],
+    "user_groups": [
+      {
+        "name": "Customers",
+        "actions": [
+          "View the shop name and address",
+          "Read the menu and prices",
+          "Fill in and submit the pre-order form",
+          "Collect the order at the shop"
+        ]
+      },
+      {
+        "name": "Shop team",
+        "actions": [
+          "Receive pre-orders at hello@brewlab.example"
+        ]
+      }
+    ],
+    "constraints": [
+      "No opening hours are shown (not decided yet)",
+      "No shop phone number is shown (the shop has none)",
+      "No embedded map",
+      "No online payment",
+      "No details made up beyond the brief",
+      "Plain HTML, CSS and JavaScript in one file with no build step",
+      "The PRD, HLD, LLD and website must agree with each other"
+    ],
+    "success_measures": [
+      "The page shows the name Brew Lab and the full address as text",
+      "All seven menu items appear with the correct rupee prices",
+      "The pre-order form has exactly the fields name, phone, items and pickup time and sends to hello@brewlab.example",
+      "The page has no horizontal overflow at 360px width",
+      "The PRD, HLD, LLD and website contain the same facts with no contradictions"
+    ],
+    "facts": [
+      "Brew Lab",
+      "12, 100 Feet Road, Indiranagar, Bengaluru 560038",
+      "Filter coffee 90",
+      "Cappuccino 160",
+      "Latte 180",
+      "Cold brew 200",
+      "Masala chai 80",
+      "Almond croissant 140",
+      "Banana bread slice 120",
+      "name, phone, items and pickup time",
+      "hello@brewlab.example",
+      "Customers collect the order at the shop",
+      "No online payment is taken"
+    ],
+    "standards": [
+      "Plain everyday wording",
+      "Every fact matches the brief exactly"
+    ],
+    "rules": [
+      "Do not show opening hours",
+      "Do not show a shop phone number",
+      "Do not invent any other detail"
+    ],
+    "done_when": [
+      "Problem section states the problem for Brew Lab customers",
+      "Users section names Customers and Shop team and what each does",
+      "Goals section states the page goal: show name, address and menu and take pre-orders for pickup",
+      "Requirements section lists the name and address as text with no embedded map",
+      "Requirements section lists all seven menu items with their rupee prices exactly as given",
+      "Requirements section lists the pre-order form with fields name, phone, items and pickup time, sent to hello@brewlab.example, with pickup at the shop and no online payment",
+      "Requirements section states the page works on phones",
+      "Success metrics section lists measurable checks from the brief with no invented numbers",
+      "Out of scope section lists opening hours, shop phone number, embedded map and online payment",
+      "The PRD contains no opening hours and no shop phone number and nothing made up"
+    ],
+    "to_be_confirmed": [],
+    "dropped_from_brief": [],
+    "site_name": "Brew Lab",
+    "business_type": "prd",
+    "charter_items": [
+      "Problem section states the problem for Brew Lab customers",
+      "Users section names Customers and Shop team and what each does",
+      "Goals section states the page goal: show name, address and menu and take pre-orders for pickup",
+      "Requirements section lists the name and address as text with no embedded map",
+      "Requirements section lists all seven menu items with their rupee prices exactly as given",
+      "Requirements section lists the pre-order form with fields name, phone, items and pickup time, sent to hello@brewlab.example, with pickup at the shop and no online payment",
+      "Requirements section states the page works on phones",
+      "Success metrics section lists measurable checks from the brief with no invented numbers",
+      "Out of scope section lists opening hours, shop phone number, embedded map and online payment",
+      "The PRD contains no opening hours and no shop phone number and nothing made up"
+    ],
+    "core_items": [
+      "Problem section states the problem for Brew Lab customers",
+      "Requirements section lists the name and address as text with no embedded map",
+      "Requirements section lists all seven menu items with their rupee prices exactly as given",
+      "Requirements section lists the pre-order form with fields name, phone, items and pickup time, sent to hello@brewlab.example, with pickup at the shop and no online payment",
+      "Requirements section states the page works on phones",
+      "Success metrics section lists measurable checks from the brief with no invented numbers"
+    ],
+    "confirmed_facts": []
+  },
+  "audits": [
+    {
+      "cycle": 1,
+      "version": 6,
+      "results": [
+        {
+          "id": "F-1",
+          "criterion": "Problem section states the problem for Brew Lab customers",
+          "verdict": "PASS",
+          "note": "Problem: \"Customers of Brew Lab have no easy way to see the menu and prices\" and none to order ahead and collect at the shop.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 1,
+          "pass": true
+        },
+        {
+          "id": "F-2",
+          "criterion": "Users section names Customers and Shop team and what each does",
+          "verdict": "PASS",
+          "note": "Users has \"### Customers\" with 4 actions and \"### Shop team\" with \"Receive pre-orders at hello@brewlab.example\".",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 2,
+          "pass": true
+        },
+        {
+          "id": "F-3",
+          "criterion": "Goals section states the page goal: show name, address and menu and take pre-orders for pickup",
+          "verdict": "PASS",
+          "note": "Goals: \"to show the shop name, address and menu, and to take pre-orders for pickup\", then G1 to G3.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 3,
+          "pass": true
+        },
+        {
+          "id": "F-4",
+          "criterion": "Requirements section lists the name and address as text with no embedded map",
+          "verdict": "PASS",
+          "note": "R1 name as text; R2 address as text; R3 \"The page has no embedded map\".",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 4,
+          "pass": true
+        },
+        {
+          "id": "F-5",
+          "criterion": "Requirements section lists all seven menu items with their rupee prices exactly as given",
+          "verdict": "PASS",
+          "note": "R4 lists all seven items with prices 90, 160, 180, 200, 80, 140, 120, matching the brief; R5 says prices are in rupees.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 5,
+          "pass": true
+        },
+        {
+          "id": "F-6",
+          "criterion": "Requirements section lists the pre-order form with fields name, phone, items and pickup time, sent to hello@brewlab.example, with pickup at the shop and no online payment",
+          "verdict": "PASS",
+          "note": "R6 fields name, phone, items and pickup time only; R7 sent to hello@brewlab.example; R8 collect at the shop; R9 no online payment.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 6,
+          "pass": true
+        },
+        {
+          "id": "F-7",
+          "criterion": "Requirements section states the page works on phones",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "R10 \"The page works on phones. At 360px width there is no horizontal overflow\"; the clause \"can all be read and used\" is not strictly measurable.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 7,
+          "pass": true
+        },
+        {
+          "id": "F-8",
+          "criterion": "Success metrics section lists measurable checks from the brief with no invented numbers",
+          "verdict": "PASS",
+          "note": "The table has 7 checks; the only numbers are the brief's prices, the 7 items, the 4 fields and the charter's 360px width. P8 flagged the G1 row only because of the postcode.",
+          "severity": "low",
+          "confidence": "medium",
+          "needs_requester_fact": null,
+          "item": 8,
+          "pass": true
+        },
+        {
+          "id": "F-9",
+          "criterion": "Out of scope section lists opening hours, shop phone number, embedded map and online payment",
+          "verdict": "PASS",
+          "note": "Out of scope has four bullets: Opening hours, Shop phone number, Embedded map, Online payment.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 9,
+          "pass": true
+        },
+        {
+          "id": "F-10",
+          "criterion": "The PRD contains no opening hours and no shop phone number and nothing made up",
+          "verdict": "PASS",
+          "note": "No hours or phone number are given anywhere; R11 and Out of scope only say they are absent. Every claim traces to the brief or charter. P4 flagged the capitalised \"Customer\" in R7, which is the user group, not a fact.",
+          "severity": "low",
+          "confidence": "medium",
+          "needs_requester_fact": null,
+          "item": 10,
+          "pass": true
+        }
+      ],
+      "extra_issues": [],
+      "rubric": [
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "criterion": "Every requirement is specific and testable",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "R1 to R12 are mostly specific and checkable; R10 \"can all be read and used\" is vague.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "criterion": "Goals and success metrics are measurable",
+          "verdict": "PASS",
+          "note": "G1 to G3 each have checkable metrics, e.g. \"Seven items are shown\" and \"no horizontal overflow at 360px width\".",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "criterion": "Users and problem are consistent with the requirements",
+          "verdict": "PASS",
+          "note": "The problem (no menu or ordering) matches R4 to R9, and both user groups (Customers, Shop team) map to R2, R7 and R8.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "criterion": "Out of scope is explicit",
+          "verdict": "PASS",
+          "note": "Out of scope names four excluded items with reasons and says \"No other detail is added beyond what the brief gives.\"",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "criterion": "No invented facts: every fact comes from the brief or the Requester's answers, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim not in the brief",
+          "verdict": "PASS",
+          "note": "No unlabelled claim falls outside the brief or charter. \"Customers are people who want to see the menu and pre-order\" and \"The Shop team receives the orders by email\" come from the charter. The P4 flag on \"Customer\" is a false positive.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        }
+      ],
+      "mechanical": {},
+      "screenshot": null,
+      "all_pass": false,
+      "output": "prd",
+      "conditions": [
+        {
+          "id": "P1",
+          "text": "All six sections are present and not empty",
+          "check": "sections-present",
+          "met": true,
+          "evidence": "all 6 sections present, none empty"
+        },
+        {
+          "id": "P2",
+          "text": "Requirement ids are unique and sequential (R1, R2, ...)",
+          "check": "ids-sequential",
+          "met": true,
+          "evidence": "R1 to R12, unique and in order"
+        },
+        {
+          "id": "P3",
+          "text": "Every brief fact appears exactly",
+          "check": "facts-present-all",
+          "met": true,
+          "evidence": "all 13 brief fact(s) appear"
+        },
+        {
+          "id": "P4",
+          "text": "No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+          "check": "no-invented-facts",
+          "met": false,
+          "evidence": "not in the charter or the Requester's answers, and not marked Assumption: Customer",
+          "assumptions": []
+        },
+        {
+          "id": "P5",
+          "text": "Nothing is \"to be confirmed\"",
+          "check": "nothing-to-be-confirmed",
+          "met": true,
+          "evidence": "nothing to be confirmed"
+        },
+        {
+          "id": "P6",
+          "text": "Every goal has a matching success metric",
+          "check": "ids-covered",
+          "met": true,
+          "evidence": "each of G1, G2, G3 has a Success metrics entry"
+        },
+        {
+          "id": "P7",
+          "text": "Every user group named in the charter appears in Requirements or in a \"no actions in this version\" statement",
+          "check": "groups-covered",
+          "met": true,
+          "evidence": "each of the 2 user group(s) has a requirement or a \"no actions\" statement"
+        },
+        {
+          "id": "P8",
+          "text": "Each numeric success metric states its measurement window, or says \"measurement window not set\"",
+          "check": "metric-window",
+          "met": false,
+          "evidence": "no measurement window: G1 | The page shows the name Brew Lab and the full address 1",
+          "severity": "warn"
+        }
+      ],
+      "read": "Read the full PRD v6: Problem (2 short paragraphs), Users (intro plus 2 subsections with bullets), Goals (3 goals plus 1 line), Requirements (R1 to R12), Success metrics (7-row table), Out of scope (4 bullets plus 1 line). Also read the brief, the charter and the P1 to P8 results."
+    },
+    {
+      "cycle": 2,
+      "version": 7,
+      "results": [
+        {
+          "id": "F-1",
+          "criterion": "Problem section states the problem for Brew Lab customers",
+          "verdict": "PASS",
+          "note": "\"Customers of Brew Lab have no easy way to see the menu and prices\" and no easy way to order ahead and collect at the shop.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 1,
+          "pass": true
+        },
+        {
+          "id": "F-2",
+          "criterion": "Users section names Customers and Shop team and what each does",
+          "verdict": "PASS",
+          "note": "\"### Customers\" lists 4 actions; \"### Shop team\" lists \"Receive pre-orders at hello@brewlab.example\".",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 2,
+          "pass": true
+        },
+        {
+          "id": "F-3",
+          "criterion": "Goals section states the page goal: show name, address and menu and take pre-orders for pickup",
+          "verdict": "PASS",
+          "note": "\"to show the shop name, address and menu, and to take pre-orders for pickup\", then G1 to G3.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 3,
+          "pass": true
+        },
+        {
+          "id": "F-4",
+          "criterion": "Requirements section lists the name and address as text with no embedded map",
+          "verdict": "PASS",
+          "note": "R1 name as text; R2 address as text; R3 \"The page has no embedded map\".",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 4,
+          "pass": true
+        },
+        {
+          "id": "F-5",
+          "criterion": "Requirements section lists all seven menu items with their rupee prices exactly as given",
+          "verdict": "PASS",
+          "note": "R4 lists all seven items with prices 90, 160, 180, 200, 80, 140, 120; R5 says prices are in rupees.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 5,
+          "pass": true
+        },
+        {
+          "id": "F-6",
+          "criterion": "Requirements section lists the pre-order form with fields name, phone, items and pickup time, sent to hello@brewlab.example, with pickup at the shop and no online payment",
+          "verdict": "PASS",
+          "note": "R6 fields name, phone, items and pickup time and no others; R7 sent to hello@brewlab.example; R8 collect at the shop; R9 no online payment.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 6,
+          "pass": true
+        },
+        {
+          "id": "F-7",
+          "criterion": "Requirements section states the page works on phones",
+          "verdict": "PASS",
+          "note": "R10: \"The page works on phones, with no horizontal overflow at 360px width.\" The soft phrase is gone.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 7,
+          "pass": true
+        },
+        {
+          "id": "F-8",
+          "criterion": "Success metrics section lists measurable checks from the brief with no invented numbers",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "7 checks; numbers are only the brief's prices, 7 items, 4 fields and 360px. Code flag P8 on the G1 row is triggered by the postcode, which is not a metric number.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 8,
+          "pass": true
+        },
+        {
+          "id": "F-9",
+          "criterion": "Out of scope section lists opening hours, shop phone number, embedded map and online payment",
+          "verdict": "PASS",
+          "note": "Four bullets: Opening hours, Shop phone number, Embedded map, Online payment.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 9,
+          "pass": true
+        },
+        {
+          "id": "F-10",
+          "criterion": "The PRD contains no opening hours and no shop phone number and nothing made up",
+          "verdict": "PASS",
+          "note": "No hours or phone number appear; R11 and Out of scope only say they are absent. P4 is now met.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 10,
+          "pass": true
+        }
+      ],
+      "extra_issues": [],
+      "rubric": [
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "criterion": "Every requirement is specific and testable",
+          "verdict": "PASS",
+          "note": "R1-R12 are each checkable by looking at the page; R10 now uses the 360px no-overflow check.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "criterion": "Goals and success metrics are measurable",
+          "verdict": "PASS",
+          "note": "G1-G3 each have a matching metric in the table, such as \"Four fields are shown\" and \"no horizontal overflow at 360px width\".",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "criterion": "Users and problem are consistent with the requirements",
+          "verdict": "PASS",
+          "note": "Both groups in Users appear in R2, R5, R7 and R8; the problem (menu, ordering, pickup) matches R1-R9.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "criterion": "Out of scope is explicit",
+          "verdict": "PASS",
+          "note": "Out of scope has four explicit bullets and R11 repeats the hours and phone exclusion.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "criterion": "No invented facts: every fact comes from the brief or the Requester's answers, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim not in the brief",
+          "verdict": "PASS",
+          "note": "No unlabelled claim outside the brief found. \"Specialty coffee shop\" and the address are from the brief; no Assumption lines needed.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        }
+      ],
+      "mechanical": {},
+      "screenshot": null,
+      "all_pass": true,
+      "output": "prd",
+      "conditions": [
+        {
+          "id": "P1",
+          "text": "All six sections are present and not empty",
+          "check": "sections-present",
+          "met": true,
+          "evidence": "all 6 sections present, none empty"
+        },
+        {
+          "id": "P2",
+          "text": "Requirement ids are unique and sequential (R1, R2, ...)",
+          "check": "ids-sequential",
+          "met": true,
+          "evidence": "R1 to R12, unique and in order"
+        },
+        {
+          "id": "P3",
+          "text": "Every brief fact appears exactly",
+          "check": "facts-present-all",
+          "met": true,
+          "evidence": "all 13 brief fact(s) appear"
+        },
+        {
+          "id": "P4",
+          "text": "No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+          "check": "no-invented-facts",
+          "met": true,
+          "evidence": "every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+          "assumptions": []
+        },
+        {
+          "id": "P5",
+          "text": "Nothing is \"to be confirmed\"",
+          "check": "nothing-to-be-confirmed",
+          "met": true,
+          "evidence": "nothing to be confirmed"
+        },
+        {
+          "id": "P6",
+          "text": "Every goal has a matching success metric",
+          "check": "ids-covered",
+          "met": true,
+          "evidence": "each of G1, G2, G3 has a Success metrics entry"
+        },
+        {
+          "id": "P7",
+          "text": "Every user group named in the charter appears in Requirements or in a \"no actions in this version\" statement",
+          "check": "groups-covered",
+          "met": true,
+          "evidence": "each of the 2 user group(s) has a requirement or a \"no actions\" statement"
+        },
+        {
+          "id": "P8",
+          "text": "Each numeric success metric states its measurement window, or says \"measurement window not set\"",
+          "check": "metric-window",
+          "met": false,
+          "evidence": "no measurement window: G1 | The page shows the name Brew Lab and the full address 1",
+          "severity": "warn"
+        }
+      ],
+      "read": "PRD v7 markdown, about 900 words: Problem (2 short paragraphs), Users (2 groups with action lists), Goals (G1-G3 plus a closing line), Requirements (R1-R12), Success metrics (7-row table), Out of scope (4 bullets plus a closing line). Also read the code conditions P1-P8 and the brief."
+    },
+    {
+      "cycle": 3,
+      "version": 7,
+      "results": [
+        {
+          "id": "F-1",
+          "criterion": "Problem section states the problem for Brew Lab customers",
+          "verdict": "PASS",
+          "note": "\"Customers of Brew Lab have no easy way to see the menu and prices. They also have no easy way to order ahead and collect the order at the shop.\"",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 1,
+          "pass": true
+        },
+        {
+          "id": "F-2",
+          "criterion": "Users section names Customers and Shop team and what each does",
+          "verdict": "PASS",
+          "note": "\"### Customers\" lists 4 actions; \"### Shop team\" lists \"Receive pre-orders at hello@brewlab.example\".",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 2,
+          "pass": true
+        },
+        {
+          "id": "F-3",
+          "criterion": "Goals section states the page goal: show name, address and menu and take pre-orders for pickup",
+          "verdict": "PASS",
+          "note": "\"to show the shop name, address and menu, and to take pre-orders for pickup\", then G1 to G3.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 3,
+          "pass": true
+        },
+        {
+          "id": "F-4",
+          "criterion": "Requirements section lists the name and address as text with no embedded map",
+          "verdict": "PASS",
+          "note": "R1 name as text; R2 address as text; R3 \"The page has no embedded map.\"",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 4,
+          "pass": true
+        },
+        {
+          "id": "F-5",
+          "criterion": "Requirements section lists all seven menu items with their rupee prices exactly as given",
+          "verdict": "PASS",
+          "note": "R4 lists Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140, Banana bread slice 120; R5 says rupees.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 5,
+          "pass": true
+        },
+        {
+          "id": "F-6",
+          "criterion": "Requirements section lists the pre-order form with fields name, phone, items and pickup time, sent to hello@brewlab.example, with pickup at the shop and no online payment",
+          "verdict": "PASS",
+          "note": "R6 fields name, phone, items and pickup time and no others; R7 sent to hello@brewlab.example; R8 collect at the shop; R9 no online payment.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 6,
+          "pass": true
+        },
+        {
+          "id": "F-7",
+          "criterion": "Requirements section states the page works on phones",
+          "verdict": "PASS",
+          "note": "R10: \"The page works on phones, with no horizontal overflow at 360px width.\"",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 7,
+          "pass": true
+        },
+        {
+          "id": "F-8",
+          "criterion": "Success metrics section lists measurable checks from the brief with no invented numbers",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "7 checks; numbers are only the brief's prices, 7 items, 4 fields and 360px. P8 fires on the G1 row because of the postcode, not a metric number.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 8,
+          "pass": true
+        },
+        {
+          "id": "F-9",
+          "criterion": "Out of scope section lists opening hours, shop phone number, embedded map and online payment",
+          "verdict": "PASS",
+          "note": "Four bullets: Opening hours, Shop phone number, Embedded map, Online payment.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 9,
+          "pass": true
+        },
+        {
+          "id": "F-10",
+          "criterion": "The PRD contains no opening hours and no shop phone number and nothing made up",
+          "verdict": "PASS",
+          "note": "No hours or phone number appear; R11 and Out of scope only say they are absent. P4 is met.",
+          "severity": "low",
+          "confidence": "high",
+          "needs_requester_fact": null,
+          "item": 10,
+          "pass": true
+        }
+      ],
+      "extra_issues": [
+        {
+          "id": "F-11",
+          "criterion": "Brief: create the design documents (PRD, HLD, LLD) and then build the website; documents and website must agree",
+          "verdict": "PASS_WITH_WARNING",
+          "note": "The state contains only the PRD (v7). Chat [47] says the HLD, LLD and website are still to be written, and [51] says Adaptation proposed no workflows.",
+          "severity": "medium",
+          "confidence": "high",
+          "needs_requester_fact": null
+        }
+      ],
+      "rubric": [
+        {
+          "id": "D-1",
+          "item": "D-1",
+          "criterion": "Every requirement is specific and testable",
+          "verdict": "PASS",
+          "note": "R1-R12 are each checkable by looking at the page, e.g. \"no horizontal overflow at 360px width\" and \"exactly seven items\".",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-2",
+          "item": "D-2",
+          "criterion": "Goals and success metrics are measurable",
+          "verdict": "PASS",
+          "note": "Goals G1-G3 are each checkable, and the metrics table gives a check per goal, e.g. \"Seven items are shown\" and \"Four fields are shown\".",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-3",
+          "item": "D-3",
+          "criterion": "Users and problem are consistent with the requirements",
+          "verdict": "PASS",
+          "note": "Users and Problem match the requirements: Customers read the menu and order (R2, R5, R8); the Shop team receives at hello@brewlab.example (R7).",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-4",
+          "item": "D-4",
+          "criterion": "Out of scope is explicit",
+          "verdict": "PASS",
+          "note": "Out of scope has four explicit bullets and says \"No other detail is added beyond what the brief gives.\"",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        },
+        {
+          "id": "D-5",
+          "item": "D-5",
+          "criterion": "No invented facts: every fact comes from the brief or the Requester's answers, or is labelled \"Assumption:\"; the evidence quotes each unlabelled claim not in the brief",
+          "verdict": "PASS",
+          "note": "No unlabelled claim outside the brief found. The 'mobile-friendly' and 'one file of plain HTML, CSS and JavaScript' wording comes from the brief and charter.",
+          "rubric": true,
+          "severity": "medium",
+          "pass": true
+        }
+      ],
+      "mechanical": {},
+      "screenshot": null,
+      "all_pass": true,
+      "output": "prd",
+      "conditions": [
+        {
+          "id": "P1",
+          "text": "All six sections are present and not empty",
+          "check": "sections-present",
+          "met": true,
+          "evidence": "all 6 sections present, none empty"
+        },
+        {
+          "id": "P2",
+          "text": "Requirement ids are unique and sequential (R1, R2, ...)",
+          "check": "ids-sequential",
+          "met": true,
+          "evidence": "R1 to R12, unique and in order"
+        },
+        {
+          "id": "P3",
+          "text": "Every brief fact appears exactly",
+          "check": "facts-present-all",
+          "met": true,
+          "evidence": "all 13 brief fact(s) appear"
+        },
+        {
+          "id": "P4",
+          "text": "No invented facts: every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+          "check": "no-invented-facts",
+          "met": true,
+          "evidence": "every number, email and proper name comes from the charter or the Requester's answers, or sits in an Assumption: line",
+          "assumptions": []
+        },
+        {
+          "id": "P5",
+          "text": "Nothing is \"to be confirmed\"",
+          "check": "nothing-to-be-confirmed",
+          "met": true,
+          "evidence": "nothing to be confirmed"
+        },
+        {
+          "id": "P6",
+          "text": "Every goal has a matching success metric",
+          "check": "ids-covered",
+          "met": true,
+          "evidence": "each of G1, G2, G3 has a Success metrics entry"
+        },
+        {
+          "id": "P7",
+          "text": "Every user group named in the charter appears in Requirements or in a \"no actions in this version\" statement",
+          "check": "groups-covered",
+          "met": true,
+          "evidence": "each of the 2 user group(s) has a requirement or a \"no actions\" statement"
+        },
+        {
+          "id": "P8",
+          "text": "Each numeric success metric states its measurement window, or says \"measurement window not set\"",
+          "check": "metric-window",
+          "met": false,
+          "evidence": "no measurement window: G1 | The page shows the name Brew Lab and the full address 1",
+          "severity": "warn"
+        }
+      ],
+      "read": "Read the full PRD v7: Problem (~80 words), Users (~90), Goals (~120), Requirements (R1-R12, ~250), Success metrics (7-row table, ~230), Out of scope (4 bullets, ~90). Also read the brief, the charter done-when list, code conditions P1-P8 and the earlier audits."
+    }
+  ],
+  "sections": {
+    "W-1": {
+      "owner": "W-1",
+      "head": "",
+      "body": "## Problem\n\nBrew Lab is a specialty coffee shop at 12, 100 Feet Road, Indiranagar, Bengaluru 560038. Customers of Brew Lab have no easy way to see the menu and prices. They also have no easy way to order ahead and collect the order at the shop.\n\nThe shop has no online page that shows its name and address. This document describes a one-page, mobile-friendly website that solves this by showing the name, address, menu and prices, and by taking pre-orders for pickup.",
+      "workflow": "PRD Problem section"
+    },
+    "W-2": {
+      "owner": "W-2",
+      "head": "",
+      "body": "## Users\n\nBrew Lab has two user groups. Customers use the page to see the shop and order ahead. The Shop team receives the orders by email.\n\n### Customers\n\nCustomers are people who want to see the menu and pre-order for pickup. Customers can:\n\n- View the shop name and address.\n- Read the menu and prices.\n- Fill in and submit the pre-order form.\n- Collect the order at the shop.\n\n### Shop team\n\nThe Shop team receives the pre-orders that customers submit. The Shop team can:\n\n- Receive pre-orders at hello@brewlab.example.",
+      "workflow": "PRD Users section"
+    },
+    "W-3": {
+      "owner": "W-3",
+      "head": "",
+      "body": "## Goals\n\nThe goal of the Brew Lab page is to show the shop name, address and menu, and to take pre-orders for pickup. Each goal below can be checked by looking at the page.\n\n- **G1**: Show the name Brew Lab and the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, with no embedded map.\n- **G2**: Show the menu of seven items with their prices in rupees, exactly as given in the brief.\n- **G3**: Take pre-orders for pickup through a form with the fields name, phone, items and pickup time, sent to hello@brewlab.example. Customers collect the order at the shop, and no online payment is taken.\n\nAll three goals apply on a phone as well as on a larger screen, because the page is mobile-friendly.",
+      "workflow": "PRD Goals section"
+    },
+    "W-4": {
+      "owner": "W-7",
+      "head": "",
+      "body": "## Requirements\n\nThis section lists what the Brew Lab page must do. Each requirement can be checked by looking at the page.\n\n1. **R1**: The page shows the name Brew Lab as text.\n2. **R2**: The page shows the address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, so customers can view the shop name and address.\n3. **R3**: The page has no embedded map. The address is the only location information on the page.\n4. **R4**: The menu lists exactly seven items: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140 and Banana bread slice 120.\n5. **R5**: Every menu price is in rupees and matches the number given in R4, so customers can read the menu and prices.\n6. **R6**: The page has a pre-order form with the fields name, phone, items and pickup time, and no other fields.\n7. **R7**: When the person ordering submits the pre-order form, the order is sent to hello@brewlab.example, where the Shop team receives it.\n8. **R8**: Customers collect the order at the shop.\n9. **R9**: No online payment is taken. The page has no payment fields.\n10. **R10**: The page works on phones, with no horizontal overflow at 360px width.\n11. **R11**: The page does not show opening hours or a shop phone number.\n12. **R12**: The page is one file of plain HTML, CSS and JavaScript with no build step, and it contains the same facts as the PRD, HLD and LLD with no contradictions.",
+      "workflow": "PRD Requirements section revision"
+    },
+    "W-5": {
+      "owner": "W-5",
+      "head": "",
+      "body": "## Success metrics\n\nEach check below can be run by looking at the page or reading the documents. Each row names the goal it measures. Where a check has a number, the charter sets no measurement window, so the row says \"measurement window not set\".\n\n| Goal | Metric |\n|------|--------|\n| G1 | The page shows the name Brew Lab and the full address 12, 100 Feet Road, Indiranagar, Bengaluru 560038 as text, and no embedded map appears. |\n| G2 | All seven menu items appear with the correct rupee prices: Filter coffee 90, Cappuccino 160, Latte 180, Cold brew 200, Masala chai 80, Almond croissant 140 and Banana bread slice 120. Seven items are shown; measurement window not set. |\n| G3 | The pre-order form has exactly the fields name, phone, items and pickup time, and it sends the order to hello@brewlab.example. Four fields are shown; measurement window not set. |\n| G3 | The page has no horizontal overflow at 360px width, so the page works on phones; measurement window not set. |\n| G1 | The PRD, HLD, LLD and website give the same name and address, with no contradictions. |\n| G2 | The PRD, HLD, LLD and website give the same seven items and rupee prices, with no contradictions. |\n| G3 | The PRD, HLD, LLD and website give the same form fields, the same email address, pickup at the shop and no online payment, with no contradictions. |",
+      "workflow": "PRD Success metrics section"
+    },
+    "W-6": {
+      "owner": "W-6",
+      "head": "",
+      "body": "## Out of scope\n\nThis version of the Brew Lab page leaves out the four items below. The page does not show or do any of them.\n\n- **Opening hours**: The page does not show opening hours, because they are not decided yet.\n- **Shop phone number**: The page does not show a shop phone number, because the shop has none.\n- **Embedded map**: The page does not include an embedded map. The address is shown as text only.\n- **Online payment**: No online payment is taken. Customers collect the order at the shop.\n\nNo other detail is added beyond what the brief gives.",
+      "workflow": "PRD Out of scope section"
+    }
+  }
+}

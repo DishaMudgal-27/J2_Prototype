@@ -1,0 +1,27 @@
+{
+  "palette": {
+    "primary": "#5a3825",
+    "secondary": "#2f4a3a",
+    "accent": "#9a4a14",
+    "background": "#faf5ee",
+    "surface": "#ffffff",
+    "text": "#2b1d14",
+    "muted": "#6b5646"
+  },
+  "fonts": {
+    "heading": "Georgia, 'Times New Roman', serif",
+    "body": "system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif",
+    "google_fonts_url": null
+  },
+  "spacing": {
+    "unit": "8px",
+    "section": "64px"
+  },
+  "radius": "12px",
+  "buttons": {
+    "primary": "background:#5a3825;color:#ffffff;border:2px solid #5a3825;min-height:48px;padding:12px 24px;font-weight:600;font-size:1rem;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none",
+    "secondary": "background:transparent;color:#5a3825;border:2px solid #5a3825;min-height:48px;padding:12px 24px;font-weight:600;font-size:1rem;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none"
+  },
+  "card": "background:#ffffff;border:1px solid #e6d9c8;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(43,29,20,0.08)",
+  "notes": "Warm coffee browns on a cream background feel like a cosy neighbourhood cafe, and the dark text and large buttons stay easy to read and tap on a phone."
+}
