@@ -1,157 +1,242 @@
-# J2 handoff (updated 8 Oct 2026)
+# J2 prototype handoff
 
-Start a new Claude chat, connect the agent-studio folder, and say:
-"Read docs/j2-handoff.md in my agent-studio folder and continue from there."
-(The round 1 handoff is kept as docs/j2-handoff-round1.md.)
+Start a new Claude Code session in the agent-studio folder and say:
+"Read docs/j2-handoff.md and continue from there."
 
-## Who / what
-The developer (intern, Testlify) builds and tests a prototype of **J2**, a multi-agent "department" designed by the project owner. Diagram: docs/j2-flow.jpg. J2 page: https://sankalpasawa.github.io/asawa-site/native/system/department.html
-Agents: Identity, Adaptation, Priority, Coordination, Audit (official md files in agents/j2/, NEVER edit them),
-plus one builder agent per workflow; validator is plain code. No CEO: only Identity talks to the user.
-The prototype builds a website from a user's brief. Claude Code (in the project) does all code changes;
-this chat plans, writes prompts for Claude Code, reads runs and writes reports.
+This file is the only handoff. It was checked against the code, docs/ and git log on 22 Oct 2026. Anything that could not be
+checked is marked **unverified**.
 
-## Documents (Claude Docs)
-- Round 1 findings (already shared with the project owner): https://claude.ai/code/artifact/4503e532-d714-45ad-9cdc-5b3872fb533d
-- Round 1 proposed solutions: https://claude.ai/code/artifact/f6201d73-93a9-4a24-b4e4-f2dd7759ad29
-- Round 2 findings (after changes, 7 Oct runs): https://claude.ai/code/artifact/f09ff16a-ea7f-4b9f-b6a0-f565fe27c312
-Label findings: J2 design / Agent behaviour / Prototype.
+## Purpose
 
-## What the build has now (all in git; Claude Code commits before and after every change)
-- Identity asks for real facts (no silent placeholders); user may choose "leave for later".
-- One builder agent per workflow; loop J2.b -> J2.h until the site is workable (browser checks).
-- Limits ask the user via ONE code-applied decision question: add budget (preset or typed amount), leave items out,
-  or finish as is (ends as done_with_open_items). Budget cap = 2x start budget. (commit 94a9a6c, NOT yet live-tested)
-- Pricing tied to work: each done-when item has a minimum cost; fixes priced as fixes; unpaid items flagged.
-- Adaptation memory: lessons + playbooks (same business type only). J2_MEMORY=0 turns off. Tests use temp folders.
-- Style guide + design rubric (screenshots) in Audit. Generalist (cafe, florist, clothing tested).
-- Simple view (default, plain language, "Your website team") + Detailed view ("See how it works").
-- Test switches: J2_FORCE_AUDIT_FAIL=<n> (hidden from agents), J2_MEMORY_TEST_LESSONS=1.
+J2 is a multi-agent "department" designed by the project owner (diagram: docs/j2-flow.jpg, public J2 page:
+`https://<owner-github-username>.github.io/<owner-site>/native/system/department.html`). A small set of agents with fixed
+roles takes a brief, agrees a plan inside a budget, builds the result, checks it, and talks to the person who asked only
+when it must.
 
-## How to run (Mac Terminal)
-    cd ~/Downloads/agent-studio
-    lsof -ti :8773 | xargs kill        # only if "Address already in use"
-    source .venv/bin/activate && J2_FIXES=0 J2_BUDGET=40 J2_MEMORY=0 STUDIO_PROVIDER=claude-cli J2_DELAY=0 python3 j2_server.py
-Open http://127.0.0.1:8773/ . Sharing: second tab `cloudflared tunnel --url http://127.0.0.1:8773` (temporary link,
-uses the developer's Claude subscription, single user at a time, stop with Ctrl+C).
-Rules: use only fake numbers starting +91 00000 (a made-up number once hit a real person). Never delete runs/ (evidence).
+The developer (the person who built this prototype) uses it to test J2 as designed and to report what works and what does not.
+The prototype builds a website from a brief. It can also write design documents first (PRD, HLD, LLD), and it can prepare
+test emails and Slack messages (dry run only).
 
-## Standard test: clothing shop, low budget
-Brief: "make a website for my cousin's clothing boutique called Thread & Loom in Pune. it sells handloom kurtas, sarees,
-cotton shirts and dupattas. people should be able to browse products by category, filter by size and price, see a size
-guide, check new arrivals, and order on whatsapp. also show a lookbook section with styled outfits, the store timings and
-location, the return and exchange policy, and a few customer reviews. it should feel earthy and elegant and work well on phones"
-Details: WhatsApp +91 00000 11111, phone +91 00000 22222, 18 FC Road Shivajinagar Pune 411005, 11am-9pm Tue-Sun closed Mon,
-exchange 7 days unworn with tags; 10 products (kurtas 1,499/1,699/2,199; sarees 3,499/4,999/3,999; shirts 1,299/1,599;
-dupattas 899/1,099); size guide XS32..XXL42; 3 reviews; lookbook 3 outfits; delivery Pune 2 days Rs79, free above 2,999.
+The user is a founder. In the product owner's words: "I just want to know what is required of me, and what my kingdom looks
+like. Navigation of the department is via the map. The rest are internal things." The UI follows that: a map, a chat, and a
+strip that says what needs the founder. Everything else sits under Internals.
 
-## Key findings so far (round 2 + 8 Oct)
-- Budget bundling/relabelling (fixed by pricing-to-work; confirmed live 8 Oct: conflict now happens and reaches user).
-- User decisions were ignored when Identity asked in free form -> stuck loops (runs 20261008-110419, -123848). Fixed in 94a9a6c.
-- Identity mixes audiences: messages to the user start with @Adaptation/@Audit; agent instructions leak to the user.
-- Memory had 109 mock playbooks polluting it (cleaned); live playbook reuse not yet proven.
-- Reserve for fixes inconsistent; Audit reads code more than it tests behaviour in the browser.
+## The agents
 
-## NEXT STEPS
-1. Live check of 94a9a6c: clothing test at budget 40. At the money question type
-   "Add 25 more. Leave out the lookbook, new arrivals and reviews." (expect 40->65, items never return);
-   next time choose "finish as is" (run must end, no repeat question).
-2. If OK, send Claude Code the SECOND PASS (project owner's 8 Oct asks):
-   - to_requester / to_agents split for every Identity reply (user never sees @Agent text); Simple view strips any leading @Agent.
-   - Simpler user messages: max 3 short sentences + one question, max 3 options, question shown once, no jargon.
-   - Owner override: J2_OVERRIDE_KEY in .env (never committed/shown to agents, redacted); "<key> budget +N" ignores cap,
-     "<key> ship", "<key> drop <item>"; visible "Owner override applied" note.
-   - Site bug: order form had no submit button (run 20261008-123848 msg 46); browser check must fail on it.
-   Mock tests, full suite, commit before/after.
-3. Prove memory: same florist brief 3x with J2_MEMORY=1, compare Playbooks tab.
-4. Test a non-shop site (college fest) for question quality.
-5. Deployment: needs company Anthropic API key + hosting account (project owner said ok if not too much effort; Tesla team can help).
-6. Update round 2 doc / write round 3 findings after these runs.
+Official role files are in `agents/j2/`. **Never edit them.** `builder.md` and `rates.json` are placeholders written for this
+prototype, not official files.
 
-## Risks and corrections (added 8 Oct, read before writing prompts)
-- Never create or overwrite .env in the project (it holds J2_OVERRIDE_KEY). Hook tests go in a throwaway temp repo.
-- The "sent back twice at most" rule is J4 on the department page, not J2. J2's bargain limit is four hops, fifteen minutes and its spend.
-- Keep decisions with the agents: add rules the validator enforces, do not hard-code agent choices in code.
-- J2 is judged against versions.html: v1 FOLLOW (20 runs, pass rate visible) and v2 REMEMBER (interrupts halved). Log questions asked to the user and pass/fail per run.
+| Agent | Role (from its file) | Persona shown in the UI |
+|---|---|---|
+| Identity | charter guardian and conflict closer; the only agent that talks to the founder | Client Lead (Identity) |
+| Adaptation | senses the goal gap and proposes workflows | Strategist (Adaptation) |
+| Priority | resource bargain and envelope authority; prices and grants | Prioritiser (Priority) |
+| Coordination | ordering, dependencies, hand-offs, the write lock | Scheduler (Coordination) |
+| Audit | independent evidence-based check; files findings | Quality Reviewer (Audit) |
 
-## Status (8 Oct, later)
-- Step 1 part A passed live (run 20261008-131555, 40 -> 65, dropped items never returned). Part B ("finish as is") NOT yet tested; that run is paused in the old server's memory (port 8773).
-- Second pass (two audiences, simple messages, owner override, form submit button) committed as 6f978af. Full mock suite green.
-- .env.example not yet committed: pre-commit hook blocks any .env.* file. Prompt 1 (allow exactly .env.example) pending.
-- Third pass pending: nav fix rejected as 'styling' (should be 'fix'); fund blocking fixes before optional sections via a validator rule; check-only report on loop and bargain limits.
-- After that: live clothing test on new code, grep runs/ and logs for the key value, then steps 3 to 6 above.
+- **Builders:** one builder agent per workflow (named like "W-3 Builder"). Each workflow carries a work atom (see below).
+  In the UI the builders appear as team personas, chosen from what the step makes: Product Analyst (drafting a PRD),
+  Solution Architect (HLD), Technical Designer (LLD), Specialist (any other document), Web Developer (building the website),
+  Messenger (sending). The persona names are display labels only; internal ids are unchanged. They live in one constant,
+  `MAPLABEL`, in `j2_ui.html`.
+- **Validator:** plain code, no AI call. It registers workflows, checks work atoms and runs the checks. Shown as "Checker
+  (automatic)".
+- **No CEO.** The official files still mention one; `agents/j2/team.md` says Identity asks the founder instead.
 
-## Status (15 Oct 2026)
+## How it works
 
-**Commits since ff1cafd** (each range starts at a checkpoint commit; every change is committed before and after)
-- Atom outputs, detailed-view cards and slim mode: 3ab8120 to c2e0fcb (82c8ca7 atom human_output and agent_output, J2_SLIM prompts; 56b8223 atom cards with preview, eight blocks, links, browser-free render test; c2e0fcb replay script).
-- Design documents (PRD, HLD, LLD) and the LLD as blueprint for the site: 0657d93 to fe9d7c9 (fc06c02, 6c13ff7, 9520e1f, fe9d7c9).
-- Budget rule for the document chain: 387792d to e1e4607.
-- Tests: `python3 j2_flow_test.py --fast` and `--fast --browser` both pass at e1e4607.
+1. **Brief.** The founder describes what they want. **J2.a:** Identity asks until it has enough, works out the business type
+   and what visitors need, and records a charter. A fact only the founder knows is asked once; if they cannot give it, it
+   is recorded as "to be confirmed" and that item is not met.
+2. **J2.b** Adaptation proposes workflows. **J2.c** Priority prices them in a bounded bargain (four hops, fifteen minutes,
+   8 AI calls). Past a bound, both positions go to Identity (**J2.d**).
+3. **Budget.** Work credits (made-up units, not money or tokens). Start budget `J2_BUDGET` (default 100); the founder's
+   approvals can raise it to `J2_BUDGET_CAP` (default twice the start). Prices come from the rate card
+   (`agents/j2/rates.json`, placeholder). A cost follows the work: each done-when item has a minimum, and a fix is priced
+   as a fix. When credits run out, the founder gets one decision question applied by code: add credits, leave items out, or
+   finish as it is.
+4. **J2.e Validator** registers each agreed workflow and creates its builder.
+5. **Work atoms.** Each workflow has a work atom in the `atom/1` shape (`docs/atom-schema.md`, `docs/atom-schema.json`,
+   `j2_schema.py`). Status: open, closed, verify_failed, abandoned. Each output item has a verb (make or do), a name, a form
+   and a ref. Adaptation writes `expected_output` items before the build; code derives one check per item (behaviour items
+   run as steps in Chrome). `depends_on` and `used_by` are recorded from what each builder's prompt actually held, so they
+   show what was **given**, not what was **used**. Results go to `receipts.jsonl` and `atoms.json`.
+6. **J2.f** Coordination schedules and holds the write lock. Builders write their own section (slim mode is the default, so a
+   builder sees its section and a short manifest; `J2_SLIM=0` gives the older full prompts). Code assembles the page.
+7. **J2.g** Audit checks the result and files findings (F-n for a website, D-n document rubric items for documents) to
+   Identity. **J2.h** Identity decides if the result is workable; Adaptation records lessons and playbooks (memory in `memory/`,
+   `J2_MEMORY=0` turns it off).
+8. **Report.** `summary.json`, `report.json` and `report.md` are written at the end, plus `map.json` and `artifacts.json`.
 
-**J2_SLIM** (on by default; `J2_SLIM=0` reproduces the older full prompts, commit f6938b2)
-- A builder gets its own section's HTML plus a short manifest of other atoms' agent_output (ids, sections, selectors), not the whole page.
-- Finished atoms in the shared state shrink to id, status and agent_output. Audit still sees the full page. Coordination's role and wording are unchanged.
+**Code-routed group chat.** All agents talk in one shared chat. Code decides who may speak to whom (`ROUTES` in `j2.py`), each
+message has one addressee, and an agent that addresses the founder is routed to Identity first. Identity's replies have two
+parts, one for the founder and one for the team, and the code keeps them apart.
 
-**Documents are opt-in** (code matches explicit words in the brief or the Requester's answers; never a default)
-- Set request, all three in one chain: "design document(s)", "design docs", "design documentation", "full documentation".
-- Single requests: PRD / product requirements; HLD / high-level design / architecture overview; LLD / low-level design / detailed design. Naming one or two makes exactly those. "Modern design" or "design a logo" trigger nothing.
-- Order is PRD, HLD, LLD; each reads the one before by its agent_output. A website follows only if the brief also names one. With an LLD it is built from it (each builder gets its LLD slice and an HLD summary; the page is checked against the slice). With no document asked for, the flow is unchanged (tested against 0657d93).
-- Files per document: `<kind>.md` and `<kind>.docx`. Checks: P1-P8 (unchanged), H1-H6, L1-L6.
+**Design documents are opt-in.** Code looks for explicit words in the brief or the founder's answers ("design docs", "PRD",
+"HLD", "low-level design" and so on; "modern design" triggers nothing). Order: PRD, then HLD, then LLD, each reading the one
+before it. A website follows only if the brief also names one; with an LLD, each builder gets its LLD slice and an HLD summary.
+With no document asked for, the flow is unchanged (guarded by `plain_unchanged`).
 
-**Budget**
-- Least each stage can cost on the rate card: PRD 65, HLD 65, LLD 55, website essentials 50 (235 for all four).
-- The cap is 2x the start budget (J2_BUDGET, default 100, so the default cap is 200). A documents-plus-site run needs a start budget of about 240 (J2_BUDGET=240) to run with no question; at the default it is asked.
-- Nothing is skipped by code. When the credits left cannot cover the stages still to do, the Requester gets the decision question (add credits, leave out, finish as it is) with each document and the site as items, once before the first plan and again before each later stage.
+**Checks.** Documents: P1 to P8 (PRD), H1 to H6 (HLD), L1 to L6 (LLD), plus the document rubric D-n (D-5 is "no invented
+facts"). Website: necessary conditions N1 to N8 (`conditions/website.json`), a render check (`j2_check.py`), and Audit
+findings. Condition files: `conditions/prd.json`, `hld.json`, `lld.json`, `website.json`.
 
-**Replay estimates** (`python3 j2_replay_size.py`, `--documents` for documents; no model calls). These are estimates, not measurements.
-- Run j2-20261015-114723, 57 calls: input 6,639,854 characters old, 5,183,068 with slim (-21.9%). About 1.66M to 1.30M tokens at characters / 4. That run's measured input was 2,950,102 tokens at 2.25 characters per token, so characters / 4 understates real tokens by about 1.8x.
-- New atom fields: about 25K characters once for 18 atoms, plus about 150 characters per builder call.
-- Documents, from one mock run of the chain: PRD 17 calls, HLD 16, LLD 14 (47 total), then 24 for the site. Stand-in size (the replayed run's average prompt per agent) is about 4.4M characters (about 1.1M tokens at /4) for the three documents; the mock run's own prompts are 1.6M characters. Stand-in overstates a document (no page, smaller state) and mock content understates it: read them as a range.
-- A site builder's LLD slice plus HLD summary is about 935 characters in the mock run, against about 132K characters of whole page on the old path.
+**Send deeds, phase 1** (`j2_send.py`): a brief that asks for a test email or Slack message gets a deed stage. Sends are dry
+run by default (nothing leaves, the deed stays open) or mock (an in-process recorder for tests). The recipient comes only from
+`J2_TEST_EMAIL` and `J2_TEST_SLACK_TARGET`, never from the brief. Receipts hold a masked recipient and hashes. There is no
+network code. Live sending is not built (phase 2).
 
-**Open items**
-- Live token measurement: no live run has measured slim mode or the documents yet.
-- Coordination relay cost: its calls stay about 90-120K characters each in the replay (the chat dominates) and slim mode only trims them 1-21%.
-- Priority ruling before stage-level questions: the stage funding check is code on minimum prices; Priority is not asked first.
-- LLD checks are structure only (ids, selectors, form fields with type and required flag); what a click does is not run.
-- GitHub push: nothing has been pushed.
+## The UI today
 
-**Mock documents run for the Detailed view** (no credits; run from the repo folder; it writes to /tmp, not runs/)
-```
-export STUDIO_MOCK=1 J2_MEMORY=0 J2_RUNS_DIR=/tmp/j2-mock-docs
-python3 - <<'PY'
-import time, j2
-r = j2.J2Run(); r.budget = 900
-r.user_says("A one-page website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru. Visitors see the menu with prices, the opening hours and where to find us, and pre-order a coffee for pickup. Write the design docs first. Users: coffee lovers and office staff. Problem: people can't see the menu or order ahead. Must-have features: see the menu with prices, pre-order a coffee, find the shop, read the opening hours. Constraints: one page only. Success: 30 pre-orders per week.")
-while r.status != "waiting": time.sleep(0.05)
-print(r.outcome); print("OPEN: http://127.0.0.1:8773/?run=j2-" + r.run_id + "&view=detail")
-PY
-python3 j2_server.py --port 8773 --no-browser
-```
-Open the URL it prints after "OPEN:". Stop the server with Ctrl+C.
+Served by `j2_server.py` from `j2_ui.html`. The Simple view is the default (plain words, one chat and a preview). The Detailed
+view is at `?view=detail`; a saved run opens read-only with `&run=<run id>`.
 
-## Status (16 Oct 2026)
+**Detailed view home:** the department name, a **Needs you** strip, the **Map**, and the **Chat** docked on the right (stacked
+below 900px). Needs you lists every open question to the founder with an "Answer in Chat" button that focuses that question,
+and shows one plain outcome line for a finished run with a "See report" link. The full outcome banner is at the top of the
+Report tab.
 
-**Commits since 7d43a29** (each range starts at a checkpoint commit)
-- Repeat-failure choices, code-written check results, rate card, PRD builder rules: e900d95 to 3a1e66c.
-- `plain_unchanged` wired into the suite: ff5d5f8 to 889229d.
-- atom/1 (schema, adapter, edges, atoms.json, cards, statuses, verbs): 405f2ae to f6938b2 (status and kinds: e56e444 to de0abbe; verb and noun: d75c6b3 to f6938b2).
-- Slim on by default: c83bc5b to the commit that holds this note (the flip is 13ccccd; the next commit moves `PLAIN_CHECKPOINT` to it).
-- Tests: `python3 j2_flow_test.py --fast` and `--fast --browser` pass; `J2_SLIM=0 python3 j2_flow_test.py --fast` passes too.
+**Left rail:** Map, Chat, and one collapsed **Internals** folder. Internals holds: Preview (the website), Goal, Workflows,
+Conflicts, Timeline, Audit, Charter, Documents, Artifacts, Style guide, Lessons, Playbooks, Report, Run details, and **Run
+settings** (what to build, the saved-run selector, New run, Back to simple view). Each internal view has a "Back to map" link.
 
-**Slim is now the default.** J2_SLIM is on unless it is set to 0; `J2_SLIM=0` turns it off and gives the prompts of f6938b2 for a plain website, tested against that commit. Audit still reads the full page. `PLAIN_CHECKPOINT` in `j2_flow_test.py` is the commit made right after the flip, so `plain_unchanged` guards the new default; move it when the plain path changes on purpose.
+**The Map is the navigation.** A click (or Enter) on a node opens its panel; the panel's Open button goes to:
 
-**atom/1** (`docs/atom-schema.md`, `docs/atom-schema.json`, `j2_schema.py`)
-- Status has four values: open, closed, verify_failed, abandoned (mapping table in the schema doc; three names do not map cleanly and are flagged there).
-- Each output item has a verb (make or do), a name, a form and a ref. Makes are artifacts, proven by exists, valid and meets the defined output ("done when"). Dos are deeds, proven by one receipt check (the receipt id from receipts.jsonl). An atom is make, do or mixed, derived by code and never stored.
-- `depends_on` and `used_by` are recorded from what each builder's prompt actually held (manifest lines, an LLD slice, the HLD summary, the earlier document); `used_by` is built by code as the exact inverse. A builder given the whole page gets no edge unless its workflow declares dependencies.
-- `runs/<id>/atoms.json` is written per run with the views and warnings (dangling edge, cycle, unused output, missing verb, and an info line for each mixed atom). Warnings never change an outcome, a prompt or a retry.
-- Detailed view cards show Notes, Workflow output (verb, noun, form, ref, depends_on, used_by) and Result (preview and links). The Simple view is unchanged.
+| Node | Open goes to |
+|---|---|
+| A node waiting on you | that question in the Chat |
+| You | the Needs you strip |
+| Client Lead (Identity) | the Chat |
+| Quality Reviewer (Audit) | the Audit tab |
+| Strategist, Prioritiser, Scheduler | the two tables under the Map (messages between functions, who made each step), filtered to that function |
+| A team persona (a step) | the Workflows tab filtered to that step's workflows |
+| Website | the site preview |
+| Charter | the Charter tab |
+| Any other deliverable | its document in Artifacts |
 
-**Open items**
-- The P4 name detector reads "This PRD" as a made-up name; the fix awaits the owner's approval.
-- External deeds (fetch, send) are defined in the schema doc; nothing produces them.
-- Chrome-driven receipts are untested: the behaviour receipt check has only run with the fake driver.
-- HLD and LLD cost minimums (98 and 88) are not measured; only PRDs have been.
-- The owner's artifact kinds file is still to be shared.
+**Map drawing** (`docs/map-schema.md`): You and the Management layer across the top; below them a tree down the middle with
+Charter at the root, each team persona above the deliverable it made. Hand-off lines run down the spine; "given to" lines loop
+beside it and end at the persona that was given the document. No two lines cross (loops that would interleave go on opposite
+sides; the code checks every pair, and an unavoidable crossing is drawn round the outside and listed under "Not recorded").
+Function-to-deliverable lines show only when a node is hovered or selected. At 600px and under, the map becomes a list of
+cards. Status is never colour alone: solid ring = filed and checked, dashed = left open, double = running now, thick red with
+"!" = fault, thick amber with "?" = waiting, hollow and faint = not made.
+
+## Files map
+
+- `j2.py`: the whole J2 flow (agents, routing, budget, validator, atoms, checks, documents, send deeds, report).
+- `j2_server.py`: HTTP server and JSON endpoints (`/api/state`, `/api/map`, `/api/docs`, `/api/artifacts`, `/api/audits`, and others).
+- `j2_ui.html`: the whole page (Simple and Detailed views). `j2_ui_render.js`: runs the page script against a stub DOM for tests.
+- `j2_map.py`: builds `map.json` (schema map/1) from a run folder or live state. Code only, no model call.
+- `j2_send.py`: send deeds, phase 1 (dry run and mock).
+- `j2_artifacts.py`: lists a run's deliverables and records from `artifacts/types.json`. `artifacts/types.json`: the artifact kinds
+  (PRD, HLD, LLD, website). The flow does not read it; the same kinds are also defined in `j2.py`, and a test keeps the two equal.
+- `j2_schema.py`: the `atom/1` adapter and warnings. `j2_check.py`: render check and the Chrome driver for behaviour steps.
+- `j2_flow_test.py`: the test suite. `j2_replay_size.py`: estimates prompt size from a saved run (no model calls).
+- `llm.py`: model wrapper (Claude CLI, Anthropic API, Gemini, or offline mock). `mock_site.py`: scripted site for mock mode.
+- `conditions/`: necessary conditions per output type. `agents/j2/`: official role files, `team.md`, placeholders, `rates.json`.
+- `docs/`: this handoff; `atom-schema.md` and `.json`; `map-schema.md`; `j2-test-plan.md` (one run per branch of the flow);
+  `j2-prompts.md` (briefs to type); `j2-flow.jpg` (the diagram); `ui-*.png` (screenshots).
+- `README.md` (what J2 mode does and every setting) and `SETUP.md` (install and run). `studio.py`, `negotiate*.py`, `server.py`,
+  `ui.html`: the earlier three-agent demo, not part of J2.
+- `runs/`: saved runs. `memory/`: lessons and playbooks (git-ignored).
+
+## How to run
+
+Install once (see SETUP.md), then:
+
+    source .venv/bin/activate
+    STUDIO_PROVIDER=claude-cli python3 j2_server.py            # live, on your Claude subscription
+    STUDIO_MOCK=1 python3 j2_server.py                         # offline, scripted agents, no key needed
+    J2_FIXES=0 J2_MEMORY=0 STUDIO_PROVIDER=claude-cli J2_DELAY=0 python3 j2_server.py    # clean test run
+
+Opens http://127.0.0.1:8773. Use `--port` for another port and `--no-browser` to stay headless. If the port is busy:
+`lsof -ti :8773 | xargs kill`.
+
+Environment variable names (set values in your shell or `.env`, never in files that are committed): `STUDIO_PROVIDER`,
+`STUDIO_MOCK`, `J2_BUDGET`, `J2_BUDGET_CAP`, `J2_FIXES`, `J2_MEMORY`, `J2_SLIM`, `J2_OUTPUT`, `J2_DELAY`, `J2_RUNS_DIR`,
+`J2_RATES`, `J2_MAX_CYCLES`, `J2_MAX_TURNS`, `J2_BARGAIN_MINUTES`, `J2_BARGAIN_CALLS`, `J2_SEND_MODE`, `J2_TEST_EMAIL`,
+`J2_TEST_SLACK_TARGET`, `J2_FORCE_AUDIT_FAIL` and `J2_MEMORY_TEST_LESSONS` (test switches), `J2_OVERRIDE_KEY` (owner override),
+`ANTHROPIC_API_KEY` and `GEMINI_API_KEY` (only if you do not use the Claude CLI). README.md "Modes and settings" lists them all.
+
+Each run is saved in `runs/j2-<time>/`: `chat.jsonl`, `calls.jsonl`, `summary.json`, `atoms.json`, `map.json`, `artifacts.json`,
+`receipts.jsonl`, site versions, screenshots, and the document files of a documents run. Use only fake phone numbers that start
+with +91 00000 in briefs.
+
+Budget guide: the least each stage costs is about PRD 65, HLD 65, LLD 55, website essentials 50 (235 for all four), so a
+documents-plus-website run needs a start budget of about 240. These minimums are from 15 Oct notes and are **unverified** now.
+
+## How to test
+
+    python3 j2_flow_test.py --fast             # offline flow test in mock mode, no browser steps
+    python3 j2_flow_test.py --fast --browser   # adds the tests that drive the page in Chrome
+    python3 j2_flow_test.py                    # everything, both J2_FIXES modes
+
+SETUP.md gives about 35 seconds and 8 to 9 minutes for the first two; the suite has grown since, so treat those numbers as
+**unverified**. Both fast modes passed on 22 Oct 2026 (commit b13db81).
+
+- **`plain_unchanged`** runs twice in every mode. It runs the plain website path (no documents) in a temp copy of a fixed
+  checkpoint commit and requires identical prompts, page and outcome: once with `J2_SLIM=0` against `f6938b2`, once with the
+  default against the commit in `PLAIN_CHECKPOINT` (`j2_flow_test.py`). Move `PLAIN_CHECKPOINT` only when the plain path changes
+  on purpose.
+- **Reference runs** under `runs/`: `j2-20261016-160511` (documents plus website, done with open items) and
+  `j2-20261022-123744` (done with open items). The Map tests read copies of both and check there are zero crossing lines and no
+  label on a line. A mock documents run is built inside the suite as the third.
+- Page tests: `j2_ui_render.js` renders the page without a browser; Chrome tests inject a probe script into a copy of the page.
+
+## Rules
+
+- Never edit `agents/j2/*.md`.
+- Never read, print or commit `.env` or any secret. Hook tests go in a throwaway temp repo, not here.
+- Never edit anything under `runs/`; it is evidence. Scrub a copy before sharing a run.
+- Change the flow only in steps the project owner or developer has agreed. Keep decisions with the agents: add rules the validator
+  enforces; do not hard-code an agent's choice in code.
+- Commit before and after every change. Do not loosen a test to make it pass; if an assertion must change, say why.
+- Do not push unless asked. No live sends: `J2_SEND_MODE` stays `dry-run` or `mock`.
+
+## Open issues and next steps
+
+1. **Given is not used.** Edges record what a builder's prompt held, not whether the builder used it. There is no proof the
+   builders used the documents they were given. The Map says "given to" for that reason.
+2. **False invented-fact flags.** The P4 name detector reads "This PRD" as a made-up name (from 16 Oct notes; the fix awaits the
+   project owner's approval). The same kind of false flag is reported for H5 and D-5: **unverified**.
+3. **Shallow atom checks.** LLD checks are structure only (ids, selectors, form fields); what a click does is not run
+   (from 15 Oct notes, not rechecked).
+4. **Budget runs out on full runs.** The two reference runs hit a limit 2 and 6 times (`limits_hit` in `summary.json`).
+5. **Pause even when all checks pass:** reported, **unverified**.
+6. **Page-wide parts** (navigation, hero) may have no owning workflow: **unverified**.
+7. **Revisions and findings.** A revision is not reliably linked to the finding it fixes: **unverified**. Commit 979ad0f added a
+   Fixes line to revise atoms from stored audits, so the gap, if real, is in what is recorded, not in the card.
+8. **Send deeds phase 2** (live sending, a way to fetch) is not built. Phase 1 is dry run and mock only.
+9. **Map gaps.** The Knows row is not drawn (schema only). The Charter has no version, shown as "version not recorded".
+10. **Artifact types are duplicated.** `artifacts/types.json` and `j2.py` both define them; a test fails if they drift.
+11. **Open question for the product owner:** should a click on a Map node open the view directly, or open the panel first (as now)?
+12. From 15 to 16 Oct notes, **unverified now:** no live run has measured slim mode or documents token cost; Chrome-driven
+    behaviour receipts have only run with the fake driver; HLD and LLD cost minimums (98 and 88) are not measured; the project
+    owner's artifact kinds file is still to be shared; the docs say `runs/` is git-ignored but it is tracked (since b2324e2).
+13. Deployment needs a company API key and a hosting account (agreed in principle, not started).
+
+## Recent history
+
+Early rounds (6 to 8 Oct). Round 1 tested conflict handling and budget on a cafe site with nine live runs. It found, among
+others: no pricing step between a ruling and the build, spending before the whole scope was checked against the budget, no
+core versus nice-to-have marking, no fix reserve, "done" meaning only that sections exist, user decisions not amending the
+charter, and placeholders defusing conflicts. Reports (Claude Docs, shared with the project owner): round 1 findings
+`https://claude.ai/code/artifact/4503e532-d714-45ad-9cdc-5b3872fb533d`, proposed solutions
+`https://claude.ai/code/artifact/f6201d73-93a9-4a24-b4e4-f2dd7759ad29`, round 2 findings
+`https://claude.ai/code/artifact/f09ff16a-ea7f-4b9f-b6a0-f565fe27c312`. Later runs showed that cost now follows the work and
+that limits reach the founder as one decision question (94a9a6c).
+
+- 7 Oct, `1d12c6d` workflow agents, the loop, memory and the first UI.
+- 7 Oct, `b408efe` Simple view added; `71975f4` cost follows the work; `ee42626` J2 works for any business (needs check, style guide, playbooks).
+- 8 Oct, `94a9a6c` budget, drop and finish are asked and applied by code only; `6f978af` two audiences, plain messages, owner override, forms need a submit button.
+- 9 Oct, `3a8960c` to `df091a7` Adaptation always proposes within budget; funded work is built before Identity asks about unfunded items.
+- 11 Oct, `aa9da25` SETUP.md added.
+- 12 Oct, `6464d86` Adaptation writes a work atom per workflow; `7b000cd` code runs each atom's checks and writes receipts.
+- 13 Oct, `d3335c2` PRD output type; `bcd649a` website necessary conditions N1 to N8.
+- 14 Oct, `16a6975` and `678dc36` expected_output items and behaviour steps run in Chrome.
+- 15 Oct, `82c8ca7` atom outputs and slim prompts; `fc06c02` design documents (PRD, HLD, LLD); `9520e1f` LLD slices as builder specs; `e1e4607` budget rule for the chain.
+- 16 Oct, `3a1e66c` finish-as-it-is on a document, code-written check results; `889229d` `plain_unchanged` wired into the suite; `da914c7` to `f6938b2` atom/1 schema, four statuses, verbs; `13ccccd` slim on by default.
+- 20 Oct, `c6333f4` to `0de305b` Detailed view: Documents tab, atom cards, Charter tab, workflow output tags and filters, document lineage rows.
+- 21 Oct, `56b6c4d` send deeds phase 1; `932fbb6` Artifacts tab and `types.json`; `19ae41a` to `5209177` Map tab (map.json, functions row, speaks-to lines); `b2324e2` runs/ tracked.
+- 22 Oct, `c042f21` Detailed view rail layout; `98eb459` Map redesign (circle nodes, given-to ends on the step, click panel); `a3bfb64` Map and Chat home with Needs you and Internals; `b13db81` simplified home, Run settings, and the crossing-free tree map with team personas.
