@@ -83,13 +83,31 @@ In a finished run the page says "left open", never "running".
 
 ## The page
 
-Function-to-work lines use the same dotted "speaks to" style, are drawn under the boxes and stop at the top of a box, so
-they never hide text. They are faint by default; hovering or clicking a function (or focusing it and pressing Enter)
-highlights its lines and shows each count; a click keeps it highlighted until the next click. With more than 12 lines
-none is shown until a function is hovered or clicked. A small "view" link on each function opens its tab. "Messages between
-functions" and "Who made each step" are closed dropdowns under the drawing, named like "Not recorded": collapsed by default,
-a click opens them.
-`renderMap(map)` is one pure function: inline SVG at wide widths and a card list at 600px and under (the functions and the
-work as a top-to-bottom list: "speaks to ...", "worked on: ..." on a function, "made with: Identity 3, Audit 2" on a work box,
-"hands off to ...", and "made by ..." on a step; no SVG lines). Status is never colour alone. Every box with a `file` links to its Open view
-in the Artifacts tab; the full text is in a tooltip. All text goes through the Detailed view's plain-words helper.
+The Map is a calm graph drawn in inline SVG, with fixed rows and a fixed left-to-right order (no physics, no random
+positions: the same map always draws the same). Rows from the top: You, Management layer (the five functions), Team layer
+(one small circle per step) and Deliverables. Every node is a circle with its name under it; the version, status word,
+calls, last seen and the rest are in the tooltip and in a click panel. Status is never colour alone: solid ring = filed
+and checked, dashed = left open, double = running now, thick red plus "!" = fault, thick amber plus "?" = waiting,
+hollow and faint = not made.
+
+Lines are thin and grey. Hand-off (a deliverable to the step and on to the next deliverable) is solid, "speaks to" is
+dotted, and "given to" is a faint curve. A "given to" curve ends on the step circle that consumed the document (the step
+that leads to the deliverable the hand-off recorded), never on a later document. If the map has no such step the line
+stays on the box and the gap is listed under "Not recorded". The wording stays "given to": the run records what was given,
+not proof of use.
+
+Function-to-deliverable lines are faint, drawn under the nodes, and stop at the top of a dot. Hovering or focusing a dot
+(or pressing Enter) lights it, the lines that touch it and the dots at their other ends, and fades the rest. A click opens
+the panel for that dot and keeps it lit until the next click, Close or Esc. With more than 12 function-to-deliverable
+lines none is shown until a dot is lit. "Messages between functions" and "Who made each step" are closed dropdowns under
+the drawing, named like "Not recorded".
+
+Every display label comes from one table in the page (`MAPLABEL`): rows (You, Management layer, Team layer, Deliverables),
+functions as "Persona (Function)" (Client Lead (Identity), Planner (Adaptation), Prioritiser (Priority), Project Manager
+(Coordination), Quality Reviewer (Audit)), steps as Drafting, Building or Sending by what the step makes, Specialists for
+the workflow builders and "Checker (automatic)" for the validator. Ids and map.json are unchanged.
+
+`renderMap(map)` is one pure function: SVG at wide widths and a card list at 600px and under (the same words: "speaks to
+...", "worked on: ...", "made with: ...", "given to ..." and "made by ..."; no SVG lines). Every deliverable with a `file`
+links to its Open view in the Artifacts tab, from the card and from the panel. All text goes through the Detailed view's
+plain-words helper.
