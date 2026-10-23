@@ -5333,7 +5333,16 @@ def map_tab():
     f = {n["id"]: n for n in lv["nodes"] if n["kind"] == "function"}
     assert (f["fn:identity"]["status"], f["fn:identity"]["detail"]) == ("running", "writing the charter") and lv["status"]["state"] == "Identity running"
     assert (f["fn:adaptation"]["status"], f["fn:adaptation"]["wait_on"]) == ("waiting", "Priority")
-    assert (f["fn:priority"]["status"], f["fn:priority"]["wait_on"]) == ("waiting_on_you", "you")
+    assert (f["fn:priority"]["status"], f["fn:priority"]["wait_on"]) == ("idle", None), "waiting on you only while a question to you is open (the same source as Needs you)"
+    lq = M.build(edit, {"snapshot": {**snap, "status": "waiting", "lanes": lanes, "paused": {"kind": "info", "questions": [{"question": "Which day?", "options": []}], "msg": 1}, "call_log": calls, "chat": chat}, "stages": [], "stage_words": {}})
+    assert {n["id"]: n for n in lq["nodes"]}["fn:priority"]["status"] == "waiting_on_you", "with a question open it does wait on you"
+    # the Map and Needs you always agree on "waiting on you": same source (an open question), checked for each kind of state
+    for paused_, idn_lane in ((None, "waiting"), (None, "idle"), ({"kind": "info", "questions": [{"question": "Which day?", "options": []}], "msg": 1, "label": "a fact"}, "waiting")):
+        ln_ = [{"id": "identity", "name": "Identity", "status": idn_lane, "on": "Requester", "doing": "asked"}]
+        mm_ = M.build(edit, {"snapshot": {**snap, "status": "waiting", "lanes": ln_, "paused": paused_, "call_log": calls, "chat": chat}, "stages": [], "stage_words": {}})
+        on_map = any(n["status"] == "waiting_on_you" for n in mm_["nodes"] if n["kind"] in ("function", "person"))
+        cnt = render_node({**j2.saved_snapshot(name, 0), "paused": paused_, "chat": chat}, docs={"docs": {}, "map": mm_})["needcount"]
+        assert on_map == (cnt > 0), (paused_, idn_lane, on_map, cnt)
     assert (f["fn:coordination"]["status"], f["fn:coordination"]["detail"]) == ("fault", "W-3 is held")
     assert (f["fn:audit"]["status"], f["fn:audit"]["detail"]) == ("idle", "last seen: checked site v2")
     assert f["fn:identity"]["calls"] == sum(1 for c in calls if c["fn"] == "identity")
@@ -5399,19 +5408,21 @@ def map_tab():
     rowl = [">Management layer</text>", ">Team layer and deliverables</text>"]
     sv2v = out2[out2.index('<svg class="mapsvg mapvert"'):out2.index("</svg>", out2.index('<svg class="mapsvg mapvert"')) + 6]      # the narrow drawing (under 900px)
     rows_ = lambda h: re.findall(r'class="rowlab"[^>]*>([^<]+)<', h)
-    assert rows_(sv2v) == ["You", "Management layer", "Team layer and deliverables"] and rows_(svg2) == ["Management layer", "Team layer and deliverables"], "the wide drawing has no You band: You sits in the Management layer row"
-    yo2, id2 = (re.search(r'cx="([\d.]+)" cy="([\d.]+)"', ng(svg2, i)).groups() for i in ("person:requester", "fn:identity"))
-    assert yo2[1] == id2[1] and float(yo2[0]) < float(id2[0]) and 'class="youdot"' in ng(svg2, "person:requester"), "You at the left end of the Management layer row, a circle with a solid centre"
-    assert all(r in svg2 for r in rowl) and [svg2.index(r) for r in rowl] == sorted(svg2.index(r) for r in rowl) and ">FUNCTIONS<" not in svg2 and ">WORK<" not in svg2 and ">Deliverables<" not in svg2 and svg2.count("data-maptab=") == 0, "row names, top to bottom; links live in the panel and the cards"
+    assert rows_(sv2v) == ["You", "Management layer", "Team layer and deliverables"] and rows_(svg2) == [], "the wide drawing has no bands: one row of chips above the trunk"
+    chip_ = lambda i: tuple(float(v) for v in re.findall(r'<rect class="shape" x="([\d.-]+)" y="([\d.-]+)"', ng(svg2, i))[-1])      # the inner outline (a running chip has two)
+    assert chip_("person:requester")[1] == chip_("fn:identity")[1] and chip_("person:requester")[0] < chip_("fn:identity")[0] < chip_("fn:adaptation")[0] < chip_("fn:audit")[0], "You first, then the five functions, in one row"
+    assert 'class="youdot"' in ng(svg2, "person:requester") and re.search(r'class="sub chipn"[^>]*>2<', ng(svg2, "person:requester")) and re.search(r'class="sub chipn"[^>]*>3<', fbox("identity")), "each chip shows a count (messages from you; calls)"
+    assert ">FUNCTIONS<" not in svg2 and ">WORK<" not in svg2 and svg2.count("data-maptab=") == 0, "links live in the panel and the cards"
     assert svg2.count('<g class="mapnode') == 1 + 5 + 5 + 6 and re.findall(r'data-fn="(fn:\w+)"', svg2) == ["fn:" + k for k in PN], "a dot for every node, the five functions in order"
-    assert fbox("identity").count("<circle") == 2 and ">Client Lead<" in fbox("identity") and ">(Identity)<" in fbox("identity") and "writing the charter" in fbox("identity").split("</title>")[0] and ">3 calls<" not in fbox("identity")      # double ring = running now; the call count and the state sit in the tooltip
+    assert fbox("identity").count('<rect class="shape"') == 2 and ">Client Lead<" in fbox("identity") and 'aria-label="Client Lead (Identity): details"' in fbox("identity") and "writing the charter" in fbox("identity").split("</title>")[0] and ">3 calls<" not in fbox("identity")      # double ring = running now; the call count and the state sit in the tooltip
     assert 'stroke="var(--validator)" stroke-width="4"' in fbox("adaptation") and ">?</text>" in fbox("adaptation") and "waiting on Priority" in fbox("adaptation").split("</title>")[0] and ">Strategist<" in fbox("adaptation")
     assert 'stroke="var(--validator)" stroke-width="4"' in fbox("priority") and "waiting on you" in fbox("priority").split("</title>")[0] and "1 AI call," in fbox("priority").split("</title>")[0] and ">Prioritiser<" in fbox("priority")
     assert 'stroke="var(--bad)" stroke-width="4"' in fbox("coordination") and ">!</text>" in fbox("coordination") and "blocked" in fbox("coordination").split("</title>")[0] and ">Scheduler<" in fbox("coordination")
     assert 'stroke="var(--line)"' in fbox("audit") and ", idle, " in fbox("audit") and "last seen: " in fbox("audit") and "@Identity" not in fbox("audit") and not re.search(r"done.when", fbox("audit")) and ">Quality Reviewer<" in fbox("audit")
     assert "<title>Client Lead (Identity), running now, writing the charter, 3 AI calls, 12.5 s, 100 tokens in, 20 out</title>" in fbox("identity")      # the full text and numbers in a tooltip
-    assert "2 from you · 5 to you" in svg2 and svg2.count('stroke-dasharray="1 3"') >= 3 and "Messages between functions" not in out2      # few lines: drawn, no table
-    assert "Client Lead (Identity) speaks to Strategist (Adaptation): 4 messages" in svg2 and "Strategist (Adaptation) speaks to Prioritiser (Priority): 7 messages" in svg2
+    assert "2 from you · 5 to you" in sv2v and sv2v.count('stroke-dasharray="1 3"') >= 3, "the narrow drawing draws a few function lines"
+    assert "Client Lead (Identity) speaks to Strategist (Adaptation): 4 messages" in sv2v and "Strategist (Adaptation) speaks to Prioritiser (Priority): 7 messages" in sv2v
+    assert svg2.count('<path class="mapedge speak') == 1 and '<details class="mapdd"><summary>Messages between functions (speaks to)</summary>' in out2, "the chip row draws only You to Client Lead; messages between functions are in the table"
     many = [spk("fn:identity", "fn:adaptation", 4), spk("fn:adaptation", "fn:priority", 7), spk("fn:priority", "fn:coordination", 2), spk("fn:coordination", "fn:audit", 9), spk("fn:audit", "fn:identity", 1)]
     out3 = render_node(snap, docs={"docs": {}, "map": {**mp2, "edges": edges + many}})["map"]
     svg3 = out3[out3.index("<svg class=\"mapsvg\""):out3.index("</svg>", out3.index("<svg class=\"mapsvg\"")) + 6]
@@ -5431,7 +5442,9 @@ def map_tab():
     assert s4.startswith('<svg class="mapsvg" data-pin="fn:identity"') and ">wrote it<" in s4 and re.findall(r'class="maplbl[^"]*" data-from="[^"]+" data-to="[^"]+" x="[^"]+" y="[^"]+">([^<]+)<', s4) == ["wrote it", "2", "1", "4"]
     for need in (".mapln{opacity:0}", ".maplbl{opacity:0", ".mapsvg .hot.mapln", ".mapsvg .mapnode.dim", ".mapsvg .hot.maplbl"):      # function-to-deliverable lines are hidden until a dot is lit; lit when hot; the rest fade when another dot is lit
         assert need in s4, need
-    assert "hot" in ng(s4, "fn:identity").split(">")[0] and "hot" in ng(s4, "fn:adaptation").split(">")[0] and "hot" in ng(s4, "person:requester").split(">")[0] and "hot" in ng(s4, "work:t0").split(">")[0] and "hot" in ng(s4, "work:t1").split(">")[0], "the pinned dot and its direct neighbours are lit"
+    s4v = o4[o4.index('<svg class="mapsvg mapvert"'):]
+    assert "hot" in ng(s4v, "fn:adaptation").split(">")[0] and "dim" in ng(s4, "fn:adaptation").split(">")[0], "a function line is a neighbour where it is drawn (narrow); the wide chip row keeps those in the table"
+    assert "hot" in ng(s4, "fn:identity").split(">")[0] and "hot" in ng(s4, "person:requester").split(">")[0] and "hot" in ng(s4, "work:t0").split(">")[0] and "hot" in ng(s4, "work:t1").split(">")[0], "the pinned dot and its direct neighbours are lit"
     assert "dim" in ng(s4, "fn:audit").split(">")[0] and "dim" in ng(s4, "work:t3").split(">")[0] and "dim" in ng(s4, "fn:priority").split(">")[0], "the rest fade"
 
 
@@ -5441,11 +5454,16 @@ def map_tab():
     assert s4.index('class="mapln') < s4.index('<g class="mapnode') and s4.rindex('<path class="map') < s4.index('<g class="mapnode'), "lines are drawn under the dots"
     ends = [re.search(r'd="M[\d.]+ ([\d.]+) C[^"]* ([\d.]+)"', x).groups() for x in re.findall(r'<path class="mapln[^"]*"[^>]*>', s4)]
     assert len({a for a, _ in ends}) == 1, "function-to-deliverable lines all start under the function labels"
-    for lp in re.findall(r'<path class="mapln[^"]*" data-from="[^"]+" data-to="([^"]+)" d="([^"]+)"', s4):      # and end at the side of their dot, a little short of it
-        x1_, y1_, x2_, y2_ = (float(v) for v in re.search(r'points="([\d.]+),([\d.]+) ([\d.]+),([\d.]+)', ng(s4, lp[0])).groups())      # a diamond: top corner, then right corner
-        cx_, cy_, r_ = x1_, y2_, x2_ - x1_
+    tops_ = {}      # every node's centre and top in the wide drawing
+    for g_ in s4.split('<g class="mapnode')[1:]:
+        id_ = htmllib.unescape(re.search(r'data-id="([^"]+)"', g_).group(1))
+        m1 = re.search(r'points="([\d.]+),([\d.]+) ([\d.]+),([\d.]+)', g_) or None
+        m2 = re.search(r'class="teamhit" cx="([\d.]+)" cy="([\d.]+)" r="([\d.]+)"', g_)
+        if m1: tops_[id_] = (float(m1.group(1)), float(m1.group(2)))
+        elif m2: tops_[id_] = (float(m2.group(1)), float(m2.group(2)) - float(m2.group(3)))
+    for lp in re.findall(r'<path class="mapln[^"]*" data-from="[^"]+" data-to="([^"]+)" d="([^"]+)"', s4):      # a chip's line ends just above the team that made the deliverable, or the deliverable
         ex_, ey_ = (float(v) for v in re.findall(r"-?[\d.]+", lp[1])[-2:])
-        assert r_ + 4 - 4.6 <= abs(ex_ - cx_) <= r_ + 4.6 and abs(ey_ - cy_) <= 8, lp      # (a dot that is running has an outer ring 4 wider)
+        assert any(abs(ex_ - x) < 0.6 and -0.6 <= y - ey_ <= 8.6 for x, y in tops_.values()), lp      # (a running node has an outer outline 4 wider)
     for tip in ("Client Lead (Identity) wrote the Box 0 with a very long name", "Client Lead (Identity) made 2 AI calls on Box 1 with a very long name", "Quality Reviewer (Audit) audited Box 1 with a very long name 1 time", "Scheduler (Coordination) made 4 AI calls on Box 3 with a very long name"):
         assert f"<title>{tip}</title>" in s4, tip
     assert "many" not in s4.split(">")[0], "no 'many' mode any more: the lines are always hover-only"
@@ -5470,7 +5488,8 @@ def map_tab():
     assert 'stroke="var(--bad)" stroke-width="4"' in box(3) and ">!</text>" in box(3)                       # thick red edge plus "!"
     assert 'fill="none" stroke="var(--line)"' in box(4) and ">!</text>" not in box(4)                      # hollow = not made
     assert 'stroke="var(--validator)" stroke-width="4"' in box(5) and ">?</text>" in box(5) and "version not recorded" in box(5)
-    assert "color-mix(in srgb, var(--prd) 14%, var(--panel))" in box(0) and "var(--hld)" in box(1) and ", version 1, filed and checked," in box(0) and ">v1<" not in box(0) and ">filed<" not in box(0)      # version and status moved into the tooltip
+    assert "color-mix(in srgb, var(--ok) 14%, var(--panel))" in box(0) and ", version 1, filed and checked," in box(0) and re.search(r'class="sub"[^>]*>v1(<| · )', box(0)) and ">filed<" not in box(0)      # green = filed; the short fact line under it
+    assert not re.search(r"var\(--(prd|hld|lld|site|charter|other|identity|adaptation|priority|coordination|audit|user)\)", svg), "colours follow the status only, never the kind of document or function"
     assert "left open" in box(2).split("</title>")[0] and "running now" in box(1).split("</title>")[0] and "fault" in box(3).split("</title>")[0] and "not made" in box(4).split("</title>")[0] and "waiting on you" in box(5).split("</title>")[0]
     assert "<title>Box 3 with a very long name, version 4, fault, Every checklist item passes inside its limits</title>" in box(3)      # full text in a tooltip
     assert not re.search(r"envelope|done.when", out, re.I), "plain words"
@@ -5606,7 +5625,7 @@ def map_tab():
             tgt = n["id"].split(">")[1]
             who_, verb = {"d1": ("Product Analyst", "drafting"), "d2": ("Solution Architect", "drafting"), "d3": ("Web Developer", "building"), "d4": ("Messenger", "sending"), "d5": ("Technical Designer", "drafting")}[tgt]
             words_ = " ".join(re.sub(r"<[^>]+>", " ", ng(svg_t, n["id"]).split("</title>")[1]).split())
-            assert words_.startswith(f"{who_} {verb} · 2 workflows") and f"{who_}, {verb} Deliverable {tgt} (2 workflows)" in ng(svg_t, n["id"]), (order, n["id"], words_)
+            assert words_ == f"{who_} · 2 workflows" and f"{who_}, {verb} Deliverable {tgt} (2 workflows)" in ng(svg_t, n["id"]), (order, n["id"], words_)
             svt_v = out_t[out_t.index('<svg class="mapsvg mapvert"'):]
             assert f">{who_}<" in ng(svt_v, n["id"]) and f">{verb} · 2 workflows<" in ng(svt_v, n["id"]), "the narrow drawing keeps one line each"
             assert f"{who_}, {verb} Deliverable {tgt} (2 workflows)" in out_t.split('class="mapcards"')[1], "the cards use the same words"
@@ -5699,8 +5718,26 @@ def map_tab():
         if os.path.isdir(os.path.join(repo_runs, n_)) and not os.path.exists(os.path.join(j2.RUNS_DIR, n_)):
             shutil.copytree(os.path.join(repo_runs, n_), os.path.join(j2.RUNS_DIR, n_))
             real_names.append(n_)
-    cross_runs = [("mock run", run.dir)] + [(n_, os.path.join(j2.RUNS_DIR, n_)) for n_ in real_names]
-    assert len(cross_runs) == 3, "both saved runs are in runs/"
+    keep_mail = os.environ.get("J2_TEST_EMAIL"); os.environ["J2_TEST_EMAIL"] = "me@example.invalid"
+    try:
+        send_run = docs_run(DESIGN_BRIEF + " When the documents are finished, send a test email to me with a short summary of the PRD.", 900)      # a mock run with a send step
+    finally:
+        os.environ.pop("J2_TEST_EMAIL", None)
+        if keep_mail is not None:
+            os.environ["J2_TEST_EMAIL"] = keep_mail
+    send_name = os.path.basename(send_run.dir)
+    cross_runs = [("mock run", run.dir), ("mock run with a send", send_run.dir)] + [(n_, os.path.join(j2.RUNS_DIR, n_)) for n_ in real_names]
+    assert len(cross_runs) == 4, "both saved runs are in runs/"
+    sm_ = M.build(send_run.dir)
+    assert [n_["id"] for n_ in sm_["nodes"] if n_["row"] == "work"][-2:] == ["step:lld>website", "work:website"] and any(n_.get("tag") == "Send" and n_["lane"] == "branch" for n_ in sm_["nodes"]), "the send sits off the trunk, the site follows the LLD"
+    # the outcome line names what is left open; the chip says when the latest Audit wants a revision
+    ns_ = render_node(j2.saved_snapshot(send_name, 0), docs={"docs": {}, "map": sm_})["needs"]
+    assert "Finished. 1 item left open: test email (dry run)." in ns_, ns_
+    ss_ = j2.saved_snapshot(send_name, 0)
+    chip_ok = render_node({**ss_, "workable": []}, docs={"docs": {}, "map": sm_})["map"]
+    chip_bad = render_node({**ss_, "workable": ["necessary condition N8 not met: a nav reaches every section"]}, docs={"docs": {}, "map": sm_})["map"]
+    assert 'class="mappill checks"' in chip_ok and "needs revision" not in chip_ok, "every check passed and Audit agrees: green"
+    assert 'class="mappill checks needsrev"' in chip_bad and "checks passed · Audit: needs revision<" in chip_bad, "the checks passed but the latest Audit says not workable: amber"
     pages_ = {}
     for label_, dir_ in cross_runs:
         mp_ = M.build(dir_)
@@ -5710,6 +5747,7 @@ def map_tab():
         assert crossings(sv_) == [], (label_, crossings(sv_))
         assert "could not be drawn without crossing" not in o_, label_
         steps_ = [n_["id"] for n_ in mp_["nodes"] if n_["kind"] == "engine"]
+        by_ = {n_["id"]: n_ for n_ in mp_["nodes"]}
         assert steps_, label_
         for sid in steps_:
             words_ = " ".join(re.sub(r"<[^>]+>", " ", ng(sv_, sid).split("</title>")[1]).replace("!", " ").replace("?", " ").split())
@@ -5717,9 +5755,27 @@ def map_tab():
             g_ = ng(sv_, sid); assert g_.count('class="teamdot"') == 5 and 'class="teamhit"' in g_, "a team persona is a ring of five dots in a round hit area"
             px_, py_ = (float(v) for v in re.search(r'class="teamhit" cx="([\d.]+)" cy="([\d.]+)"', g_).groups())
             tgt_ = "work:" + htmllib.unescape(sid).split(">")[1]
+            if by_[tgt_].get("lane") == "branch":
+                continue
+            src_ = "work:" + htmllib.unescape(sid).split(">")[0].split(":")[1]
             dx_, dy_ = (float(v) for v in re.search(r'points="([\d.]+),[\d.]+ [\d.]+,([\d.]+)', ng(sv_, tgt_)).groups())
-            assert abs(px_ - dx_) < 0.6 and py_ < dy_, (label_, sid, "the persona sits right above the deliverable it made")
+            sx_ = float(re.search(r'points="([\d.]+),', ng(sv_, src_)).group(1))
+            assert abs(py_ - dy_) < 0.6 and sx_ < px_ < dx_, (label_, sid, "the team sits on the stretch of line leading into the deliverable it made")
+        # side jobs: never in the trunk; the site's step takes the last document; drawn below the trunk
+        stp_ = [(e["from"], e["to"]) for e in mp_["edges"] if e["kind"] == "step"]
+        trunk_ = [n_["id"] for n_ in mp_["nodes"] if n_["kind"] == "work" and n_.get("lane") == "trunk"]
+        for d_ in [x for x in mp_["nodes"] if x["kind"] == "work" and x.get("tag") == "Send"]:
+            assert d_["lane"] == "branch" and not any(f == d_["id"] for f, _ in stp_), (label_, d_["id"], "a send is a side job: nothing is built from it")
+            ty_ = float(re.search(r'points="[\d.]+,[\d.]+ [\d.]+,([\d.]+)', ng(sv_, "work:website")).group(1))
+            ey_ = float(re.search(r'<rect class="shape" x="[\d.-]+" y="([\d.-]+)"', ng(sv_, d_["id"])).group(1))
+            assert ey_ > ty_, (label_, "the side job is drawn below the trunk")
+        if "work:website" in trunk_:
+            into_web = [f for f, t in stp_ if t.endswith(">website") and t.startswith("step:")]
+            assert into_web == [trunk_[trunk_.index("work:website") - 1]], (label_, into_web, "the site's step takes the last document as its input")
         for d_ in [x for x in mp_["nodes"] if x["kind"] == "work"]:
+            if d_.get("tag") == "Send":
+                assert '<rect class="shape"' in ng(sv_, d_["id"]) and "<polygon" not in ng(sv_, d_["id"]), (label_, d_["id"], "a send ends in a letter icon")
+                continue
             assert '<polygon class="shape"' in ng(sv_, d_["id"]) and '<circle class="shape"' not in ng(sv_, d_["id"]), (label_, d_["id"], "a deliverable is a diamond")
         sv_v = o_[o_.index('<svg class="mapsvg mapvert"'):o_.index("</svg>", o_.index('<svg class="mapsvg mapvert"'))]
         assert crossings(sv_v) == [], (label_, "narrow drawing", crossings(sv_v))
@@ -5815,13 +5871,13 @@ def map_tab():
               "const texts = [...sv.querySelectorAll('text')].filter(t => parseFloat(getComputedStyle(t).opacity) > 0.01 && t.textContent.trim()).map(t => ({t: t.textContent.trim(), b: t.getBBox()}));"
               "r.n = texts.length; r.hits = []; for (const x of texts) { for (const l of lines) if (l.o.some(([px, py]) => px > x.b.x - 1 && px < x.b.x + x.b.width + 1 && py > x.b.y && py < x.b.y + x.b.height)) r.hits.push(x.t + ' on ' + l.id); }"
               "for (let i = 0; i < texts.length; i++) for (let j = i + 1; j < texts.length; j++) { const a = texts[i].b, b = texts[j].b; if (a.x < b.x + b.width - 1 && b.x < a.x + a.width - 1 && a.y < b.y + b.height - 1 && b.y < a.y + a.height - 1) r.hits.push(texts[i].t + ' over ' + texts[j].t); }")
-        for rn in (name, *real_names):
+        for rn in (name, send_name, *real_names):
             d_ = home_probe(rn, base_js + fx)
             assert d_["n"] > 20 and d_["hits"] == [], (rn, d_["hits"])      # no label sits on a line or on another label
         # the wide drawing fits the map pane at 1440x900 with no scroll inside it; under 900px the narrow drawing is shown instead
         fit_js = ("const p = document.getElementById('pane-map'), w = document.querySelector('.mapsvg:not(.mapvert)'), v = document.querySelector('.mapsvg.mapvert');"
                   "r.fit = [p.scrollHeight, p.clientHeight, w.getClientRects().length > 0, v.getClientRects().length > 0];")
-        for rn in (name, *real_names):
+        for rn in (name, send_name, *real_names):
             f1 = home_probe(rn, base_js + fit_js, "1440,900")["fit"]
             assert f1[2] is True and f1[3] is False and f1[0] <= f1[1] + 1, (rn, f1)      # wide drawing shown, and it fits
         f2 = home_probe(real_names[0], base_js + fit_js, "860,900")["fit"]

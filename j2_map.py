@@ -127,8 +127,8 @@ def _functions(chat, calls, snap, requester_waiting, nr):
             node["status"] = {"working": "running", "waiting": "waiting", "blocked": "fault"}.get(ln.get("status"), "idle")
             if node["status"] == "waiting":
                 node["wait_on"] = on
-                if on == "Requester":
-                    node["status"], node["wait_on"] = "waiting_on_you", "you"
+                if on == "Requester":      # "waiting on you" only while a question to the Requester is open (the same source as Needs you)
+                    node["status"], node["wait_on"] = ("waiting_on_you", "you") if requester_waiting else ("idle", None)
             doing = (ln.get("doing") or "")[:140]
             node["detail"] = doing if node["status"] != "idle" else (f"last seen: {doing or last}" if (doing or last) else "no message recorded")
         else:
@@ -261,17 +261,32 @@ def build(d, live=None):
                           "color": "--other", "status": "not_made", "version": None, "detail": "not started", "file": None,
                           "workflows": [], "template": "send", "_atoms": [], "_order": 10 ** 5 + late})
     nodes.sort(key=lambda n: n["_order"])
-    # steps: what turned one box into the next (named by what its workflows do), with counts
+    # steps: what turned one box into the next (named by what its workflows do), with counts. The documents and the site are the
+    # trunk, in order. A deed (a send) is a side job: its step starts at the document it was built from (its recorded edge, else the
+    # last trunk box before it), so it never sits between two documents and the site's step takes the last document as its input.
     edges, work = [], [n for n in nodes if n["kind"] == "work"]
+    trunk = [n for n in work if n.get("template") != "send"]
+    made_by = {a["id"]: n["id"] for n in work for a in n.get("_atoms") or []}
+    pairs = list(zip(trunk, trunk[1:]))
+    for n in work:
+        n["lane"] = "trunk" if n in trunk else "branch"
+        if n in trunk:
+            continue
+        src = next((made_by.get(e.get("atom")) for a in n.get("_atoms") or [] for e in a.get("depends_on") or []
+                    if made_by.get(e.get("atom")) in {t["id"] for t in trunk}), None)
+        parent = next((t for t in trunk if t["id"] == src), None) or next((t for t in reversed(trunk) if t["_order"] <= n["_order"]), None) \
+            or (trunk[-1] if trunk else None)
+        if parent:
+            pairs.append((parent, n))
     steps = []
-    for a, b in zip(work, work[1:]):
+    for a, b in pairs:
         ats = b.get("_atoms") or []
         ch = _checks(ats)
         wf = len(b["workflows"])
         detail = (f"{wf} workflow{'s' if wf != 1 else ''} · {ch['passed']} of {ch['run']} checks passed" if wf else "not recorded")
         sid = f"step:{a['id'].split(':')[1]}>{b['id'].split(':')[1]}"
         steps.append({"id": sid, "kind": "engine", "row": "work", "label": STEP_VERB.get(b.get("template"), "Make"), "status": b["status"],
-                      "version": None, "detail": detail, "file": None, "workflows": b["workflows"], "tag": None, "color": None})
+                      "version": None, "detail": detail, "file": None, "workflows": b["workflows"], "tag": None, "color": None, "lane": b["lane"]})
         edges += [{"from": a["id"], "to": sid, "kind": "step", "label": None, "n": wf, "basis": "recorded" if wf else "declared"},
                   {"from": sid, "to": b["id"], "kind": "step", "label": None, "n": wf, "basis": "recorded" if wf else "declared"}]
         if not wf:
@@ -337,12 +352,16 @@ def build(d, live=None):
     lines = _work_lines(d, work, calls, docs, nr)
     if state == "not recorded":
         nr.append("how the run ended (summary.json)")
-    # interleave the steps with the boxes in drawing order
-    order = []
-    for i, n in enumerate(work):
+    # drawing order: each trunk box, then the side jobs that leave it (their step, then the deed), then the step to the next trunk box
+    order, into = [], {st["id"].split(">")[1]: st for st in steps}
+    for i, n in enumerate(trunk):
+        if i:
+            order.append(into[n["id"].split(":")[1]])
         order.append(n)
-        if i < len(steps):
-            order.append(steps[i])
+        for b in [x for x in work if x["lane"] == "branch"]:
+            st = into.get(b["id"].split(":")[1])
+            if st and st["id"].split(">")[0] == "step:" + n["id"].split(":")[1]:
+                order += [st, b]
     out_nodes = [person] + funcs + order
     for n in out_nodes:
         n.pop("_atoms", None)
