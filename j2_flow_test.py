@@ -913,12 +913,29 @@ SIMPLE_FORBIDDEN_CASE = re.compile(r"\b(COUNTER|GRANT|REFUSE|Clause|NEEDS_REVISI
                                    r"|\b(?:after|before|by|from|until|than) the team\b")   # e.g. "after Audit" -> not "after the team"
 
 
+CHROME_HANGS = []
+
+
+def chrome_dom(cmd, capture_output=True, text=True, timeout=90):
+    """Headless Chrome for a page check. About once in a full --browser run (some 520 Chrome calls) one call never finishes,
+    whichever page it is: 1200 calls of the same pages outside the suite never hung. A hang is retried once and listed at the end
+    of the run; a page that hangs twice, or renders the wrong thing, still fails."""
+    import subprocess
+    for k in range(2):
+        try:
+            return j2.j2_check.run_chrome(cmd, timeout)
+        except subprocess.TimeoutExpired:
+            if k:
+                raise
+            CHROME_HANGS.append(f"{inspect.stack()[1].function}: {cmd[-1][-60:]}")
+
+
 def simple_text(base):
     """Visible text of the Simple view (#sview) after the page has rendered, from headless Chrome's DOM."""
     import html.parser
     import subprocess
     chrome = j2.j2_check.find_chrome()
-    out = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=6000", "--dump-dom",
+    out = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=6000", "--dump-dom",
                           base + "/?view=simple"], capture_output=True, text=True, timeout=90).stdout
 
     class P(html.parser.HTMLParser):
@@ -1005,7 +1022,7 @@ def simple_view():
                 assert body not in text, ("agent message in the Simple view", m["text"][:80])
         # (d) the Detailed view shows both parts of a reply, each labelled with who it is for
         import subprocess
-        dom = subprocess.run([j2.j2_check.find_chrome(), "--headless=new", "--disable-gpu", "--virtual-time-budget=6000",
+        dom = chrome_dom([j2.j2_check.find_chrome(), "--headless=new", "--disable-gpu", "--virtual-time-budget=6000",
                               "--dump-dom", base + "/?view=detail"], capture_output=True, text=True, timeout=90).stdout
         assert "for Requester (you)" in dom and "for Adaptation" in dom, "Detailed view must label both audiences"
     finally:
@@ -1088,7 +1105,7 @@ def work_atom_cards():
     srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     try:
-        dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=8000", "--dump-dom",
+        dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=8000", "--dump-dom",
                               f"http://127.0.0.1:{srv.server_address[1]}/?view=detail"],
                              capture_output=True, text=True, timeout=120).stdout
     finally:
@@ -1448,7 +1465,7 @@ def detail_stays_open():
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     try:
         before = len(run.audits)
-        out = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=12000", "--dump-dom",
+        out = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=12000", "--dump-dom",
                               f"http://127.0.0.1:{srv.server_address[1]}/?view=detail"],
                              capture_output=True, text=True, timeout=120).stdout
         m = re.search(r'data-r="([^"]*)"', out)
@@ -3827,7 +3844,7 @@ def fresh_page_run():
         if j2.j2_check.find_chrome() and (BROWSER or not FAST):       # the real page: no error text in the page's own elements
             import subprocess
             for q in ("?view=detail", f"?view=detail&run={rid}", "?view=simple"):
-                dom = subprocess.run([j2.j2_check.find_chrome(), "--headless=new", "--disable-gpu", "--virtual-time-budget=6000",
+                dom = chrome_dom([j2.j2_check.find_chrome(), "--headless=new", "--disable-gpu", "--virtual-time-budget=6000",
                                       "--dump-dom", base + "/" + q], capture_output=True, text=True, timeout=90).stdout
                 assert re.search(r'id="sstatus">\s*</', dom) and 'class="oops"' not in dom.split("</script>")[-1], q
     finally:
@@ -4731,13 +4748,20 @@ def charter_objects():
     keep = {k: os.environ.get(k) for k in ("J2_TEST_EMAIL", "J2_SEND_MODE")}
     os.environ["J2_TEST_EMAIL"] = "me@example.invalid"
     os.environ.pop("J2_SEND_MODE", None)
+    given, read_as = [], []
 
     def objects(run, orig):
+        facts = run._fact_problems
+        def read(goal, change):      # the charter as the intake reads it, before anything else sees it
+            read_as.append(list(goal["done_when"]))
+            return facts(goal, change)
+        run._fact_problems = read
         def call(fn, *a, **k):
             r = orig(fn, *a, **k)
             g = r.get("goal") if isinstance(r, dict) else None
             if fn == "identity" and isinstance(g, dict) and g.get("done_when") and all(isinstance(x, str) for x in g["done_when"]):
-                g["done_when"] = [{"item": i, "criterion": x} for i, x in enumerate(g["done_when"], 1)]
+                given.append(list(g["done_when"]))      # out of order on purpose: the item number, not the list position, says where each goes
+                g["done_when"] = [{"item": i, "criterion": x} for i, x in reversed(list(enumerate(g["done_when"], 1)))]
             return r
         return call
     try:
@@ -4753,9 +4777,11 @@ def charter_objects():
     assert any(m.get("who") == "validator" and m.get("register") for m in chat), "the run went past the GRANT: workflows were registered"
     g = json.load(open(os.path.join(run.dir, "goal.json"), encoding="utf-8"))
     assert all(isinstance(c, str) for c in g["done_when"] + g["charter_items"] + g.get("core_items", [])), "the charter holds the item text, never the object"
+    assert given and read_as == given, ("item n is read as charter item n, with its criterion text unchanged", given, read_as)
+    assert all(run._no(c) == i for i, c in enumerate(given[-1], 1)), "each criterion keeps its item number"
     deed = [w for w in run.past_workflows + run.workflows if w["name"] == j2_send.DEEDS["send_email"]["label"]]
     assert deed and deed[0]["atoms"], "the send deed's atom was created"
-    print("charter given as objects: done_when read as text, the run goes past Priority's GRANT, documents and website built, the test email deed atom created ok")
+    print("charter given as objects (out of order): each item number keeps its criterion text, done_when read as text, the run goes past Priority's GRANT, documents and website built, the test email deed atom created ok")
 
 
 def milestone_emails():
@@ -5600,7 +5626,7 @@ def map_tab():
         open(page, "w", encoding="utf-8").write(f"<html><head><meta name=viewport content='width=device-width'><style>{css}</style></head><body>{real}"
             "<script>document.body.setAttribute('data-m', [document.documentElement.scrollWidth, innerWidth, getComputedStyle(document.querySelector('.mapsvgwrap')).display, getComputedStyle(document.querySelector('.mapcards')).display, [...document.querySelectorAll('.mapln')].every(x => x.getBoundingClientRect().width === 0)].join('|'))</script></body></html>")
         for width, want in ((500, "none|block|true"), (1100, "block|none|false")):
-            dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", f"--window-size={width},800", "--virtual-time-budget=2000", "--dump-dom", "file://" + page],
+            dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", f"--window-size={width},800", "--virtual-time-budget=2000", "--dump-dom", "file://" + page],
                                  capture_output=True, text=True, timeout=120).stdout
             sw, iw, a, b, c = re.search(r'data-m="([^"]+)"', dom).group(1).split("|")
             assert int(sw) <= int(iw) and f"{a}|{b}|{c}" == want, (width, sw, iw, a, b, c)      # at 500px the function-to-work lines take no space
@@ -5624,7 +5650,7 @@ def map_tab():
         srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
         threading.Thread(target=srv.serve_forever, daemon=True).start()
         try:
-            dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=12000", "--dump-dom",
+            dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=12000", "--dump-dom",
                                   f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={name}"], capture_output=True, text=True, timeout=180).stdout
         finally:
             j2_server.HERE, j2_server.RUN = keep_here, keep
@@ -5642,7 +5668,7 @@ def map_tab():
         srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
         threading.Thread(target=srv.serve_forever, daemon=True).start()
         try:
-            dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=8000", "--dump-dom",
+            dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=8000", "--dump-dom",
                                   f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={name}"], capture_output=True, text=True, timeout=120).stdout
         finally:
             j2_server.RUN = keep
@@ -5900,7 +5926,7 @@ def map_tab():
             srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
             threading.Thread(target=srv.serve_forever, daemon=True).start()
             try:
-                dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", f"--window-size={size}", "--virtual-time-budget=12000", "--dump-dom",
+                dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", f"--window-size={size}", "--virtual-time-budget=12000", "--dump-dom",
                                       f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={run_name}"], capture_output=True, text=True, timeout=180).stdout
             finally:
                 j2_server.HERE, j2_server.RUN = keep_here, keep
@@ -6326,4 +6352,6 @@ if __name__ == "__main__":
     print("G simple view (plain words at the source and as fallback, buttons once, phone toggle, ready card) ok")
     assert fingerprint(REAL_MEMORY) == REAL_BEFORE, "the tests changed the real memory/ files"
     print("playbooks: same business type only, mock memory kept from live runs; real memory/ untouched ok")
+    if CHROME_HANGS:
+        print(f"Chrome hung {len(CHROME_HANGS)} time(s), each passed on its one retry: " + "; ".join(CHROME_HANGS))
     print("j2 flow checks passed")

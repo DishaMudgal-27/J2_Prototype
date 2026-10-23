@@ -3697,7 +3697,11 @@ class J2Run:
             return
         # The STATE shows each done-when item as {"item": n, "criterion": text}; a charter that copies that shape is read as the text
         # (run j2-20261023-102259: the objects reached a set and stopped the run). Everything after this sees strings.
-        goal["done_when"] = [str(c.get("criterion") or c.get("text") or "").strip() if isinstance(c, dict) else c for c in goal.get("done_when") or []]
+        # The item number is a position in the charter, so the objects are put in item order first: item n stays checklist item n.
+        dw = goal.get("done_when") or []
+        if any(isinstance(c, dict) for c in dw):
+            dw = sorted(dw, key=lambda c: as_int(c.get("item")) if isinstance(c, dict) and as_int(c.get("item")) > 0 else 10**6)
+        goal["done_when"] = [str(c.get("criterion") or c.get("text") or "").strip() if isinstance(c, dict) else c for c in dw]
         goal["done_when"] = [c for c in goal["done_when"] if c != ""]
         bad = self._fact_problems(goal, change)
         if bad:
