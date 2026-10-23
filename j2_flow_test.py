@@ -5308,7 +5308,12 @@ def map_tab():
     ng = lambda s, i: next(x for x in s.split('<g class="mapnode')[1:] if f'data-id="{htmllib.escape(i)}"' in x)      # one dot: its tooltip, rings and label
     fbox = lambda k: ng(svg2, f"fn:{k}")
     PN = {"identity": "Client Lead (Identity)", "adaptation": "Strategist (Adaptation)", "priority": "Prioritiser (Priority)", "coordination": "Scheduler (Coordination)", "audit": "Quality Reviewer (Audit)"}
-    rowl = [">You</text>", ">Management layer</text>", ">Team layer and deliverables</text>"]
+    rowl = [">Management layer</text>", ">Team layer and deliverables</text>"]
+    sv2v = out2[out2.index('<svg class="mapsvg mapvert"'):out2.index("</svg>", out2.index('<svg class="mapsvg mapvert"')) + 6]      # the narrow drawing (under 900px)
+    rows_ = lambda h: re.findall(r'class="rowlab"[^>]*>([^<]+)<', h)
+    assert rows_(sv2v) == ["You", "Management layer", "Team layer and deliverables"] and rows_(svg2) == ["Management layer", "Team layer and deliverables"], "the wide drawing has no You band: You sits in the Management layer row"
+    yo2, id2 = (re.search(r'cx="([\d.]+)" cy="([\d.]+)"', ng(svg2, i)).groups() for i in ("person:requester", "fn:identity"))
+    assert yo2[1] == id2[1] and float(yo2[0]) < float(id2[0]) and 'class="youdot"' in ng(svg2, "person:requester"), "You at the left end of the Management layer row, a circle with a solid centre"
     assert all(r in svg2 for r in rowl) and [svg2.index(r) for r in rowl] == sorted(svg2.index(r) for r in rowl) and ">FUNCTIONS<" not in svg2 and ">WORK<" not in svg2 and ">Deliverables<" not in svg2 and svg2.count("data-maptab=") == 0, "row names, top to bottom; links live in the panel and the cards"
     assert svg2.count('<g class="mapnode') == 1 + 5 + 5 + 6 and re.findall(r'data-fn="(fn:\w+)"', svg2) == ["fn:" + k for k in PN], "a dot for every node, the five functions in order"
     assert fbox("identity").count("<circle") == 2 and ">Client Lead<" in fbox("identity") and ">(Identity)<" in fbox("identity") and "writing the charter" in fbox("identity").split("</title>")[0] and ">3 calls<" not in fbox("identity")      # double ring = running now; the call count and the state sit in the tooltip
@@ -5349,7 +5354,8 @@ def map_tab():
     ends = [re.search(r'd="M[\d.]+ ([\d.]+) C[^"]* ([\d.]+)"', x).groups() for x in re.findall(r'<path class="mapln[^"]*"[^>]*>', s4)]
     assert len({a for a, _ in ends}) == 1, "function-to-deliverable lines all start under the function labels"
     for lp in re.findall(r'<path class="mapln[^"]*" data-from="[^"]+" data-to="([^"]+)" d="([^"]+)"', s4):      # and end at the side of their dot, a little short of it
-        cx_, cy_, r_ = (float(v) for v in re.search(r'cx="([\d.]+)" cy="([\d.]+)" r="([\d.]+)"', ng(s4, lp[0])).groups())
+        x1_, y1_, x2_, y2_ = (float(v) for v in re.search(r'points="([\d.]+),([\d.]+) ([\d.]+),([\d.]+)', ng(s4, lp[0])).groups())      # a diamond: top corner, then right corner
+        cx_, cy_, r_ = x1_, y2_, x2_ - x1_
         ex_, ey_ = (float(v) for v in re.findall(r"-?[\d.]+", lp[1])[-2:])
         assert r_ + 4 - 4.6 <= abs(ex_ - cx_) <= r_ + 4.6 and abs(ey_ - cy_) <= 8, lp      # (a dot that is running has an outer ring 4 wider)
     for tip in ("Client Lead (Identity) wrote the Box 0 with a very long name", "Client Lead (Identity) made 2 AI calls on Box 1 with a very long name", "Quality Reviewer (Audit) audited Box 1 with a very long name 1 time", "Scheduler (Coordination) made 4 AI calls on Box 3 with a very long name"):
@@ -5372,7 +5378,7 @@ def map_tab():
     assert ">No checks yet<" in nc and 'class="mappill nochecks"' in nc and 'class="mappill checks"' not in nc and "0 of 0" not in nc, "a run with no checks is not shown as a green chip"
     box = lambda i: ng(svg, f"work:t{i}")
     assert 'stroke-dasharray="6 4"' in box(2) and "stroke-dasharray" not in box(0)                       # dashed = left open
-    assert box(1).count("<circle") == 2 and box(0).count("<circle") == 1                                      # double ring = running now
+    assert box(1).count("<polygon") == 2 and box(0).count("<polygon") == 1 and "<circle class=\"shape\"" not in box(0)      # deliverables are diamonds; a double outline = running now
     assert 'stroke="var(--bad)" stroke-width="4"' in box(3) and ">!</text>" in box(3)                       # thick red edge plus "!"
     assert 'fill="none" stroke="var(--line)"' in box(4) and ">!</text>" not in box(4)                      # hollow = not made
     assert 'stroke="var(--validator)" stroke-width="4"' in box(5) and ">?</text>" in box(5) and "version not recorded" in box(5)
@@ -5393,7 +5399,7 @@ def map_tab():
     empty = render_node(snap, docs={"docs": {}, "map": {"nodes": [], "edges": []}})["map"]
     assert "Nothing to draw yet." in empty
     real = render_node(snap, docs={"docs": {}, "map": saved})["map"]
-    assert real.count('<g class="mapnode') == len(saved["nodes"]) and "Product requirements" in real and "v6" in real and f"Not recorded ({len(saved['not_recorded'])})" in real
+    assert real.count('<g class="mapnode') == 2 * len(saved["nodes"]) and real.split('<svg class="mapsvg mapvert"')[0].count('<g class="mapnode') == len(saved["nodes"]) and "Product requirements" in real and "v6" in real and f"Not recorded ({len(saved['not_recorded'])})" in real
     assert not re.search(r"envelope|done.when", real, re.I)
     assert real.count('data-maptab=') >= 5 and ">Management layer</text>" in real and '<details class="mapdd"><summary>Messages between functions (speaks to)</summary>' in real      # six pairs: a table, not crossing lines
     assert '<details class="mapdd"><summary>Who made each step (calls by function)</summary>' in real and "<td>Web Developer (building Website)</td><td>not recorded</td>" in real
@@ -5405,7 +5411,7 @@ def map_tab():
     assert f"made with: {mw('prd')}" in rc and f"made with: {mw('lld')}" in rc and "made with: Quality Reviewer (Audit) 2" in rc and "made with: Client Lead (Identity)<" in rc.replace("</div>", "<")
     assert rc.count("which other function worked on this: not recorded") == 1 and "worked on: Charter, " + lab["prd"] + " " + str(by_fn("identity", docs_rec["prd"]["calls"], calls)) in rc
     assert "worked on: " + lab["prd"] + " 1, " + lab["hld"] + " 1, " + lab["lld"] + " 1, " + lab["website"] + " 2" in rc      # Audit
-    assert real.split("<svg")[1].split(">")[0].startswith(' class="mapsvg"') and real.count('<path class="mapln"') == len([x for x in lines]), "17 lines: drawn, shown only on hover or click"
+    assert real.split("<svg")[1].split(">")[0].startswith(' class="mapsvg"') and real.count('<path class="mapln"') == 2 * len([x for x in lines]), "17 lines in each drawing, shown only on hover or click"
     assert "which function made this step: not recorded" in rc and "made by Client Lead (Identity) 2, Strategist (Adaptation) 1, Prioritiser (Priority) 1, Scheduler (Coordination) 6, Quality Reviewer (Audit) 1" in rc and rc.count('data-node="fn:') == 5
     # a browser: no sideways scroll at 500px, cards shown, SVG hidden; the tab sits after Artifacts and the pane reads plain
     chrome = j2.j2_check.find_chrome()
@@ -5474,19 +5480,20 @@ def map_tab():
     rg = render_node(snap, docs={"docs": {}, "map": saved})
     gv, byid = rg["given"], {n["id"]: n for n in saved["nodes"]}
     assert gv and all(g["known"] and byid[g["to"]]["kind"] == "engine" and g["to"].endswith(">" + g["box"].split(":", 1)[1]) for g in gv), gv
-    drawn = re.findall(r'<path class="mapedge given[^"]*" data-from="([^"]+)" data-to="([^"]+)"', rg["map"])
+    wide = lambda h: h.split('<svg class="mapsvg mapvert"')[0]      # the wide drawing (the narrow one draws the same lines)
+    drawn = re.findall(r'<path class="mapedge given[^"]*" data-from="([^"]+)" data-to="([^"]+)"', wide(rg["map"]))
     assert drawn and all(b.startswith("step:") for _, b in drawn) and len(drawn) == len([g for g in gv if not g["chain"]]), drawn
     assert "work:" not in " ".join(b for _, b in drawn) and "which step used" not in rg["map"], "every consumer is known on the real map"
     cut = {**saved, "edges": [e for e in saved["edges"] if not (e["kind"] == "step" and e["to"] == "work:lld")]}      # no step recorded for the LLD: the line stays on the box and the gap is listed
     oc = render_node(snap, docs={"docs": {}, "map": cut})
     gc = [g for g in oc["given"] if g["box"] == "work:lld"]
     assert gc and all(not g["known"] and g["to"] == "work:lld" for g in gc), gc
-    dc = re.findall(r'<path class="mapedge given[^"]*" data-from="([^"]+)" data-to="([^"]+)"', oc["map"])
+    dc = re.findall(r'<path class="mapedge given[^"]*" data-from="([^"]+)" data-to="([^"]+)"', wide(oc["map"]))
     assert ("work:prd", "work:lld") in dc and all(b.startswith("step:") for a, b in dc if b != "work:lld")
     assert f"Not recorded ({len(saved['not_recorded']) + len(gc)})" in oc["map"] and "which step used Product requirements given to Low-level design: not recorded" in oc["map"]
     assert "given to Low-level design (which step used it: not recorded)" in oc["map"].split('class="mapcards"')[1], "the cards say the same"
     # every function dot reads "Persona (Function)"
-    assert re.findall(r'data-fn="fn:\w+"[^>]*aria-label="([^"]+)"', rg["map"]) == [PN[k] + ": details" for k in PN], "Persona (Function) on every function dot"
+    assert re.findall(r'data-fn="fn:\w+"[^>]*aria-label="([^"]+)"', wide(rg["map"])) == [PN[k] + ": details" for k in PN], "Persona (Function) on every function dot"
     assert ">Identity<" not in rg["map"].split("<svg")[1].split("</svg>")[0] and ">(Identity)<" in rg["map"], "the bare function name is only in brackets"
     # a step is Drafting, Building or Sending by what it makes, wherever it sits in the row
     def tiny(order):
@@ -5510,7 +5517,10 @@ def map_tab():
                 continue
             tgt = n["id"].split(">")[1]
             who_, verb = {"d1": ("Product Analyst", "drafting"), "d2": ("Solution Architect", "drafting"), "d3": ("Web Developer", "building"), "d4": ("Messenger", "sending"), "d5": ("Technical Designer", "drafting")}[tgt]
-            assert f">{who_}<" in ng(svg_t, n["id"]) and f">{verb} · 2 workflows<" in ng(svg_t, n["id"]) and f"{who_}, {verb} Deliverable {tgt} (2 workflows)" in ng(svg_t, n["id"]), (order, n["id"], who_)
+            words_ = " ".join(re.sub(r"<[^>]+>", " ", ng(svg_t, n["id"]).split("</title>")[1]).split())
+            assert words_.startswith(f"{who_} {verb} · 2 workflows") and f"{who_}, {verb} Deliverable {tgt} (2 workflows)" in ng(svg_t, n["id"]), (order, n["id"], words_)
+            svt_v = out_t[out_t.index('<svg class="mapsvg mapvert"'):]
+            assert f">{who_}<" in ng(svt_v, n["id"]) and f">{verb} · 2 workflows<" in ng(svt_v, n["id"]), "the narrow drawing keeps one line each"
             assert f"{who_}, {verb} Deliverable {tgt} (2 workflows)" in out_t.split('class="mapcards"')[1], "the cards use the same words"
         assert ">Write<" not in svg_t and ">Build<" not in svg_t and ">Send<" not in svg_t and ">Drafting<" not in svg_t
     # ---- Map and Chat are the whole app: the rail, the Needs you strip, and the Map as the navigation
@@ -5560,8 +5570,8 @@ def map_tab():
     assert "<th>Strategist (Adaptation)</th>" in fo and "<th>Prioritiser (Priority)</th>" not in fo, "the calls table keeps only that function"
     assert "data-mapfiltclear" not in real and '<details class="mapdd" open>' not in real, "unfiltered: both tables closed"
     # ---- the home is simpler: the header is only the department name; the controls are in Run settings; one Map heading
-    hdr = re.search(r'<header class="dtop">(.*?)</header>', ui, re.S).group(1)
-    assert re.sub(r"<[^>]+>", "", hdr).strip() == "J2 Department" and not re.search(r"<(select|button|a |p )", hdr), "the header is the name and nothing else"
+    assert '<header class="dtop">' not in ui and ui.count("J2 Department") == 1 and "<title>J2 Department</title>" in ui, "no department heading on the page; the title stays"
+    assert ui.split('<div id="dview">')[1].split('<div class="dcol">')[1].lstrip().startswith('<section class="needs"'), "the page starts with the Needs you strip"
     rs = ui[ui.index('id="pane-runsettings"'):ui.index("</section>", ui.index('id="pane-runsettings"'))]
     assert all(f'id="{i}"' in rs for i in ("outsel", "runsel", "reset", "to-simple")) and "Back to simple view" in rs and 'href="?view=simple"' in rs, "the old controls live in Run settings"
     assert all(f'id="{i}"' not in ui[:ui.index('id="pane-runsettings"')].split('<div id="dview">')[1] for i in ("outsel", "runsel", "reset", "to-simple")), "and nowhere else in the Detailed view"
@@ -5577,12 +5587,13 @@ def map_tab():
     def svg_edges(h):
         out = []
         for m_ in re.finditer(r'<path class="mapedge[^"]*" data-from="([^"]+)" data-to="([^"]+)" d="([^"]+)"', h):
-            nums = [float(v) for v in re.findall(r"-?\d+\.?\d*", m_.group(3))]
-            if "C" in m_.group(3):
-                x0, y0, x1, y1, x2, y2, x3, y3 = nums
-                pts = [((1 - t) ** 3 * x0 + 3 * (1 - t) ** 2 * t * x1 + 3 * (1 - t) * t * t * x2 + t ** 3 * x3, (1 - t) ** 3 * y0 + 3 * (1 - t) ** 2 * t * y1 + 3 * (1 - t) * t * t * y2 + t ** 3 * y3) for t in (i / 60 for i in range(61))]
-            else:
-                pts = [(nums[0], nums[1]), (nums[2], nums[3])]
+            pts, cx, cy = [], 0.0, 0.0
+            for k_, a_ in re.findall(r"([MLC])([^MLC]*)", m_.group(3)):
+                v = [float(x) for x in a_.split()]
+                if k_ != "C":
+                    cx, cy = v[0], v[1]; pts.append((cx, cy)); continue
+                pts += [((1 - t) ** 3 * cx + 3 * (1 - t) ** 2 * t * v[0] + 3 * (1 - t) * t * t * v[2] + t ** 3 * v[4], (1 - t) ** 3 * cy + 3 * (1 - t) ** 2 * t * v[1] + 3 * (1 - t) * t * t * v[3] + t ** 3 * v[5]) for t in (i / 60 for i in range(1, 61))]
+                cx, cy = v[4], v[5]
             out.append((htmllib.unescape(m_.group(1)), htmllib.unescape(m_.group(2)), pts))
         return out
     def crossings(h):
@@ -5602,6 +5613,7 @@ def map_tab():
             real_names.append(n_)
     cross_runs = [("mock run", run.dir)] + [(n_, os.path.join(j2.RUNS_DIR, n_)) for n_ in real_names]
     assert len(cross_runs) == 3, "both saved runs are in runs/"
+    pages_ = {}
     for label_, dir_ in cross_runs:
         mp_ = M.build(dir_)
         sn_ = j2.saved_snapshot(os.path.basename(dir_), 0)
@@ -5612,8 +5624,18 @@ def map_tab():
         steps_ = [n_["id"] for n_ in mp_["nodes"] if n_["kind"] == "engine"]
         assert steps_, label_
         for sid in steps_:
-            first = [t for t in re.findall(r"<text[^>]*>([^<]+)</text>", ng(sv_, sid)) if t not in ("!", "?")][0]
-            assert first in TEAM, (label_, sid, first)
+            words_ = " ".join(re.sub(r"<[^>]+>", " ", ng(sv_, sid).split("</title>")[1]).replace("!", " ").replace("?", " ").split())
+            assert any(words_.startswith(t_ + " ") for t_ in TEAM), (label_, sid, words_)
+            g_ = ng(sv_, sid); assert g_.count('class="teamdot"') == 5 and 'class="teamhit"' in g_, "a team persona is a ring of five dots in a round hit area"
+            px_, py_ = (float(v) for v in re.search(r'class="teamhit" cx="([\d.]+)" cy="([\d.]+)"', g_).groups())
+            tgt_ = "work:" + htmllib.unescape(sid).split(">")[1]
+            dx_, dy_ = (float(v) for v in re.search(r'points="([\d.]+),[\d.]+ [\d.]+,([\d.]+)', ng(sv_, tgt_)).groups())
+            assert abs(px_ - dx_) < 0.6 and py_ < dy_, (label_, sid, "the persona sits right above the deliverable it made")
+        for d_ in [x for x in mp_["nodes"] if x["kind"] == "work"]:
+            assert '<polygon class="shape"' in ng(sv_, d_["id"]) and '<circle class="shape"' not in ng(sv_, d_["id"]), (label_, d_["id"], "a deliverable is a diamond")
+        sv_v = o_[o_.index('<svg class="mapsvg mapvert"'):o_.index("</svg>", o_.index('<svg class="mapsvg mapvert"'))]
+        assert crossings(sv_v) == [], (label_, "narrow drawing", crossings(sv_v))
+        pages_[label_] = [(htmllib.unescape(a_["from"]), htmllib.unescape(a_["to"]), a_["page"]) for a_ in render_node(sn_, docs={"docs": {}, "map": mp_})["pages"]]
     # three given-to loops that all interleave cannot sit on two sides: the one that cannot be placed is drawn round the outside and listed, never silently crossed
     ds = [f"d{i}" for i in range(1, 7)]
     tn, te = [], []
@@ -5639,7 +5661,7 @@ def map_tab():
         os.remove(os.path.join(ended, "map.json"))
         with open(os.path.join(ended, "chat.jsonl"), "a", encoding="utf-8") as fh:
             fh.write(json.dumps({"id": 9999, "who": "identity", "text": "@Requester Add credits?", "to_user": True, "pause": "limit", "next": "user"}) + "\n")
-        def home_probe(run_name, js):
+        def home_probe(run_name, js, size="1280,900"):
             tmp = tempfile.mkdtemp(prefix="j2-home-")
             open(os.path.join(tmp, "j2_ui.html"), "w", encoding="utf-8").write(ui.replace("</body>", "<script>setTimeout(() => { const r = {}; try { " + js + " } catch (e) { r.error = String(e); } document.body.setAttribute('data-r', JSON.stringify(r)); }, 4500)</script></body>"))
             keep_here, j2_server.HERE = j2_server.HERE, tmp
@@ -5647,7 +5669,7 @@ def map_tab():
             srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
             threading.Thread(target=srv.serve_forever, daemon=True).start()
             try:
-                dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--window-size=1280,900", "--virtual-time-budget=12000", "--dump-dom",
+                dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", f"--window-size={size}", "--virtual-time-budget=12000", "--dump-dom",
                                       f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={run_name}"], capture_output=True, text=True, timeout=180).stdout
             finally:
                 j2_server.HERE, j2_server.RUN = keep_here, keep
@@ -5691,23 +5713,31 @@ def map_tab():
         # the header is the name only; Map has one visible heading; the outcome line opens the Report; the banner text is there; nothing overlaps
         vis_js = "const seen = e => e.getClientRects().length > 0 && getComputedStyle(e).visibility !== 'hidden';"
         c = home_probe(name, base_js + vis_js +
-            "r.head = document.querySelector('#dview header.dtop').innerText.trim(); r.heads = q('#dview h1, #dview h2, #dview h3').filter(seen).map(h => h.textContent.trim()).filter(t => t === 'Map').length;"
+            "r.head = q('#dview h1').filter(seen).length + '|' + document.getElementById('dview').innerText.includes('J2 Department'); r.heads = q('#dview h1, #dview h2, #dview h3').filter(seen).map(h => h.textContent.trim()).filter(t => t === 'Map').length;"
             "r.outcome = !!document.querySelector('#needs [data-outcome]'); document.querySelector('#needs [data-gotab=\"report\"]').click(); r.afterLink = vis(); r.banner = document.getElementById('banner').textContent; r.bannerIn = !!document.getElementById('banner').closest('#pane-report'); r.bannerShown = seen(document.getElementById('banner'));"
             "showTab('runsettings'); r.settings = ['outsel', 'runsel', 'reset', 'to-simple'].map(i => seen(document.getElementById(i))).join(','); r.runsel = document.getElementById('runsel').value; r.opts = document.getElementById('runsel').options.length;"
             "showTab('map');")
-        assert c["head"] == "J2 Department" and c["heads"] == 1, c      # the header has only the name; exactly one visible "Map" heading
+        assert c["head"] == "0|false" and c["heads"] == 1, c      # no department heading; exactly one visible "Map" heading
         assert c["outcome"] is True and c["afterLink"] == "report" and c["bannerIn"] is True and c["bannerShown"] is True and c["banner"].startswith("Viewing saved run " + name + " (read only)."), c
         assert c["settings"] == "true,true,true,true" and c["opts"] >= 2, c      # the controls are all there in Run settings
         newest = os.path.join(j2.RUNS_DIR, "j2-29990101-000001")      # sorts first, so the selector (newest 60) always lists it
         shutil.copytree(run.dir, newest)
         assert home_probe("j2-29990101-000001", base_js + "showTab('runsettings'); r.val = document.getElementById('runsel').value;")["val"] == "j2-29990101-000001", "the selector shows the run that is open"
-        fx = ("const lines = [...document.querySelectorAll('.mapsvg path.mapedge')].filter(p => parseFloat(getComputedStyle(p).opacity) > 0.01).map(p => { const L = p.getTotalLength(), o = []; for (let i = 0; i <= L; i += 2) { const t = p.getPointAtLength(i); o.push([t.x, t.y]); } return {id: p.dataset.from + ' > ' + p.dataset.to, o}; });"
-              "const texts = [...document.querySelectorAll('.mapsvg text')].filter(t => parseFloat(getComputedStyle(t).opacity) > 0.01 && t.textContent.trim()).map(t => ({t: t.textContent.trim(), b: t.getBBox()}));"
+        fx = ("const sv = [...document.querySelectorAll('.mapsvg')].find(x => x.getClientRects().length); const lines = [...sv.querySelectorAll('path.mapedge')].filter(p => parseFloat(getComputedStyle(p).opacity) > 0.01).map(p => { const L = p.getTotalLength(), o = []; for (let i = 0; i <= L; i += 2) { const t = p.getPointAtLength(i); o.push([t.x, t.y]); } return {id: p.dataset.from + ' > ' + p.dataset.to, o}; });"
+              "const texts = [...sv.querySelectorAll('text')].filter(t => parseFloat(getComputedStyle(t).opacity) > 0.01 && t.textContent.trim()).map(t => ({t: t.textContent.trim(), b: t.getBBox()}));"
               "r.n = texts.length; r.hits = []; for (const x of texts) { for (const l of lines) if (l.o.some(([px, py]) => px > x.b.x - 1 && px < x.b.x + x.b.width + 1 && py > x.b.y && py < x.b.y + x.b.height)) r.hits.push(x.t + ' on ' + l.id); }"
               "for (let i = 0; i < texts.length; i++) for (let j = i + 1; j < texts.length; j++) { const a = texts[i].b, b = texts[j].b; if (a.x < b.x + b.width - 1 && b.x < a.x + a.width - 1 && a.y < b.y + b.height - 1 && b.y < a.y + a.height - 1) r.hits.push(texts[i].t + ' over ' + texts[j].t); }")
         for rn in (name, *real_names):
             d_ = home_probe(rn, base_js + fx)
             assert d_["n"] > 20 and d_["hits"] == [], (rn, d_["hits"])      # no label sits on a line or on another label
+        # the wide drawing fits the map pane at 1440x900 with no scroll inside it; under 900px the narrow drawing is shown instead
+        fit_js = ("const p = document.getElementById('pane-map'), w = document.querySelector('.mapsvg:not(.mapvert)'), v = document.querySelector('.mapsvg.mapvert');"
+                  "r.fit = [p.scrollHeight, p.clientHeight, w.getClientRects().length > 0, v.getClientRects().length > 0];")
+        for rn in (name, *real_names):
+            f1 = home_probe(rn, base_js + fit_js, "1440,900")["fit"]
+            assert f1[2] is True and f1[3] is False and f1[0] <= f1[1] + 1, (rn, f1)      # wide drawing shown, and it fits
+        f2 = home_probe(real_names[0], base_js + fit_js, "860,900")["fit"]
+        assert f2[2] is False and f2[3] is True, f2      # under 900px: the vertical drawing
         # Run settings: New run posts to /api/reset; choosing a saved run opens it
         e_ = home_probe(name, base_js + "let posted = ''; window.fetch = (u, o) => { if (String(u).includes('/api/reset')) posted = (o && o.method) || 'GET'; return new Promise(() => {}); }; showTab('runsettings'); document.getElementById('reset').click(); r.posted = posted;")
         assert e_["posted"] == "POST", e_
