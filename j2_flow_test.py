@@ -4635,6 +4635,41 @@ def docs_repeat_failure():
           "a single document ends, wording is about the document, the message's check results are code's and never claim a pass over an unmet condition ok")
 
 
+def charter_objects():
+    """A live model copied the STATE's shape into its charter: done_when as {"item", "criterion"} objects, not strings (run
+    j2-20261023-102259 stopped with "unhashable type: 'dict'" right after Priority's GRANT of the PRD workflows). The charter is
+    read as the text and the run goes on: documents, website and a test email, past the GRANT, with the deed atom created."""
+    import j2_send
+    keep = {k: os.environ.get(k) for k in ("J2_TEST_EMAIL", "J2_SEND_MODE")}
+    os.environ["J2_TEST_EMAIL"] = "me@example.invalid"
+    os.environ.pop("J2_SEND_MODE", None)
+
+    def objects(run, orig):
+        def call(fn, *a, **k):
+            r = orig(fn, *a, **k)
+            g = r.get("goal") if isinstance(r, dict) else None
+            if fn == "identity" and isinstance(g, dict) and g.get("done_when") and all(isinstance(x, str) for x in g["done_when"]):
+                g["done_when"] = [{"item": i, "criterion": x} for i, x in enumerate(g["done_when"], 1)]
+            return r
+        return call
+    try:
+        run = docs_run(DESIGN_BRIEF + " When the documents are finished, send a test email to me with a short summary of the PRD.", 900, patch=objects)
+    finally:
+        for k_, v in keep.items():
+            os.environ.pop(k_, None)
+            if v is not None:
+                os.environ[k_] = v
+    chat = [json.loads(l) for l in open(os.path.join(run.dir, "chat.jsonl"), encoding="utf-8") if l.strip() and not l.startswith('{"meta"')]
+    assert run.error is None and not any(m.get("who") == "system" and str(m.get("text", "")).startswith("Stopped:") for m in chat), run.error
+    assert any(m.get("who") == "priority" and m.get("decision") == "grant" for m in chat), "Priority granted"
+    assert any(m.get("who") == "validator" and m.get("register") for m in chat), "the run went past the GRANT: workflows were registered"
+    g = json.load(open(os.path.join(run.dir, "goal.json"), encoding="utf-8"))
+    assert all(isinstance(c, str) for c in g["done_when"] + g["charter_items"] + g.get("core_items", [])), "the charter holds the item text, never the object"
+    deed = [w for w in run.past_workflows + run.workflows if w["name"] == j2_send.DEEDS["send_email"]["label"]]
+    assert deed and deed[0]["atoms"], "the send deed's atom was created"
+    print("charter given as objects: done_when read as text, the run goes past Priority's GRANT, documents and website built, the test email deed atom created ok")
+
+
 def send_deeds():
     """Send deeds, phase 1 (no network): the brief's send words trigger a trailing deed stage; the recipient comes only
     from J2_TEST_EMAIL / J2_TEST_SLACK_TARGET; dry-run leaves the atom open, mock records one message; the proof check
@@ -5333,6 +5368,8 @@ def map_tab():
     pn0 = render_node(snap, docs={"docs": {}, "map": mp, "mappin": "work:t0"})["map"]
     assert pn0.count("data-mapopen=") == 7 and 'class="mappanel" data-panel="work:t0"' in pn0 and 'data-mapopen="f0.md">Open Box 0 with a very long name</a>' in pn0 and "data-mapclose" in pn0 and "v1" in pn0.split('class="mappanel"')[1], "the panel has the link and the details"
     assert "Identity running" in out and "3 of 4 checks passed" in out and 'class="mappill running"' in out and 'class="mappill checks"' in out
+    nc = render_node(snap, docs={"docs": {}, "map": {**mp, "status": {**mp["status"], "state": "Crashed", "state_status": "fault", "checks": {"passed": 0, "run": 0}}}})["map"]
+    assert ">No checks yet<" in nc and 'class="mappill nochecks"' in nc and 'class="mappill checks"' not in nc and "0 of 0" not in nc, "a run with no checks is not shown as a green chip"
     box = lambda i: ng(svg, f"work:t{i}")
     assert 'stroke-dasharray="6 4"' in box(2) and "stroke-dasharray" not in box(0)                       # dashed = left open
     assert box(1).count("<circle") == 2 and box(0).count("<circle") == 1                                      # double ring = running now
@@ -5927,6 +5964,7 @@ if __name__ == "__main__":
         docs_chain()
         docs_funding()
         send_deeds()
+        charter_objects()
         artifact_types()
         artifacts_tab()
         map_tab()

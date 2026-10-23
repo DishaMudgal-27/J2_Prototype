@@ -3605,6 +3605,10 @@ class J2Run:
             self.outcome = "Stopped: Identity couldn't record a charter from the brief and the answers."
             self.turn = None
             return
+        # The STATE shows each done-when item as {"item": n, "criterion": text}; a charter that copies that shape is read as the text
+        # (run j2-20261023-102259: the objects reached a set and stopped the run). Everything after this sees strings.
+        goal["done_when"] = [str(c.get("criterion") or c.get("text") or "").strip() if isinstance(c, dict) else c for c in goal.get("done_when") or []]
+        goal["done_when"] = [c for c in goal["done_when"] if c != ""]
         bad = self._fact_problems(goal, change)
         if bad:
             why = (f"charter facts not found in the brief or the Requester's answers: {bad}; each fact must be copied "
