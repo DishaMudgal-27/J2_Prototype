@@ -110,7 +110,9 @@ pre{white-space:pre-wrap;word-wrap:break-word;font:12px/1.45 var(--mono);backgro
 .banner{font:500 12.5px var(--body);background:var(--panel2);color:var(--priority);padding:6px 16px;border-bottom:1px solid var(--line)}
 .lock{font:500 12px var(--mono);color:var(--coordination)}
 /* ---- Simple view (default): chat + preview, one voice, plain words */
-body.simple #dview{display:none}body:not(.simple) #sview{display:none}
+body:not(.simple) #sview{display:none}
+/* the Simple view keeps the rail (Chat lit, Map back to the home): only the rail of #dview shows */
+body.simple #dview{display:flex;flex:0 0 auto}body.simple #dview .dcol{display:none}@media (min-width:601px){body.simple{flex-direction:row}body.simple #dview{order:-1}}
 #dview{display:contents}
 #sview{flex:1;display:flex;flex-direction:column;min-height:0}
 .shead{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
@@ -176,7 +178,8 @@ body:not(.simple) #dview{display:flex;flex:1;min-height:0}
 .rail.tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;border-radius:12px;padding:8px 2px;font:500 10.5px/1.2 var(--body);text-align:center;color:var(--muted)}
 .rail.tabs button svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .rail.tabs button:hover{color:var(--ink)}
-.rail.tabs button[aria-selected="true"]{color:var(--vio);background:color-mix(in srgb,var(--vio) 13%,transparent);font-weight:600}
+.rail.tabs button[aria-selected="true"],.rail.tabs #gochat[aria-current="page"]{color:var(--vio);background:color-mix(in srgb,var(--vio) 13%,transparent);font-weight:600}
+body.simple .rail.tabs button[aria-selected="true"]{color:var(--muted);background:none;font-weight:500}
 .rail.tabs button:focus-visible,.rdrow:focus-visible{outline:2px solid var(--vio);outline-offset:1px}
 .dcol{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
 #dview header.dtop{align-items:flex-end;gap:10px;padding:18px var(--gut) 8px;border-bottom:0;background:none}
@@ -992,7 +995,7 @@ $("smsgs").addEventListener("click", async e => {
   $("sbox").value += `${$("sbox").value ? "; " : ""}${g.dataset.q}. Option ${b.dataset.opt}`; $("sbox").focus();
 });
 // View choice: ?view= wins, then the saved choice, then Simple. localStorage can throw (private mode, blocked).
-function setView(v, keep){ document.body.classList.toggle("simple", v !== "detail");
+function setView(v, keep){ document.body.classList.toggle("simple", v !== "detail"); $("gochat").setAttribute("aria-current", v !== "detail" ? "page" : "false");
   if (keep) try { localStorage.setItem("j2view", v); } catch (e) {} }
 (() => { const q = new URLSearchParams(location.search).get("view"); let v = q;
   if (!v) try { v = localStorage.getItem("j2view"); } catch (e) {}
@@ -1143,7 +1146,8 @@ function showTab(name){
 }
 document.querySelectorAll(".tabs [role=tab]").forEach(b => b.onclick = () => { if (b.dataset.tab === "workflows" && WFSTEP.length){ WFSTEP = []; if (state) paint($("pane-workflows"), renderWorkflows(state)); } showTab(b.dataset.tab); });
 showTab("map");
-$("gochat").onclick = () => focusChat();
+$("gochat").onclick = () => setView("simple", true);      // Chat is the Simple view; any other rail item goes back to the Detailed view
+document.querySelectorAll(".rail [role=tab]").forEach(b => b.addEventListener("click", () => setView("detail", true)));
 $("internals").onclick = () => { const o = $("railsub").hidden; $("railsub").hidden = !o; $("internals").setAttribute("aria-expanded", String(o)); };
 $("backmap").onclick = () => showTab("map");
 // Artifacts: read-only list driven by artifacts/types.json (/api/artifacts): deliverables, then evidence and records.

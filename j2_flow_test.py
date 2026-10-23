@@ -5951,7 +5951,12 @@ def map_tab():
             b = home_probe(name, base_js +
                 "let chats = 0; const fc = focusChat; focusChat = () => { chats++; return fc(); }; r.none = document.getElementById('needs').innerText.replace(/\\s+/g, ' ') + '|' + document.getElementById('needcount').textContent;"
                 "click('person:requester'); r.person = document.activeElement.id; showTab('map'); click('fn:identity'); r.chats = chats; r.pane = vis();"
-                "showTab('map'); document.getElementById('gochat').click(); r.railchat = chats; document.getElementById('internals').click(); r.toggled = document.getElementById('railsub').hidden;")
+                "showTab('map'); window.j2mark = 1; const where = location.href, rs = () => [document.body.classList.contains('simple'), rect('#sview').width > 0, rect('.rail.tabs').width > 0, rect('#dview .dcol').width, document.getElementById('gochat').getAttribute('aria-current'), getComputedStyle(document.querySelector('.rail [data-tab=map]')).fontWeight].join('|'),"
+                " msgs = () => document.getElementById('msgs').children.length + '/' + document.getElementById('smsgs').children.length + '|' + document.getElementById('needs').textContent.replace(/\\s+/g, ' ') + '|' + document.getElementById('runsel').value;"
+                "r.m0 = msgs(); r.home0 = rs(); document.getElementById('gochat').click(); r.railchat = chats; r.simple = rs(); r.railleft = rect('.rail.tabs').right <= rect('#sview').left + 1; r.m1 = msgs();"
+                "document.querySelector('.rail [data-tab=map]').click(); r.back = rs() + '|' + vis(); r.m2 = msgs(); document.getElementById('gochat').click(); r.m3 = msgs(); document.querySelector('.rail [data-tab=map]').click(); r.m4 = msgs(); r.same = (window.j2mark === 1) + '|' + (location.href === where);"
+                "document.getElementById('internals').click(); r.toggled = document.getElementById('railsub').hidden;"
+                "showTab('runsettings'); document.getElementById('to-simple').click(); r.tosimple = rs(); document.querySelector('.rail [data-tab=map]').click();")
         finally:
             shutil.rmtree(ended, ignore_errors=True)
         assert a["home"] == "map" and a["count"] == "1" and "Needs you" in a["needs"] and "Add credits?" in a["needs"] and "Answer in Chat" in a["needs"], a
@@ -5966,7 +5971,12 @@ def map_tab():
         assert n["fn:audit"]["pane"] == "audit" and n["step:prd>hld"]["pane"] == "workflows" and n["step:prd>hld"]["wf"] == ",".join(sw), n
         assert n["work:prd"]["pane"] == "artifacts" and n["work:prd"]["art"] == "prd.md" and n["work:website"]["pane"] == "preview" and n["work:charter"]["pane"] == "charter", n
         assert a["wfnote"] is True and a["wfcleared"] == 0, a      # "Show all" clears the step filter
-        assert b["none"].startswith("Needs you 0 Nothing needs you right now.") and b["none"].endswith("See report|0") and b["person"] == "needs" and b["chats"] == 1 and b["railchat"] == 2 and b["toggled"] is False, b
+        assert b["none"].startswith("Needs you 0 Nothing needs you right now.") and b["none"].endswith("See report|0") and b["person"] == "needs" and b["chats"] == 1 and b["railchat"] == 1 and b["toggled"] is False, b
+        # the rail's Chat opens the Simple view with the rail kept and Chat lit; Map goes back to the unchanged home; same run, same messages, no reload
+        assert b["home0"] == "false|false|true|" + b["home0"].split("|")[3] + "|false|600" and float(b["home0"].split("|")[3]) > 0, b
+        assert b["simple"] == "true|true|true|0|page|500" and b["railleft"] is True, b
+        assert b["back"] == b["home0"] + "|map" and b["tosimple"] == b["simple"], b      # Back to simple view does what Chat does
+        assert b["m0"] == b["m1"] == b["m2"] == b["m3"] == b["m4"] and b["same"] == "true|true" and int(b["m0"].split("/")[0]) > 0, b
         # the header is the name only; Map has one visible heading; the outcome line opens the Report; the banner text is there; nothing overlaps
         vis_js = "const seen = e => e.getClientRects().length > 0 && getComputedStyle(e).visibility !== 'hidden';"
         c = home_probe(name, base_js + vis_js +
