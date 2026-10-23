@@ -4758,6 +4758,77 @@ def charter_objects():
     print("charter given as objects: done_when read as text, the run goes past Priority's GRANT, documents and website built, the test email deed atom created ok")
 
 
+def milestone_emails():
+    """Milestone emails (code, dry run): with J2_MILESTONE_EMAILS=1, or a brief that asks for updates by email, one email each
+    time a goal of the run is reached (PRD, HLD, LLD filed and checked; the site workable), only for the run's own goals. The
+    recipient is only J2_TEST_EMAIL; receipts are masked; an email never stops the run; the map hangs each under its goal."""
+    import j2_send
+    import j2_map as M
+    keep = {k: os.environ.get(k) for k in ("J2_TEST_EMAIL", "J2_SEND_MODE", "J2_MILESTONE_EMAILS")}
+    addr = "me@example.invalid"
+
+    def env(**kw):
+        for k_ in keep:
+            os.environ.pop(k_, None)
+        os.environ.update({k_: v for k_, v in kw.items() if v is not None})
+
+    def receipts(run):
+        path = os.path.join(run.dir, "receipts.jsonl")
+        return [r for r in (json.loads(x) for x in open(path, encoding="utf-8") if x.strip()) if r.get("deed") == "milestone_email"] if os.path.exists(path) else []
+
+    def everything(run):
+        return "".join(open(os.path.join(dp, f), encoding="utf-8", errors="ignore").read() for dp, _, fs in os.walk(run.dir) for f in fs if f.endswith((".json", ".jsonl", ".md", ".txt")))
+    try:
+        assert j2_send.asks_updates("Send me updates by email as you go") and j2_send.asks_updates("email me when each part is done")
+        assert j2_send.asks_updates("keep me posted by email") and not j2_send.asks_updates("an email field in the form", "show our email address", BREW_LAB)
+        # on, documents and a site: one email per goal reached, in order, each a dry-run deed under its goal
+        env(J2_TEST_EMAIL=addr, J2_MILESTONE_EMAILS="1")
+        run = docs_run(DESIGN_BRIEF, 900)
+        assert [x["goal"] for x in run.milestone_log] == ["PRD", "HLD", "LLD", "Website"] and run.outcome.startswith("Done"), (run.milestone_log, run.outcome)
+        rs = receipts(run)
+        assert [r["subject"] for r in rs] == [f"J2 · Brew Lab · {g} done" for g in ("PRD", "HLD", "LLD", "Website")], [r["subject"] for r in rs]
+        assert all(r["mode"] == "dry-run" and r["sent"] is False and r["to_masked"] == j2_send.mask(addr) and r["to_hash"] == j2_send.digest(addr)[:16] for r in rs), rs
+        assert addr not in everything(run), "the address is never written in full"
+        wfs = {w["id"]: w for w in run.past_workflows + run.workflows}
+        mails = [wfs[x["atom"].split(".")[0]] for x in run.milestone_log]
+        assert all(w["cost"] == j2.RATES_DEED().get("send_email") == 5 and w["atoms"][0]["results"][0]["pass"] is None for w in mails), "5 credits each; dry run leaves the atom open"
+        mp = M.build(run.dir)
+        st = {e["to"]: e["from"] for e in mp["edges"] if e["kind"] == "step"}
+        brs = [n for n in mp["nodes"] if n["kind"] == "work" and n.get("lane") == "branch"]
+        assert [(st[st[n["id"]]], n["label"], n["status"]) for n in brs] == [(f"work:{k}", f"Email · {g} done", "left_open") for k, g in (("prd", "PRD"), ("hld", "HLD"), ("lld", "LLD"), ("website", "Website"))], brs
+        out = render_node(j2.saved_snapshot(os.path.basename(run.dir), 0), docs={"docs": {}, "map": mp})
+        wide = out["map"][out["map"].index('<svg class="mapsvg"'):out["map"].index("</svg>")]
+        assert wide.count('class="mapedge branch') == 8 and all(f">Email · {g} done · dry run<" in wide for g in ("PRD", "HLD", "LLD", "Website")), "one branch per email, under its goal"
+        assert "Finished. 4 emails waiting (dry run)." in out["needs"], out["needs"]
+        # a PRD only: one email, never one for a goal the run does not have
+        run2 = docs_run("Write a PRD for Campus Notes." + CAMPUS, 400)
+        assert [x["goal"] for x in run2.milestone_log] == ["PRD"], run2.milestone_log
+        # off: none at all (the plain path is also guarded by plain_unchanged)
+        env(J2_TEST_EMAIL=addr)
+        run3 = docs_run(DESIGN_BRIEF, 900)
+        assert run3.milestone_log == [] and receipts(run3) == [], "off by default"
+        # the brief asks for updates by email: on, without the setting
+        run4 = docs_run("Write a PRD for Campus Notes. Send me updates by email as you go." + CAMPUS, 400)
+        assert [x["goal"] for x in run4.milestone_log] == ["PRD"], run4.milestone_log
+        # no test address: refused and recorded, the run goes on
+        env(J2_MILESTONE_EMAILS="1")
+        run5 = docs_run("Write a PRD for Campus Notes." + CAMPUS, 400)
+        assert run5.outcome.startswith("Done") and receipts(run5)[0]["refused"] and receipts(run5)[0]["to_masked"] is None, receipts(run5)
+        # the credits can't cover it: skipped with the reason, the run goes on
+        env(J2_TEST_EMAIL=addr, J2_MILESTONE_EMAILS="1")
+        keep_rate, j2.RATES_DEED = j2.RATES_DEED, (lambda: {"send_email": 10 ** 6})
+        try:
+            run6 = docs_run("Write a PRD for Campus Notes." + CAMPUS, 400)
+        finally:
+            j2.RATES_DEED = keep_rate
+        assert run6.outcome.startswith("Done") and run6.milestone_log[0]["result"] == "skipped" and "work credits" in run6.milestone_log[0]["why"] and receipts(run6) == [], run6.milestone_log
+    finally:
+        env(**{k_: v for k_, v in keep.items()})
+    print("milestone emails: one per goal reached (PRD, HLD, LLD, website) and only the run's own goals, off by default, on when the brief asks "
+          "for updates by email, only to the test address and masked, dry run leaves them open, skipped (never stopping) when credits are short "
+          "or refused when no address is set, one map branch under each goal, outcome line counts them ok")
+
+
 def send_deeds():
     """Send deeds, phase 1 (no network): the brief's send words trigger a trailing deed stage; the recipient comes only
     from J2_TEST_EMAIL / J2_TEST_SLACK_TARGET; dry-run leaves the atom open, mock records one message; the proof check
@@ -6155,6 +6226,7 @@ if __name__ == "__main__":
         docs_funding()
         send_deeds()
         charter_objects()
+        milestone_emails()
         artifact_types()
         artifacts_tab()
         map_tab()

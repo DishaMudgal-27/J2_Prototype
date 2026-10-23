@@ -10,7 +10,9 @@ import re
 
 DEEDS = {"send_email": {"channel": "email", "var": "J2_TEST_EMAIL", "words": "test email", "label": "Send a test email"},
          "send_slack_message": {"channel": "slack", "var": "J2_TEST_SLACK_TARGET", "words": "test Slack message",
-                                "label": "Send a test Slack message"}}
+                                "label": "Send a test Slack message"},
+         # a milestone email: code sends one when a goal of the run is reached (j2.py _milestone), never asked for by name
+         "milestone_email": {"channel": "email", "var": "J2_TEST_EMAIL", "words": "milestone email", "label": "Email"}}
 TARGET_VAR = {d["channel"]: d["var"] for d in DEEDS.values()}
 MODES = ("dry-run", "mock")      # live sending is not built yet: any other J2_SEND_MODE falls back to dry-run
 SENT = []      # the mock recorder: every message a mock send "delivered" (tests read it; reset() empties it)
@@ -18,6 +20,8 @@ SENT = []      # the mock recorder: every message a mock send "delivered" (tests
 _SEND_EMAIL = re.compile(r"\b(?:send|forward|mail)\b[^.!?\n]{0,40}\be-?mail\b|\be-?mail\s+(?:it|them|this|me|the)\b", re.I)
 _SEND_SLACK = re.compile(r"\b(?:send|post|share|message|dm|notify|ping|drop)\b[^.!?\n]{0,40}\bslack\b|"
                          r"\bslack\s+(?:it|them|this|me|the)\b", re.I)
+_UPDATES = re.compile(r"\b(?:updates?|progress|milestones?)\b[^.!?\n]{0,40}\b(?:by|via|over)\s+e-?mail\b|"
+                      r"\be-?mail\s+me\s+(?:updates?|when|each|as|after|at)\b|\bkeep\s+me\s+(?:posted|updated)\b[^.!?\n]{0,30}\be-?mail\b", re.I)
 _ADDRESS = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 _SLACK_TARGET = re.compile(r"(?<![\w@])([#@][\w.-]+)")
 
@@ -27,6 +31,20 @@ def detect_deeds(*texts):
     "Slack": a mere mention (a Slack link in the footer, an email field) matches nothing."""
     text = " ".join(str(t or "") for t in texts)
     return [k for k, rx in (("send_email", _SEND_EMAIL), ("send_slack_message", _SEND_SLACK)) if rx.search(text)]
+
+
+def asks_updates(*texts):
+    """True when the brief asks to be kept up to date by email ("send me updates by email", "email me when each part is done")."""
+    return bool(_UPDATES.search(" ".join(str(t or "") for t in texts)))
+
+
+def milestone(project, goal, version, checks, summary):
+    """{subject, body} of a milestone email, by code from the run's own record: no link, no address, no model."""
+    clean = lambda t: re.sub(r"\s+", " ", _ADDRESS.sub("[address]", re.sub(r"https?://\S+|www\.\S+", "[link]", str(t or "")))).strip()
+    body = [f"Goal: {goal} done", f"Version: {version if version is not None else 'not recorded'}",
+            f"Checks passed: {checks[0]} of {checks[1]}" if checks[1] else "Checks passed: none recorded",
+            f"Summary: {clean(summary)[:200] or 'not recorded'}"]
+    return {"subject": f"J2 · {clean(project)} · {goal} done", "body": "\n".join(body)}
 
 
 def mode():
@@ -104,11 +122,11 @@ def deliver(msg):
     return {"sent": False, "result": "dry-run", "refused": None}
 
 
-def send(kind, name, text, artifact=None):
+def send(kind, name, text, artifact=None, built=None):
     """Build the message, send it (dry-run or mock) to the configured target, and return the receipt record. The
-    recipient is read from the environment here and nowhere else."""
+    recipient is read from the environment here and nowhere else. built: {subject, body} made by the caller (a milestone)."""
     ch = DEEDS[kind]["channel"]
-    msg = {"channel": ch, "to": target(ch), **build(kind, name, text)}
+    msg = {"channel": ch, "to": target(ch), **(built or build(kind, name, text))}
     res = deliver(msg)
     return {"deed": kind, "channel": ch, "mode": mode(), "to_masked": mask(msg["to"]) if msg["to"] else None,
             "to_hash": digest(msg["to"].lower())[:16] if msg["to"] else None, "subject": msg["subject"],
@@ -140,7 +158,8 @@ def check(c, run_dir):
     if kind not in DEEDS or not art or not os.path.isfile(path):
         return {"actual": None, "pass": False, "evidence": "the receipt does not name a document that exists"}
     text = open(path, encoding="utf-8").read()
-    if digest(text) != rec.get("artifact_sha256") or digest(build(kind, art, text)["body"]) != rec.get("body_sha256"):
+    body_ok = kind == "milestone_email" or digest(build(kind, art, text)["body"]) == rec.get("body_sha256")      # a milestone's body is built from the run record, not the file alone
+    if digest(text) != rec.get("artifact_sha256") or not body_ok:
         return {"actual": None, "pass": False, "evidence": f"{art} changed since the receipt was written"}
     want = target(rec.get("channel"))
     if not want or digest(want.lower())[:16] != rec.get("to_hash"):

@@ -1106,8 +1106,10 @@ const needLine = t => { t = dv(mapClean(t)); return esc(t.length > 150 ? t.slice
 // One plain line for a finished or saved run: how it ended, with a link to the Report (the full text of the outcome is there, word for word).
 function outcomeLine(s){
   const o = String((s && s.outcome) || ""); if (!o) return "";
-  const open = (MAP.nodes || []).filter(n => n.kind === "work" && n.status === "left_open").map(n => String(n.label).replace(/^send (a |an |the )?/i, "").replace(/^./, c => c.toLowerCase()) + (/dry run/i.test(n.detail || "") ? " (dry run)" : ""));
-  if (open.length && /^Done/i.test(o)) return `Finished. ${open.length} item${open.length === 1 ? "" : "s"} left open: ${open.join(", ")}.`;
+  const left = (MAP.nodes || []).filter(n => n.kind === "work" && n.status === "left_open"), mails = left.filter(n => /^Email · /.test(n.label) && /dry run/i.test(n.detail || ""));
+  const open = left.filter(n => !mails.includes(n)).map(n => String(n.label).replace(/^send (a |an |the )?/i, "").replace(/^./, c => c.toLowerCase()) + (/dry run/i.test(n.detail || "") ? " (dry run)" : ""));
+  const parts = [...(mails.length ? [`${mails.length} email${mails.length === 1 ? "" : "s"} waiting (dry run)`] : []), ...(open.length ? [`${open.length} item${open.length === 1 ? "" : "s"} left open: ${open.join(", ")}`] : [])];
+  if (parts.length && /^Done/i.test(o)) return `Finished. ${parts.join(". ")}.`;
   return /^Done with open items/i.test(o) ? "Finished. Some items were left open." : /^Done/i.test(o) ? "Finished. Nothing is left open." : /^Stopped|^Crashed/i.test(o) ? "Stopped before the end." : "Finished.";
 }
 function renderNeeds(s){
@@ -1325,7 +1327,8 @@ function renderMap(m){
     const e = st && edges.find(x => x.kind === "step" && x.to === st.id && trunkDecks.some(t => t.id === x.from));
     const pv = work.slice(0, work.indexOf(d)).reverse().find(x => trunkDecks.includes(x));
     return {d, s: st, p: e ? e.from : pv ? pv.id : (trunkDecks[trunkDecks.length - 1] || {}).id}; }).filter(b => b.p);
-  const branchText = d => `${String(d.label).replace(/^send (a |an |the )?/i, "").replace(/^./, c => c.toUpperCase())} · ${/dry run/i.test(d.detail || "") ? "dry run, not sent" : MAPW[d.status] || mapClean(d.detail || "")}`;
+  const branchText = d => /^Email · /.test(d.label) ? `${d.label} · ${/dry run/i.test(d.detail || "") ? "dry run" : MAPW[d.status] || mapClean(d.detail || "")}`      // a milestone email
+    : `${String(d.label).replace(/^send (a |an |the )?/i, "").replace(/^./, c => c.toUpperCase())} · ${/dry run/i.test(d.detail || "") ? "dry run, not sent" : MAPW[d.status] || mapClean(d.detail || "")}`;
   // ---- the vertical layout (under 900px): You and the Management layer across the top, then the work as a tree down the middle: Charter at the root,
   // each persona above the deliverable it made.
   // Hand-off lines run straight down the spine; "given to" lines loop round it on the left or the right, so a deliverable that feeds more than one step branches.
@@ -1424,16 +1427,18 @@ function renderMap(m){
     group(Us, "to").forEach(l => l.sort((p, q) => q.a - p.a).forEach((p, k) => { p.off = (k - (l.length - 1) / 2) * 7; }));
     group(Us, "from").forEach(l => l.sort((p, q) => (q.b - q.a) - (p.b - p.a)).forEach((p, k) => { p.soff = (k - (l.length - 1) / 2) * 7; }));
     group(Bs, "to").forEach(l => l.sort((p, q) => q.a - p.a).forEach((p, k) => { p.off = (k - (l.length - 1) / 2) * 7; }));
-    const T = Math.round(34 + 16 + 41 + 10 + 14 * lvlMax(Us)), topY = T - Y.rowB - 10 - 10, botY = T + Y.fact + 4 + 10;
-    const brBase = (Bs.length ? botY + 14 * (lvlMax(Bs) - 1) : T + Y.fact + 4) + 6;      // side jobs sit just under the labels (and any line below them)
+    const T = Math.round(34 + 16 + 41 + 10 + 14 * lvlMax(Us)), topY = T - Y.rowB - 10 - 10;
+    const brBase = T + Y.fact + 10, brBottom = brs.length ? brBase + 80 : T + Y.fact + 4;      // side jobs hang under their parent's labels, each label centred under its node
+    const botY = brBottom + 10;      // lines under the trunk pass below the labels and the side jobs
     const flat = (xs, y0, xe, y1, lev) => { const R = Math.min(24, Math.abs(xe - xs) / 3);      // up (or down), flat across at one level clear of the labels, rounded corners, down to the end
       return `M${rd(xs)} ${rd(y0)} C${rd(xs)} ${rd(lev)} ${rd(xs)} ${rd(lev)} ${rd(xs + R)} ${rd(lev)} L${rd(xe - R)} ${rd(lev)} C${rd(xe)} ${rd(lev)} ${rd(xe)} ${rd(lev)} ${rd(xe)} ${rd(y1)}`; };
     const title = p => `${name(p.from)} was given to ${p.g.known ? name(p.to) : "the " + name(p.g.box) + " box"}${p.g.basis === "declared" ? " (by order, not recorded)" : ""}`;
     // the layout is tried with growing spacing until no "given to" line or side job passes through a label box (the boxes are estimated from the text)
-    let S = 150; for (let i = 1; i < n; i++){ const s = into[i] && by[into[i]]; S = Math.max(S, s ? wTeam(s) / 2 + 8 : 0, Math.max(dW(td[i]), dW(td[i - 1])) + 20); }
+    const colW = d => Math.max(dW(d), ...brs.filter(b => b.p === d.id).flatMap(b => [b.s ? wTeam(b.s) : 0, wSub(branchText(b.d))]));      // a deliverable's column: its labels and its side jobs'
+    let S = 150; for (let i = 1; i < n; i++){ const s = into[i] && by[into[i]]; S = Math.max(S, s ? wTeam(s) + 12 : 0, Math.max(colW(td[i]), colW(td[i - 1])) + 20); }
     let out;
     for (let tries = 0; tries < 10; tries++, S += 24){
-      const M = n ? Math.max(48, dW(td[0]) / 2 + 8) : 48, Mr = n ? Math.max(48, dW(td[n - 1]) / 2 + 8) : 48;
+      const M = n ? Math.max(48, colW(td[0]) / 2 + 8) : 48, Mr = n ? Math.max(48, colW(td[n - 1]) / 2 + 8) : 48;
       const W0 = Math.max(720, chipsW + 24, M + Math.max(n - 1, 0) * S + Mr), sp = n > 1 ? (W0 - M - Mr) / (n - 1) : 0, pos = {}, ed = [], boxes = [], team = {};
       td.forEach((d, i) => { pos[d.id] = {x: rd(M + i * sp), y: T, r: rD}; });
       Object.entries(into).forEach(([i, s]) => { pos[s] = {x: rd((pos[td[i - 1].id].x + pos[td[i].id].x) / 2), y: T, r: rP(by[s])}; });
@@ -1458,19 +1463,21 @@ function renderMap(m){
         push(p, flat(s0.x + p.soff, T - s0.r - 2, e.x + p.off, T - e.r - 4, lev)); });
       // below: out of the diamond's lower right, past its label, under the labels, up into the bottom of the team that used it
       const under = (x, y, xd, lev) => `M${rd(x)} ${rd(y)} L${rd(xd - 8)} ${rd(y)} C${rd(xd)} ${rd(y)} ${rd(xd)} ${rd(y)} ${rd(xd)} ${rd(y + 8)} L${rd(xd)} ${rd(lev)}`;
-      Bs.forEach(p => { const s0 = pos[p.from], e = pos[p.to], lev = botY + 14 * (p.lvl - 1) + (p.bad ? 24 : 0), xe = rd(e.x + p.off), xd = s0.x + dW(by[p.from]) / 2 + 8, y = T + s0.r / 2 + 1;
+      Bs.forEach(p => { const s0 = pos[p.from], e = pos[p.to], lev = botY + 14 * (p.lvl - 1) + (p.bad ? 24 : 0), xe = rd(e.x + p.off), xd = s0.x + colW(by[p.from]) / 2 + 8 + (brs.some(b => b.p === p.from) ? 8 : 0), y = T + s0.r / 2 + 1;
         const R = Math.min(18, Math.abs(xe - xd) / 3);
         push(p, under(s0.x + s0.r / 2 + 1, y, xd, lev - R) + ` C${rd(xd)} ${rd(lev)} ${rd(xd)} ${rd(lev)} ${rd(xd + R)} ${rd(lev)} L${rd(xe - R)} ${rd(lev)} C${rd(xe)} ${rd(lev)} ${rd(xe)} ${rd(lev)} ${rd(xe)} ${rd(lev - R)} L${xe} ${rd(T + e.r + 4)}`); });
       // side jobs: out of the parent's lower right, past its label, down to the team, then the end (a letter icon for a send)
-      brs.forEach(b => { const p0 = pos[b.p], xc = rd(p0.x + dW(by[b.p]) / 2 + 14), gy = rd(brBase + 18), ey = rd(brBase + 42);
-        if (b.s){ pos[b.s.id] = {x: xc, y: gy, r: rP(b.s)};
-          ed.push({cls: "mapedge branch", from: b.p, to: b.s.id, d: under(p0.x + p0.r / 2 + 1, T + p0.r / 2 + 1, xc, gy - rP(b.s) - 4), w: 1.5, title: `side job: ${name(b.p)} to ${name(b.s.id)}`}); }
-        pos[b.d.id] = {x: xc, y: ey, r: 12};
-        const from = b.s ? pos[b.s.id] : p0;
-        ed.push({cls: "mapedge branch", from: b.s ? b.s.id : b.p, to: b.d.id, d: b.s ? `M${xc} ${rd(gy + from.r + 1)} L${xc} ${rd(ey - 12)}` : under(p0.x + p0.r / 2 + 1, T + p0.r / 2 + 1, xc, ey - 12), w: 1.5,
+      // a side job: out of its parent's lower right, round its label, back under the parent, down to the team and the end
+      const hook = (p0, xh, yb, yEnd) => under(p0.x + p0.r / 2 + 1, T + p0.r / 2 + 1, xh, yb - 8)
+        + ` C${rd(xh)} ${rd(yb)} ${rd(xh)} ${rd(yb)} ${rd(xh - 8)} ${rd(yb)} L${rd(p0.x + 8)} ${rd(yb)} C${rd(p0.x)} ${rd(yb)} ${rd(p0.x)} ${rd(yb)} ${rd(p0.x)} ${rd(yb + 8)} L${rd(p0.x)} ${rd(yEnd)}`;
+      brs.forEach(b => { const p0 = pos[b.p], xh = p0.x + dW(by[b.p]) / 2 + 8, gy = rd(brBase + 18), ey = rd(brBase + 54);
+        if (b.s){ pos[b.s.id] = {x: p0.x, y: gy, r: rP(b.s)};
+          ed.push({cls: "mapedge branch", from: b.p, to: b.s.id, d: hook(p0, xh, brBase, gy - rP(b.s) - 4), w: 1.5, title: `side job: ${name(b.p)} to ${name(b.s.id)}`}); }
+        pos[b.d.id] = {x: p0.x, y: ey, r: 12};
+        ed.push({cls: "mapedge branch", from: b.s ? b.s.id : b.p, to: b.d.id, d: b.s ? `M${p0.x} ${rd(gy + rP(b.s) + 15)} L${p0.x} ${rd(ey - 12)}` : hook(p0, xh, brBase, ey - 12), w: 1.5,
           title: `side job: ${name(b.s ? b.s.id : b.p)} to ${name(b.d.id)}`});
-        if (b.s) boxes.push({id: b.s.id, x0: xc + rP(b.s) + 6, x1: xc + rP(b.s) + 6 + wTeam(b.s), y0: gy - 7, y1: gy + 5});
-        boxes.push({id: b.d.id, x0: xc + 20, x1: xc + 20 + wSub(branchText(b.d)), y0: ey - 7, y1: ey + 5}); });
+        if (b.s){ const w = wTeam(b.s); boxes.push({id: b.s.id, x0: p0.x - w / 2, x1: p0.x + w / 2, y0: gy + rP(b.s) + 2, y1: gy + rP(b.s) + 14}); }
+        const w2 = wSub(branchText(b.d)); boxes.push({id: b.d.id, x0: p0.x - w2 / 2, x1: p0.x + w2 / 2, y0: ey + 14, y1: ey + 26}); });
       // the check: no line through a label box (its own end excepted), and no two team labels on top of each other
       const hit = ed.filter(e => e.cls === "mapedge given" || e.cls === "mapedge branch").some(e => { const q = pts(e);
         return boxes.some(bx => bx.id !== e.from && bx.id !== e.to && q.some(([x, y]) => x > bx.x0 && x < bx.x1 && y > bx.y0 && y < bx.y1)); })
@@ -1488,7 +1495,7 @@ function renderMap(m){
     speaks.filter(e => String(e.to).startsWith("work:") && pos[e.from] && pos[e.to]).forEach(e => { const a = pos[e.from], mk = Object.keys(glyphOf).find(s => (mapStepTo(m, by[s]) || {}).id === e.to) || (branchList.find(b => b.d.id === e.to && b.s) || {}).s?.id;
       const b = pos[mk] || pos[e.to], x0 = a.x, y0 = 21 + 14, x1 = b.x, y1 = rd(b.y - b.r - 4);
       ed.push({cls: "mapln", from: e.from, to: e.to, d: `M${x0} ${y0} C${x0} ${rd((y0 + y1) / 2)} ${x1} ${rd((y0 + y1) / 2)} ${x1} ${y1}`, w: 1.5, dash: "1 3", title: lineWord(e), lbl: e.n != null ? e.n : "wrote it", lx: rd((x0 + x1) / 2 + 4), ly: rd((y0 + y1) / 2 - 4)}); });
-    const bottom = Math.max(T + Y.fact + 6, Bs.length ? botY + 14 * (lvlMax(Bs) - 1) + 4 : 0, brs.length ? brBase + 42 + 16 : 0) + 6;
+    const bottom = Math.max(T + Y.fact + 6, Bs.length ? botY + 14 * (lvlMax(Bs) - 1) + 4 : 0, brs.length ? brBase + 54 + 28 : 0) + 6;
     const chipHtml = c => { const p = pos[c.x.id], x0 = rd(p.x - c.w / 2);
       return mapShape("rect", c.x.status, null, x0, 8, c.w, 26) + (c.x.kind === "person" ? `<circle class="youdot" cx="${x0 + 14}" cy="21" r="3.2" fill="var(--muted)"/>` : "")
         + `<text x="${x0 + (c.x.kind === "person" ? 24 : 12)}" y="25" style="font-weight:600">${mapWords(c.text)}</text><text class="sub chipn" x="${rd(x0 + c.w - 10)}" y="25" text-anchor="end">${c.count}</text>`; };
@@ -1496,7 +1503,7 @@ function renderMap(m){
     const dots = [...chips.map(c => ({n: c.x, html: chipHtml(c), badge: [rd(pos[c.x.id].x + c.w / 2 - 3), 9]})),
       ...Object.values(into).map(s => ({n: by[s], lines: [teamLine(by[s])], side: "above", dy: Y[team[s].row], anchor: team[s].anchor})),
       ...td.map(d => ({n: d, lines: [mapWords(d.label), {t: mapWords(fact(d)), sub: true}], side: "below", dy: Y.name})),
-      ...brs.flatMap(b => [...(b.s ? [{n: b.s, lines: [teamLine(b.s)], side: "right"}] : []), {n: b.d, lines: [{t: mapWords(branchText(b.d)), sub: true}], side: "right"}])];
+      ...brs.flatMap(b => [...(b.s ? [{n: b.s, lines: [teamLine(b.s)], side: "below", dy: rP(b.s) + 12}] : []), {n: b.d, lines: [{t: mapWords(branchText(b.d)), sub: true}], side: "below", dy: 23}])];
     const L = {cls: "mapsvg", mid: "maparrow", W, H: bottom, pos, ed, rows: [], dots};
     return {svg: draw(L, adjOf(ed)), hidden: ff.slice(), arcs: arcs.map(p => ({from: p.from, to: p.to, page: p.page})), branches: brs.map(b => ({id: b.d.id, side: b.side})),
       drawn: {given: arcs.length > 0, speak: !!(idn && yo && (you || back)), branch: brs.length > 0}};

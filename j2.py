@@ -2590,6 +2590,7 @@ class J2Run:
         # agent_output, and what earlier stages left behind. Empty for every other run.
         self.docset, self.stages, self.stage_i, self.chain, self.docs = [], [], 0, {}, {}
         self.deed_log, self.deed_seen = [], set()      # send deeds done (note, result) and the notices already given
+        self.milestone_log = []      # milestone emails (J2_MILESTONE_EMAILS=1, or the brief asks for updates by email): one per goal reached
         self.open_docs = []          # documents the Requester accepted as they were, with what was still not right
         self.given = {}              # workflow id -> {"edges": [{atom, why}], "whole": bool}: what its builder's prompt held (atom/1)
         self.board = j2_board.new_board()   # board/1 (j2_board.py): questions and answers, behind J2_BOARD=1
@@ -3525,6 +3526,69 @@ class J2Run:
             return
         self._deeds_finished()
 
+    GOAL_TAGS = {"prd": "PRD", "hld": "HLD", "lld": "LLD", "website": "Website"}
+
+    def _milestone(self):
+        """A goal reached (a document filed and checked, or the site workable): one email about it, built and sent by code,
+        when milestone emails are on (J2_MILESTONE_EMAILS=1, or the brief asks for updates by email). Dry-run or mock only,
+        to J2_TEST_EMAIL only. It is a deed atom (verb do) whose parent is the goal it reports. An email never stops the
+        run: when the credits can't cover it, it is skipped and the reason recorded."""
+        said = [self.request] + [x["answer"] for x in self.intake]
+        if os.getenv("J2_MILESTONE_EMAILS", "0") != "1" and not j2_send.asks_updates(*said):
+            return
+        kind = self.stage_kind or self.output
+        tag = self.GOAL_TAGS.get(kind)
+        if not tag or any(x["goal"] == tag for x in self.milestone_log):
+            return
+        cost = RATES_DEED().get("send_email", 0)
+        if cost > self.budget - self.spent:
+            why = f"it needs {cost} work credits and {max(self.budget - self.spent, 0)} are left"
+            self.milestone_log.append({"goal": tag, "atom": None, "result": "skipped", "why": why})
+            self._event("code", "milestone_skipped", f"{tag}: {why}")
+            return self.post("system", f"Milestone email for {tag} skipped: {why}. The run goes on.", warning=True)
+        base = (self.stage_archive[0]["goal"] if self.stage_archive else self.goal) or {}
+        project = base.get("site_name") or base.get("product_name") or "Project"
+        res = [r for w in self.workflows for a in w.get("atoms") or [] for r in a.get("results") or []]
+        checks = (sum(1 for r in res if r.get("pass") is True), len(res))
+        art = self.out["file"] if self.doc else "site/index.html"
+        path = os.path.join(self.dir, art)
+        text = open(path, encoding="utf-8").read() if os.path.isfile(path) else ""
+        if self.doc:      # the document's first section: its first line of text
+            sec = re.split(r"^##\s+.*$", text, flags=re.M)
+            summary = next((ln.strip(" -*#") for ln in (sec[1] if len(sec) > 1 else text).splitlines() if ln.strip(" -*#")), "")
+        else:
+            summary = re.split(r"(?<=[.!?])\s", str(base.get("statement") or ""))[0]
+        built = j2_send.milestone(project, tag, len(self.sites) or None, checks, summary)
+        wid = f"W-{len(self.past_workflows) + len(self.workflows) + 1}"
+        aid = f"{wid}.a1"
+        atom = {"id": aid, "goal": f"Email: {tag} done", "how": {"agent": "code"}, "constraints": ["only to the target in J2_TEST_EMAIL", "built by code, no model"],
+                "context": [art] if text else [],
+                "expected_output": [{"text": f"The milestone email for {tag} reaches the configured test address", "kind": "send", "target": "milestone_email"}],
+                "verification": [{"text": f"The milestone email for {tag} was sent to the configured test address", "type": "deed-send",
+                                  "target": "milestone_email", "expect": True, "atom": aid, "item": 1}]}
+        wf = {"id": wid, "proposal_id": None, "name": f"Email · {tag} done", "covers": [], "fixes": [], "covers_text": [],
+              "purpose": f"A milestone email: {tag} done", "cost": cost, "estimate": cost,
+              "envelope": {"money_limit": cost, "model_call_limit": 0, "retry_limit": 0}, "charged": True,
+              "calls_used": 0, "retries_used": 0, "outputs": None, "completion_check": "", "dependencies": [],
+              "status": "running", "cycle": self.cycle, "agent": "Code", "section": None, "revises": None, "atoms": [atom]}
+        self.given[wid] = {"edges": [{"atom": a["id"], "why": f"the email reports {tag} done"} for w in self.workflows for a in w.get("atoms") or []], "whole": False}
+        rec = j2_send.send("milestone_email", art, text, art if text else None, built=built)
+        os.makedirs(self.dir, exist_ok=True)
+        with open(os.path.join(self.dir, "receipts.jsonl"), "a", encoding="utf-8") as f:
+            f.write(json.dumps({"atom": aid, "type": "deed-send-record", **rec, "t": time.strftime("%Y-%m-%dT%H:%M:%S"), "by": "code"}, ensure_ascii=False) + "\n")
+        self._run_checks(wf, 1, "", atoms=[atom])
+        ok = atom["results"][0]["pass"]
+        note = "Not sent (dry run)." if ok is None else f"Not sent: {rec['refused'] or atom['results'][0]['evidence']}." if ok is False \
+            else "Sent in test mode to the mock recorder only."
+        atom["human_output"] = {"text": note}
+        atom["deed"] = {k: rec.get(k) for k in ("channel", "mode", "sent")}
+        wf["status"] = "failed" if ok is False else "done"
+        self.past_workflows.append(wf)
+        self._recalc_spent()
+        self.save("workflows.json", self.workflows)
+        self.milestone_log.append({"goal": tag, "atom": aid, "result": rec["result"], "why": rec.get("refused")})
+        self.post("system", f"Milestone email · {tag} done: {note}", warning=ok is False)
+
     def _deeds_finished(self):
         """The last stage was a send: the closing message and outcome, with what each send did in plain words."""
         words = " ".join(x["note"] for x in self.deed_log)
@@ -4413,6 +4477,7 @@ class J2Run:
                       defaults=("Your website is ready.", "") if not fails else
                       ("We're still working on your site.", "Not workable yet: rework the failing findings."))
         if not fails and r.get("done"):
+            self._milestone()                  # a goal reached: its email (when milestone emails are on); never stops the run
             if self.stages:                    # a design-document run: the next stage starts, or the last one is recorded
                 self.post("system", f"The {self.out['noun']} is workable: every check passes.")
                 if self._next_stage():
@@ -7112,6 +7177,7 @@ class J2Run:
                                  "revises": w.get("revises"), "status": w["status"], "calls": w["calls_used"],
                                  "retries": w["retries_used"]} for w in self._all_wfs()],
             "limits_hit": [e["detail"] for e in self.events if e["type"] == "limit"],
+            **({"milestone_emails": self.milestone_log} if self.milestone_log else {}),
             "lessons": {"memory": self.memory, "saved": [x["id"] for x in self.lessons_saved], "used": self.lessons_used},
             "playbooks": {"saved": self.playbook_saved, "used": self.playbooks_used},
             "business_type": (self.goal or {}).get("business_type"), "style_guide": bool(self.style),
