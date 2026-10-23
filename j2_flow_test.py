@@ -5780,6 +5780,22 @@ def map_tab():
         sv_v = o_[o_.index('<svg class="mapsvg mapvert"'):o_.index("</svg>", o_.index('<svg class="mapsvg mapvert"'))]
         assert crossings(sv_v) == [], (label_, "narrow drawing", crossings(sv_v))
         pages_[label_] = [(htmllib.unescape(a_["from"]), htmllib.unescape(a_["to"]), a_["page"]) for a_ in render_node(sn_, docs={"docs": {}, "map": mp_})["pages"]]
+        # label sides, no exceptions: a deliverable's name and fact line below its diamond, a team's line above the trunk
+        for d_ in [x for x in mp_["nodes"] if x["kind"] == "work" and x.get("lane") == "trunk"]:
+            g_ = ng(sv_, d_["id"]); cy_ = float(re.search(r'points="[\d.]+,[\d.]+ [\d.]+,([\d.]+)', g_).group(1))
+            ys_ = [float(y) for y in re.findall(r'<text[^>]* y="([\d.]+)"', g_.split("</title>")[1]) if True]
+            ys_ = [y for y, t_ in zip(ys_, re.findall(r'<text[^>]*>([^<]*)<', g_.split("</title>")[1])) if t_ not in ("!", "?")]
+            assert len(ys_) == 2 and all(y > cy_ for y in ys_), (label_, d_["id"], "name and fact line below the diamond")
+        for sid in [x["id"] for x in mp_["nodes"] if x["kind"] == "engine" and x.get("lane") == "trunk"]:
+            g_ = ng(sv_, sid); cy_ = float(re.search(r'class="teamhit" cx="[\d.]+" cy="([\d.]+)"', g_).group(1))
+            ys_ = [float(y) for y in re.findall(r'<text class="sub"[^>]* y="([\d.]+)"', g_)]
+            assert len(ys_) == 1 and ys_[0] < cy_, (label_, sid, "the team's line above the trunk")
+        # the legend: in a collapsed row, and only what this map draws
+        lg_ = o_.split('<details class="mapdd mapleg"><summary>Legend</summary>')[1].split("</details>")[0]
+        keys_ = re.findall(r'data-legend="([^"]+)"', lg_)
+        assert "asks" not in keys_ and "uses" not in keys_ and ("send" in keys_) == any(x.get("tag") == "Send" for x in mp_["nodes"]), (label_, keys_)
+        assert ("given_to" in keys_) == ('class="mapedge given' in sv_) and ("left_open" in keys_) == any(x["status"] == "left_open" for x in mp_["nodes"]), (label_, keys_)
+        assert not re.search(r'<details class="mapdd mapleg"[^>]* open', o_), "the legend starts closed"
     # three given-to loops that all interleave cannot sit on two sides: the one that cannot be placed is drawn round the outside and listed, never silently crossed
     ds = [f"d{i}" for i in range(1, 7)]
     tn, te = [], []
