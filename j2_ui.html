@@ -1252,7 +1252,8 @@ function renderMap(m){
   if (!nodes.length) return `<div class="mapwrap"><p class="empty">Nothing to draw yet.</p></div>`;
   const st = m.status || {}, ck = st.checks || {passed: 0, run: 0}, by = mapById(m), name = id => mapName(m, id);
   const head = `<div class="maphead"><h3>Map</h3><span class="mappill ${esc(st.state_status || "idle")}">${mapWords(st.state || "not recorded")}</span>`
-    + `<span class="mappill checks">${ck.passed} of ${ck.run} checks passed</span></div>`;
+    + (ck.run ? `<span class="mappill checks">${ck.passed} of ${ck.run} checks passed</span>` : `<span class="mappill">No checks yet</span>`)
+    + "</div>";
   const work = nodes.filter(n => n.row === "work"), people = nodes.filter(n => n.row === "people"), fns = nodes.filter(n => n.row === "functions"), decks = work.filter(n => n.kind !== "engine"), steps = work.filter(n => n.kind === "engine");
   // layout: You and the Management layer across the top, then the work as a tree down the middle: Charter at the root, each persona above the deliverable it made.
   // Hand-off lines run straight down the spine; "given to" lines loop round it on the left or the right, so a deliverable that feeds more than one step branches.

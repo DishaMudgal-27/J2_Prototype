@@ -4429,6 +4429,47 @@ def plain_unchanged(checkpoint=None, slim=None, board=None):
         shutil.rmtree(old, ignore_errors=True)
 
 
+def charter_crash_fix():
+    """runs/j2-20261023-115255 crashed (TypeError: unhashable type: 'dict') because done_when held dicts, and a
+    rejected-then-replaced charter doubled charter_items to 18 entries (9 strings from the rejected charter, 9
+    dicts from the new one), from the same root cause: nothing normalised a charter's done_when items to strings
+    before storing them. (a) a charter whose done_when items are dicts registers and runs past the validator,
+    normalised to strings. (b) a second charter submitted before any workflow is registered renumbers from 1, not
+    accumulated onto the first's."""
+    FIRST = ["Problem section states the shop has no online booking", "Users section names students and staff",
+             "Requirements section lists the classes with time and price"]
+    SECOND = [{"item": 1, "criterion": "Problem section states the shop has no online booking"},
+              {"item": 2, "criterion": "Users section names students and staff"}]
+
+    def make_goal(items):
+        return {"statement": "A one-page site for Still Point Yoga", "site_name": "Still Point Yoga",
+                "audience": "Students", "standards": ["Clear"], "rules": ["Plain HTML"], "done_when": items,
+                "core": [True] * len(items), "to_be_confirmed": [], "dropped_from_brief": [], "facts": [],
+                "business_type": "studio", "visitor_needs": []}
+
+    run = j2.J2Run()
+    run.budget = 300
+    run.request = "A one-page site for a yoga studio called Still Point Yoga."
+    calls = {"n": 0}
+
+    def call(fn, fmt, task, mock, **k):
+        calls["n"] += 1
+        return {"say": "@Adaptation Charter recorded.", "enough": True, "questions": [],
+                "goal": make_goal(FIRST if calls["n"] == 1 else SECOND), "next": "adaptation", "reason": "ok"}
+    run.call = call
+    run._identity_intake({})
+    assert run.goal["done_when"] == FIRST, run.goal["done_when"]
+    assert run.goal["charter_items"] == FIRST, run.goal["charter_items"]
+    assert not run.workflows and not run.past_workflows, "nothing registered yet: the next charter must renumber"
+    run._identity_intake({})
+    expect = [x["criterion"] for x in SECOND]
+    assert run.goal["done_when"] == expect, run.goal["done_when"]                 # dicts normalised to strings
+    assert all(isinstance(x, str) for x in run.goal["done_when"]), run.goal["done_when"]
+    assert run.goal["charter_items"] == expect, run.goal["charter_items"]         # renumbered 1..2, not 1..5
+    print("charter crash fix: dict done_when items normalise to strings and register past the validator; a charter "
+          "replaced before any work is registered renumbers from 1 ok")
+
+
 def board_disabled():
     """Message board step 1: with J2_BOARD unset (default off), a run writes no board.json or board.jsonl, and
     artifacts.json has no board row at all (absent, the same way a mock run's missing screenshots produce no row,
@@ -6023,6 +6064,7 @@ if __name__ == "__main__":
         plain_unchanged("f6938b2", slim="0")      # J2_SLIM=0 is the old path, prompt for prompt
         plain_unchanged()                         # the default (slim) path against the commit made right after the flip
         plain_unchanged(board="0")                 # J2_BOARD=0 explicitly set: still identical, prompt for prompt
+        charter_crash_fix()
         board_disabled()
         os.environ["J2_BOARD"] = "1"
         board_story()

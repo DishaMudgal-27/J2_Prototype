@@ -3654,11 +3654,15 @@ class J2Run:
                 goal = stage_goal(self.output, goal, self.chain)
         # The no-errors gate has fixed wording: Identity can't extend it with features (runs/j2-20261009-133203
         # item 16 added filters and category browsing, so it couldn't pass once those were dropped).
-        goal["done_when"] = [GATE_TEXT if NO_ERRORS_GATE.search(str(c)) else c for c in goal.get("done_when") or []]
+        goal["done_when"] = [GATE_TEXT if NO_ERRORS_GATE.search(str(c)) else
+                             (c.get("criterion") or c.get("text") or str(c)) if isinstance(c, dict) else c
+                             for c in goal.get("done_when") or []]
         crit, core = goal["done_when"], goal.pop("core", None)
         # Every item keeps its number for the whole run: a new charter (a change request) keeps the earlier numbers
-        # and numbers its new items after them. Audit may still use these numbers after items are dropped.
-        old = (self.goal or {}).get("charter_items") or []
+        # and numbers its new items after them. Audit may still use these numbers after items are dropped. But if no
+        # work has been registered against the old numbers yet (the charter was rejected and replaced before
+        # Adaptation proposed anything), there is nothing to keep stable: the replacement renumbers from 1.
+        old = (self.goal or {}).get("charter_items") or [] if self.workflows or self.past_workflows else []
         goal["charter_items"] = old + [c for c in crit if c not in old]
         if isinstance(core, list) and len(core) == len(crit):          # stored by text: drops renumber the list
             goal["core_items"] = [c for c, k in zip(crit, core) if k is True]
