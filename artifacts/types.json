@@ -276,6 +276,16 @@
       "form": "data",
       "file": "chat.jsonl",
       "deliverable": false
+    },
+    {
+      "name": "board",
+      "kind": "record",
+      "label": "Message board",
+      "tag": "Other",
+      "color": "--other",
+      "form": "data",
+      "file": "board.json",
+      "deliverable": false
     }
   ]
 }
