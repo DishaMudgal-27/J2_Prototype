@@ -913,21 +913,10 @@ SIMPLE_FORBIDDEN_CASE = re.compile(r"\b(COUNTER|GRANT|REFUSE|Clause|NEEDS_REVISI
                                    r"|\b(?:after|before|by|from|until|than) the team\b")   # e.g. "after Audit" -> not "after the team"
 
 
-CHROME_HANGS = []
-
-
 def chrome_dom(cmd, capture_output=True, text=True, timeout=90):
-    """Headless Chrome for a page check. About once in a full --browser run (some 520 Chrome calls) one call never finishes,
-    whichever page it is: 1200 calls of the same pages outside the suite never hung. A hang is retried once and listed at the end
-    of the run; a page that hangs twice, or renders the wrong thing, still fails."""
-    import subprocess
-    for k in range(2):
-        try:
-            return j2.j2_check.run_chrome(cmd, timeout)
-        except subprocess.TimeoutExpired:
-            if k:
-                raise
-            CHROME_HANGS.append(f"{inspect.stack()[1].function}: {cmd[-1][-60:]}")
+    """Headless Chrome for a page check (j2_check.run_chrome: on a timeout Chrome and its helpers are killed). No retry: a page
+    that hangs fails the test."""
+    return j2.j2_check.run_chrome(cmd, timeout)
 
 
 def simple_text(base):
@@ -6005,6 +5994,37 @@ def map_tab():
             assert f1[2] is True and f1[3] is False and f1[0] <= f1[1] + 1, (rn, f1)      # wide drawing shown, and it fits
         f2 = home_probe(real_names[0], base_js + fit_js, "860,900")["fit"]
         assert f2[2] is False and f2[3] is True, f2      # under 900px: the vertical drawing
+        # phone width: nothing wider than 360px on the Simple view or the home, and the rail is along the bottom. Headless Chrome's
+        # window is at least 500px wide, so the page is measured in a 360px iframe served from the same origin.
+        def phone_probe(run_name, view):
+            js = ("setTimeout(() => { const d = document.querySelector('iframe').contentDocument, W = d.documentElement.clientWidth, r = {W, sw: d.documentElement.scrollWidth, out: []};"
+                  "d.querySelectorAll('body *').forEach(e => { const b = e.getBoundingClientRect(); if (b.width && b.height && (b.right > W + 0.5 || b.left < -0.5)) r.out.push((e.id || e.className || e.tagName) + ' ' + Math.round(b.left) + '-' + Math.round(b.right)); });"
+                  "const rail = d.querySelector('.rail.tabs').getBoundingClientRect(), main = d.querySelector(" + json.dumps("#sview" if view == "simple" else "#dview .dcol") + ").getBoundingClientRect();"
+                  "r.rail = [rail.top >= main.bottom - 1, Math.abs(rail.bottom - d.documentElement.clientHeight) <= 1, rail.height > 0];"
+                  "document.body.setAttribute('data-r', JSON.stringify(r)); }, 6000)")
+            page = (f'<!doctype html><body style="margin:0"><iframe src="/?view={view}&run={run_name}" style="width:360px;height:800px;border:0;display:block"></iframe>'
+                    f'<script>{js}</script></body>')
+
+            class Wrap(j2_server.Handler):
+                def do_GET(self):
+                    return self._send(200, page, "text/html") if self.path == "/wrap" else super().do_GET()
+            tmp = tempfile.mkdtemp(prefix="j2-phone-")
+            open(os.path.join(tmp, "j2_ui.html"), "w", encoding="utf-8").write(ui)
+            keep_here, j2_server.HERE = j2_server.HERE, tmp
+            keep, j2_server.RUN = j2_server.RUN, run
+            srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), Wrap)
+            threading.Thread(target=srv.serve_forever, daemon=True).start()
+            try:
+                dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--window-size=600,800", "--virtual-time-budget=10000", "--dump-dom",
+                                  f"http://127.0.0.1:{srv.server_address[1]}/wrap"], capture_output=True, text=True, timeout=180).stdout
+            finally:
+                j2_server.HERE, j2_server.RUN = keep_here, keep
+                srv.shutdown()
+            return json.loads(htmllib.unescape(re.search(r'data-r="([^"]*)"', dom).group(1)))
+        for v_ in ("simple", "detail"):
+            p_ = phone_probe(name, v_)
+            assert p_["W"] == 360 and p_["sw"] == 360 and p_["out"] == [], (v_, p_)      # no sideways scroll, nothing past either edge
+            assert p_["rail"] == [True, True, True], (v_, p_)      # the rail is along the bottom, below the screen's content
         # Run settings: New run posts to /api/reset; choosing a saved run opens it
         e_ = home_probe(name, base_js + "let posted = ''; window.fetch = (u, o) => { if (String(u).includes('/api/reset')) posted = (o && o.method) || 'GET'; return new Promise(() => {}); }; showTab('runsettings'); document.getElementById('reset').click(); r.posted = posted;")
         assert e_["posted"] == "POST", e_
@@ -6362,6 +6382,4 @@ if __name__ == "__main__":
     print("G simple view (plain words at the source and as fallback, buttons once, phone toggle, ready card) ok")
     assert fingerprint(REAL_MEMORY) == REAL_BEFORE, "the tests changed the real memory/ files"
     print("playbooks: same business type only, mock memory kept from live runs; real memory/ untouched ok")
-    if CHROME_HANGS:
-        print(f"Chrome hung {len(CHROME_HANGS)} time(s), each passed on its one retry: " + "; ".join(CHROME_HANGS))
     print("j2 flow checks passed")
