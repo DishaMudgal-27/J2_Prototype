@@ -1503,6 +1503,8 @@ def mock_charter(text):
         items = ["Visitors can browse products by category", "Every product shows its id and price",
                  "Visitors can filter products by size and price",
                  "Every product has an order button that opens a WhatsApp link with the product id and price"]
+        if re.search(r"\btimings?\b|\bhours?\b|\bopen\b", t):    # only when the brief gives them, never invented
+            items.append("The store timings and the shop address are listed")
     else:
         items = [d for k, d in (("menu", "The menu with prices is shown"), ("hour", "Opening hours are listed"),
                                 ("where", "The address and a map link are shown"),
@@ -1640,6 +1642,10 @@ def mock_page(w, goal, sections, anchors=()):
                 "color:#2b211b}section{padding:16px 0;border-top:1px solid #e6dccf}</style>", hero)
     if "viewport" in n or any("phone" in str(t).lower() for t in w.get("covers_text") or []):
         return '<meta name="viewport" content="width=device-width, initial-scale=1">', ""
+    if re.search(r"timings?|hours|address", n):
+        # The timings/address section (and a later revise of it) writes only its own items, so the page records
+        # where the timings are and a board answer can name that section instead of saying "not recorded".
+        shown = [(i, d) for i, d in shown if re.search(r"timings?|hours|address|where to find", str(d), re.I)] or shown
     if "product" in n:        # fake catalog, id and price recorded as data-id/data-price so a board answer can name them
         idx, d = next(((i, d) for i, d in shown if "price" in str(d).lower()), shown[0] if shown else (1, ""))
         cards = "".join(f'<article class="j2-card" data-id="p{k}" data-price="{p}" style="max-width:100%;'
@@ -3640,9 +3646,16 @@ class J2Run:
 
         def mock():
             if change:
+                # J2.a for a change request: Identity asks the workflow that already built that part of the page
+                # where it is, instead of assuming the change needs a new section (board, J2_BOARD=1).
                 return json.dumps({"say": "@Adaptation Charter updated for the change request.", "enough": True,
                                    "next": "Adaptation", "goal": {**self.goal, "done_when": list(self.goal["done_when"])
-                                                                  + [f"Change: {change}"]}})
+                                                                  + [f"Change: {change}"]},
+                                   **self._mock_board_ask("identity",
+                                                          self._board_owner_atom("timings", "hours", "address",
+                                                                                 "location"),
+                                                          "where the store timings are",
+                                                          "Are store timings already on the page, and where?")})
             text = " ".join([self.request] + [x["answer"] for x in self.intake])
             if self.doc and not self.intake and len(self.request.split()) < 25 and not last:
                 return json.dumps({"say": "Before we start, a few quick questions so the document has the facts.",
@@ -4859,6 +4872,19 @@ class J2Run:
             if self.blueprint and not self.workflows and not self.feedback:
                 return json.dumps(self._mock_blueprint_plan(crit))
             if self.feedback:
+                # A change to something an earlier workflow already built is a revise of that workflow's section,
+                # priced as a fix. Which workflow that is comes off the board (Q-n), not from a guess.
+                owner = self._board_owner("timings", "hours", "address", "location") \
+                    if j2_board.enabled() and re.search(r"\bhours?\b|\btimings?\b|\baddress\b",
+                                                        str(self.feedback), re.I) else None
+                if owner:
+                    return json.dumps({"say": f"@Priority The Requester asked: \"{self.feedback}\". {owner['id']} "
+                                              f"already owns that section ({owner['name']}), so this is a revise of "
+                                              "it, priced as a fix.", "act": "PROPOSE", "next": "Priority",
+                                       "workflows": [{"name": "Visiting hours", "goal_gap": self.feedback,
+                                                      "parts": ["fix"], "revises": owner["id"], "covers": [],
+                                                      "outputs": ["index.html"],
+                                                      "completion_check": "The visiting hours are in that section"}]})
                 return json.dumps({"say": f"@Priority The Requester asked: \"{self.feedback}\". One workflow covers it.",
                                    "act": "PROPOSE", "next": "Priority",
                                    "workflows": [{"name": "Requester change", "goal_gap": self.feedback,
@@ -4890,8 +4916,11 @@ class J2Run:
                 return json.dumps({"say": "@Priority One fix per failing item.", "act": "PROPOSE", "next": "Priority",
                                    "workflows": others})
             if self.cycle == 1 and not self.workflows and (self.goal or {}).get("business_type") == "boutique":
+                timings = items(r"timings|address", {"page_section"})    # only when the brief gave them
                 return json.dumps({"say": "@Priority Proposal for cycle 1: scaffold and styling, products, order "
-                                          "on WhatsApp, and filter.", "act": "PROPOSE", "next": "Priority", "workflows": [
+                                          "on WhatsApp, and filter."
+                                          + (" Plus the store timings and address." if timings else ""),
+                                   "act": "PROPOSE", "next": "Priority", "workflows": [
                                        {"name": "Scaffold and styling", "goal_gap": "No site exists",
                                         "parts": ["page_section", "styling"], "covers": [self._no(crit[0])],
                                         "outputs": ["index.html"],
@@ -4900,7 +4929,13 @@ class J2Run:
                                        {"name": "Products", "goal_gap": "Each product's id and price are shown",
                                         "parts": ["page_section"], "covers": items(r"id and price", {"page_section"}),
                                         "outputs": ["index.html"],
-                                        "completion_check": "Every product shows its id and price"},
+                                        "completion_check": "Every product shows its id and price"}]
+                                   # before the other sections, so the timings sit in their own section
+                                   + ([{"name": "Store timings and address",
+                                        "goal_gap": "Visitors can't see when the shop is open or where it is",
+                                        "parts": ["page_section"], "covers": timings, "outputs": ["index.html"],
+                                        "completion_check": "The timings and the address are on the page"}]
+                                      if timings else []) + [
                                        {"name": "Order on WhatsApp", "goal_gap": "Order button opens a WhatsApp link",
                                         "parts": ["form"], "covers": items(r"whatsapp", {"form"}),
                                         "outputs": ["index.html"],
@@ -5432,8 +5467,14 @@ class J2Run:
                 # The first counter deliberately names Identity, to show the route check in mock mode.
                 return json.dumps({"say": say, "decision": "COUNTER", "workflows": offer,
                                    "next": "Identity" if self.exchanges == 0 else "Adaptation"})
+            # Pricing a revise: Priority asks Adaptation whether this is new work or a fix before it grants
+            # (board, J2_BOARD=1), instead of reading the price off the parts alone.
+            revises = next((str(w.get("revises")) for w in table if w.get("revises")), "")
+            ask = self._mock_board_ask("priority", "adaptation", "new work or a fix",
+                                       f"Is this new work or a fix of {revises}?") if revises else {}
             return json.dumps({"say": f"@Adaptation Granted ({cost_of(table)} of {remaining} left).",
-                               "decision": "GRANT", "workflows": [env(w) for w in table], "next": "Adaptation"})
+                               "decision": "GRANT", "workflows": [env(w) for w in table], "next": "Adaptation",
+                               **ask})
         p = self.call("priority", '{"say": str (address @Adaptation), "decision": "GRANT"|"COUNTER"|"REFUSE", '
                       '"workflows": ' + self.GRANT_FMT + ' (what you fund, each with its envelope; for COUNTER, your '
                       'smaller version), '
@@ -6412,12 +6453,15 @@ class J2Run:
 
     def _mock_board_reuse(self, reader):
         """Mock mode's Reuse (item 4): the reader names the answered entries that share a topic (BOARD_TOPICS) with
-        its own name or covered items, never every entry on the board."""
+        its own name or covered items, never every entry on the board. A builder doesn't reuse what its own atom
+        asked (it got that as an Answer); a function reads its own earlier entry back off the board on a later
+        turn, which is the point of the board."""
         if not j2_board.enabled():
             return {}
         name, covered, mine = self._board_reader(reader)
         mytext = " ".join([name] + [str(c) for c in covered]).lower()
-        used = [e["id"] for e in self.board["entries"] if e["status"] == "answered" and e["asked_by"] != mine
+        used = [e["id"] for e in self.board["entries"] if e["status"] == "answered"
+                and not (isinstance(reader, dict) and e["asked_by"] == mine)
                 and any(any(k in mytext for k in topic) and any(k in str(e["question"]).lower() for k in topic)
                         for topic in self.BOARD_TOPICS)]
         return {"board_used": used} if used else {}
@@ -6436,17 +6480,23 @@ class J2Run:
         return {"board_question": {"to": to, "about": about, "text": text}}
 
     def _board_owner(self, *words):
-        """The atom of the done workflow whose name, gap or covered items mention one of these words, latest first:
-        who the mock scenario asks about that subject. None when the run has built no such workflow."""
+        """The done workflow that owns this subject: the one whose name says so, else the one whose gap or covered
+        items do, latest first. Who to ask, read off the run's own record; None when nothing built it."""
         crit = (self.goal or {}).get("done_when") or []
-        for w in reversed(self._all_wfs()):
-            if w.get("status") != "done":
-                continue
-            text = " ".join([str(w.get("name") or ""), str(w.get("goal_gap") or "")]
-                            + [c for c in crit if self._no(c) in (self._wf_items(w) or [])]).lower()
-            if any(k in text for k in words):
-                return next((a["id"] for a in w.get("atoms") or [] if a.get("agent_output")), None)
+        done = [w for w in reversed(self._all_wfs()) if w.get("status") == "done"]
+        for name_only in (True, False):
+            for w in done:
+                text = " ".join([str(w.get("name") or "")] if name_only else
+                                [str(w.get("goal_gap") or "")]
+                                + [c for c in crit if self._no(c) in (self._wf_items(w) or [])]).lower()
+                if any(k in text for k in words):
+                    return w
         return None
+
+    def _board_owner_atom(self, *words):
+        """The atom of that workflow (what a question names), or None."""
+        w = self._board_owner(*words) or {}
+        return next((a["id"] for a in w.get("atoms") or [] if a.get("agent_output")), None)
 
     def _mock_board_extra(self, w, attempt):
         """Mock mode only, for a builder. Ask (item 2, via J2_FORCE_QUESTION): a question only on the matched
@@ -6479,28 +6529,33 @@ class J2Run:
             note = f"<!-- board: {', '.join(attrs)} confirmed -->"
             return {"answer": f"This section's items use {', '.join(attrs)}.",
                     "artifact_update": None if note in body else {"body": body.rstrip() + "\n" + note}}
-        anchors = re.findall(r'<section[^>]*\bid="([\w-]+)"', body)
-        heads = re.findall(r"<h[23][^>]*>([^<]+)</h[23]>", body)
-        if sid and anchors:
-            return {"answer": f"Yes: it is in section {sid}, anchor #{anchors[0]}"
-                              + (f', headed "{heads[0]}"' if heads else "") + ".", "artifact_update": None}
+        # "where": the section of its own body whose heading answers the question, by anchor and heading.
+        secs = re.findall(r'<section[^>]*\bid="([\w-]+)"[^>]*>\s*(?:<h[23][^>]*>([^<]*)</h[23]>)?', body)
+        want = j2_board.content_words(asked)
+        pick = next((s for s in secs if any(k in (s[1] or "").lower() for k in want)), secs[0] if secs else None)
+        if sid and pick:
+            return {"answer": f"Yes: it is in section {sid}, anchor #{pick[0]}"
+                              + (f', headed "{pick[1]}"' if pick[1] else "") + ".", "artifact_update": None}
         if attrs:
             return {"answer": f"This section's items use {', '.join(attrs)}.", "artifact_update": None}
         return {"answer": "not recorded", "artifact_update": None}
 
     def _mock_board_answer_fn(self, fn, entry):
-        """Mock mode's Answer (item 3) from a function: read out of the run's own record. Adaptation says whether a
-        workflow is new work or a revision priced as a fix; anything else is "not recorded"."""
+        """Mock mode's Answer (item 3) from a function: read out of the run's own record. Adaptation answers from the
+        proposal it has on the table (self.a_pos), so it can say whether the work is new or a revise priced as a
+        fix while Priority is still pricing it. Anything the run hasn't recorded is "not recorded"."""
         text = str((entry or {}).get("question") or "").lower()
         if fn == "adaptation" and re.search(r"new work|fix|revis", text):
-            w = next((x for x in reversed(self._all_wfs()) if x.get("revises")), None)
+            table = self.a_pos or []
+            named = (re.search(r"\bW-\d+\b", text, re.I) or [""])[0].upper()
+            w = next((x for x in table if str(x.get("revises") or "").upper() == named and named), None) \
+                or next((x for x in table if x.get("revises")), None)
             if w:
-                return {"answer": f"{w['id']} is a fix: it revises {w['revises']}'s section and is priced with a "
-                                  f"'fix' part ({', '.join(w.get('parts') or []) or 'not recorded'})."}
-            w = next((x for x in reversed(self._all_wfs()) if x.get("cycle") == self.cycle), None)
-            if w:
-                return {"answer": f"{w['id']} is new work: it covers {w.get('covers') or 'not recorded'} and revises "
-                                  "nothing."}
+                return {"answer": f"A fix: {w.get('name')} revises {w['revises']}'s section, priced with a 'fix' "
+                                  f"part ({', '.join(w.get('parts') or []) or 'not recorded'})."}
+            if table:
+                return {"answer": f"New work: {table[0].get('name')} revises nothing and covers "
+                                  f"{table[0].get('covers') or 'not recorded'}."}
         return {"answer": "not recorded"}
 
     def _spec_conflict(self, w, meta):
@@ -6951,8 +7006,14 @@ class J2Run:
                                        ("Section present in the page" if ok else "No section for this item")})
             n = sum(f["verdict"] == "NEEDS_REVISION" for f in fs)
             rub = [{"id": rid, "verdict": "PASS", "evidence": "Mock: looks fine in the measurements"} for rid, _ in RUBRIC]
+            # Checking a price item: Audit asks the workflow that built the products which attribute holds the
+            # price, rather than guessing from the markup (board, J2_BOARD=1).
+            changed = any(m.get("change") for m in self.chat)     # the demo's order: after the change request
+            ask = self._mock_board_ask("audit", self._board_owner_atom("product"), "the price attribute",
+                                       "Which attribute holds the price?") if changed else {}
             return json.dumps({"say": "@Identity All criteria pass; done-when may hold." if not n else
-                               f"@Identity {n} finding needs revision.", "findings": fs, "rubric": rub, "next": "Identity"})
+                               f"@Identity {n} finding needs revision.", "findings": fs, "rubric": rub,
+                               "next": "Identity", **ask})
         r = self.call("audit", '{"say": str, "findings": [{"id": "F-1", "item": int|null (done-when item number; null '
                       'for an extra issue), "criterion": str, "verdict": "PASS"|"PASS_WITH_WARNING"|'
                       '"NEEDS_REVISION"|"BLOCKED_BY_EVIDENCE"|"POLICY_CONCERN", "severity": "low"|"medium"|"high"|'

@@ -68,6 +68,11 @@ BOUTIQUE_BRIEF = ("make a website for my cousin's clothing boutique called Threa
                   "kurtas (1499, 1699), sarees (3499), cotton shirts (1299) and dupattas (899). people should be able "
                   "to browse products by category, filter by size and price, see a size guide, check new arrivals, "
                   "and order on whatsapp (+91 00000 11111). it should feel earthy and elegant and work well on phones")
+# The same boutique with its timings and address, so an earlier workflow owns that part of the page: the message
+# board demo (board_functions). Every price, timing and number here is in the brief; the phone numbers are fake.
+BOUTIQUE_HOURS_BRIEF = (BOUTIQUE_BRIEF.replace(" it should feel earthy",
+                        " the shop is open 11am to 8pm every day except monday, at 14 Laxmi Road in Pune, and the "
+                        "phone is +91 00000 22222. it should feel earthy"))
 SHOW = "--chat" in sys.argv
 FAST = "--fast" in sys.argv
 BROWSER = not FAST or "--browser" in sys.argv        # the tests that drive the page in Chrome
@@ -4537,6 +4542,99 @@ def board_story():
           "never reaches an AI call, and a second question from the same atom is refused ok")
 
 
+def board_run(brief=None, demo=False):
+    """The message board demo run (Part B): the Thread & Loom brief with its prices and timings, built to Done, then
+    the change request "Add a section for visiting hours". J2_FIXES=1, so the change request is checked at J2.a,
+    which is where Identity asks the workflow that already built the timings. Returns the finished run."""
+    fixes = os.environ.get("J2_FIXES")
+    os.environ["J2_FIXES"] = "1"
+    os.environ["J2_FORCE_QUESTION"] = "identity,priority,audit"
+    try:
+        run = j2.J2Run()
+        run.budget = 260
+        say(run, brief or BOUTIQUE_HOURS_BRIEF)
+        finish(run)
+        assert run.outcome.startswith("Done"), run.outcome
+        say(run, "Add a section for visiting hours")
+        finish(run)
+    finally:
+        os.environ.pop("J2_FORCE_QUESTION", None)
+        os.environ["J2_FIXES"] = fixes if fixes is not None else "0"
+    if demo:
+        print(f"board demo run: {os.path.basename(run.dir)} ({run.outcome})")
+    return run
+
+
+def board_functions():
+    """Message board, Part B: the whole story with the functions asking. Thread & Loom is built to Done, then the
+    Requester asks for a section of visiting hours, and (J2_FORCE_QUESTION=identity,priority,audit) exactly three
+    questions are asked, each once: Q-1 Identity asks the workflow that built the timings where they are; Q-2
+    Priority asks Adaptation whether the change is new work or a fix; Q-3 Audit asks the products workflow which
+    attribute holds the price. Adaptation reuses Q-1 and plans a revise of that workflow's section priced as a fix,
+    the revise builder reuses Q-1, and on the next audit Audit reads its own Q-3 back off the board instead of
+    asking again. A question the board already answers is refused ("already answered in Q-3"). The run ends Done,
+    N6 (no invented content) passes, and the switch never reaches an AI call."""
+    run = board_run()
+    assert run.outcome.startswith("Done"), run.outcome
+    b = run.board["entries"]
+    assert [e["id"] for e in b] == ["Q-1", "Q-2", "Q-3"], b                      # exactly 3, in order
+    assert [e["asked_by"] for e in b] == ["identity", "priority", "audit"], b
+    assert all(e["asked_by_role"] == "function" and e["status"] == "answered" for e in b), b
+    assert len({e["question"] for e in b}) == 3, b                               # each asked once
+    timings = b[0]["to"].split(".")[0]
+    assert b[0]["to"].startswith("W-") and b[0]["answered_from"]["workflow"] == timings, b[0]
+    assert isinstance(b[0]["answered_from"]["version"], int), b[0]               # the version it had on record
+    assert "item-" in b[0]["answer"] and "timings" in b[0]["answer"], b[0]       # read off its recorded section
+    assert b[1]["to"] == "adaptation" and b[1]["answered_from"] == {"function": "adaptation"}, b[1]
+    assert b[1]["answer"].lower().startswith("a fix"), b[1]
+    assert "data-price" in b[2]["answer"], b[2]
+    # Reuse: Adaptation and the revise builder read Q-1, Audit reads its own Q-3 back on the next audit
+    assert sum(len(e["used_by"]) for e in b) >= 3, b
+    assert "adaptation" in b[0]["used_by"] and any(r.startswith("W-") for r in b[0]["used_by"]), b[0]
+    assert "audit" in b[2]["used_by"], b[2]
+    rev = next(w for w in run._all_wfs() if w["name"] == "Visiting hours")
+    assert rev["revises"] == timings and rev["cost"] == j2.RATES["fix"], rev     # a revise, priced as a fix
+    chat = [m for m in run.chat if m["who"] in ("identity", "priority", "audit", "adaptation")]
+    assert any(m["who"] == "identity" and "Q-1:" in m["text"] for m in chat), "the ask is in the chat"
+    assert any(m["who"] == "adaptation" and "Q-2:" in m["text"] for m in chat), "the answer is in the chat"
+    assert any(m["who"] == "adaptation" and "[read Q-1]" in m["text"] for m in chat), "a function's read tag"
+    assert any(m["who"] == "audit" and "[read" in m["text"] and "Q-3" in m["text"] for m in chat), "Audit's read tag"
+    # A question the board already answers is refused, whoever asks it
+    dup = run._ask_board("coordination", {"to": b[2]["to"], "about": "the price attribute",
+                                          "text": "Which attribute holds the price?"}, 1, role="function")
+    assert dup["status"] == "refused", dup
+    with open(os.path.join(run.dir, "board.jsonl"), encoding="utf-8") as f:
+        assert json.loads(f.readlines()[-1])["reason"] == "already answered in Q-3"
+    with open(os.path.join(run.dir, "conditions.json"), encoding="utf-8") as f:
+        n6 = next(c for c in json.load(f) if c["id"] == "N6")
+    assert n6["met"], n6                      # no invented content: the mock built from the brief only
+    with open(os.path.join(run.dir, "calls.jsonl"), encoding="utf-8") as f:
+        for c in (json.loads(ln) for ln in f):
+            seen = (c["system"] + c["prompt"]).lower()
+            for bad in ("j2_force_question", "test switch", "identity,priority,audit"):
+                assert bad not in seen, (c["id"], c["fn"], bad)
+    print("board functions: Identity, Priority and Audit each ask once (a workflow, a function and an earlier "
+          "workflow answer), Adaptation and the revise builder reuse Q-1, Audit reads its own Q-3 back on the next "
+          "audit, a duplicate is refused, N6 passes, the run ends Done and the switch never reaches an AI call ok")
+
+
+def board_functions_off():
+    """Message board, Part B: the same brief and change request with J2_BOARD unset write no board file, ask
+    nothing, and no prompt carries the board fields or the BOARD block (the flag gates all of it; plain_unchanged
+    guards the prompts byte for byte)."""
+    os.environ.pop("J2_BOARD", None)
+    run = board_run()
+    assert run.outcome.startswith("Done"), run.outcome
+    assert not run.board["entries"] and not os.path.isfile(os.path.join(run.dir, "board.json"))
+    assert not os.path.isfile(os.path.join(run.dir, "board.jsonl"))
+    with open(os.path.join(run.dir, "calls.jsonl"), encoding="utf-8") as f:
+        for c in (json.loads(ln) for ln in f):
+            for bad in ("BOARD (", "board_question", "board_used"):
+                assert bad not in c["system"] + c["prompt"], (c["id"], c["fn"], bad)
+    print("board off: the same brief and change request with J2_BOARD unset write no board file, ask nothing, and "
+          "no prompt mentions the board ok")
+
+
 def board_not_mine():
     """Message board, Part A: "not mine" (item 3). The target's reply isn't its area, so the entry is unanswered and
     the asking workflow continues normally (the existing Adaptation path; no follow-up question, no crash)."""
@@ -6301,6 +6399,16 @@ def docs_intake_and_compare():
 
 
 if __name__ == "__main__":
+    if "--board-demo" in sys.argv:
+        # python3 j2_flow_test.py --fast --board-demo: the message board demo (board_functions' own run), saved to
+        # runs/ as evidence instead of the temp folder. Mock mode, the browser measurement stubbed as --fast does.
+        os.environ["J2_BOARD"] = "1"
+        j2.RUNS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "runs")
+        demo = board_run(demo=True)
+        print(f"Board: {len(demo.board['entries'])} question(s), "
+              + ", ".join(f"{e['id']} {e['asked_by']} -> {e['to']} ({e['status']})" for e in demo.board["entries"]))
+        print(f"http://127.0.0.1:8773/?run={os.path.basename(demo.dir)}&view=detail")
+        sys.exit(0)
     if FAST:
         print("--fast: browser measurement stubbed" + ("" if BROWSER else "; tests that drive the page in Chrome are "
                                                        "skipped below (add --browser to run them)"))
@@ -6338,8 +6446,10 @@ if __name__ == "__main__":
         plain_unchanged(board="0")                 # J2_BOARD=0 explicitly set: still identical, prompt for prompt
         charter_crash_fix()
         board_disabled()
+        board_functions_off()
         os.environ["J2_BOARD"] = "1"
         board_story()
+        board_functions()
         board_not_mine()
         os.environ.pop("J2_BOARD", None)
         atom_schema()
