@@ -4494,9 +4494,10 @@ def board_disabled():
 def board_story():
     """Message board, Part A: the main story. J2_FORCE_QUESTION=order makes the Order workflow's first attempt ask
     Products one question (item 2); Products answers from its own recorded section, with an artifact_update, and
-    its atom gets "Updated by Q-1" (item 3); Filter and the later Viewport fix reuse Q-1 without asking, recording a
-    depends_on edge (item 5); no Adaptation re-plan follows (exactly the 5 proposed workflows run, no Fix/Cover-item
-    extras). The switch is never in calls.jsonl, and a second question from the same atom is refused."""
+    its atom gets "Updated by Q-1" (item 3); Filter reuses Q-1 without asking, recording a depends_on edge (item 4),
+    and Audit reuses it too (the price topic is in the items it checks), while the Viewport fix, whose work shares no
+    topic with the question, does not; no Adaptation re-plan follows (exactly the 5 proposed workflows run, no
+    Fix/Cover-item extras). The switch is never in calls.jsonl, and a second question from the same atom is refused."""
     os.environ["J2_FORCE_QUESTION"] = "order"
     try:
         run = docs_run(BOUTIQUE_BRIEF, 200)
@@ -4528,9 +4529,12 @@ def board_story():
     second = run._ask_board(order_wf, {"to": "W-2.a1", "about": "x", "text": "y"}, 1)
     assert second["status"] == "refused" and "already asked" in (
         json.loads(open(os.path.join(run.dir, "board.jsonl"), encoding="utf-8").readlines()[-1])["reason"]), second
+    assert "W-5.a1" not in q1["used_by"], ("the Viewport fix shares no topic with the question, so it may not reuse "
+                                           "it in mock mode", q1["used_by"])
+    assert q1["asked_by_role"] == "builder" and (q1["answered_from"] or {}).get("workflow") == "W-2", q1
     print("board story: J2_FORCE_QUESTION asks once, Products answers with an artifact_update and 'Updated by Q-1', "
-          "Filter and Viewport fix reuse it (depends_on 'board Q-1', used_by), no re-plan, the switch never reaches "
-          "an AI call, and a second question from the same atom is refused ok")
+          "Filter reuses it (depends_on 'board Q-1', used_by) and the Viewport fix does not, no re-plan, the switch "
+          "never reaches an AI call, and a second question from the same atom is refused ok")
 
 
 def board_not_mine():

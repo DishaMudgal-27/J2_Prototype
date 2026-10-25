@@ -497,14 +497,17 @@ function fixesLine(a, w){
   return `Fixes: ${fixes.map(esc).join(", ")}. Before: ${show(before)}. After: ${show(after)}.`;
 }
 // "Asked Q-n" / "Answered Q-n" / "Used Q-n" for an atom card, from the Board tab's own data (BOARD), recorded only.
+// An entry a function asked says so ("Answered Q-1, asked by Identity (function)"), since the asker is no atom.
+const fnName = f => String(f || "").charAt(0).toUpperCase() + String(f || "").slice(1);
 function boardLine(a, w){
   const es = BOARD.entries || [];
   if (!es.length) return "";
   const asked = es.filter(e => e.atom === a.id), answered = es.filter(e => e.answered_by === w.id && e.to === a.id);
   const used = es.filter(e => (e.used_by || []).includes(a.id));
+  const from = e => e.asked_by_role === "function" ? `${esc(e.id)}, asked by ${esc(fnName(e.asked_by))} (function)` : esc(e.id);
   const parts = [];
   if (asked.length) parts.push(`Asked ${asked.map(e => esc(e.id)).join(", ")}`);
-  if (answered.length) parts.push(`Answered ${answered.map(e => esc(e.id)).join(", ")}`);
+  if (answered.length) parts.push(`Answered ${answered.map(from).join("; ")}`);
   if (used.length) parts.push(`Used ${used.map(e => esc(e.id)).join(", ")}`);
   return parts.join(". ");
 }
@@ -1135,7 +1138,7 @@ const TABHINT = {preview: "What the team has built so far.", goal: "What you ask
   map: "Who worked with whom, and what each made.", style: "The look and feel the team agreed on.",
   lessons: "What the team learned from earlier runs.", playbooks: "Plans reused from earlier runs of the same kind.",
   report: "A summary of the run.", rundetails: "The agents, the steps and the settings of this run.", runsettings: "What to build, which run to open, and a new run.",
-  board: "Questions asked between builders, answered, and reused (recorded data only)."};
+  board: "Questions the functions and the builders asked, who answered them, and who reused them (recorded data only)."};
 function showTab(name){
   document.querySelectorAll(".tabs [role=tab]").forEach(x => x.setAttribute("aria-selected", x.dataset.tab === name));
   const tb = document.querySelector(`.tabs [data-tab="${name}"]`);
@@ -1156,16 +1159,23 @@ let ARTOPEN = "";
 // Board tab: board/1 entries (j2_board.py), read-only. Shown only when the run has one (tab-board.hidden, set from
 // s.has_board). Recorded data only: every row is a stored board entry, nothing guessed.
 const BOARD = {schema: "board/1", entries: []};
+// Where an answer came from: {workflow, version} or {function}, as recorded (nothing guessed).
+const boardFrom = f => !f ? '<span class="empty">not recorded</span>'
+  : f.function ? `${esc(fnName(f.function))} (function)`
+  : `${esc(f.workflow)}${f.version ? " v" + esc(f.version) : ""}`;
 function boardRow(e){
   const st = {open: "open", answered: "answered", unanswered: "unanswered", refused: "refused"}[e.status] || e.status;
-  return `<tr data-board="${esc(e.id)}"><td>${esc(e.id)}</td><td>${esc(e.asked_by)}</td><td>${esc(e.to)}</td>`
+  const role = e.asked_by_role ? ` <span class="empty">${esc(e.asked_by_role)}</span>` : "";
+  return `<tr data-board="${esc(e.id)}"><td>${esc(e.id)}</td><td>${esc(e.asked_by)}${role}</td><td>${esc(e.to)}</td>`
     + `<td>${esc(e.question)}</td><td>${e.answer ? esc(e.answer) : '<span class="empty">not recorded</span>'}</td>`
-    + `<td>${esc(st)}</td><td>${e.artifact_update ? "yes" : '<span class="empty">no</span>'}</td>`
+    + `<td>${esc(st)}</td><td>${boardFrom(e.answered_from)}</td>`
+    + `<td>${e.artifact_update ? "yes" : '<span class="empty">no</span>'}</td>`
     + `<td>${(e.used_by || []).length ? esc(e.used_by.join(", ")) : '<span class="empty">none</span>'}</td></tr>`;
 }
 const renderBoard = () => !BOARD.entries.length ? '<p class="empty">No questions asked yet.</p>'
   : `<table class="boardtbl"><thead><tr><th>Q-id</th><th>Asked by</th><th>To</th><th>Question</th><th>Answer</th>`
-    + `<th>Status</th><th>Artifact update</th><th>Used by</th></tr></thead><tbody>${BOARD.entries.map(boardRow).join("")}</tbody></table>`;
+    + `<th>Status</th><th>Answered from</th><th>Artifact update</th><th>Used by</th></tr></thead>`
+    + `<tbody>${BOARD.entries.map(boardRow).join("")}</tbody></table>`;
 async function loadBoard(){
   try { const r = await fetch(`/api/board?${runQ().slice(1)}`, {cache:"no-store"}); if (r.ok) Object.assign(BOARD, await r.json()); } catch (e) {}
   paint($("pane-board"), renderBoard());
