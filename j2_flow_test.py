@@ -913,12 +913,18 @@ SIMPLE_FORBIDDEN_CASE = re.compile(r"\b(COUNTER|GRANT|REFUSE|Clause|NEEDS_REVISI
                                    r"|\b(?:after|before|by|from|until|than) the team\b")   # e.g. "after Audit" -> not "after the team"
 
 
+def chrome_dom(cmd, capture_output=True, text=True, timeout=90):
+    """Headless Chrome for a page check (j2_check.run_chrome: on a timeout Chrome and its helpers are killed). No retry: a page
+    that hangs fails the test."""
+    return j2.j2_check.run_chrome(cmd, timeout)
+
+
 def simple_text(base):
     """Visible text of the Simple view (#sview) after the page has rendered, from headless Chrome's DOM."""
     import html.parser
     import subprocess
     chrome = j2.j2_check.find_chrome()
-    out = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=6000", "--dump-dom",
+    out = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=6000", "--dump-dom",
                           base + "/?view=simple"], capture_output=True, text=True, timeout=90).stdout
 
     class P(html.parser.HTMLParser):
@@ -1005,7 +1011,7 @@ def simple_view():
                 assert body not in text, ("agent message in the Simple view", m["text"][:80])
         # (d) the Detailed view shows both parts of a reply, each labelled with who it is for
         import subprocess
-        dom = subprocess.run([j2.j2_check.find_chrome(), "--headless=new", "--disable-gpu", "--virtual-time-budget=6000",
+        dom = chrome_dom([j2.j2_check.find_chrome(), "--headless=new", "--disable-gpu", "--virtual-time-budget=6000",
                               "--dump-dom", base + "/?view=detail"], capture_output=True, text=True, timeout=90).stdout
         assert "for Requester (you)" in dom and "for Adaptation" in dom, "Detailed view must label both audiences"
     finally:
@@ -1088,7 +1094,7 @@ def work_atom_cards():
     srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     try:
-        dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=8000", "--dump-dom",
+        dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=8000", "--dump-dom",
                               f"http://127.0.0.1:{srv.server_address[1]}/?view=detail"],
                              capture_output=True, text=True, timeout=120).stdout
     finally:
@@ -1448,7 +1454,7 @@ def detail_stays_open():
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     try:
         before = len(run.audits)
-        out = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=12000", "--dump-dom",
+        out = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=12000", "--dump-dom",
                               f"http://127.0.0.1:{srv.server_address[1]}/?view=detail"],
                              capture_output=True, text=True, timeout=120).stdout
         m = re.search(r'data-r="([^"]*)"', out)
@@ -3827,7 +3833,7 @@ def fresh_page_run():
         if j2.j2_check.find_chrome() and (BROWSER or not FAST):       # the real page: no error text in the page's own elements
             import subprocess
             for q in ("?view=detail", f"?view=detail&run={rid}", "?view=simple"):
-                dom = subprocess.run([j2.j2_check.find_chrome(), "--headless=new", "--disable-gpu", "--virtual-time-budget=6000",
+                dom = chrome_dom([j2.j2_check.find_chrome(), "--headless=new", "--disable-gpu", "--virtual-time-budget=6000",
                                       "--dump-dom", base + "/" + q], capture_output=True, text=True, timeout=90).stdout
                 assert re.search(r'id="sstatus">\s*</', dom) and 'class="oops"' not in dom.split("</script>")[-1], q
     finally:
@@ -4772,13 +4778,20 @@ def charter_objects():
     keep = {k: os.environ.get(k) for k in ("J2_TEST_EMAIL", "J2_SEND_MODE")}
     os.environ["J2_TEST_EMAIL"] = "me@example.invalid"
     os.environ.pop("J2_SEND_MODE", None)
+    given, read_as = [], []
 
     def objects(run, orig):
+        facts = run._fact_problems
+        def read(goal, change):      # the charter as the intake reads it, before anything else sees it
+            read_as.append(list(goal["done_when"]))
+            return facts(goal, change)
+        run._fact_problems = read
         def call(fn, *a, **k):
             r = orig(fn, *a, **k)
             g = r.get("goal") if isinstance(r, dict) else None
             if fn == "identity" and isinstance(g, dict) and g.get("done_when") and all(isinstance(x, str) for x in g["done_when"]):
-                g["done_when"] = [{"item": i, "criterion": x} for i, x in enumerate(g["done_when"], 1)]
+                given.append(list(g["done_when"]))      # out of order on purpose: the item number, not the list position, says where each goes
+                g["done_when"] = [{"item": i, "criterion": x} for i, x in reversed(list(enumerate(g["done_when"], 1)))]
             return r
         return call
     try:
@@ -4794,9 +4807,82 @@ def charter_objects():
     assert any(m.get("who") == "validator" and m.get("register") for m in chat), "the run went past the GRANT: workflows were registered"
     g = json.load(open(os.path.join(run.dir, "goal.json"), encoding="utf-8"))
     assert all(isinstance(c, str) for c in g["done_when"] + g["charter_items"] + g.get("core_items", [])), "the charter holds the item text, never the object"
+    assert given and read_as == given, ("item n is read as charter item n, with its criterion text unchanged", given, read_as)
+    assert all(run._no(c) == i for i, c in enumerate(given[-1], 1)), "each criterion keeps its item number"
     deed = [w for w in run.past_workflows + run.workflows if w["name"] == j2_send.DEEDS["send_email"]["label"]]
     assert deed and deed[0]["atoms"], "the send deed's atom was created"
-    print("charter given as objects: done_when read as text, the run goes past Priority's GRANT, documents and website built, the test email deed atom created ok")
+    print("charter given as objects (out of order): each item number keeps its criterion text, done_when read as text, the run goes past Priority's GRANT, documents and website built, the test email deed atom created ok")
+
+
+def milestone_emails():
+    """Milestone emails (code, dry run): with J2_MILESTONE_EMAILS=1, or a brief that asks for updates by email, one email each
+    time a goal of the run is reached (PRD, HLD, LLD filed and checked; the site workable), only for the run's own goals. The
+    recipient is only J2_TEST_EMAIL; receipts are masked; an email never stops the run; the map hangs each under its goal."""
+    import j2_send
+    import j2_map as M
+    keep = {k: os.environ.get(k) for k in ("J2_TEST_EMAIL", "J2_SEND_MODE", "J2_MILESTONE_EMAILS")}
+    addr = "me@example.invalid"
+
+    def env(**kw):
+        for k_ in keep:
+            os.environ.pop(k_, None)
+        os.environ.update({k_: v for k_, v in kw.items() if v is not None})
+
+    def receipts(run):
+        path = os.path.join(run.dir, "receipts.jsonl")
+        return [r for r in (json.loads(x) for x in open(path, encoding="utf-8") if x.strip()) if r.get("deed") == "milestone_email"] if os.path.exists(path) else []
+
+    def everything(run):
+        return "".join(open(os.path.join(dp, f), encoding="utf-8", errors="ignore").read() for dp, _, fs in os.walk(run.dir) for f in fs if f.endswith((".json", ".jsonl", ".md", ".txt")))
+    try:
+        assert j2_send.asks_updates("Send me updates by email as you go") and j2_send.asks_updates("email me when each part is done")
+        assert j2_send.asks_updates("keep me posted by email") and not j2_send.asks_updates("an email field in the form", "show our email address", BREW_LAB)
+        # on, documents and a site: one email per goal reached, in order, each a dry-run deed under its goal
+        env(J2_TEST_EMAIL=addr, J2_MILESTONE_EMAILS="1")
+        run = docs_run(DESIGN_BRIEF, 900)
+        assert [x["goal"] for x in run.milestone_log] == ["PRD", "HLD", "LLD", "Website"] and run.outcome.startswith("Done"), (run.milestone_log, run.outcome)
+        rs = receipts(run)
+        assert [r["subject"] for r in rs] == [f"J2 · Brew Lab · {g} done" for g in ("PRD", "HLD", "LLD", "Website")], [r["subject"] for r in rs]
+        assert all(r["mode"] == "dry-run" and r["sent"] is False and r["to_masked"] == j2_send.mask(addr) and r["to_hash"] == j2_send.digest(addr)[:16] for r in rs), rs
+        assert addr not in everything(run), "the address is never written in full"
+        wfs = {w["id"]: w for w in run.past_workflows + run.workflows}
+        mails = [wfs[x["atom"].split(".")[0]] for x in run.milestone_log]
+        assert all(w["cost"] == j2.RATES_DEED().get("send_email") == 5 and w["atoms"][0]["results"][0]["pass"] is None for w in mails), "5 credits each; dry run leaves the atom open"
+        mp = M.build(run.dir)
+        st = {e["to"]: e["from"] for e in mp["edges"] if e["kind"] == "step"}
+        brs = [n for n in mp["nodes"] if n["kind"] == "work" and n.get("lane") == "branch"]
+        assert [(st[st[n["id"]]], n["label"], n["status"]) for n in brs] == [(f"work:{k}", f"Email · {g} done", "left_open") for k, g in (("prd", "PRD"), ("hld", "HLD"), ("lld", "LLD"), ("website", "Website"))], brs
+        out = render_node(j2.saved_snapshot(os.path.basename(run.dir), 0), docs={"docs": {}, "map": mp})
+        wide = out["map"][out["map"].index('<svg class="mapsvg"'):out["map"].index("</svg>")]
+        assert wide.count('class="mapedge branch') == 8 and all(f">Email · {g} done · dry run<" in wide for g in ("PRD", "HLD", "LLD", "Website")), "one branch per email, under its goal"
+        assert "Finished. 4 emails waiting (dry run)." in out["needs"], out["needs"]
+        # a PRD only: one email, never one for a goal the run does not have
+        run2 = docs_run("Write a PRD for Campus Notes." + CAMPUS, 400)
+        assert [x["goal"] for x in run2.milestone_log] == ["PRD"], run2.milestone_log
+        # off: none at all (the plain path is also guarded by plain_unchanged)
+        env(J2_TEST_EMAIL=addr)
+        run3 = docs_run(DESIGN_BRIEF, 900)
+        assert run3.milestone_log == [] and receipts(run3) == [], "off by default"
+        # the brief asks for updates by email: on, without the setting
+        run4 = docs_run("Write a PRD for Campus Notes. Send me updates by email as you go." + CAMPUS, 400)
+        assert [x["goal"] for x in run4.milestone_log] == ["PRD"], run4.milestone_log
+        # no test address: refused and recorded, the run goes on
+        env(J2_MILESTONE_EMAILS="1")
+        run5 = docs_run("Write a PRD for Campus Notes." + CAMPUS, 400)
+        assert run5.outcome.startswith("Done") and receipts(run5)[0]["refused"] and receipts(run5)[0]["to_masked"] is None, receipts(run5)
+        # the credits can't cover it: skipped with the reason, the run goes on
+        env(J2_TEST_EMAIL=addr, J2_MILESTONE_EMAILS="1")
+        keep_rate, j2.RATES_DEED = j2.RATES_DEED, (lambda: {"send_email": 10 ** 6})
+        try:
+            run6 = docs_run("Write a PRD for Campus Notes." + CAMPUS, 400)
+        finally:
+            j2.RATES_DEED = keep_rate
+        assert run6.outcome.startswith("Done") and run6.milestone_log[0]["result"] == "skipped" and "work credits" in run6.milestone_log[0]["why"] and receipts(run6) == [], run6.milestone_log
+    finally:
+        env(**{k_: v for k_, v in keep.items()})
+    print("milestone emails: one per goal reached (PRD, HLD, LLD, website) and only the run's own goals, off by default, on when the brief asks "
+          "for updates by email, only to the test address and masked, dry run leaves them open, skipped (never stopping) when credits are short "
+          "or refused when no address is set, one map branch under each goal, outcome line counts them ok")
 
 
 def send_deeds():
@@ -5374,7 +5460,16 @@ def map_tab():
     f = {n["id"]: n for n in lv["nodes"] if n["kind"] == "function"}
     assert (f["fn:identity"]["status"], f["fn:identity"]["detail"]) == ("running", "writing the charter") and lv["status"]["state"] == "Identity running"
     assert (f["fn:adaptation"]["status"], f["fn:adaptation"]["wait_on"]) == ("waiting", "Priority")
-    assert (f["fn:priority"]["status"], f["fn:priority"]["wait_on"]) == ("waiting_on_you", "you")
+    assert (f["fn:priority"]["status"], f["fn:priority"]["wait_on"]) == ("idle", None), "waiting on you only while a question to you is open (the same source as Needs you)"
+    lq = M.build(edit, {"snapshot": {**snap, "status": "waiting", "lanes": lanes, "paused": {"kind": "info", "questions": [{"question": "Which day?", "options": []}], "msg": 1}, "call_log": calls, "chat": chat}, "stages": [], "stage_words": {}})
+    assert {n["id"]: n for n in lq["nodes"]}["fn:priority"]["status"] == "waiting_on_you", "with a question open it does wait on you"
+    # the Map and Needs you always agree on "waiting on you": same source (an open question), checked for each kind of state
+    for paused_, idn_lane in ((None, "waiting"), (None, "idle"), ({"kind": "info", "questions": [{"question": "Which day?", "options": []}], "msg": 1, "label": "a fact"}, "waiting")):
+        ln_ = [{"id": "identity", "name": "Identity", "status": idn_lane, "on": "Requester", "doing": "asked"}]
+        mm_ = M.build(edit, {"snapshot": {**snap, "status": "waiting", "lanes": ln_, "paused": paused_, "call_log": calls, "chat": chat}, "stages": [], "stage_words": {}})
+        on_map = any(n["status"] == "waiting_on_you" for n in mm_["nodes"] if n["kind"] in ("function", "person"))
+        cnt = render_node({**j2.saved_snapshot(name, 0), "paused": paused_, "chat": chat}, docs={"docs": {}, "map": mm_})["needcount"]
+        assert on_map == (cnt > 0), (paused_, idn_lane, on_map, cnt)
     assert (f["fn:coordination"]["status"], f["fn:coordination"]["detail"]) == ("fault", "W-3 is held")
     assert (f["fn:audit"]["status"], f["fn:audit"]["detail"]) == ("idle", "last seen: checked site v2")
     assert f["fn:identity"]["calls"] == sum(1 for c in calls if c["fn"] == "identity")
@@ -5440,19 +5535,21 @@ def map_tab():
     rowl = [">Management layer</text>", ">Team layer and deliverables</text>"]
     sv2v = out2[out2.index('<svg class="mapsvg mapvert"'):out2.index("</svg>", out2.index('<svg class="mapsvg mapvert"')) + 6]      # the narrow drawing (under 900px)
     rows_ = lambda h: re.findall(r'class="rowlab"[^>]*>([^<]+)<', h)
-    assert rows_(sv2v) == ["You", "Management layer", "Team layer and deliverables"] and rows_(svg2) == ["Management layer", "Team layer and deliverables"], "the wide drawing has no You band: You sits in the Management layer row"
-    yo2, id2 = (re.search(r'cx="([\d.]+)" cy="([\d.]+)"', ng(svg2, i)).groups() for i in ("person:requester", "fn:identity"))
-    assert yo2[1] == id2[1] and float(yo2[0]) < float(id2[0]) and 'class="youdot"' in ng(svg2, "person:requester"), "You at the left end of the Management layer row, a circle with a solid centre"
-    assert all(r in svg2 for r in rowl) and [svg2.index(r) for r in rowl] == sorted(svg2.index(r) for r in rowl) and ">FUNCTIONS<" not in svg2 and ">WORK<" not in svg2 and ">Deliverables<" not in svg2 and svg2.count("data-maptab=") == 0, "row names, top to bottom; links live in the panel and the cards"
+    assert rows_(sv2v) == ["You", "Management layer", "Team layer and deliverables"] and rows_(svg2) == [], "the wide drawing has no bands: one row of chips above the trunk"
+    chip_ = lambda i: tuple(float(v) for v in re.findall(r'<rect class="shape" x="([\d.-]+)" y="([\d.-]+)"', ng(svg2, i))[-1])      # the inner outline (a running chip has two)
+    assert chip_("person:requester")[1] == chip_("fn:identity")[1] and chip_("person:requester")[0] < chip_("fn:identity")[0] < chip_("fn:adaptation")[0] < chip_("fn:audit")[0], "You first, then the five functions, in one row"
+    assert 'class="youdot"' in ng(svg2, "person:requester") and re.search(r'class="sub chipn"[^>]*>2<', ng(svg2, "person:requester")) and re.search(r'class="sub chipn"[^>]*>3<', fbox("identity")), "each chip shows a count (messages from you; calls)"
+    assert ">FUNCTIONS<" not in svg2 and ">WORK<" not in svg2 and svg2.count("data-maptab=") == 0, "links live in the panel and the cards"
     assert svg2.count('<g class="mapnode') == 1 + 5 + 5 + 6 and re.findall(r'data-fn="(fn:\w+)"', svg2) == ["fn:" + k for k in PN], "a dot for every node, the five functions in order"
-    assert fbox("identity").count("<circle") == 2 and ">Client Lead<" in fbox("identity") and ">(Identity)<" in fbox("identity") and "writing the charter" in fbox("identity").split("</title>")[0] and ">3 calls<" not in fbox("identity")      # double ring = running now; the call count and the state sit in the tooltip
+    assert fbox("identity").count('<rect class="shape"') == 2 and ">Client Lead<" in fbox("identity") and 'aria-label="Client Lead (Identity): details"' in fbox("identity") and "writing the charter" in fbox("identity").split("</title>")[0] and ">3 calls<" not in fbox("identity")      # double ring = running now; the call count and the state sit in the tooltip
     assert 'stroke="var(--validator)" stroke-width="4"' in fbox("adaptation") and ">?</text>" in fbox("adaptation") and "waiting on Priority" in fbox("adaptation").split("</title>")[0] and ">Strategist<" in fbox("adaptation")
     assert 'stroke="var(--validator)" stroke-width="4"' in fbox("priority") and "waiting on you" in fbox("priority").split("</title>")[0] and "1 AI call," in fbox("priority").split("</title>")[0] and ">Prioritiser<" in fbox("priority")
     assert 'stroke="var(--bad)" stroke-width="4"' in fbox("coordination") and ">!</text>" in fbox("coordination") and "blocked" in fbox("coordination").split("</title>")[0] and ">Scheduler<" in fbox("coordination")
     assert 'stroke="var(--line)"' in fbox("audit") and ", idle, " in fbox("audit") and "last seen: " in fbox("audit") and "@Identity" not in fbox("audit") and not re.search(r"done.when", fbox("audit")) and ">Quality Reviewer<" in fbox("audit")
     assert "<title>Client Lead (Identity), running now, writing the charter, 3 AI calls, 12.5 s, 100 tokens in, 20 out</title>" in fbox("identity")      # the full text and numbers in a tooltip
-    assert "2 from you · 5 to you" in svg2 and svg2.count('stroke-dasharray="1 3"') >= 3 and "Messages between functions" not in out2      # few lines: drawn, no table
-    assert "Client Lead (Identity) speaks to Strategist (Adaptation): 4 messages" in svg2 and "Strategist (Adaptation) speaks to Prioritiser (Priority): 7 messages" in svg2
+    assert "2 from you · 5 to you" in sv2v and sv2v.count('stroke-dasharray="1 3"') >= 3, "the narrow drawing draws a few function lines"
+    assert "Client Lead (Identity) speaks to Strategist (Adaptation): 4 messages" in sv2v and "Strategist (Adaptation) speaks to Prioritiser (Priority): 7 messages" in sv2v
+    assert svg2.count('<path class="mapedge speak') == 1 and '<details class="mapdd"><summary>Messages between functions (speaks to)</summary>' in out2, "the chip row draws only You to Client Lead; messages between functions are in the table"
     many = [spk("fn:identity", "fn:adaptation", 4), spk("fn:adaptation", "fn:priority", 7), spk("fn:priority", "fn:coordination", 2), spk("fn:coordination", "fn:audit", 9), spk("fn:audit", "fn:identity", 1)]
     out3 = render_node(snap, docs={"docs": {}, "map": {**mp2, "edges": edges + many}})["map"]
     svg3 = out3[out3.index("<svg class=\"mapsvg\""):out3.index("</svg>", out3.index("<svg class=\"mapsvg\"")) + 6]
@@ -5472,7 +5569,9 @@ def map_tab():
     assert s4.startswith('<svg class="mapsvg" data-pin="fn:identity"') and ">wrote it<" in s4 and re.findall(r'class="maplbl[^"]*" data-from="[^"]+" data-to="[^"]+" x="[^"]+" y="[^"]+">([^<]+)<', s4) == ["wrote it", "2", "1", "4"]
     for need in (".mapln{opacity:0}", ".maplbl{opacity:0", ".mapsvg .hot.mapln", ".mapsvg .mapnode.dim", ".mapsvg .hot.maplbl"):      # function-to-deliverable lines are hidden until a dot is lit; lit when hot; the rest fade when another dot is lit
         assert need in s4, need
-    assert "hot" in ng(s4, "fn:identity").split(">")[0] and "hot" in ng(s4, "fn:adaptation").split(">")[0] and "hot" in ng(s4, "person:requester").split(">")[0] and "hot" in ng(s4, "work:t0").split(">")[0] and "hot" in ng(s4, "work:t1").split(">")[0], "the pinned dot and its direct neighbours are lit"
+    s4v = o4[o4.index('<svg class="mapsvg mapvert"'):]
+    assert "hot" in ng(s4v, "fn:adaptation").split(">")[0] and "dim" in ng(s4, "fn:adaptation").split(">")[0], "a function line is a neighbour where it is drawn (narrow); the wide chip row keeps those in the table"
+    assert "hot" in ng(s4, "fn:identity").split(">")[0] and "hot" in ng(s4, "person:requester").split(">")[0] and "hot" in ng(s4, "work:t0").split(">")[0] and "hot" in ng(s4, "work:t1").split(">")[0], "the pinned dot and its direct neighbours are lit"
     assert "dim" in ng(s4, "fn:audit").split(">")[0] and "dim" in ng(s4, "work:t3").split(">")[0] and "dim" in ng(s4, "fn:priority").split(">")[0], "the rest fade"
 
 
@@ -5482,11 +5581,16 @@ def map_tab():
     assert s4.index('class="mapln') < s4.index('<g class="mapnode') and s4.rindex('<path class="map') < s4.index('<g class="mapnode'), "lines are drawn under the dots"
     ends = [re.search(r'd="M[\d.]+ ([\d.]+) C[^"]* ([\d.]+)"', x).groups() for x in re.findall(r'<path class="mapln[^"]*"[^>]*>', s4)]
     assert len({a for a, _ in ends}) == 1, "function-to-deliverable lines all start under the function labels"
-    for lp in re.findall(r'<path class="mapln[^"]*" data-from="[^"]+" data-to="([^"]+)" d="([^"]+)"', s4):      # and end at the side of their dot, a little short of it
-        x1_, y1_, x2_, y2_ = (float(v) for v in re.search(r'points="([\d.]+),([\d.]+) ([\d.]+),([\d.]+)', ng(s4, lp[0])).groups())      # a diamond: top corner, then right corner
-        cx_, cy_, r_ = x1_, y2_, x2_ - x1_
+    tops_ = {}      # every node's centre and top in the wide drawing
+    for g_ in s4.split('<g class="mapnode')[1:]:
+        id_ = htmllib.unescape(re.search(r'data-id="([^"]+)"', g_).group(1))
+        m1 = re.search(r'points="([\d.]+),([\d.]+) ([\d.]+),([\d.]+)', g_) or None
+        m2 = re.search(r'class="teamhit" cx="([\d.]+)" cy="([\d.]+)" r="([\d.]+)"', g_)
+        if m1: tops_[id_] = (float(m1.group(1)), float(m1.group(2)))
+        elif m2: tops_[id_] = (float(m2.group(1)), float(m2.group(2)) - float(m2.group(3)))
+    for lp in re.findall(r'<path class="mapln[^"]*" data-from="[^"]+" data-to="([^"]+)" d="([^"]+)"', s4):      # a chip's line ends just above the team that made the deliverable, or the deliverable
         ex_, ey_ = (float(v) for v in re.findall(r"-?[\d.]+", lp[1])[-2:])
-        assert r_ + 4 - 4.6 <= abs(ex_ - cx_) <= r_ + 4.6 and abs(ey_ - cy_) <= 8, lp      # (a dot that is running has an outer ring 4 wider)
+        assert any(abs(ex_ - x) < 0.6 and -0.6 <= y - ey_ <= 8.6 for x, y in tops_.values()), lp      # (a running node has an outer outline 4 wider)
     for tip in ("Client Lead (Identity) wrote the Box 0 with a very long name", "Client Lead (Identity) made 2 AI calls on Box 1 with a very long name", "Quality Reviewer (Audit) audited Box 1 with a very long name 1 time", "Scheduler (Coordination) made 4 AI calls on Box 3 with a very long name"):
         assert f"<title>{tip}</title>" in s4, tip
     assert "many" not in s4.split(">")[0], "no 'many' mode any more: the lines are always hover-only"
@@ -5511,7 +5615,8 @@ def map_tab():
     assert 'stroke="var(--bad)" stroke-width="4"' in box(3) and ">!</text>" in box(3)                       # thick red edge plus "!"
     assert 'fill="none" stroke="var(--line)"' in box(4) and ">!</text>" not in box(4)                      # hollow = not made
     assert 'stroke="var(--validator)" stroke-width="4"' in box(5) and ">?</text>" in box(5) and "version not recorded" in box(5)
-    assert "color-mix(in srgb, var(--prd) 14%, var(--panel))" in box(0) and "var(--hld)" in box(1) and ", version 1, filed and checked," in box(0) and ">v1<" not in box(0) and ">filed<" not in box(0)      # version and status moved into the tooltip
+    assert "color-mix(in srgb, var(--ok) 14%, var(--panel))" in box(0) and ", version 1, filed and checked," in box(0) and re.search(r'class="sub"[^>]*>v1(<| · )', box(0)) and ">filed<" not in box(0)      # green = filed; the short fact line under it
+    assert not re.search(r"var\(--(prd|hld|lld|site|charter|other|identity|adaptation|priority|coordination|audit|user)\)", svg), "colours follow the status only, never the kind of document or function"
     assert "left open" in box(2).split("</title>")[0] and "running now" in box(1).split("</title>")[0] and "fault" in box(3).split("</title>")[0] and "not made" in box(4).split("</title>")[0] and "waiting on you" in box(5).split("</title>")[0]
     assert "<title>Box 3 with a very long name, version 4, fault, Every checklist item passes inside its limits</title>" in box(3)      # full text in a tooltip
     assert not re.search(r"envelope|done.when", out, re.I), "plain words"
@@ -5551,7 +5656,7 @@ def map_tab():
         open(page, "w", encoding="utf-8").write(f"<html><head><meta name=viewport content='width=device-width'><style>{css}</style></head><body>{real}"
             "<script>document.body.setAttribute('data-m', [document.documentElement.scrollWidth, innerWidth, getComputedStyle(document.querySelector('.mapsvgwrap')).display, getComputedStyle(document.querySelector('.mapcards')).display, [...document.querySelectorAll('.mapln')].every(x => x.getBoundingClientRect().width === 0)].join('|'))</script></body></html>")
         for width, want in ((500, "none|block|true"), (1100, "block|none|false")):
-            dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", f"--window-size={width},800", "--virtual-time-budget=2000", "--dump-dom", "file://" + page],
+            dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", f"--window-size={width},800", "--virtual-time-budget=2000", "--dump-dom", "file://" + page],
                                  capture_output=True, text=True, timeout=120).stdout
             sw, iw, a, b, c = re.search(r'data-m="([^"]+)"', dom).group(1).split("|")
             assert int(sw) <= int(iw) and f"{a}|{b}|{c}" == want, (width, sw, iw, a, b, c)      # at 500px the function-to-work lines take no space
@@ -5575,7 +5680,7 @@ def map_tab():
         srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
         threading.Thread(target=srv.serve_forever, daemon=True).start()
         try:
-            dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=12000", "--dump-dom",
+            dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=12000", "--dump-dom",
                                   f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={name}"], capture_output=True, text=True, timeout=180).stdout
         finally:
             j2_server.HERE, j2_server.RUN = keep_here, keep
@@ -5593,7 +5698,7 @@ def map_tab():
         srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
         threading.Thread(target=srv.serve_forever, daemon=True).start()
         try:
-            dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=8000", "--dump-dom",
+            dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--virtual-time-budget=8000", "--dump-dom",
                                   f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={name}"], capture_output=True, text=True, timeout=120).stdout
         finally:
             j2_server.RUN = keep
@@ -5647,7 +5752,7 @@ def map_tab():
             tgt = n["id"].split(">")[1]
             who_, verb = {"d1": ("Product Analyst", "drafting"), "d2": ("Solution Architect", "drafting"), "d3": ("Web Developer", "building"), "d4": ("Messenger", "sending"), "d5": ("Technical Designer", "drafting")}[tgt]
             words_ = " ".join(re.sub(r"<[^>]+>", " ", ng(svg_t, n["id"]).split("</title>")[1]).split())
-            assert words_.startswith(f"{who_} {verb} · 2 workflows") and f"{who_}, {verb} Deliverable {tgt} (2 workflows)" in ng(svg_t, n["id"]), (order, n["id"], words_)
+            assert words_ == f"{who_} · 2 workflows" and f"{who_}, {verb} Deliverable {tgt} (2 workflows)" in ng(svg_t, n["id"]), (order, n["id"], words_)
             svt_v = out_t[out_t.index('<svg class="mapsvg mapvert"'):]
             assert f">{who_}<" in ng(svt_v, n["id"]) and f">{verb} · 2 workflows<" in ng(svt_v, n["id"]), "the narrow drawing keeps one line each"
             assert f"{who_}, {verb} Deliverable {tgt} (2 workflows)" in out_t.split('class="mapcards"')[1], "the cards use the same words"
@@ -5740,8 +5845,26 @@ def map_tab():
         if os.path.isdir(os.path.join(repo_runs, n_)) and not os.path.exists(os.path.join(j2.RUNS_DIR, n_)):
             shutil.copytree(os.path.join(repo_runs, n_), os.path.join(j2.RUNS_DIR, n_))
             real_names.append(n_)
-    cross_runs = [("mock run", run.dir)] + [(n_, os.path.join(j2.RUNS_DIR, n_)) for n_ in real_names]
-    assert len(cross_runs) == 3, "both saved runs are in runs/"
+    keep_mail = os.environ.get("J2_TEST_EMAIL"); os.environ["J2_TEST_EMAIL"] = "me@example.invalid"
+    try:
+        send_run = docs_run(DESIGN_BRIEF + " When the documents are finished, send a test email to me with a short summary of the PRD.", 900)      # a mock run with a send step
+    finally:
+        os.environ.pop("J2_TEST_EMAIL", None)
+        if keep_mail is not None:
+            os.environ["J2_TEST_EMAIL"] = keep_mail
+    send_name = os.path.basename(send_run.dir)
+    cross_runs = [("mock run", run.dir), ("mock run with a send", send_run.dir)] + [(n_, os.path.join(j2.RUNS_DIR, n_)) for n_ in real_names]
+    assert len(cross_runs) == 4, "both saved runs are in runs/"
+    sm_ = M.build(send_run.dir)
+    assert [n_["id"] for n_ in sm_["nodes"] if n_["row"] == "work"][-2:] == ["step:lld>website", "work:website"] and any(n_.get("tag") == "Send" and n_["lane"] == "branch" for n_ in sm_["nodes"]), "the send sits off the trunk, the site follows the LLD"
+    # the outcome line names what is left open; the chip says when the latest Audit wants a revision
+    ns_ = render_node(j2.saved_snapshot(send_name, 0), docs={"docs": {}, "map": sm_})["needs"]
+    assert "Finished. 1 item left open: test email (dry run)." in ns_, ns_
+    ss_ = j2.saved_snapshot(send_name, 0)
+    chip_ok = render_node({**ss_, "workable": []}, docs={"docs": {}, "map": sm_})["map"]
+    chip_bad = render_node({**ss_, "workable": ["necessary condition N8 not met: a nav reaches every section"]}, docs={"docs": {}, "map": sm_})["map"]
+    assert 'class="mappill checks"' in chip_ok and "needs revision" not in chip_ok, "every check passed and Audit agrees: green"
+    assert 'class="mappill checks needsrev"' in chip_bad and "checks passed · Audit: needs revision<" in chip_bad, "the checks passed but the latest Audit says not workable: amber"
     pages_ = {}
     for label_, dir_ in cross_runs:
         mp_ = M.build(dir_)
@@ -5751,6 +5874,7 @@ def map_tab():
         assert crossings(sv_) == [], (label_, crossings(sv_))
         assert "could not be drawn without crossing" not in o_, label_
         steps_ = [n_["id"] for n_ in mp_["nodes"] if n_["kind"] == "engine"]
+        by_ = {n_["id"]: n_ for n_ in mp_["nodes"]}
         assert steps_, label_
         for sid in steps_:
             words_ = " ".join(re.sub(r"<[^>]+>", " ", ng(sv_, sid).split("</title>")[1]).replace("!", " ").replace("?", " ").split())
@@ -5758,13 +5882,47 @@ def map_tab():
             g_ = ng(sv_, sid); assert g_.count('class="teamdot"') == 5 and 'class="teamhit"' in g_, "a team persona is a ring of five dots in a round hit area"
             px_, py_ = (float(v) for v in re.search(r'class="teamhit" cx="([\d.]+)" cy="([\d.]+)"', g_).groups())
             tgt_ = "work:" + htmllib.unescape(sid).split(">")[1]
+            if by_[tgt_].get("lane") == "branch":
+                continue
+            src_ = "work:" + htmllib.unescape(sid).split(">")[0].split(":")[1]
             dx_, dy_ = (float(v) for v in re.search(r'points="([\d.]+),[\d.]+ [\d.]+,([\d.]+)', ng(sv_, tgt_)).groups())
-            assert abs(px_ - dx_) < 0.6 and py_ < dy_, (label_, sid, "the persona sits right above the deliverable it made")
+            sx_ = float(re.search(r'points="([\d.]+),', ng(sv_, src_)).group(1))
+            assert abs(py_ - dy_) < 0.6 and sx_ < px_ < dx_, (label_, sid, "the team sits on the stretch of line leading into the deliverable it made")
+        # side jobs: never in the trunk; the site's step takes the last document; drawn below the trunk
+        stp_ = [(e["from"], e["to"]) for e in mp_["edges"] if e["kind"] == "step"]
+        trunk_ = [n_["id"] for n_ in mp_["nodes"] if n_["kind"] == "work" and n_.get("lane") == "trunk"]
+        for d_ in [x for x in mp_["nodes"] if x["kind"] == "work" and x.get("tag") == "Send"]:
+            assert d_["lane"] == "branch" and not any(f == d_["id"] for f, _ in stp_), (label_, d_["id"], "a send is a side job: nothing is built from it")
+            ty_ = float(re.search(r'points="[\d.]+,[\d.]+ [\d.]+,([\d.]+)', ng(sv_, "work:website")).group(1))
+            ey_ = float(re.search(r'<rect class="shape" x="[\d.-]+" y="([\d.-]+)"', ng(sv_, d_["id"])).group(1))
+            assert ey_ > ty_, (label_, "the side job is drawn below the trunk")
+        if "work:website" in trunk_:
+            into_web = [f for f, t in stp_ if t.endswith(">website") and t.startswith("step:")]
+            assert into_web == [trunk_[trunk_.index("work:website") - 1]], (label_, into_web, "the site's step takes the last document as its input")
         for d_ in [x for x in mp_["nodes"] if x["kind"] == "work"]:
+            if d_.get("tag") == "Send":
+                assert '<rect class="shape"' in ng(sv_, d_["id"]) and "<polygon" not in ng(sv_, d_["id"]), (label_, d_["id"], "a send ends in a letter icon")
+                continue
             assert '<polygon class="shape"' in ng(sv_, d_["id"]) and '<circle class="shape"' not in ng(sv_, d_["id"]), (label_, d_["id"], "a deliverable is a diamond")
         sv_v = o_[o_.index('<svg class="mapsvg mapvert"'):o_.index("</svg>", o_.index('<svg class="mapsvg mapvert"'))]
         assert crossings(sv_v) == [], (label_, "narrow drawing", crossings(sv_v))
         pages_[label_] = [(htmllib.unescape(a_["from"]), htmllib.unescape(a_["to"]), a_["page"]) for a_ in render_node(sn_, docs={"docs": {}, "map": mp_})["pages"]]
+        # label sides, no exceptions: a deliverable's name and fact line below its diamond, a team's line above the trunk
+        for d_ in [x for x in mp_["nodes"] if x["kind"] == "work" and x.get("lane") == "trunk"]:
+            g_ = ng(sv_, d_["id"]); cy_ = float(re.search(r'points="[\d.]+,[\d.]+ [\d.]+,([\d.]+)', g_).group(1))
+            ys_ = [float(y) for y in re.findall(r'<text[^>]* y="([\d.]+)"', g_.split("</title>")[1]) if True]
+            ys_ = [y for y, t_ in zip(ys_, re.findall(r'<text[^>]*>([^<]*)<', g_.split("</title>")[1])) if t_ not in ("!", "?")]
+            assert len(ys_) == 2 and all(y > cy_ for y in ys_), (label_, d_["id"], "name and fact line below the diamond")
+        for sid in [x["id"] for x in mp_["nodes"] if x["kind"] == "engine" and x.get("lane") == "trunk"]:
+            g_ = ng(sv_, sid); cy_ = float(re.search(r'class="teamhit" cx="[\d.]+" cy="([\d.]+)"', g_).group(1))
+            ys_ = [float(y) for y in re.findall(r'<text class="sub"[^>]* y="([\d.]+)"', g_)]
+            assert len(ys_) == 1 and ys_[0] < cy_, (label_, sid, "the team's line above the trunk")
+        # the legend: in a collapsed row, and only what this map draws
+        lg_ = o_.split('<details class="mapdd mapleg"><summary>Legend</summary>')[1].split("</details>")[0]
+        keys_ = re.findall(r'data-legend="([^"]+)"', lg_)
+        assert "asks" not in keys_ and "uses" not in keys_ and ("send" in keys_) == any(x.get("tag") == "Send" for x in mp_["nodes"]), (label_, keys_)
+        assert ("given_to" in keys_) == ('class="mapedge given' in sv_) and ("left_open" in keys_) == any(x["status"] == "left_open" for x in mp_["nodes"]), (label_, keys_)
+        assert not re.search(r'<details class="mapdd mapleg"[^>]* open', o_), "the legend starts closed"
     # three given-to loops that all interleave cannot sit on two sides: the one that cannot be placed is drawn round the outside and listed, never silently crossed
     ds = [f"d{i}" for i in range(1, 7)]
     tn, te = [], []
@@ -5798,7 +5956,7 @@ def map_tab():
             srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
             threading.Thread(target=srv.serve_forever, daemon=True).start()
             try:
-                dom = subprocess.run([chrome, "--headless=new", "--disable-gpu", f"--window-size={size}", "--virtual-time-budget=12000", "--dump-dom",
+                dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", f"--window-size={size}", "--virtual-time-budget=12000", "--dump-dom",
                                       f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={run_name}"], capture_output=True, text=True, timeout=180).stdout
             finally:
                 j2_server.HERE, j2_server.RUN = keep_here, keep
@@ -5823,7 +5981,12 @@ def map_tab():
             b = home_probe(name, base_js +
                 "let chats = 0; const fc = focusChat; focusChat = () => { chats++; return fc(); }; r.none = document.getElementById('needs').innerText.replace(/\\s+/g, ' ') + '|' + document.getElementById('needcount').textContent;"
                 "click('person:requester'); r.person = document.activeElement.id; showTab('map'); click('fn:identity'); r.chats = chats; r.pane = vis();"
-                "showTab('map'); document.getElementById('gochat').click(); r.railchat = chats; document.getElementById('internals').click(); r.toggled = document.getElementById('railsub').hidden;")
+                "showTab('map'); window.j2mark = 1; const where = location.href, rs = () => [document.body.classList.contains('simple'), rect('#sview').width > 0, rect('.rail.tabs').width > 0, rect('#dview .dcol').width, document.getElementById('gochat').getAttribute('aria-current'), getComputedStyle(document.querySelector('.rail [data-tab=map]')).fontWeight].join('|'),"
+                " msgs = () => document.getElementById('msgs').children.length + '/' + document.getElementById('smsgs').children.length + '|' + document.getElementById('needs').textContent.replace(/\\s+/g, ' ') + '|' + document.getElementById('runsel').value;"
+                "r.m0 = msgs(); r.home0 = rs(); document.getElementById('gochat').click(); r.railchat = chats; r.simple = rs(); r.railleft = rect('.rail.tabs').right <= rect('#sview').left + 1; r.m1 = msgs();"
+                "document.querySelector('.rail [data-tab=map]').click(); r.back = rs() + '|' + vis(); r.m2 = msgs(); document.getElementById('gochat').click(); r.m3 = msgs(); document.querySelector('.rail [data-tab=map]').click(); r.m4 = msgs(); r.same = (window.j2mark === 1) + '|' + (location.href === where);"
+                "document.getElementById('internals').click(); r.toggled = document.getElementById('railsub').hidden;"
+                "showTab('runsettings'); document.getElementById('to-simple').click(); r.tosimple = rs(); document.querySelector('.rail [data-tab=map]').click();")
         finally:
             shutil.rmtree(ended, ignore_errors=True)
         assert a["home"] == "map" and a["count"] == "1" and "Needs you" in a["needs"] and "Add credits?" in a["needs"] and "Answer in Chat" in a["needs"], a
@@ -5838,7 +6001,12 @@ def map_tab():
         assert n["fn:audit"]["pane"] == "audit" and n["step:prd>hld"]["pane"] == "workflows" and n["step:prd>hld"]["wf"] == ",".join(sw), n
         assert n["work:prd"]["pane"] == "artifacts" and n["work:prd"]["art"] == "prd.md" and n["work:website"]["pane"] == "preview" and n["work:charter"]["pane"] == "charter", n
         assert a["wfnote"] is True and a["wfcleared"] == 0, a      # "Show all" clears the step filter
-        assert b["none"].startswith("Needs you 0 Nothing needs you right now.") and b["none"].endswith("See report|0") and b["person"] == "needs" and b["chats"] == 1 and b["railchat"] == 2 and b["toggled"] is False, b
+        assert b["none"].startswith("Needs you 0 Nothing needs you right now.") and b["none"].endswith("See report|0") and b["person"] == "needs" and b["chats"] == 1 and b["railchat"] == 1 and b["toggled"] is False, b
+        # the rail's Chat opens the Simple view with the rail kept and Chat lit; Map goes back to the unchanged home; same run, same messages, no reload
+        assert b["home0"] == "false|false|true|" + b["home0"].split("|")[3] + "|false|600" and float(b["home0"].split("|")[3]) > 0, b
+        assert b["simple"] == "true|true|true|0|page|500" and b["railleft"] is True, b
+        assert b["back"] == b["home0"] + "|map" and b["tosimple"] == b["simple"], b      # Back to simple view does what Chat does
+        assert b["m0"] == b["m1"] == b["m2"] == b["m3"] == b["m4"] and b["same"] == "true|true" and int(b["m0"].split("/")[0]) > 0, b
         # the header is the name only; Map has one visible heading; the outcome line opens the Report; the banner text is there; nothing overlaps
         vis_js = "const seen = e => e.getClientRects().length > 0 && getComputedStyle(e).visibility !== 'hidden';"
         c = home_probe(name, base_js + vis_js +
@@ -5856,17 +6024,48 @@ def map_tab():
               "const texts = [...sv.querySelectorAll('text')].filter(t => parseFloat(getComputedStyle(t).opacity) > 0.01 && t.textContent.trim()).map(t => ({t: t.textContent.trim(), b: t.getBBox()}));"
               "r.n = texts.length; r.hits = []; for (const x of texts) { for (const l of lines) if (l.o.some(([px, py]) => px > x.b.x - 1 && px < x.b.x + x.b.width + 1 && py > x.b.y && py < x.b.y + x.b.height)) r.hits.push(x.t + ' on ' + l.id); }"
               "for (let i = 0; i < texts.length; i++) for (let j = i + 1; j < texts.length; j++) { const a = texts[i].b, b = texts[j].b; if (a.x < b.x + b.width - 1 && b.x < a.x + a.width - 1 && a.y < b.y + b.height - 1 && b.y < a.y + a.height - 1) r.hits.push(texts[i].t + ' over ' + texts[j].t); }")
-        for rn in (name, *real_names):
+        for rn in (name, send_name, *real_names):
             d_ = home_probe(rn, base_js + fx)
             assert d_["n"] > 20 and d_["hits"] == [], (rn, d_["hits"])      # no label sits on a line or on another label
         # the wide drawing fits the map pane at 1440x900 with no scroll inside it; under 900px the narrow drawing is shown instead
         fit_js = ("const p = document.getElementById('pane-map'), w = document.querySelector('.mapsvg:not(.mapvert)'), v = document.querySelector('.mapsvg.mapvert');"
                   "r.fit = [p.scrollHeight, p.clientHeight, w.getClientRects().length > 0, v.getClientRects().length > 0];")
-        for rn in (name, *real_names):
+        for rn in (name, send_name, *real_names):
             f1 = home_probe(rn, base_js + fit_js, "1440,900")["fit"]
             assert f1[2] is True and f1[3] is False and f1[0] <= f1[1] + 1, (rn, f1)      # wide drawing shown, and it fits
         f2 = home_probe(real_names[0], base_js + fit_js, "860,900")["fit"]
         assert f2[2] is False and f2[3] is True, f2      # under 900px: the vertical drawing
+        # phone width: nothing wider than 360px on the Simple view or the home, and the rail is along the bottom. Headless Chrome's
+        # window is at least 500px wide, so the page is measured in a 360px iframe served from the same origin.
+        def phone_probe(run_name, view):
+            js = ("setTimeout(() => { const d = document.querySelector('iframe').contentDocument, W = d.documentElement.clientWidth, r = {W, sw: d.documentElement.scrollWidth, out: []};"
+                  "d.querySelectorAll('body *').forEach(e => { const b = e.getBoundingClientRect(); if (b.width && b.height && (b.right > W + 0.5 || b.left < -0.5)) r.out.push((e.id || e.className || e.tagName) + ' ' + Math.round(b.left) + '-' + Math.round(b.right)); });"
+                  "const rail = d.querySelector('.rail.tabs').getBoundingClientRect(), main = d.querySelector(" + json.dumps("#sview" if view == "simple" else "#dview .dcol") + ").getBoundingClientRect();"
+                  "r.rail = [rail.top >= main.bottom - 1, Math.abs(rail.bottom - d.documentElement.clientHeight) <= 1, rail.height > 0];"
+                  "document.body.setAttribute('data-r', JSON.stringify(r)); }, 6000)")
+            page = (f'<!doctype html><body style="margin:0"><iframe src="/?view={view}&run={run_name}" style="width:360px;height:800px;border:0;display:block"></iframe>'
+                    f'<script>{js}</script></body>')
+
+            class Wrap(j2_server.Handler):
+                def do_GET(self):
+                    return self._send(200, page, "text/html") if self.path == "/wrap" else super().do_GET()
+            tmp = tempfile.mkdtemp(prefix="j2-phone-")
+            open(os.path.join(tmp, "j2_ui.html"), "w", encoding="utf-8").write(ui)
+            keep_here, j2_server.HERE = j2_server.HERE, tmp
+            keep, j2_server.RUN = j2_server.RUN, run
+            srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), Wrap)
+            threading.Thread(target=srv.serve_forever, daemon=True).start()
+            try:
+                dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--window-size=600,800", "--virtual-time-budget=10000", "--dump-dom",
+                                  f"http://127.0.0.1:{srv.server_address[1]}/wrap"], capture_output=True, text=True, timeout=180).stdout
+            finally:
+                j2_server.HERE, j2_server.RUN = keep_here, keep
+                srv.shutdown()
+            return json.loads(htmllib.unescape(re.search(r'data-r="([^"]*)"', dom).group(1)))
+        for v_ in ("simple", "detail"):
+            p_ = phone_probe(name, v_)
+            assert p_["W"] == 360 and p_["sw"] == 360 and p_["out"] == [], (v_, p_)      # no sideways scroll, nothing past either edge
+            assert p_["rail"] == [True, True, True], (v_, p_)      # the rail is along the bottom, below the screen's content
         # Run settings: New run posts to /api/reset; choosing a saved run opens it
         e_ = home_probe(name, base_js + "let posted = ''; window.fetch = (u, o) => { if (String(u).includes('/api/reset')) posted = (o && o.method) || 'GET'; return new Promise(() => {}); }; showTab('runsettings'); document.getElementById('reset').click(); r.posted = posted;")
         assert e_["posted"] == "POST", e_
@@ -6124,6 +6323,7 @@ if __name__ == "__main__":
         docs_funding()
         send_deeds()
         charter_objects()
+        milestone_emails()
         artifact_types()
         artifacts_tab()
         map_tab()

@@ -152,9 +152,13 @@ The page opens in the **Simple view**, made for someone who knows nothing about 
 - **When done:** "Your website is ready" with Open full screen, Download the HTML file and Ask for a change.
 - **Errors:** a plain "Something went wrong. Try again."; the details stay in the Detailed view.
 
-"See how it works" (top right) opens the **Detailed view**: everything described below, and "Back to simple
-view" from there. The choice is remembered in the browser, and `?view=simple` / `?view=detail` in the URL
-picks one. The Simple view only changes how the run is shown; the agents and `j2.py` behave the same in both.
+"See how it works" (top right) opens the **Detailed view**: everything described below. A rail on the left
+switches between the views: **Map** (the Detailed view opens on it), **Chat** (the Simple view; the rail stays and
+Chat is highlighted) and **Internals** (the other tabs: Preview, Goal, Workflows, Conflicts, Timeline, Audit,
+Charter, Documents, Artifacts, Board, Style guide, Lessons, Playbooks, Report, Run details, Run settings). Any
+rail item other than Chat goes back to the Detailed view. On a phone the rail runs along the bottom of the
+screen. The choice is remembered in the browser, and `?view=simple` / `?view=detail` in the URL picks one. The
+Simple view only changes how the run is shown; the agents and `j2.py` behave the same in both.
 
 You type the brief as the Requester. The flow follows `docs/j2-flow.jpg` and the
 [J2 page](https://<owner-github-username>.github.io/<owner-site>/native/system/department.html) (J2.a to J2.h). Only Identity
@@ -334,6 +338,52 @@ something changes (budget raised, an item dropped, a new answer from the Request
 Each AI call is saved in `runs/j2-*/calls.jsonl` (inputs, full prompt, raw reply, reason, tokens, seconds). Each
 section is in `sections.json`.
 
+### Map
+
+The **Map** tab draws the run as a metro line, built by code from the run's own files (`j2_map.py`, no model
+call). Schema: `docs/map-schema.md`.
+- **Trunk:** the Charter, then each deliverable (PRD, HLD, LLD, website) in order, joined by steps named by what
+  their workflows do (Write, Build, Send). Deliverable labels sit below the line, team labels above.
+- **Branches:** side jobs (a send deed, a milestone email) leave the trunk at the document they were built from,
+  so they never sit between two documents. A milestone email hangs under the goal it reports.
+- **Functions row:** Identity, Adaptation, Priority, Coordination and Audit, with calls, seconds and tokens. Each
+  links to the tab that shows its work.
+- Colours show status only. A chip row and the top line give the state ("Waiting on you", "Done", ...) and the
+  checks passed; the outcome line names any open items. A legend lists the kinds drawn.
+- Wide screens get a left-to-right drawing; under 900px it is drawn top to bottom.
+- `runs/j2-*/map.json` is written beside `atoms.json`. `/api/map` serves the same shape for a live run, a saved
+  run, and old runs (rebuilt from the folder). Anything the run did not record is shown as "not recorded".
+
+### Message board (`J2_BOARD=1`, off by default)
+
+A blocked workflow agent can ask the one that knows instead of guessing (`j2_board.py`, schema `board/1`):
+- **Ask:** the builder posts one question ("@<target> Q-1: ..."). An agent can ask at most one question.
+- **Answer:** the target answers by updating its own section, marked "Updated by Q-1", and the asker continues.
+- **Reuse:** later builders read the answered entry instead of asking again. Their message carries "[read Q-1]",
+  and a `depends_on` edge is recorded.
+- An unanswered question leaves the asker on the normal path.
+- Saved in `board.json` and `board.jsonl`. The **Board** tab under Internals lists the entries, and atom cards
+  show "Asked / Answered / Used Q-n". With the flag unset, no board files are written and the flow is unchanged.
+
+`J2_FORCE_QUESTION=<workflow id or role word>` (mock mode only) is a test switch like `J2_FORCE_AUDIT_FAIL`: that
+builder's first attempt asks one question. Agents never see the switch; humans see it labelled in the chat. The
+"boutique" demo brief (a clothing shop) exercises the whole ask, answer and reuse loop.
+
+### Sends: test messages and milestone emails (dry run)
+
+`j2_send.py` has no network code. Live sending is not built yet.
+- **Send deeds:** a brief that asks to email or Slack the result ("send it to me by email") gets a deed stage.
+  A send verb must be near "email" or "Slack"; a mere mention matches nothing.
+- **Milestone emails:** one email per goal reached (each document filed and checked, or the site workable),
+  built by code from the run's record: goal, version, checks passed and a one-line summary, with links and
+  addresses removed. They are opt-in: set `J2_MILESTONE_EMAILS=1`, or ask in the brief ("email me updates").
+  When the credits can't cover one, it is skipped with the reason and the run goes on.
+- **Recipient:** taken only from `J2_TEST_EMAIL` / `J2_TEST_SLACK_TARGET`, never from the brief. Anything else
+  is refused, and nothing is sent when the variable is unset.
+- **Mode:** `J2_SEND_MODE` is `dry-run` (default: nothing leaves, the deed stays open) or `mock` (an in-process
+  recorder, for tests).
+- **Receipts:** hold a masked recipient (`d***@example.com`) and hashes, never a full address or a secret.
+
 ### Modes and settings
 
 `J2_FIXES` (default 0) is shown in the page header and on the first line of `chat.jsonl`:
@@ -362,6 +412,12 @@ Settings:
 | `J2_OUTPUT` | website | `website`, `prd`, `hld` or `lld` (a brief that asks for design docs, or a PRD, HLD or LLD, picks them without this). A website must also meet the necessary conditions in `conditions/website.json` (N1 to N8, checked by code after each build, written to `conditions.json`). `prd` writes a PRD instead (also picked on the start page; `hld` and `lld` work the same way with `conditions/hld.json` and `conditions/lld.json`): six markdown sections checked by code (no browser), necessary conditions in `conditions/prd.json` (P8 is a warning: `"severity": "warn"` shows but never blocks; statements beyond the brief start with `Assumption:` and are collected into a closing "Assumptions to confirm" section), the document rubric D-1 to D-5, `rates_prd` in `rates.json`; the run ends with `prd.md` and `prd.docx` (needs `python-docx`) |
 | `J2_FORCE_AUDIT_FAIL` | off | Test switch, see below |
 | `J2_MEMORY_TEST_LESSONS` | off | 1 lets J2.b read test lessons (demo runs only), see below |
+| `J2_BOARD` | off | 1 turns on the message board, see "Message board" |
+| `J2_FORCE_QUESTION` | off | Mock-only test switch: that builder asks one question |
+| `J2_MILESTONE_EMAILS` | off | 1 sends a milestone email per goal reached (dry run) |
+| `J2_SEND_MODE` | `dry-run` | `dry-run` or `mock`; live sending is not built |
+| `J2_TEST_EMAIL` | unset | The only address a send may go to |
+| `J2_TEST_SLACK_TARGET` | unset | The only Slack target a send may go to |
 | `J2_OVERRIDE_KEY` | unset | Owner override key, `.env` only, see below |
 
 **Owner override: `J2_OVERRIDE_KEY`.** Set it in `.env` (never committed; `.env.example` lists the name only). A
@@ -470,6 +526,13 @@ playbooks into the real file, and a live clothing run reused one. Those are now 
   instructions, the new example briefs
 - E: the page's tabs, lanes and their statuses, call links with reasons and no invented tokens, the full call
   record, saved runs opened read-only, path tricks refused, a fake key redacted, clear memory
+- Map: `map.json` matches a rebuild from the folder, with the expected nodes, edges and statuses. The wide and
+  vertical drawings fit. At phone width (a 360px frame), the Simple and Detailed views have nothing past either
+  edge, and the rail runs along the bottom
+- Board: off writes no board files; `J2_FORCE_QUESTION` asks once, is answered and is reused; an unanswered
+  question falls back to the normal path
+- Sends: a send needs a send verb, only the configured targets are allowed, dry run stays open, and receipts are
+  masked. Milestone emails: one per goal reached, off by default, on when the brief asks
 
 ### Still different from the J2 page
 

@@ -21,7 +21,12 @@ The Knows row is a later version: its node kind is in the schema, nothing is dra
 | built_from | the files the map was built from |
 | not_recorded | what the run did not record and the map therefore shows as "not recorded" |
 
-## Nodes: `{id, kind, row, label, status, version, detail, file, workflows, tag, color}`
+## Nodes: `{id, kind, row, label, status, version, detail, file, workflows, tag, color, lane}`
+
+`lane` (work and step nodes): `"trunk"` for the Charter, the documents and the site, in order; `"branch"` for a side job (a send
+deed) and its step. A branch's step starts at the document the deed was built from (its recorded `depends_on`, else the last trunk
+box before it), so a deed never sits between two documents, and the site's step takes the last document as its input. Nodes are
+listed in drawing order: each trunk box, the side jobs that leave it (step, then deed), then the step to the next trunk box.
 
 | kind | row | what it is | built from |
 |---|---|---|---|
@@ -35,8 +40,9 @@ A function node also has `calls`, `seconds`, `tokens {input, output}`, `tab` (th
 Charter, Adaptation Workflows, Priority Conflicts, Coordination Timeline, Audit Audit), `wait_on` (who it waits for) and
 `detail` (the one line on what it is doing). An engine node also has `made_by`.
 
-**Function states.** A running run uses `lanes()`: working is `running`, waiting is `waiting` (`wait_on` names who; the
-Requester gives `waiting_on_you`), blocked is `fault`, idle is `idle` with "last seen: ...". A finished or old run has no
+**Function states.** A running run uses `lanes()`: working is `running`, waiting is `waiting` (`wait_on` names who), blocked is
+`fault`, idle is `idle` with "last seen: ...". Waiting on the Requester is `waiting_on_you` only while a question to the Requester
+is open (the page's Needs you strip reads the same question); otherwise it is `idle`. A finished or old run has no
 live state: every function is `idle` with "last seen: <its last message>", never `running`. A question left unanswered
 (live `paused`, or the last chat message carries `pause`) puts `waiting_on_you` on Identity and on the Requester node.
 Without a chat the line says "no message recorded", and without `calls.jsonl` the counts are 0 and the gap is listed.
@@ -83,37 +89,27 @@ In a finished run the page says "left open", never "running".
 
 ## The page
 
-The Map is a calm graph drawn in inline SVG, laid out the same way every time (no physics, no random positions). From the
-top: You, the Management layer (the five functions), then the work as a tree down the middle. Charter is the root; below
-it, each deliverable sits under the team persona that made it. Every node is a circle with its name beside or under it;
-the version, status word, calls, last seen and the rest are in the tooltip and in a click panel. Status is never colour
-alone: solid ring = filed and checked, dashed = left open, double = running now, thick red plus "!" = fault, thick amber
-plus "?" = waiting, hollow and faint = not made.
+**Wide (900px and up): a metro line.** One horizontal trunk: the Charter, the documents and the site are diamonds on the line,
+evenly spaced; the team that made each one (a ring of five dots, "<Persona> · N workflows") sits on the stretch of line leading into
+it. Under each diamond (or above, when a line or a side job leaves from below): its name and one fact line ("v6 · 13/13 checks", or
+"not recorded"). A side job (a send) leaves its parent diamond on a short branch below the line (above it when a line already
+passes under that diamond): its team, then a letter icon with "Test email · dry run, not sent". "Given to" lines that skip a stop
+run faintly above the line, flat over the labels, or under it and up to the team that used the document; two that would
+interleave go on opposite sides, and the code checks every pair of drawn lines for a crossing. A line that cannot be placed is
+drawn round the outside and listed under "Not recorded". The Management layer is one row of chips above: You (with the messages
+from you), then Client Lead, Strategist, Prioritiser, Scheduler and Quality Reviewer (each with its AI calls). Lines from a chip to
+the work it did, and messages between functions, are shown on hover or in the "Messages between functions" table.
 
-Lines are thin and grey. Hand-off (down the spine, deliverable to persona to deliverable) is solid, "speaks to" is dotted,
-and "given to" is a faint loop beside the spine. A "given to" loop ends on the persona that consumed the document (the step
-that leads to the deliverable the hand-off recorded), never on a later document, so a deliverable that feeds more than one
-step branches. If the map has no such step the loop ends on the box and the gap is listed under "Not recorded". The wording
-stays "given to": the run records what was given, not proof of use.
+**Narrow (under 900px)** the trunk runs top to bottom with side jobs in a column beside it; at 600px and under the map is a list of
+cards.
 
-No two drawn lines cross. Loops that would interleave go on opposite sides of the spine; the code then checks every pair of
-lines for a crossing. A line that cannot be placed without one is drawn round the outside and listed under "Not recorded"
-as "could not be drawn without crossing". Function-to-function lines that would cross another go in the "Messages between
-functions" table instead. Function-to-deliverable lines are never drawn by default: hovering or focusing a dot lights it, the
-lines that touch it and the dots at their other ends, and fades the rest; a click opens the panel and keeps it lit until the
-next click, Close or Esc.
+**Colour means status only:** green = filed and checked, amber = waiting on you, red = fault, grey = not made or idle; a dashed
+outline = left open, a double outline = running now; "!" and "?" marks as before. The status chip is green when the checks pass,
+amber with "Audit: needs revision" when the latest Audit says the work is not workable yet, and neutral "No checks yet" before any
+check ran. The Needs you strip's outcome line names what is left open (for example "1 item left open: test email (dry run)").
 
-Every display label comes from one table in the page (`MAPLABEL`): rows (You, Management layer, Team layer and
-deliverables), functions as "Persona (Function)" (Client Lead (Identity), Strategist (Adaptation), Prioritiser (Priority),
-Scheduler (Coordination), Quality Reviewer (Audit)), team personas chosen from the step's output type (drafting a PRD:
-Product Analyst; an HLD: Solution Architect; an LLD: Technical Designer; any other document: Specialist; building the
-website: Web Developer; sending: Messenger) with a small line "drafting, building or sending, N workflows", and
-"Checker (automatic)" for the validator. Ids and map.json are unchanged.
-
-`renderMap(map)` is one pure function: SVG at wide widths and a card list at 600px and under (the same words: "speaks to
-...", "worked on: ...", "made with: ...", "given to ..." and "made by ..."; no SVG lines). Every deliverable with a `file`
-links to its Open view in the Artifacts tab, from the card and from the panel. All text goes through the Detailed view's
-plain-words helper.
+Every display label comes from one table in the page (`MAPLABEL`). `renderMap(map)` is one pure function; all text goes through the
+Detailed view's plain-words helper.
 
 ## Home and navigation
 

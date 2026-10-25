@@ -16,6 +16,7 @@ import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 import tempfile
 
@@ -104,6 +105,20 @@ frames.forEach(f => f.addEventListener('load', () => setTimeout(() => {
 </script></body></html>"""
 
 
+def run_chrome(cmd, timeout, text=True):
+    """subprocess.run for headless Chrome, in its own process group. On a timeout the whole group is killed: subprocess.run
+    kills only the main process, and the helpers it leaves hold the output pipes open, so a 90s timeout ran for 10+ minutes
+    (and the helpers stayed behind)."""
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=text, start_new_session=True)
+    try:
+        out, err = p.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        os.killpg(p.pid, signal.SIGKILL)
+        p.communicate()
+        raise
+    return subprocess.CompletedProcess(cmd, p.returncode, out, err)
+
+
 def find_chrome():
     if os.getenv("J2_CHROME", "").lower() in ("none", "off", "0"):      # J2_CHROME=none: run as if Chrome is missing
         return None
@@ -142,10 +157,10 @@ def check(html):
         m = None
         for attempt in range(2):       # one retry: a rare Chrome hang mustn't count as "the site failed the check"
             try:
-                p = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--allow-file-access-from-files",
+                p = run_chrome([chrome, "--headless=new", "--disable-gpu", "--allow-file-access-from-files",
                                     "--window-size=1400,1000", "--virtual-time-budget=4000", "--dump-dom",
                                     "file://" + os.path.join(tmp, "wrap.html")],
-                                   capture_output=True, text=True, timeout=90)
+                                   timeout=90)
             except subprocess.TimeoutExpired:
                 out["note"] = "Chrome timed out after 90s (twice)."
                 continue
@@ -203,9 +218,9 @@ def tap_targets(html, selector, min_px=TAP_MIN):
             f.write(TAP_WRAPPER % (json.dumps(selector), int(min_px)))
         for _ in range(2):             # one retry, as in check(): a Chrome hang isn't a failed check
             try:
-                p = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--allow-file-access-from-files",
+                p = run_chrome([chrome, "--headless=new", "--disable-gpu", "--allow-file-access-from-files",
                                     "--window-size=400,1000", "--virtual-time-budget=3000", "--dump-dom",
-                                    "file://" + os.path.join(tmp, "wrap.html")], capture_output=True, text=True, timeout=60)
+                                    "file://" + os.path.join(tmp, "wrap.html")], timeout=60)
             except subprocess.TimeoutExpired:
                 continue
             m = re.search(r'data-j2="([^"]*)"', p.stdout)
@@ -265,10 +280,9 @@ def screenshot(html, path):
         with open(os.path.join(tmp, "shot.html"), "w", encoding="utf-8") as f:
             f.write(f'<!doctype html><body style="margin:0;background:#888;display:flex">{frames}</body>')
         try:
-            subprocess.run([chrome, "--headless=new", "--disable-gpu", "--hide-scrollbars", "--allow-file-access-from-files",
+            run_chrome([chrome, "--headless=new", "--disable-gpu", "--hide-scrollbars", "--allow-file-access-from-files",
                             f"--window-size={sum(WIDTHS.values()) + 40},900", "--virtual-time-budget=4000",
-                            f"--screenshot={os.path.abspath(path)}", "file://" + os.path.join(tmp, "shot.html")],
-                           capture_output=True, timeout=90)
+                            f"--screenshot={os.path.abspath(path)}", "file://" + os.path.join(tmp, "shot.html")], timeout=90, text=False)
         except subprocess.TimeoutExpired:
             return None
     return path if os.path.exists(path) and os.path.getsize(path) > 0 else None
@@ -502,9 +516,9 @@ def behavior(html, ops):
             f.write(BEHAVIOR_WRAPPER % (json.dumps(ops), SETTLE_MS))
         for _ in range(2):             # one retry, as in check(): a Chrome hang isn't a failed check
             try:
-                p = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--allow-file-access-from-files",
+                p = run_chrome([chrome, "--headless=new", "--disable-gpu", "--allow-file-access-from-files",
                                     "--window-size=1300,1000", f"--virtual-time-budget={budget}", "--dump-dom",
-                                    "file://" + os.path.join(tmp, "wrap.html")], capture_output=True, text=True, timeout=90)
+                                    "file://" + os.path.join(tmp, "wrap.html")], timeout=90)
             except subprocess.TimeoutExpired:
                 continue
             m = re.search(r'data-j2="([^"]*)"', p.stdout)

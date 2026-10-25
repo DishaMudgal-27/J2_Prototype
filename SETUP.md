@@ -71,6 +71,7 @@ The budget is counted in work credits. Set it with `J2_BUDGET` (the default is 1
 | A normal one-page website | the default, 100 |
 | One document (PRD, HLD or LLD) | not measured live. Start with the default and raise it if the team runs out |
 | A full documents-plus-website run | `J2_BUDGET=500` or more. One measured live run used all 500 credits, so the default of 100 is too low |
+| A test email, Slack message or milestone email | 5 credits each, on top of the run. A milestone email the credits can't cover is skipped and the run goes on |
 
 `J2_BUDGET_CAP` (default 2 x the budget) is the most your approvals can raise it to.
 
@@ -104,6 +105,27 @@ STUDIO_PROVIDER=claude-cli python3 j2_server.py --port 8780 --no-browser
 
 Provider order: `STUDIO_PROVIDER=claude-cli` wins. Otherwise `ANTHROPIC_API_KEY`, then `GEMINI_API_KEY`, then mock.
 
+### Optional features (off by default)
+
+```bash
+# Message board: a blocked builder can ask the agent that knows, and later builders reuse the answer
+J2_BOARD=1 STUDIO_PROVIDER=claude-cli python3 j2_server.py
+
+# Offline board demo: type a clothing-shop brief (products, filters, order on WhatsApp); the order builder asks one question on purpose
+J2_BOARD=1 J2_FORCE_QUESTION=order STUDIO_MOCK=1 python3 j2_server.py
+
+# Milestone emails: one per goal reached (each document, then the site). Dry run: nothing is sent
+J2_MILESTONE_EMAILS=1 J2_TEST_EMAIL=you@example.com STUDIO_PROVIDER=claude-cli python3 j2_server.py
+```
+
+Sends (a test email or Slack message asked for in the brief, and milestone emails) are dry run only. Live sending
+is not built yet. They go only to `J2_TEST_EMAIL` or `J2_TEST_SLACK_TARGET`, never to an address in the brief. With
+the variable unset, nothing is sent. Asking in the brief ("email me updates") also turns milestone emails on.
+
+The page opens in the Simple view. "See how it works" opens the Detailed view, which starts on the Map. The rail
+on the left switches between Map, Chat (the Simple view) and Internals (the other tabs, including Board when the
+board is on). On a phone the rail runs along the bottom.
+
 ## Settings
 
 Set any of these before `python3 j2_server.py`, like the examples above.
@@ -126,6 +148,12 @@ Set any of these before `python3 j2_server.py`, like the examples above.
 | `J2_RUNS_DIR` | `runs/` | Folder runs are saved to |
 | `J2_CHROME` | auto | Path to Chrome for Audit screenshots |
 | `J2_OVERRIDE_KEY` | unset | Owner override key, set in `.env` only (see `README.md`) |
+| `J2_BOARD` | off | `1` turns on the message board |
+| `J2_FORCE_QUESTION` | off | Mock-only test switch: the matching builder (workflow id or role word) asks one question |
+| `J2_MILESTONE_EMAILS` | off | `1` writes a milestone email per goal reached (dry run) |
+| `J2_SEND_MODE` | `dry-run` | `dry-run` or `mock` (tests). Live sending is not built |
+| `J2_TEST_EMAIL` | unset | The only address a send may go to |
+| `J2_TEST_SLACK_TARGET` | unset | The only Slack target a send may go to |
 
 ## Checks
 
@@ -147,6 +175,8 @@ Each run is saved under `runs/` (or `J2_RUNS_DIR`): chat log, AI calls, site ver
 - `atoms.json`: every work atom of the run in the `atom/1` shape, with its warnings. The shape is described in
   `docs/atom-schema.md` (machine form: `docs/atom-schema.json`)
 - the document files of a documents run: `prd.md`, `hld.md`, `lld.md`, and `.docx` copies (needs `python-docx`)
+- `map.json`: the Map tab's drawing data, built by code from the run's files. Described in `docs/map-schema.md`
+- `board.json` and `board.jsonl`: the message board, only when `J2_BOARD=1`
 
 Past runs open read-only from the page. Lessons are kept in `memory/`, which is git-ignored. A few reference runs are tracked; new runs are ignored by git.
 
