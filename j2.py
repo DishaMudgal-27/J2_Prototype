@@ -6290,7 +6290,7 @@ class J2Run:
         w = next((x for x in self._all_wfs() if x["id"] == to.split(".")[0]), None)
         return ("workflow", w) if w else (None, None)
 
-    def _ask_board(self, asker, question, attempt, role="builder"):
+    def _ask_board(self, asker, question, attempt, role=None):
         """Items 2 (Ask) and 3 (Answer), for a function (asker: its name) or a builder (asker: its workflow). The
         question is refused, with the reason posted, when it names no target, when a builder's atom already asked,
         when the board already answers it (60% of its content words, j2_board.duplicate_of) or when the target isn't
@@ -6298,6 +6298,7 @@ class J2Run:
         credits: to the target's builder, given its recorded section and agent_output, or to the target function.
         If a builder's answer corrects its own output, _apply_board_update bumps the site version ("Updated by Q-n")."""
         builder = isinstance(asker, dict)
+        role = role or ("builder" if builder else "function")      # what the entry records as asked_by_role
         asked_by = asker["id"] if builder else asker
         asking = self.atom if builder else asked_by      # the entry's own side: an atom id, or the function's name
         label = NAMES.get(asked_by, asked_by)
@@ -6308,6 +6309,9 @@ class J2Run:
         dup = j2_board.duplicate_of(text, self.board["entries"])
         reason = ("max one question per atom; this atom already asked"
                       if builder and any(e["atom"] == asking for e in self.board["entries"]) else
+                  "max one question per turn; this function already asked this turn"
+                      if not builder and any(e["asked_by"] == asked_by and e["cycle"] == self.cycle
+                                             and e["attempt"] == attempt for e in self.board["entries"]) else
                   "no target named" if not to else
                   f"already answered in {dup}" if dup else
                   "the target isn't a workflow of this run or one of the five functions" if not target else
@@ -6318,7 +6322,7 @@ class J2Run:
                   "the target workflow isn't built yet"
                       if kind == "workflow" and "." not in str(to) and target.get("status") != "done" else None)
         entry = j2_board.new_entry(f"Q-{len(self.board['entries']) + 1}", asked_by, asking, to, about, text,
-                                   self.cycle, attempt, asked_by_role="builder" if builder else "function")
+                                   self.cycle, attempt, asked_by_role=role)
         self.board["entries"].append(entry)
         if reason:
             entry["status"] = "refused"
@@ -6327,7 +6331,7 @@ class J2Run:
             self.post("system", f"Board {entry['id']}: {asked_by}'s question to {to} refused — {reason}.")
             return entry
         j2_board.write(self.dir, self.board)
-        j2_board.log_event(self.dir, {"event": "asked", "id": entry["id"], "asked_by": asked_by, "role": entry["asked_by_role"],
+        j2_board.log_event(self.dir, {"event": "asked", "id": entry["id"], "asked_by": asked_by, "role": role,
                                       "atom": asking, "to": to, "about": about})
         answerer = target if kind == "function" else target["id"]
         self.post(asked_by, f"@{NAMES.get(answerer, answerer)} {entry['id']}: {text}")
@@ -6384,7 +6388,9 @@ class J2Run:
             reply.update(self._mock_board_reuse(fn))
         q = reply.get("board_question") or reply.get("question")
         if isinstance(q, dict) and q.get("to"):
-            self._ask_board(fn, q, 1, role="function")      # asked first, so the tag below lands on its own message
+            # Asked first, so the tag below lands on the function's own message. The turn it asked in is recorded as
+            # the entry's attempt, which is how "at most one question per turn" is checked.
+            self._ask_board(fn, q, self.agent_turns.get(fn, 0), role="function")
         read = self._credit_board_used(reply, fn)
         if read:
             self.board_read[fn] = sorted(set((self.board_read.get(fn) or []) + read))

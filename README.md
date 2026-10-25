@@ -356,18 +356,43 @@ call). Schema: `docs/map-schema.md`.
 
 ### Message board (`J2_BOARD=1`, off by default)
 
-A blocked workflow agent can ask the one that knows instead of guessing (`j2_board.py`, schema `board/1`):
-- **Ask:** the builder posts one question ("@<target> Q-1: ..."). An agent can ask at most one question.
-- **Answer:** the target answers by updating its own section, marked "Updated by Q-1", and the asker continues.
-- **Reuse:** later builders read the answered entry instead of asking again. Their message carries "[read Q-1]",
-  and a `depends_on` edge is recorded.
-- An unanswered question leaves the asker on the normal path.
-- Saved in `board.json` and `board.jsonl`. The **Board** tab under Internals lists the entries, and atom cards
+A blocked agent can ask the one that knows instead of guessing (`j2_board.py`, schema `board/1`). **Askers:** the
+five functions (Identity, Adaptation, Priority, Coordination, Audit) and the workflow builders. **Targets:** a
+workflow, including a done one from an earlier cycle, or another function.
+- **Ask:** the asker posts one question ("@<target> Q-1: ..."). A builder asks at most one per atom, a function at
+  most one per turn. A function's reply format carries the field as `board_question` (every function format
+  already uses "question" for the Requester or for a policy question); a builder's is `question`.
+- **Board first:** every agent prompt, functions and builders, holds "BOARD (answered questions; check here before
+  asking)". A question the board already answers is refused and the asker pointed at it ("already answered in
+  Q-1"): 60% or more of its content words are already in that entry's question.
+- **Answer:** one short answer-only call that may not ask back, costs no credits and counts as an AI call. A
+  workflow answers from its recorded section and `agent_output`, and a correction to its own section is applied
+  and marked "Updated by Q-1"; a function answers from the run's record. Nothing recorded is "not recorded".
+- **Reuse:** a later agent names the entry it used instead of asking again. Its message carries "[read Q-1]",
+  `used_by` records the atom or the function, and a builder's prompt records a `depends_on` edge.
+- An unanswered question ("not mine") leaves the asker on the normal path.
+- Saved in `board.json` and `board.jsonl`, with `asked_by_role` ("function" or "builder") and `answered_from`
+  (`{workflow, version}` or `{function}`). The **Board** tab under Internals lists the entries, and atom cards
   show "Asked / Answered / Used Q-n". With the flag unset, no board files are written and the flow is unchanged.
 
-`J2_FORCE_QUESTION=<workflow id or role word>` (mock mode only) is a test switch like `J2_FORCE_AUDIT_FAIL`: that
-builder's first attempt asks one question. Agents never see the switch; humans see it labelled in the chat. The
-"boutique" demo brief (a clothing shop) exercises the whole ask, answer and reuse loop.
+`J2_FORCE_QUESTION=<comma list>` (mock mode only) is a test switch like `J2_FORCE_AUDIT_FAIL`: each named asker
+asks one question, once per run. A name is a function (`identity`, `adaptation`, `priority`, `coordination`,
+`audit`) or a builder (a workflow id, or a role word matched against its name, such as `order`). Agents never see
+the switch; humans see it labelled in the chat.
+
+**Demo** (offline, mock mode, saved to `runs/`):
+
+```bash
+python3 j2_flow_test.py --fast --board-demo
+```
+
+It builds the Thread & Loom boutique (prices, timings and address from the brief) to Done, then asks for "a section
+for visiting hours", and prints the run id and its page URL. Three questions are asked, each once: Identity asks
+the workflow that built the timings where they are, Adaptation reuses that answer and plans a revise of that
+workflow's section priced as a fix, Priority asks Adaptation whether the change is new work or a fix, the revise
+builder reuses the answer, and Audit asks the products workflow which attribute holds the price, then reads its own
+entry back on the next audit. (The new checklist item is then paid for by its own small workflow: cost follows the
+work.) The same run with `J2_BOARD` unset writes no board file and asks nothing.
 
 ### Sends: test messages and milestone emails (dry run)
 
@@ -413,7 +438,7 @@ Settings:
 | `J2_FORCE_AUDIT_FAIL` | off | Test switch, see below |
 | `J2_MEMORY_TEST_LESSONS` | off | 1 lets J2.b read test lessons (demo runs only), see below |
 | `J2_BOARD` | off | 1 turns on the message board, see "Message board" |
-| `J2_FORCE_QUESTION` | off | Mock-only test switch: that builder asks one question |
+| `J2_FORCE_QUESTION` | off | Mock-only test switch: a comma list of askers (a function or a builder), each asking one question |
 | `J2_MILESTONE_EMAILS` | off | 1 sends a milestone email per goal reached (dry run) |
 | `J2_SEND_MODE` | `dry-run` | `dry-run` or `mock`; live sending is not built |
 | `J2_TEST_EMAIL` | unset | The only address a send may go to |
@@ -529,8 +554,10 @@ playbooks into the real file, and a live clothing run reused one. Those are now 
 - Map: `map.json` matches a rebuild from the folder, with the expected nodes, edges and statuses. The wide and
   vertical drawings fit. At phone width (a 360px frame), the Simple and Detailed views have nothing past either
   edge, and the rail runs along the bottom
-- Board: off writes no board files; `J2_FORCE_QUESTION` asks once, is answered and is reused; an unanswered
-  question falls back to the normal path
+- Board: off writes no board files and no prompt mentions it; a builder asks once, is answered and is reused;
+  an unanswered question falls back to the normal path. The demo run: Identity, Priority and Audit each ask
+  once (answered by a workflow, by a function and by a workflow from an earlier cycle), the answers are
+  reused, a duplicate question is refused, and the run ends Done with N6 met
 - Sends: a send needs a send verb, only the configured targets are allowed, dry run stays open, and receipts are
   masked. Milestone emails: one per goal reached, off by default, on when the brief asks
 

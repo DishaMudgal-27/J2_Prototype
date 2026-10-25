@@ -4605,6 +4605,14 @@ def board_functions():
     assert dup["status"] == "refused", dup
     with open(os.path.join(run.dir, "board.jsonl"), encoding="utf-8") as f:
         assert json.loads(f.readlines()[-1])["reason"] == "already answered in Q-3"
+    # and a function asks at most once in a turn (the turn it asked in is the entry's attempt)
+    cycle, run.cycle = run.cycle, b[2]["cycle"]
+    again = run._ask_board("audit", {"to": b[0]["to"], "about": "the nav", "text": "Which section holds the nav?"},
+                           b[2]["attempt"], role="function")
+    run.cycle = cycle
+    assert again["status"] == "refused", again
+    with open(os.path.join(run.dir, "board.jsonl"), encoding="utf-8") as f:
+        assert "per turn" in json.loads(f.readlines()[-1])["reason"]
     with open(os.path.join(run.dir, "conditions.json"), encoding="utf-8") as f:
         n6 = next(c for c in json.load(f) if c["id"] == "N6")
     assert n6["met"], n6                      # no invented content: the mock built from the brief only
@@ -4613,9 +4621,33 @@ def board_functions():
             seen = (c["system"] + c["prompt"]).lower()
             for bad in ("j2_force_question", "test switch", "identity,priority,audit"):
                 assert bad not in seen, (c["id"], c["fn"], bad)
+    only_identity_addresses_user(run)         # the board's own messages never reach the Requester
+    board_tab_render(run, b[:3], timings)
     print("board functions: Identity, Priority and Audit each ask once (a workflow, a function and an earlier "
           "workflow answer), Adaptation and the revise builder reuse Q-1, Audit reads its own Q-3 back on the next "
           "audit, a duplicate is refused, N6 passes, the run ends Done and the switch never reaches an AI call ok")
+
+
+def board_tab_render(run, entries, timings):
+    """Item 5, browser-free (j2_ui_render.js): the Board tab shows every entry with who asked and in what role, and
+    where the answer came from (a workflow with its version, or a function). The atom card of the workflow that
+    answered a function's question says so, since the asker is no atom."""
+    import shutil
+    if not shutil.which("node"):
+        print("board tab render skipped: node not found")
+        return
+    snap = j2.saved_snapshot(os.path.basename(run.dir), 0)
+    out = render_node(snap, docs={"docs": {}, "board": entries})
+    tab = out["board"]
+    assert "<th>Answered from</th>" in tab and tab.count('<tr data-board=') == len(entries), tab[:400]
+    assert tab.count(">function<") == len(entries), "every entry says a function asked it"
+    assert "Adaptation (function)" in tab, tab          # Q-2 was answered by a function
+    assert re.search(rf"{timings} v\d+", tab), tab      # Q-1 by a workflow, with the version it had on record
+    card = out["cards"][timings]
+    line = card.split('data-note="board">')[1].split("</span>")[0] if 'data-note="board">' in card else "(no board line)"
+    assert "Answered Q-1, asked by Identity (function)" in line, line
+    print("board tab: every entry shows its asker and role and where the answer came from, and the answering atom's "
+          "card names the function that asked ok")
 
 
 def board_functions_off():

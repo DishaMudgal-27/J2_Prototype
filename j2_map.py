@@ -315,6 +315,8 @@ def build(d, live=None):
     # message board (board/1): an "asks" line from the asking deliverable to the answering one, an "uses" line from
     # each reuser's deliverable to it, labelled with the board id. Recorded data only; a question and its reuse inside
     # the same deliverable (the usual case for one website) have no line to draw, same as any self-referencing edge.
+    # A question a function asked (asked_by_role "function") has no deliverable on the asking side, so no line
+    # either; the Board tab lists every entry whoever asked it.
     board = ((live or {}).get("board") if live else _read(d, "board.json")) or {}
     board_edges = []
     for e in board.get("entries") or []:
