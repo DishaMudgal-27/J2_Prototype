@@ -1,8 +1,7 @@
 """Offline checks of the realization planner (j2_realization.py): python realization_test.py
 
-The rules (plan_faults), the judge's cap and roll-ups, holds and routes, the reply example in agents/j2/realization.md,
-and whole planning runs in mock mode: a plan that passes on the second look, one that never passes, and the pilot
-over every brief. No AI calls.
+The rules (plan_faults), the judge's cap and roll-ups, holds and routes, the planning part of agents/j2/adaptation.md,
+and whole planning runs in mock mode: a plan that passes on the second look and one that never passes. No AI calls.
 """
 import copy
 import json
@@ -81,9 +80,18 @@ ok(has(faults_of(lambda p: p["certainty_assessment"].update(zone="operate")), "y
 ok(has(faults_of(lambda p: wf(p, "Plan").update(approach="")), "approach is empty"), "certainty: approach required")
 
 # ---- no worked scenario in the planner's prompt: the plan comes from the charter, realization and certainty only
-doc = open(os.path.join(R.AGENTS, "realization.md"), encoding="utf-8").read()
+doc = R.adaptation_part("PLANNING")
 ok("```json" not in doc and not re.search(r"coffee|cafe|sudoku", R.planner_system(), re.I),
-   "realization.md carries no example plan for any scenario")
+   "the planning part of adaptation.md carries no example plan for any scenario")
+# ---- realization and certainty live in adaptation.md: the planner gets both, the judge certainty, Adaptation's role neither
+ok(not os.path.exists(os.path.join(R.AGENTS, "realization.md")) and not os.path.exists(os.path.join(R.AGENTS, "certainty.md"))
+   and R.adaptation_part("REALIZATION") and R.adaptation_part("CERTAINTY")
+   and R.adaptation_part("REALIZATION") in R.adaptation_part("PLANNING")
+   and R.adaptation_part("CERTAINTY") in R.adaptation_part("PLANNING"),
+   "realization and certainty are two sections of adaptation.md, not separate files")
+ok("The four zones" in R.planner_system() and "Step 1: factors" in R.planner_system()
+   and "The four zones" in R.judge_system() and "Step 1: factors" not in R.judge_system(),
+   "the planner reads both sections; the judge reads the Certainty section only")
 
 # ---- the judge: checklist, code-computed scores, roll-up, holds, route
 p = R.mock_plan(GOAL)
@@ -182,6 +190,16 @@ import j2_flow_test as F      # noqa: E402  (sets J2's test env: temp runs and m
 j2 = F.j2
 j2.j2_check.tap_targets, j2.j2_check.behavior = F.fake_tap_targets, F.fake_behavior
 j2.j2_check.check, j2.j2_check.find_chrome = F.fake_check, lambda: None
+_was = os.environ.pop("J2_REALIZATION", None)
+ok(j2.realization_on(), "realization and certainty are on by default (J2_REALIZATION unset)")
+os.environ["J2_REALIZATION"] = "0"
+ok(not j2.realization_on(), "J2_REALIZATION=0 turns them off")
+if _was is None:
+    os.environ.pop("J2_REALIZATION", None)
+else:
+    os.environ["J2_REALIZATION"] = _was
+ok("Realization: cut" not in j2.system_prompt("adaptation", "x") and "The four zones" not in j2.system_prompt("adaptation", "x")
+   and "# Adaptation Agent" in j2.system_prompt("adaptation", "x"), "Adaptation's own role leaves out the planning part")
 prompts, real_ask = [], R.llm.ask
 
 

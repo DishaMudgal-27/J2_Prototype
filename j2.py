@@ -137,7 +137,7 @@ def system_prompt(fn, reply_format, builder="builder.md"):
         path = os.path.join(J2_DIR, name)
         if name.endswith(".md") and os.path.exists(path):
             with open(path, encoding="utf-8") as f:
-                parts.append(f.read().strip())
+                parts.append(j2_realization.PLANNING_PART.sub("", f.read()).strip())   # the planning part is the planner's only
         elif not name.endswith(".md"):
             parts.append(name.strip())
     parts.append(f"You are {NAMES[fn]}.\n\n## Reply format (required)\n{reply_format}")
@@ -2370,9 +2370,9 @@ def memory_on():
 
 
 def realization_on():
-    """J2_REALIZATION=1: Adaptation's first website plan goes through the realization axis with certainty
-    (agents/j2/realization.md, certainty.md, confidence-judge.md; j2_realization.py). Off by default."""
-    return os.getenv("J2_REALIZATION", "0") == "1"
+    """On by default: Adaptation's first website plan goes through the realization axis with certainty (the planning
+    part of agents/j2/adaptation.md, confidence-judge.md; j2_realization.py). J2_REALIZATION=0 turns it off."""
+    return os.getenv("J2_REALIZATION", "1") != "0"
 
 
 def load_lessons():
@@ -7822,7 +7822,7 @@ class J2Run:
             path = os.path.join(J2_DIR, name)
             if os.path.exists(path):
                 with open(path, encoding="utf-8") as f:
-                    roles.append(f"### {name}\n{f.read().strip()}")
+                    roles.append(f"### {name}\n{j2_realization.PLANNING_PART.sub('', f.read()).strip()}")
 
         def mock():
             c = metrics["conflicts"]

@@ -1,7 +1,7 @@
 ---
 agent: confidence-judge
 role: answer a yes/no checklist about each proposed workflow, before anything is built; code turns the answers into a score
-reads: charter (goal, done-when items, constraints), the proposal (factors, stages, workflows, open facts), certainty.md
+reads: charter (goal, done-when items, constraints), the proposal (factors, stages, workflows, open facts), the Certainty section of adaptation.md
 writes: answers and short notes; never a score, never changes the plan
 method: fixed checklist with code-computed scores (CheckEval, DeepEval DAG), task-specific checklist items written once
   per plan (TICK), comparison for revised workflows, a second look near the gate (docs/realization-axis.md 4.1)
@@ -30,7 +30,7 @@ Every workflow gets the fixed questions below. Code also adds:
 | D2 | done_test | The done-test states a pass line: a number, a count, an exact text or an explicit condition |
 | D3 | done_test | The done-test checks behaviour or content, not only that something exists |
 | D4 | done_test | Code or Audit can run the done-test without a judgement call |
-| Z1 | zone_fit | Its shape matches its certainty zone under `certainty.md` |
+| Z1 | zone_fit | Its shape matches its certainty zone under the Certainty section of `adaptation.md` |
 | S1 | size | It needs only one kind of thinking |
 | S2 | size | It fits one builder's run: one coherent output, not a bundle of unrelated ones |
 

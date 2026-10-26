@@ -144,7 +144,7 @@ Set any of these before `python3 j2_server.py`, like the examples above.
 | `J2_BUDGET` | 100 | Starting budget, in work credits (see "Which budget fits which run") |
 | `J2_BUDGET_CAP` | 2 x budget | Most your approvals can raise the budget to |
 | `J2_MEMORY` | 1 | `0` turns lessons and playbooks off |
-| `J2_REALIZATION` | 0 | `1`: Adaptation's first plan of a website run goes through the realization axis with certainty, a separate judge scores every workflow before the build, and Adaptation writes its decisions first (`docs/realization-axis.md`). Writes `realization.json`, `realization.md` and `decisions.md` in the run folder |
+| `J2_REALIZATION` | 1 | On by default: Adaptation's first plan of a website run goes through realization and certainty (the planning part of `agents/j2/adaptation.md`), a separate judge scores every workflow before the build, and planning files are written under `artifacts/` for the build to read. Writes `realization.json` and `realization.md` in the run folder. `0` turns it off (the classic path) |
 | `J2_DELAY` | 2 | Seconds between AI calls |
 | `J2_MAX_CYCLES` | 6 | Plan, build, audit cycles before Identity asks you what to do |
 | `J2_MAX_TURNS` | 30 | Agent turns per cycle |

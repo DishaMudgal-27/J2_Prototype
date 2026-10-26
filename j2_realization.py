@@ -1,7 +1,7 @@
-"""Realization axis for Adaptation (agents/j2/realization.md, docs/realization-axis.md): plan, check, judge, revise.
+"""Realization axis for Adaptation (the planning part of agents/j2/adaptation.md, docs/realization-axis.md): plan, check, judge, revise.
 
 plan_goal(goal) runs the planning half on its own, outside J2's loop. Nothing is built here.
-1. Adaptation proposes factors, stages and workflows (realization.md + certainty.md).
+1. Adaptation proposes factors, stages and workflows (adaptation.md: its Realization and Certainty sections).
 2. Code checks the rules (plan_faults); a plan with faults is sent back once with the faults named.
 3. A separate judge call answers a yes/no checklist about every workflow (confidence-judge.md): fixed questions under six
    checks, item questions written once per charter, and one per owned factor. Code computes each score from the
@@ -36,7 +36,7 @@ STAGES = tuple(s["id"] for s in load_stages())
 
 
 def stage_table():
-    """realization.md's stage table, rendered from stages.json, grouped."""
+    """The Realization section's stage table, rendered from stages.json, grouped."""
     st = load_stages()
     rows = ["| Stage | Kind of thinking | Tiers | Output | How to approach | Use it when |", "|---|---|---|---|---|---|"]
     for g in dict.fromkeys(s["group"] for s in st):
@@ -50,7 +50,7 @@ CHECKS = ("inputs", "method", "done_test", "factors", "zone_fit", "size")
 ANSWERS = ("yes", "partly", "no")
 CITATION = re.compile(r"^research\.md#R-\d+$")
 
-# ---- certainty (agents/j2/certainty.md), the same rule J2_CERTAINTY uses in the earlier prototype
+# ---- certainty (adaptation.md, Certainty section), the same rule J2_CERTAINTY uses in the earlier prototype
 ZONES = ("operate", "analyze", "experiment", "stabilize")       # Cynefin: Clear, Complicated, Complex, Chaotic
 SIGNALS = ("broken", "reaction", "facts_given", "known_pattern", "open_choices")
 EXPERIMENT_FIELDS = ("hypothesis", "signal", "fails_if", "limit")
@@ -75,7 +75,7 @@ def signal_answer(signals, k):
 
 
 def certainty_zone(signals):
-    """certainty.md's rule: broken -> stabilize; reaction -> experiment; facts, pattern and no open choices ->
+    """The Certainty section's rule: broken -> stabilize; reaction -> experiment; facts, pattern and no open choices ->
     operate; else analyze. Two or more unknowns move one zone toward less certainty."""
     a = lambda k: signal_answer(signals, k)
     if a("broken") == "yes":
@@ -102,7 +102,7 @@ def certainty_faults(p):
     if miss:
         out.append(f"certainty_assessment.signals lacks {', '.join(miss)} (each {{answer: yes|no|unknown, evidence}})")
     elif certainty_zone(sig) != zone:
-        out.append(f"your signals give {certainty_zone(sig)} by the rule in certainty.md, but zone says {zone}: fix "
+        out.append(f"your signals give {certainty_zone(sig)} by the Certainty rule, but zone says {zone}: fix "
                    "the signals or the zone, and shape the workflows to match")
     an = p.get("analysis") if isinstance(p.get("analysis"), dict) else {}
     if zone == "analyze" and not (an.get("chosen") and an.get("options")):
@@ -124,7 +124,7 @@ def certainty_faults(p):
     return out
 
 
-# ---- the realization rules (realization.md Step 2 and "Research workflows")
+# ---- the realization rules (Realization section, Step 2 and "Research workflows")
 
 def kind(w):
     """research, deliver or decide: derived, never stored."""
@@ -147,7 +147,7 @@ def _cycle(wfs):
 
 
 def plan_faults(p, goal):
-    """What a plan breaks: [] when it follows realization.md and certainty.md. Each fault names what to fix."""
+    """What a plan breaks: [] when it follows the Realization and Certainty sections. Each fault names what to fix."""
     out = []
     for k in ("factors", "unplaced", "stages", "workflows", "open_facts"):
         if not isinstance(p.get(k), list):
@@ -288,7 +288,7 @@ QUESTIONS = (            # id, check, weight, question
                               "condition."),
     ("D3", "done_test", 0.10, "The done-test checks behaviour or content, not only that something exists."),
     ("D4", "done_test", 0.06, "Code or Audit can run the done-test without a judgement call."),
-    ("Z1", "zone_fit", 0.25, "Its shape matches its certainty zone under certainty.md: direct build for operate; options "
+    ("Z1", "zone_fit", 0.25, "Its shape matches its certainty zone under the Certainty section: direct build for operate; options "
                              "weighed and one chosen for analyze; hypothesis, signal, fails_if and limit for experiment; "
                              "fix-only for stabilize."),
     ("S1", "size", 0.15, "It needs only one kind of thinking (it does not mix, for example, deciding what to say with "
@@ -451,7 +451,7 @@ PLAN_FMT = """{
  "deferred": [{"item": int, "until": str}],
  "factors": [{"name": str, "source": "brief"|"general"|"research"|"budget", "quote": str|null, "citation": str|null, "why": str, "stages": [stage id]}],
  "unplaced": [{"name": str, "why": str}],
- "stages": [{"id": str (a stage id from the stage table in realization.md), "thinking": str, "tiers": ["strategy"|"capability"|"architecture"|"feature"|"contract"|"implementation"], "goal": str, "done_test": str, "method": str|null, "owns_factors": [factor name], "inputs_from": [stage id]}],
+ "stages": [{"id": str (a stage id from the stage table in the Realization section), "thinking": str, "tiers": ["strategy"|"capability"|"architecture"|"feature"|"contract"|"implementation"], "goal": str, "done_test": str, "method": str|null, "owns_factors": [factor name], "inputs_from": [stage id]}],
  "workflows": [{"name": str (unique), "stage": stage id, "certainty": zone, "certainty_signals": [str], "approach": str (one sentence), "goal": str, "done_test": str (observable, pass/fail), "delivers": [item number], "informs": [item number], "inputs_from": [workflow name], "experiment": {"hypothesis": str, "signal": str, "fails_if": str, "limit": str}|null, "research": {"question": str, "feeds": str, "min_sources": int (3 or more), "output": "research.md#R-n"}|null}],
  "open_facts": [{"fact": str, "workflow": workflow name, "blocking": bool, "handling": str}],
  "not_ready": []
@@ -466,16 +466,26 @@ def _read(name):
         return f.read()
 
 
+PART = "<!-- {0}:START[^>]*-->\n?(.*?)<!-- {0}:END -->"
+PLANNING_PART = re.compile(r"\s*" + PART.format("PLANNING"), re.S)      # stripped from Adaptation's role (j2.py)
+
+
+def adaptation_part(name):
+    """A marked part of adaptation.md: "PLANNING" (all of it), "REALIZATION" or "CERTAINTY"."""
+    m = re.search(PART.format(name), _read("adaptation.md"), re.S)
+    return m.group(1).strip() if m else ""
+
+
 def planner_system():
     return ("You are Adaptation in J2, the department's planner. Identity has set the goal; you decide how it becomes "
-            "real. Follow the two files below exactly: realization.md says where to cut, certainty.md what kind of cut "
-            "each workflow gets. Reply with one JSON object and nothing else.\n\n"
-            + _read("realization.md").replace("<!-- STAGE TABLE -->", stage_table()) + "\n\n" + _read("certainty.md"))
+            "real. Follow the planning part of adaptation.md below exactly: the Realization section says where to cut, "
+            "the Certainty section what kind of cut each workflow gets. Reply with one JSON object and nothing else.\n\n"
+            + adaptation_part("PLANNING").replace("<!-- STAGE TABLE -->", stage_table()))
 
 
 def judge_system():
-    return (_read("confidence-judge.md") + "\n\ncertainty.md, for the zone_fit check:\n\n" + _read("certainty.md")
-            + "\n\nReply with one JSON object and nothing else.")
+    return (_read("confidence-judge.md") + "\n\nThe Certainty section of adaptation.md, for the zone_fit check:\n\n"
+            + adaptation_part("CERTAINTY") + "\n\nReply with one JSON object and nothing else.")
 
 
 def charter_text(goal):
@@ -501,7 +511,7 @@ def _web_note(web):
 
 def plan_task(goal, web, extra=""):
     return (f"CHARTER (from Identity):\n{charter_text(goal)}\n\n{_web_note(web)}{extra}\n\nPlan how this goal becomes real. "
-            "Work through realization.md Steps 1 to 3: factors, stages, then workflows inside the stages, each with "
+            "Work through the Realization section's Steps 1 to 3: factors, stages, then workflows inside the stages, each with "
             "its certainty zone. Every done-when item is delivered by exactly one workflow (or deferred). A separate "
             f"judge will score each workflow afterwards; you don't score.\n\nReply format:\n{PLAN_FMT}")
 
@@ -511,7 +521,7 @@ def revise_task(goal, web, plan, low, extra=""):
              for n, s in low.items()]
     return (f"CHARTER (from Identity):\n{charter_text(goal)}\n\n{_web_note(web)}{extra}\n\nYOUR CURRENT PLAN:\n"
             f"{json.dumps(plan, ensure_ascii=False)}\n\nTHE JUDGE SCORED THESE WORKFLOWS BELOW {THRESHOLD:.2f}:\n"
-            + "\n".join(lines) + "\n\nRevise the plan (realization.md Step 5): for each workflow above, apply the remedy "
+            + "\n".join(lines) + "\n\nRevise the plan (the Realization section's Step 5): for each workflow above, apply the remedy "
             "for its weakest check. Keep every other workflow exactly as it is, with the same name. Keep a revised "
             "workflow's name unless you split it. Name each change in changes.\n\nReply with the full plan in this "
             f"format:\n{REVISE_FMT}")
