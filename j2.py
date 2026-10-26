@@ -743,6 +743,19 @@ def md_section(doc, heading):
     return next((b for _, h, b in md_sections(doc) if want and squash(h).startswith(want)), None)
 
 
+def md_replace_section(doc, heading, text):
+    """The document with the body under `heading` replaced by `text` (the heading line is kept, the rest of the
+    document is untouched). The document unchanged when it has no such heading."""
+    lines, want = str(doc).splitlines(), squash(strip_md(heading))
+    heads = [(i, len(m[1]), squash(strip_md(m[2]))) for i, ln in enumerate(lines) if (m := MD_HEADING.match(ln))]
+    for k, (i, lv, h) in enumerate(heads):
+        if want and h.startswith(want):
+            end = next((j for j, l2, _ in heads[k + 1:] if l2 <= lv), len(lines))
+            body = str(text).strip("\n")
+            return "\n".join(lines[:i + 1] + ["", body, ""] + lines[end:])
+    return str(doc)
+
+
 def md_words(text):
     return len(re.findall(r"\w+", strip_md(text)))
 
@@ -1022,9 +1035,14 @@ def doc_assumptions(doc):
     return [m.group(1).strip() for ln in strip_md(body).splitlines() if (m := ASSUMPTION.search(ln))]
 
 
+VERSION_NOTE = re.compile(r"(?m)^\s*(?:[-*+]\s*)?Version \d+: (?:Q-\d+, )?.*$")      # written by code, not by an agent
+
+
 def without_assumptions(doc):
-    """The document without its Assumption: lines and the closing assumptions section: what must come from the brief."""
+    """The document without its Assumption: lines, the closing assumptions section and the version notes code writes
+    when a board answer changes a section: what must come from the brief."""
     body = re.split(rf"(?m)^##\s+{ASSUMPTIONS_HEADING}\s*$", str(doc))[0]
+    body = VERSION_NOTE.sub("", body)
     return "\n".join(ln for ln in body.splitlines() if not ASSUMPTION.search(strip_md(ln)))
 
 
@@ -1735,14 +1753,22 @@ def mock_prd_charter(text):
         return " ".join(x.group(1).split()) if x else default
     features = [f.strip() for f in re.split(r",|;|\band\b", field(r"must-have features|features")) if f.strip()]
     success = [f.strip() for f in field(r"success").split(";") if f.strip()]
-    groups = user_groups({"users": field("users")})     # mock: the first group does the features, the rest say nothing
+    users = field("users")
+    if not features:
+        # A brief that labels nothing: the mock reads the brief's own sentences about what the page and the form do,
+        # and its "must" sentences as the measures. Every word is the brief's; nothing is invented.
+        sents = [" ".join(s.split()).split(":")[0].strip(" .") for s in re.split(r"(?<=\.)\s+|\n+", text)]
+        features = [s for s in sents if re.match(r"The (?:page|form|weekly|class)\b", s)]
+        success = success or [s[:1].lower() + s[1:] for s in sents if " must " in f" {s} "][:2]
+        users = users or ("visitors" if features else "")
+    groups = user_groups({"users": users})     # mock: the first group does the features, the rest say nothing
     items = [f"The Problem section states the problem {name} solves", "The Users section says who the users are",
              "The Goals section lists the goals as G1, G2, ...",
              "The Requirements section lists every must-have feature as R1, R2, ...",
              "The Success metrics section gives a measurable metric for each goal",
              "The Out of scope section says what the product won't do"]
     return {"statement": f"A PRD for {name}", "product_name": name, "site_name": name,
-            "users": field("users", "Its users"), "audience": field("users", "Its users"),
+            "users": users or "Its users", "audience": users or "Its users",
             "user_groups": [{"name": x, "actions": features if i == 0 else []} for i, x in enumerate(groups)],
             "problem": field("problem", "The problem the brief describes"), "features": features,
             "constraints": [c.strip() for c in field("constraints").split(";") if c.strip()], "success_measures": success,
@@ -1762,7 +1788,11 @@ def mock_doc_section(w, goal):
     body = {"Problem": f"{g.get('problem') or ''}. {name} exists to solve this.",
             "Users": f"The users of {name} are {g.get('users') or 'its users'}." + (f"\n\n{idle}" if idle else ""),
             "Goals": "\n".join(f"- **G{i}**: {s}" for i, s in enumerate(succ, 1)) or f"- **G1**: {name} solves the problem",
-            "Requirements": "\n".join(f"{i}. **R{i}**: {who[:1].upper() + who[1:]} can {f}" for i, f in enumerate(feats, 1)),
+            # A labelled brief's features are verb phrases ("see the menu"); a brief the mock read whole gives whole
+            # sentences, which are written as they stand with the group named after them.
+            "Requirements": "\n".join(f"{i}. **R{i}**: " + (f"{f} ({who})" if f[:1].isupper() else
+                                                            f"{who[:1].upper() + who[1:]} can {f}")
+                                      for i, f in enumerate(feats, 1)),
             "Success metrics": "| Goal | Metric |\n|---|---|\n" + "\n".join(f"| G{i} | {s} |" for i, s in enumerate(succ, 1)),
             "Out of scope": "\n".join(f"- Anything outside this constraint: {c}" for c in g.get("constraints") or [])
                             or f"- Features beyond the listed requirements of {name}"}[sec]
@@ -2569,7 +2599,7 @@ def saved_snapshot(name, since=0):
     chat = [m for m in rows if not m.get("meta")]
     s, wfs = _read(d, "summary.json", {}), _read(d, "workflows.json", [])
     sections = _read(d, "sections.json", {})
-    audits = _read(d, "audits.json", [])
+    audits = [a for a in _read(d, "audits.json", []) if (a or {}).get("kind") != "recheck"]   # a board re-check is not an audit
     site = os.path.join(d, "site")
     versions = len([f for f in os.listdir(site) if re.fullmatch(r"v\d+\.(?:html|md)", f)]) if os.path.isdir(site) else 0
     docs = _read(d, "documents.json", {})
@@ -2660,6 +2690,8 @@ class J2Run:
         self.given = {}              # workflow id -> {"edges": [{atom, why}], "whole": bool}: what its builder's prompt held (atom/1)
         self.board = j2_board.new_board()   # board/1 (j2_board.py): questions and answers, behind J2_BOARD=1
         self.board_read = {}         # function -> board ids it has just read: post() tags its next message "[read Q-n]"
+        self.rechecks, self.doc_changes = [], []    # board/1 part C: recheck entries (audits.json) and doc changes made
+        self.board_failed = []       # atoms a board change left failing: Adaptation takes them after this turn
         self.past_workflows, self.stage_archive, self.site_tag, self.stage_checked = [], [], "", True
         self.blueprint, self.proposed_lld, self.lld_revisions, self.lld_conflicts = None, {}, [], {}   # the LLD as the spec
         self.stage_calls0 = 0         # AI calls before the current stage (a document's call range, for the cost estimate)
@@ -3292,6 +3324,13 @@ class J2Run:
                 self._turn_workflow_agent(self.handoff)
             else:
                 getattr(self, "_turn_" + self.turn)(self.handoff)
+            if self.board_failed and self.turn != "adaptation":
+                # A board change left a built atom failing its checks (board/1 part C): the existing atom_failed
+                # path takes it, and its own ending hands the turn on.
+                h = self.board_failed.pop(0)
+                self.post("system", f"{', '.join(h['atoms'])} {h['owner_note']}. Adaptation reads the receipts and "
+                                    "prices the fix.", warning=True)
+                self._handoff("adaptation", kind="atom_failed", **h)
             if self.relay:
                 # An agent addressed the Requester: Identity takes it first, then the flow resumes where it was going.
                 r, self.relay = self.relay, None
@@ -5465,10 +5504,11 @@ class J2Run:
                                     "ahead; the necessary-conditions check after the build will show the gap.", warning=True)
         return r
 
-    def _fact_source(self):
-        """What a facts-present string must come from: the charter and the Requester's own words, squashed."""
-        return squash(" ".join(strings(self.goal or {}) + [self.request] + [m["text"] for m in self.chat
-                                                                             if m["who"] == "user"]))
+    def _fact_source(self, goal=None):
+        """What a facts-present string must come from: the charter and the Requester's own words, squashed. goal: an
+        earlier stage's charter, for a re-check of a document that is already filed."""
+        return squash(" ".join(strings(goal or self.goal or {}) + [self.request] + [m["text"] for m in self.chat
+                                                                                    if m["who"] == "user"]))
 
     def _atom_problems(self, w, pool=()):
         """J2.e's work-atom check: missing fields first; then the check rules (check_problems) for every atom. pool: the
@@ -6341,6 +6381,7 @@ class J2Run:
         self._atom_outputs(w, meta, attempt)
         w["status"], w["version"] = "done", len(self.sites)
         self.save("workflows.json", self.workflows)
+        self._board_forward(w)      # built after a board change to a document it depends on: marked re-checked
         self._say(fn, f"@Coordination {human}" + (f" [read {', '.join(board_read)}]" if board_read else ""), nxt, note,
                   workflow=fn, human_output=human, version=len(self.sites), section=sid, workflow_cost=w["cost"],
                   **({"board_read": board_read} if board_read else {}))
@@ -6704,11 +6745,26 @@ class J2Run:
             entry["answered_from"] = ({"function": answerer} if kind == "function" else
                                       {"workflow": target["id"], "version": target.get("version")})
             update = (reply or {}).get("artifact_update")
-            updated = kind == "workflow" and isinstance(update, dict)
+            doc_up = kind == "workflow" and isinstance(update, dict) and update.get("doc")
+            updated = kind == "workflow" and isinstance(update, dict) and not doc_up
+            if doc_up:
+                # An answer that changes a document (item 1): only the owner of that section may, and a PRD change
+                # is a change request for Identity, never applied here.
+                why = self._board_doc_update(entry, target, update)
+                if why:
+                    entry["status"] = "refused"
+                    j2_board.write(self.dir, self.board)
+                    j2_board.log_event(self.dir, {"event": "refused", "id": entry["id"], "reason": why})
+                    self.post("system", f"Board {entry['id']}: {answerer}'s change to the "
+                                        f"{str(update.get('doc')).upper()} refused — {why}.")
+                    return entry
             if updated:
                 entry["artifact_update"] = update
                 self._apply_board_update(target["id"], update, entry["id"])
-            self.post(answerer, f"@{label} {entry['id']}: {answer}" + (" (updated my section)" if updated else ""))
+            self.post(answerer, f"@{label} {entry['id']}: {answer}"
+                      + (" (updated my section)" if updated else
+                         f" (changed the {str(update.get('doc')).upper()})" if doc_up and entry["artifact_update"] else
+                         " (sent to Identity)" if doc_up else ""))
         j2_board.write(self.dir, self.board)
         j2_board.log_event(self.dir, {"event": entry["status"], "id": entry["id"],
                                       "answered_from": entry["answered_from"]})
@@ -6731,12 +6787,20 @@ class J2Run:
                     "status": target.get("status"), "version": target.get("version"), "cycle": target.get("cycle"),
                     "atoms": [{"atom": a["id"], "agent_output": a.get("agent_output"),
                                "human_output": a.get("human_output")} for a in target.get("atoms") or []]}
+        # A document's section: its own text, read back from the run's record (the current stage's sections.json, or
+        # the stage file of a document that is already filed).
+        kind = self._doc_of_workflow(target["id"])
+        body = atom_section_body(self.dir, self._all_wfs(), (target.get("atoms") or [{}])[0].get("id")) if kind else None
         return self.call(target["id"],
                          '{"answer": str (plain words; say "not mine" if this isn\'t your area), "artifact_update": '
-                         'null|{"body": str, "head": str} (only if your own section needs correcting)}',
+                         + (f'null|{{"doc": "{kind}", "section": str (the heading you own), "text": str (the whole new '
+                            'section in markdown, from the record only), "reason": str} (only if your own section of '
+                            'the document needs correcting)}' if kind else
+                            'null|{"body": str, "head": str} (only if your own section needs correcting)}'),
                          ask + f"YOUR RECORDED WORK: {json.dumps(recorded, ensure_ascii=False)}\n"
-                         + (f"YOUR SECTION AS RECORDED ({target.get('section')}):\n```head\n{sec.get('head') or ''}\n```"
-                            f"\n```section\n{sec.get('body') or ''}\n```\n" if sec else
+                         + (f"YOUR SECTION OF {kind.upper()} AS RECORDED:\n```markdown\n{body}\n```\n" if kind and body
+                            else f"YOUR SECTION AS RECORDED ({target.get('section')}):\n```head\n{sec.get('head') or ''}"
+                            f"\n```\n```section\n{sec.get('body') or ''}\n```\n" if sec and not kind else
                             "YOUR SECTION AS RECORDED: not recorded.\n") + rules,
                          lambda: json.dumps(self._mock_board_answer(target["id"], entry)),
                          answer_only=True) or {}
@@ -6783,6 +6847,240 @@ class J2Run:
                 ho = a.get("human_output") or {}
                 a["human_output"] = {**ho, "text": f"{ho.get('text') or ''} Updated by {entry_id}.".strip()}
         self.save("workflows.json", self.workflows)
+
+    # ---- a board answer that changes a document (board/1 part C): only the owner of that section may change it, a
+    # PRD change is a change request for Identity, and the change is re-checked and propagated by recorded edges.
+    def _doc_of_workflow(self, wid):
+        """The document a workflow wrote (documents.json), or None for a website workflow."""
+        return next((k for k, d in self.docs.items() if wid in (d.get("workflows") or [])), None)
+
+    def _doc_of_atom(self, aid):
+        """The document an atom wrote (documents.json), or None for a website atom."""
+        return next((k for k, d in self.docs.items() if aid in (d.get("atoms") or [])), None)
+
+    def _doc_version(self, kind):
+        """A document's latest version number, from the version files the run wrote (site/hld-v3.md, or v3.md in a
+        one-document run). 0 when the run recorded none."""
+        site = os.path.join(self.dir, "site")
+        ns = [int(m[1]) for f in (os.listdir(site) if os.path.isdir(site) else [])
+              for p in (rf"{kind}-v(\d+)\.md", r"v(\d+)\.md") if (m := re.fullmatch(p, f))]
+        return max(ns, default=0)
+
+    def _board_doc_owner(self, aid, kind, section):
+        """Whether the answering atom owns that section: the atom is one of that document's atoms and its workflow
+        writes that heading (documents.json and workflows.json, never a guess)."""
+        d, want = self.docs.get(kind) or {}, squash(strip_md(section))
+        if not want or aid not in (d.get("atoms") or []):
+            return False
+        w = next((x for x in self._all_wfs() if any(a["id"] == aid for a in x.get("atoms") or [])), None)
+        return bool(w) and w["id"] in (d.get("workflows") or []) and squash(w.get("name") or "").endswith(want)
+
+    def _board_doc_update(self, entry, target, update):
+        """Item 1: the reason the change can't be applied, or None once it has been applied. A PRD change is never
+        applied here: it becomes a change request for Identity (the existing relay path) and is recorded as such."""
+        kind, section = str(update.get("doc") or "").lower(), str(update.get("section") or "")
+        text, why = str(update.get("text") or ""), str(update.get("reason") or "").strip()
+        aid = (target.get("atoms") or [{}])[0].get("id")
+        if kind not in self.docs:
+            return f"{kind or 'that document'} is not a document of this run"
+        if section not in OUTPUTS[kind]["sections"]:
+            return f"{section!r} is not a section of the {kind.upper()}"
+        if not self._board_doc_owner(aid, kind, section):
+            return f"{aid} doesn't own the {kind.upper()}'s {section} section"
+        if not text.strip():
+            return "the change has no new text"
+        if kind == "prd":
+            # The PRD is the Requester's own charter of requirements: Identity decides, the board never rewrites it.
+            entry["artifact_update"] = None
+            entry["sent_to_identity"] = {"doc": "prd", "section": section, "reason": why or "not recorded"}
+            self.relay = {"from": target["id"], "text": f"{entry['id']}: the PRD's {section} section needs changing "
+                                                        f"({why or 'no reason recorded'}). The board doesn't change the "
+                                                        "PRD; this is a change request for you."}
+            self.post("system", f"Board {entry['id']}: a PRD change is never applied from the board. It goes to "
+                                f"Identity as a change request ({section}).", warning=True)
+            return None
+        v0, v1 = self._revise_doc(kind, section, text, why or f"answered {entry['id']}", entry["id"])
+        if v1 is None:
+            return f"{kind}.md is not in the run folder"
+        entry["artifact_update"] = {"doc": kind, "section": section, "from_version": v0, "to_version": v1}
+        self._board_note(aid, entry["id"])
+        passed, sent = self._board_propagate(entry, aid, kind, v1)
+        self.post("system", f"{kind.upper()} v{v0} -> v{v1} ({entry['id']}). Re-checked: {passed} passed, "
+                            f"{sent} sent to Adaptation.", checks=target["id"])
+        return None
+
+    def _revise_doc(self, kind, section, text, reason, qid):
+        """Item 2: replace one section of a filed document, append its version note, export it again and refresh
+        everything that reads it. Returns (from_version, to_version), or (None, None) when the file isn't there."""
+        path = os.path.join(self.dir, f"{kind}.md")
+        if not os.path.isfile(path):
+            return None, None
+        with open(path, encoding="utf-8") as f:
+            old = f.read()
+        v0 = self._doc_version(kind)
+        v1 = v0 + 1
+        body = re.sub(r"^\s*#{1,6}\s+[^\n]*\n?", "", str(text).strip("\n"), count=1)      # the heading line stays
+        new = md_replace_section(old, section, body.strip("\n") + f"\n\nVersion {v1}: {qid}, {reason}.")
+        if new == old:
+            return None, None
+        self._write_doc(kind, new, version=v1)
+        self.doc_changes.append({"id": qid, "doc": kind, "section": section, "from": v0, "to": v1, "reason": reason})
+        return v0, v1
+
+    def _write_doc(self, kind, text, version=None):
+        """Write a document the run has already filed: <kind>.md, its new version file, the export, and the records
+        that read it (documents.json's agent_output, the chain, the charter's chain, the LLD blueprint)."""
+        with open(os.path.join(self.dir, f"{kind}.md"), "w", encoding="utf-8") as f:
+            f.write(text)
+        if version:
+            os.makedirs(os.path.join(self.dir, "site"), exist_ok=True)
+            tag = f"{kind}-" if len(self.stages) > 1 else ""
+            with open(os.path.join(self.dir, "site", f"{tag}v{version}.md"), "w", encoding="utf-8") as f:
+                f.write(text)
+        if OUTPUTS[kind].get("export"):
+            OUTPUTS[kind]["export"](text, self.dir)
+        ao = doc_agent_output(kind, text)
+        if kind in self.docs:
+            self.docs[kind] = {**self.docs[kind], "agent_output": ao}
+            self.save("documents.json", self.docs)
+        if kind in self.chain:
+            self.chain[kind] = ao
+        ch = (self.goal or {}).get("chain")
+        if isinstance(ch, dict) and kind in ch:      # the charter every later builder reads
+            ch[kind] = ao
+            ch[f"{kind}_ids"] = [x["id"] for x in (ao.get("requirements") or ao.get("components") or [])]
+            self.save("goal.json", self.goal)
+        if kind == "lld" and self.blueprint:
+            self.blueprint = copy.deepcopy(ao)
+        return ao
+
+    def _board_note(self, aid, qid):
+        """"Updated by Q-k" on the atom's own note (atoms.json reads it), once."""
+        for w in self._all_wfs():
+            for a in w.get("atoms") or []:
+                if a["id"] == aid:
+                    ho = a.get("human_output") or {}
+                    if f"Updated by {qid}" not in str(ho.get("text") or ""):
+                        a["human_output"] = {**ho, "text": f"{ho.get('text') or ''} Updated by {qid}.".strip()}
+                    self.save("workflows.json", self.workflows)
+
+    def _board_propagate(self, entry, aid, kind, version):
+        """Items 3 and 4: re-run the changed document's conditions and the owner atom's checks, then follow the
+        recorded used_by edges (nothing else) and re-check every atom that is already closed. A failing atom goes to
+        Adaptation on the existing atom_failed path. Returns (passed, sent to Adaptation)."""
+        qid = entry["id"]
+        self._doc_conditions(kind, qid, version)
+        views = {v["id"]: v for v in j2_schema.run_views(self._all_wfs(), self.given)[0]}
+        seen, queue, impact = set(), [aid], []
+        while queue:                       # transitively, by recorded edges only
+            cur = queue.pop(0)
+            if cur in seen:
+                continue
+            seen.add(cur)
+            queue += [e["atom"] for e in (views.get(cur) or {}).get("used_by") or []]
+        results, sent = [], []
+        for x in [aid] + [i for i in seen if i != aid]:
+            a, w = self._atom_of(x)
+            if not a or a.get("status") != "passed":      # not built yet: its own build checks it (_board_forward)
+                continue
+            a["board_stale"] = qid
+            page, doc = self._recheck_page(x)
+            failed = self._run_checks(w, (a.get("attempts") or 1), page, atoms=[a], doc=doc, trigger=qid)
+            ok = not failed
+            if ok:
+                a.pop("board_stale", None)
+                a["board_rechecked"] = qid
+            else:
+                sent.append((w, a))
+            if x != aid:      # impact is what the change reached; the owner's own re-check is item 3
+                impact.append({"atom": x, "result": "passed" if ok else "failed"})
+            results += (a.get("results") or [])
+        entry["impact"] = impact
+        self.audits_recheck(qid, kind, version, results)
+        self.save("workflows.json", self.workflows)
+        j2_board.write(self.dir, self.board)
+        for w, a in sent:
+            # The existing path, after this turn (_run): Adaptation reads the receipts and prices a revise as a fix.
+            self._event(w["id"], "board_recheck_failed", f"{a['id']} failed its checks after {qid}")
+            self.board_failed.append({"wid": w["id"], "atoms": [a["id"]], "attempt": a.get("attempts") or 1,
+                                      "owner_note": f"its checks failed after the board change {qid}"})
+        return sum(1 for x in impact if x["result"] == "passed"), len(sent)
+
+    def _atom_of(self, aid):
+        """(atom, workflow) for an atom id of this run, else (None, None)."""
+        for w in self._all_wfs():
+            for a in w.get("atoms") or []:
+                if a["id"] == aid:
+                    return a, w
+        return None, None
+
+    def _recheck_page(self, aid):
+        """(page, doc) an atom's own checks run against: the document its stage wrote, or what is built now."""
+        kind = self._doc_of_atom(aid)
+        if kind:
+            path = os.path.join(self.dir, f"{kind}.md")
+            if os.path.isfile(path):
+                with open(path, encoding="utf-8") as f:
+                    return f.read(), True
+        return (self.sites[-1] if self.sites else ""), self.doc
+
+    def _doc_conditions(self, kind, qid, version):
+        """Item 3: the changed document's own necessary conditions (P1-P8 / H1-H6 / L1-L6), re-run by code on the new
+        text with that stage's charter. Saved as conditions-<kind>.json; the live run's conditions.json is the
+        current stage's and is left alone."""
+        path = os.path.join(self.dir, f"{kind}.md")
+        if not os.path.isfile(path):
+            return []
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
+        goal = next((s["goal"] for s in reversed(self.stage_archive) if s.get("stage") == kind), self.goal)
+        conds = check_conditions(load_conditions(OUTPUTS[kind]["conditions"]), text, goal,
+                                 self._fact_source(goal), OUTPUTS[kind]["sections"])
+        self.save(f"conditions-{kind}.json", conds)
+        self.post("system", f"{kind.upper()} v{version} conditions after {qid} (checked by code): " + "; ".join(
+            f"{c['id']} " + ("met" if c["met"] else f"NOT MET ({c['evidence']})") for c in conds), mechanical=True)
+        return conds
+
+    def audits_recheck(self, qid, kind, version, results):
+        """Item 3: the recheck's own entry in audits.json. Kept apart from the audits themselves (self.audits), so
+        nothing that reads the latest audit sees it; readers of the file skip "kind": "recheck"."""
+        self.rechecks.append({"kind": "recheck", "trigger": qid, "doc": kind, "version": version,
+                              "t": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                              "results": [{k: r.get(k) for k in ("atom", "check", "pass", "evidence")} for r in results]})
+        self.save("audits.json", self.audits + self.rechecks)
+
+    def _board_forward(self, w):
+        """Item 4 for an atom built after the change: when its recorded edges reach an atom a board answer changed,
+        its own checks have just run against the changed document, so it is marked re-checked and listed in the
+        entry's impact. Recorded edges only."""
+        if not (j2_board.enabled() and self.doc_changes):
+            return
+        views = {v["id"]: v for v in j2_schema.run_views(self._all_wfs(), self.given)[0]}
+
+        def reaches(aid, want, seen=None):
+            seen = seen if seen is not None else set()
+            if aid in seen:
+                return False
+            seen.add(aid)
+            deps = [e["atom"] for e in (views.get(aid) or {}).get("depends_on") or []]
+            return want in deps or any(reaches(d, want, seen) for d in deps)
+        for a in w.get("atoms") or []:
+            if a.get("status") != "passed":
+                continue
+            for e in self.board["entries"]:
+                qid, up = e["id"], e.get("artifact_update") or {}
+                if not up.get("doc") or a.get("board_rechecked") == qid or any(x["atom"] == a["id"]
+                                                                              for x in e.get("impact") or []):
+                    continue
+                if reaches(a["id"], e["atom"]):
+                    a["board_rechecked"] = qid
+                    e["impact"] = (e.get("impact") or []) + [{"atom": a["id"], "result": "passed"}]
+                    self._receipt(a, {"text": f"built after {qid} and its checks passed", "type": "recheck",
+                                      "target": e["atom"]}, a.get("attempts") or 1,
+                                  {"actual": True, "pass": True,
+                                   "evidence": f"{a['id']} depends on {e['atom']}, which {qid} changed"}, trigger=qid)
+                    j2_board.write(self.dir, self.board)
+                    self.save("workflows.json", self.workflows)
 
     def _credit_board_used(self, meta, reader=None):
         """Item 4 (Reuse): used_by is only recorded when the reply names the board id it used. The reader is the
@@ -6864,10 +7162,26 @@ class J2Run:
         w = self._board_owner(*words) or {}
         return next((a["id"] for a in w.get("atoms") or [] if a.get("agent_output")), None)
 
+    # The document question each role word scripts (mock mode): the builder of this section asks the atom of the
+    # earlier document its own prompt was built from (_chain_edges), about the subject that section must settle.
+    DOC_ASKS = {"lld": ("Interactive elements", "hld", "Components", "how the booking is sent",
+                        "How is the booking sent: mailto or a server endpoint?"),
+                "hld": ("Components", "prd", "Requirements", "which requirement the booking form covers",
+                        "Which requirement covers the booking form?")}
+
     def _mock_board_extra(self, w, attempt):
         """Mock mode only, for a builder. Ask (item 2, via J2_FORCE_QUESTION): a question only on the matched
         workflow's first attempt, at most once per run. Reuse (item 4): the answered entries that share a topic with
         this workflow, so later builders reuse them without a real model."""
+        ask = self.DOC_ASKS.get(self.output) if self.doc else None
+        if ask and attempt == 1 and not self.question_forced and self.output in self.force_qs \
+                and ask[0].lower() in str(w["name"]).lower():
+            to = next(reversed(self._doc_atoms(ask[1], ask[2])), None)
+            if to:
+                self.question_forced = True
+                self.post("system", f"TEST SWITCH J2_FORCE_QUESTION={self.force_question} (humans only, agents don't "
+                                    f"see this): {w['id']} asks {to} about {ask[3]}.", warning=True, test=True)
+                return {"question": {"to": to, "about": ask[3], "text": ask[4]}}
         words = [x for x in self.force_qs if x not in FUNCTIONS]
         if words and attempt == 1 and not self.question_forced \
                 and any(x == w["id"].lower() or x in str(w["name"]).lower() for x in words):
@@ -6887,6 +7201,8 @@ class J2Run:
         question about where something is names the section and its anchor. "not recorded" when the section holds
         neither, never invented."""
         w = next((x for x in self._all_wfs() if x["id"] == wid), None)
+        if self._doc_of_workflow(wid):
+            return self._mock_board_answer_doc(wid, w, entry)
         sid = (w or {}).get("section")
         body = (self.sections.get(sid) or {}).get("body") or ""
         asked = " ".join([str((entry or {}).get("about") or ""), str((entry or {}).get("question") or "")]).lower()
@@ -6905,6 +7221,44 @@ class J2Run:
         if attrs:
             return {"answer": f"This section's items use {', '.join(attrs)}.", "artifact_update": None}
         return {"answer": "not recorded", "artifact_update": None}
+
+    def _mock_board_answer_doc(self, wid, w, entry):
+        """Mock mode's Answer from a document section (board/1 part C): read out of the section the run recorded. A
+        question about how something is sent is answered from the address the brief gives, with the correction to its
+        own section; a question about which requirement covers something names the requirement. The words are the
+        brief's and the document's; nothing is invented, and "not recorded" when the run holds neither."""
+        kind = self._doc_of_workflow(wid)
+        section = next((s for s in OUTPUTS[kind]["sections"] if squash(w.get("name") or "").endswith(squash(s))), None)
+        aid = ((w or {}).get("atoms") or [{}])[0].get("id")
+        body = (atom_section_body(self.dir, self._all_wfs(), aid) or "") if aid else ""
+        body = re.sub(r"^\s*#{1,6}\s+[^\n]*\n?", "", body.strip("\n"), count=1).strip("\n")
+        asked = " ".join([str((entry or {}).get("about") or ""), str((entry or {}).get("question") or "")]).lower()
+        said = " ".join([self.request] + [m["text"] for m in self.chat if m["who"] == "user"])
+        if not section or not body.strip():
+            return {"answer": "not recorded", "artifact_update": None}
+        if re.search(r"\bsent\b|\bsend\b|mailto|endpoint|server", asked):
+            mail = next(iter(sorted(x.rstrip(".") for x in set(EMAIL.findall(said)))), None)
+            if not mail:
+                return {"answer": "not recorded", "artifact_update": None}
+            add = f"The booking is sent by mailto to {mail}; there is no server endpoint."
+            lines = body.splitlines()
+            lines[-1] = lines[-1].rstrip() + " " + add
+            return {"answer": f"mailto to {mail}, no server.",
+                    "artifact_update": {"doc": kind, "section": section, "text": "\n".join(lines),
+                                        "reason": f"the form sends the booking by mailto to {mail}, with no server"}
+                    if add not in body else None}
+        if re.search(r"requirement|covers", asked):
+            m = next((ln for ln in body.splitlines() if re.search(r"\bform\b|\bbook", ln, re.I)), None)
+            rid = re.search(r"\bR(\d+)\b", m) if m else None
+            if not rid:
+                return {"answer": "not recorded", "artifact_update": None}
+            mail = next(iter(sorted(x.rstrip(".") for x in set(EMAIL.findall(said)))), None)
+            lines = body.splitlines()                 # the same requirement, saying where the booking goes
+            lines[lines.index(m)] = m.rstrip() + (f" The booking goes to {mail}." if mail else "")
+            return {"answer": f"R{rid[1]} covers it: {squash(strip_md(m))[:110]}",
+                    "artifact_update": {"doc": kind, "section": section, "text": "\n".join(lines),
+                                        "reason": f"R{rid[1]} should say where the booking goes"} if mail else None}
+        return {"answer": f"That is in the {kind.upper()}'s {section} section, as recorded.", "artifact_update": None}
 
     def _mock_board_answer_fn(self, fn, entry):
         """Mock mode's Answer (item 3) from a function: read out of the run's own record. Adaptation answers from the
@@ -7101,7 +7455,7 @@ class J2Run:
         build), or the build is wrong. Only a wrong build the budget left can't fix goes to Identity. An atom with no
         fix after its attempts is ESCALATED."""
         self.step = 2
-        w = self._wf(h.get("wid"))
+        w = self._wf(h.get("wid")) or next((x for x in self._all_wfs() if x["id"] == h.get("wid")), None)
         atoms = [a for a in (w or {}).get("atoms") or [] if a["id"] in (h.get("atoms") or [])]
         if not atoms:
             return self._handoff("coordination", kind="schedule")
@@ -7115,7 +7469,8 @@ class J2Run:
         # is read as written in the document means the check's target is wrong, not the build.
         corr, why = {}, []
         for a in atoms if self.doc and self.sites else []:
-            fixed = [(c, corrected_check(c, self.sites[-1]) if not doc_check(c, self.sites[-1])["pass"] else None)
+            page = self._recheck_page(a["id"])[0]      # its own document: a filed one when the atom wrote that
+            fixed = [(c, corrected_check(c, page) if not doc_check(c, page)["pass"] else None)
                      for c in a.get("verification") or [] if isinstance(c, dict)]
             if any(x for _, x in fixed):
                 corr[a["id"]] = [x[0] if x else c for c, x in fixed]
@@ -7172,7 +7527,8 @@ class J2Run:
                 self._reject(f"{a['id']} corrected check", "; ".join(probs))
             else:
                 a["verification"] = new["verification"]
-                if not self._run_checks(w, MAX_CHECK_ATTEMPTS, self.sites[-1], atoms=[a],
+                if not self._run_checks(w, MAX_CHECK_ATTEMPTS, *self._recheck_page(a["id"])[:1], atoms=[a],
+                                        doc=self._recheck_page(a["id"])[1],
                                         recheck="check corrected by Adaptation"):
                     self._seal_atoms(w, [a], MAX_CHECK_ATTEMPTS)
                     if a.get("status") == "passed":
