@@ -18,6 +18,39 @@ MAKE_CHECKS = {"file-exists": "exists", "element-count": "exists", "grep-count":
 DO_CHECKS = ("behavior-steps", "deed-send")      # a do item has one check, "receipt": a receipt exists and shows success
 
 
+# Which recorded edge means "this atom's own content was built from that one". A change to an atom travels along
+# these and no others: a manifest edge only listed another section's summary in the prompt, and a board edge records
+# that an answer was on the prompt, not that the section was built from it. One name per reason, so a run can be
+# read (and tested) by name.
+import re as _re
+
+CONTENT_EDGES = (("prd_requirements", _re.compile(r"^the PRD's requirements were in this builder's prompt")),
+                 ("hld_components", _re.compile(r"^the HLD's components were in this builder's prompt")),
+                 ("hld_summary", _re.compile(r"^the HLD component summary was in this builder's prompt")),
+                 ("lld_slice", _re.compile(r"^LLD slice\b")),
+                 ("declared_dependency", _re.compile(r"^its workflow depends on\b")))
+
+
+def content_edge(why):
+    """The name of the content edge this reason records, or None when it isn't one (a manifest listing, a board
+    answer, or anything else a run records about a prompt)."""
+    for name, pat in CONTENT_EDGES:
+        if pat.match(str(why or "")):
+            return name
+    return None
+
+
+def dedupe_edges(edges):
+    """The edges with each (atom, reason) pair once, in the order they were recorded."""
+    out, seen = [], set()
+    for e in edges or []:
+        key = (e.get("atom"), e.get("why"))
+        if key not in seen:
+            seen.add(key)
+            out.append(e)
+    return out
+
+
 def atom_status(atom, wf=None, ended=False):
     """One of STATUSES from today's names. atom: passed, failed (after every attempt, and also after each one that will be
     retried), escalated, could not run, or none yet. wf: its workflow's status (registered, held, running, done, failed,
@@ -56,7 +89,7 @@ def atom_view(atom, wf=None, edges=None, ended=False):
             "status": atom_status(a, wf, ended), "attempt": a.get("attempts") or ag.get("attempt"),
             "goal": a.get("goal"), "how": a.get("how"), "constraints": a.get("constraints") or [],
             "context": a.get("context") or [], "defined_output": a.get("expected_output") or [],
-            "verification": ver, "output": out, "depends_on": [dict(e) for e in edges or []], "used_by": [],
+            "verification": ver, "output": out, "depends_on": dedupe_edges([dict(e) for e in edges or []]), "used_by": [],
             "notes": (a.get("human_output") or {}).get("text") or "", "details": details,
             # board/1: a board answer changed something this atom was built from (stale until its checks ran again)
             **({"stale": a["board_stale"]} if a.get("board_stale") else {}),
@@ -106,6 +139,8 @@ def link_views(views):
         for e in v["depends_on"]:
             if e["atom"] in by:
                 by[e["atom"]]["used_by"].append({"atom": v["id"], "why": e["why"]})
+    for v in views:
+        v["used_by"] = dedupe_edges(v["used_by"])
     return views
 
 

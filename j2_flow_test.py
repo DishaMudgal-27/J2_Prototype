@@ -4685,6 +4685,30 @@ def doc_board_run(force="lld", patch=None, budget=1400, demo=False):
     return run
 
 
+def board_content_edges():
+    """Message board, part C: the named allowlist of content edges (j2_schema.CONTENT_EDGES). A document change
+    travels along the reasons that say what a section was built from (the PRD's requirements, the HLD's components
+    or summary, an LLD slice, a declared dependency) and along nothing else: a manifest listing and a board answer
+    record what a prompt held. (atom, reason) pairs are recorded once."""
+    S = j2.j2_schema
+    want = {"the PRD's requirements were in this builder's prompt (charter)": "prd_requirements",
+            "the HLD's components were in this builder's prompt (charter)": "hld_components",
+            "the HLD component summary was in this builder's prompt": "hld_summary",
+            "LLD slice S1, S2: its form fields were in this builder's prompt": "lld_slice",
+            "its workflow depends on Products": "declared_dependency"}
+    for why, name in want.items():
+        assert S.content_edge(why) == name, (why, S.content_edge(why))
+    assert {n for n, _ in S.CONTENT_EDGES} == set(want.values()), S.CONTENT_EDGES
+    for why in (j2.J2Run.MANIFEST_WHY, "board Q-1", "the email reports prd done", "the message is built from prd.md",
+                "declared dependency", "", None):
+        assert S.content_edge(why) is None, why
+    e = lambda a, w: {"atom": a, "why": w}
+    assert S.dedupe_edges([e("W-1.a1", "a"), e("W-1.a1", "a"), e("W-1.a1", "b"), e("W-2.a1", "a")]) == \
+        [e("W-1.a1", "a"), e("W-1.a1", "b"), e("W-2.a1", "a")]
+    print("board content edges: the five named content edges classify, a manifest listing, a board answer and a send "
+          "edge do not, and the same atom and reason are recorded once ok")
+
+
 def board_doc_change():
     """Message board, part C (a): the LLD's Interactive elements builder asks the HLD's Components atom how the
     booking is sent; the HLD owner answers from the brief's address and corrects its own section. Code applies it
@@ -4709,29 +4733,39 @@ def board_doc_change():
     assert "mailto" in json.dumps(run.docs["hld"]["agent_output"]), "documents.json carries the new components"
     conds = json.load(open(os.path.join(run.dir, "conditions-hld.json"), encoding="utf-8"))
     assert [c["id"] for c in conds] == ["H1", "H2", "H3", "H4", "H5", "H6"] and all(c["met"] for c in conds), conds
-    line = next((x for x in run.chat if x["who"] == "system" and f"HLD v{up['from_version']} -> "
-                 f"v{up['to_version']} (Q-1)" in x["text"]), None)
-    assert line and "Re-checked:" in line["text"] and "sent to Adaptation" in line["text"], line
-    # the impact: the atoms the recorded edges reach from the changed atom, each with its own re-check receipt
+    line = next((x for x in run.chat if x["who"] == "system" and "Re-checked:" in x["text"]
+                 and f"HLD v{up['from_version']} -> v{up['to_version']} (Q-1)" in x["text"]), None)
+    assert line and "sent to Adaptation" in line["text"], [x["text"] for x in run.chat if x["who"] == "system"][-4:]
+    # the impact: the transitive closure over content edges from the changed atom, each with its re-check receipt
+    atomviews = {v["id"]: v for v in json.load(open(os.path.join(run.dir, "atoms.json"), encoding="utf-8"))["atoms"]}
     impact = {x["atom"]: x["result"] for x in e["impact"]}
-    later = {x["atom"]: x["result"] for x in e["rechecked_later"]}
     assert impact and all(r == "passed" for r in impact.values()), e["impact"]
-    assert "W-13.a1" in impact, "the LLD atom that used HLD Components is re-checked"
-    # the chat line reports impact itself, and a sibling section of the same document is not swept in with it
+    assert len(impact) == len(e["impact"]), ("each atom once", e["impact"])
+    content = [(x["atom"], j2.j2_schema.content_edge(x["why"])) for x in atomviews["W-9.a1"]["used_by"]]
+    read_me = {a for a, name in content if name}
+    lld_read = {a for a, name in content if name == "hld_components"}
+    assert lld_read and lld_read <= set(impact) and lld_read <= set(run.docs["lld"]["atoms"]), \
+        ("every LLD atom that read the HLD's components is impacted", sorted(lld_read))
+    site_read = {a for a, name in content if name == "hld_summary"}
+    assert len(site_read) > 1 and site_read <= set(impact), \
+        ("every website atom built from the HLD summary is impacted", sorted(site_read))
+    assert read_me == set(impact), (sorted(read_me), sorted(impact))
+    # the chat line reports impact itself, and an edge that only listed a section is not a content edge
     counts = re.search(r"Re-checked: (\d+) passed, (\d+) sent to Adaptation", line["text"])
     assert int(counts[1]) + int(counts[2]) == len(impact), (line["text"], e["impact"])
     assert int(counts[1]) == sum(r == "passed" for r in impact.values()), (line["text"], e["impact"])
     sib = [a for a in impact if a in ("W-10.a1", "W-11.a1", "W-12.a1")]
-    assert not sib, ("an HLD section the change has no edge to is not impacted", sib)
-    assert all(j2.J2Run.MANIFEST_WHY != x["why"] for x in
-               next(v for v in json.load(open(os.path.join(run.dir, "atoms.json"), encoding="utf-8"))["atoms"]
-                    if v["id"] == "W-13.a1")["depends_on"] if x["atom"] == "W-9.a1"), \
-        "W-13 depends on the HLD components for its content, not only through the manifest"
-    assert any(a.startswith(("W-19", "W-20", "W-21", "W-22", "W-23")) for a in later), \
-        "the website atoms built after the change are re-checked when they are built"
+    assert not sib, ("an HLD section the change has no content edge to is not impacted", sib)
+    assert j2.j2_schema.content_edge(j2.J2Run.MANIFEST_WHY) is None and j2.j2_schema.content_edge("board Q-1") is None
+    assert [j2.j2_schema.content_edge(x["why"]) for x in atomviews["W-13.a1"]["depends_on"]
+            if x["atom"] == "W-9.a1"].count("hld_components") == 1, atomviews["W-13.a1"]["depends_on"]
+    for v in atomviews.values():      # the same atom and reason appear once
+        for key in ("depends_on", "used_by"):
+            pairs = [(x["atom"], x["why"]) for x in v[key]]
+            assert len(pairs) == len(set(pairs)), (v["id"], key, pairs)
     recs = [json.loads(ln) for ln in open(os.path.join(run.dir, "receipts.jsonl"), encoding="utf-8")]
     triggered = {r["atom"] for r in recs if r.get("trigger") == "Q-1"}
-    assert set(impact) | set(later) | {"W-9.a1"} <= triggered, (sorted(triggered), sorted(impact))
+    assert set(impact) | {"W-9.a1"} <= triggered, (sorted(triggered), sorted(impact))
     rechecks = [a for a in json.load(open(os.path.join(run.dir, "audits.json"), encoding="utf-8"))
                 if a.get("kind") == "recheck"]
     assert len(rechecks) == 1 and rechecks[0]["trigger"] == "Q-1" and rechecks[0]["doc"] == "hld" \
@@ -4739,8 +4773,7 @@ def board_doc_change():
     assert all(r["pass"] for r in rechecks[0]["results"]), rechecks[0]
     atoms = {a["id"]: a for a in json.load(open(os.path.join(run.dir, "atoms.json"), encoding="utf-8"))["atoms"]}
     assert atoms["W-9.a1"]["rechecked"] == "Q-1" and "Updated by Q-1" in atoms["W-9.a1"]["notes"], atoms["W-9.a1"]
-    assert all(atoms[a]["rechecked"] == "Q-1" for a in list(impact) + list(later)), \
-        [a for a in list(impact) + list(later) if not atoms[a].get("rechecked")]
+    assert all(atoms[a]["rechecked"] == "Q-1" for a in impact), [a for a in impact if not atoms[a].get("rechecked")]
     assert not any(a.get("stale") for a in atoms.values()), "a re-checked atom is not stale"
     rows = {r["type"]: r for r in json.load(open(os.path.join(run.dir, "artifacts.json"), encoding="utf-8"))["rows"]
             if r["kind"] == "type"}
@@ -4762,7 +4795,7 @@ def board_doc_change():
         tab = out["board"]
         assert "<th>Impact</th>" in tab and f'<td data-impact="Q-1">' in tab, tab[:400]
         cell = tab.split('<td data-impact="Q-1">')[1].split("</td>")[0]
-        for a, r in list(impact.items()) + [(a, r) for a, r in later.items()]:
+        for a, r in impact.items():
             assert a in cell and ("passed" if r == "passed" else "sent to Adaptation") in cell, (a, r, cell)
         assert f"HLD Components v{up['from_version']} → v{up['to_version']}" in tab, tab[:600]
         for bad in ("Q-1", "re-check", "HLD v", "board"):
@@ -6802,6 +6835,7 @@ if __name__ == "__main__":
         board_functions()
         board_not_mine()
         if mode == "0":      # the board's document changes don't branch on J2_FIXES: four stages, run once
+            board_content_edges()
             board_doc_change()
             board_doc_not_owner()
             board_doc_prd()

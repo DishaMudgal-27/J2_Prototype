@@ -384,17 +384,19 @@ workflow, including a done one from an earlier cycle, or another function.
   the `.docx` again, and refreshes what reads it (the chain, the charter, the LLD blueprint).
 - It then re-runs that document's conditions (P1-P8 / H1-H6 / L1-L6) and the owner's checks, with no AI call:
   receipts carry `"trigger": "Q-k"` and `audits.json` gets a `{"kind": "recheck"}` entry.
-- The change **propagates by recorded edges only**, from the changed atom and transitively (`used_by`: HLD → LLD →
-  website). Each atom it reaches is re-checked and marked `rechecked`; one that fails goes to Adaptation as a
-  revise priced as a fix. A sibling section of the same document is not impacted unless it has an edge of its own:
-  the manifest edge (every later builder is shown the other sections' summary) records what a prompt held, not
-  what a section is built from, so a change never travels along it. No recorded edge means `impact: []`.
-- Records: `from_version`/`to_version` on the entry, `impact` (what the change reached when it was made, which is
-  what the chat line counts) and `rechecked_later` (atoms built afterwards, marked when their own checks passed),
-  `changed_by`/`rechecked_after` on the artifact rows, `stale`/`rechecked` and "Updated by Q-k" on the atoms, an
-  `asks` line between the two deliverables on the Map with the version bump and "re-checked after Q-k", an
-  **Impact** column on the Board tab, and one chat line: "HLD v6 -> v7 (Q-1). Re-checked: 1 passed, 0 sent to
-  Adaptation." The Simple view is unchanged.
+- The change **propagates along content edges only**, from the changed atom and transitively: the named allowlist
+  in `j2_schema.CONTENT_EDGES` (the PRD's requirements, the HLD's components or summary, an LLD slice, a declared
+  dependency) is what says a section was built from another. A manifest listing ("its section, anchor and
+  selectors were listed") and a `board Q-n` edge record what a prompt held, not what the work was built from, so a
+  change never travels along them, and a sibling section of the same document is not impacted without a content
+  edge of its own. No content edge means `impact: []`. Each atom the closure reaches is re-checked and marked
+  `rechecked` (as it is built, if it comes later); one that fails goes to Adaptation as a revise priced as a fix.
+- Records: `from_version`/`to_version` and `impact` on the entry (every atom the closure reached, with what its
+  re-check found), `changed_by`/`rechecked_after` on the artifact rows, `stale`/`rechecked` and "Updated by Q-k" on
+  the atoms, an `asks` line between the two deliverables on the Map with the version bump and "re-checked after
+  Q-k", an **Impact** column on the Board tab, and two chat lines: the change ("HLD v6 -> v7 (Q-1): the Components
+  section is replaced ...") and, when the run stops, the tally, whose numbers are `impact` itself ("HLD v6 -> v7
+  (Q-1). Re-checked: 12 passed, 0 sent to Adaptation."). The Simple view is unchanged.
 
 `J2_FORCE_QUESTION=<comma list>` (mock mode only) is a test switch like `J2_FORCE_AUDIT_FAIL`: each named asker
 asks one question, once per run. A name is a function (`identity`, `adaptation`, `priority`, `coordination`,

@@ -1167,14 +1167,11 @@ const boardFrom = f => !f ? '<span class="empty">not recorded</span>'
 const boardUpdate = u => !u ? '<span class="empty">no</span>'
   : u.doc ? `${esc(String(u.doc).toUpperCase())} ${esc(u.section)}${u.from_version ? ` v${esc(u.from_version)} → v${esc(u.to_version)}` : ""}`
   : "yes";
-// Impact: every atom the change reached by a recorded edge, with what its re-check found; the atoms built after it
-// are listed under them. Recorded data only.
+// Impact: every atom the change reached by a content edge, with what its re-check found. Recorded data only.
 const BOARDRES = {passed: "passed", failed: "sent to Adaptation"};
-const boardImpact = e => {
-  const rows = (x, late) => `${esc(x.atom)} <span class="empty">${esc(BOARDRES[x.result] || x.result)}${late ? ", built after" : ""}</span>`;
-  const now = (e.impact || []).map(x => rows(x, false)), later = (e.rechecked_later || []).map(x => rows(x, true));
-  return now.length || later.length ? now.concat(later).join("<br>") : '<span class="empty">none</span>';
-};
+const boardImpact = e => (e.impact || []).length
+  ? e.impact.map(x => `${esc(x.atom)} <span class="empty">${esc(BOARDRES[x.result] || x.result)}</span>`).join("<br>")
+  : '<span class="empty">none</span>';
 function boardRow(e){
   const st = {open: "open", answered: "answered", unanswered: "unanswered", refused: "refused"}[e.status] || e.status;
   const role = e.asked_by_role ? ` <span class="empty">${esc(e.asked_by_role)}</span>` : "";

@@ -40,8 +40,8 @@ def new_entry(entry_id, asked_by, atom, to, about, question, cycle, attempt, ask
     return {"id": entry_id, "asked_by": asked_by, "atom": atom, "to": to, "about": about, "question": question,
             "answer": None, "answered_by": None, "status": "open", "artifact_update": None, "used_by": [],
             "cycle": cycle, "attempt": attempt, "asked_by_role": asked_by_role, "answered_from": None,
-            # a change to a document: what the recorded edges reached when it was made, and the atoms built after it
-            "impact": [], "rechecked_later": []}
+            # a change to a document: every atom the content edges reach, with what its re-check found
+            "impact": []}
 
 
 def content_words(text):
