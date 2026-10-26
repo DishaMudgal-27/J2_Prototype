@@ -175,75 +175,21 @@ Workflows that depend on it are held with it. Never pass a `not_ready` workflow 
 
 ## Reply fields (on PROPOSE, beside the certainty fields)
 
-The shape is `docs/realization-schema.json`. Example for a coffee-shop website (items: 1 menu, 2 hours and
-location, 3 signature drinks, 4 contact form):
+The shape is `docs/realization-schema.json`; the reply format in your task lists every field. Fill them from this
+charter only. There is no model plan to copy: the factors, stages and workflows come from what this charter says and
+what certainty.md tells you about it.
 
-```json
-{
-  "factors": [
-    {"name": "10,000 visitors a month", "source": "brief", "quote": "handle 10,000 visitors a month",
-     "why": "decides hosting and page weight", "stages": ["engineering"]},
-    {"name": "stand out from chains", "source": "brief", "quote": "stand out from the chains",
-     "why": "a generic cafe site loses to the chains' apps", "stages": ["product", "design"]},
-    {"name": "fast on phones", "source": "general", "quote": null,
-     "why": "most visitors look on the way", "stages": ["engineering"]}
-  ],
-  "unplaced": [],
-  "stages": [
-    {"id": "product", "thinking": "users", "tiers": ["capability", "feature"],
-     "goal": "Every visitor finds menu, hours and the signature drinks within one scroll",
-     "done_test": "Every done-when item has a place in the page plan", "method": "story mapping",
-     "owns_factors": ["stand out from chains"], "inputs_from": []},
-    {"id": "design", "thinking": "experience", "tiers": ["feature"],
-     "goal": "One warm, local style that sets the shop apart", "done_test": "A style guide every section follows",
-     "method": "style options then choice", "owns_factors": ["stand out from chains"], "inputs_from": ["product"]},
-    {"id": "engineering", "thinking": "structure", "tiers": ["architecture"],
-     "goal": "Pages load fast for 10,000 visitors a month", "done_test": "Static build plan with an image budget",
-     "method": "static site pattern", "owns_factors": ["10,000 visitors a month", "fast on phones"],
-     "inputs_from": ["product"]},
-    {"id": "build", "thinking": "making", "tiers": ["implementation"],
-     "goal": "Every section built to the plan and style guide", "done_test": "Builder checks pass for every section",
-     "method": "builder checks", "owns_factors": [], "inputs_from": ["product", "design", "engineering"]}
-  ],
-  "workflows": [
-    {"name": "How cafe sites stand out", "stage": "product", "certainty": "analyze",
-     "goal": "Know what independent cafe sites show that chain sites don't",
-     "done_test": "research.md#R-1 has the question, 3 cited sources, findings and what changes in the page plan",
-     "delivers": [], "informs": [3], "inputs_from": [],
-     "research": {"question": "What do well-reviewed independent cafe sites show that chain sites don't?",
-                  "feeds": "Page plan: what the signature-drinks section shows and where",
-                  "min_sources": 3, "output": "research.md#R-1"}},
-    {"name": "Page plan", "stage": "product", "certainty": "analyze",
-     "goal": "One page plan: every item has a section, in the order a visitor needs them",
-     "done_test": "Every done-when item has a section in the plan, and the signature drinks sit above the menu",
-     "delivers": [], "informs": [1, 2, 3, 4], "inputs_from": ["How cafe sites stand out"]},
-    {"name": "Style guide", "stage": "design", "certainty": "analyze",
-     "goal": "One warm, local style every section follows",
-     "done_test": "A style guide with colours, type and spacing, applied to every section in the plan",
-     "delivers": [], "informs": [1, 2, 3, 4], "inputs_from": ["Page plan"]},
-    {"name": "Build plan", "stage": "engineering", "certainty": "operate",
-     "goal": "A static page that loads fast for 10,000 visitors a month",
-     "done_test": "A static build plan with an image budget of 300 KB per page",
-     "delivers": [], "informs": [1, 2, 3, 4], "inputs_from": ["Page plan"]},
-    {"name": "Menu and drinks", "stage": "build", "certainty": "operate",
-     "goal": "The menu and the signature drinks on the page",
-     "done_test": "Every menu item and price from the charter appears; the drinks section is above the menu",
-     "delivers": [1, 3], "informs": [], "inputs_from": ["Page plan", "Style guide", "Build plan"]},
-    {"name": "Visit and contact", "stage": "build", "certainty": "operate",
-     "goal": "Hours, location and a working contact form on the page",
-     "done_test": "Hours and address appear as given; the form has a submit control and a destination",
-     "delivers": [2, 4], "informs": [], "inputs_from": ["Page plan", "Style guide", "Build plan"]}
-  ],
-  "open_facts": [
-    {"fact": "Shop phone number", "workflow": "Visit and contact", "blocking": false,
-     "handling": "Assumption: phone number to be confirmed; the contact form works without it"}
-  ],
-  "not_ready": []
-}
-```
+- `factors`: each fact that shapes the work, with its `source` (`brief`, `general`, `research` or `budget`), the `quote` it came
+  from (null for general knowledge), `why` it matters, and the `stages` it affects.
+- `unplaced`: factors no stage owns yet.
+- `stages`: the stages this charter needs, from the stage table, each with its `goal`, `done_test`, `method`, the
+  factors it owns and the stages it takes input from.
+- `workflows`: each with its stage, certainty, goal, a testable `done_test`, the done-when items it `delivers`, the
+  items it `informs`, its `inputs_from`, and `research` or `experiment` when certainty calls for one.
+- `open_facts`: facts the charter does not give, each marked blocking or handled as a stated assumption.
+- `not_ready`: workflows that cannot be made ready yet, with where they go.
 
-Each workflow also carries the usual proposal fields and the certainty fields from `certainty.md`. They are left out
-above for length. The judge's scores and the revision rounds are written by code, not by you.
+Each workflow also carries the usual proposal fields and the certainty fields from `certainty.md`. The judge's scores and the revision rounds are written by code, not by you.
 
 ## After Audit says the output misses
 

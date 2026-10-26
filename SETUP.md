@@ -164,8 +164,6 @@ python3 j2_flow_test.py --fast --browser   # adds the tests that drive the page 
 python3 j2_flow_test.py                    # the full test, both J2_FIXES modes. Longest
 python3 j2_check.py site.html              # render check on any HTML page
 python3 realization_test.py                # realization planner, judge and J2 runs with J2_REALIZATION, offline
-python3 realization_pilot.py [ids]         # live: plan and judge the briefs in scenarios/realization_briefs.json
-python3 realization_calibrate.py --rejudge # live: judge saved plans twice to measure the judge's consistency
 ```
 
 `plain_unchanged` is one of the checks. It compares the plain website path (no documents asked for) with a fixed

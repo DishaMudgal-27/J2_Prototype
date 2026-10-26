@@ -14,7 +14,6 @@ import tempfile
 os.environ["STUDIO_MOCK"] = "1"          # before llm is imported
 os.environ.pop("STUDIO_PROVIDER", None)
 import j2_realization as R               # noqa: E402
-import realization_pilot as P            # noqa: E402
 
 GOAL = {"statement": "A coffee shop site", "done_when": ["menu", "hours and location", "signature drinks", "contact form"]}
 passed = 0
@@ -81,14 +80,10 @@ ok(has(faults_of(lambda p: p["certainty_assessment"].update(zone="operate")), "y
    "certainty: zone must follow the signals")
 ok(has(faults_of(lambda p: wf(p, "Plan").update(approach="")), "approach is empty"), "certainty: approach required")
 
-# ---- the reply example in realization.md follows the same rules (plus the certainty fields it leaves out)
+# ---- no worked scenario in the planner's prompt: the plan comes from the charter, realization and certainty only
 doc = open(os.path.join(R.AGENTS, "realization.md"), encoding="utf-8").read()
-ex = json.loads(re.findall(r"```json\n(.*?)```", doc, re.S)[0])
-ex.update(certainty_assessment=R.mock_plan(GOAL)["certainty_assessment"], analysis={"options": ["a"], "chosen": "a"})
-for w in ex["workflows"]:
-    w.setdefault("approach", "As in the analysis.")
-ok(R.plan_faults(ex, GOAL) == [], "the realization.md example passes plan_faults: "
-   + "; ".join(R.plan_faults(ex, GOAL)))
+ok("```json" not in doc and not re.search(r"coffee|cafe|sudoku", R.planner_system(), re.I),
+   "realization.md carries no example plan for any scenario")
 
 # ---- the judge: checklist, code-computed scores, roll-up, holds, route
 p = R.mock_plan(GOAL)
@@ -181,14 +176,6 @@ with tempfile.TemporaryDirectory() as d:
     R.plan_goal(GOAL, log=log, out_dir=out)
     ok(os.path.exists(os.path.join(out, "trace.json")) and os.path.exists(os.path.join(out, "report.md")),
        "trace and report written")
-    os.environ["J2_RUNS_DIR"] = d
-    import contextlib
-    import io
-    with contextlib.redirect_stdout(io.StringIO()):
-        P.main([])
-    pilot = [x for x in os.listdir(d) if x.startswith("realization-pilot-")][0]
-    text = open(os.path.join(d, pilot, "summary.md"), encoding="utf-8").read()
-    ok(text.count("\n| ") == 1 + len(P.load_briefs()) and "failed" not in text, "the pilot runs every brief")
 
 # ---- inside J2 (mock): off by default; on, the first website plan goes through realization
 import j2_flow_test as F      # noqa: E402  (sets J2's test env: temp runs and memory)
