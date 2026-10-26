@@ -12,24 +12,26 @@ import os
 import re
 
 import j2_artifacts as A
+import j2_realization as R
 
 SCHEMA = "map/1"
 NODE_KINDS = ("person", "function", "engine", "work", "know")      # v2 draws person, function, engine and work
 EDGE_KINDS = ("handoff", "step", "speaks_to", "draws_on", "asks", "uses")   # asks/uses: the message board (board/1),
                                                                             # between deliverables only (J2_BOARD=1)
-STATUSES = ("filed", "running", "waiting", "waiting_on_you", "fault", "left_open", "not_made", "idle")
-WORDS = {"filed": "filed and checked", "running": "running now", "waiting_on_you": "waiting on you", "waiting": "waiting", "fault": "fault",
+STATUSES = ("filed", "done_unchecked", "running", "waiting", "waiting_on_you", "fault", "left_open", "not_made", "idle")
+WORDS = {"filed": "filed and checked", "done_unchecked": "done · checks did not pass", "running": "running now", "waiting_on_you": "waiting on you", "waiting": "waiting", "fault": "fault",
          "left_open": "left open", "not_made": "not made", "idle": "idle"}
 FUNCS = ("identity", "adaptation", "priority", "coordination", "audit")
 NAMES = {"identity": "Identity", "adaptation": "Adaptation", "priority": "Priority", "coordination": "Coordination", "audit": "Audit"}
 # the existing tab that shows each function's work (declared here; a box links to it)
 FN_TAB = {"identity": "charter", "adaptation": "workflows", "priority": "conflicts", "coordination": "timeline", "audit": "audit"}
-STEP_VERB = {"doc-sections": "Write", "site-parts": "Build", "send": "Send"}      # what the workflows of that kind do
+STEP_VERB = {"doc-sections": "Write", "site-parts": "Build", "send": "Send", "decide": "Write", "style": "Make"}      # what the workflows of that kind do
 LEGEND = [
     {"key": "function", "label": "function", "drawn": True},
     {"key": "engine", "label": "engine", "drawn": True},
     {"key": "work", "label": "work with its version", "drawn": True},
     {"key": "filed", "label": "filed and checked", "drawn": True},
+    {"key": "done_unchecked", "label": "done · checks did not pass", "drawn": True},
     {"key": "running", "label": "running now", "drawn": True},
     {"key": "left_open", "label": "left open", "drawn": True},
     {"key": "waiting_on_you", "label": "waiting on you", "drawn": True},
@@ -69,19 +71,29 @@ def empty(why="nothing to draw yet"):
             "not_recorded": [why]}
 
 
-def _status(atoms, ended, has_files=True):
+def _unchecked(atoms, done):
+    """The workflows set to done whose atom did not pass its checks (verify_failed, or still open)."""
+    return sorted({a["workflow"] for a in atoms if a.get("workflow") in done and a.get("status") in ("verify_failed", "open")},
+                  key=_num)
+
+
+def _status(atoms, ended, has_files=True, done=()):
     """A work box's status from its atoms (atom closed = filed; open = running now, or left open once the run ended;
-    verify_failed = fault; abandoned = not made)."""
-    st = [a.get("status") for a in atoms]
+    verify_failed = fault; abandoned = not made). An atom of a workflow set to done that did not pass its checks is never
+    filed and checked: the box is done_unchecked (done · checks did not pass) unless something else is worse."""
+    bad = set(_unchecked(atoms, done))
+    st = [a.get("status") for a in atoms if a.get("workflow") not in bad]
     if not st:
-        return "filed" if has_files else "not_made"      # a file with no atoms recorded: it exists, nothing contradicts it
-    if "verify_failed" in st:
-        return "fault"
-    if all(s == "closed" for s in st):
-        return "filed"
-    if all(s == "abandoned" for s in st):
-        return "not_made"
-    return "left_open" if ended else "running"
+        s = "filed" if has_files or bad else "not_made"      # a file with no atoms recorded: it exists, nothing contradicts it
+    elif "verify_failed" in st:
+        s = "fault"
+    elif all(x == "closed" for x in st):
+        s = "filed"
+    elif all(x == "abandoned" for x in st):
+        s = "not_made"
+    else:
+        s = "left_open" if ended else "running"
+    return "done_unchecked" if bad and s == "filed" else s
 
 
 def _checks(atoms):
@@ -244,6 +256,71 @@ def build(d, live=None):
                           "detail": "; ".join(a.get("notes") or "" for a in sends).strip() or "one deed", "file": "receipts.jsonl",
                           "workflows": [wid], "template": "send", "_atoms": sends, "_order": _num(wid)})
             nr.append(f"version of {sends[0].get('name') or 'send'}")
+    # every workflow in workflows.json sits on one deliverable: a decide workflow (realization) on its own spec, the rest by
+    # their stage's deliverable, then by their section, then by their output refs (the rows above). One it can't place is
+    # listed by id under not recorded, never dropped.
+    wfs = [w for w in ((snap.get("workflows") if live else _read(d, "workflows.json", [])) or []) if isinstance(w, dict) and w.get("id")]
+    wfs.sort(key=lambda w: _num(w["id"]))
+    done = {w["id"] for w in wfs if w.get("status") == "done"}
+    roles = {x["id"]: x for x in R.load_stages()}
+    plan = {w.get("name"): w for w in ((((_read(d, "realization.json") or {}).get("plan") or {}).get("workflows")) or [])
+            if isinstance(w, dict)}
+    rowed = [n for n in nodes if n.get("template") not in (None, "send")]
+    refs = {wid: n["id"] for n in rowed for wid in n["workflows"]}
+    sends = {wid for n in nodes if n.get("template") == "send" for wid in n["workflows"]}
+    secs, staged = {}, set()      # section id -> deliverable: stage-<doc>.json for an earlier document, sections.json for the current one
+    for f in sorted(os.listdir(d)):
+        m = re.fullmatch(r"stage-(\w+)\.json", f)
+        if m and f"work:{m.group(1)}" in {n["id"] for n in rowed}:
+            staged.add(f"work:{m.group(1)}")
+            secs.update({k: f"work:{m.group(1)}" for k in ((_read(d, f, {}) or {}).get("sections") or {})})
+    current = [n for n in rowed if n["id"] not in staged]
+    if len(current) == 1:
+        for k in _read(d, "sections.json", {}) or {}:
+            secs.setdefault(k, current[0]["id"])
+    mates = {}
+    for w in wfs:
+        if w.get("stage") and w["id"] in refs:
+            mates.setdefault(w["stage"], []).append(refs[w["id"]])
+    by_stage = {k: max(set(v), key=v.count) for k, v in mates.items()}
+    holder, unplaced = {}, []
+    for w in wfs:
+        wid, sec, stage = w["id"], w.get("section"), w.get("stage")
+        if wid in sends:
+            continue
+        p = plan.get(w.get("proposal_id")) or plan.get(w.get("name"))
+        decide = stage in roles and (R.kind(p) == "decide" if p else str(w.get("artifact") or "").startswith("artifacts/"))
+        at = holder.get(sec) if sec and sec != wid else None
+        if not at and decide:
+            at = f"work:{wid}"
+            nodes.append({"id": at, "kind": "work", "row": "work", "label": roles[stage]["output"], "tag": "Spec", "color": "--other",
+                          "status": "not_made", "version": None, "detail": "", "file": w.get("artifact"), "workflows": [],
+                          "template": "decide", "_atoms": [], "_order": _num(wid), "_team": roles[stage]["role"]})
+        at = at or by_stage.get(stage) or secs.get(sec) or refs.get(wid)
+        if at:
+            holder[wid] = at
+        else:
+            unplaced.append(wid)
+    if unplaced:
+        nr.append(f"workflows not placed on the map: {', '.join(unplaced)}")
+    for n in nodes:
+        if n.get("template") in (None, "send"):
+            continue
+        n["workflows"] = [w["id"] for w in wfs if holder.get(w["id"]) == n["id"]]
+        n["_atoms"] = [a for wid in n["workflows"] for a in by_wf.get(wid, [])]
+        n["status"] = _status(n["_atoms"], ended, has_files=n["template"] != "decide" or os.path.isfile(os.path.join(d, n["file"] or "")), done=done)
+        n["detail"] = f"{len(n['_atoms'])} work atoms" if n["_atoms"] else "no work atoms recorded"
+        n["_order"] = min((_num(x) for x in n["workflows"]), default=n["_order"])
+        st = {w.get("stage") for w in wfs if w["id"] in n["workflows"]}
+        if len(st) == 1 and next(iter(st)) in roles:
+            n["_team"] = roles[next(iter(st))]["role"]
+    # the style guide (style.json): a small deliverable made by the workflow with style_guide true, beside the one it belongs to
+    sg = next((w for w in wfs if w.get("style_guide") and holder.get(w["id"])), None)
+    if sg and os.path.isfile(os.path.join(d, "style.json")):
+        par = next(n for n in nodes if n["id"] == holder[sg["id"]])
+        nodes.append({"id": "work:style", "kind": "work", "row": "work", "label": "Style guide", "tag": "Style", "color": "--other",
+                      "status": "filed", "version": None, "detail": f"made by {sg['id']}", "file": "style.json", "workflows": [sg["id"]],
+                      "template": "style", "_atoms": [], "_order": par["_order"] + 0.5, "_parent": par["id"], "_team": par.get("_team")})
     # planned but not built yet: a live run's stage list (or a saved run's) names what is still to come
     stages = list((live or {}).get("stages") or ((_read(d, "summary.json") or {}).get("design_documents") or {}).get("stages") or [])
     have = {n["id"] for n in nodes}
@@ -265,7 +342,7 @@ def build(d, live=None):
     # trunk, in order. A deed (a send) is a side job: its step starts at the document it was built from (its recorded edge, else the
     # last trunk box before it), so it never sits between two documents and the site's step takes the last document as its input.
     edges, work = [], [n for n in nodes if n["kind"] == "work"]
-    trunk = [n for n in work if n.get("template") != "send"]
+    trunk = [n for n in work if n.get("template") not in ("send", "style")]
     made_by = {a["id"]: n["id"] for n in work for a in n.get("_atoms") or []}
     pairs = list(zip(trunk, trunk[1:]))
     for n in work:
@@ -274,7 +351,7 @@ def build(d, live=None):
             continue
         src = next((made_by.get(e.get("atom")) for a in n.get("_atoms") or [] for e in a.get("depends_on") or []
                     if made_by.get(e.get("atom")) in {t["id"] for t in trunk}), None)
-        parent = next((t for t in trunk if t["id"] == src), None) or next((t for t in reversed(trunk) if t["_order"] <= n["_order"]), None) \
+        parent = next((t for t in trunk if t["id"] in (n.get("_parent"), src)), None) or next((t for t in reversed(trunk) if t["_order"] <= n["_order"]), None) \
             or (trunk[-1] if trunk else None)
         if parent:
             pairs.append((parent, n))
@@ -283,17 +360,33 @@ def build(d, live=None):
         ats = b.get("_atoms") or []
         ch = _checks(ats)
         wf = len(b["workflows"])
-        detail = (f"{wf} workflow{'s' if wf != 1 else ''} · {ch['passed']} of {ch['run']} checks passed" if wf else "not recorded")
+        bad = _unchecked(ats, done)
+        detail = (f"{wf} workflow{'s' if wf != 1 else ''} · {ch['passed']} of {ch['run']} checks passed" if wf else "not recorded") \
+            + (f" · {len(bad)} done, checks did not pass ({', '.join(bad)})" if bad else "")
+        if b.get("template") == "style":
+            detail = b["detail"]
         sid = f"step:{a['id'].split(':')[1]}>{b['id'].split(':')[1]}"
         steps.append({"id": sid, "kind": "engine", "row": "work", "label": STEP_VERB.get(b.get("template"), "Make"), "status": b["status"],
-                      "version": None, "detail": detail, "file": None, "workflows": b["workflows"], "tag": None, "color": None, "lane": b["lane"]})
+                      "version": None, "detail": detail, "file": None, "workflows": b["workflows"], "tag": None, "color": None, "lane": b["lane"],
+                      "team": b.get("_team"), "unchecked": bad})
         edges += [{"from": a["id"], "to": sid, "kind": "step", "label": None, "n": wf, "basis": "recorded" if wf else "declared"},
                   {"from": sid, "to": b["id"], "kind": "step", "label": None, "n": wf, "basis": "recorded" if wf else "declared"}]
         if not wf:
             nr.append(f"workflows of {b['label']}")
-    # hand-offs: recorded atom edges between boxes, then declared dependencies (types.json) not already seen, then the charter
+    # hand-offs: a spec given to every deliverable whose workflows read it (workflows.json dependencies, the plan's inputs_from),
+    # then recorded atom edges between boxes, then declared dependencies (types.json) not already seen, then the charter
     owner = {a["id"]: n["id"] for n in work for a in n.get("_atoms") or []}
-    seen = set()
+    seen, named, readers = set(), {}, {}
+    for w in wfs:
+        named.update({k: w["id"] for k in (w.get("proposal_id"), w.get("name")) if k})
+    for w in wfs:
+        for dep in w.get("dependencies") or []:
+            src, dst = holder.get(named.get(dep)), holder.get(w["id"])
+            if src and dst and src != dst and src.startswith("work:W-"):
+                readers.setdefault((src, dst), []).append(w["id"])
+    for (src, dst), ids in readers.items():
+        seen.add((src, dst))
+        handoffs.append({"from": src, "to": dst, "kind": "handoff", "label": f"given to {', '.join(ids)}", "n": len(ids), "basis": "recorded"})
     for n in work:
         for a in n.get("_atoms") or []:
             for e in a.get("depends_on") or []:
@@ -366,9 +459,8 @@ def build(d, live=None):
                 order += [st, b]
     out_nodes = [person] + funcs + order
     for n in out_nodes:
-        n.pop("_atoms", None)
-        n.pop("_order", None)
-        n.pop("template", None)
+        for k in ("_atoms", "_order", "template", "_team", "_parent"):
+            n.pop(k, None)
     ch = _checks(atoms)
     return {"schema": SCHEMA, "run": os.path.basename(d), "live": bool(live),
             "status": {"state": state, "state_status": state_status, "checks": ch},
