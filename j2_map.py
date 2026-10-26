@@ -164,7 +164,7 @@ def _work_lines(d, work, calls, docs, nr):
             audits[m.group(1)] = len((_read(d, f, {}) or {}).get("audits") or [])
     site = next((n for n in work if n["id"] == "work:website" and n.get("file")), None)
     if site and "website" not in audits and isinstance(_read(d, "audits.json"), list):      # a plain site run has no stage file: its audits are audits.json
-        audits["website"] = len(_read(d, "audits.json"))
+        audits["website"] = len([a for a in _read(d, "audits.json") if (a or {}).get("kind") != "recheck"])
     out = []
     for n in work:
         if n["kind"] != "work" or n["status"] == "not_made":
@@ -205,6 +205,14 @@ def _speaks(chat, have):
     return edges
 
 
+def _board_note(row):
+    """What the message board (board/1) did to this deliverable, for the node's own line: the ids that changed it and
+    the ids it was re-checked after (artifacts.json, recorded data only)."""
+    r = row or {}
+    return ((f"; changed by {', '.join(r['changed_by'])}" if r.get("changed_by") else "")
+            + (f"; re-checked after {', '.join(r['rechecked_after'])}" if r.get("rechecked_after") else ""))
+
+
 def build(d, live=None):
     if not d or not os.path.isdir(d):
         return empty("run not found")
@@ -218,6 +226,7 @@ def build(d, live=None):
     built_from.append("artifacts.json" if saved else "folder scan (types.json)")
     if not saved and not live:
         nr.append("artifacts.json (rows rebuilt from the folder)")
+    marks = {f"work:{r['type']}": r for r in rows}      # message board (board/1): what it changed and re-checked
     atoms = list(snap.get("atoms_v1", {}).values()) if live else None
     if atoms is None:
         atoms = A._atoms(d)
@@ -309,7 +318,7 @@ def build(d, live=None):
         n["workflows"] = [w["id"] for w in wfs if holder.get(w["id"]) == n["id"]]
         n["_atoms"] = [a for wid in n["workflows"] for a in by_wf.get(wid, [])]
         n["status"] = _status(n["_atoms"], ended, has_files=n["template"] != "decide" or os.path.isfile(os.path.join(d, n["file"] or "")), done=done)
-        n["detail"] = f"{len(n['_atoms'])} work atoms" if n["_atoms"] else "no work atoms recorded"
+        n["detail"] = (f"{len(n['_atoms'])} work atoms" if n["_atoms"] else "no work atoms recorded") + _board_note(marks.get(n["id"]))
         n["_order"] = min((_num(x) for x in n["workflows"]), default=n["_order"])
         st = {w.get("stage") for w in wfs if w["id"] in n["workflows"]}
         if len(st) == 1 and next(iter(st)) in roles:

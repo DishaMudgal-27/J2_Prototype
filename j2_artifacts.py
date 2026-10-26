@@ -67,12 +67,31 @@ def _atoms(d):
     return rows
 
 
+def _board(d, atoms):
+    """What the message board (board/1) changed and re-checked, per deliverable type: {type: {"changed_by": [Q-n],
+    "rechecked_after": [Q-n]}}, from board.json only. Empty when the run has no board."""
+    entries = (_read(d, "board.json", {}) or {}).get("entries") or []
+    wf_of = {v["id"]: v.get("workflow") for v in atoms}
+    out = {}
+    for e in entries:
+        up = e.get("artifact_update") or {}
+        if up.get("doc"):
+            out.setdefault(up["doc"], {}).setdefault("changed_by", []).append(e["id"])
+        for x in e.get("impact") or []:
+            wid = wf_of.get(x.get("atom"))
+            if wid:
+                out.setdefault(("_wf", wid), {}).setdefault("rechecked_after", []).append(e["id"])
+    return out
+
+
 def rows(d, types=None):
-    """[{name, type, kind, form, file, deliverable, workflows, depends_on, version, sha256, time}] for a run folder."""
+    """[{name, type, kind, form, file, deliverable, workflows, depends_on, version, sha256, time}] for a run folder,
+    plus changed_by and rechecked_after when the message board changed or re-checked it."""
     types = types or load_types()
     if not d or not os.path.isdir(d):
         return []
     atoms, docs, out = _atoms(d), _read(d, "documents.json", {}) or {}, []
+    board = _board(d, atoms)
     for t in types["types"]:
         files = [os.path.relpath(p, d) for p in sorted(glob.glob(os.path.join(d, t["file"])), key=_num)] \
             if "*" in t["file"] else [t["file"]] if os.path.isfile(os.path.join(d, t["file"])) else []
@@ -81,6 +100,8 @@ def rows(d, types=None):
             rx = re.compile(t["workflow"]["refs"])
             wf = sorted({v["workflow"] for v in atoms for o in v.get("output") or []
                          if o.get("verb") == "make" and rx.search(str(o.get("ref") or ""))}, key=_num)
+        changed = sorted(set((board.get(t["name"]) or {}).get("changed_by") or []), key=_num)
+        rechecked = sorted({q for w in wf for q in (board.get(("_wf", w)) or {}).get("rechecked_after") or []}, key=_num)
         for rel in files:
             sha, when = _stat(d, rel)
             out.append({"name": t["label"] if len(files) == 1 or t["kind"] == "type" else
@@ -88,6 +109,8 @@ def rows(d, types=None):
                         "type": t["name"], "kind": t["kind"], "form": t["form"], "file": rel, "deliverable": t["deliverable"],
                         "workflows": wf, "depends_on": list(t["depends_on"]) if "depends_on" in t else [],
                         "version": _version(d, t, len(docs) <= 1) if t["kind"] == "type" else None,
+                        **({"changed_by": changed} if changed else {}),
+                        **({"rechecked_after": rechecked} if rechecked else {}),
                         "sha256": sha, "time": when})
     built = {r["type"] for r in out}
     for r in out:      # what it depends on in this run: only the types that were built

@@ -57,7 +57,10 @@ def atom_view(atom, wf=None, edges=None, ended=False):
             "goal": a.get("goal"), "how": a.get("how"), "constraints": a.get("constraints") or [],
             "context": a.get("context") or [], "defined_output": a.get("expected_output") or [],
             "verification": ver, "output": out, "depends_on": [dict(e) for e in edges or []], "used_by": [],
-            "notes": (a.get("human_output") or {}).get("text") or "", "details": details}
+            "notes": (a.get("human_output") or {}).get("text") or "", "details": details,
+            # board/1: a board answer changed something this atom was built from (stale until its checks ran again)
+            **({"stale": a["board_stale"]} if a.get("board_stale") else {}),
+            **({"rechecked": a["board_rechecked"]} if a.get("board_rechecked") else {})}
 
 
 def atom_kind(view):

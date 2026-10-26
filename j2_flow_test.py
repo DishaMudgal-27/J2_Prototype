@@ -4657,6 +4657,224 @@ def board_tab_render(run, entries, timings):
           "card names the function that asked ok")
 
 
+            # the demo brief of the message board's document changes: runs/j2-20261026-114456's first message
+YOGA_BRIEF = (
+    "Create the design documents (PRD, HLD and LLD) and then build the website for Still Point Yoga, a small yoga "
+    "studio at 4th Floor, 22 Church Street, Bengaluru 560001.\n\nThe page shows the name Still Point Yoga and the "
+    "address as text, with no embedded map.\n\nThe weekly class list has five classes, each with day, time and price "
+    "in rupees:\nMonday 7:00 am Gentle Flow 500\nTuesday 6:30 pm Strength Yoga 600\nThursday 7:00 am Breath and "
+    "Stretch 450\nSaturday 9:00 am Beginners Basics 400\nSunday 8:00 am Slow Sunday 500\n\nThe page has a class "
+    "booking form with the fields name, email, class and preferred date. The form sends the booking to "
+    "bookings@stillpoint.example. Payment is made at the studio. No online payment is taken.\n\nThe teachers' names "
+    "are not decided yet, and the studio has no phone number. Do not show teacher names or a phone number, and do "
+    "not make any other detail up.\n\nThe page must work on phones. The documents and the website must agree with "
+    "each other.")
+
+
+def doc_board_run(force="lld", patch=None, budget=1400, demo=False):
+    """The document-change demo run: Still Point Yoga, the PRD, HLD and LLD, then the website, with
+    J2_FORCE_QUESTION=<force> so one builder asks the document it was built from."""
+    os.environ["J2_FORCE_QUESTION"] = force
+    try:
+        run = docs_run(YOGA_BRIEF, budget, patch=patch)
+        finish(run)
+    finally:
+        os.environ.pop("J2_FORCE_QUESTION", None)
+    if demo:
+        print(f"board doc demo run: {os.path.basename(run.dir)} ({run.outcome})")
+    return run
+
+
+def board_doc_change():
+    """Message board, part C (a): the LLD's Interactive elements builder asks the HLD's Components atom how the
+    booking is sent; the HLD owner answers from the brief's address and corrects its own section. Code applies it
+    (only the owner may), bumps the HLD's version, re-runs H1-H6 on the new text, re-checks every atom the recorded
+    edges reach (a receipt with "trigger": "Q-1" for each), and the run still ends Done."""
+    run = doc_board_run()
+    assert run.outcome.startswith("Done"), run.outcome
+    assert [e["id"] for e in run.board["entries"]] == ["Q-1"], run.board["entries"]
+    e = run.board["entries"][0]
+    assert e["asked_by"] == "W-14" and e["to"] == "W-9.a1" and e["status"] == "answered", e
+    assert "mailto" in e["answer"] and "bookings@stillpoint.example" in e["answer"], e
+    up = e["artifact_update"]
+    assert up == {"doc": "hld", "section": "Components", "from_version": up["from_version"],
+                  "to_version": up["from_version"] + 1}, up
+    # the document itself: the new text, the version note, the export and the records that read it
+    hld = open(os.path.join(run.dir, "hld.md"), encoding="utf-8").read()
+    comps = j2.md_section(hld, "Components")
+    assert "mailto to bookings@stillpoint.example" in comps, comps[-300:]
+    assert f"Version {up['to_version']}: Q-1," in comps, comps[-300:]
+    assert os.path.isfile(os.path.join(run.dir, "hld.docx"))
+    assert os.path.isfile(os.path.join(run.dir, "site", f"hld-v{up['to_version']}.md"))
+    assert "mailto" in json.dumps(run.docs["hld"]["agent_output"]), "documents.json carries the new components"
+    conds = json.load(open(os.path.join(run.dir, "conditions-hld.json"), encoding="utf-8"))
+    assert [c["id"] for c in conds] == ["H1", "H2", "H3", "H4", "H5", "H6"] and all(c["met"] for c in conds), conds
+    # the impact: recorded edges only, each with its own re-check receipt
+    impact = {x["atom"]: x["result"] for x in e["impact"]}
+    assert impact and all(r == "passed" for r in impact.values()), e["impact"]
+    assert "W-13.a1" in impact, "the LLD atoms that used HLD Components are re-checked"
+    assert any(a.startswith(("W-19", "W-20", "W-21", "W-22", "W-23")) for a in impact), "the website atoms too"
+    recs = [json.loads(ln) for ln in open(os.path.join(run.dir, "receipts.jsonl"), encoding="utf-8")]
+    triggered = {r["atom"] for r in recs if r.get("trigger") == "Q-1"}
+    assert set(impact) | {"W-9.a1"} <= triggered, (sorted(triggered), sorted(impact))
+    rechecks = [a for a in json.load(open(os.path.join(run.dir, "audits.json"), encoding="utf-8"))
+                if a.get("kind") == "recheck"]
+    assert len(rechecks) == 1 and rechecks[0]["trigger"] == "Q-1" and rechecks[0]["doc"] == "hld" \
+        and rechecks[0]["version"] == up["to_version"] and rechecks[0]["results"], rechecks
+    assert all(r["pass"] for r in rechecks[0]["results"]), rechecks[0]
+    atoms = {a["id"]: a for a in json.load(open(os.path.join(run.dir, "atoms.json"), encoding="utf-8"))["atoms"]}
+    assert atoms["W-9.a1"]["rechecked"] == "Q-1" and "Updated by Q-1" in atoms["W-9.a1"]["notes"], atoms["W-9.a1"]
+    assert all(atoms[a]["rechecked"] == "Q-1" for a in impact), [a for a in impact if not atoms[a].get("rechecked")]
+    assert not any(a.get("stale") for a in atoms.values()), "a re-checked atom is not stale"
+    rows = {r["type"]: r for r in json.load(open(os.path.join(run.dir, "artifacts.json"), encoding="utf-8"))["rows"]
+            if r["kind"] == "type"}
+    assert rows["hld"]["changed_by"] == ["Q-1"] and rows["hld"]["version"] == up["to_version"], rows["hld"]
+    assert rows["lld"]["rechecked_after"] == ["Q-1"] and rows["website"]["rechecked_after"] == ["Q-1"], rows
+    m = json.load(open(os.path.join(run.dir, "map.json"), encoding="utf-8"))
+    assert {"from": "work:lld", "to": "work:hld", "kind": "asks", "label": "Q-1", "n": None,
+            "basis": "recorded"} in m["edges"], [x for x in m["edges"] if x["kind"] == "asks"]
+    hld_node = next(n for n in m["nodes"] if n["id"] == "work:hld")
+    assert hld_node["version"] == up["to_version"] and "re-checked after Q-1" in hld_node["detail"], hld_node
+    line = next((x for x in run.chat if x["who"] == "system" and f"HLD v{up['from_version']} -> "
+                 f"v{up['to_version']} (Q-1)" in x["text"]), None)
+    assert line and "Re-checked:" in line["text"] and "sent to Adaptation" in line["text"], line
+    assert any(m["who"] == "W-14" and "Q-1:" in m["text"] for m in run.chat), "the ask is in the chat"
+    assert any(m["who"] == "W-9" and "(changed the HLD)" in m["text"] for m in run.chat), "the answer is in the chat"
+    import shutil
+    if shutil.which("node"):
+        snap = j2.saved_snapshot(os.path.basename(run.dir), 0)
+        out = render_node(snap, docs={"docs": {"hld": {"text": hld, "asked": True, "workflows": ["W-9"]}}})
+        assert f"Version {up['to_version']}: Q-1," in out["docs"], "the Documents tab shows the version note"
+        for bad in ("Q-1", "re-check", "HLD v", "board"):
+            assert bad not in out["simple"], (bad, "the Simple view is unchanged by a board change")
+    print("board doc change: the LLD builder asks, the HLD owner corrects its own section, the HLD is re-exported at "
+          f"v{up['to_version']} with its version note, H1-H6 pass again, every atom the recorded edges reach is "
+          "re-checked with a Q-1 receipt, the records and the map carry it, and the run ends Done ok")
+
+
+def board_doc_not_owner():
+    """Message board, part C (b): a change to a section the answering atom doesn't own is refused with the reason,
+    and the document is untouched."""
+    run = doc_board_run()
+    before = open(os.path.join(run.dir, "hld.md"), encoding="utf-8").read()
+    run.call = lambda fn, fmt, task, mock, **k: {
+        "answer": "The components are in the HLD.",
+        "artifact_update": {"doc": "hld", "section": "Components", "text": "- **C1** anything.", "reason": "mine now"}}
+    e = run._ask_board("audit", {"to": "W-12.a1", "about": "the components", "text": "Who owns the component list?"},
+                       1, role="function")
+    assert e["status"] == "refused" and e["artifact_update"] is None, e
+    with open(os.path.join(run.dir, "board.jsonl"), encoding="utf-8") as f:
+        assert json.loads(f.readlines()[-1])["reason"] == "W-12.a1 doesn't own the HLD's Components section"
+    assert open(os.path.join(run.dir, "hld.md"), encoding="utf-8").read() == before, "the HLD is untouched"
+    print("board doc not owner: a change to a section the answerer doesn't own is refused and nothing is written ok")
+
+
+def board_doc_prd():
+    """Message board, part C (c): the HLD's Components builder asks the PRD's Requirements atom which requirement
+    covers the booking form. A PRD change is never applied from the board: the entry records that it went to
+    Identity, the PRD file is unchanged, and Identity gets it on the existing path."""
+    run = doc_board_run(force="hld")
+    assert run.outcome.startswith("Done"), run.outcome
+    e = run.board["entries"][0]
+    assert e["asked_by"] == "W-9" and e["to"] == "W-4.a1" and e["status"] == "answered", e
+    assert e["artifact_update"] is None and e["sent_to_identity"]["doc"] == "prd", e
+    assert e["sent_to_identity"]["section"] == "Requirements", e
+    assert not e.get("impact"), "nothing is propagated from a change that was not applied"
+    prd = open(os.path.join(run.dir, "prd.md"), encoding="utf-8").read()
+    assert "Version " not in prd and not os.path.isfile(os.path.join(run.dir, "conditions-prd.json")), "the PRD is unchanged"
+    assert not [a for a in json.load(open(os.path.join(run.dir, "audits.json"), encoding="utf-8"))
+                if a.get("kind") == "recheck"], "no re-check: nothing changed"
+    assert any(m["who"] == "system" and "never applied from the board" in m["text"] for m in run.chat), "the chat says so"
+    calls = [json.loads(ln) for ln in open(os.path.join(run.dir, "calls.jsonl"), encoding="utf-8")]
+    asked = [c for c in calls if c["fn"] == "identity" and "Q-1: the PRD's Requirements section needs changing" in c["prompt"]]
+    assert len(asked) == 1, "Identity got the change request on the existing path, once"
+    assert any(m["who"] == "identity" and m["text"].startswith("@W-4 Builder") for m in run.chat), \
+        "and answered the atom that asked for the change"
+    print("board doc prd: a PRD change from the board is not applied; it goes to Identity as a change request and the "
+          "PRD file stays as it was ok")
+
+
+def board_doc_no_edge():
+    """Message board, part C (d): a change to a section no recorded edge leads away from propagates to nothing: the
+    entry's impact is [] and no other atom is re-checked or marked."""
+    run = doc_board_run()
+    v0 = run._doc_version("lld")
+    rules = j2.md_section(open(os.path.join(run.dir, "lld.md"), encoding="utf-8").read(),
+                          "Responsive and accessibility rules")
+    run.call = lambda fn, fmt, task, mock, **k: {
+        "answer": "Every field has a visible label, as recorded.",
+        "artifact_update": {"doc": "lld", "section": "Responsive and accessibility rules",
+                            "text": rules.strip() + "\n- Every control keeps its visible label.",
+                            "reason": "the label rule was not explicit"}}
+    before = {a["id"]: dict(a) for w in run._all_wfs() for a in w.get("atoms") or [] if a["id"] != "W-17.a1"}
+    e = run._ask_board("audit", {"to": "W-17.a1", "about": "the label rule", "text": "Where is the label rule kept?"},
+                       1, role="function")
+    assert e["status"] == "answered" and e["artifact_update"]["to_version"] == v0 + 1, e
+    assert e["impact"] == [], e["impact"]
+    assert all(before[a["id"]] == a for w in run._all_wfs() for a in w.get("atoms") or []
+               if a["id"] in before), "no other atom is touched"
+    print("board doc no edge: a change the recorded edges lead away from nowhere propagates to nothing (impact []) ok")
+
+
+def board_doc_recheck_fails():
+    """Message board, part C (e): the owner's own checks fail after its change, so code hands the atom to Adaptation
+    on the existing atom_failed path (a revise priced as a fix) instead of leaving a stale document behind."""
+    def patch(run, orig):
+        def call(fn, fmt, task, mock, **k):
+            if "ASKS YOU" in task and k.get("answer_only"):
+                return {"answer": "mailto, no server.",
+                        "artifact_update": {"doc": "hld", "section": "Components", "text": "To be decided.",
+                                            "reason": "the component list is not settled"}}
+            return orig(fn, fmt, task, mock, **k)
+        return call
+    run = doc_board_run(patch=patch)
+    e = run.board["entries"][0]
+    assert e["status"] == "answered" and e["artifact_update"]["doc"] == "hld", e
+    rechecks = [a for a in json.load(open(os.path.join(run.dir, "audits.json"), encoding="utf-8"))
+                if a.get("kind") == "recheck"]
+    assert rechecks and any(r["pass"] is False and r["atom"] == "W-9.a1" for r in rechecks[0]["results"]), rechecks
+    assert any(m["who"] == "system" and "failed after the board change Q-1" in m["text"] for m in run.chat), \
+        [m["text"] for m in run.chat if m["who"] == "system"][-3:]
+    assert any(m.get("act") in ("CHECK_WRONG", "BUILD_WRONG") and m["who"] == "adaptation" for m in run.chat), \
+        "Adaptation read the receipts and decided"
+    atoms = {a["id"]: a for a in json.load(open(os.path.join(run.dir, "atoms.json"), encoding="utf-8"))["atoms"]}
+    assert atoms["W-9.a1"].get("stale") == "Q-1" or atoms["W-9.a1"].get("rechecked") == "Q-1", atoms["W-9.a1"]
+    print("board doc recheck fails: a change that breaks the owner's own checks goes to Adaptation on the existing "
+          "atom_failed path, and the atom stays marked ok")
+
+
+def board_doc_off():
+    """Message board, part C (f): with J2_BOARD unset the same brief and switch run byte for byte the same (every
+    call, the documents and the outcome), and no board or re-check record is written."""
+    os.environ.pop("J2_BOARD", None)
+    plain, switched = doc_board_run(force=""), doc_board_run(force="lld")
+    for run in (plain, switched):
+        assert run.outcome.startswith("Done"), run.outcome
+        assert not run.board["entries"] and not run.doc_changes and not run.rechecks
+        for name in ("board.json", "board.jsonl", "conditions-hld.json"):
+            assert not os.path.isfile(os.path.join(run.dir, name)), name
+        assert not [a for a in json.load(open(os.path.join(run.dir, "audits.json"), encoding="utf-8"))
+                    if a.get("kind") == "recheck"]
+        rows = json.load(open(os.path.join(run.dir, "artifacts.json"), encoding="utf-8"))["rows"]
+        assert not any("changed_by" in r or "rechecked_after" in r for r in rows), rows
+        atoms = json.load(open(os.path.join(run.dir, "atoms.json"), encoding="utf-8"))["atoms"]
+        assert not any("stale" in a or "rechecked" in a for a in atoms)
+
+    def fingerprint(run):
+        calls = [json.loads(ln) for ln in open(os.path.join(run.dir, "calls.jsonl"), encoding="utf-8")]
+        h = lambda t: hashlib.sha256(re.sub(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d", "T", t).encode()).hexdigest()[:12]
+        return ([[c["fn"], h(c["system"]), h(c["prompt"])] for c in calls], run.outcome,
+                [h(open(os.path.join(run.dir, f"{k}.md"), encoding="utf-8").read()) for k in ("prd", "hld", "lld")])
+    a, b = fingerprint(plain), fingerprint(switched)
+    assert a[1:] == b[1:] and a[0] == b[0], f"{len(a[0])} vs {len(b[0])} calls; first difference: " + str(
+        next((i for i, (x, y) in enumerate(zip(a[0], b[0])) if x != y), None))
+    for c in (json.loads(ln) for ln in open(os.path.join(switched.dir, "calls.jsonl"), encoding="utf-8")):
+        for bad in ("BOARD (", "board_question", "board_used", "artifact_update"):
+            assert bad not in c["system"] + c["prompt"], (c["id"], c["fn"], bad)
+    print(f"board doc off: with J2_BOARD unset the switch changes nothing: {len(a[0])} calls, the three documents and "
+          "the outcome are identical, and no board or re-check record is written ok")
+
+
 def board_functions_off():
     """Message board, Part B: the same brief and change request with J2_BOARD unset write no board file, ask
     nothing, and no prompt carries the board fields or the BOARD block (the flag gates all of it; plain_unchanged
@@ -6499,6 +6717,17 @@ def docs_intake_and_compare():
 
 
 if __name__ == "__main__":
+    if "--board-doc-demo" in sys.argv:
+        # python3 j2_flow_test.py --fast --board-doc-demo: the document-change demo (board_doc_change's own run),
+        # saved to runs/ as evidence instead of the temp folder. Mock mode, the browser measurement stubbed.
+        os.environ["J2_BOARD"] = "1"
+        j2.RUNS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "runs")
+        demo = doc_board_run(demo=True)
+        e = (demo.board["entries"] or [{}])[0]
+        print(f"Board: {e.get('id')} {e.get('asked_by')} -> {e.get('to')} ({e.get('status')}); "
+              f"{json.dumps(e.get('artifact_update'))}; impact {len(e.get('impact') or [])} atom(s)")
+        print(f"http://127.0.0.1:8773/?run={os.path.basename(demo.dir)}&view=detail")
+        sys.exit(0)
     if "--board-demo" in sys.argv:
         # python3 j2_flow_test.py --fast --board-demo: the message board demo (board_functions' own run), saved to
         # runs/ as evidence instead of the temp folder. Mock mode, the browser measurement stubbed as --fast does.
@@ -6552,7 +6781,15 @@ if __name__ == "__main__":
         board_story()
         board_functions()
         board_not_mine()
+        if mode == "0":      # the board's document changes don't branch on J2_FIXES: four stages, run once
+            board_doc_change()
+            board_doc_not_owner()
+            board_doc_prd()
+            board_doc_no_edge()
+            board_doc_recheck_fails()
         os.environ.pop("J2_BOARD", None)
+        if mode == "0":
+            board_doc_off()
         atom_schema()
         docs_blueprint()
         docs_views()

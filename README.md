@@ -375,10 +375,28 @@ workflow, including a done one from an earlier cycle, or another function.
   (`{workflow, version}` or `{function}`). The **Board** tab under Internals lists the entries, and atom cards
   show "Asked / Answered / Used Q-n". With the flag unset, no board files are written and the flow is unchanged.
 
+**Doc changes from the board.** In a design-document run an answer may correct the document itself:
+`artifact_update` names `{doc, section, text, reason}`.
+- Only the atom that **owns** that section (`documents.json`) may change it; anything else is refused with the
+  reason. A **PRD** change is never applied from the board: it goes to Identity as a change request on the
+  existing path, and the entry records that.
+- Code replaces that section of `<kind>.md`, appends "Version n: Q-k, <reason>.", writes the new version file and
+  the `.docx` again, and refreshes what reads it (the chain, the charter, the LLD blueprint).
+- It then re-runs that document's conditions (P1-P8 / H1-H6 / L1-L6) and the owner's checks, with no AI call:
+  receipts carry `"trigger": "Q-k"` and `audits.json` gets a `{"kind": "recheck"}` entry.
+- The change **propagates by recorded edges only** (`used_by`, transitively: HLD → LLD → website). Each atom it
+  reaches is re-checked and marked `rechecked`; one that fails goes to Adaptation as a revise priced as a fix. No
+  recorded edge means `impact: []` and nothing propagates.
+- Records: `from_version`/`to_version` and `impact` on the entry, `changed_by`/`rechecked_after` on the artifact
+  rows, `stale`/`rechecked` and "Updated by Q-k" on the atoms, an `asks` line between the two deliverables on the
+  Map with the version bump and "re-checked after Q-k", and one chat line: "HLD v6 -> v7 (Q-1). Re-checked: 4
+  passed, 0 sent to Adaptation." The Simple view is unchanged.
+
 `J2_FORCE_QUESTION=<comma list>` (mock mode only) is a test switch like `J2_FORCE_AUDIT_FAIL`: each named asker
 asks one question, once per run. A name is a function (`identity`, `adaptation`, `priority`, `coordination`,
-`audit`) or a builder (a workflow id, or a role word matched against its name, such as `order`). Agents never see
-the switch; humans see it labelled in the chat.
+`audit`), a builder (a workflow id, or a role word matched against its name, such as `order`), or a document
+(`hld`, `lld`: that document's builder asks the document it was built from). Agents never see the switch; humans
+see it labelled in the chat.
 
 **Demo** (offline, mock mode, saved to `runs/`):
 
@@ -393,6 +411,11 @@ workflow's section priced as a fix, Priority asks Adaptation whether the change 
 builder reuses the answer, and Audit asks the products workflow which attribute holds the price, then reads its own
 entry back on the next audit. (The new checklist item is then paid for by its own small workflow: cost follows the
 work.) The same run with `J2_BOARD` unset writes no board file and asks nothing.
+
+The document demo is the same command with `--board-doc-demo`: it writes the PRD, HLD and LLD for Still Point Yoga
+and then the website, and the LLD's Interactive elements builder asks the HLD's Components atom how the booking is
+sent. The HLD owner answers from the address in the brief and corrects its own section, so the HLD gains a version,
+H1-H6 pass again, and every atom the recorded edges reach is re-checked.
 
 ### Sends: test messages and milestone emails (dry run)
 
