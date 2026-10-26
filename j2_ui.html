@@ -1163,18 +1163,30 @@ const BOARD = {schema: "board/1", entries: []};
 const boardFrom = f => !f ? '<span class="empty">not recorded</span>'
   : f.function ? `${esc(fnName(f.function))} (function)`
   : `${esc(f.workflow)}${f.version ? " v" + esc(f.version) : ""}`;
+// What an answer changed: a section of a document (with the versions), or the answerer's own section.
+const boardUpdate = u => !u ? '<span class="empty">no</span>'
+  : u.doc ? `${esc(String(u.doc).toUpperCase())} ${esc(u.section)}${u.from_version ? ` v${esc(u.from_version)} → v${esc(u.to_version)}` : ""}`
+  : "yes";
+// Impact: every atom the change reached by a recorded edge, with what its re-check found; the atoms built after it
+// are listed under them. Recorded data only.
+const BOARDRES = {passed: "passed", failed: "sent to Adaptation"};
+const boardImpact = e => {
+  const rows = (x, late) => `${esc(x.atom)} <span class="empty">${esc(BOARDRES[x.result] || x.result)}${late ? ", built after" : ""}</span>`;
+  const now = (e.impact || []).map(x => rows(x, false)), later = (e.rechecked_later || []).map(x => rows(x, true));
+  return now.length || later.length ? now.concat(later).join("<br>") : '<span class="empty">none</span>';
+};
 function boardRow(e){
   const st = {open: "open", answered: "answered", unanswered: "unanswered", refused: "refused"}[e.status] || e.status;
   const role = e.asked_by_role ? ` <span class="empty">${esc(e.asked_by_role)}</span>` : "";
   return `<tr data-board="${esc(e.id)}"><td>${esc(e.id)}</td><td>${esc(e.asked_by)}${role}</td><td>${esc(e.to)}</td>`
     + `<td>${esc(e.question)}</td><td>${e.answer ? esc(e.answer) : '<span class="empty">not recorded</span>'}</td>`
     + `<td>${esc(st)}</td><td>${boardFrom(e.answered_from)}</td>`
-    + `<td>${e.artifact_update ? "yes" : '<span class="empty">no</span>'}</td>`
+    + `<td>${boardUpdate(e.artifact_update)}</td><td data-impact="${esc(e.id)}">${boardImpact(e)}</td>`
     + `<td>${(e.used_by || []).length ? esc(e.used_by.join(", ")) : '<span class="empty">none</span>'}</td></tr>`;
 }
 const renderBoard = () => !BOARD.entries.length ? '<p class="empty">No questions asked yet.</p>'
   : `<table class="boardtbl"><thead><tr><th>Q-id</th><th>Asked by</th><th>To</th><th>Question</th><th>Answer</th>`
-    + `<th>Status</th><th>Answered from</th><th>Artifact update</th><th>Used by</th></tr></thead>`
+    + `<th>Status</th><th>Answered from</th><th>Artifact update</th><th>Impact</th><th>Used by</th></tr></thead>`
     + `<tbody>${BOARD.entries.map(boardRow).join("")}</tbody></table>`;
 async function loadBoard(){
   try { const r = await fetch(`/api/board?${runQ().slice(1)}`, {cache:"no-store"}); if (r.ok) Object.assign(BOARD, await r.json()); } catch (e) {}

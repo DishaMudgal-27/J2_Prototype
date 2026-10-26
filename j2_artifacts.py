@@ -77,7 +77,9 @@ def _board(d, atoms):
         up = e.get("artifact_update") or {}
         if up.get("doc"):
             out.setdefault(up["doc"], {}).setdefault("changed_by", []).append(e["id"])
-        for x in e.get("impact") or []:
+            # the changed document itself: its own conditions and the owner's checks were re-run
+            out[up["doc"]].setdefault("rechecked_after", []).append(e["id"])
+        for x in (e.get("impact") or []) + (e.get("rechecked_later") or []):
             wid = wf_of.get(x.get("atom"))
             if wid:
                 out.setdefault(("_wf", wid), {}).setdefault("rechecked_after", []).append(e["id"])
@@ -101,7 +103,8 @@ def rows(d, types=None):
             wf = sorted({v["workflow"] for v in atoms for o in v.get("output") or []
                          if o.get("verb") == "make" and rx.search(str(o.get("ref") or ""))}, key=_num)
         changed = sorted(set((board.get(t["name"]) or {}).get("changed_by") or []), key=_num)
-        rechecked = sorted({q for w in wf for q in (board.get(("_wf", w)) or {}).get("rechecked_after") or []}, key=_num)
+        rechecked = sorted({q for w in wf for q in (board.get(("_wf", w)) or {}).get("rechecked_after") or []}
+                           | set((board.get(t["name"]) or {}).get("rechecked_after") or []), key=_num)
         for rel in files:
             sha, when = _stat(d, rel)
             out.append({"name": t["label"] if len(files) == 1 or t["kind"] == "type" else
