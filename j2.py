@@ -2692,6 +2692,7 @@ class J2Run:
         self.board_read = {}         # function -> board ids it has just read: post() tags its next message "[read Q-n]"
         self.rechecks, self.doc_changes = [], []    # board/1 part C: recheck entries (audits.json) and doc changes made
         self.board_failed = []       # atoms a board change left failing: Adaptation takes them after this turn
+        self.board_asks = []         # a PRD change a board answer asked for: Identity takes it after this turn
         self.past_workflows, self.stage_archive, self.site_tag, self.stage_checked = [], [], "", True
         self.blueprint, self.proposed_lld, self.lld_revisions, self.lld_conflicts = None, {}, [], {}   # the LLD as the spec
         self.stage_calls0 = 0         # AI calls before the current stage (a document's call range, for the cost estimate)
@@ -3331,6 +3332,12 @@ class J2Run:
                 self.post("system", f"{', '.join(h['atoms'])} {h['owner_note']}. Adaptation reads the receipts and "
                                     "prices the fix.", warning=True)
                 self._handoff("adaptation", kind="atom_failed", **h)
+            if self.board_asks and self.turn != "identity":
+                # A board answer asked for a PRD change (board/1 part C): Identity decides it as a change request,
+                # on the same path as any question the charter can't answer, and the flow resumes after it.
+                q = self.board_asks.pop(0)
+                self._handoff("identity", kind="question", frm=q["frm"], question=q["question"],
+                              resume={"to": self.turn, "handoff": self.handoff} if self.turn else None)
             if self.relay:
                 # An agent addressed the Requester: Identity takes it first, then the flow resumes where it was going.
                 r, self.relay = self.relay, None
@@ -4803,7 +4810,7 @@ class J2Run:
         if winner == "adaptation" and f:
             f.update({"pass": True, "verdict": "WITHDRAWN", "note": f"{f.get('note', '')} (withdrawn in {c['id']})"})
             audit["all_pass"] = all(x.get("pass") for x in audit["results"] + audit.get("rubric", []))
-            self.save("audits.json", self.audits)
+            self._save_audits()
             self._settle(c, winner, f"Finding {sid} withdrawn.", by)
             if audit["all_pass"]:
                 return self._handoff("identity", kind="audit")
@@ -6893,9 +6900,10 @@ class J2Run:
             # The PRD is the Requester's own charter of requirements: Identity decides, the board never rewrites it.
             entry["artifact_update"] = None
             entry["sent_to_identity"] = {"doc": "prd", "section": section, "reason": why or "not recorded"}
-            self.relay = {"from": target["id"], "text": f"{entry['id']}: the PRD's {section} section needs changing "
-                                                        f"({why or 'no reason recorded'}). The board doesn't change the "
-                                                        "PRD; this is a change request for you."}
+            self.board_asks.append({"frm": target["id"],
+                                    "question": f"{entry['id']}: the PRD's {section} section needs changing "
+                                                f"({why or 'no reason recorded'}). The board doesn't change the PRD, so "
+                                                "this is a change request for you."})
             self.post("system", f"Board {entry['id']}: a PRD change is never applied from the board. It goes to "
                                 f"Identity as a change request ({section}).", warning=True)
             return None
@@ -7041,13 +7049,18 @@ class J2Run:
             f"{c['id']} " + ("met" if c["met"] else f"NOT MET ({c['evidence']})") for c in conds), mechanical=True)
         return conds
 
+    def _save_audits(self):
+        """audits.json: the audits, then the board's re-check entries (board/1 part C). Readers of the file skip
+        "kind": "recheck"; with the board off the file is the audits alone, as before."""
+        self.save("audits.json", self.audits + self.rechecks)
+
     def audits_recheck(self, qid, kind, version, results):
         """Item 3: the recheck's own entry in audits.json. Kept apart from the audits themselves (self.audits), so
         nothing that reads the latest audit sees it; readers of the file skip "kind": "recheck"."""
         self.rechecks.append({"kind": "recheck", "trigger": qid, "doc": kind, "version": version,
                               "t": time.strftime("%Y-%m-%dT%H:%M:%S"),
                               "results": [{k: r.get(k) for k in ("atom", "check", "pass", "evidence")} for r in results]})
-        self.save("audits.json", self.audits + self.rechecks)
+        self._save_audits()
 
     def _board_forward(self, w):
         """Item 4 for an atom built after the change: when its recorded edges reach an atom a board answer changed,
@@ -7242,7 +7255,11 @@ class J2Run:
                 return {"answer": "not recorded", "artifact_update": None}
             add = f"The booking is sent by mailto to {mail}; there is no server endpoint."
             lines = body.splitlines()
-            lines[-1] = lines[-1].rstrip() + " " + add
+            # into the responsibility of the component that holds the form (before its "Covers R..", so the ids and
+            # the chain checks still read as they did)
+            i = next((k for k, ln in enumerate(lines) if re.search(r"\bform\b|\bbook", ln, re.I)), len(lines) - 1)
+            m = re.search(r"\s*\bCovers\b", lines[i])
+            lines[i] = lines[i][:m.start()] + " " + add + lines[i][m.start():] if m else lines[i].rstrip() + " " + add
             return {"answer": f"mailto to {mail}, no server.",
                     "artifact_update": {"doc": kind, "section": section, "text": "\n".join(lines),
                                         "reason": f"the form sends the booking by mailto to {mail}, with no server"}
@@ -7650,7 +7667,7 @@ class J2Run:
         if self.blueprint and not self.doc:
             audit["lld"] = self._lld_compare(site)
         self.audits.append(audit)
-        self.save("audits.json", self.audits)
+        self._save_audits()
         nxt, note = self._pick("audit", r.get("next"), ("identity",), "identity",
                                "Audit files its findings to Identity, who decides J2.h")
         fails = workable(audit)
