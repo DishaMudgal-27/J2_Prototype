@@ -38,7 +38,9 @@ import copy
 from functools import reduce
 import html
 import html.parser
+import itertools
 import json
+import math
 import os
 import re
 import threading
@@ -48,6 +50,7 @@ import j2_artifacts
 import j2_board
 import j2_check
 import j2_map
+import j2_realization
 import j2_schema
 import j2_send
 import llm
@@ -134,7 +137,7 @@ def system_prompt(fn, reply_format, builder="builder.md"):
         path = os.path.join(J2_DIR, name)
         if name.endswith(".md") and os.path.exists(path):
             with open(path, encoding="utf-8") as f:
-                parts.append(f.read().strip())
+                parts.append(j2_realization.PLANNING_PART.sub("", f.read()).strip())   # the planning part is the planner's only
         elif not name.endswith(".md"):
             parts.append(name.strip())
     parts.append(f"You are {NAMES[fn]}.\n\n## Reply format (required)\n{reply_format}")
@@ -168,12 +171,13 @@ RATES_ON = os.getenv("J2_RATES", "1") != "0"
 RATES = {}      # agents/j2/rates.json, reloaded at each reset so edits apply without a restart
 
 
-def load_rates(output="website"):
-    """The rate card for the run's output type (rates.json: "rates" for a website, "rates_prd" for a PRD)."""
+def load_rates(output="website", card=True):
+    """The rate card for the run's output type (rates.json: "rates" for a website, "rates_prd" for a PRD). card=False:
+    no rate card, so each workflow costs Adaptation's own estimate (estimated_resources.money), as with J2_RATES=0."""
     global RATES, OUTPUT
     RATES, OUTPUT = {}, output
     path = os.path.join(J2_DIR, "rates.json")
-    if RATES_ON and os.path.exists(path):
+    if card and RATES_ON and os.path.exists(path):
         with open(path, encoding="utf-8") as f:
             RATES = {k: int(v) for k, v in (json.load(f).get(OUTPUTS[output]["rates"]) or {}).items()}
 
@@ -317,6 +321,12 @@ MAX_CHECK_ATTEMPTS = 3
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 SPECIFIC = re.compile(r"\d|" + EMAIL.pattern)       # a time, price, number or email in a goal
 IDENT = re.compile(r"^[#.]?[A-Za-z][\w-]*$")         # a section id or class name
+# J2_REALIZATION: an id range in how or constraints ("#pad-1 to #pad-9", "cell-0-0..cell-8-8", "#cell-r-c (r and c
+# 0 to 8)") tells the builder to create every id in it; a name with a digit in it (#pad-4, j2-btn) is not a count.
+ID_RANGE = re.compile(r"#?\b([a-z][\w-]*?)(\d+(?:-\d+)*)\s*(?:to|through|\.\.|–|—)\s*#?\1(\d+(?:-\d+)*)\b")
+RC_RANGE = re.compile(r"#?\b([a-z][\w-]*?-)r-c\b[^.;]{0,40}?\b(\d+)\s*(?:to|through|\.\.|–|—)\s*(\d+)\b")
+NAME_WITH_DIGIT = re.compile(r"[#.]?\b[a-z][\w-]*\d[\w-]*", re.I)
+MAX_RANGE_IDS = 400
 # A goal that describes an action needs a behaviour item proving it works; a rule that depends on a date needs a
 # control on the page that sets the date, used by the steps (never today's date).
 ACTION_GOAL = re.compile(r"\b(?:(?:re)?calculat\w*|self-updating|on change|shows?\s*(?:/|and|or)\s*hides?|"
@@ -504,12 +514,34 @@ def behavior_problems(steps, told, source, about):
     return out
 
 
-def check_problems(a, source, types=CHECK_TYPES):
+def range_ids(told):
+    """Every id an id range in this squashed text names, space-joined ("" when there is none): "pad-1 to pad-9" ->
+    pad-1 ... pad-9; "cell-0-0 to cell-8-8" and "cell-r-c (r and c 0 to 8)" -> cell-0-0 ... cell-8-8. A range of
+    more than MAX_RANGE_IDS ids is left out."""
+    out = []
+    for pre, lo, hi in ID_RANGE.findall(told):
+        lo, hi = [int(x) for x in lo.split("-")], [int(x) for x in hi.split("-")]
+        if len(lo) == len(hi) and all(x <= y for x, y in zip(lo, hi)) and \
+                math.prod(y - x + 1 for x, y in zip(lo, hi)) <= MAX_RANGE_IDS:
+            out += [pre + "-".join(map(str, p)) for p in itertools.product(*[range(x, y + 1) for x, y in zip(lo, hi)])]
+    for pre, lo, hi in RC_RANGE.findall(told):
+        lo, hi = int(lo), int(hi)
+        if lo <= hi and (hi - lo + 1) ** 2 <= MAX_RANGE_IDS:
+            out += [f"{pre}{r}-{c}" for r in range(lo, hi + 1) for c in range(lo, hi + 1)]
+    return " ".join(out)
+
+
+def check_problems(a, source, types=CHECK_TYPES, upstream="", ranges=False):
     """J2.e's rules for one atom's checks. source: the charter and the Requester's answers, squashed. types: the
-    check types the output allows (a website's, or DOC_CHECK_TYPES for a document)."""
+    check types the output allows (a website's, or DOC_CHECK_TYPES for a document). upstream: the how and constraints
+    of the workflows this one depends on, squashed: an id one of them is told to create may be checked here too.
+    ranges (J2_REALIZATION): an id range in how or constraints names every id in it, and a digit inside a name in a
+    check's text (#pad-4, j2-btn) is not a count."""
     out, checks = [], a.get("verification") if isinstance(a.get("verification"), list) else []
     # (tap-targets: expect is the minimum size in px, so a label like "at least 44x44px" must expect 44)
-    told = squash(json.dumps([a.get("how"), a.get("constraints")], ensure_ascii=False))
+    told = squash(json.dumps([a.get("how"), a.get("constraints")], ensure_ascii=False)) + (" " + upstream if upstream else "")
+    if ranges:
+        told += " " + range_ids(told)
     for n, c in enumerate(checks, 1):
         lab = f"expected output item {c['item']}" if isinstance(c, dict) and c.get("item") else f"check {n}"
         if not isinstance(c, dict):
@@ -541,7 +573,7 @@ def check_problems(a, source, types=CHECK_TYPES):
         elif t in COUNTED:
             if bad := target_problem(target, told, source):
                 out.append(f"{lab} {t} {bad}")
-            nums = [int(x) for x in re.findall(r"\d+", label)]
+            nums = [int(x) for x in re.findall(r"\d+", NAME_WITH_DIGIT.sub(" ", label) if ranges else label)]
             if nums and as_int(c.get("expect"), None) not in nums:
                 out.append(f"{lab} says {label!r} but expects {c.get('expect')!r}")
     if SPECIFIC.search(str(a.get("goal") or "")) and not any(
@@ -1247,6 +1279,24 @@ def mock_atom(w):
 def with_atoms(wfs, atom=None):
     """Workflows with a work atom each (the mock's, or code's cheapest-fit proposal); atom: the output type's."""
     return [{**w, "atoms": w.get("atoms") or [(atom or mock_atom)(w)]} if isinstance(w, dict) else w for w in wfs or []]
+
+
+# ---- artifact workflows: a workflow whose output is a file Adaptation names (any path and type), not the site file
+# or a section of it. The workflows after it read the file, kept under the run's artifacts/ folder. Code runs its work
+# atom's text checks on the file.
+FILE_PATH = re.compile(r"(?!/)(?!.*\.\.)[\w./-]+\.\w+")
+SITE_FILES = ("index.html", "site/index.html")
+
+
+def is_artifact(w):
+    outs = [str(o).strip() for o in (w or {}).get("outputs") or []]
+    return bool(outs) and all(FILE_PATH.fullmatch(o) and o.lower() not in SITE_FILES for o in outs)
+
+
+def artifact_path(w):
+    """Where a file workflow's output is kept: artifacts/<the path Adaptation named>."""
+    f = str(w["outputs"][0]).strip()
+    return f if f.startswith("artifacts/") else "artifacts/" + f
 
 
 def key(name):
@@ -2319,6 +2369,12 @@ def memory_on():
     return os.getenv("J2_MEMORY", "1") != "0"
 
 
+def realization_on():
+    """On by default: Adaptation's first website plan goes through the realization axis with certainty (the planning
+    part of agents/j2/adaptation.md, confidence-judge.md; j2_realization.py). J2_REALIZATION=0 turns it off."""
+    return os.getenv("J2_REALIZATION", "1") != "0"
+
+
 def load_lessons():
     if not memory_on() or not os.path.exists(MEMORY_FILE):
         return []
@@ -2644,6 +2700,9 @@ class J2Run:
         self.fail_floor = 0          # audits before this index don't count for "same failure twice in a row"
         self.last_limit = None       # the last limit question: state then and the Requester's decision
         self.adapt_idle = None       # _adapt_state() when Adaptation last proposed nothing for lack of budget
+        # J2_REALIZATION=1: the judged realization plan, its decisions, whether its blocking facts were asked, the record
+        self.realization = realization_on()
+        self.real, self.real_decisions, self.real_asked, self.real_summary = None, {}, False, None
         self._begin_cycle(advance=False)
 
     def set_output(self, out):
@@ -2658,7 +2717,8 @@ class J2Run:
         """Switch what is built (set_output before the first message; a design-document run at each stage)."""
         self.output = output_type(out)
         self.out, self.doc = OUTPUTS[self.output], bool(OUTPUTS[self.output]["sections"])
-        load_rates(self.output)
+        # J2_REALIZATION: no rate card; Adaptation estimates each workflow's budget (estimated_resources.money)
+        load_rates(self.output, card=not (getattr(self, "realization", None) or realization_on()))
         types = "|".join(f'"{t}"' for t in self.out["check_types"])
         # A document's agents get its own check types, finding ids and atom rules; a website's prompts stay as they were.
         kinds = "|".join(f'"{k}"' for k in expect_kinds(self.out["check_types"]))
@@ -2785,6 +2845,7 @@ class J2Run:
                                     "force_audit_fail": self.force_fail or None,
                                     "force_question": self.force_question or None,
                                     "test_lessons": self.test_lessons or None,
+                                    "realization": int(self.realization),
                                     "provider": None if llm.MOCK else llm.PROVIDER, "model": None if llm.MOCK else llm.MODEL,
                                     "mock": llm.MOCK}) + "\n")
             f.write(json.dumps(m, ensure_ascii=False) + "\n")
@@ -4973,8 +5034,36 @@ class J2Run:
             return json.dumps({"say": "@Priority Nothing left to propose.", "act": "PROPOSE", "next": "Priority",
                                "workflows": []})
 
+        def mock_real():
+            # J2_REALIZATION's first proposal: the judged plan's workflows as written. The mock gives a workflow that
+            # covers no item a file output (artifacts/<name>.md) with a text check, and estimates every budget.
+            wfs = []
+            for x in self.real_summary["proposal_brief"]:
+                w_ = {"name": x["name"], "goal_gap": x.get("goal") or x["name"], "covers": x["covers"],
+                      "parts": [item_kind(crit[i - 1]) for i in x["covers"] if 0 < i <= len(crit)] or ["page_section"],
+                      "outputs": ["index.html"], "completion_check": x.get("done_test") or x["name"],
+                      "dependencies": x["after"], "estimated_resources": {"money": 10, "calls": 2, "time_minutes": 5}}
+                if not x["covers"]:
+                    f = "artifacts/" + re.sub(r"[^a-z0-9]+", "-", x["name"].lower()).strip("-") + ".md"
+                    w_.update(outputs=[f], parts=[], estimated_resources={"money": 5, "calls": 1, "time_minutes": 3},
+                              atoms=[{"goal": f"{f} states what {x['name']} sets", "constraints": [f"Write only {f}"],
+                                      "context": ["charter goal"], "how": {"kind": "AI", "agent": "Builder",
+                                                                           "steps": f"Write {f}"},
+                                      "expected_output": [{"text": f"The {x['name']} heading", "kind": "heading",
+                                                           "target": x["name"]},
+                                                          {"text": f"{f} is written", "kind": "file", "target": f}],
+                                      "verification": [{"text": f"The file has the heading {x['name']}.",
+                                                        "type": "heading-present", "target": x["name"],
+                                                        "expect": True, "item": 1},
+                                                       {"text": f"{f} exists.", "type": "file-exists", "target": f,
+                                                        "expect": True, "item": 2}]}])
+                wfs.append(w_)
+            return json.dumps({"say": f"@Priority The judged plan: {len(wfs)} workflows, in run order.", "act": "PROPOSE",
+                               "next": "Priority", "workflows": wfs})
+
         def mock():
-            r = json.loads(mock_plain())
+            first_real = bool(real and (self.real_summary or {}).get("proposal_brief") and not self.workflows)
+            r = json.loads(mock_real() if first_real else mock_plain())
             r["workflows"] = with_atoms(r.get("workflows"), self.out.get("mock_atom"))
             if r.get("act") == "PROPOSE" and not self.workflows and sum(item_min(c) for c in crit) > self.budget - self.spent:
                 r = self._cheapest_fit()                         # the charter costs more than the budget left
@@ -5031,7 +5120,14 @@ class J2Run:
                       + f"\nNECESSARY CONDITIONS (code checks every one on the built {self.out['noun']}; it is workable "
                       "only when all are met, so your plan must build what each needs):\n"
                       + "\n".join(f"{c['id']}: {c['text']}" for c in load_conditions(self.out["conditions"])))
-        r = self.call("adaptation", fmt, task, mock)
+        real = None
+        if self._realization_applies():
+            real = self._realization_plan(h)
+            if real is None:         # a blocking Requester fact went to Identity first
+                return
+            task += real
+        # A proposal that follows the realization plan carries more workflows and atoms than the 900-token default
+        r = self.call("adaptation", fmt, task, mock, **({"max_tokens": 8000} if real else {}))
         if self._budget_question(r):
             # Affordability is Priority's call (J2.c): a budget question is rejected, asked once more, then replaced.
             self._event("adaptation", "invalid_move", "budget POLICY_QUESTION rejected")
@@ -5065,6 +5161,12 @@ class J2Run:
             note = f"Dispute isn't valid: {sid}. Treated as a proposal."
             self._event("adaptation", "invalid_move", note)
         wfs = norm(r.get("workflows"))
+        if real and self.real_summary is not None:       # did the proposal follow the plan? (names match, by design)
+            planned = [x["name"] for x in self.real_summary["proposal_brief"]]
+            got = [w.get("name") for w in wfs]
+            self.real_summary["proposed"] = {"planned": planned, "followed": [n for n in planned if n in got],
+                                             "not_proposed": [n for n in planned if n not in got],
+                                             "extra": [n for n in got if n not in planned]}
         st = self._adapt_state()
         self.adapt_idle = st if st[0] and (not wfs or act == "POLICY_QUESTION") else None
         if act == "POLICY_QUESTION":
@@ -5113,6 +5215,75 @@ class J2Run:
         self.bargain = {"start": time.time(), "calls": self.calls}      # J2.c starts: hops, minutes, spend
         self._handoff("priority", kind="proposal", table=wfs)
 
+    REAL_NOTE = ("\nTHIS PLAN RUNS IN J2. Every workflow becomes one funded J2 workflow with one output, run in "
+                 "dependency order. A workflow's output is either one section of the single-page site (index.html), "
+                 "checked by code (file, element and text checks, named tests, behaviour steps in a browser), or one "
+                 "file that later workflows read; every workflow that lists it in inputs_from, directly or through "
+                 "another, reads that file. Its done_test names what the output must contain. Checking the whole site "
+                 "is Audit's job: never plan check, review, QA, test or report workflows.")
+
+    def _realization_applies(self):
+        """J2_REALIZATION=1 shapes the first plan of a website run (not documents, a blueprint build or a change request)."""
+        return (self.realization and self.goal and not self.doc and not self.blueprint and not self.feedback
+                and not self._all_wfs())
+
+    def _realization_plan(self, h):
+        """Adaptation's first plan through the realization axis (j2_realization): factors, stages, workflows with a
+        certainty zone each, checked by code; a separate judge scores every workflow and Adaptation revises below 0.80.
+        Research workflows are off: J2's calls have no web access. A blocking Requester fact goes to Identity once,
+        before the proposal (returns None). Otherwise returns the text added to Adaptation's task: every workflow to
+        propose, in run order, each with its output (a site section or an artifact file), and the items to leave out.
+        Records realization.json and realization.md."""
+        if self.real is None:
+            self.post("system", "Realization is on: Adaptation plans by stage and certainty, and a separate judge scores "
+                                "every workflow before anything is built.")
+            r = j2_realization.plan_goal(self.goal, web=False, log=lambda m: None, extra=self.REAL_NOTE)
+            self.real = r
+            self.calls += r["calls"]
+            self.save("realization.json", r)
+            with open(os.path.join(self.dir, "realization.md"), "w", encoding="utf-8") as f:
+                f.write(j2_realization.report(r))
+            rows, _ = j2_realization.proposal_brief(r)
+            self.real_summary = {
+                "plan_confidence": r["plan_confidence"],
+                "stages": [s.get("id") for s in r["plan"].get("stages") or []],
+                "workflows": len(rows), "rounds": len(r["rounds"]) - 1,
+                "plan_faults": r["plan_faults"], "waiting_on_identity": r["waiting_on_identity"],
+                "not_ready": r["not_ready"], "calls": r["calls"], "seconds": r["seconds"]}
+            self._event("adaptation", "realization", f"plan confidence {r['plan_confidence']:.2f}, "
+                                                     f"{len(rows)} workflows")
+            low = [x["workflow"] for x in r["not_ready"]]
+            self.post("adaptation", f"Plan by realization and certainty: stages {', '.join(self.real_summary['stages'])}; "
+                                    f"{len(rows)} workflows; the judge's plan confidence is {r['plan_confidence']:.2f}"
+                                    + (f"; not ready: {', '.join(low)}" if low else "") + ". Details in realization.md.",
+                      realization=True)
+        r = self.real
+        if r["waiting_on_identity"] and not self.real_asked:
+            self.real_asked = True
+            asks = "; ".join(str(a) for x in r["waiting_on_identity"] for a in x["ask"])
+            q = f"Before anything is built, the plan needs facts only the Requester knows: {asks}"
+            self._say("adaptation", f"@Identity {q}", "identity", None, act="POLICY_QUESTION")
+            self._handoff("identity", kind="question", frm="adaptation", question=q,
+                          resume={"to": "adaptation", "handoff": {"kind": "propose", "why": h.get("why")}})
+            return None
+        rows, left = j2_realization.proposal_brief(r, answered=self.real_asked)
+        self.real_summary["proposal_brief"] = rows
+        self.real_summary["left_out"] = left
+        return (f"\nREALIZATION PLAN (judged before any build, plan confidence {r['plan_confidence']:.2f}; "
+                "realization.md): propose exactly these workflows, in this order, one J2 workflow each, with the same "
+                "name, the same covers, and dependencies naming the workflows in after. Give each one output in "
+                "outputs: index.html when it builds part of the site, or one file that later workflows read (you "
+                "choose its path, name and type, e.g. a .md or .json path; keep the same path in every reply). A file "
+                "workflow builds no part of the "
+                "site; its work atom's checks run on the file as text, so use only the check types file-exists, "
+                "facts-present, heading-present and section-not-empty (expected_output kinds file, facts and heading). "
+                "Estimate each "
+                "workflow's budget yourself in estimated_resources.money: there is no rate card. Every work atom must "
+                "prove its workflow's done_test; an experiment workflow builds only the probe it describes.\n"
+                + json.dumps(rows, ensure_ascii=False)
+                + (f"\nLEAVE OUT these items, in left_out with this reason: {json.dumps(left, ensure_ascii=False)}"
+                   if left else ""))
+
     def _mock_doc_plan(self, fails):
         """Mock Adaptation for a document: one workflow per section in the first cycle; then one fix per failing
         checklist item, rewriting the section that holds it. ponytail: no mock for change requests to a document."""
@@ -5141,7 +5312,8 @@ class J2Run:
         """J2.e's work-atom check on Adaptation's workflows: one whose atom lacks a field is rejected with the field
         named and Adaptation gets one retry; what is still incomplete after it is dropped from the proposal."""
         for retry in (True, False):
-            bad = {w.get("name") or "?": m for w in norm(r.get("workflows")) if (m := self._atom_problems(w))}
+            pool = norm(r.get("workflows"))
+            bad = {w.get("name") or "?": m for w in pool if (m := self._atom_problems(w, pool))}
             if not bad:
                 break
             why = [self._reject(n, "; ".join(m)) for n, m in bad.items()]
@@ -5149,7 +5321,7 @@ class J2Run:
                 r = self.call("adaptation", fmt, task + "\nTHE VALIDATOR REJECTED: " + "; ".join(why) + ". Send your "
                               "reply again with every field of every work atom filled in.", mock)
             else:
-                r = {**r, "workflows": [w for w in norm(r.get("workflows")) if not self._atom_problems(w)]}
+                r = {**r, "workflows": [w for w in pool if not self._atom_problems(w, pool)]}
         for w in norm(r.get("workflows")):
             self.proposed_atoms[w.get("name")] = normalise_checks(w["atoms"])
             if self.blueprint:
@@ -5296,14 +5468,69 @@ class J2Run:
         return squash(" ".join(strings(self.goal or {}) + [self.request] + [m["text"] for m in self.chat
                                                                              if m["who"] == "user"]))
 
-    def _atom_problems(self, w):
-        """J2.e's work-atom check: missing fields first; then the check rules (check_problems) for every atom."""
+    def _atom_problems(self, w, pool=()):
+        """J2.e's work-atom check: missing fields first; then the check rules (check_problems) for every atom. pool: the
+        other workflows proposed with this one; an id a workflow it depends on is told to create counts as known."""
         miss = atom_missing(w)
         if miss:
             return ["missing " + ", ".join(miss)]
-        src, types = self._fact_source(), self.out["check_types"]
+        # a file workflow's checks run on its file as text, and "the file exists" (code confirms the file it wrote)
+        src, types = self._fact_source(), (DOC_CHECK_TYPES + ("file-exists",)) if self._file_wf(w) else self.out["check_types"]
+        real = bool(getattr(self, "realization", False))
+        up = self._upstream_told(w, pool) if real else ""      # base J2 stays as it was
         return [f"work atom {n}: {x}" for n, a in enumerate(w["atoms"], 1)
-                for x in expected_problems(a, types) or check_problems(cover_expected(copy.deepcopy(a)), src, types)]
+                for x in expected_problems(a, types) or check_problems(cover_expected(copy.deepcopy(a)), src, types, up,
+                                                                       ranges=real)]
+
+    def _priority_file_note(self, table):
+        """J2_REALIZATION: what Priority needs to know about file workflows on the table ("" when there are none, so other
+        runs' prompts are unchanged). They cover no done-when item by design; the build workflows after them read them."""
+        files = [w.get("name") for w in table if isinstance(w, dict) and self._file_wf(w)]
+        if not files:
+            return ""
+        return (f" FILE WORKFLOWS ON THE TABLE: {json.dumps(files, ensure_ascii=False)}. They come from the judged "
+                "realization plan (realization.md): each writes one file (a product spec, design guide or architecture) "
+                "that the build workflows after it read and follow, so they cover no done-when item by design and are "
+                "not optional extras. Judge them like any workflow: fund them when the build workflows that depend on "
+                "them are funded, and question only their cost. Folding their work into the build workflows' steps "
+                "is not the plan.")
+
+    def _file_wf(self, w):
+        """A workflow whose output is a file later workflows read (J2_REALIZATION website runs only; a document run's
+        workflows write sections of its document as before)."""
+        return bool(getattr(self, "realization", False)) and not self.doc and is_artifact(w)
+
+    def _next_wf_id(self, name, plan_ix=None):
+        """The id a newly registered workflow gets: W-<its place in the realization plan> when it is planned and that id
+        is free; else the next number after every id in use and every planned place."""
+        plan_ix = plan_ix or {}
+        used = {x["id"] for x in self._all_wfs()}
+        if name in plan_ix and f"W-{plan_ix[name] + 1}" not in used:
+            return f"W-{plan_ix[name] + 1}"
+        n = max([len(self.past_workflows) + len(self.workflows), len(plan_ix)] + [as_int(str(i)[2:]) for i in used]) + 1
+        while f"W-{n}" in used:
+            n += 1
+        return f"W-{n}"
+
+    def _upstream_told(self, w, pool=()):
+        """The how and constraints of every workflow w depends on, directly or through others, squashed: from the
+        workflows proposed with it and those already registered."""
+        by = {}
+        for x in list(self._all_wfs()) + [x for x in pool if isinstance(x, dict)]:
+            for k in (x.get("id"), x.get("name")):
+                if k:
+                    by[k] = x
+        seen, stack, told = set(), list(w.get("dependencies") or []), []
+        while stack:
+            d = by.get(str(stack.pop()))
+            if not d or id(d) in seen or d is w:
+                continue
+            seen.add(id(d))
+            stack += d.get("dependencies") or []
+            for a in d.get("atoms") or self.proposed_atoms.get(d.get("name")) or []:
+                if isinstance(a, dict):
+                    told.append([a.get("how"), a.get("constraints")])
+        return squash(json.dumps(told, ensure_ascii=False)) if told else ""
 
     def _budget_question(self, r):
         return str(r.get("act", "")).upper() == "POLICY_QUESTION" and \
@@ -5487,7 +5714,8 @@ class J2Run:
                       "A COUNTER names in say what you cut and why. "
                       f"Exchange {self.exchanges + 1} of {MAX_ATTEMPTS}; after that Identity rules on both final "
                       "positions." + (" Prices are fixed by the rate card: to spend less, remove parts or whole "
-                                      "workflows, not the price." if RATES else ""), mock)
+                                      "workflows, not the price." if RATES else "")
+                      + self._priority_file_note(table), mock)
         dec = str(p.get("decision") or "").lower()
         wfs = norm(p.get("workflows")) or (table if dec == "grant" else [])
         note = None
@@ -5673,11 +5901,18 @@ class J2Run:
         remaining, registered, refused, defaults = self.budget - self.spent, [], [], []
         covered = {i for x in self.workflows if x["status"] in ("registered", "held", "running", "done")
                    for i in self._wf_items(x)}
-        for w in norm(agreed):
+        batch = norm(agreed)
+        # J2_REALIZATION: register in the plan's run order, each under the id of its place in the plan (W-1 is the first
+        # to run), even when it is registered later than others; other workflows take ids after the plan's
+        plan_ix = {x["name"]: i for i, x in enumerate((self.real_summary or {}).get("proposal_brief") or [])}
+        if plan_ix:
+            batch.sort(key=lambda x: plan_ix.get(x.get("name"), 10 ** 6))
+        for w in batch:
             c, name = granted(w), w.get("name") or "?"
             missing = [f for f in self.REQUIRED if not (w.get(f) or (f == "goal_gap" and w.get("purpose")))]
             atoms = normalise_checks(w.get("atoms") or self.proposed_atoms.get(name))   # Priority or a ruling may drop them
-            no_atom = self._atom_problems({"atoms": atoms})
+            no_atom = self._atom_problems({"atoms": atoms, "outputs": w.get("outputs"),
+                                           "dependencies": w.get("dependencies")}, batch)
             lld = [str(i) for i in (w.get("lld_sections") or self.proposed_lld.get(name) or [])] if self.blueprint else []
             unknown_lld = [i for i in lld if i not in {x["id"] for x in self.blueprint["sections"]}] if self.blueprint else []
             rc, unknown = price(w)
@@ -5705,7 +5940,7 @@ class J2Run:
             if not RATES and as_int((w.get("envelope") or {}).get("money_limit")) <= 0:
                 defaults.append(f"{name}: no money_limit granted, charged the estimate ({c})")
             covered |= set(self._covers(w))
-            wf = {"id": f"W-{len(self.past_workflows) + len(self.workflows) + 1}", "proposal_id": w.get("id"), "name": w.get("name", "workflow"),
+            wf = {"id": self._next_wf_id(name, plan_ix), "proposal_id": w.get("id"), "name": w.get("name", "workflow"),
                   "covers": [self._no_at(i) for i in self._covers(w)], "fixes": [str(f) for f in w.get("fixes") or []],
                   "covers_text": [((self.goal or {}).get("done_when") or [])[i - 1] for i in self._covers(w)],
                   "purpose": w.get("purpose") or w.get("goal_gap", ""), "cost": c, "estimate": w.get("estimate", wf_cost(w)),
@@ -5724,6 +5959,10 @@ class J2Run:
             wf["section"] = src["section"] if src and src["section"] in self.sections and src["section"] not in taken \
                 else wf["id"]
             wf["revises"] = rv if wf["section"] != wf["id"] else None
+            if self.real_summary:       # J2_REALIZATION: the plan's stage (a fix keeps the stage of what it revises)
+                st = {x["name"]: x.get("stage") for x in self.real_summary.get("proposal_brief") or []}.get(wf["name"])
+                if st or (src or {}).get("stage"):
+                    wf["stage"] = st or src["stage"]
             add_workflow_agent(wf["id"])
             wf["agent"] = NAMES[wf["id"]]
             self.workflows.append(wf)
@@ -5923,6 +6162,8 @@ class J2Run:
                           for a in w.get("atoms") or []]
         brief["covers_items"] = [((self.goal or {}).get("done_when") or [])[i - 1] for i in self._wf_items(w)]
         self.atom = (w.get("atoms") or [{}])[0].get("id")     # its AI calls are tagged with the atom they build
+        if self._file_wf(w):
+            return self._run_artifact(w, brief, max_calls)
         attempt, failed, evidence, prev_sig, early, spec_stop = 0, [], "", set(), None, None
         while True:
             attempt += 1
@@ -6002,6 +6243,7 @@ class J2Run:
                                        f"ATTEMPT AND THESE FAILED:\n{evidence}\nFix the section so they pass." if evidence
                                        else "")
                                     + (f"\nYOUR LAST ATTEMPT WAS REJECTED: {last_err}. Fix that." if last_err else "")
+                                    + self._artifact_context(w)
                                     + self._page_context(w, prev))),
                                     mock, max_tokens=16000, json_reply=False)
                     try:
@@ -6116,6 +6358,109 @@ class J2Run:
             return self._handoff("adaptation", kind="atom_failed", wid=fn, atoms=bad, attempt=attempt, owner_note=owner)
         self._handoff("coordination", kind="schedule")
 
+    def _artifact_inputs(self, w):
+        """The finished artifact workflows this workflow depends on, directly or through others (a fix also reads
+        what the workflow it revises read), in id order."""
+        by = {k: x for x in self._all_wfs() for k in (x.get("id"), x.get("name")) if k}
+        src = by.get(str(w.get("revises") or ""))
+        stack, seen, out = list(w.get("dependencies") or []) + list((src or {}).get("dependencies") or []), set(), []
+        while stack:
+            d = by.get(str(stack.pop()))
+            if not d or d["id"] in seen or d["id"] == w["id"]:
+                continue
+            seen.add(d["id"])
+            stack += d.get("dependencies") or []
+            if self._file_wf(d) and d.get("status") == "done":
+                out.append(d)
+        return sorted(out, key=lambda x: as_int(str(x["id"])[2:]))
+
+    def _artifact_context(self, w):
+        """The text of every artifact this workflow reads, for its prompt ("" when it reads none)."""
+        parts = []
+        for d in self._artifact_inputs(w):
+            f = artifact_path(d)
+            try:
+                with open(os.path.join(self.dir, f), encoding="utf-8") as fh:
+                    parts.append(f"--- {f} (written by {d['id']} {d['name']}) ---\n{fh.read()[:6000]}")
+            except OSError:
+                continue
+        return ("\nARTIFACTS YOU READ (written by the workflows you depend on; follow their 'Rules for later "
+                "workflows'):\n" + "\n".join(parts)) if parts else ""
+
+    def _run_artifact(self, w, brief, max_calls):
+        """An artifact workflow's agent writes one file (its output, named by Adaptation) instead of a section of the
+        site. Code runs its work atom's checks on the file as text, up to MAX_CHECK_ATTEMPTS attempts, then reports to
+        Coordination like any workflow (or hands the receipts to Adaptation after the last failed attempt)."""
+        fn, f = w["id"], artifact_path(w)
+        path = os.path.join(self.dir, f)
+        fmt = ('First line: a JSON object {"say": str (one short line to @Coordination: what you wrote; code runs your '
+               'checks, so don\'t claim they pass), "human_output": str (1 to 3 plain sentences telling a person what '
+               'this file contains), "atom_human_output": str (1 or 2 plain sentences in everyday words: no ids, no '
+               'selectors), "next": "Coordination"}. Then the whole file between a line <<<FILE and a line FILE>>>.')
+        g = self.goal or {}
+        charter = {k: g.get(k) for k in ("statement", "audience", "standards", "rules", "done_when", "to_be_confirmed")}
+
+        def mock():
+            return (json.dumps({"say": f"@Coordination {fn} wrote {f}.", "human_output": f"I wrote {f} for the "
+                                "workflows after it.", "atom_human_output": "This sets what the later parts of the "
+                                "page follow.", "next": "Coordination"})
+                    + f"\n<<<FILE\n# {w['name']}\n\nWhat {w['name']} sets for the workflows after it, from the charter.\n"
+                      "FILE>>>")
+        attempt, evidence, text, meta, failed = 0, "", None, {}, []
+        while attempt < MAX_CHECK_ATTEMPTS and w["calls_used"] < max_calls + attempt:
+            attempt += 1
+            w["calls_used"] += 1
+            raw = self.call(fn, fmt, f"YOU ARE {NAMES[fn]}, the agent for one registered workflow.\nYOUR WORKFLOW: "
+                            f"{json.dumps(brief, ensure_ascii=False)}\nYOUR OUTPUT IS ONE FILE, {f}, which the "
+                            "workflows after you read and follow. It builds no part of the site. Write what your "
+                            "workflow's goal and work atom ask for, in the format the file's name says. Mark anything "
+                            "the charter doesn't give as an assumption. Code runs your work atom's checks on the file."
+                            f"\nCHARTER: {json.dumps(charter, ensure_ascii=False)}" + self._artifact_context(w)
+                            + (f"\nATTEMPT {attempt} OF {MAX_CHECK_ATTEMPTS}. THESE CHECKS FAILED ON YOUR LAST "
+                               f"ATTEMPT:\n{evidence}\nFix the file so they pass." if evidence else ""),
+                            mock, max_tokens=8000, json_reply=False)
+            body = re.search(r"^<<<FILE[ \t]*\n(.*?)\n?^FILE>>>", raw or "", re.S | re.M)
+            head = str(raw or "").split("<<<FILE")[0].strip()
+            try:
+                meta = llm.extract_json(head)
+            except ValueError:
+                meta = {"say": head}
+            if not body:
+                evidence = "- the reply had no file between a line <<<FILE and a line FILE>>>"
+                continue
+            text = body[1].strip() + "\n"
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write(text)
+            failed = self._run_checks(w, attempt, text, doc=True)
+            if not failed:
+                break
+            evidence = "\n".join(f"- {r['check']} ({r['type']} {r['target']}, expect {r['expect']}): {r['evidence']}"
+                                 for r in failed)
+        self.write_lock = self.atom = None
+        if text is None:
+            w["status"] = "failed"
+            self._say(fn, f"@Coordination {fn} failed: no usable artifact after {attempt} attempt(s). {f} was not "
+                          "written.", "coordination", None, workflow=fn)
+            self._event(fn, "limit_fail", f"{fn}: no usable artifact")
+            self.save("workflows.json", self.workflows)
+            return self._handoff("coordination", kind="schedule")
+        human = self._human_output(w, meta, w["section"])
+        self._atom_outputs(w, meta, attempt)
+        w["status"], w["version"], w["artifact"] = "done", len(self.sites), f
+        self.save("workflows.json", self.workflows)
+        self._say(fn, f"@Coordination {human}", "coordination", None, workflow=fn, human_output=human,
+                  version=len(self.sites), section=w["section"], workflow_cost=w["cost"], artifact=f)
+        if failed:
+            bad = sorted({r["atom"] for r in failed})
+            for a in w["atoms"]:
+                if a["id"] in bad:
+                    a["status"] = "failed"
+            self.post("system", f"{', '.join(bad)} failed its checks on all {attempt} attempts. Code sends the receipts "
+                                "to Adaptation, which decides whether the check or the artifact is wrong.")
+            return self._handoff("adaptation", kind="atom_failed", wid=fn, atoms=bad, attempt=attempt, owner_note="")
+        self._handoff("coordination", kind="schedule")
+
     def _human_output(self, w, meta, sid):
         """1 to 3 plain sentences saying what the builder built. "done." alone is rejected and asked for once more
         (a short call about the section just written); if that fails too, code writes the sentence."""
@@ -6158,7 +6503,20 @@ class J2Run:
     def _agent_output(self, w, a, attempt):
         """What other agents read instead of searching: built by code from the section as written and the receipts of
         this attempt. Files, section names, element ids and selectors created, the checks and their results, the
-        receipt id (receipts.jsonl: atom and attempt)."""
+        receipt id (receipts.jsonl: atom and attempt). An artifact workflow: its file and headings."""
+        if self._file_wf(w):
+            f = artifact_path(w)
+            try:
+                with open(os.path.join(self.dir, f), encoding="utf-8") as fh:
+                    text = fh.read()
+            except OSError:
+                text = ""
+            recs = [r for r in self.receipts if r["atom"] == a["id"] and r["attempt"] == attempt and "check" in r]
+            return {"atom": a["id"], "attempt": attempt, "receipt": f"{a['id']}:{attempt}", "kind": "artifact",
+                    "file": f, "files": [f], "section_names": [w["name"]] + [m[2] for ln in text.splitlines()
+                                                                             if (m := MD_HEADING.match(ln))][:6],
+                    "checks": [{"check": r["check"], "type": r["type"], "target": r["target"], "pass": r["pass"]}
+                               for r in recs]}
         return build_agent_output(w, a, attempt, (self.sections.get(w["section"]) or {}).get("body") or "", self.receipts,
                                   self.audits[-1] if self.audits else None, len(self.sites), self.doc, self.out.get("file"))
 
@@ -6701,13 +7059,21 @@ class J2Run:
             with open(os.path.join(self.dir, "receipts.jsonl"), "a", encoding="utf-8") as f:
                 f.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
-    def _run_checks(self, w, attempt, page, atoms=None, **extra):
-        """Code runs every check of the workflow's atoms on the built site; each result is a receipt and the atom keeps
-        its latest ones. Returns the failed receipts."""
-        site_dir, failed = os.path.join(self.dir, "site"), []
+    def _run_checks(self, w, attempt, page, atoms=None, doc=None, **extra):
+        """Code runs every check of the workflow's atoms on the built site (doc=True: page is a markdown document, as
+        for an artifact workflow); each result is a receipt and the atom keeps its latest ones. Returns the failed
+        receipts."""
+        site_dir, failed, doc = os.path.join(self.dir, "site"), [], self.doc if doc is None else doc
+
+        def one(c):
+            if doc and c.get("type") == "file-exists" and self._file_wf(w):      # a file workflow: the file it wrote
+                f = artifact_path(w)
+                ok = os.path.isfile(os.path.join(self.dir, f))
+                return {"actual": ok, "pass": ok, "evidence": f"{f} {'exists' if ok else 'not found'} in the run"}
+            return run_check(c, site_dir, page, doc)
         for a in atoms or w.get("atoms") or []:
             ver = [c for c in a.get("verification") or [] if isinstance(c, dict)]
-            recs = [self._receipt(a, c, attempt, run_check(c, site_dir, page, self.doc), **extra) for c in ver]
+            recs = [self._receipt(a, c, attempt, one(c), **extra) for c in ver]
             a["results"], a["attempts"] = recs, attempt
             self._expected_receipts(a, ver, recs, attempt, **extra)
             # pass None = could not run (no browser): never a failed attempt, never escalated
@@ -7365,6 +7731,7 @@ class J2Run:
             self._event("system", "atoms_json", f"atoms.json not written: {e}")
         self.save("summary.json", {
             "run": self.run_id, "output_type": self.output, "j2_fixes": int(self.fixes),
+            **({"realization": {"applied": self.real is not None, **(self.real_summary or {})}} if self.realization else {}),
             **({"design_documents": {"requested": self.docset, "stages": self.stages, "files": {k: v["file"] for k, v in self.docs.items()},
                                      "chain": self._chain_record(), "lld_revisions": self.lld_revisions,
                                      "lld_compare": (self.audits[-1].get("lld") if self.audits else None)}}
@@ -7455,7 +7822,7 @@ class J2Run:
             path = os.path.join(J2_DIR, name)
             if os.path.exists(path):
                 with open(path, encoding="utf-8") as f:
-                    roles.append(f"### {name}\n{f.read().strip()}")
+                    roles.append(f"### {name}\n{j2_realization.PLANNING_PART.sub('', f.read()).strip()}")
 
         def mock():
             c = metrics["conflicts"]

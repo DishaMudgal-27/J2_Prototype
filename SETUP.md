@@ -144,6 +144,7 @@ Set any of these before `python3 j2_server.py`, like the examples above.
 | `J2_BUDGET` | 100 | Starting budget, in work credits (see "Which budget fits which run") |
 | `J2_BUDGET_CAP` | 2 x budget | Most your approvals can raise the budget to |
 | `J2_MEMORY` | 1 | `0` turns lessons and playbooks off |
+| `J2_REALIZATION` | 1 | On by default: Adaptation's first plan of a website run goes through realization and certainty (the planning part of `agents/j2/adaptation.md`), a separate judge scores every workflow before the build, and planning files are written under `artifacts/` for the build to read. Writes `realization.json` and `realization.md` in the run folder. `0` turns it off (the classic path) |
 | `J2_DELAY` | 2 | Seconds between AI calls |
 | `J2_MAX_CYCLES` | 6 | Plan, build, audit cycles before Identity asks you what to do |
 | `J2_MAX_TURNS` | 30 | Agent turns per cycle |
@@ -168,6 +169,7 @@ python3 j2_flow_test.py --fast             # offline flow test in mock mode, no 
 python3 j2_flow_test.py --fast --browser   # adds the tests that drive the page in Chrome. About 8 to 9 minutes
 python3 j2_flow_test.py                    # the full test, both J2_FIXES modes. Longest
 python3 j2_check.py site.html              # render check on any HTML page
+python3 realization_test.py                # realization planner, judge and J2 runs with J2_REALIZATION, offline
 ```
 
 `plain_unchanged` is one of the checks. It compares the plain website path (no documents asked for) with a fixed

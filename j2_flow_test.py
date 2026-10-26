@@ -43,6 +43,7 @@ import tempfile
 
 os.environ["STUDIO_MOCK"] = "1"
 os.environ["J2_MEMORY"] = "0"        # clean runs: the memory tests turn it on
+os.environ["J2_REALIZATION"] = "0"   # the classic path (realization is on by default; realization_test.py covers it)
 # Every memory file of this test session lives in a temp folder, set before j2 is imported, so no test can write
 # lessons or playbooks into the real memory/ (it once wrote 109 mock cafe playbooks there; a live run reused one).
 SESSION_MEMORY = tempfile.mkdtemp(prefix="j2-test-memory-")
@@ -4984,11 +4985,11 @@ def milestone_emails():
         assert all(w["cost"] == j2.RATES_DEED().get("send_email") == 5 and w["atoms"][0]["results"][0]["pass"] is None for w in mails), "5 credits each; dry run leaves the atom open"
         mp = M.build(run.dir)
         st = {e["to"]: e["from"] for e in mp["edges"] if e["kind"] == "step"}
-        brs = [n for n in mp["nodes"] if n["kind"] == "work" and n.get("lane") == "branch"]
+        brs = [n for n in mp["nodes"] if n["kind"] == "work" and n.get("lane") == "branch" and n["tag"] == "Send"]      # the style guide is the other side job
         assert [(st[st[n["id"]]], n["label"], n["status"]) for n in brs] == [(f"work:{k}", f"Email · {g} done", "left_open") for k, g in (("prd", "PRD"), ("hld", "HLD"), ("lld", "LLD"), ("website", "Website"))], brs
         out = render_node(j2.saved_snapshot(os.path.basename(run.dir), 0), docs={"docs": {}, "map": mp})
         wide = out["map"][out["map"].index('<svg class="mapsvg"'):out["map"].index("</svg>")]
-        assert wide.count('class="mapedge branch') == 8 and all(f">Email · {g} done · dry run<" in wide for g in ("PRD", "HLD", "LLD", "Website")), "one branch per email, under its goal"
+        assert wide.count('class="mapedge branch') == 8 + 2 and all(f">Email · {g} done · dry run<" in wide for g in ("PRD", "HLD", "LLD", "Website")), "one branch per email, under its goal"
         assert "Finished. 4 emails waiting (dry run)." in out["needs"], out["needs"]
         # a PRD only: one email, never one for a goal the run does not have
         run2 = docs_run("Write a PRD for Campus Notes." + CAMPUS, 400)
@@ -5259,7 +5260,8 @@ def artifact_types():
     # records: every record is a kind record, not a deliverable, with a file pattern; a full run keeps the ones a mock run writes
     recs = [t for t in T["types"] if t["kind"] == "record"]
     assert [t["name"] for t in recs] == ["screenshots", "atoms", "audits", "receipts", "conditions", "chain", "goal", "workflows",
-                                         "summary", "report", "chat", "board"] and not any(t["deliverable"] for t in recs)
+                                         "summary", "report", "chat", "board", "realization", "workflow_files",
+                                     "workflow_files_in_folders"] and not any(t["deliverable"] for t in recs)
     # depends_on matches the edges a real chain run records between the documents and the site
     run = docs_run(DESIGN_BRIEF, 900)
     owner = {a: k for k, v in json.load(open(os.path.join(run.dir, "documents.json"))).items() for a in v["atoms"]}
@@ -5279,10 +5281,12 @@ def artifact_types():
     for k in j2.DOC_SET:      # the workflows a row names are the workflows the run recorded for that document
         assert next(r for r in rows if r["type"] == k)["workflows"] == sorted(docs[k]["workflows"], key=lambda x: int(x[2:])), k
     for t in recs:
-        if t["name"] not in ("screenshots", "board"):      # a mock run takes no screenshots; board.json only exists under J2_BOARD=1
+        # a mock run takes no screenshots; board.json only exists under J2_BOARD=1; the realization plan and workflow files
+        # only exist under J2_REALIZATION=1
+        if t["name"] not in ("screenshots", "board", "realization", "workflow_files", "workflow_files_in_folders"):
             assert os.path.isfile(os.path.join(run.dir, t["file"])), t["file"]
     print("artifact types: prd, hld, lld and website match the Python field by field (sections, files, triggers, groups, tags, "
-          "colours, conditions, builder, rates, minimum cost, depends_on); drift on either side fails; 12 record entries ok")
+          "colours, conditions, builder, rates, minimum cost, depends_on); drift on either side fails; 15 record entries ok")
 
 
 def artifacts_tab():
@@ -5428,6 +5432,57 @@ def by_fn(fn, rng, calls):
     return sum(1 for c in calls if c["fn"] == fn and rng["from"] <= c["id"] <= rng["to"])
 
 
+def map_every_workflow():
+    """Map: every workflow in workflows.json is on the map (by stage, then section, then output refs) or listed by id under
+    not recorded; a realization run's specs are deliverables with their stage's role and "given to" lines to the build
+    workflows that read them; a workflow set to done whose atom did not pass shows "done · checks did not pass" (amber),
+    counted in the team label; the style guide is a small deliverable."""
+    import j2_map as M
+    repo = os.path.join(os.path.dirname(os.path.abspath(__file__)), "runs")      # read-only: building a map never writes to a run
+    runs = [os.path.join(repo, n) for n in sorted(os.listdir(repo)) if n.startswith("j2-")] if os.path.isdir(repo) else []
+    seen = 0
+    for d in runs:
+        wfs = j2._read(d, "workflows.json", None)
+        if not isinstance(wfs, list):
+            continue
+        m = M.build(d)
+        on = {x for n in m["nodes"] for x in n.get("workflows") or []}
+        listed = {x for t in m["not_recorded"] if t.startswith("workflows not placed on the map: ") for x in t.split(": ", 1)[1].split(", ")}
+        miss = [w["id"] for w in wfs if w["id"] not in on | listed]
+        assert not miss, (d, miss)
+        assert not on & listed, (d, on & listed)
+        seen += 1
+    r = os.path.join(repo, "j2-20261026-155610")
+    if not os.path.isdir(r):
+        print(f"map: every workflow placed or listed in {seen} saved runs (run 155610 not here: its checks skipped) ok")
+        return
+    m = M.build(r)
+    by = {n["id"]: n for n in m["nodes"]}
+    work = [n["id"] for n in m["nodes"] if n["kind"] == "work" and n["lane"] == "trunk"]
+    assert work == ["work:charter", "work:W-1", "work:W-2", "work:W-3", "work:website"], work      # Charter -> specs -> Website
+    assert [(by[k]["label"], by[k]["file"], by[k]["status"]) for k in work[1:4]] == [("Product plan", "artifacts/product-spec.md", "filed"),
+        ("Design guide", "artifacts/design-guide.md", "filed"), ("Architecture (HLD + LLD)", "artifacts/architecture.md", "filed")]
+    assert [by[f"step:{a}>{b}"]["team"] for a, b in (("charter", "W-1"), ("W-1", "W-2"), ("W-2", "W-3"), ("W-3", "website"))] == \
+        ["Product Manager", "Design Lead", "Solution Architect", "Web Developer"]
+    given = {(e["from"], e["to"]): e["label"] for e in m["edges"] if e["kind"] == "handoff"}
+    assert given[("work:W-1", "work:website")] == "given to W-4, W-6, W-7, W-8" and given[("work:W-2", "work:website")] == "given to W-4, W-5, W-7, W-9, W-11" \
+        and given[("work:W-3", "work:website")] == "given to W-4, W-5, W-6, W-7, W-10" and given[("work:W-1", "work:W-3")] == "given to W-3", given
+    site, step = by["work:website"], by["step:W-3>website"]
+    assert {"W-7", "W-9"} <= set(site["workflows"]) and site["status"] == "done_unchecked" and step["unchecked"] == ["W-7", "W-9"], (site, step)
+    assert step["detail"].endswith("· 2 done, checks did not pass (W-7, W-9)"), step["detail"]
+    assert (by["work:style"]["file"], by["work:style"]["workflows"], by["work:style"]["lane"]) == ("style.json", ["W-4"], "branch")
+    keep_dir, j2.RUNS_DIR = j2.RUNS_DIR, repo
+    try:
+        out = render_node(j2.saved_snapshot("j2-20261026-155610", 0), docs={"docs": {}, "map": m})["map"]
+    finally:
+        j2.RUNS_DIR = keep_dir
+    wide = out[out.index('<svg class="mapsvg"'):out.index("</svg>")]
+    assert all(t in wide for t in ("Product Manager", "Design Lead", "Solution Architect", "Web Developer</tspan> · 14 workflows · 2 done, checks did not pass")), wide[:400]
+    assert 'stroke="var(--validator)" stroke-width="4" stroke-dasharray="2 3"' in wide and "done · checks did not pass" in out, "amber and dotted, never colour alone"
+    print(f"map: every workflow placed or listed in {seen} saved runs; run 155610 Charter -> three specs (Product Manager, Design Lead, "
+          "Solution Architect) -> Website, given-to lines, W-7 and W-9 done · checks did not pass (amber), style guide ok")
+
+
 def map_tab():
     """Map v1 (map/1): map.json written beside atoms.json (additive, after the summary and again after the report), the
     same map from a rebuilt folder, an old run, a live run, /api/map, the SVG for every status (never colour alone), the
@@ -5448,9 +5503,9 @@ def map_tab():
     assert os.path.exists(os.path.join(run.dir, "atoms.json")) and saved["schema"] == "map/1" and saved["run"] == name and not saved["live"]
     # golden structure: the Requester, then the work in order with a step between each pair
     assert [n["id"] for n in saved["nodes"]] == ["person:requester", "fn:identity", "fn:adaptation", "fn:priority", "fn:coordination", "fn:audit", "work:charter", "step:charter>prd", "work:prd", "step:prd>hld",
-        "work:hld", "step:hld>lld", "work:lld", "step:lld>website", "work:website"], [n["id"] for n in saved["nodes"]]
+        "work:hld", "step:hld>lld", "work:lld", "step:lld>website", "work:website", "step:website>style", "work:style"], [n["id"] for n in saved["nodes"]]
     assert [(n["kind"], n["row"]) for n in saved["nodes"]] == [("person", "people")] + [("function", "functions")] * 5 + [(k, "work") for k in
-        ("work", "engine", "work", "engine", "work", "engine", "work", "engine", "work")]
+        ("work", "engine", "work", "engine", "work", "engine", "work", "engine", "work", "engine", "work")]
     by = {n["id"]: n for n in saved["nodes"]}
     assert [by[f"work:{k}"]["status"] for k in ("charter", "prd", "hld", "lld", "website")] == ["filed"] * 5
     assert [by[f"work:{k}"]["label"] for k in ("prd", "hld", "lld", "website")] == ["Product requirements", "High-level design", "Low-level design", "Website"]
@@ -5469,7 +5524,7 @@ def map_tab():
     assert {(e["from"], e["to"], e["basis"]) for e in saved["edges"] if e["kind"] == "handoff"} == {
         ("work:prd", "work:hld", "recorded"), ("work:prd", "work:lld", "recorded"), ("work:hld", "work:lld", "recorded"),
         ("work:hld", "work:website", "recorded"), ("work:lld", "work:website", "recorded"), ("work:charter", "work:prd", "declared")}
-    assert sum(1 for e in saved["edges"] if e["kind"] == "step") == 8
+    assert sum(1 for e in saved["edges"] if e["kind"] == "step") == 8 + 2      # + the style guide's side job
     ck = [x for a in atoms for x in a["verification"] if x["met"] is not None]
     assert saved["status"] == {"state": "Done", "state_status": "idle", "checks": {"passed": sum(x["met"] is True for x in ck), "run": len(ck)}}
     assert "version of Charter" in saved["not_recorded"] and "which other function worked on Website (only Audit is recorded)" in saved["not_recorded"] and \
@@ -5520,7 +5575,7 @@ def map_tab():
     assert by["person:requester"]["detail"] == "1 message from you" and by["person:requester"]["status"] == "idle"
     # a plain website run has the Charter and the site only; a PRD-only run has no site
     plain = docs_run(BREW_LAB, 200)
-    assert [n["id"] for n in json.load(open(os.path.join(plain.dir, "map.json")))["nodes"]] == ["person:requester", "fn:identity", "fn:adaptation", "fn:priority", "fn:coordination", "fn:audit", "work:charter", "step:charter>website", "work:website"]
+    assert [n["id"] for n in json.load(open(os.path.join(plain.dir, "map.json")))["nodes"]] == ["person:requester", "fn:identity", "fn:adaptation", "fn:priority", "fn:coordination", "fn:audit", "work:charter", "step:charter>website", "work:website", "step:website>style", "work:style"]
     # an old run: no artifacts.json, atoms.json or map.json; the same boxes, and the gaps are named
     old = os.path.join(j2.RUNS_DIR, "j2-20200102-000000")
     shutil.copytree(run.dir, old)
@@ -5561,13 +5616,20 @@ def map_tab():
     pick = lambda k: next(a for a in doc["atoms"] if a["workflow"] in rows[k]["workflows"])
     pick("hld")["status"], pick("lld")["status"] = "open", "verify_failed"
     json.dump(doc, open(os.path.join(edit, "atoms.json"), "w"))
+    ewf = json.load(open(os.path.join(edit, "workflows.json")))
+    json.dump([{**w, "status": "done"} for w in ewf], open(os.path.join(edit, "workflows.json"), "w"))
+    st = {n["id"]: n["status"] for n in M.build(edit)["nodes"]}      # set to done but the atom did not pass: amber, never filed and checked
+    assert st["work:hld"] == st["work:lld"] == "done_unchecked", st
+    for w in ewf:      # the workflows that own the open and the failed atom are not done: left open and fault
+        w["status"] = {pick("hld")["workflow"]: "running", pick("lld")["workflow"]: "failed"}.get(w["id"], w["status"])
+    json.dump(ewf, open(os.path.join(edit, "workflows.json"), "w"))
     json.dump({"schema": "artifacts/1", "rows": [r for r in rows.values() if r["type"] != "website"] + [r for r in json.load(open(os.path.join(edit, "artifacts.json")))["rows"] if r["kind"] == "record"]}, open(os.path.join(edit, "artifacts.json"), "w"))
     me = M.build(edit)
     st = {n["id"]: n["status"] for n in me["nodes"]}
     assert st["work:hld"] == "left_open" and st["work:lld"] == "fault" and st["work:website"] == "not_made" and "running" not in json.dumps(st)      # the summary still lists the site as planned
     # a live run: open means running now, the pill names who is working, a pending question is waiting on you, planned stages are not made
     snap = j2.saved_snapshot(name, 0)
-    snap["atoms_v1"] = {a["id"]: a for a in doc["atoms"]}
+    snap["atoms_v1"], snap["workflows"] = {a["id"]: a for a in doc["atoms"]}, ewf
     lane = {"id": "identity", "name": "Identity", "status": "working"}
     live = M.build(edit, {"snapshot": {**snap, "status": "running", "lanes": [lane], "paused": None}, "stages": ["prd", "hld", "lld", "send_email", "website"],
                           "stage_words": {"send_email": "the test email"}})
@@ -5990,7 +6052,7 @@ def map_tab():
     cross_runs = [("mock run", run.dir), ("mock run with a send", send_run.dir)] + [(n_, os.path.join(j2.RUNS_DIR, n_)) for n_ in real_names]
     assert len(cross_runs) == 4, "both saved runs are in runs/"
     sm_ = M.build(send_run.dir)
-    assert [n_["id"] for n_ in sm_["nodes"] if n_["row"] == "work"][-2:] == ["step:lld>website", "work:website"] and any(n_.get("tag") == "Send" and n_["lane"] == "branch" for n_ in sm_["nodes"]), "the send sits off the trunk, the site follows the LLD"
+    assert [n_["id"] for n_ in sm_["nodes"] if n_["row"] == "work" and "style" not in n_["id"]][-2:] == ["step:lld>website", "work:website"] and any(n_.get("tag") == "Send" and n_["lane"] == "branch" for n_ in sm_["nodes"]), "the send sits off the trunk, the site follows the LLD"
     # the outcome line names what is left open; the chip says when the latest Audit wants a revision
     ns_ = render_node(j2.saved_snapshot(send_name, 0), docs={"docs": {}, "map": sm_})["needs"]
     assert "Finished. 1 item left open: test email (dry run)." in ns_, ns_
@@ -6471,6 +6533,7 @@ if __name__ == "__main__":
         artifact_types()
         artifacts_tab()
         map_tab()
+        map_every_workflow()
         docs_repeat_failure()
         docs_intake_and_compare()
         plain_unchanged("f6938b2", slim="0")      # J2_SLIM=0 is the old path, prompt for prompt

@@ -117,10 +117,12 @@ def listing(d):
 
 
 def served(d, name):
-    """The path of a file named in the run's artifact rows, else None. Nothing else is ever served."""
+    """The path of a file named in the run's artifact rows (saved, or found now by the types list), else None. Nothing
+    else is ever served."""
     name = str(name or "")
     if not d or ".." in name.split("/") or os.path.isabs(name):
         return None
-    ok = {r["file"] for r in (listing(d)["deliverables"] + listing(d)["records"])}
+    ok = {r["file"] for r in (listing(d)["deliverables"] + listing(d)["records"])} | {r["file"].replace(os.sep, "/")
+                                                                                     for r in rows(d)}
     p = os.path.join(d, name)
     return p if name in ok and os.path.isfile(p) and os.path.getsize(p) <= MAX_BYTES else None

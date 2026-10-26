@@ -28,6 +28,15 @@ deed) and its step. A branch's step starts at the document the deed was built fr
 box before it), so a deed never sits between two documents, and the site's step takes the last document as its input. Nodes are
 listed in drawing order: each trunk box, the side jobs that leave it (step, then deed), then the step to the next trunk box.
 
+**Every workflow is placed.** Each workflow in `workflows.json` sits on one box, decided in this order: a realization decide
+workflow (the plan's kind, else an `artifacts/` file with a stage) gets its own spec box `work:<workflow id>`, labelled with its
+stage's `output` from `agents/j2/stages.json`; a revision joins the box of the workflow that owns its section; a workflow of a
+stage joins the box that holds its stage-mates; a section in `stage-<doc>.json` or `sections.json` names its document (or the
+current one); last, the output refs (`artifacts.json`). One that fits none is listed by id in `not_recorded` as "workflows not
+placed on the map: W-n, ...", never dropped. A realization run's trunk is Charter, the specs, then the Website. A spec has a
+hand-off labelled "given to W-n, ..." to every box whose workflows read it (`dependencies`, the plan's `inputs_from`).
+The style guide (`style.json`) is a small side job `work:style`, made by the workflow with `style_guide` true.
+
 | kind | row | what it is | built from |
 |---|---|---|---|
 | person | people | the Requester ("You") | chat (messages from the Requester, a pending question) |
@@ -38,7 +47,9 @@ listed in drawing order: each trunk box, the side jobs that leave it (step, then
 
 A function node also has `calls`, `seconds`, `tokens {input, output}`, `tab` (the existing tab that shows its work: Identity
 Charter, Adaptation Workflows, Priority Conflicts, Coordination Timeline, Audit Audit), `wait_on` (who it waits for) and
-`detail` (the one line on what it is doing). An engine node also has `made_by`.
+`detail` (the one line on what it is doing). An engine node also has `made_by`, `team` (the role of its box's stage from
+`stages.json`, or null: the page then names it from the output type) and `unchecked` (the workflows set to done whose atom did
+not pass its checks; the page counts them in the team label).
 
 **Function states.** A running run uses `lanes()`: working is `running`, waiting is `waiting` (`wait_on` names who), blocked is
 `fault`, idle is `idle` with "last seen: ...". Waiting on the Requester is `waiting_on_you` only while a question to the Requester
@@ -56,9 +67,10 @@ deed). `version` is `null` when the run did not record one: the page says "versi
 | status | from | drawn |
 |---|---|---|
 | filed | every atom of the box is `closed` (a file with no atoms recorded counts as filed) | solid edge, tinted |
+| done_unchecked | a workflow is `done` in `workflows.json` but its atom is `verify_failed` or still `open`: "done · checks did not pass" | thick amber dotted edge |
 | running | live run: an atom is `open`, or a function is working | double edge |
 | left_open | finished run: an atom is still `open` | dashed edge |
-| fault | an atom is `verify_failed`; a function is blocked | thick red edge and "!" |
+| fault | an atom is `verify_failed` and its workflow is not `done`; a function is blocked | thick red edge and "!" |
 | waiting | a function waits for another function | thick amber edge and "?" |
 | waiting_on_you | a question to the Requester is pending | thick amber edge and "?" |
 | not_made | planned but not built, or every atom `abandoned` | hollow |
