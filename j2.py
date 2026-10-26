@@ -92,6 +92,7 @@ DELAY = 0 if llm.MOCK else float(os.getenv("J2_DELAY", "2"))   # spacing for fre
 NAMES = {"validator": "Validator", "identity": "Identity", "adaptation": "Adaptation",
          "priority": "Priority", "coordination": "Coordination", "audit": "Audit", "user": "Requester (you)",
          "system": "System"}
+FUNCTIONS = ("identity", "adaptation", "priority", "coordination", "audit")   # the five, as opposed to the builders
 # Who may hand the turn to whom (J2 routes). Code narrows these further by situation. Only Identity reaches the
 # Requester ("user"); an agent that addresses the Requester anyway is redirected to Identity.
 ROUTES = {"identity": ("user", "adaptation", "priority", "coordination", "audit"),
@@ -1552,6 +1553,8 @@ def mock_charter(text):
         items = ["Visitors can browse products by category", "Every product shows its id and price",
                  "Visitors can filter products by size and price",
                  "Every product has an order button that opens a WhatsApp link with the product id and price"]
+        if re.search(r"\btimings?\b|\bhours?\b|\bopen\b", t):    # only when the brief gives them, never invented
+            items.append("The store timings and the shop address are listed")
     else:
         items = [d for k, d in (("menu", "The menu with prices is shown"), ("hour", "Opening hours are listed"),
                                 ("where", "The address and a map link are shown"),
@@ -1689,6 +1692,10 @@ def mock_page(w, goal, sections, anchors=()):
                 "color:#2b211b}section{padding:16px 0;border-top:1px solid #e6dccf}</style>", hero)
     if "viewport" in n or any("phone" in str(t).lower() for t in w.get("covers_text") or []):
         return '<meta name="viewport" content="width=device-width, initial-scale=1">', ""
+    if re.search(r"timings?|hours|address", n):
+        # The timings/address section (and a later revise of it) writes only its own items, so the page records
+        # where the timings are and a board answer can name that section instead of saying "not recorded".
+        shown = [(i, d) for i, d in shown if re.search(r"timings?|hours|address|where to find", str(d), re.I)] or shown
     if "product" in n:        # fake catalog, id and price recorded as data-id/data-price so a board answer can name them
         idx, d = next(((i, d) for i, d in shown if "price" in str(d).lower()), shown[0] if shown else (1, ""))
         cards = "".join(f'<article class="j2-card" data-id="p{k}" data-price="{p}" style="max-width:100%;'
@@ -2650,6 +2657,7 @@ class J2Run:
         self.open_docs = []          # documents the Requester accepted as they were, with what was still not right
         self.given = {}              # workflow id -> {"edges": [{atom, why}], "whole": bool}: what its builder's prompt held (atom/1)
         self.board = j2_board.new_board()   # board/1 (j2_board.py): questions and answers, behind J2_BOARD=1
+        self.board_read = {}         # function -> board ids it has just read: post() tags its next message "[read Q-n]"
         self.past_workflows, self.stage_archive, self.site_tag, self.stage_checked = [], [], "", True
         self.blueprint, self.proposed_lld, self.lld_revisions, self.lld_conflicts = None, {}, [], {}   # the LLD as the spec
         self.stage_calls0 = 0         # AI calls before the current stage (a document's call range, for the cost estimate)
@@ -2668,10 +2676,13 @@ class J2Run:
         # Test switch, off unless set: in cycle 1, Audit's result for this done-when item is forced to NEEDS_REVISION
         self.force_fail = as_int(os.getenv("J2_FORCE_AUDIT_FAIL"), 0) if os.getenv("J2_FORCE_AUDIT_FAIL") else 0
         self.forced = False
-        # Test switch, off unless set: a workflow id or role word (products|order|filter, matched against its name);
-        # in mock mode, that builder's first attempt asks one question (message board, J2_BOARD=1 only)
+        # Test switch, off unless set: a comma list of askers (identity|adaptation|priority|coordination|audit, or a
+        # workflow id or role word like products|order|filter matched against its name). In mock mode each named
+        # asker asks one question, once per run (message board, J2_BOARD=1 only).
         self.force_question = os.getenv("J2_FORCE_QUESTION") or ""
-        self.question_forced = False
+        self.force_qs = [x.strip().lower() for x in self.force_question.split(",") if x.strip()]
+        self.question_forced = False     # the builders' one forced question
+        self.forced_asks = set()         # the functions that have asked theirs
         self.test_lessons = os.getenv("J2_MEMORY_TEST_LESSONS") == "1"   # demo only: J2.b may read test lessons
         self.p_refused = {}         # workflow name -> why: what Priority refused in the current negotiation
         self.rejections = []        # every validator rejection, with its exact reason
@@ -2817,6 +2828,10 @@ class J2Run:
                 text = "@Requester " + to_requester(text, keep=self._fact_source())   # _ask_user shapes its own
         if who == "identity" and meta.get("to_user"):
             text = self._requester_noun(text)
+        if self.board_read.get(who) and not meta.get("to_user"):
+            # Item 5: a function's message carries the same "[read Q-n]" tag a builder's does, once.
+            ids = self.board_read.pop(who)
+            text, meta = f"{text} [read {', '.join(ids)}]", {**meta, "board_read": ids}
         m = {"id": len(self.chat) + 1, "t": time.strftime("%H:%M:%S"), "who": who, "text": text, "step": self.step, **meta}
         if self.pending_calls.get(who):          # the AI calls behind this message, for the detail view
             m["calls"] = self.pending_calls.pop(who)
@@ -2937,12 +2952,20 @@ class J2Run:
     REPLY_DEFAULTS = ("Thanks, got it. We're working on it now.", "Go ahead with the Requester's latest answer.")
 
     def call(self, fn, reply_format, task, mock, max_tokens=900, json_reply=True, images=None, defaults=None,
-             _retry=False):
+             _retry=False, answer_only=False):
         """One agent's AI call. Every JSON reply format gets a "reason" field. Each call is logged to calls.jsonl
-        (inputs, reply, reason, tokens, time) and linked to the agent's next chat message for the detail view."""
+        (inputs, reply, reason, tokens, time) and linked to the agent's next chat message for the detail view.
+
+        With J2_BOARD=1 every function's format gets the board fields the same way (board_question, board_used) and
+        every function's prompt gets the answered entries (_board_context); answer_only is the board's own answer
+        call, which may not ask back."""
+        board = j2_board.enabled() and json_reply and fn in FUNCTIONS and not answer_only
+        if board and reply_format.rstrip().endswith("}") and '"board_question"' not in reply_format:
+            reply_format = reply_format.rstrip()[:-1] + ", " + self.FN_BOARD_FMT + "}"
         if json_reply and reply_format.rstrip().endswith("}") and '"reason"' not in reply_format:
             reply_format = reply_format.rstrip()[:-1] + ", " + self.REASON + "}"
         user = f"{self.context(fn)}\n\nYOUR TURN:\n{task}" + (self.PLAIN_TO_REQUESTER if fn == "identity" else "") \
+            + (self._board_context() if board else "") \
             + (DOC_NOTE.format(label=self.out["label"]) if self.doc else "")
         system = system_prompt(fn, reply_format, self.out["builder"])
         if self.calls and DELAY:
@@ -2968,6 +2991,8 @@ class J2Run:
             self.call_log[-1]["images"] = [os.path.relpath(p, self.dir) for p in images]
         if fn == "identity" and json_reply and '"to_requester"' in reply_format and reply.get("enough") is not False:
             reply = self._check_audiences(reply, reply_format, task, mock, max_tokens, defaults, _retry)
+        if board and isinstance(reply, dict):
+            self._board_turn(fn, reply)
         return reply
 
     def _check_audiences(self, r, fmt, task, mock, max_tokens, defaults, retried):
@@ -3682,9 +3707,16 @@ class J2Run:
 
         def mock():
             if change:
+                # J2.a for a change request: Identity asks the workflow that already built that part of the page
+                # where it is, instead of assuming the change needs a new section (board, J2_BOARD=1).
                 return json.dumps({"say": "@Adaptation Charter updated for the change request.", "enough": True,
                                    "next": "Adaptation", "goal": {**self.goal, "done_when": list(self.goal["done_when"])
-                                                                  + [f"Change: {change}"]}})
+                                                                  + [f"Change: {change}"]},
+                                   **self._mock_board_ask("identity",
+                                                          self._board_owner_atom("timings", "hours", "address",
+                                                                                 "location"),
+                                                          "where the store timings are",
+                                                          "Are store timings already on the page, and where?")})
             text = " ".join([self.request] + [x["answer"] for x in self.intake])
             if self.doc and not self.intake and len(self.request.split()) < 25 and not last:
                 return json.dumps({"say": "Before we start, a few quick questions so the document has the facts.",
@@ -3787,11 +3819,15 @@ class J2Run:
                 goal = stage_goal(self.output, goal, self.chain)
         # The no-errors gate has fixed wording: Identity can't extend it with features (runs/j2-20261009-133203
         # item 16 added filters and category browsing, so it couldn't pass once those were dropped).
-        goal["done_when"] = [GATE_TEXT if NO_ERRORS_GATE.search(str(c)) else c for c in goal.get("done_when") or []]
+        goal["done_when"] = [GATE_TEXT if NO_ERRORS_GATE.search(str(c)) else
+                             (c.get("criterion") or c.get("text") or str(c)) if isinstance(c, dict) else c
+                             for c in goal.get("done_when") or []]
         crit, core = goal["done_when"], goal.pop("core", None)
         # Every item keeps its number for the whole run: a new charter (a change request) keeps the earlier numbers
-        # and numbers its new items after them. Audit may still use these numbers after items are dropped.
-        old = (self.goal or {}).get("charter_items") or []
+        # and numbers its new items after them. Audit may still use these numbers after items are dropped. But if no
+        # work has been registered against the old numbers yet (the charter was rejected and replaced before
+        # Adaptation proposed anything), there is nothing to keep stable: the replacement renumbers from 1.
+        old = (self.goal or {}).get("charter_items") or [] if self.workflows or self.past_workflows else []
         goal["charter_items"] = old + [c for c in crit if c not in old]
         if isinstance(core, list) and len(core) == len(crit):          # stored by text: drops renumber the list
             goal["core_items"] = [c for c, k in zip(crit, core) if k is True]
@@ -4897,6 +4933,19 @@ class J2Run:
             if self.blueprint and not self.workflows and not self.feedback:
                 return json.dumps(self._mock_blueprint_plan(crit))
             if self.feedback:
+                # A change to something an earlier workflow already built is a revise of that workflow's section,
+                # priced as a fix. Which workflow that is comes off the board (Q-n), not from a guess.
+                owner = self._board_owner("timings", "hours", "address", "location") \
+                    if j2_board.enabled() and re.search(r"\bhours?\b|\btimings?\b|\baddress\b",
+                                                        str(self.feedback), re.I) else None
+                if owner:
+                    return json.dumps({"say": f"@Priority The Requester asked: \"{self.feedback}\". {owner['id']} "
+                                              f"already owns that section ({owner['name']}), so this is a revise of "
+                                              "it, priced as a fix.", "act": "PROPOSE", "next": "Priority",
+                                       "workflows": [{"name": "Visiting hours", "goal_gap": self.feedback,
+                                                      "parts": ["fix"], "revises": owner["id"], "covers": [],
+                                                      "outputs": ["index.html"],
+                                                      "completion_check": "The visiting hours are in that section"}]})
                 return json.dumps({"say": f"@Priority The Requester asked: \"{self.feedback}\". One workflow covers it.",
                                    "act": "PROPOSE", "next": "Priority",
                                    "workflows": [{"name": "Requester change", "goal_gap": self.feedback,
@@ -4928,8 +4977,11 @@ class J2Run:
                 return json.dumps({"say": "@Priority One fix per failing item.", "act": "PROPOSE", "next": "Priority",
                                    "workflows": others})
             if self.cycle == 1 and not self.workflows and (self.goal or {}).get("business_type") == "boutique":
+                timings = items(r"timings|address", {"page_section"})    # only when the brief gave them
                 return json.dumps({"say": "@Priority Proposal for cycle 1: scaffold and styling, products, order "
-                                          "on WhatsApp, and filter.", "act": "PROPOSE", "next": "Priority", "workflows": [
+                                          "on WhatsApp, and filter."
+                                          + (" Plus the store timings and address." if timings else ""),
+                                   "act": "PROPOSE", "next": "Priority", "workflows": [
                                        {"name": "Scaffold and styling", "goal_gap": "No site exists",
                                         "parts": ["page_section", "styling"], "covers": [self._no(crit[0])],
                                         "outputs": ["index.html"],
@@ -4938,7 +4990,13 @@ class J2Run:
                                        {"name": "Products", "goal_gap": "Each product's id and price are shown",
                                         "parts": ["page_section"], "covers": items(r"id and price", {"page_section"}),
                                         "outputs": ["index.html"],
-                                        "completion_check": "Every product shows its id and price"},
+                                        "completion_check": "Every product shows its id and price"}]
+                                   # before the other sections, so the timings sit in their own section
+                                   + ([{"name": "Store timings and address",
+                                        "goal_gap": "Visitors can't see when the shop is open or where it is",
+                                        "parts": ["page_section"], "covers": timings, "outputs": ["index.html"],
+                                        "completion_check": "The timings and the address are on the page"}]
+                                      if timings else []) + [
                                        {"name": "Order on WhatsApp", "goal_gap": "Order button opens a WhatsApp link",
                                         "parts": ["form"], "covers": items(r"whatsapp", {"form"}),
                                         "outputs": ["index.html"],
@@ -5636,8 +5694,14 @@ class J2Run:
                 # The first counter deliberately names Identity, to show the route check in mock mode.
                 return json.dumps({"say": say, "decision": "COUNTER", "workflows": offer,
                                    "next": "Identity" if self.exchanges == 0 else "Adaptation"})
+            # Pricing a revise: Priority asks Adaptation whether this is new work or a fix before it grants
+            # (board, J2_BOARD=1), instead of reading the price off the parts alone.
+            revises = next((str(w.get("revises")) for w in table if w.get("revises")), "")
+            ask = self._mock_board_ask("priority", "adaptation", "new work or a fix",
+                                       f"Is this new work or a fix of {revises}?") if revises else {}
             return json.dumps({"say": f"@Adaptation Granted ({cost_of(table)} of {remaining} left).",
-                               "decision": "GRANT", "workflows": [env(w) for w in table], "next": "Adaptation"})
+                               "decision": "GRANT", "workflows": [env(w) for w in table], "next": "Adaptation",
+                               **ask})
         p = self.call("priority", '{"say": str (address @Adaptation), "decision": "GRANT"|"COUNTER"|"REFUSE", '
                       '"workflows": ' + self.GRANT_FMT + ' (what you fund, each with its envelope; for COUNTER, your '
                       'smaller version), '
@@ -6480,6 +6544,13 @@ class J2Run:
     BOARD_FMT = ('"question": null|{"to": str (an atom id from OTHER SECTIONS or BOARD), "about": str, "text": str} '
                  '(optional: the one atom that knows; at most one question per atom, never repeat an already-answered '
                  'question), "board_used": null|[str] (optional: the board ids, e.g. ["Q-1"], whose answer you used), ')
+    # The same two fields for the five functions (added to every function format in call()). The question field is
+    # called board_question because every function format already uses "question"/"questions" for the Requester or
+    # for a policy question; code reads either key but only ever acts on the {to, about, text} shape.
+    FN_BOARD_FMT = ('"board_question": null|{"to": str (the workflow id, atom id or function name that knows), '
+                    '"about": str, "text": str} (optional: ask the one that knows instead of guessing; at most one '
+                    'question per turn, and never one the BOARD already answers), "board_used": null|[str] '
+                    '(optional: the board ids, e.g. ["Q-1"], whose answer you used)')
 
     def _hld_summary(self):
         comps = (self.chain.get("hld") or {}).get("components")
@@ -6545,7 +6616,9 @@ class J2Run:
         return [{k: (x.get("agent_output") or {}).get(k) for k in ("atom", "section", "anchor", "selectors")}
                 for o in self.workflows if o["id"] != w["id"] for x in o.get("atoms") or [] if x.get("agent_output")]
 
-    # ---- message board (board/1, j2_board.py): item 5, Reuse. Items 2-4 (Ask, Answer, Resume) are _ask_board below.
+    # ---- message board (board/1, j2_board.py). Askers: the five functions (their format gets FN_BOARD_FMT in call())
+    # and the builders (BOARD_FMT). Targets: a workflow, including a done one from an earlier cycle, or another
+    # function. _ask_board is Ask and Answer, _board_turn is one function's turn, _credit_board_used is Reuse.
     def _board_context(self):
         if not j2_board.enabled():
             return ""
@@ -6558,61 +6631,127 @@ class J2Run:
 
     def _board_edges(self):
         """depends_on from every atom a board answer came from, recorded the same way manifest/HLD/LLD edges are:
-        what the prompt held, not whether it was used (used_by only follows a named board_used)."""
+        what the prompt held, not whether it was used (used_by only follows a named board_used). Only atoms: an
+        answer from a function is not an atom, so it carries no atom/1 edge."""
         if not j2_board.enabled():
             return []
-        return [{"atom": e["to"], "why": f"board {e['id']}"} for e in self.board["entries"] if e["status"] == "answered"]
+        atoms = self._atoms_v1()
+        return [{"atom": e["to"], "why": f"board {e['id']}"} for e in self.board["entries"]
+                if e["status"] == "answered" and e["to"] in atoms]
 
-    def _ask_board(self, w, question, attempt):
-        """Items 2 (Ask) and 3 (Answer). Validates the builder's optional question: the target atom exists and is
-        built, at most one question per atom, never a repeat of an already-answered question; otherwise refused,
-        with the reason posted. A valid question gets one short, uncredited call to the target's builder; if its
-        answer changes its own output, _apply_board_update bumps the site version with an "Updated by Q-n" note."""
-        asking, to = self.atom, question.get("to")
+    def _board_target(self, to):
+        """What a question names: ("function", name) for one of the five, ("workflow", workflow) for a workflow id or
+        one of its atom ids (any cycle of this run, and the earlier stages' workflows), else (None, None)."""
+        to = str(to or "")
+        if to.lower() in FUNCTIONS:
+            return "function", to.lower()
+        w = next((x for x in self._all_wfs() if x["id"] == to.split(".")[0]), None)
+        return ("workflow", w) if w else (None, None)
+
+    def _ask_board(self, asker, question, attempt, role=None):
+        """Items 2 (Ask) and 3 (Answer), for a function (asker: its name) or a builder (asker: its workflow). The
+        question is refused, with the reason posted, when it names no target, when a builder's atom already asked,
+        when the board already answers it (60% of its content words, j2_board.duplicate_of) or when the target isn't
+        a built workflow or another function. A valid question gets one short answer-only call, which costs no
+        credits: to the target's builder, given its recorded section and agent_output, or to the target function.
+        If a builder's answer corrects its own output, _apply_board_update bumps the site version ("Updated by Q-n")."""
+        builder = isinstance(asker, dict)
+        role = role or ("builder" if builder else "function")      # what the entry records as asked_by_role
+        asked_by = asker["id"] if builder else asker
+        asking = self.atom if builder else asked_by      # the entry's own side: an atom id, or the function's name
+        label = NAMES.get(asked_by, asked_by)
+        to = question.get("to")
         about, text = str(question.get("about") or ""), str(question.get("text") or "")
+        kind, target = self._board_target(to)
         atoms_v1 = self._atoms_v1()
+        dup = j2_board.duplicate_of(text, self.board["entries"])
         reason = ("max one question per atom; this atom already asked"
-                      if any(e["atom"] == asking for e in self.board["entries"]) else
-                  "no target atom named" if not to else
-                  "that question is already answered; reuse it instead of asking again"
-                      if any(e["to"] == to and e["about"] == about and e["status"] == "answered"
-                             for e in self.board["entries"]) else
-                  "the target atom isn't in the manifest" if to not in atoms_v1 else
-                  "the target atom isn't built yet" if atoms_v1[to]["status"] != "closed" else None)
-        entry = j2_board.new_entry(f"Q-{len(self.board['entries']) + 1}", w["id"], asking, to, about, text,
-                                   self.cycle, attempt)
+                      if builder and any(e["atom"] == asking for e in self.board["entries"]) else
+                  "max one question per turn; this function already asked this turn"
+                      if not builder and any(e["asked_by"] == asked_by and e["cycle"] == self.cycle
+                                             and e["attempt"] == attempt for e in self.board["entries"]) else
+                  "no target named" if not to else
+                  f"already answered in {dup}" if dup else
+                  "the target isn't a workflow of this run or one of the five functions" if not target else
+                  "a function can't ask itself" if kind == "function" and target == asked_by else
+                  "the target atom isn't in the manifest" if kind == "workflow" and "." in str(to) and to not in atoms_v1 else
+                  "the target atom isn't built yet"
+                      if kind == "workflow" and "." in str(to) and atoms_v1[to]["status"] != "closed" else
+                  "the target workflow isn't built yet"
+                      if kind == "workflow" and "." not in str(to) and target.get("status") != "done" else None)
+        entry = j2_board.new_entry(f"Q-{len(self.board['entries']) + 1}", asked_by, asking, to, about, text,
+                                   self.cycle, attempt, asked_by_role=role)
         self.board["entries"].append(entry)
         if reason:
             entry["status"] = "refused"
             j2_board.write(self.dir, self.board)
             j2_board.log_event(self.dir, {"event": "refused", "id": entry["id"], "reason": reason})
-            self.post("system", f"Board {entry['id']}: {w['id']}'s question to {to} refused — {reason}.")
+            self.post("system", f"Board {entry['id']}: {asked_by}'s question to {to} refused — {reason}.")
             return entry
         j2_board.write(self.dir, self.board)
-        j2_board.log_event(self.dir, {"event": "asked", "id": entry["id"], "atom": asking, "to": to, "about": about})
-        target_wid = to.split(".")[0]
-        self.post(w["id"], f"@{NAMES.get(target_wid, target_wid)} {entry['id']}: {text}")
-        reply = self.call(target_wid,
-                           '{"answer": str (plain words; say "not mine" if this isn\'t your area), "artifact_update": '
-                           'null|{"body": str, "head": str} (only if your own section needs correcting)}',
-                           f"ATOM {asking} ASKS YOU ({to}) ABOUT {about}: {text}\nAnswer only if it's your area; say "
-                           '"not mine" otherwise. No credits are charged for this reply.',
-                           lambda: json.dumps(self._mock_board_answer(target_wid)))
+        j2_board.log_event(self.dir, {"event": "asked", "id": entry["id"], "asked_by": asked_by, "role": role,
+                                      "atom": asking, "to": to, "about": about})
+        answerer = target if kind == "function" else target["id"]
+        self.post(asked_by, f"@{NAMES.get(answerer, answerer)} {entry['id']}: {text}")
+        reply = self._board_answer(entry, label, kind, target)
         answer = str((reply or {}).get("answer") or "").strip()
         if not answer or answer.lower() in ("not mine", "n/a", "none"):
             entry["status"] = "unanswered"      # the existing Adaptation path takes it from here, same as any block
         else:
-            entry["status"], entry["answer"], entry["answered_by"] = "answered", answer, target_wid
+            entry["status"], entry["answer"], entry["answered_by"] = "answered", answer, answerer
+            entry["answered_from"] = ({"function": answerer} if kind == "function" else
+                                      {"workflow": target["id"], "version": target.get("version")})
             update = (reply or {}).get("artifact_update")
-            updated = isinstance(update, dict)
+            updated = kind == "workflow" and isinstance(update, dict)
             if updated:
                 entry["artifact_update"] = update
-                self._apply_board_update(target_wid, update, entry["id"])
-            self.post(target_wid, f"@{NAMES.get(w['id'], w['id'])} {entry['id']}: {answer}"
-                                  + (" (updated my section)" if updated else ""))
+                self._apply_board_update(target["id"], update, entry["id"])
+            self.post(answerer, f"@{label} {entry['id']}: {answer}" + (" (updated my section)" if updated else ""))
         j2_board.write(self.dir, self.board)
-        j2_board.log_event(self.dir, {"event": entry["status"], "id": entry["id"]})
+        j2_board.log_event(self.dir, {"event": entry["status"], "id": entry["id"],
+                                      "answered_from": entry["answered_from"]})
         return entry
+
+    def _board_answer(self, entry, label, kind, target):
+        """The Answer call (item 3): one short answer-only call, no question field, no credits, counted as an AI
+        call. A workflow answers from its recorded section and agent_output; a function answers from the run's
+        record. Nothing recorded means "not recorded", never a guess."""
+        ask = f"{label} ASKS YOU ABOUT {entry['about']}: {entry['question']}\n"
+        rules = ('Answer from the record only, in one or two short sentences: say "not recorded" for anything this '
+                 'run has not recorded, and "not mine" if this isn\'t your area. No credits are charged for this '
+                 "reply, and you may not ask anything back.")
+        if kind == "function":
+            return self.call(target, '{"answer": str (plain words; say "not mine" if this isn\'t your area)}',
+                             ask + rules, lambda: json.dumps(self._mock_board_answer_fn(target, entry)),
+                             answer_only=True) or {}
+        sec = self.sections.get(target.get("section")) or {}
+        recorded = {"workflow": target["id"], "name": target.get("name"), "section": target.get("section"),
+                    "status": target.get("status"), "version": target.get("version"), "cycle": target.get("cycle"),
+                    "atoms": [{"atom": a["id"], "agent_output": a.get("agent_output"),
+                               "human_output": a.get("human_output")} for a in target.get("atoms") or []]}
+        return self.call(target["id"],
+                         '{"answer": str (plain words; say "not mine" if this isn\'t your area), "artifact_update": '
+                         'null|{"body": str, "head": str} (only if your own section needs correcting)}',
+                         ask + f"YOUR RECORDED WORK: {json.dumps(recorded, ensure_ascii=False)}\n"
+                         + (f"YOUR SECTION AS RECORDED ({target.get('section')}):\n```head\n{sec.get('head') or ''}\n```"
+                            f"\n```section\n{sec.get('body') or ''}\n```\n" if sec else
+                            "YOUR SECTION AS RECORDED: not recorded.\n") + rules,
+                         lambda: json.dumps(self._mock_board_answer(target["id"], entry)),
+                         answer_only=True) or {}
+
+    def _board_turn(self, fn, reply):
+        """One function's board turn, from call(): any board id it names is credited (and its next message tagged
+        "[read Q-n]"), then its one question is asked. At most one question per turn, by the shape of the format."""
+        if llm.MOCK and not reply.get("board_used"):
+            reply.update(self._mock_board_reuse(fn))
+        q = reply.get("board_question") or reply.get("question")
+        if isinstance(q, dict) and q.get("to"):
+            # Asked first, so the tag below lands on the function's own message. The turn it asked in is recorded as
+            # the entry's attempt, which is how "at most one question per turn" is checked.
+            self._ask_board(fn, q, self.agent_turns.get(fn, 0), role="function")
+        read = self._credit_board_used(reply, fn)
+        if read:
+            self.board_read[fn] = sorted(set((self.board_read.get(fn) or []) + read))
 
     def _apply_board_update(self, wid, update, entry_id):
         """An answer's artifact_update that changes the target's own section (website builds only; a document
@@ -6643,14 +6782,15 @@ class J2Run:
                 a["human_output"] = {**ho, "text": f"{ho.get('text') or ''} Updated by {entry_id}.".strip()}
         self.save("workflows.json", self.workflows)
 
-    def _credit_board_used(self, meta):
-        """Item 5 (Reuse): used_by is only recorded when the builder's reply names the board id it used. Returns
-        the ids actually credited, so the caller can tag its own chat message ("read Q-n")."""
-        read, changed = [], False
+    def _credit_board_used(self, meta, reader=None):
+        """Item 4 (Reuse): used_by is only recorded when the reply names the board id it used. The reader is the
+        atom that is building (a builder) or the function's name. Returns the ids actually credited, so the caller
+        can tag its own chat message ("read Q-n")."""
+        read, changed, who = [], False, reader or self.atom
         for qid in meta.get("board_used") or []:
             e = next((e for e in self.board["entries"] if e["id"] == qid and e["status"] == "answered"), None)
-            if e and self.atom not in e["used_by"]:
-                e["used_by"].append(self.atom)
+            if e and who and who not in e["used_by"]:
+                e["used_by"].append(who)
                 changed = True
             if e:
                 read.append(qid)
@@ -6658,34 +6798,129 @@ class J2Run:
             j2_board.write(self.dir, self.board)
         return read
 
+    # Topics the mock reuse rule matches on (the keywords of this demo's brief and change request; timings and hours
+    # are the same topic). An entry is reused only when a topic is in both its question and the reader's own work.
+    BOARD_TOPICS = (("timings", "timing", "hours", "hour"), ("price", "prices", "priced", "pricing"),
+                    ("product", "products"), ("order", "orders"), ("filter", "filters", "filtering"))
+
+    def _board_reader(self, reader):
+        """(what the reader is called, the items it is working on, its own asked_by id). A builder: its name and the
+        done-when items it covers. A function: its name, the Requester's change request and the workflows of the
+        cycle it is working on — plus, for Audit, every done-when item, since it checks them all."""
+        crit = (self.goal or {}).get("done_when") or []
+        if isinstance(reader, dict):
+            covered = [c for c in crit if self._no(c) in (self._wf_items(reader) or [])]
+            return str(reader.get("name") or ""), covered + [str(reader.get("goal_gap") or "")], reader["id"]
+        working = [str(self.feedback or "")] + [str(w.get("name") or "") for w in self.workflows
+                                                if w.get("cycle") == self.cycle]
+        return NAMES.get(reader, reader), (crit if reader == "audit" else []) + working, reader
+
+    def _mock_board_reuse(self, reader):
+        """Mock mode's Reuse (item 4): the reader names the answered entries that share a topic (BOARD_TOPICS) with
+        its own name or covered items, never every entry on the board. A builder doesn't reuse what its own atom
+        asked (it got that as an Answer); a function reads its own earlier entry back off the board on a later
+        turn, which is the point of the board."""
+        if not j2_board.enabled():
+            return {}
+        name, covered, mine = self._board_reader(reader)
+        mytext = " ".join([name] + [str(c) for c in covered]).lower()
+        used = [e["id"] for e in self.board["entries"] if e["status"] == "answered"
+                and not (isinstance(reader, dict) and e["asked_by"] == mine)
+                and any(any(k in mytext for k in topic) and any(k in str(e["question"]).lower() for k in topic)
+                        for topic in self.BOARD_TOPICS)]
+        return {"board_used": used} if used else {}
+
+    def _mock_board_ask(self, fn, to, about, text):
+        """Mock mode's Ask (item 2) for a function, via J2_FORCE_QUESTION (a comma list: identity, priority, audit,
+        coordination, adaptation, or a builder's id or role word). The named function asks this one question once
+        per run. The switch is for humans: it is posted as a test note and never reaches an agent's prompt."""
+        if not (j2_board.enabled() and llm.MOCK) or fn not in self.force_qs or fn in self.forced_asks:
+            return {}
+        if not to or not self._board_target(to)[1]:
+            return {}
+        self.forced_asks.add(fn)
+        self.post("system", f"TEST SWITCH J2_FORCE_QUESTION={self.force_question} (humans only, agents don't see "
+                            f"this): {NAMES[fn]} asks {to} about {about}.", warning=True, test=True)
+        return {"board_question": {"to": to, "about": about, "text": text}}
+
+    def _board_owner(self, *words):
+        """The done workflow that owns this subject: the one whose name says so, else the one whose gap or covered
+        items do, latest first. Who to ask, read off the run's own record; None when nothing built it."""
+        crit = (self.goal or {}).get("done_when") or []
+        done = [w for w in reversed(self._all_wfs()) if w.get("status") == "done"]
+        for name_only in (True, False):
+            for w in done:
+                text = " ".join([str(w.get("name") or "")] if name_only else
+                                [str(w.get("goal_gap") or "")]
+                                + [c for c in crit if self._no(c) in (self._wf_items(w) or [])]).lower()
+                if any(k in text for k in words):
+                    return w
+        return None
+
+    def _board_owner_atom(self, *words):
+        """The atom of that workflow (what a question names), or None."""
+        w = self._board_owner(*words) or {}
+        return next((a["id"] for a in w.get("atoms") or [] if a.get("agent_output")), None)
+
     def _mock_board_extra(self, w, attempt):
-        """Mock mode only. Ask (item 2, via J2_FORCE_QUESTION): a question only on the matched workflow's first
-        attempt, at most once per run. Reuse (item 5): otherwise, any board id answered by a different atom is
-        named, so later builders reuse it without a real model."""
-        fq = self.force_question
-        if fq and attempt == 1 and not self.question_forced and (fq == w["id"] or fq.lower() in str(w["name"]).lower()):
+        """Mock mode only, for a builder. Ask (item 2, via J2_FORCE_QUESTION): a question only on the matched
+        workflow's first attempt, at most once per run. Reuse (item 4): the answered entries that share a topic with
+        this workflow, so later builders reuse them without a real model."""
+        words = [x for x in self.force_qs if x not in FUNCTIONS]
+        if words and attempt == 1 and not self.question_forced \
+                and any(x == w["id"].lower() or x in str(w["name"]).lower() for x in words):
             manifest = self._manifest(w)
             if manifest:
                 self.question_forced = True
-                self.post("system", f"TEST SWITCH J2_FORCE_QUESTION={fq} (humans only, agents don't see this): "
-                                    f"{w['id']} asks {manifest[-1]['atom']} about its data attributes.",
+                self.post("system", f"TEST SWITCH J2_FORCE_QUESTION={self.force_question} (humans only, agents don't "
+                                    f"see this): {w['id']} asks {manifest[-1]['atom']} about its data attributes.",
                           warning=True, test=True)
                 return {"question": {"to": manifest[-1]["atom"], "about": "data attributes",
                                       "text": "Which attributes hold this item's id and price?"}}
-        used = [e["id"] for e in self.board["entries"] if e["status"] == "answered" and e["asked_by"] != w["id"]]
-        return {"board_used": used} if used else {}
+        return self._mock_board_reuse(w)
 
-    def _mock_board_answer(self, wid):
-        """Mock mode's Answer (item 3): the target's own section, read for its data-* attributes; "not recorded"
-        when none are found, never invented."""
-        w = self._wf(wid)
-        body = (self.sections.get((w or {}).get("section")) or {}).get("body") or ""
+    def _mock_board_answer(self, wid, entry=None):
+        """Mock mode's Answer (item 3) from a workflow: read out of its own recorded section. A question about an
+        attribute or a price names the section's data-* attributes (and offers the correction that records them); a
+        question about where something is names the section and its anchor. "not recorded" when the section holds
+        neither, never invented."""
+        w = next((x for x in self._all_wfs() if x["id"] == wid), None)
+        sid = (w or {}).get("section")
+        body = (self.sections.get(sid) or {}).get("body") or ""
+        asked = " ".join([str((entry or {}).get("about") or ""), str((entry or {}).get("question") or "")]).lower()
         attrs = sorted(set(re.findall(r"\bdata-[\w-]+(?==)", body)))
-        if not attrs:
-            return {"answer": "not recorded", "artifact_update": None}
-        note = f"<!-- board: {', '.join(attrs)} confirmed -->"
-        return {"answer": f"This section's items use {', '.join(attrs)}.",
-                "artifact_update": None if note in body else {"body": body.rstrip() + "\n" + note}}
+        if not re.search(r"where|which section|on the page", asked) and attrs:
+            note = f"<!-- board: {', '.join(attrs)} confirmed -->"
+            return {"answer": f"This section's items use {', '.join(attrs)}.",
+                    "artifact_update": None if note in body else {"body": body.rstrip() + "\n" + note}}
+        # "where": the section of its own body whose heading answers the question, by anchor and heading.
+        secs = re.findall(r'<section[^>]*\bid="([\w-]+)"[^>]*>\s*(?:<h[23][^>]*>([^<]*)</h[23]>)?', body)
+        want = j2_board.content_words(asked)
+        pick = next((s for s in secs if any(k in (s[1] or "").lower() for k in want)), secs[0] if secs else None)
+        if sid and pick:
+            return {"answer": f"Yes: it is in section {sid}, anchor #{pick[0]}"
+                              + (f', headed "{pick[1]}"' if pick[1] else "") + ".", "artifact_update": None}
+        if attrs:
+            return {"answer": f"This section's items use {', '.join(attrs)}.", "artifact_update": None}
+        return {"answer": "not recorded", "artifact_update": None}
+
+    def _mock_board_answer_fn(self, fn, entry):
+        """Mock mode's Answer (item 3) from a function: read out of the run's own record. Adaptation answers from the
+        proposal it has on the table (self.a_pos), so it can say whether the work is new or a revise priced as a
+        fix while Priority is still pricing it. Anything the run hasn't recorded is "not recorded"."""
+        text = str((entry or {}).get("question") or "").lower()
+        if fn == "adaptation" and re.search(r"new work|fix|revis", text):
+            table = self.a_pos or []
+            named = (re.search(r"\bW-\d+\b", text, re.I) or [""])[0].upper()
+            w = next((x for x in table if str(x.get("revises") or "").upper() == named and named), None) \
+                or next((x for x in table if x.get("revises")), None)
+            if w:
+                return {"answer": f"A fix: {w.get('name')} revises {w['revises']}'s section, priced with a 'fix' "
+                                  f"part ({', '.join(w.get('parts') or []) or 'not recorded'})."}
+            if table:
+                return {"answer": f"New work: {table[0].get('name')} revises nothing and covers "
+                                  f"{table[0].get('covers') or 'not recorded'}."}
+        return {"answer": "not recorded"}
 
     def _spec_conflict(self, w, meta):
         """A builder says its LLD slice can't be built as written (spec_conflict). The first time for a section, that
@@ -7143,8 +7378,14 @@ class J2Run:
                                        ("Section present in the page" if ok else "No section for this item")})
             n = sum(f["verdict"] == "NEEDS_REVISION" for f in fs)
             rub = [{"id": rid, "verdict": "PASS", "evidence": "Mock: looks fine in the measurements"} for rid, _ in RUBRIC]
+            # Checking a price item: Audit asks the workflow that built the products which attribute holds the
+            # price, rather than guessing from the markup (board, J2_BOARD=1).
+            changed = any(m.get("change") for m in self.chat)     # the demo's order: after the change request
+            ask = self._mock_board_ask("audit", self._board_owner_atom("product"), "the price attribute",
+                                       "Which attribute holds the price?") if changed else {}
             return json.dumps({"say": "@Identity All criteria pass; done-when may hold." if not n else
-                               f"@Identity {n} finding needs revision.", "findings": fs, "rubric": rub, "next": "Identity"})
+                               f"@Identity {n} finding needs revision.", "findings": fs, "rubric": rub,
+                               "next": "Identity", **ask})
         r = self.call("audit", '{"say": str, "findings": [{"id": "F-1", "item": int|null (done-when item number; null '
                       'for an extra issue), "criterion": str, "verdict": "PASS"|"PASS_WITH_WARNING"|'
                       '"NEEDS_REVISION"|"BLOCKED_BY_EVIDENCE"|"POLICY_CONCERN", "severity": "low"|"medium"|"high"|'

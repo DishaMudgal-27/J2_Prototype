@@ -114,6 +114,11 @@ J2_BOARD=1 STUDIO_PROVIDER=claude-cli python3 j2_server.py
 # Offline board demo: type a clothing-shop brief (products, filters, order on WhatsApp); the order builder asks one question on purpose
 J2_BOARD=1 J2_FORCE_QUESTION=order STUDIO_MOCK=1 python3 j2_server.py
 
+# The same with the functions asking (Identity, Priority and Audit each ask one question):
+J2_BOARD=1 J2_FIXES=1 J2_FORCE_QUESTION=identity,priority,audit STUDIO_MOCK=1 python3 j2_server.py
+# or the whole demo without a browser, saved to runs/:
+python3 j2_flow_test.py --fast --board-demo
+
 # Milestone emails: one per goal reached (each document, then the site). Dry run: nothing is sent
 J2_MILESTONE_EMAILS=1 J2_TEST_EMAIL=you@example.com STUDIO_PROVIDER=claude-cli python3 j2_server.py
 ```
@@ -150,11 +155,12 @@ Set any of these before `python3 j2_server.py`, like the examples above.
 | `J2_CHROME` | auto | Path to Chrome for Audit screenshots |
 | `J2_OVERRIDE_KEY` | unset | Owner override key, set in `.env` only (see `README.md`) |
 | `J2_BOARD` | off | `1` turns on the message board |
-| `J2_FORCE_QUESTION` | off | Mock-only test switch: the matching builder (workflow id or role word) asks one question |
+| `J2_FORCE_QUESTION` | off | Mock-only test switch: a comma list of askers, each asking one question. A function (`identity`, `adaptation`, `priority`, `coordination`, `audit`) or a builder (workflow id or role word) |
 | `J2_MILESTONE_EMAILS` | off | `1` writes a milestone email per goal reached (dry run) |
 | `J2_SEND_MODE` | `dry-run` | `dry-run` or `mock` (tests). Live sending is not built |
 | `J2_TEST_EMAIL` | unset | The only address a send may go to |
-| `J2_TEST_SLACK_TARGET` | unset | The only Slack target a send may go to |
+| `J2_TEST_SLACK_TARGET` | unset
+ | The only Slack target a send may go to |
 
 ## Checks
 
