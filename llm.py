@@ -106,9 +106,27 @@ def _ask_claude_cli(system, user, effort, progress, images=None):
     env = {k: v for k, v in os.environ.items() if k not in ("ANTHROPIC_API_KEY", "CLAUDECODE")}
     io = (["--input-format", "stream-json", "--output-format", "stream-json", "--verbose"] if images
           else ["--output-format", "json"])
-    cmd = ["claude", "-p", *io, "--system-prompt", system, "--tools", "", "--model", MODEL,
+    # A long system prompt goes in a temporary file: Windows refuses a command line over 32,767 characters (WinError 206)
+    sysfile = None
+    if len(system) > 20000:
+        with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as f:
+            f.write(system)
+            sysfile = f.name
+    cmd = ["claude", "-p", *io, *(["--system-prompt-file", sysfile] if sysfile else ["--system-prompt", system]),
+           "--tools", "", "--model", MODEL,
            "--effort", "low" if effort == "low" else "high", "--no-session-persistence", "--strict-mcp-config",
            "--disable-slash-commands", "--setting-sources", ""]
+    try:
+        return _run_claude_cli(cmd, images, user, env, progress)
+    finally:
+        if sysfile:
+            try:
+                os.remove(sysfile)
+            except OSError:
+                pass
+
+
+def _run_claude_cli(cmd, images, user, env, progress):
     stdin = (json.dumps({"type": "user", "message": {"role": "user", "content": _blocks(user, images)}}) + "\n"
              if images else user)
     last = None

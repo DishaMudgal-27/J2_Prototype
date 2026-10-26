@@ -286,6 +286,36 @@
       "form": "data",
       "file": "board.json",
       "deliverable": false
+    },
+    {
+      "name": "realization",
+      "kind": "record",
+      "label": "Realization plan",
+      "tag": "Other",
+      "color": "--other",
+      "form": "data",
+      "file": "realization.json",
+      "deliverable": false
+    },
+    {
+      "name": "workflow_files",
+      "kind": "record",
+      "label": "Workflow file",
+      "tag": "Other",
+      "color": "--other",
+      "form": "data",
+      "file": "artifacts/*.*",
+      "deliverable": false
+    },
+    {
+      "name": "workflow_files_in_folders",
+      "kind": "record",
+      "label": "Workflow file",
+      "tag": "Other",
+      "color": "--other",
+      "form": "data",
+      "file": "artifacts/*/*.*",
+      "deliverable": false
     }
   ]
 }

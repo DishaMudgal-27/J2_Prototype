@@ -113,7 +113,10 @@ def run_chrome(cmd, timeout, text=True):
     try:
         out, err = p.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
-        os.killpg(p.pid, signal.SIGKILL)
+        if hasattr(os, "killpg"):
+            os.killpg(p.pid, signal.SIGKILL)
+        else:      # Windows has no process groups: taskkill /T ends Chrome and the helpers it started
+            subprocess.run(["taskkill", "/F", "/T", "/PID", str(p.pid)], capture_output=True)
         p.communicate()
         raise
     return subprocess.CompletedProcess(cmd, p.returncode, out, err)
