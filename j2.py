@@ -574,6 +574,8 @@ def check_problems(a, source, types=CHECK_TYPES, upstream="", ranges=False):
             if bad := target_problem(target, told, source):
                 out.append(f"{lab} {t} {bad}")
             nums = [int(x) for x in re.findall(r"\d+", NAME_WITH_DIGIT.sub(" ", label) if ranges else label)]
+            if t == "tap-targets":      # "tappable at 360px": the screen width is never the count or the size
+                nums = [x for x in nums if x not in j2_check.WIDTHS.values()]
             if nums and as_int(c.get("expect"), None) not in nums:
                 out.append(f"{lab} says {label!r} but expects {c.get('expect')!r}")
     if SPECIFIC.search(str(a.get("goal") or "")) and not any(

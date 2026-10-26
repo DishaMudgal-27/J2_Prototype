@@ -1153,6 +1153,12 @@ def atom_checks():
     bad = j2.check_problems({**a, "how": how, "verification": [opt]}, src)
     assert bad == ["check 1 says '8 event options' but expects 9"], bad
     assert not j2.check_problems({**a, "how": how, "verification": [{**opt, "expect": 8}]}, src)
+    # tap targets: the screen widths 360/1280 in a label are never the count or the size (runs/j2-20261026-174314)
+    tap = {"text": "Controls are tappable at 360px", "type": "tap-targets", "target": "#events", "expect": 44}
+    assert not j2.check_problems({**a, "how": how, "verification": [tap]}, src)
+    assert not j2.check_problems({**a, "how": how, "verification": [{**tap, "text": "44px targets at 360px and 1280px"}]}, src)
+    assert j2.check_problems({**a, "how": how, "verification": [{**tap, "text": "48px targets at 360px"}]}, src) == [
+        "check 1 says '48px targets at 360px' but expects 44"], "a real size still has to match"
     for t in ("Day 1", "hello@brewlab.in", ".untold-class"):
         bad = j2.check_problems({**a, "how": how, "verification": [{**opt, "text": "event options", "target": t}]}, src)
         assert len(bad) == 1 and "targets" in bad[0], (t, bad)
