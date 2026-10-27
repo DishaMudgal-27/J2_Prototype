@@ -125,7 +125,8 @@ PAUSES = {"info": "J2.a: not enough information to work yet",
           "ruling_budget": "J2_FIXES=1: Identity's ruling is over budget after Priority's final answer",
           "audit": "J2.h: a done-when item only the Requester can close",
           "fact": "J2.g: a fact only the Requester knows",
-          "limit": "a safety limit was hit: add budget, drop the failing items or ship as is"}
+          "limit": "a safety limit was hit: add budget, drop the failing items or ship as is",
+          "send_confirm": "J2_SEND_MODE=live: may real emails go to the test address in this run"}
 TO_USER = re.compile(r"@(?:requester|user)\b", re.I)
 
 
@@ -1388,7 +1389,7 @@ DECISION_FMT = ('"decision": "continue"|"drop"|"ship"|"stop"|null (null if the a
                 'leave out)')
 BUILT_CLAIM = re.compile(r"\b(?:now has|already has|so far the (?:page|site) has|the (?:page|site) has|is built|"
                          r"(?:we|I)(?:'ve| have)? (?:built|added)|has been (?:built|added))\b", re.I)
-DECISION_PAUSES = ("limit", "conflict", "ruling_budget")    # the Requester decides; info/fact/question only inform
+DECISION_PAUSES = ("limit", "conflict", "ruling_budget", "send_confirm")    # the Requester decides; info/fact/question only inform
 ONLY_PICK = re.compile(r"\s*(option\s*)?[1-9]\s*[.:)]?\s*", re.I)
 
 
@@ -2686,6 +2687,7 @@ class J2Run:
         self.docset, self.stages, self.stage_i, self.chain, self.docs = [], [], 0, {}, {}
         self.deed_log, self.deed_seen = [], set()      # send deeds done (note, result) and the notices already given
         self.milestone_log = []      # milestone emails (J2_MILESTONE_EMAILS=1, or the brief asks for updates by email): one per goal reached
+        self.send_confirm = None     # J2_SEND_MODE=live: the Requester's answer (True/False) to "send real emails?", asked once a run
         self.open_docs = []          # documents the Requester accepted as they were, with what was still not right
         self.given = {}              # workflow id -> {"edges": [{atom, why}], "whole": bool}: what its builder's prompt held (atom/1)
         self.board = j2_board.new_board()   # board/1 (j2_board.py): questions and answers, behind J2_BOARD=1
@@ -3366,7 +3368,7 @@ class J2Run:
         return {"intake": self._identity_intake, "stage_decision": self._stage_decision, "resolve": self._identity_resolve, "approval": self._identity_approval,
                 "audit": self._identity_audit, "requester_answered": self._identity_hears_requester,
                 "ruling_budget": self._identity_ruling_budget, "limit": self._identity_limit,
-                }.get(h.get("kind"), self._identity_question)(h)
+                "send_confirm": self._identity_send_confirm}.get(h.get("kind"), self._identity_question)(h)
 
     CHARTER_FMT = ('{"statement": str, "site_name": str, "audience": str, "standards": [str], "rules": [str], '
                    '"done_when": [str], "core": [bool] (one per done-when item, same order: true for the business '
@@ -3615,6 +3617,8 @@ class J2Run:
         """A send deed after the documents: one workflow, one atom, no charter, plan, builder or audit. Code builds the
         message from the last finished document, sends it (dry-run or mock; recipient only from the environment),
         writes the receipt, and runs the atom's one check, which only reads that receipt. Then the chain goes on."""
+        if j2_send.DEEDS[kind]["channel"] == "email" and self._confirm_send({"deed": kind}):
+            return
         self.past_workflows += self.workflows
         self.workflows = []
         d, cost = j2_send.DEEDS[kind], RATES_DEED().get(kind, 0)
@@ -3639,7 +3643,7 @@ class J2Run:
         self._recalc_spent()
         self.given[wid] = {"edges": [{"atom": x, "why": f"the message is built from {art['file']}"}
                                      for x in art["atoms"]] if art else [], "whole": False}
-        rec = j2_send.send(kind, art["file"], text, art["file"]) if art else \
+        rec = j2_send.send(kind, art["file"], text, art["file"], **self._send_args(atom)) if art else \
             {"deed": kind, "channel": d["channel"], "mode": j2_send.mode(), "sent": False, "result": "refused",
              "refused": "there is no finished document to send", "artifact": None}
         os.makedirs(self.dir, exist_ok=True)
@@ -3648,8 +3652,7 @@ class J2Run:
                                 "by": "code"}, ensure_ascii=False) + "\n")
         self._run_checks(wf, 1, "", atoms=[atom])
         ok = atom["results"][0]["pass"]
-        note = ("Not sent (dry run)." if ok is None else f"Not sent: {rec['refused'] or atom['results'][0]['evidence']}."
-                if ok is False else f"The {d['words']} was sent in test mode to the mock recorder only.")
+        note = self._send_note(rec, ok, atom, f"The {d['words']} was sent in test mode to the mock recorder only.")
         atom["human_output"] = {"text": note}
         atom["deed"] = {k: rec.get(k) for k in ("channel", "mode", "sent")}
         wf["status"] = "failed" if ok is False else "done"
@@ -3662,11 +3665,48 @@ class J2Run:
 
     GOAL_TAGS = {"prd": "PRD", "hld": "HLD", "lld": "LLD", "website": "Website"}
 
-    def _milestone(self):
+    def _confirm_send(self, handoff):
+        """J2_SEND_MODE=live: before the first email of a run, Identity asks the Requester once. True when the run paused;
+        the answer (_identity_send_confirm) comes back with handoff. No = every send of the run stays a dry run."""
+        if j2_send.mode() != "live" or self.send_confirm is not None:
+            return False
+        self._ask_user("Before the first email goes out, one question.",
+                       [{"question": "Send real emails to your test address during this run?", "options": ["Yes", "No"]}],
+                       "send_confirm", handoff={"kind": "send_confirm", **handoff})
+        return True
+
+    def _identity_send_confirm(self, h):
+        """The answer to the send question: Yes (or option 1) allows live sends for the rest of the run; anything else is No."""
+        yes = bool(re.match(r"\s*(?:yes|y|ok|sure|option\s*1|1)\b", h.get("answer") or "", re.I))
+        self.send_confirm = yes
+        self.decisions[-1]["decision"] = "yes" if yes else "no"
+        self.post("identity", "Got it. Real emails go to your test address only." if yes else
+                  "Got it. No real emails: every send in this run stays a dry run.", to_user=True, next="user")
+        if h.get("deed"):
+            return self._deed_stage(h["deed"])
+        self._goal_done(h.get("r") or {})
+
+    def _send_args(self, atom):
+        """What j2_send.send needs to send at most once: the run folder (its receipts), the email's key and the answer."""
+        return {"run_dir": self.dir, "key": f"{self.run_id}/{atom['id']}/{atom['goal']}", "confirmed": self.send_confirm is True}
+
+    @staticmethod
+    def _send_note(rec, ok, atom, mock_note):
+        """The atom's one line: sent, not sent and why (it stays open), or refused."""
+        if ok is None:
+            return atom["results"][0]["evidence"] + "."
+        if ok is False:
+            return f"Not sent: {rec['refused'] or atom['results'][0]['evidence']}."
+        if rec.get("error") == "duplicate":
+            return "Already sent earlier in this run; not sent again."
+        return f"Sent to your test address ({rec['to_masked']})." if rec.get("mode") == "live" else mock_note
+
+    def _milestone(self, r=None):
         """A goal reached (a document filed and checked, or the site workable): one email about it, built and sent by code,
         when milestone emails are on (J2_MILESTONE_EMAILS=1, or the brief asks for updates by email). Dry-run or mock only,
         to J2_TEST_EMAIL only. It is a deed atom (verb do) whose parent is the goal it reports. An email never stops the
-        run: when the credits can't cover it, it is skipped and the reason recorded."""
+        run: when the credits can't cover it, it is skipped and the reason recorded. True when the run paused to ask the
+        Requester before its first live email (r, Identity's reply, comes back with the answer)."""
         said = [self.request] + [x["answer"] for x in self.intake]
         if os.getenv("J2_MILESTONE_EMAILS", "0") != "1" and not j2_send.asks_updates(*said):
             return
@@ -3679,7 +3719,10 @@ class J2Run:
             why = f"it needs {cost} work credits and {max(self.budget - self.spent, 0)} are left"
             self.milestone_log.append({"goal": tag, "atom": None, "result": "skipped", "why": why})
             self._event("code", "milestone_skipped", f"{tag}: {why}")
-            return self.post("system", f"Milestone email for {tag} skipped: {why}. The run goes on.", warning=True)
+            self.post("system", f"Milestone email for {tag} skipped: {why}. The run goes on.", warning=True)
+            return False
+        if self._confirm_send({"r": r}):
+            return True
         base = (self.stage_archive[0]["goal"] if self.stage_archive else self.goal) or {}
         project = base.get("site_name") or base.get("product_name") or "Project"
         res = [r for w in self.workflows for a in w.get("atoms") or [] for r in a.get("results") or []]
@@ -3706,21 +3749,20 @@ class J2Run:
               "calls_used": 0, "retries_used": 0, "outputs": None, "completion_check": "", "dependencies": [],
               "status": "running", "cycle": self.cycle, "agent": "Code", "section": None, "revises": None, "atoms": [atom]}
         self.given[wid] = {"edges": [{"atom": a["id"], "why": f"the email reports {tag} done"} for w in self.workflows for a in w.get("atoms") or []], "whole": False}
-        rec = j2_send.send("milestone_email", art, text, art if text else None, built=built)
+        rec = j2_send.send("milestone_email", art, text, art if text else None, built=built, **self._send_args(atom))
         os.makedirs(self.dir, exist_ok=True)
         with open(os.path.join(self.dir, "receipts.jsonl"), "a", encoding="utf-8") as f:
             f.write(json.dumps({"atom": aid, "type": "deed-send-record", **rec, "t": time.strftime("%Y-%m-%dT%H:%M:%S"), "by": "code"}, ensure_ascii=False) + "\n")
         self._run_checks(wf, 1, "", atoms=[atom])
         ok = atom["results"][0]["pass"]
-        note = "Not sent (dry run)." if ok is None else f"Not sent: {rec['refused'] or atom['results'][0]['evidence']}." if ok is False \
-            else "Sent in test mode to the mock recorder only."
+        note = self._send_note(rec, ok, atom, "Sent in test mode to the mock recorder only.")
         atom["human_output"] = {"text": note}
         atom["deed"] = {k: rec.get(k) for k in ("channel", "mode", "sent")}
         wf["status"] = "failed" if ok is False else "done"
         self.past_workflows.append(wf)
         self._recalc_spent()
         self.save("workflows.json", self.workflows)
-        self.milestone_log.append({"goal": tag, "atom": aid, "result": rec["result"], "why": rec.get("refused")})
+        self.milestone_log.append({"goal": tag, "atom": aid, "result": rec["result"], "why": rec.get("refused") or rec.get("why")})
         self.post("system", f"Milestone email · {tag} done: {note}", warning=ok is False)
 
     def _deeds_finished(self):
@@ -4381,6 +4423,29 @@ class J2Run:
             rows = list(by.values())
         return rows
 
+    def _goal_done(self, r):
+        """The site or a document is workable (r: Identity's reply): its milestone email, then the next stage or the end.
+        When the email is the first live send, the run pauses to ask the Requester and the answer comes back here."""
+        if self._milestone(r):                 # a goal reached: its email (when milestone emails are on); never stops the run
+            return
+        if self.stages:                    # a design-document run: the next stage starts, or the last one is recorded
+            self.post("system", f"The {self.out['noun']} is workable: every check passes.")
+            if self._next_stage():
+                return
+        self.post("identity", ("We're finished. Kept as they were: " + "; ".join(self.open_docs) + "." if self.open_docs else
+                               "Your design documents are ready." if self.docset and self.stage_kind != "website" and
+                               len(self.docset) > 1 else
+                               r.get("to_requester") or r.get("say") or ("Your document is ready." if self.doc else
+                                                                         "Your website is ready.")), done=True,
+                  to_user=True, next="user")
+        self.outcome = (self._ship_outcome("after the Requester accepted a document as it is") if self.open_docs else
+                        "Done: the design documents are workable. Every done-when item, rubric item and necessary "
+                        "condition passes in each." if self.docset and self.doc and len(self.docset) > 1
+                        else self.out["done"])
+        self.turn = None
+        if self.memory and not self.docset:
+            self._save_playbook()
+
     def _identity_limit(self, h):
         """A safety limit was hit (budget, cycles, turns, the same failure twice in a row) or only the Requester can
         close what's left. Identity asks: keep working (adding budget if it ran out), drop the failing items, or ship
@@ -4626,25 +4691,7 @@ class J2Run:
                       defaults=("Your website is ready.", "") if not fails else
                       ("We're still working on your site.", "Not workable yet: rework the failing findings."))
         if not fails and r.get("done"):
-            self._milestone()                  # a goal reached: its email (when milestone emails are on); never stops the run
-            if self.stages:                    # a design-document run: the next stage starts, or the last one is recorded
-                self.post("system", f"The {self.out['noun']} is workable: every check passes.")
-                if self._next_stage():
-                    return
-            self.post("identity", ("We're finished. Kept as they were: " + "; ".join(self.open_docs) + "." if self.open_docs else
-                                   "Your design documents are ready." if self.docset and self.stage_kind != "website" and
-                                   len(self.docset) > 1 else
-                                   r.get("to_requester") or r.get("say") or ("Your document is ready." if self.doc else
-                                                                             "Your website is ready.")), done=True,
-                      to_user=True, next="user")
-            self.outcome = (self._ship_outcome("after the Requester accepted a document as it is") if self.open_docs else
-                            "Done: the design documents are workable. Every done-when item, rubric item and necessary "
-                            "condition passes in each." if self.docset and self.doc and len(self.docset) > 1
-                            else self.out["done"])
-            self.turn = None
-            if self.memory and not self.docset:
-                self._save_playbook()
-            return
+            return self._goal_done(r)
         if fails and r.get("needs_decision"):
             return self._identity_limit({"reason": "Identity: the site can't be finished as asked without your "
                                                    "decision.", "budget_needed": as_int(r.get("budget_needed")) or None})

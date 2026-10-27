@@ -78,9 +78,13 @@ refused and a brief that names another recipient is told so. The one check, `dee
 |---|---|---|---|
 | `dry-run` (default) | nothing is sent; note "Not sent (dry run)" | does not pass (could not run) | open |
 | `mock` | one message goes to an in-process recorder, nothing leaves the machine | passes | closed |
+| `live`, sent | one email by SMTP (STARTTLS) to the test address; note "Sent to your test address (m***@...)" | passes | closed |
+| `live`, not sent | SMTP settings missing, auth, connection or refused, or over `J2_SEND_CAP`; note "Not sent: <why>" | does not pass (could not run) | open |
+| `live`, the Requester said No | every send of the run stays a dry run | does not pass (could not run) | open |
 | target unset or refused | nothing is sent | fails | verify_failed |
 
-A declined send (live confirmation) is `abandoned`; that question and real transports (SMTP, Slack webhook) are not built yet.
+Live mode asks the Requester once a run, before the first email. An email's key (run id, atom id, goal) is in its
+receipt; a key already sent is never sent again. A Slack webhook is not built yet: a Slack send stays a dry run.
 Price: `rates_deed` in `agents/j2/rates.json` (placeholder, 5 each; `J2_RATES=0` makes it free), funded by the stage gate.
 
 ## Edges

@@ -59,6 +59,8 @@ def fingerprint(paths):
 
 REAL_BEFORE = fingerprint(REAL_MEMORY)
 import j2  # noqa: E402
+for _k in ("J2_SEND_MODE", *j2.j2_send.SMTP_VARS, "J2_SEND_CAP"):      # .env is never used here: the tests never send a real email
+    os.environ.pop(_k, None)
 ATOM = [j2.mock_atom({})]            # a complete work atom for workflows a test registers directly
 
 BREW_LAB = ("A one-page website for Brew Lab, a small specialty coffee shop in Indiranagar, Bengaluru. Visitors should "
@@ -5244,6 +5246,217 @@ def milestone_emails():
           "or refused when no address is set, one map branch under each goal, outcome line counts them ok")
 
 
+def fake_smtp(behave="ok", password="pw-never-in-a-file-123"):
+    """A local SMTP server on 127.0.0.1 (no real network): EHLO, STARTTLS with its own certificate (made here by openssl),
+    AUTH PLAIN, MAIL, RCPT, DATA. behave: "ok", "auth" (535 to the login) or "refuse" (550 to RCPT). Its error replies carry
+    server text that must never reach a run file. Returns (server, port, got, cert): got lists each message it accepted."""
+    import base64
+    import socketserver
+    import ssl
+    import subprocess
+    import threading
+    d = tempfile.mkdtemp(prefix="j2-smtp-")
+    cert, key = os.path.join(d, "c.pem"), os.path.join(d, "k.pem")
+    subprocess.run(["openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-keyout", key, "-out", cert, "-days", "1",
+                    "-subj", "/CN=127.0.0.1", "-addext", "subjectAltName=IP:127.0.0.1"], check=True, capture_output=True)
+    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    ctx.load_cert_chain(cert, key)
+    got = []
+
+    class H(socketserver.StreamRequestHandler):
+        def handle(self):
+            sock, tls = self.request, False
+            f = sock.makefile("rb")
+            w = lambda t: sock.sendall((t + "\r\n").encode())
+            w("220 fake ESMTP")
+            while True:
+                line = f.readline()
+                if not line:
+                    return
+                cmd = line.decode().strip()
+                up = cmd.upper()
+                if up.startswith(("EHLO", "HELO")):
+                    ext = ["fake", "AUTH PLAIN" if tls else "STARTTLS", "OK"]
+                    for i, e in enumerate(ext):
+                        w(f"250{' ' if i == len(ext) - 1 else '-'}{e}")
+                elif up == "STARTTLS":
+                    w("220 go ahead")
+                    sock = ctx.wrap_socket(sock, server_side=True)
+                    f, tls = sock.makefile("rb"), True
+                elif up.startswith("AUTH PLAIN"):
+                    parts = cmd.split()
+                    pw = base64.b64decode(parts[2]).split(b"\0")[-1].decode() if len(parts) > 2 else ""
+                    w("535 5.7.8 server-secret-text bad credentials" if behave == "auth" or pw != password else "235 ok")
+                elif up.startswith("MAIL"):
+                    w("250 ok")
+                elif up.startswith("RCPT"):
+                    w("550 5.1.1 server-secret-text no such user" if behave == "refuse" else "250 ok")
+                elif up == "DATA":
+                    w("354 go ahead")
+                    data = []
+                    while (ln := f.readline()) not in (b".\r\n", b""):
+                        data.append(ln)
+                    got.append({"data": b"".join(data).decode(), "tls": tls})
+                    w("250 2.0.0 queued")
+                elif up == "QUIT":
+                    w("221 bye")
+                    return
+                else:
+                    w("502 not here")
+
+    srv = socketserver.ThreadingTCPServer(("127.0.0.1", 0), H)
+    srv.daemon_threads = True
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    return srv, srv.server_address[1], got, cert
+
+
+def live_sends():
+    """Live sending (J2_SEND_MODE=live) against a fake local SMTP server: asked once per run (Yes / No), STARTTLS and login,
+    one key never sent twice, J2_SEND_CAP, missing settings refused and recorded, auth / connection / refused failures leave the
+    atom open with the error class; receipts and every run file hold no password, no full address, no server text."""
+    import email
+    import email.policy
+    import socket
+    import ssl
+    import j2_send
+    import j2_map as M
+    names = ("J2_SEND_MODE", "J2_SEND_CAP", "J2_TEST_EMAIL", "J2_MILESTONE_EMAILS", *j2_send.SMTP_VARS)
+    keep, keep_tls = {k: os.environ.get(k) for k in names}, j2_send.tls_context
+    addr, frm, pw = "me@example.invalid", "j2-from@example.invalid", "pw-never-in-a-file-123"
+    servers, shown = [], []
+
+    def env(port, **kw):
+        for k in names:
+            os.environ.pop(k, None)
+        os.environ.update({"J2_SEND_MODE": "live", "J2_TEST_EMAIL": addr, "J2_MILESTONE_EMAILS": "1", "J2_SMTP_HOST": "127.0.0.1",
+                           "J2_SMTP_PORT": str(port), "J2_SMTP_USER": "j2-user", "J2_SMTP_PASSWORD": pw, "J2_SMTP_FROM": frm})
+        for k, v in kw.items():
+            os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v)
+
+    def server(behave="ok"):
+        srv, port, got, cert = fake_smtp(behave, pw)
+        servers.append(srv)
+        j2_send.tls_context = lambda: ssl.create_default_context(cafile=cert)      # trust the fake server's own certificate only
+        return port, got
+
+    def recs(run):
+        return j2_send.records(run.dir)
+
+    def asks(run):
+        return [m for m in run.chat if m.get("pause") == "send_confirm"]
+
+    def clean(run):
+        text = "".join(open(os.path.join(dp, f), encoding="utf-8", errors="ignore").read() for dp, _, fs in os.walk(run.dir) for f in fs)
+        text += json.dumps(run.chat) + json.dumps(run.snapshot(), default=str)
+        for bad in (pw, addr, frm, "server-secret-text", "bad credentials"):
+            assert bad not in text, f"{bad!r} is in a run file, the chat or the state"
+        shown.extend(recs(run))
+
+    def prd(answer, brief="Write a PRD for Campus Notes." + CAMPUS):
+        run = docs_run(brief, 400)
+        assert run.paused and run.paused["kind"] == "send_confirm" and not recs(run), (run.outcome, run.paused)
+        q = stage_question(run)
+        assert "Send real emails to your test address during this run?" in q and "Yes" in q and "No" in q, q
+        say(run, answer)
+        return run
+
+    def box(run):
+        return next(n for n in M.build(run.dir)["nodes"] if str(n.get("label", "")).startswith("Email · "))
+    try:
+        # success: asked once, then STARTTLS, login, one message to the test address; the atom closes; map and outcome say sent
+        port, got = server()
+        env(port)
+        run = prd("Yes")
+        r = recs(run)
+        assert [(x["mode"], x["sent"], x["smtp_code"], x["result"], x["error"]) for x in r] == [("live", True, 250, "sent", None)], r
+        assert r[0]["to_masked"] == "m***@example.invalid" and r[0]["to_hash"] == j2_send.digest(addr)[:16] and r[0]["key"].endswith("/Email: PRD done") and r[0]["t"]
+        m = email.message_from_string(got[0]["data"], policy=email.policy.default) if len(got) == 1 else {}
+        assert got[0]["tls"] and m["To"] == addr and m["From"] == frm and m["Subject"] == "J2 · Campus Notes · PRD done", (got, dict(m))
+        assert run.outcome.startswith("Done") and len(asks(run)) == 1, run.outcome
+        v = next(v for v in json.load(open(os.path.join(run.dir, "atoms.json")))["atoms"] if v["id"] == r[0]["atom"])
+        assert v["status"] == "closed" and v["notes"] == "Sent to your test address (m***@example.invalid)." and v["details"]["mode"] == "live"
+        assert box(run)["status"] == "filed", box(run)
+        out = render_node(j2.saved_snapshot(os.path.basename(run.dir), 0), docs={"docs": {}, "map": M.build(run.dir)})
+        assert ">Email · PRD done · sent<" in out["map"] and "Finished. Email · PRD done · sent." in out["needs"], out["needs"]
+        clean(run)
+        # no duplicates: the same key again (a retry, or the run resumed from its folder) sends nothing and says so
+        again = j2_send.send("milestone_email", "prd.md", "", None, built={"subject": "s", "body": "b"}, run_dir=run.dir, key=r[0]["key"], confirmed=True)
+        assert again["sent"] is False and again["error"] == "duplicate" and again["result"] == "skipped" and len(got) == 1, again
+        # the brief's own test email, with milestones on: one question for both sends, two messages, two keys
+        got.clear()
+        run = prd("Option 1", "Write a PRD for Campus Notes. Send me an email with it." + CAMPUS)
+        r = recs(run)
+        assert [x["deed"] for x in r] == ["milestone_email", "send_email"] and all(x["sent"] for x in r) and len(got) == 2 and len(asks(run)) == 1, r
+        assert len({x["key"] for x in r}) == 2 and run.outcome.startswith("Done"), run.outcome
+        clean(run)
+        # the cap: four goals, J2_SEND_CAP=2: two go out, two are skipped and recorded; still asked only once
+        got.clear()
+        env(port, J2_SEND_CAP="2")
+        run = docs_run(DESIGN_BRIEF, 900)
+        say(run, "yes")
+        r = recs(run)
+        assert [(x["sent"], x["error"]) for x in r] == [(True, None), (True, None), (False, "cap"), (False, "cap")] and len(got) == 2, r
+        assert "J2_SEND_CAP" in r[2]["why"] and len(asks(run)) == 1 and run.outcome.startswith("Done"), run.outcome
+        assert [x["goal"] for x in run.milestone_log] == ["PRD", "HLD", "LLD", "Website"]
+        clean(run)
+        # No: every send of the run stays a dry run; nothing reaches the server; never asked again
+        got.clear()
+        env(port)
+        run = docs_run(DESIGN_BRIEF, 900)
+        say(run, "No")
+        r = recs(run)
+        assert len(r) == 4 and all(x["mode"] == "dry-run" and not x["sent"] for x in r) and not got and len(asks(run)) == 1, r
+        assert box(run)["detail"] == "Not sent (dry run)." and run.outcome.startswith("Done")
+        clean(run)
+        # auth failure: 535; not sent, the atom stays open with the reason; the map says failed; no server text kept
+        port, got = server("auth")
+        env(port)
+        run = prd("Yes")
+        r = recs(run)[0]
+        assert (r["sent"], r["error"], r["smtp_code"], r["result"]) == (False, "auth", 535, "failed") and not got, r
+        v = next(v for v in json.load(open(os.path.join(run.dir, "atoms.json")))["atoms"] if v["id"] == r["atom"])
+        assert v["status"] == "open" and v["notes"] == "Not sent: the SMTP server did not accept the login (auth).", v
+        assert box(run)["status"] == "left_open" and run.outcome.startswith("Done"), run.outcome
+        out = render_node(j2.saved_snapshot(os.path.basename(run.dir), 0), docs={"docs": {}, "map": M.build(run.dir)})
+        assert ">Email · PRD done · failed<" in out["map"] and "Finished. Email · PRD done · failed." in out["needs"], out["needs"]
+        clean(run)
+        # refused: 550 to the recipient
+        port, got = server("refuse")
+        env(port)
+        r = recs(prd("Yes"))[0]
+        assert (r["sent"], r["error"], r["smtp_code"]) == (False, "refused", 550) and not got, r
+        # connection failure: nothing listens on the port
+        with socket.socket() as sk:
+            sk.bind(("127.0.0.1", 0))
+            dead = sk.getsockname()[1]
+        env(dead)
+        run = prd("Yes")
+        r = recs(run)[0]
+        assert (r["sent"], r["error"], r["smtp_code"]) == (False, "connection", None) and run.outcome.startswith("Done"), r
+        clean(run)
+        # missing settings: refused and recorded by name (never a value), the run goes on
+        env(port, J2_SMTP_HOST=None, J2_SMTP_PASSWORD="")
+        run = prd("Yes")
+        r = recs(run)[0]
+        assert (r["sent"], r["error"]) == (False, "settings") and r["why"] == "J2_SMTP_HOST, J2_SMTP_PASSWORD not set, so nothing is sent", r
+        assert run.outcome.startswith("Done") and "Not sent: J2_SMTP_HOST" in box(run)["detail"]
+        clean(run)
+    finally:
+        for srv in servers:
+            srv.shutdown()
+        j2_send.tls_context = keep_tls
+        for k, v in keep.items():
+            os.environ.pop(k, None)
+            if v is not None:
+                os.environ[k] = v
+    if "--receipts" in sys.argv:
+        for x in shown:
+            print(json.dumps({k: x.get(k) for k in ("deed", "mode", "sent", "result", "smtp_code", "error", "why", "to_masked", "to_hash", "key", "t")}))
+    print("live sends (fake local SMTP server): asked once per run (yes sends, no keeps every send a dry run), STARTTLS and login, "
+          "one key never sent twice, J2_SEND_CAP skips and records, auth / refused / connection failures and missing settings leave the "
+          "atom open with the error class, the map and outcome line say sent or failed, no password, full address or server text in any file ok")
+
+
 def send_deeds():
     """Send deeds, phase 1 (no network): the brief's send words trigger a trailing deed stage; the recipient comes only
     from J2_TEST_EMAIL / J2_TEST_SLACK_TARGET; dry-run leaves the atom open, mock records one message; the proof check
@@ -6763,6 +6976,8 @@ if __name__ == "__main__":
         docs_chain()
         docs_funding()
         send_deeds()
+        if mode == "0":
+            live_sends()
         charter_objects()
         milestone_emails()
         artifact_types()

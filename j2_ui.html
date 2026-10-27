@@ -1110,11 +1110,14 @@ function needsYou(s){
 }
 const needLine = t => { t = dv(mapClean(t)); return esc(t.length > 150 ? t.slice(0, 149) + "…" : t); };
 // One plain line for a finished or saved run: how it ended, with a link to the Report (the full text of the outcome is there, word for word).
+// A send's word from its one line (the atom's note): dry run, sent (live, mock or already sent) or failed (not sent, and why).
+const sendWord = n => /dry run/i.test(n.detail || "") ? "dry run" : /^(Sent|Already sent|The .* was sent)\b/.test(n.detail || "") ? "sent" : /^Not sent:/.test(n.detail || "") ? "failed" : "";
 function outcomeLine(s){
   const o = String((s && s.outcome) || ""); if (!o) return "";
   const left = (MAP.nodes || []).filter(n => n.kind === "work" && n.status === "left_open"), mails = left.filter(n => /^Email · /.test(n.label) && /dry run/i.test(n.detail || ""));
-  const open = left.filter(n => !mails.includes(n)).map(n => String(n.label).replace(/^send (a |an |the )?/i, "").replace(/^./, c => c.toLowerCase()) + (/dry run/i.test(n.detail || "") ? " (dry run)" : ""));
-  const parts = [...(mails.length ? [`${mails.length} email${mails.length === 1 ? "" : "s"} waiting (dry run)`] : []), ...(open.length ? [`${open.length} item${open.length === 1 ? "" : "s"} left open: ${open.join(", ")}`] : [])];
+  const real = (MAP.nodes || []).filter(n => n.kind === "work" && /^Email · /.test(n.label) && ["sent", "failed"].includes(sendWord(n)));
+  const open = left.filter(n => !mails.includes(n) && !real.includes(n)).map(n => String(n.label).replace(/^send (a |an |the )?/i, "").replace(/^./, c => c.toLowerCase()) + (/dry run/i.test(n.detail || "") ? " (dry run)" : ""));
+  const parts = [...real.map(n => `${n.label} · ${sendWord(n)}`), ...(mails.length ? [`${mails.length} email${mails.length === 1 ? "" : "s"} waiting (dry run)`] : []), ...(open.length ? [`${open.length} item${open.length === 1 ? "" : "s"} left open: ${open.join(", ")}`] : [])];
   if (parts.length && /^Done/i.test(o)) return `Finished. ${parts.join(". ")}.`;
   return /^Done with open items/i.test(o) ? "Finished. Some items were left open." : /^Done/i.test(o) ? "Finished. Nothing is left open." : /^Stopped|^Crashed/i.test(o) ? "Stopped before the end." : "Finished.";
 }
@@ -1342,8 +1345,8 @@ function renderMap(m){
     const e = st && edges.find(x => x.kind === "step" && x.to === st.id && trunkDecks.some(t => t.id === x.from));
     const pv = work.slice(0, work.indexOf(d)).reverse().find(x => trunkDecks.includes(x));
     return {d, s: st, p: e ? e.from : pv ? pv.id : (trunkDecks[trunkDecks.length - 1] || {}).id}; }).filter(b => b.p);
-  const branchText = d => /^Email · /.test(d.label) ? `${d.label} · ${/dry run/i.test(d.detail || "") ? "dry run" : MAPW[d.status] || mapClean(d.detail || "")}`      // a milestone email
-    : `${String(d.label).replace(/^send (a |an |the )?/i, "").replace(/^./, c => c.toUpperCase())} · ${/dry run/i.test(d.detail || "") ? "dry run, not sent" : MAPW[d.status] || mapClean(d.detail || "")}`;
+  const branchText = d => /^Email · /.test(d.label) ? `${d.label} · ${sendWord(d) || MAPW[d.status] || mapClean(d.detail || "")}`      // a milestone email
+    : `${String(d.label).replace(/^send (a |an |the )?/i, "").replace(/^./, c => c.toUpperCase())} · ${/dry run/i.test(d.detail || "") ? "dry run, not sent" : sendWord(d) || MAPW[d.status] || mapClean(d.detail || "")}`;
   // ---- the vertical layout (under 900px): You and the Management layer across the top, then the work as a tree down the middle: Charter at the root,
   // each persona above the deliverable it made.
   // Hand-off lines run straight down the spine; "given to" lines loop round it on the left or the right, so a deliverable that feeds more than one step branches.
