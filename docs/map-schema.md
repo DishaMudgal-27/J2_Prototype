@@ -24,19 +24,19 @@ The Knows row is a later version: its node kind is in the schema, nothing is dra
 
 ## Nodes: `{id, kind, row, label, status, version, detail, file, workflows, tag, color, lane}`
 
-`lane` (work and step nodes): `"trunk"` for the Charter, the documents and the site, in order; `"branch"` for a side job (a send
-deed) and its step. A branch's step starts at the document the deed was built from (its recorded `depends_on`, else the last trunk
-box before it), so a deed never sits between two documents, and the site's step takes the last document as its input. Nodes are
-listed in drawing order: each trunk box, the side jobs that leave it (step, then deed), then the step to the next trunk box.
+`lane` (work and step nodes): `"trunk"` for every box but a send, in an order where each box comes after every box it reads (run
+order only breaks ties, never draws a line); `"branch"` for a side job (a send deed) and its step. Nodes are listed in drawing
+order: each trunk box, the side jobs that read it (step, then deed; a planned side job with no record yet goes after the box before
+it in the plan, with no line), then the step to the next trunk box.
 
 **Every workflow is placed.** Each workflow in `workflows.json` sits on one box, decided in this order: a realization decide
-workflow (the plan's kind, else an `artifacts/` file with a stage) gets its own spec box `work:<workflow id>`, labelled with its
-stage's `output` from `agents/j2/stages.json`; a revision joins the box of the workflow that owns its section; a workflow of a
+workflow (the plan's kind, else an `artifacts/` file with a stage) that wrote its file, or is still unfinished, gets its own spec
+box `work:<workflow id>`, labelled from its file (`artifacts/hint-method.md` is "Hint method"), with its stage's `output` from
+`agents/j2/stages.json` as `output` (the second line); one that finished with no file sits with its stage-mates; a revision joins the box of the workflow that owns its section; a workflow of a
 stage joins the box that holds its stage-mates; a section in `stage-<doc>.json` or `sections.json` names its document (or the
 current one); last, the output refs (`artifacts.json`). One that fits none is listed by id in `not_recorded` as "workflows not
-placed on the map: W-n, ...", never dropped. A realization run's trunk is Charter, the specs, then the Website. A spec has a
-hand-off labelled "given to W-n, ..." to every box whose workflows read it (`dependencies`, the plan's `inputs_from`).
-The style guide (`style.json`) is a small side job `work:style`, made by the workflow with `style_guide` true.
+placed on the map: W-n, ...", never dropped. The style guide (`style.json`) is `work:style`, made by the workflow with
+`style_guide` true; the later build workflows read it, so its line runs into the site.
 
 | kind | row | what it is | built from |
 |---|---|---|---|
@@ -79,11 +79,19 @@ deed). `version` is `null` when the run did not record one: the page says "versi
 
 In a finished run the page says "left open", never "running".
 
-## Edges: `{from, to, kind, label, n, basis}`
+## Edges: `{from, to, kind, label, n, basis, source}`
 
-- `step`: box to engine to box, `n` = workflows of the box it leads to.
-- `handoff`: from atom `depends_on` between boxes (`basis: "recorded"`), from `types.json` dependencies not already seen, and
-  Charter to the first box (`basis: "declared"`: by order, not recorded).
+**No line without a record.** Every edge carries `source`, the record it was drawn from: `{file, workflow, field, value}` (for
+example `{"file": "workflows.json", "workflow": "W-4", "field": "dependencies", "value": "copy-guide"}`), and points producer ->
+consumer. Nothing is drawn from run order alone, and no rule names a run, a workflow, a file or a stage.
+
+- `handoff` (a read): A -> B when a workflow on B lists a workflow on A in its `dependencies` (workflows.json), its plan's
+  `inputs_from` (realization.json) or its atoms' `depends_on` (atoms.json). `label` "given to W-n, ..." names every reader.
+- `step`: the Charter -> each team (every workflow is given the charter: `goal.json`); the box just before a team on the trunk ->
+  that team, only when the team's box reads it (a send: the box it reads); the team -> its box, from the record that put its
+  workflows there (`artifact`, `stage`, `section`, `style_guide`, artifacts.json `workflows`, an atom's send output, or a planned
+  stage in summary.json). A step's id names that box before it, else the Charter (`step:charter>W-3`). `n` = workflows of its box.
+  The Line view draws a trunk segment only between two nodes such an edge joins; other reads are its "given to" loops.
 - `speaks_to`: message counts from the chat: Requester to Identity (their messages), Identity to the Requester (messages
   addressed to them), and function to function (`who` to `next`). Messages to and from workflow agents (W-n) are not drawn.
   Up to three function-to-function pairs are drawn as thin dotted lines with their counts; more go in a small table under
@@ -114,12 +122,16 @@ from its file (`artifacts/hint-method.md` is "Hint method"), with its stage's ou
 barycentre, then neighbours are swapped while that removes a crossing; then a seeded d3-force pass (link, x-centring and collision
 forces; y fixed per row; a fixed seed and 240 ticks) moves nodes along their row, and a last sweep keeps every label at least 24px
 from its neighbours. The same run always draws the same; crossings are allowed but few (the count is on the SVG as
-`data-crossings`). Lines are smooth curves, thin and faint, lit on hover. A dot's size is its workflow count, its label is under
+`data-crossings`). Lines are smooth curves, thin and faint. On hover or focus a node's lines brighten and dots flow along them,
+producer to consumer, about 1.5 s per line: lines into it ("reads") and out of it ("read by") in two calm colours, both in the
+Legend; nothing moves at rest, and with prefers-reduced-motion the lit lines get small arrowheads instead. A dot's size is its workflow count, its label is under
 it, and its status is on the ring only (the same colours and marks as the Line view).
 Clicking a stage moves it to the middle of the view (300 ms, eased; no animation with prefers-reduced-motion) with its workflows
 (id, short name, status) evenly round it on a ring stretched to the canvas, joined by curved spokes; every other node fades to
-20% with its label hidden (restored on close), so only the stage's and the circle's words show. Clicking a workflow there opens
-its panel (floating beside the map, over the chat column; a sheet from the bottom under 1100px): status, what it delivers, what it reads, what reads it, checks, an Open button
+20% with its label hidden (restored on close), so only the stage's and the circle's words show; only the stage's own lines are drawn (the
+rest are hidden, not faded), and a workflow's own links show on hover, with the flow. Clicking a workflow there opens its panel
+(over the map's right side, inside the map card; below the map when the map is under 720px wide; one panel at a time: a
+workflow, a deliverable or the open stage, Esc or Close shuts it): status, what it delivers, what it reads, what reads it, checks, an Open button
 to its card in Workflows, and draws its own "reads" (solid) and "read by" (dashed) links. Esc, Back or a click on empty space
 returns. Drag to pan, wheel or pinch to zoom; Fit resets. A deliverable or the Charter opens the same panel and Open button as in
 the Line view. The library is d3 7.9.0 (ISC), vendored at `vendor/d3.min.js` and served by the app itself: no CDN.

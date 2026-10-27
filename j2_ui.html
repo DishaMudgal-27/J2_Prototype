@@ -155,17 +155,20 @@ body.simple #dview{display:flex;flex:0 0 auto}body.simple #dview .dcol{display:n
   .stoggle button[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
   body.sp-preview .schat{display:none}body.sp-preview .sprev{display:block}}
 /* Map: calm graph look, details in a click panel */
+:root{--flowin:#6fa8dc;--flowout:#c49bd9}      /* the two calm colours of a flow: lines into a node (reads), lines out of it (read by) */
 .mapviews{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-left:auto}.mapviews button{border:0;background:transparent;color:var(--ink);padding:2px 12px;font:inherit;font-size:13px;cursor:pointer}.mapviews button[aria-pressed="true"]{background:var(--line);font-weight:600}
 .mapsvgwrap[data-view="tree"] .mapsvg{display:none!important}.mapsvgwrap[data-view="line"] .treebox{display:none}
 .treebox{position:relative;margin:0 0 8px}.treebar{display:flex;gap:10px;align-items:center;margin:0 0 6px}.treebar .sub{color:var(--muted);font-size:12px}.treebar .linkbtn{color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:8px;padding:2px 10px;text-decoration:none}.treebar [hidden]{display:none}
-.treepanel{position:fixed;top:120px;right:24px;width:360px;max-height:calc(100vh - 150px);overflow:auto;box-sizing:border-box;margin:0;z-index:20;box-shadow:0 8px 28px rgba(0,0,0,.4)}      /* beside the map, over the chat column: the map keeps its size */
-@media (max-width:1100px){.treepanel{top:auto;left:0;right:0;bottom:0;width:auto;max-height:55vh;border-radius:14px 14px 0 0;animation:treeup .25s ease-out}}
-@keyframes treeup{from{transform:translateY(100%)}to{transform:none}}@media (prefers-reduced-motion: reduce){.treepanel{animation:none}}
+.treebox{container-type:inline-size}.treepanel{position:absolute;top:44px;right:10px;width:300px;max-height:calc(100% - 56px);overflow:auto;box-sizing:border-box;margin:0;z-index:5;box-shadow:0 8px 28px rgba(0,0,0,.4)}      /* inside the map card, over its right side */
+@container (max-width:720px){.treepanel{position:static;width:auto;max-height:none;margin-top:8px;box-shadow:none}}
 .treesvg .thide .tlab,.treesvg .thide .tsub{display:none}
 .treesvg{display:block;width:100%;height:clamp(440px,64vh,760px);background:#16181d;border:1px solid #2a2e35;border-radius:12px;cursor:grab;touch-action:none;font:12px system-ui,sans-serif;user-select:none}.treesvg:active{cursor:grabbing}
 .treesvg .tedge{fill:none;stroke:#8a8f98;stroke-width:1.2;opacity:.32;transition:opacity .3s}.treesvg .tedge.hot{opacity:.95;stroke:#c9ccd1;stroke-width:1.8}
 .treesvg .tnode{cursor:pointer;transition:opacity .3s}.treesvg .tdim{opacity:.2}.treesvg .tlab{fill:#dcddde;font-size:13px;paint-order:stroke;stroke:#16181d;stroke-width:3px;stroke-linejoin:round}.treesvg .tsub{fill:#8a8f98;font-size:11px;paint-order:stroke;stroke:#16181d;stroke-width:3px;stroke-linejoin:round}.treesvg .tglyph{fill:#8a8f98}.treesvg .tglyphl{fill:none;stroke:#8a8f98;stroke-width:1.2}
 .treesvg .tnode:hover .tdot,.treesvg .tnode:focus-visible .tdot,.treesvg .tnode.sel .tdot{filter:drop-shadow(0 0 5px rgba(200,205,215,.6))}.treesvg .tnode:focus{outline:none}
+.treesvg .tgone,.treesvg .twflinks{display:none}.treesvg .twflinks.on,.treesvg .twflinks.hov{display:inline}
+.treesvg .tedge.hot.fin,.treesvg .tlink.hot.fin{stroke:var(--flowin);opacity:.95}.treesvg .tedge.hot.fout,.treesvg .tlink.hot.fout{stroke:var(--flowout);opacity:.95}
+.treesvg .tflow{pointer-events:none}.treesvg .tflow.fin,.treesvg .tarr.fin{fill:var(--flowin)}.treesvg .tflow.fout,.treesvg .tarr.fout{fill:var(--flowout)}
 .treesvg .tspoke{fill:none;stroke:#8a8f98;stroke-width:1;opacity:.45}.treesvg .tlink{fill:none;stroke:#c9ccd1;stroke-width:1.6;opacity:.9}.treesvg .tlink.readby{stroke-dasharray:4 3}
 @media (prefers-reduced-motion: reduce){.treesvg .tnode,.treesvg .tedge{transition:none}}
 .mapsvg{background:var(--panel);border:1px solid var(--line);border-radius:12px}.mapsvg .rowlab{text-transform:uppercase}.mapsvg .mapnode:focus{outline:none}.mapsvg .mapnode:focus-visible circle:first-of-type{stroke-width:3}
@@ -1237,7 +1240,7 @@ const MAPLABEL = {
   verbTag: {PRD: "drafting", HLD: "drafting", LLD: "drafting", Site: "building", Send: "sending"},     // a step with no recorded kind: the deliverable it leads to says
   team: {drafting: {PRD: "Product Analyst", HLD: "Solution Architect", LLD: "Technical Designer", other: "Specialist"}, building: "Web Developer", sending: "Messenger"},
   legend: {function: "Management persona (chip)", engine: "Team (dot cluster)", work: "Deliverable (diamond)", send: "Side job: a send (letter icon)", person: "You", filed: "filed and checked", running: "running now", left_open: "left open",
-           waiting_on_you: "waiting on you", fault: "fault", not_made: "not made", handoff: "hand-off", speaks_to: "speaks to", given_to: "given to", done_unchecked: "done · checks did not pass"}};
+           waiting_on_you: "waiting on you", fault: "fault", not_made: "not made", handoff: "hand-off", speaks_to: "speaks to", given_to: "given to", done_unchecked: "done · checks did not pass", flow_in: "on hover: reads (flows in)", flow_out: "on hover: read by (flows out)"}};
 const MAPW = {filed: "filed and checked", done_unchecked: "done · checks did not pass", running: "running now", left_open: "left open", waiting: "waiting", waiting_on_you: "waiting on you", fault: "fault", not_made: "not made", idle: ""};
 const MAPS = {filed: "filed", done_unchecked: "done · checks did not pass", running: "running now", left_open: "left open", waiting: "waiting", waiting_on_you: "waiting on you", fault: "fault", not_made: "not made", idle: ""};
 const MAXLINES = 3;      // more function-to-function lines than this go in a small table instead of crossing lines
@@ -1272,6 +1275,8 @@ const mapStepSay = (m, n) => { const t = mapStepTo(m, n); return `${mapPersona(m
 const mapName = (m, id) => { const n = mapById(m)[id]; return !n ? id : n.kind === "function" ? mapFn(n) : n.kind === "engine" ? `${mapPersona(m, n)} (${mapStepVerb(m, n)} ${(mapStepTo(m, n) || {label: "this deliverable"}).label})` : n.label; };
 // "Given to": a document box to the step that was given it. The step is the one that leads to the box the hand-off recorded, so the line ends on that step circle.
 // No such step in the map: the line stays on the box and the gap is listed under Not recorded. Nothing is guessed.
+// the trunk draws a segment between two neighbours only when the map records one feeding the other (a read, or a team making a box)
+const mapLinked = (m, a, b) => (m.edges || []).some(e => (e.kind === "step" || e.kind === "handoff") && e.from === a && e.to === b);
 function mapGiven(m){
   const by = mapById(m), edges = m.edges || [], stepOf = {};
   edges.filter(e => e.kind === "step" && by[e.from] && by[e.from].kind === "engine" && by[e.to]).forEach(e => { stepOf[e.to] = e.from; });
@@ -1314,8 +1319,6 @@ const treeWfStatus = (m, w) => { const box = mapById(m)[w.box] || {};
   if (w.atoms === "abandoned" || w.status === "unfunded") return "not_made";
   if (w.atoms === "open") return w.status === "done" ? "done_unchecked" : m.live ? "running" : "left_open";
   return w.status === "done" ? "filed" : m.live && w.status === "running" ? "running" : "idle"; };
-// a deliverable's own name: a spec is named from its file (artifacts/hint-method.md is "Hint method"); the rest keep their label
-const treeName = n => n && n.tag === "Spec" && /^artifacts\/[^/]+\.\w+$/.test(n.file || "") ? (t => t.charAt(0).toUpperCase() + t.slice(1))(n.file.split("/").pop().replace(/\.\w+$/, "").replace(/[-_]+/g, " ").trim()) : (n || {}).label;
 function mapTree(m){
   const nodes = m.nodes || [], edges = m.edges || [], by = mapById(m);
   const steps = nodes.filter(n => n.kind === "engine"), decks = nodes.filter(n => n.row === "work" && n.kind === "work"), charter = by["work:charter"];
@@ -1325,27 +1328,26 @@ function mapTree(m){
     g.steps.push(s.id); (s.workflows || []).forEach(w => { if (!g.workflows.includes(w)) g.workflows.push(w); });
     if (tRank(s.status) < tRank(g.status)) g.status = s.status;
     g.order = Math.min(g.order, nodes.indexOf(s)); if (t) stageOf[t.id] = id; });
-  // what a deliverable reads: recorded hand-offs between deliverables, and a side job's parent (the document it was built from)
+  // one workflow is one team's: two steps whose personas differ but share a workflow (a box and the side file its maker also wrote) are one stage
+  for (let again = true; again;){ again = false; const gs = Object.values(stages);
+    for (const g of gs) for (const h of gs) if (g !== h && stages[g.id] && stages[h.id] && g.workflows.some(w => h.workflows.includes(w))){
+      const [keep, drop] = g.workflows.length >= h.workflows.length ? [g, h] : [h, g];
+      drop.steps.forEach(x => keep.steps.push(x)); drop.workflows.forEach(w => { if (!keep.workflows.includes(w)) keep.workflows.push(w); });
+      if (tRank(drop.status) < tRank(keep.status)) keep.status = drop.status; keep.order = Math.min(keep.order, drop.order);
+      Object.keys(stageOf).forEach(k => { if (stageOf[k] === drop.id) stageOf[k] = keep.id; }); delete stages[drop.id]; again = true; } }
+  // what a deliverable reads: the recorded hand-offs between deliverables (map.json)
   const dep = {}, isDeck = id => by[id] && by[id].kind === "work" && id !== "work:charter";
   edges.filter(e => e.kind === "handoff" && isDeck(e.from) && isDeck(e.to) && e.from !== e.to).forEach(e => (dep[e.to] = dep[e.to] || new Set()).add(e.from));
-  // a side job made by its parent's own workflow (the style guide: style.json, written by the first build workflow and read by the later
-  // ones) is an input of the parent, not a child: its edge points into the parent, and it sits in the row of the files its maker reads
-  const flows = Object.fromEntries((m.workflows || []).map(w => [w.id, w])), anchor = {};
-  steps.filter(s => s.lane === "branch").forEach(s => { const t = mapStepTo(m, s), e = edges.find(x => x.kind === "step" && x.to === s.id && isDeck(x.from)); if (!t || !e) return;
-    const own = (t.workflows || []).length && t.workflows.every(w => (by[e.from].workflows || []).includes(w));
-    if (!own) return (dep[t.id] = dep[t.id] || new Set()).add(e.from);
-    (dep[e.from] = dep[e.from] || new Set()).add(t.id);
-    anchor[t.id] = [...new Set(t.workflows.flatMap(w => (flows[w] || {}).reads || []).map(r => (flows[r] || {}).box).filter(b => b && isDeck(b) && b !== t.id && b !== e.from))]; });
-  const label = n => n.kind === "stage" ? n.label : n.id === "work:charter" ? "Charter" : treeTrim(treeName(n), 28);
+  const label = n => n.kind === "stage" ? n.label : treeTrim(n.label, 28);
   const sub = n => n.kind === "stage" ? `${n.workflows.length} workflow${n.workflows.length === 1 ? "" : "s"}` : n.id === "work:charter" ? "the plan"
-    : n.tag === "Send" ? (sendWord(n) || MAPS[n.status] || "") : [treeName(n) !== n.label ? n.label : "", n.version != null ? "v" + n.version : "", MAPS[n.status]].filter(Boolean).join(" · ");      // a spec's stage output is its second line
+    : n.tag === "Send" ? (sendWord(n) || MAPS[n.status] || "") : [n.output && n.output !== n.label ? n.output : "", n.version != null ? "v" + n.version : "", MAPS[n.status]].filter(Boolean).join(" · ");      // a spec's stage output is its second line
   const T = [], row = {};
   if (charter) { T.push({id: charter.id, kind: "charter", n: charter, wf: 0, status: charter.status}); row[charter.id] = 0; }
   Object.values(stages).sort((a, b) => a.order - b.order).forEach(g => { T.push({id: g.id, kind: "stage", n: g, wf: g.workflows.length, status: g.status}); row[g.id] = 1; });
   const ds = decks.filter(d => d.id !== "work:charter");
   ds.forEach(d => { T.push({id: d.id, kind: "deck", n: d, wf: (d.workflows || []).length, status: d.status}); row[d.id] = 2; });
   for (let k = 0; k < ds.length + 2; k++) ds.forEach(d => { (dep[d.id] || []).forEach(s => { if (row[s] != null) row[d.id] = Math.max(row[d.id], Math.min(row[s] + 1, ds.length + 2)); });
-    (anchor[d.id] || []).forEach(a => { if (row[a] != null) row[d.id] = Math.max(row[d.id], row[a]); }); });      // beside the files its maker reads
+  });
   const L = [];      // the drawn links: charter to each stage (or to a deliverable no team made), team to deliverable, deliverable to what reads it
   if (charter) Object.keys(stages).forEach(id => L.push({from: charter.id, to: id, kind: "plan"}));
   ds.forEach(d => { if (stageOf[d.id]) L.push({from: stageOf[d.id], to: d.id, kind: "made"}); else if (charter && !(dep[d.id] || new Set()).size) L.push({from: charter.id, to: d.id, kind: "plan"});
@@ -1353,7 +1355,7 @@ function mapTree(m){
   T.forEach(t => { t.row = row[t.id]; t.r = t.kind === "charter" ? 11 : treeR(t.wf); t.label = label(t.n); t.sub = sub(t.n);
     t.w = Math.round(Math.max(t.label.length * 7.4, t.sub.length * 6.3, 2 * t.r) + 8); });
   const rows = []; T.forEach(t => (rows[t.row] = rows[t.row] || []).push(t));
-  const R = rows.map(r => r || []), ix = {}, up = {}, down = {};
+  const R = Array.from(rows, r => r || []), ix = {}, up = {}, down = {};
   L.forEach(l => { (up[l.to] = up[l.to] || []).push(l.from); (down[l.from] = down[l.from] || []).push(l.to); });
   const pack = r => { let x = 0; r.forEach(t => { t.x = x + t.w / 2; x += t.w + TGAP; }); const mid = x / 2; r.forEach(t => { t.x -= mid; ix[t.id] = t; }); };
   R.forEach(pack);
@@ -1403,7 +1405,7 @@ function treeRing(m, g, W, H){
     const lw = Math.max(`${id} · ${treeTrim(w.name, 24)}`.length * 7.4, word.length * 6.3);      // its label beside the dot, outward (see ringHtml)
     return {id, w, a, x, y, st, word, lbox: right ? [x + 13, y - 13, x + 13 + lw, y + 16] : [x - 13 - lw, y - 13, x - 13, y + 16]}; })};
 }
-function treeHtml(m){
+function treeHtml(m, other){      // other: the panel of a deliverable picked on the tree (only one panel shows at a time)
   const L = mapTree(m), by = mapById(m), open = L.at[TREE.open] && L.at[TREE.open].kind === "stage" ? TREE.open : "";
   const c = open ? (TREE.c || {x: L.W / 2, y: L.H / 2}) : null, P = id => id === open ? c : L.at[id];
   const near = new Set(open ? [open, ...L.links.filter(l => l.from === open || l.to === open).flatMap(l => [l.from, l.to])] : []);
@@ -1413,7 +1415,7 @@ function treeHtml(m){
     links: L.links.map(l => ({from: l.from, to: l.to, kind: l.kind})), crossings: L.crossings, W: L.W, H: L.H, open, c,
     ring: ring ? ring.items.map(x => ({id: x.id, x: tRd(c.x + x.x), y: tRd(c.y + x.y), status: x.st, box: [c.x + x.lbox[0], c.y + x.lbox[1], c.x + x.lbox[2], c.y + x.lbox[3]].map(tRd)})) : [], R: ring ? ring.R : 0, rx: ring ? ring.rx : 0, ry: ring ? ring.ry : 0};
   const look = st => mapLook(st);
-  const edge = l => `<path class="tedge ${l.kind}${dim(l.from) || dim(l.to) ? " tdim" : ""}" data-from="${esc(l.from)}" data-to="${esc(l.to)}" d="${treeCurve(P(l.from), P(l.to))}"><title>${mapWords(l.kind === "reads" ? `${treeName(by[l.to])} reads ${treeName(by[l.from])}` : l.kind === "made" ? `${L.at[l.from].label} made ${treeName(by[l.to])}` : `the Charter to ${L.at[l.to].label}`)}</title></path>`;
+  const edge = l => `<path class="tedge ${l.kind}${open && l.from !== open && l.to !== open ? " tgone" : ""}" data-from="${esc(l.from)}" data-to="${esc(l.to)}" d="${treeCurve(P(l.from), P(l.to))}"><title>${mapWords(l.kind === "reads" ? `${(by[l.to] || {}).label} reads ${(by[l.from] || {}).label}` : l.kind === "made" ? `${L.at[l.from].label} made ${(by[l.to] || {}).label}` : `the Charter to ${L.at[l.to].label}`)}</title></path>`;
   const dot = t => { const k = look(t.status), p = P(t.id), aria = `${t.label}: ${t.sub}${t.kind === "stage" ? ", open its workflows" : ", details"}`;
     const glyph = t.kind === "stage" ? [0, 72, 144, 216, 288].map(a => { const q = a * Math.PI / 180 - Math.PI / 2; return `<circle cx="${tRd(t.r * .5 * Math.cos(q))}" cy="${tRd(t.r * .5 * Math.sin(q))}" r="${tRd(Math.max(1.6, t.r * .15))}" class="tglyph"/>`; }).join("")
       : t.kind === "charter" ? `<circle r="${tRd(t.r * .45)}" class="tglyph"/>` : t.n.tag === "Send" ? `<path class="tglyphl" d="M${-t.r * .5} ${-t.r * .3} L0 ${t.r * .15} L${t.r * .5} ${-t.r * .3}"/>` : "";
@@ -1429,27 +1431,33 @@ function treeHtml(m){
       return `<g class="tnode twf${TREE.wf === x.id ? " sel" : ""}" data-wf="${esc(x.id)}" transform="translate(${x.x},${x.y})" tabindex="0" role="button" aria-label="${mapWords(`${x.id} ${x.w.name}: ${x.word}, details`)}">`
         + `<circle class="tdot" r="7" fill="#1d2026" stroke="${k.stroke}" stroke-width="${Math.max(1.6, k.width)}"${k.dash}/>`
         + `<text class="tlab" x="${lx}" y="${ly}" text-anchor="${anc}">${mapWords(x.id)} · ${mapWords(treeTrim(x.w.name, 24))}</text><text class="tsub" x="${lx}" y="${ly + 13}" text-anchor="${anc}">${mapWords(x.word)}</text></g>`; }).join("") + `</g>`;
-  // a picked workflow: its own "reads" and "read by" links, to the workflows in the circle or to the box the other one sits on
+  // each workflow in the circle: its own "reads" and "read by" links, to the workflows in the circle or to the box the other one sits on;
+  // drawn for the picked one, shown for another on hover (with the flow)
   let links = "";
-  if (pick){ const gpos = id => { const r = ring.items.find(x => x.id === id); if (r) return {x: c.x + r.x, y: c.y + r.y};
+  if (ring){ const gpos = id => { const r = ring.items.find(x => x.id === id); if (r) return {x: c.x + r.x, y: c.y + r.y};
       const w = (m.workflows || []).find(x => x.id === id), b = w && w.box && L.at[w.box]; return b ? P(b.id) : null; };
-    const me = {x: c.x + pick.x, y: c.y + pick.y}, readBy = (m.workflows || []).filter(w => (w.reads || []).includes(pick.id)).map(w => w.id);
-    const one = (id, kind) => { const q = gpos(id); if (!q) return ""; const a = kind === "reads" ? q : me, b = kind === "reads" ? me : q, mx = (a.x + b.x) / 2 + (b.y - a.y) * .18, my = (a.y + b.y) / 2 - (b.x - a.x) * .18;
-      return `<path class="tlink ${kind}" data-from="${esc(kind === "reads" ? id : pick.id)}" data-to="${esc(kind === "reads" ? pick.id : id)}" d="M${tRd(a.x)} ${tRd(a.y)} Q${tRd(mx)} ${tRd(my)} ${tRd(b.x)} ${tRd(b.y)}"><title>${mapWords(kind === "reads" ? `${pick.id} reads ${id}` : `${id} reads ${pick.id}`)}</title></path>`; };
-    links = (pick.w.reads || []).map(id => one(id, "reads")).join("") + readBy.map(id => one(id, "readby")).join(""); }
+    links = ring.items.map(it => { const me = {x: c.x + it.x, y: c.y + it.y}, readBy = (m.workflows || []).filter(w => (w.reads || []).includes(it.id)).map(w => w.id);
+      const one = (id, kind) => { const q = gpos(id); if (!q) return ""; const a = kind === "reads" ? q : me, b = kind === "reads" ? me : q, mx = (a.x + b.x) / 2 + (b.y - a.y) * .18, my = (a.y + b.y) / 2 - (b.x - a.x) * .18;
+        return `<path class="tlink ${kind}" data-from="${esc(kind === "reads" ? id : it.id)}" data-to="${esc(kind === "reads" ? it.id : id)}" d="M${tRd(a.x)} ${tRd(a.y)} Q${tRd(mx)} ${tRd(my)} ${tRd(b.x)} ${tRd(b.y)}"><title>${mapWords(kind === "reads" ? `${it.id} reads ${id}` : `${id} reads ${it.id}`)}</title></path>`; };
+      return `<g class="twflinks${pick === it ? " on" : ""}" data-wf="${esc(it.id)}">` + (it.w.reads || []).map(id => one(id, "reads")).join("") + readBy.map(id => one(id, "readby")).join("") + `</g>`; }).join(""); }
   const z = TREE.zoom, order = [...L.nodes.filter(t => t.id !== open), ...L.nodes.filter(t => t.id === open)];
   const svg = `<svg class="treesvg" viewBox="0 0 ${L.W} ${L.H}" data-w="${L.W}" data-h="${L.H}" data-crossings="${L.crossings}" role="group" aria-label="Map, tree view: the Charter, the teams and what each made">`
-    + `<g class="tview"${z ? ` transform="translate(${tRd(z.x)},${tRd(z.y)}) scale(${z.k})"` : ""}><g class="tedges">${L.links.map(edge).join("")}</g><g class="tlinks">${links}</g><g class="tnodes">${order.map(dot).join("")}</g></g></svg>`;
+    + `<g class="tview"${z ? ` transform="translate(${tRd(z.x)},${tRd(z.y)}) scale(${z.k})"` : ""}><g class="tedges">${L.links.map(edge).join("")}</g><g class="tlinks">${links}</g><g class="tnodes">${order.map(dot).join("")}</g><g class="tflows"></g></g>`
+    + `<defs>${["fin", "fout"].map(k => `<marker id="tarr-${k}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path class="tarr ${k}" d="M0 0 L8 4 L0 8 z"/></marker>`).join("")}</defs></svg>`;
   const ws = pick && pick.w, readers = ws ? (m.workflows || []).filter(w => (w.reads || []).includes(ws.id)).map(w => w.id) : [];
   const box = ws && by[ws.box];
   const panel = ws ? `<aside class="mappanel treepanel" data-wfpanel="${esc(ws.id)}" aria-label="Details of ${esc(ws.id)}"><div class="mappanelhead"><b>${mapWords(ws.id)} · ${mapWords(ws.name)}</b><button type="button" class="linkbtn" data-treewfclose>Close (Esc)</button></div>`
-    + [`status: ${mapWords(pick.word && pick.word !== MAPS[pick.st] ? pick.word : MAPW[pick.st] || pick.st)}${ws.status ? " (workflow " + mapWords(ws.status) + ")" : ""}`, `delivers: ${box ? mapWords(treeName(box)) : "not recorded"}`,
+    + [`status: ${mapWords(pick.word && pick.word !== MAPS[pick.st] ? pick.word : MAPW[pick.st] || pick.st)}${ws.status ? " (workflow " + mapWords(ws.status) + ")" : ""}`, `delivers: ${box ? mapWords(box.label) : "not recorded"}`,
        `reads: ${(ws.reads || []).length ? ws.reads.map(x => mapWords(x)).join(", ") : "nothing recorded"}`, `read by: ${readers.length ? readers.map(x => mapWords(x)).join(", ") : "nothing recorded"}`,
        ws.checks && ws.checks.run ? `checks: ${ws.checks.passed} of ${ws.checks.run} passed` : "checks: none recorded"].map(x => `<div class="sub">${x}</div>`).join("")
     + `<div class="sub"><button type="button" class="gobtn" data-wfcard="${esc(ws.id)}">Open</button>${box ? ` <button type="button" class="linkbtn" data-mapgo="${esc(box.id)}">${mapWords(mapGoLabel(box))}</button>` : ""}</div></aside>` : "";
   const bar = `<div class="treebar"><button type="button" class="linkbtn" data-treefit>Fit</button><button type="button" class="linkbtn" data-treeback${open ? "" : " hidden"}>Back</button>`
     + `<span class="sub">${open ? `${mapWords(L.at[open].label)}: ${L.stages[open].workflows.length} workflow${L.stages[open].workflows.length === 1 ? "" : "s"}. Esc, Back or a click on empty space returns.` : "Click a team to open its workflows. Drag to pan, scroll or pinch to zoom."}</span></div>`;
-  return `<div class="treebox">${bar}${svg}${panel}</div>`;
+  const g = open && L.stages[open], made = g ? g.steps.map(id => mapStepTo(m, by[id])).filter(Boolean) : [];
+  const stagePanel = g ? `<aside class="mappanel treepanel" data-stagepanel="${esc(open)}" aria-label="Details of ${esc(g.label)}"><div class="mappanelhead"><b>${mapWords(g.label)}</b><button type="button" class="linkbtn" data-treeback>Close (Esc)</button></div>`
+    + [`${g.workflows.length} workflow${g.workflows.length === 1 ? "" : "s"}: ${g.workflows.map(x => mapWords(x)).join(", ")}`, `made: ${made.map(x => mapWords(x.label)).join(", ") || "not recorded"}`, MAPW[g.status] || ""].filter(Boolean).map(x => `<div class="sub">${x}</div>`).join("")
+    + `<div class="sub"><button type="button" class="gobtn" data-mapgo="${esc(g.steps[0])}">${mapWords(mapGoLabel(by[g.steps[0]]))}</button> Click a workflow in the circle for its details.</div></aside>` : "";
+  return `<div class="treebox">${bar}${svg}${panel || (other || "").replace('class="mappanel"', 'class="mappanel treepanel"') || stagePanel}</div>`;
 }
 // Tree view at run time: pan and zoom (d3-zoom), the 300 ms move of a stage to the middle and back, and the clicks. renderMap draws
 // the state in TREE; these only animate between two drawn states and then repaint.
@@ -1473,8 +1481,8 @@ function treeMove(id, a, b, opening, done){
   const at = el => ({x: +el.dataset.x, y: +el.dataset.y}), nodes = Object.fromEntries([...svg.querySelectorAll(".tnodes > .tnode")].map(x => [x.dataset.id, at(x)]));
   const near = new Set([id]), es = [...svg.querySelectorAll(".tedge")];
   es.forEach(e => { if (e.dataset.from === id) near.add(e.dataset.to); if (e.dataset.to === id) near.add(e.dataset.from); });
-  if (opening){ svg.querySelectorAll(".tnodes > .tnode").forEach(x => { x.classList.toggle("tdim", x.dataset.id !== id); x.classList.toggle("thide", x.dataset.id !== id); }); es.forEach(e => e.classList.toggle("tdim", e.dataset.from !== id && e.dataset.to !== id)); }
-  else { svg.querySelectorAll(".tdim,.thide").forEach(x => x.classList.remove("tdim", "thide")); }
+  if (opening){ svg.querySelectorAll(".tnodes > .tnode").forEach(x => { x.classList.toggle("tdim", x.dataset.id !== id); x.classList.toggle("thide", x.dataset.id !== id); }); es.forEach(e => e.classList.toggle("tgone", e.dataset.from !== id && e.dataset.to !== id)); }
+  else { svg.querySelectorAll(".tdim,.thide,.tgone").forEach(x => x.classList.remove("tdim", "thide", "tgone")); svg.querySelectorAll(".twflinks").forEach(x => x.remove()); }
   const ring = g.querySelector(".tring"), ease = typeof d3 !== "undefined" && d3.easeCubicInOut ? d3.easeCubicInOut : t => t, t0 = performance.now();
   let over = false; const end = () => { if (!over){ over = true; done(); } };
   setTimeout(end, 450);      // a tab that draws no frames (hidden, or headless) still lands on the end state
@@ -1492,11 +1500,11 @@ function treeOpen(id){
   const s = treeSvg(), g = [...s.querySelectorAll(".tnode.tstage")].find(x => x.dataset.id === id); if (!g) return;
   const c = treeCentre(s), from = {x: +g.dataset.x, y: +g.dataset.y};
   TREE.c = {x: tRd(c.x), y: tRd(c.y)};
-  TREE.open = id; TREE.wf = ""; paintMap();      // draw the open state (its circle), then play the move into it from the tree
+  TREE.open = id; TREE.wf = ""; MAPPIN = ""; paintMap();      // draw the open state (its circle), then play the move into it from the tree
   const s2 = treeSvg(), g2 = s2 && [...s2.querySelectorAll(".tnode.tstage")].find(x => x.dataset.id === id);
   if (!g2 || treeReduce()) return;
   g2.setAttribute("transform", `translate(${from.x},${from.y})`); const rg = g2.querySelector(".tring"); if (rg){ rg.setAttribute("transform", "scale(0)"); rg.style.opacity = 0; }
-  s2.querySelectorAll(".tdim,.thide").forEach(x => x.classList.remove("tdim", "thide"));
+  s2.querySelectorAll(".tdim,.thide,.tgone").forEach(x => x.classList.remove("tdim", "thide", "tgone"));
   treeMove(id, from, TREE.c, true, () => { if (TREE.open === id){ $("pane-map").__html = null; paintMap(); } });      // the end state, drawn exactly as a repaint draws it
 }
 function treeClose(){
@@ -1513,13 +1521,32 @@ function treeClick(e){
   if (e.target.closest("[data-treefit]")){ treeFit(); return true; }
   if (e.target.closest("[data-treeback]")){ treeClose(); return true; }
   if (e.target.closest("[data-treewfclose]")){ TREE.wf = ""; paintMap(); return true; }
-  const w = e.target.closest(".twf"); if (w){ TREE.wf = TREE.wf === w.dataset.wf ? "" : w.dataset.wf; paintMap(); return true; }
-  const n = e.target.closest(".tnode"); if (n){ if (n.dataset.kind === "stage"){ if (TREE.open === n.dataset.id) treeClose(); else treeOpen(n.dataset.id); } else mapSelect(MAPPIN === n.dataset.id ? "" : n.dataset.id); return true; }
+  const w = e.target.closest(".twf"); if (w){ TREE.wf = TREE.wf === w.dataset.wf ? "" : w.dataset.wf; MAPPIN = ""; paintMap(); return true; }
+  const n = e.target.closest(".tnode"); if (n){ if (n.dataset.kind === "stage"){ if (TREE.open === n.dataset.id) treeClose(); else treeOpen(n.dataset.id); } else { TREE.wf = ""; mapSelect(MAPPIN === n.dataset.id ? "" : n.dataset.id); } return true; }
   if (e.target.closest(".treesvg")){ if (TREE.wf){ TREE.wf = ""; paintMap(); } else if (TREE.open) treeClose(); else if (MAPPIN) mapSelect(""); return true; }      // empty space
   return false;
 }
-function treeHover(e, on){ const n = e.target.closest && e.target.closest(".tnodes > .tnode"), svg = treeSvg(); if (!n || !svg) return false;
-  svg.querySelectorAll(".tedge").forEach(x => x.classList.toggle("hot", on && (x.dataset.from === n.dataset.id || x.dataset.to === n.dataset.id))); return true; }
+// hover or focus: the node's lines (or a circle workflow's links) brighten and dots flow along them, producer to consumer, in about 1.5 s;
+// lines into it ("reads") and out of it ("read by") in two colours. Nothing moves at rest; with reduced motion, arrowheads instead.
+function treeFlow(svg, id, wf){
+  svg.querySelectorAll(".tflow").forEach(x => x.remove()); svg.querySelectorAll(".twflinks.hov").forEach(x => x.classList.remove("hov"));
+  svg.querySelectorAll(".tedge.hot,.tlink.hot").forEach(x => { x.classList.remove("hot", "fin", "fout"); x.removeAttribute("marker-end"); });
+  if (!id && !wf) return;
+  let es = [];
+  if (wf){ const g = [...svg.querySelectorAll(".twflinks")].find(x => x.dataset.wf === wf); if (g){ g.classList.add("hov"); es = [...g.querySelectorAll(".tlink")].map(x => [x, x.classList.contains("reads") ? "fin" : "fout"]); } }
+  else es = [...svg.querySelectorAll(".tedge:not(.tgone)")].filter(x => x.dataset.from === id || x.dataset.to === id).map(x => [x, x.dataset.to === id ? "fin" : "fout"]);
+  const layer = svg.querySelector(".tflows"), NS = "http://www.w3.org/2000/svg";
+  es.forEach(([x, k]) => { x.classList.add("hot", k);
+    if (treeReduce() || !layer) return x.setAttribute("marker-end", `url(#tarr-${k})`);
+    const c = document.createElementNS(NS, "circle"), a = document.createElementNS(NS, "animateMotion");
+    c.setAttribute("class", "tflow " + k); c.setAttribute("r", "2.8"); c.dataset.from = x.dataset.from; c.dataset.to = x.dataset.to;
+    a.setAttribute("dur", "1.5s"); a.setAttribute("repeatCount", "indefinite"); a.setAttribute("path", x.getAttribute("d"));
+    c.appendChild(a); layer.appendChild(c); });
+}
+function treeHover(e, on){ const svg = treeSvg(), w = e.target.closest && e.target.closest(".twf"), n = !w && e.target.closest && e.target.closest(".tnodes > .tnode");
+  if (!svg || (!w && !n)) return false;
+  const el = w || n; if (!on && e.relatedTarget && el.contains(e.relatedTarget)) return true;      // moving inside the same dot
+  treeFlow(svg, on && n ? n.dataset.id : "", on && w ? w.dataset.wf : ""); return true; }
 function renderMap(m){
   const nodes = m.nodes || [], edges = m.edges || [];
   if (!nodes.length) return `<div class="mapwrap"><p class="empty">Nothing to draw yet.</p></div>`;
@@ -1639,9 +1666,10 @@ function renderMap(m){
   const fnBottom = Y_FN + 18 + 32;      // function lines start under the function's label
   // every line is described first, so a node knows its neighbours (hover and click light a node and the lines that touch it)
   const ed = [], seg = (a, b) => { const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1; return `M${rd(a.x + dx / L * (a.r + 2))} ${rd(a.y + dy / L * (a.r + 2))} L${rd(b.x - dx / L * (b.r + 4))} ${rd(b.y - dy / L * (b.r + 4))}`; };
-  spine.forEach((n, i) => { const p = spine[i + 1]; if (p) ed.push({cls: "mapedge", from: n.id, to: p.id, d: seg(pos[n.id], pos[p.id]), w: 1.2, title: `hand-off: ${name(n.id)} to ${name(p.id)}`}); });
+  spine.forEach((n, i) => { const p = spine[i + 1]; if (p && mapLinked(m, n.id, p.id)) ed.push({cls: "mapedge", from: n.id, to: p.id, d: seg(pos[n.id], pos[p.id]), w: 1.2, title: `hand-off: ${name(n.id)} to ${name(p.id)}`}); });
   arcs.forEach(p => { const a = pos[p.from], b = pos[p.to], sg = p.page === "L" ? -1 : 1, k = 1.33 * (p.bulge + (p.bad ? 40 : 0)), g = p.g;
-    ed.push({cls: "mapedge given", from: p.from, to: p.to, d: `M${rd(a.x + sg * (a.r + 2))} ${a.y} C${rd(a.x + sg * k)} ${a.y} ${rd(b.x + sg * k)} ${b.y} ${rd(b.x + sg * (b.r + 5))} ${b.y}`, w: 1, dash: g.basis === "declared" ? "2 3" : "", box: g.box, bad: p.bad,
+    ed.push({cls: "mapedge given", from: p.from, to: p.to, d: (() => { const X = a.x + sg * k / 1.33, dir = b.y >= a.y ? 1 : -1, R = Math.min(12, Math.abs(b.y - a.y) / 2, Math.abs(k / 1.33) / 3);      // out, along, back: loops from one node stay nested
+      return `M${rd(a.x + sg * (a.r + 2))} ${a.y} L${rd(X - sg * R)} ${a.y} C${rd(X)} ${a.y} ${rd(X)} ${a.y} ${rd(X)} ${rd(a.y + dir * R)} L${rd(X)} ${rd(b.y - dir * R)} C${rd(X)} ${b.y} ${rd(X)} ${b.y} ${rd(X - sg * R)} ${b.y} L${rd(b.x + sg * (b.r + 5))} ${b.y}`; })(), w: 1, dash: g.basis === "declared" ? "2 3" : "", box: g.box, bad: p.bad,
       title: `${name(p.from)} was given to ${g.known ? name(g.to) : "the " + name(g.box) + " box"}${g.basis === "declared" ? " (by order, not recorded)" : ""}`}); });
   if (idn && pos["person:requester"] && (you || back)) ed.push({cls: "mapedge speak", from: "person:requester", to: "fn:identity", d: seg(pos["person:requester"], idn), w: 1, dash: "1 3",
     title: `you speak to ${name("fn:identity")}: ${you ? you.n : 0} messages; ${name("fn:identity")} speaks to you: ${back ? back.n : 0}`, say: youSay});
@@ -1726,9 +1754,9 @@ function renderMap(m){
       // the trunk: deliverable, team, deliverable; a stretch with no team recorded joins the two deliverables
       td.forEach((d, i) => { if (!i) return; const a = pos[td[i - 1].id], b = pos[d.id], s = into[i];
         if (s){ const g = pos[s];
-          ed.push({cls: "mapedge trunk", from: td[i - 1].id, to: s, d: `M${rd(a.x + a.r + 1)} ${T} L${rd(g.x - g.r - 4)} ${T}`, w: 1.5, title: `hand-off: ${name(td[i - 1].id)} to ${name(s)}`});
+          if (mapLinked(m, td[i - 1].id, s)) ed.push({cls: "mapedge trunk", from: td[i - 1].id, to: s, d: `M${rd(a.x + a.r + 1)} ${T} L${rd(g.x - g.r - 4)} ${T}`, w: 1.5, title: `hand-off: ${name(td[i - 1].id)} to ${name(s)}`});
           ed.push({cls: "mapedge trunk", from: s, to: d.id, d: `M${rd(g.x + g.r + 1)} ${T} L${rd(b.x - b.r - 4)} ${T}`, w: 1.5, title: `hand-off: ${name(s)} to ${name(d.id)}`}); }
-        else ed.push({cls: "mapedge trunk", from: td[i - 1].id, to: d.id, d: `M${rd(a.x + a.r + 1)} ${T} L${rd(b.x - b.r - 4)} ${T}`, w: 1.5, title: `hand-off: ${name(td[i - 1].id)} to ${name(d.id)}`}); });
+        else if (mapLinked(m, td[i - 1].id, d.id)) ed.push({cls: "mapedge trunk", from: td[i - 1].id, to: d.id, d: `M${rd(a.x + a.r + 1)} ${T} L${rd(b.x - b.r - 4)} ${T}`, w: 1.5, title: `hand-off: ${name(td[i - 1].id)} to ${name(d.id)}`}); });
       const push = (p, d) => ed.push({cls: "mapedge given", from: p.from, to: p.to, d, w: 1.5, dash: p.g.basis === "declared" ? "2 3" : "", box: p.g.box, bad: p.bad, page: p.page, title: title(p)});
       // above: straight up from the top of the diamond, across over the team labels, down to the top of the team that used it
       Us.forEach(p => { const s0 = pos[p.from], e = pos[p.to], lev = topY - 14 * (p.lvl - 1) - (p.bad ? 24 : 0);
@@ -1833,6 +1861,7 @@ function renderMap(m){
     if (k === "engine") return `<svg width="22" height="18" viewBox="0 0 22 18" aria-hidden="true"><circle cx="11" cy="9" r="7" fill="none" stroke="var(--muted)" stroke-width="1"/>${[[11, 5.2], [14.6, 7.8], [13.3, 12], [8.7, 12], [7.4, 7.8]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.3" fill="var(--muted)"/>`).join("")}</svg>`;
     if (k === "handoff") return `<svg width="28" height="18" viewBox="0 0 28 18" aria-hidden="true"><line x1="2" y1="9" x2="22" y2="9" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#maparrow)"/></svg>`;
     if (k === "speaks_to") return `<svg width="28" height="18" viewBox="0 0 28 18" aria-hidden="true"><line x1="2" y1="9" x2="22" y2="9" stroke="var(--muted)" stroke-width="1" stroke-dasharray="1 3" stroke-linecap="round" marker-end="url(#maparrow)"/></svg>`;
+    if (k === "flow_in" || k === "flow_out") return `<svg width="28" height="18" viewBox="0 0 28 18" aria-hidden="true"><line x1="2" y1="9" x2="24" y2="9" stroke="var(--${k === "flow_in" ? "flowin" : "flowout"})" stroke-width="1.6"/><circle cx="16" cy="9" r="2.6" fill="var(--${k === "flow_in" ? "flowin" : "flowout"})"/></svg>`;
     if (k === "given_to") return `<svg width="28" height="18" viewBox="0 0 28 18" aria-hidden="true"><path d="M2 16 C2 4 22 14 22 3" fill="none" stroke="var(--muted)" stroke-width="1" opacity=".6" marker-end="url(#maparrow)"/></svg>`;
     const sh = {function: 'stroke="var(--muted)" stroke-width="1.5" fill="var(--panel)"', engine: 'stroke="var(--muted)" stroke-width="1.5" fill="var(--panel)"', work: 'stroke="var(--muted)" stroke-width="1.5" fill="var(--panel)"',
       filed: 'stroke="var(--ok)" stroke-width="2" fill="color-mix(in srgb, var(--ok) 14%, var(--panel))"', running: 'stroke="var(--muted)" stroke-width="1.5" fill="var(--panel)"',
@@ -1841,16 +1870,17 @@ function renderMap(m){
     if (!sh) return `<svg width="28" height="18" viewBox="0 0 28 18" aria-hidden="true"><line x1="2" y1="9" x2="22" y2="9" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3"/></svg>`;      // any other line kind the map lists
     const mark = k === "fault" ? '<text x="11" y="13" text-anchor="middle" style="font-weight:700;font-size:10px;fill:var(--bad)">!</text>' : k === "waiting_on_you" ? '<text x="11" y="13" text-anchor="middle" style="font-weight:700;font-size:10px;fill:var(--validator)">?</text>' : "";
     return k === "running" ? `<svg width="22" height="18" viewBox="0 0 22 18" aria-hidden="true"><circle cx="11" cy="9" r="8" fill="none" stroke="var(--muted)" stroke-width="1.5"/><circle cx="11" cy="9" r="4.5" ${sh}/></svg>` : ring(sh, mark); };
-  const fixed = ["work", "engine", "function", "send", "filed", "done_unchecked", "waiting_on_you", "fault", "not_made", "left_open", "running", "handoff", "given_to", "speaks_to"];
+  const fixed = ["work", "engine", "function", "send", "filed", "done_unchecked", "waiting_on_you", "fault", "not_made", "left_open", "running", "handoff", "given_to", "speaks_to", "flow_in", "flow_out"];
   const drawnKinds = new Set(LH.drawn.given ? ["given_to"] : []);      // the legend lists only what this map draws
   if (LH.drawn.speak) drawnKinds.add("speaks_to");
+  if (MAPVIEW !== "line"){ drawnKinds.add("flow_in"); drawnKinds.add("flow_out"); }      // the Tree view's hover flow
   if (edges.some(e => e.kind === "step") || trunkDecks.length > 1) drawnKinds.add("handoff");
   nodes.forEach(x => { drawnKinds.add(x.kind === "work" ? (x.tag === "Send" ? "send" : "work") : x.kind === "engine" ? "engine" : "function"); drawnKinds.add(isWait(x.status) ? "waiting_on_you" : x.status); });
   const ordered = fixed.filter(k => drawnKinds.has(k)).map(k => ({key: k, label: MAPLABEL.legend[k] || k}));
   const legend = `<details class="mapdd mapleg"><summary>Legend</summary><div class="maplegend" aria-label="Legend">${ordered.map(l => `<span data-legend="${esc(l.key)}">${sw(l.key)}${mapWords(MAPLABEL.legend[l.key] || l.label)}</span>`).join("")}</div></details>`;
   given.filter(g => !g.known).forEach(g => gaps.push(`which step used ${name(g.from)} given to ${name(g.box)}: not recorded`));
   const nr = gaps.length ? `<details class="mapnr"><summary>Not recorded (${gaps.length})</summary><ul>${gaps.map(x => `<li>${mapWords(x)}</li>`).join("")}</ul></details>` : "";
-  return `<div class="mapwrap">${head}<div class="mapsvgwrap" data-view="${MAPVIEW === "line" ? "line" : "tree"}">${svg}${treeHtml(m)}${panel}${under}</div>${cards}${legend}${nr}</div>`;
+  return `<div class="mapwrap">${head}<div class="mapsvgwrap" data-view="${MAPVIEW === "line" ? "line" : "tree"}">${svg}${treeHtml(m, MAPVIEW === "line" ? "" : panel)}${MAPVIEW === "line" ? panel : ""}${under}</div>${cards}${legend}${nr}</div>`;
 }
 async function openArtifact(f){
   ARTOPEN = f; showTab("artifacts"); await loadArtifacts();
@@ -1898,7 +1928,7 @@ $("pane-map").addEventListener("focusin", e => mapHover(e, true)); $("pane-map")
 $("pane-map").addEventListener("keydown", e => { const tn = e.target.closest && e.target.closest(".tnode"); if (tn && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); treeClick(e); return; }
   const g = mapNode(e); if (g && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); mapSelect(MAPPIN === g.dataset.id ? "" : g.dataset.id); } });
 document.addEventListener("keydown", e => { if (e.key !== "Escape" || $("pane-map").hidden) return;      // Esc: the picked workflow, then the open stage, then the panel
-  if (MAPVIEW === "tree" && TREE.wf){ TREE.wf = ""; paintMap(); } else if (MAPVIEW === "tree" && TREE.open) treeClose(); else if (MAPPIN) mapSelect(""); });
+  if (MAPVIEW === "tree" && TREE.wf){ TREE.wf = ""; paintMap(); } else if (MAPPIN) mapSelect(""); else if (MAPVIEW === "tree" && TREE.open) treeClose(); });
 $("pane-map").addEventListener("click", async e => { const t = e.target.closest("[data-maptab]"); if (t){ e.preventDefault(); showTab(t.dataset.maptab); return; }
   if (!e.target.closest("[data-mapgo],[data-wfcard],[data-mapopen],[data-mapclose]") && treeClick(e)){ e.preventDefault(); return; }
   if (e.target.closest("[data-mapclose]")){ e.preventDefault(); mapSelect(""); return; }
