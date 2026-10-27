@@ -428,9 +428,9 @@ and then the website, and the LLD's Interactive elements builder asks the HLD's 
 sent. The HLD owner answers from the address in the brief and corrects its own section, so the HLD gains a version,
 H1-H6 pass again, and every atom the recorded edges reach is re-checked.
 
-### Sends: test messages and milestone emails (dry run)
+### Sends: test messages and milestone emails
 
-`j2_send.py` has no network code. Live sending is not built yet.
+`j2_send.py` sends nothing by default (dry run). Live sending is email only, by SMTP (Python `smtplib`, STARTTLS).
 - **Send deeds:** a brief that asks to email or Slack the result ("send it to me by email") gets a deed stage.
   A send verb must be near "email" or "Slack"; a mere mention matches nothing.
 - **Milestone emails:** one email per goal reached (each document filed and checked, or the site workable),
@@ -439,9 +439,16 @@ H1-H6 pass again, and every atom the recorded edges reach is re-checked.
   When the credits can't cover one, it is skipped with the reason and the run goes on.
 - **Recipient:** taken only from `J2_TEST_EMAIL` / `J2_TEST_SLACK_TARGET`, never from the brief. Anything else
   is refused, and nothing is sent when the variable is unset.
-- **Mode:** `J2_SEND_MODE` is `dry-run` (default: nothing leaves, the deed stays open) or `mock` (an in-process
-  recorder, for tests).
-- **Receipts:** hold a masked recipient (`d***@example.com`) and hashes, never a full address or a secret.
+- **Mode:** `J2_SEND_MODE` is `dry-run` (default: nothing leaves, the deed stays open), `mock` (an in-process
+  recorder, for tests) or `live` (a real email by SMTP; a Slack send stays a dry run).
+- **Live:** the first email of a run asks you once in Needs you: "Send real emails to your test address during
+  this run?" No keeps every send of that run a dry run. Each email has a key (run id, atom id, goal) and is never
+  sent twice, even on a retry or a resumed run. At most `J2_SEND_CAP` (default 10) go out per run; the rest are
+  skipped and recorded. A missing SMTP setting refuses that send, records why and the run goes on. A sent email
+  closes its atom; a failed one stays open with the reason. The Map says "Email · PRD done · sent" or "· failed".
+- **Receipts:** hold the mode, sent, the SMTP code, a masked recipient (`d***@example.com`), hashes and the time;
+  on a failure, an error class (`settings`, `auth`, `connection`, `refused`, `smtp`), never the server's text. Never
+  a full address, a password or any setting's value.
 
 ### Modes and settings
 
@@ -474,7 +481,9 @@ Settings:
 | `J2_BOARD` | off | 1 turns on the message board, see "Message board" |
 | `J2_FORCE_QUESTION` | off | Mock-only test switch: a comma list of askers (a function or a builder), each asking one question |
 | `J2_MILESTONE_EMAILS` | off | 1 sends a milestone email per goal reached (dry run) |
-| `J2_SEND_MODE` | `dry-run` | `dry-run` or `mock`; live sending is not built |
+| `J2_SEND_MODE` | `dry-run` | `dry-run`, `mock` or `live` (real email by SMTP, after you say yes once a run) |
+| `J2_SEND_CAP` | 10 | The most live emails one run sends |
+| `J2_SMTP_HOST`, `J2_SMTP_PORT`, `J2_SMTP_USER`, `J2_SMTP_PASSWORD`, `J2_SMTP_FROM` | unset | SMTP for live mode (in `.env` only) |
 | `J2_TEST_EMAIL` | unset | The only address a send may go to |
 | `J2_TEST_SLACK_TARGET` | unset | The only Slack target a send may go to |
 | `J2_OVERRIDE_KEY` | unset | Owner override key, `.env` only, see below |
