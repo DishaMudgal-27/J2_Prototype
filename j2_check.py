@@ -176,7 +176,12 @@ def check(html):
     out.pop("note", None)
     raw = json.loads(m.group(1).replace("&quot;", '"').replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">"))
     errors = []
-    for name, r in raw.items():
+    # In WIDTHS order, not the order the two frames happened to finish in: a run's recorded mechanical check (and
+    # the prompt Audit reads) is then the same for the same page, whichever width loads first.
+    for name in list(WIDTHS) + [k for k in raw if k not in WIDTHS]:
+        r = raw.get(name)
+        if r is None:
+            continue
         if "error" in r:
             out[name] = {"note": r["error"]}
             continue
