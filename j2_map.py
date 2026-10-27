@@ -72,8 +72,10 @@ def empty(why="nothing to draw yet"):
 
 
 def _unchecked(atoms, done):
-    """The workflows set to done whose atom did not pass its checks (verify_failed, or still open)."""
-    return sorted({a["workflow"] for a in atoms if a.get("workflow") in done and a.get("status") in ("verify_failed", "open")},
+    """The workflows set to done whose atom did not pass its checks (verify_failed, or still open). A send is never one: one
+    not sent (a dry run, skipped or failed) says so on its own box."""
+    send = lambda a: any(o.get("form") == "send" for o in a.get("output") or [])
+    return sorted({a["workflow"] for a in atoms if a.get("workflow") in done and a.get("status") in ("verify_failed", "open") and not send(a)},
                   key=_num)
 
 
