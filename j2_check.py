@@ -176,7 +176,7 @@ def check(html):
     out.pop("note", None)
     raw = json.loads(m.group(1).replace("&quot;", '"').replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">"))
     errors = []
-    for name, r in raw.items():
+    for name, r in sorted(raw.items(), key=lambda x: list(WIDTHS).index(x[0]) if x[0] in WIDTHS else len(WIDTHS)):      # the widths in order, never in the order Chrome finished them
         if "error" in r:
             out[name] = {"note": r["error"]}
             continue
