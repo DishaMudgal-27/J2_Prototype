@@ -321,6 +321,12 @@ MAX_CHECK_ATTEMPTS = 3
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 SPECIFIC = re.compile(r"\d|" + EMAIL.pattern)       # a time, price, number or email in a goal
 IDENT = re.compile(r"^[#.]?[A-Za-z][\w-]*$")         # a section id or class name
+# A selector: an id, a class or an element, with any number of attribute clauses after it ([data-code=TL-K1],
+# [href*="wa.me"]). The attribute part is markup, so a charter value inside one is not a fact used as a target.
+SELECTOR = re.compile(r"""^(?P<base>[#.]?[A-Za-z][\w-]*)(?P<attrs>(?:\[\s*[A-Za-z][\w:-]*\s*"""
+                      r"""(?:[~^$*|]?=\s*(?:"[^"]*"|'[^']*'|[^\]\s]*))?\s*\])+)?$""")
+# What a grep-count may look for besides an id or a class: a link's own address.
+LINK_TARGET = re.compile(r"""^(?:(?:https?|mailto|tel):\S*|(?:[\w-]+\.)+[a-z]{2,}(?:/\S*)?)$""", re.I)
 # J2_REALIZATION: an id range in how or constraints ("#pad-1 to #pad-9", "cell-0-0..cell-8-8", "#cell-r-c (r and c
 # 0 to 8)") tells the builder to create every id in it; a name with a digit in it (#pad-4, j2-btn) is not a count.
 ID_RANGE = re.compile(r"#?\b([a-z][\w-]*?)(\d+(?:-\d+)*)\s*(?:to|through|\.\.|–|—)\s*#?\1(\d+(?:-\d+)*)\b")
@@ -449,14 +455,26 @@ def strings(x):
     return [x] if isinstance(x, str) else []
 
 
-def target_problem(target, told, source):
-    """Why a counted check or a behaviour step can't use this selector (None when it can): only an id or class
-    the atom's how or constraints tells the builder to create."""
-    name = str(target or "").lstrip("#.")
-    if not IDENT.match(str(target or "")) or EMAIL.search(str(target)) or \
-            (re.search(r"\d", name) and squash(name) in source):
+def target_problem(target, told, source, kind=None):
+    """Why a counted check or a behaviour step can't use this selector (None when it can): only an id or class the
+    atom's how or constraints tells the builder to create. kind: the check's type, so a grep-count may also look for
+    a link's own address.
+
+    A selector may carry attribute clauses (".j2-card[data-code=TL-K1]", 'a[href*="wa.me"]'): the id or class in
+    front of them is what the atom must create, and a charter value inside an attribute is part of the selector,
+    not a fact used as a target. An element with an attribute clause names markup, so it needs no declaration. A
+    bare charter value ("TL-K1", "+91 00000 11111") is still rejected, with facts-present named instead.
+    (runs/j2-20261027-170831 lost its whole products section to this rule.)"""
+    s = str(target or "").strip()
+    if kind == "grep-count" and LINK_TARGET.match(s) and not EMAIL.search(s):
+        return None      # a link's address (wa.me, mailto:, tel:) is markup the page must contain, not prose
+    m = SELECTOR.match(s)
+    name = m.group("base").lstrip("#.") if m else ""
+    if not m or EMAIL.search(s) or (re.search(r"\d", name) and squash(name) in source):
         return (f"targets {target!r}: only a section id or class name, never a charter fact, an email or a generic "
                 "string (use facts-present for those)")
+    if m.group("attrs") and not s.startswith(("#", ".")):
+        return None      # an element and an attribute (a[href*="wa.me"]): markup, nothing the builder must invent
     if name.lower() not in told:
         return f"targets {target!r}, which the atom's how or constraints doesn't tell the builder to create"
     return None
@@ -571,7 +589,7 @@ def check_problems(a, source, types=CHECK_TYPES, upstream="", ranges=False):
             about = squash(json.dumps([a.get("goal"), a.get("how"), label], ensure_ascii=False))
             out += [f"{lab} behavior {x}" for x in behavior_problems(target, told, source, about)]
         elif t in COUNTED:
-            if bad := target_problem(target, told, source):
+            if bad := target_problem(target, told, source, t):
                 out.append(f"{lab} {t} {bad}")
             nums = [int(x) for x in re.findall(r"\d+", NAME_WITH_DIGIT.sub(" ", label) if ranges else label)]
             if t == "tap-targets":      # "tappable at 360px": the screen width is never the count or the size
@@ -5766,8 +5784,21 @@ class J2Run:
                       "positions." + (" Prices are fixed by the rate card: to spend less, remove parts or whole "
                                       "workflows, not the price." if RATES else "")
                       + self._priority_file_note(table), mock)
-        dec = str(p.get("decision") or "").lower()
-        wfs = norm(p.get("workflows")) or (table if dec == "grant" else [])
+        for _ in range(2):      # a GRANT carries a price; the reply, not the workflow, is re-asked when it doesn't
+            dec = str(p.get("decision") or "").lower()
+            wfs = norm(p.get("workflows")) or (table if dec == "grant" else [])
+            if dec != "grant":
+                break
+            wfs, lost = self._kept_price(wfs, table)
+            if not lost:
+                break
+            self._event("priority", "invalid_move", "GRANT without a price: " + ", ".join(lost))
+            self.post("system", "Priority's GRANT has no cost or envelope for " + ", ".join(lost) + ", and the "
+                      "proposal it was shown has no price either. Priority is asked once more; the workflow is not "
+                      "rejected for that.", redirect=True)
+            p = self.call("priority", fmt, task + "\nYOUR LAST REPLY GRANTED WITHOUT A PRICE: every workflow in "
+                          "workflows needs its own cost (or estimated_resources.money) and envelope.money_limit. "
+                          "Send the same decision again with those filled in.", mock)
         note = None
         if dec not in ("grant", "counter", "refuse"):
             dec, wfs, note = "refuse", [], f"Priority's decision '{p.get('decision')}' isn't GRANT/COUNTER/REFUSE. Treated as REFUSE."
@@ -5846,6 +5877,8 @@ class J2Run:
                       "final.", mock)
         dec = str(p.get("decision") or "").lower()
         wfs = norm(p.get("workflows")) or (table if dec == "grant" else [])
+        if dec == "grant":      # the same rule: an echo without a price keeps the price code computed for the ruling
+            wfs = self._kept_price(wfs, table)[0]
         if dec not in ("grant", "counter", "refuse") or granted_total(wfs) > remaining or (dec == "counter" and not wfs):
             dec, wfs = "refuse", []
         m = self._say("priority", p.get("say", ""), None, None, decision=dec, exchange="ruling", conflict=c["id"])
@@ -5900,6 +5933,34 @@ class J2Run:
         self._parked(f"the Requester kept Priority's refusal on {c['id']}")
 
     # ------------------------------------------------------------------ J2.e: validator
+    def _kept_price(self, wfs, table):
+        """A GRANT that echoes a workflow without its cost, estimate or envelope keeps the price code had already
+        computed for that proposal (the table Priority was shown). The price is code's: an echo can't drop it, and
+        a workflow is never registered or rejected as "cost 0" because of one. Returns (workflows, the names that
+        have no price anywhere). runs/j2-20261027-170831 lost its whole products section this way: Priority granted
+        it with cost, estimated_resources and envelope all null, and the validator read 0."""
+        by = {str(k): w for w in table or [] for k in (w.get("id"), w.get("name")) if k}
+        out, lost, kept = [], [], []
+        for w in wfs:
+            src = by.get(str(w.get("id"))) or by.get(str(w.get("name")))
+            if granted(w) > 0 or not src or granted(src) <= 0:
+                out.append(w)
+                if granted(w) <= 0:
+                    lost.append(w.get("name") or "?")
+                continue
+            env = {**(src.get("envelope") or {}), **{k: v for k, v in (w.get("envelope") or {}).items() if v}}
+            env["money_limit"] = granted(src)
+            out.append({**w, "cost": src.get("cost"), "estimate": src.get("estimate", src.get("cost")),
+                        "estimated_resources": w.get("estimated_resources") or src.get("estimated_resources"),
+                        "envelope": env})
+            kept.append((w.get("name") or "?", granted(src)))
+        if kept:
+            said = ", ".join(f"{n} ({c})" for n, c in kept)
+            self._event("priority", "price_kept", said)
+            self.post("system", f"Priority's GRANT carried no price for {', '.join(n for n, _ in kept)}; code keeps "
+                                f"the price it had already computed: {said}.")
+        return out, lost
+
     def _agree(self, wfs):
         self.step = 5
         registered, refused, defaults = self._register(wfs)
@@ -6738,6 +6799,18 @@ class J2Run:
         entry = j2_board.new_entry(f"Q-{len(self.board['entries']) + 1}", asked_by, asking, to, about, text,
                                    self.cycle, attempt, asked_by_role=role)
         self.board["entries"].append(entry)
+        if squash(str(to or "")).lstrip("@") in ("requester", "user", "you"):
+            # Only Identity talks to the Requester (the board is agent to agent), so the question takes Identity's
+            # existing path instead of being refused: Identity answers it from the charter or asks the Requester.
+            # runs/j2-20261027-170831 lost Identity's own question this way.
+            entry["status"] = j2_board.ROUTED
+            self.board_asks.append({"frm": asked_by, "question": f"{entry['id']} ({about or 'no subject recorded'}): "
+                                                                 f"{text}"})
+            j2_board.write(self.dir, self.board)
+            j2_board.log_event(self.dir, {"event": entry["status"], "id": entry["id"], "asked_by": asked_by, "to": to})
+            self.post("system", f"Board {entry['id']}: a question for the Requester goes to Identity, the only agent "
+                                "who talks to them; the board itself is agent to agent.")
+            return entry
         if reason:
             entry["status"] = "refused"
             j2_board.write(self.dir, self.board)
