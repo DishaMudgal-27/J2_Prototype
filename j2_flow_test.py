@@ -4892,6 +4892,232 @@ def board_doc_change():
           "re-checked with a Q-1 receipt, the records and the map carry it, and the run ends Done ok")
 
 
+
+def artifact_versions():
+    """Artifact version history and role hand-offs (versions/1, j2_artifacts.versions, versions.json, /api/versions).
+
+    On the document-change demo run (Still Point, J2_BOARD=1 J2_FORCE_QUESTION=lld) every deliverable the run saved -
+    the PRD, HLD, LLD, the style guide and the website - has its whole history, oldest first: who made each version
+    (workflow, atom, role), why it was made, how many lines changed, and a sha256 whose latest row is the row
+    artifacts.json already holds. The HLD's history carries the version Q-1 changed. The hand-offs between the roles
+    (Product worker -> Tech writer, Tech writer -> UI developer, Designer -> UI developer) are realized only from
+    checks the run itself recorded, each naming the receipt or audit behind it; with those files gone every hand-off
+    says "not recorded", never a pass. A plain website run has the style guide and the website only. Old saved runs,
+    the live run and a run that isn't there all answer without an error."""
+    import html as htmllib
+    import shutil
+    import threading
+    import urllib.error
+    import urllib.request
+    import j2_artifacts as A
+    import j2_map
+    import j2_server
+    H = lambda p: hashlib.sha256(open(p, "rb").read()).hexdigest()
+    run = doc_board_run()
+    assert run.outcome.startswith("Done"), run.outcome
+    v = A.versions(run.dir)
+    assert v["schema"] == "versions/1" and v["run"] == os.path.basename(run.dir) and v["roles"] == A.ROLES
+    by = {a["artifact"]: a for a in v["artifacts"]}
+    assert list(by) == ["prd", "hld", "lld", "website", "design"], list(by)
+    rows = {r["type"]: r for r in json.load(open(os.path.join(run.dir, "artifacts.json")))["rows"] if r["deliverable"]}
+    for kind, a in by.items():
+        assert a["role"] == A.ROLES[kind] and a["versions"] == len(a["history"]) >= 1, a
+        assert [r["version"] for r in a["history"]] == sorted(r["version"] for r in a["history"]), a["history"]
+        for r in a["history"]:
+            assert set(r) == {"version", "file", "time", "sha256", "made_by", "why", "lines_changed"}, r
+            assert r["why"] and r["made_by"], r                       # every row says who and why, or "not recorded"
+            assert r["made_by"] != "not recorded", (kind, r)          # this run records a maker for every version
+            for m in r["made_by"]:
+                assert m["role"] == A.ROLES[kind] and m["workflow"] in {w["id"] for w in run._all_wfs()}, m
+                assert m["atom"].startswith(m["workflow"] + "."), m
+            assert r["sha256"] == H(os.path.join(run.dir, r["file"])), r["file"]
+            assert set(r["lines_changed"]) == {"added", "removed"}, r
+        last = a["history"][-1]
+        if kind in rows:      # the newest version is the row artifacts.json already holds
+            assert (last["version"], last["sha256"]) == (rows[kind]["version"], rows[kind]["sha256"]), (kind, last)
+        else:
+            assert kind == "design" and last["sha256"] == H(os.path.join(run.dir, "style.json")), last
+    # the HLD version the board question changed, with the lines it changed
+    up = run.board["entries"][0]["artifact_update"]
+    q = [r for r in by["hld"]["history"] if r["why"] == "changed by Q-1"]
+    assert [r["version"] for r in q] == [up["to_version"]], [(r["version"], r["why"]) for r in by["hld"]["history"]]
+    assert q[0]["lines_changed"]["added"] >= 1 and len(q[0]["made_by"]) == 1, q[0]
+    assert [r["why"] for r in by["hld"]["history"] if r["version"] == 1] == ["built"], by["hld"]["history"][0]
+    # the hand-offs, each realized from a check this run recorded (a condition audit, a slice receipt, R-1)
+    hand = {(h["from_artifact"], h["to_artifact"]): h for h in v["handoffs"]}
+    assert set(hand) == {("prd", "hld"), ("prd", "lld"), ("lld", "website"), ("design", "website")}, list(hand)
+    receipts = [json.loads(ln) for ln in open(os.path.join(run.dir, "receipts.jsonl"), encoding="utf-8")]
+    for pair in (("prd", "hld"), ("lld", "website"), ("design", "website")):
+        h = hand[pair]
+        assert h["realized"] == "pass" and h["evidence"] and h["consumers"], h
+        assert (h["from_role"], h["to_role"]) == (A.ROLES[pair[0]], A.ROLES[pair[1]]), h
+        assert h["from_version"] in [r["version"] for r in by[pair[0]]["history"]], h
+        for ev in h["evidence"]:
+            if ":" in ev:      # an LLD slice receipt: atom and attempt
+                atom, attempt = ev.split(":")
+                assert any(r.get("type") == "lld-slice" and r.get("atom") == atom
+                           and str(r.get("attempt")) == attempt and r.get("pass") is True for r in receipts), ev
+            else:              # a condition or rubric id with the audit it was recorded in
+                cid, n = re.fullmatch(r"([\w-]+(?:-[A-Z]\d)?) \(audit (\d+)\)", ev).groups()
+                au = A._audits(run.dir, pair[1] if pair[1] in ("hld", "lld") else None)
+                assert 1 <= int(n) <= len(au), (ev, len(au))
+                ids = [c["id"] for c in au[int(n) - 1].get("conditions") or []] \
+                    + [r["id"] for r in au[int(n) - 1].get("rubric") or []]
+                ends = cid.split("-") if re.fullmatch(r"[A-Z]\d+-[A-Z]\d+", cid) else [cid]
+                assert all(x in ids for x in ends), (ev, ids)      # "H1-H6": the range the audit ran; "R-1": one id
+    assert hand[("prd", "lld")]["realized"] == "pass", hand[("prd", "lld")]
+    assert v["not_recorded"] == [], v["not_recorded"]
+    # versions.json is written beside artifacts.json, and says the same as a fresh read
+    saved = json.load(open(os.path.join(run.dir, "versions.json")))
+    assert saved["schema"] == "versions/1" and saved["artifacts"] == v["artifacts"] and saved["handoffs"] == v["handoffs"]
+    # a plain website run: the style guide and the website only, the hand-off realized from R-1
+    plain = docs_run(BREW_LAB, 200)
+    pv = A.versions(plain.dir)
+    assert [a["artifact"] for a in pv["artifacts"]] == ["website", "design"], pv["artifacts"]
+    ph = pv["handoffs"]
+    assert [(h["from_artifact"], h["to_artifact"]) for h in ph] == [("design", "website")], ph
+    assert ph[0]["realized"] == "pass" and re.fullmatch(r"R-1 \(audit \d+\)", ph[0]["evidence"][0]), ph[0]
+    assert ph[0]["from_role"] == "Designer" and ph[0]["to_role"] == "UI developer" and ph[0]["from_version"] == 1, ph[0]
+    assert pv["not_recorded"] == [], pv["not_recorded"]
+    # a check the run didn't record is "not recorded", never a pass
+    gone = os.path.join(j2.RUNS_DIR, "j2-20200102-000000")
+    shutil.copytree(run.dir, gone)
+    for f in ["audits.json", "receipts.jsonl"] + [x for x in os.listdir(gone) if x.startswith("stage-")]:
+        os.remove(os.path.join(gone, f))
+    gv = A.versions(gone)
+    assert {h["realized"] for h in gv["handoffs"]} == {"not recorded"}, gv["handoffs"]
+    assert all(not h["evidence"] and h["note"] for h in gv["handoffs"]), gv["handoffs"]
+    assert len([x for x in gv["not_recorded"] if "was realized" in x]) == len(gv["handoffs"]), gv["not_recorded"]
+    assert [a["artifact"] for a in gv["artifacts"]] == [a["artifact"] for a in v["artifacts"]], "the history is still read"
+    # an old saved run with no versions.json or artifacts.json opens, and so do the real saved runs in this clone
+    old = os.path.join(j2.RUNS_DIR, "j2-20200103-000000")
+    shutil.copytree(run.dir, old)
+    for f in ("versions.json", "artifacts.json", "map.json"):
+        os.remove(os.path.join(old, f))
+    ov = A.versions(old)
+    assert ov["artifacts"] and A.tree(old)["groups"] and j2_map.build(old)["nodes"], ov["run"]
+    here = os.path.dirname(os.path.abspath(__file__))
+    real = [os.path.join(here, "runs", x) for x in sorted(os.listdir(os.path.join(here, "runs")))[:4]] \
+        if os.path.isdir(os.path.join(here, "runs")) else []
+    for d in [x for x in real if os.path.isdir(x)]:
+        rv = A.versions(d)
+        assert rv["schema"] == "versions/1" and isinstance(rv["artifacts"], list), d
+        for a in rv["artifacts"]:
+            assert a["history"] and all(r["why"] and r["made_by"] for r in a["history"]), (d, a["artifact"])
+        assert all(h["realized"] in ("pass", "fail", "not recorded") for h in rv["handoffs"]), d
+        assert A.tree(d)["groups"], d
+    # /api/versions: the live run, a saved run, and a run that isn't there
+    keep, live = j2_server.RUN, j2.J2Run()
+    j2_server.RUN = live
+    srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{srv.server_address[1]}"
+    try:
+        got = json.load(urllib.request.urlopen(f"{base}/api/versions"))
+        assert got["schema"] == "versions/1" and got["artifacts"] == [] and got["not_recorded"] == ["the run folder"], got
+        got = json.load(urllib.request.urlopen(f"{base}/api/versions?run={os.path.basename(run.dir)}"))
+        assert got == saved, "a saved run is served the file it wrote"
+        got = json.load(urllib.request.urlopen(f"{base}/api/versions?run={os.path.basename(old)}"))
+        assert [a["artifact"] for a in got["artifacts"]] == [a["artifact"] for a in ov["artifacts"]], got["run"]
+        got = json.load(urllib.request.urlopen(f"{base}/api/versions?run=j2-19990101-000000"))
+        assert got["artifacts"] == [] and got["not_recorded"] == ["the run folder"], got
+    finally:
+        j2_server.RUN = keep
+        srv.shutdown()
+    assert not os.path.exists(live.dir), "reading must not create the run folder"
+    # the page: the Versions list of each deliverable, newest first, and a "Handed to" line per hand-off
+    if shutil.which("node"):
+        tree, m = A.tree(run.dir), j2_map.build(run.dir)
+        out = render_node({"workflows": [], "atoms_v1": {}, "chat": []},
+                          docs={"docs": {}, "map": m, "artifacts": {"deliverables": [], "records": [], "tree": tree}})
+        art = out["artifacts"]
+        hld_rows = re.findall(r'data-art="site/hld-v(\d+)\.md"[^>]*>(.*?)</div>', art)
+        assert [int(n) for n, _ in hld_rows] == sorted((int(n) for n, _ in hld_rows), reverse=True), hld_rows
+        top = htmllib.unescape(re.sub(r"<[^>]+>", " ", hld_rows[0][1]))
+        for word in (f"v{up['to_version']}", "made by Tech writer", "changed by Q-1", "lines", "Open"):
+            assert word in " ".join(top.split()), (word, top)
+        assert "+" in top and "/-" in top, top                        # the lines the change added and removed
+        hands = [htmllib.unescape(re.sub(r"<[^>]+>", " ", x)) for x in re.findall(r'<div class="arthand">(.*?)</div>', art)]
+        assert len(hands) == len(v["handoffs"]), hands
+        assert any("UI developer" in x and "realized: pass" in x and "evidence R-1 (audit" in x for x in hands), hands
+        assert all("realized:" in x for x in hands), hands
+        assert art.count('class="artst st-filed">realized: pass') == len(v["handoffs"]), art
+        assert "Product worker · 6 versions" in art or re.search(r"Product worker · \d+ versions", art), art[:200]
+        # the Map: the role and the version count on each box, the hand-off result on the line between two boxes
+        subs = {t["label"]: t["sub"] for t in out["tree"]["nodes"] if t["kind"] == "deck"}
+        assert any(re.fullmatch(r"Tech writer · v\d+, \d+ versions · filed", s) for s in subs.values()), subs
+        assert all(any(r in s for r in A.ROLES.values()) for k, s in subs.items() if k != "Charter"), subs
+        labs = re.findall(r'<text class="thand"[^>]*>([^<]+)</text>', out["map"])
+        assert labs and set(labs) == {"pass"} and len(labs) == len([h for h in v["handoffs"] if h["realized"] != "not recorded"]), labs
+        assert "realized: pass · evidence" in htmllib.unescape(re.sub(r"<[^>]+>", " ", out["map"])), "the Line view's lines say it too"
+    # the real page, Detailed view only: 1280 and 390 wide, light and dark. The Versions list and the "Handed to"
+    # lines use the page's own tokens, so each theme colours them like the status chips beside them.
+    chrome = j2.j2_check.find_chrome()
+    if chrome and BROWSER:
+        ui = open(os.path.join(here, "j2_ui.html"), encoding="utf-8").read()
+        name = os.path.basename(run.dir)
+        READ = ("const art = d.getElementById('pane-artifacts'), hands = [...art.querySelectorAll('.arthand')], vis = e => e.getClientRects().length > 0;"
+                "const vrow = art.querySelector('[data-art^=\"site/hld-v\"]'), W = d.documentElement.clientWidth;"
+                "r.dark = w.matchMedia('(prefers-color-scheme: dark)').matches; r.bg = w.getComputedStyle(d.body).backgroundColor;"
+                "r.hands = hands.length; r.shown = hands.filter(vis).length; r.text = hands.map(e => e.innerText.replace(/\\s+/g, ' ').trim());"
+                "r.chip = hands.map(e => w.getComputedStyle(e.querySelector('.artst')).color);"
+                "r.chipok = hands.every(e => { const c = e.querySelector('.artst'); return c && w.getComputedStyle(c).color === w.getComputedStyle(art.querySelector('.artst.st-filed')).color; });"
+                "r.vrow = vrow ? vrow.innerText.replace(/\\s+/g, ' ').trim() : null; r.vshown = !!vrow && vis(vrow);"
+                "r.out = [...art.querySelectorAll('*')].filter(e => { const b = e.getBoundingClientRect(); return b.width && b.height && (b.right > W + 0.5 || b.left < -0.5); })"
+                ".map(e => (e.className || e.tagName) + ' ' + Math.round(b_(e)));"
+                "r.pane = Math.round(art.getBoundingClientRect().width);")
+
+        def probe(size="1280,900", dark=False, width=None):
+            tmp = tempfile.mkdtemp(prefix="j2-vers-")
+            head = ("const d = document.querySelector('iframe').contentDocument, w = d.defaultView;" if width
+                    else "const d = document, w = window;")
+            js = ("const b_ = e => e.getBoundingClientRect().right; setTimeout(() => { const r = {}; try { " + head
+                  + "w.showTab('artifacts'); d.querySelectorAll('#pane-artifacts details').forEach(x => { x.open = true; });"
+                  + READ + " } catch (e) { r.error = String(e); } document.body.setAttribute('data-r', JSON.stringify(r)); }, 5500)")
+            open(os.path.join(tmp, "j2_ui.html"), "w", encoding="utf-8").write(
+                ui if width else ui.replace("</body>", f"<script>{js}</script></body>"))
+            page = (f'<!doctype html><body style="margin:0"><iframe src="/?view=detail&run={name}" '
+                    f'style="width:{width}px;height:900px;border:0;display:block"></iframe><script>{js}</script></body>')
+
+            class Wrap(j2_server.Handler):
+                def do_GET(self):
+                    return self._send(200, page, "text/html") if self.path == "/wrap" else super().do_GET()
+            keep_here, j2_server.HERE = j2_server.HERE, tmp
+            keep_run, j2_server.RUN = j2_server.RUN, run
+            srv2 = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), Wrap if width else j2_server.Handler)
+            threading.Thread(target=srv2.serve_forever, daemon=True).start()
+            url = (f"http://127.0.0.1:{srv2.server_address[1]}/wrap" if width
+                   else f"http://127.0.0.1:{srv2.server_address[1]}/?view=detail&run={name}")
+            try:
+                dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", f"--window-size={size}"]
+                                 + (["--force-dark-mode"] if dark else [])
+                                 + ["--virtual-time-budget=14000", "--dump-dom", url], timeout=180).stdout
+            finally:
+                j2_server.HERE, j2_server.RUN = keep_here, keep_run
+                srv2.shutdown()
+            got = json.loads(htmllib.unescape(re.search(r'data-r="([^"]*)"', dom).group(1)))
+            assert "error" not in got, got
+            return got
+        seen = {}
+        for label, kw in (("1280 light", {}), ("1280 dark", {"dark": True}),
+                          ("390 light", {"size": "600,900", "width": 390}),
+                          ("390 dark", {"size": "600,900", "width": 390, "dark": True})):
+            g = probe(**kw)
+            assert g["hands"] == g["shown"] == len(v["handoffs"]), (label, g)
+            assert g["dark"] is bool(kw.get("dark")) and g["chipok"] is True, (label, g)
+            assert all("realized: pass" in t for t in g["text"]), (label, g["text"])
+            assert any("UI developer" in t and "evidence R-1 (audit" in t for t in g["text"]), (label, g["text"])
+            assert g["vshown"] and "made by Tech writer" in g["vrow"] and "changed by Q-1" in g["vrow"], (label, g["vrow"])
+            assert g["out"] == [], (label, g["out"])      # nothing past either edge of the Artifacts tab
+            assert g["pane"] <= (390 if kw.get("width") else 1280), (label, g["pane"])
+            seen[label] = g["bg"]
+        assert seen["1280 light"] != seen["1280 dark"] and seen["390 light"] != seen["390 dark"], seen
+    print("artifact versions: every deliverable of the demo run has its whole history with the maker, the role and why "
+          f"(HLD v{up['to_version']} changed by Q-1, {by['hld']['versions']} versions), the newest row is the one "
+          "artifacts.json holds, the four hand-offs are realized from recorded conditions, slice receipts and R-1, a "
+          "plain run has the style guide and the website only, missing checks read \"not recorded\", old runs open, and "
+          "/api/versions answers live, saved and missing ok")
+
 def board_doc_not_owner():
     """Message board, part C (b): a change to a section the answering atom doesn't own is refused with the reason,
     and the document is untouched."""
@@ -7629,6 +7855,7 @@ if __name__ == "__main__":
             board_content_edges()
             board_story_view()
             board_doc_change()
+            artifact_versions()
             board_doc_not_owner()
             board_doc_prd()
             board_doc_no_edge()
