@@ -14,7 +14,8 @@ import os
 import re
 
 SCHEMA = "board/1"
-STATUSES = ("open", "answered", "unanswered", "refused")
+ROUTED = "routed to Identity"      # a question for the Requester: only Identity talks to them
+STATUSES = ("open", "answered", "unanswered", "refused", ROUTED)
 ROLES = ("function", "builder")
 # Words the duplicate test drops before comparing two questions: they carry no subject of their own.
 STOPWORDS = frozenset(

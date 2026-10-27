@@ -4687,6 +4687,91 @@ def doc_board_run(force="lld", patch=None, budget=1400, demo=False):
     return run
 
 
+def validator_fixes():
+    """The three losses in runs/j2-20261027-170831, from its own summary.json rejections.
+
+    (1) The selector rule read a selector with an attribute clause as a charter fact, so the products atom was
+    rejected for '.j2-card[data-code=TL-K1]' (cycle 2) and for a grep-count on 'wa.me' (cycle 4); a bare charter
+    value is still rejected, with facts-present named. (2) Priority GRANTed the products workflow with cost,
+    estimated_resources and envelope all null, and the validator rejected it as "its cost is 0"; the price code
+    computed for the table is now kept and the workflow registers. (3) Identity's board question to the Requester
+    was refused ("the target isn't a workflow of this run"); it now takes Identity's own path."""
+    told = j2.squash(json.dumps([{"steps": "In #products render 8 .j2-card elements, each with an .order-btn "
+                                           "linking to wa.me"}, ["Create .j2-card for each product and .order-btn "
+                                                                 "per card"]]))
+    source = j2.squash("TL-K1 Indigo Block Print Kurta Rs 1499 TL-H1 Khadi Cotton Shirt TL-S2 Chanderi Saree "
+                       "WhatsApp +91 00000 11111")
+    # (1a) cycle 2: the behaviour steps the run lost, verbatim
+    steps = ["set #size-filter M", "expect-visible .j2-card[data-code=TL-K1]", "set #price-filter under1500",
+             "expect-visible .j2-card[data-code=TL-H1]", "expect-hidden .j2-card[data-code=TL-S2]"]
+    assert j2.behavior_problems(steps, told + " #size-filter #price-filter", source, "filter behavior by size") == [], \
+        j2.behavior_problems(steps, told + " #size-filter #price-filter", source, "filter")
+    # (1b) cycle 4: the grep-count the run lost, and the link forms beside it
+    for t in ("wa.me", "https://wa.me/910000011111", "tel:", "mailto:"):
+        assert j2.target_problem(t, told, source, "grep-count") is None, (t, j2.target_problem(t, told, source, "grep-count"))
+    assert j2.target_problem('a[href*="wa.me"]', told, source, "element-count") is None
+    assert j2.target_problem(".j2-card[data-code=TL-K1]", told, source, "element-count") is None
+    # (1c) a bare charter value is still a fact, not a target; an undeclared class is still undeclared
+    for bad in ("TL-K1", "+91 00000 11111", "Rs 1499"):
+        why = j2.target_problem(bad, told, source, "grep-count")
+        assert why and "use facts-present for those" in why, (bad, why)
+    assert "doesn't tell the builder to create" in j2.target_problem(".cat-filter-kurta", told, source, "element-count")
+    # (2) a GRANT that echoes a workflow without its price keeps the price code computed for the table. The live
+    # run had no rate card, so the price was Priority's envelope and the echo left nothing behind.
+    run, run2 = j2.J2Run(), j2.J2Run()
+    j2.load_rates("website", card=False)      # the live run had no rate card: the price was Priority's envelope
+    try:
+        run.budget, run.spent = 150, 54
+        table = j2.norm([{"id": "p1", "name": "Products, filter and WhatsApp order",
+                          "estimated_resources": {"money": 30},
+                          "envelope": {"money_limit": 30, "model_call_limit": 2}}])
+        assert j2.granted(table[0]) == 30, table
+        echoed = j2.norm([{"id": "p1", "name": "Products, filter and WhatsApp order", "cost": None,
+                           "estimated_resources": None, "envelope": None}])
+        assert j2.granted(echoed[0]) == 0, "the echo as Priority sent it: no price at all"
+        kept, lost = run._kept_price(echoed, table)
+        assert not lost and j2.granted(kept[0]) == 30 and kept[0]["cost"] == 30, (kept, lost)
+        assert (kept[0].get("envelope") or {}).get("model_call_limit") == 2, kept[0]
+        assert any(m["who"] == "system" and "code keeps the price it had already computed" in m["text"] for m in run.chat)
+        lost2 = run._kept_price(j2.norm([{"id": "p9", "name": "No price anywhere"}]), table)[1]
+        assert lost2 == ["No price anywhere"], lost2       # nothing to keep: the reply is re-asked, not the workflow
+        # and the registration that used to say "its cost is 0" now goes through
+        run2.budget, run2.goal = 150, {"statement": "A site", "done_when": ["Products section lists all 8 products"],
+                                       "charter_items": ["Products section lists all 8 products"], "facts": [],
+                                       "to_be_confirmed": []}
+        wf = {**echoed[0], "goal_gap": "No products on the page", "outputs": ["#products"],
+              "completion_check": "8 product cards are on the page", "covers": [1], "atoms": ATOM}
+        assert "its cost is 0" in str(run2._register([dict(wf)])[1]), "without the fix the echo is rejected as cost 0"
+        registered, refused, _ = run2._register(run2._kept_price([wf], table)[0])
+        assert registered and not refused, (registered, refused)
+        assert registered[0]["cost"] == 30 and registered[0]["envelope"]["money_limit"] == 30, registered[0]
+    finally:
+        j2.load_rates("website")      # put the rate card back for the tests after this one
+    # (3) a board question for the Requester goes to Identity, not refused
+    os.environ["J2_BOARD"] = "1"
+    try:
+        run3 = j2.J2Run()
+        e = run3._ask_board("identity", {"to": "Requester", "about": "how to proceed after repeated failure",
+                                         "text": "Keep going, leave those parts out, or stop now?"}, 1,
+                            role="function")
+        assert e["status"] == j2.j2_board.ROUTED == "routed to Identity", e
+        assert run3.board_asks and run3.board_asks[0]["frm"] == "identity", run3.board_asks
+        assert e["id"] in run3.board_asks[0]["question"], run3.board_asks
+        assert any(m["who"] == "system" and "goes to Identity" in m["text"] for m in run3.chat)
+        with open(os.path.join(run3.dir, "board.json"), encoding="utf-8") as f:
+            assert json.load(f)["entries"][0]["status"] == "routed to Identity"
+        for who in ("user", "@Requester", "You"):
+            e2 = run3._ask_board("audit", {"to": who, "about": "x", "text": f"Ask the Requester about {who}?"}, 1,
+                                 role="function")
+            assert e2["status"] == j2.j2_board.ROUTED, (who, e2)
+    finally:
+        os.environ.pop("J2_BOARD", None)
+    print("validator fixes: an attribute selector and a wa.me grep-count are selectors again (the two atoms "
+          "runs/j2-20261027-170831 lost now pass), a bare charter value still points at facts-present, a GRANT "
+          "without a price keeps the computed one and registers at 30, and a board question for the Requester is "
+          "routed to Identity ok")
+
+
 def board_content_edges():
     """Message board, part C: the named allowlist of content edges (j2_schema.CONTENT_EDGES). A document change
     travels along the reasons that say what a section was built from (the PRD's requirements, the HLD's components
@@ -7533,6 +7618,7 @@ if __name__ == "__main__":
         plain_unchanged()                         # the default (slim) path against the commit made right after the flip
         plain_unchanged(board="0")                 # J2_BOARD=0 explicitly set: still identical, prompt for prompt
         charter_crash_fix()
+        validator_fixes()
         board_disabled()
         board_functions_off()
         os.environ["J2_BOARD"] = "1"
