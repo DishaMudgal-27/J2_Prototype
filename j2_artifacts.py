@@ -147,5 +147,166 @@ def served(d, name):
         return None
     ok = {r["file"] for r in (listing(d)["deliverables"] + listing(d)["records"])} | {r["file"].replace(os.sep, "/")
                                                                                      for r in rows(d)}
+    if name not in ok:
+        ok |= set(tree_files(tree(d)))      # the tree's files: versions, the style guide, exports and the run's other records
     p = os.path.join(d, name)
     return p if name in ok and os.path.isfile(p) and os.path.getsize(p) <= MAX_BYTES else None
+
+
+# ---------------------------------------------------------------------------------------------------------------- the tree
+# The Artifacts tab as a tree (artifacts-tree/1): Plan, Specs, Deliverables, Proof, Records. Makers, readers and statuses come
+# from j2_map.build, the same data the Map draws, so the two always agree; the files come from listing() and the run folder, each
+# exactly once. Nothing names a run, a workflow or a stage: only file kinds (types.json) and the map's own fields.
+TREE_STATUS = {"filed": "filed", "done_unchecked": "checks did not pass", "fault": "failed", "left_open": "open", "running": "open",
+               "waiting": "open", "waiting_on_you": "open", "not_made": "not made", "idle": "filed"}
+RECORD_MAKER = {"goal.json": "Client Lead (Identity)", "realization.json": "Adaptation (scored by the confidence judge)", "audits.json": "Quality Reviewer (Audit)", "receipts.jsonl": "Checker (automatic)",
+                "chat.jsonl": "every function (the chat)", "calls.jsonl": "every function (AI calls)"}      # who writes each kind of record
+PROOF = ("receipts.jsonl", "audits.json", "conditions.json")
+RECORD_NAME = {"calls.jsonl": "AI calls", "outputs.jsonl": "Workflow outputs", "map.json": "Map data", "artifacts.json": "Artifact list",
+               "report.json": "Run report (data)", "sections.json": "Sections", "documents.json": "Documents record"}      # files types.json does not list
+
+
+def _lines(d, f):
+    try:
+        with open(os.path.join(d, f), encoding="utf-8") as fh:
+            return sum(1 for x in fh if x.strip())
+    except OSError:
+        return 0
+
+
+def tree(d, m=None):
+    import j2_map
+    if not d or not os.path.isdir(d):
+        return {"schema": "artifacts-tree/1", "groups": []}
+    m = m or j2_map.build(d)
+    lst, types = listing(d), {t["file"]: t for t in load_types()["types"] if "*" not in t["file"]}
+    rowsby = {r["file"]: r for r in lst["deliverables"] + lst["records"]}
+    by = {n["id"]: n for n in m["nodes"]}
+    made_step = {e["to"]: by[e["from"]] for e in m["edges"] if e["kind"] == "step" and by.get(e["from"], {}).get("kind") == "engine"}
+    reads = [e for e in m["edges"] if e["kind"] == "handoff"]
+    used = set()
+
+    def size(f):
+        return os.path.getsize(os.path.join(d, f)) if f and os.path.isfile(os.path.join(d, f)) else None
+
+    def opener(f):
+        r = rowsby.get(f)
+        if r:
+            return r["open"]
+        ext = os.path.splitext(f or "")[1]
+        return "image" if ext == ".png" else "preview" if ext == ".html" else "text"
+
+    def item(name, f=None, made=None, status="filed", **kw):
+        if f and (f in used or not os.path.isfile(os.path.join(d, f))):
+            f = None      # each file once; a send has no file of its own (its receipt is under Proof)
+        if f:
+            used.add(f)
+        return {"name": name, "file": f, "made_by": made, "status": status, "size": size(f), "open": opener(f) if f else None, **kw}
+
+    def maker(n):
+        st = made_step.get(n["id"])
+        return {"persona": st["persona"], "workflows": list(n.get("workflows") or [])} if st else None
+
+    def readers(nid):
+        return sorted({w for e in reads if e["from"] == nid for w in e.get("readers") or []}, key=lambda w: int(re.sub(r"\D", "", w) or 0))
+
+    def status(n):
+        return n.get("send") or TREE_STATUS.get(n.get("status"), n.get("status") or "filed") if n.get("tag") == "Send" else TREE_STATUS.get(n.get("status"), "filed")
+
+    # 1 Plan
+    plan = []
+    if "work:charter" in by or os.path.isfile(os.path.join(d, "goal.json")):
+        wrote = any(e["kind"] == "speaks_to" and e["to"] == "work:charter" and e["from"] == "fn:identity" for e in m["edges"])
+        plan.append(item("Charter", "goal.json", {"function": RECORD_MAKER["goal.json"]} if wrote else None))
+    rz = _read(d, "realization.json")
+    if rz is not None:
+        st = rz.get("stages") or {}
+        zone = (((rz.get("plan") or {}).get("certainty_assessment")) or {}).get("zone")
+        note = [f"zone {zone}" if zone else "", f"{len(st)} stages: {', '.join(st)}" if st else "",
+                f"plan confidence {rz['plan_confidence']}" if rz.get("plan_confidence") is not None else ""]
+        kids = [item("Realization plan (text)", "realization.md", {"function": "code"})] if os.path.isfile(os.path.join(d, "realization.md")) else []
+        plan.append(item("Realization plan", "realization.json", {"function": RECORD_MAKER["realization.json"]}, note=" · ".join(x for x in note if x), children=kids))
+    wfs = _read(d, "workflows.json", []) or []
+    if os.path.isfile(os.path.join(d, "workflows.json")):
+        plan.append(item("Workflows", "workflows.json", {"function": "Validator (code)"}, note=f"{len(wfs)} workflows"))
+    # 2 Specs: every decide workflow's file, with its maker and how many workflows read it
+    specs = [item(n["label"], n.get("file"), maker(n), status(n), output=n.get("output") if n.get("output") != n["label"] else None, read_by=len(readers(n["id"])), node=n["id"])
+             for n in m["nodes"] if n["kind"] == "work" and n.get("tag") == "Spec"]
+    specs += [item(r["name"], f, None, note="no workflow recorded as its maker") for f, r in rowsby.items()
+              if r["type"].startswith("workflow_files") and f not in used]
+    # 3 Deliverables: each delivered output, with its style guide, its versions, its screenshots and exports, and the sends that report it
+    deck = [n for n in m["nodes"] if n["kind"] == "work" and n["id"] != "work:charter" and n.get("tag") not in ("Spec", "Style", "Send")]
+    style = [n for n in m["nodes"] if n.get("tag") == "Style"]
+    sends = [n for n in m["nodes"] if n.get("tag") == "Send"]
+    placed_send = set()
+    out = []
+    for n in deck:
+        kids = []
+        for s_ in style:
+            if any(e["from"] == s_["id"] and e["to"] == n["id"] for e in reads):
+                kids.append(item(s_["label"], s_.get("file"), maker(s_), status(s_), node=s_["id"], read_by=len(readers(s_["id"]))))
+        t = next((x for x in load_types()["types"] if x["kind"] == "type" and f"work:{x['name']}" == n["id"]), None)
+        site = os.path.join(d, "site")
+        if t and os.path.isdir(site):
+            pat = r"v(\d+)\.html" if t["form"] == "page" else rf"(?:{re.escape(t['name'])}-)?v(\d+)\.md"
+            vs = sorted(((int(mm.group(1)), f"site/{f}") for f in os.listdir(site) for mm in [re.fullmatch(pat, f)] if mm))
+            if t["form"] != "page" and any(re.fullmatch(rf"{re.escape(t['name'])}-v\d+\.md", f) for f in os.listdir(site)):
+                vs = [(k, f) for k, f in vs if os.path.basename(f).startswith(t["name"] + "-")]      # several documents: only this one's
+            if vs:
+                kids.append({"name": "Versions", "count": len(vs), "collapsed": True,
+                             "children": [item(f"v{k}", f, None, "filed") for k, f in vs]})
+            if t["form"] == "page":
+                shots = sorted((f for f, r in rowsby.items() if r["type"] == "screenshots"), key=_num)
+                if shots:
+                    kids.append({"name": "Screenshots", "count": len(shots), "collapsed": False, "children": [item(r_["name"], f) for f in shots for r_ in [rowsby[f]]]})
+            base = os.path.splitext(n.get("file") or "")[0]
+            for f in sorted(os.listdir(d)):
+                if base and f.startswith(os.path.basename(base) + ".") and f != os.path.basename(n.get("file") or "") and f.endswith(".docx"):
+                    kids.append(item("Word file", f, {"function": "code (export)"}))
+        for s_ in sends:
+            if any(e["from"] == n["id"] and e["to"] == s_["id"] for e in reads):
+                placed_send.add(s_["id"])
+                kids.append(item(s_["label"], None, maker(s_), status(s_), node=s_["id"], note="receipt in Check results"))
+        out.append(item(n["label"], n.get("file"), maker(n), status(n), version=n.get("version"), node=n["id"],
+                        workflows=len(n.get("workflows") or []), children=kids))
+    out += [item(s_["label"], None, maker(s_), status(s_), node=s_["id"], note="receipt in Check results") for s_ in sends if s_["id"] not in placed_send]
+    out += [item(s_["label"], s_.get("file"), maker(s_), status(s_), node=s_["id"]) for s_ in style if s_.get("file") not in used]
+    # 4 Proof
+    proof = []
+    for f in PROOF:
+        if os.path.isfile(os.path.join(d, f)):
+            j = _read(d, f)
+            n_ = _lines(d, f) if f.endswith(".jsonl") else len(j) if isinstance(j, (list, dict)) else 0
+            proof.append(item({"receipts.jsonl": "Check results", "audits.json": "Audits", "conditions.json": "Necessary conditions"}[f], f,
+                              {"function": RECORD_MAKER.get(f, "code")}, note=f"{n_} {('entr' + ('y' if n_ == 1 else 'ies')) if f.endswith('.jsonl') else 'item' + ('' if n_ == 1 else 's')}"))
+    for f in sorted(os.listdir(d)):
+        if re.fullmatch(r"stage-\w+\.json", f):
+            proof.append(item(f"Stage record: {f[6:-5]}", f, {"function": "code"}, note=(lambda k: f"{k} audit{'' if k == 1 else 's'}")(len((_read(d, f, {}) or {}).get('audits') or []))))
+    # 5 Records: everything else the run kept
+    rec = []
+    for f, r in rowsby.items():
+        if f not in used:
+            rec.append(item(r["name"], f, {"function": RECORD_MAKER.get(f, "code")}))
+    for root, _, files in os.walk(d):
+        for x in sorted(files):
+            f = os.path.relpath(os.path.join(root, x), d).replace(os.sep, "/")
+            if f not in used and not x.startswith("."):
+                rec.append(item(types.get(f, {}).get("label") or RECORD_NAME.get(f) or f, f, {"function": RECORD_MAKER.get(f, "code")}))
+    groups = [("plan", "Plan", plan, False), ("specs", "Specs", specs, False), ("deliverables", "Deliverables", out, False),
+              ("proof", "Proof", proof, False), ("records", "Records", rec, True)]
+    return {"schema": "artifacts-tree/1", "groups": [{"id": k, "label": lab, "count": len(it), "collapsed": col, "items": it}
+                                                       for k, lab, it, col in groups]}
+
+
+def tree_files(t):
+    """Every file the tree shows, once each (for serving and tests)."""
+    out = []
+
+    def walk(xs):
+        for x in xs:
+            if x.get("file"):
+                out.append(x["file"])
+            walk(x.get("children") or [])
+    for g in t.get("groups") or []:
+        walk(g["items"])
+    return out

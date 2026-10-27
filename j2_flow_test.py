@@ -4734,7 +4734,7 @@ def board_doc_change():
     assert rows["lld"]["rechecked_after"] == ["Q-1"] and rows["website"]["rechecked_after"] == ["Q-1"], rows
     m = json.load(open(os.path.join(run.dir, "map.json"), encoding="utf-8"))
     assert {"from": "work:lld", "to": "work:hld", "kind": "asks", "label": "Q-1", "n": None,
-            "basis": "recorded"} in m["edges"], [x for x in m["edges"] if x["kind"] == "asks"]
+            "basis": "recorded", "source": {"file": "board.json", "field": "entries", "value": "Q-1"}} in m["edges"], [x for x in m["edges"] if x["kind"] == "asks"]
     hld_node = next(n for n in m["nodes"] if n["id"] == "work:hld")
     assert hld_node["version"] == up["to_version"] and "re-checked after Q-1" in hld_node["detail"], hld_node
     line = next((x for x in run.chat if x["who"] == "system" and f"HLD v{up['from_version']} -> "
@@ -5210,12 +5210,12 @@ def milestone_emails():
         mails = [wfs[x["atom"].split(".")[0]] for x in run.milestone_log]
         assert all(w["cost"] == j2.RATES_DEED().get("send_email") == 5 and w["atoms"][0]["results"][0]["pass"] is None for w in mails), "5 credits each; dry run leaves the atom open"
         mp = M.build(run.dir)
-        st = {e["to"]: e["from"] for e in mp["edges"] if e["kind"] == "step"}
-        brs = [n for n in mp["nodes"] if n["kind"] == "work" and n.get("lane") == "branch" and n["tag"] == "Send"]      # the style guide is the other side job
+        st = {e["to"]: e["from"] for e in mp["edges"] if e["kind"] == "step" and e["from"] != "work:charter"}      # a step's recorded input (the Charter feeds every team too)
+        brs = [n for n in mp["nodes"] if n["kind"] == "work" and n.get("lane") == "branch" and n["tag"] == "Send"]
         assert [(st[st[n["id"]]], n["label"], n["status"]) for n in brs] == [(f"work:{k}", f"Email · {g} done", "left_open") for k, g in (("prd", "PRD"), ("hld", "HLD"), ("lld", "LLD"), ("website", "Website"))], brs
         out = render_node(j2.saved_snapshot(os.path.basename(run.dir), 0), docs={"docs": {}, "map": mp})
         wide = out["map"][out["map"].index('<svg class="mapsvg"'):out["map"].index("</svg>")]
-        assert wide.count('class="mapedge branch') == 8 + 2 and all(f">Email · {g} done · dry run<" in wide for g in ("PRD", "HLD", "LLD", "Website")), "one branch per email, under its goal"
+        assert wide.count('class="mapedge branch') == 8 and all(f">Email · {g} done · dry run<" in wide for g in ("PRD", "HLD", "LLD", "Website")), "one branch per email, under its goal"
         assert "Finished. 4 emails waiting (dry run)." in out["needs"], out["needs"]
         # a PRD only: one email, never one for a goal the run does not have
         run2 = docs_run("Write a PRD for Campus Notes." + CAMPUS, 400)
@@ -5824,8 +5824,10 @@ def artifacts_tab():
         assert get(f"/api/artifact?name=site/index.html&run={name}").read().decode().lstrip().lower().startswith("<!doctype")
         assert get("/api/artifact?name=site/shots/v4.png&run=j2-20200101-000000").read()[:4] == b"\x89PNG"
         assert json.loads(get("/api/artifact?name=atoms.json").read())["schema"] == "atom/1"
-        for bad in ("prd.docx", "../j2.py", "/etc/passwd", "site/v1.html", "hld-v1.md", "site/hld-v1.md", "nothing.json", "", "calls.jsonl",
-                    "artifacts.json", "prd.md/../goal.json"):
+        # the tree's own files open too (versions, the Word export, the run's other records); nothing outside the run or unknown
+        assert get("/api/artifact?name=prd.docx").headers["Content-Type"] == j2_server.DOCX and get("/api/artifact?name=site/v1.html").read()
+        assert get("/api/artifact?name=site/hld-v1.md").read().decode().startswith("#") and get("/api/artifact?name=artifacts.json").read()
+        for bad in ("../j2.py", "/etc/passwd", "hld-v1.md", "nothing.json", "", "prd.md/../goal.json", "site/../../j2.py"):
             try:
                 get("/api/artifact?name=" + urllib.request.quote(bad))
                 assert False, f"served {bad!r}"
@@ -5896,6 +5898,361 @@ def by_fn(fn, rng, calls):
     return sum(1 for c in calls if c["fn"] == fn and rng["from"] <= c["id"] <= rng["to"])
 
 
+def artifacts_tree():
+    """The Artifacts tab as a tree (artifacts-tree/1) for every run under runs/: Plan, Specs, Deliverables, Proof, Records; every file in
+    artifacts.json exactly once; every spec has its maker; makers, readers and statuses are j2_map.build's; no deliverable under Records.
+    Run 174314: 5 specs, the Website with its style guide, 14 versions and 2 screenshots. The tab renders it, Records collapsed."""
+    import collections
+    import j2_artifacts as A
+    import j2_map as M
+    repo = os.path.join(os.path.dirname(os.path.abspath(__file__)), "runs")
+    names = sorted(n for n in os.listdir(repo) if os.path.isfile(os.path.join(repo, n, "workflows.json"))) if os.path.isdir(repo) else []
+    seen = 0
+    for name in names:
+        d = os.path.join(repo, name)
+        m = M.build(d)
+        t = A.tree(d, m)
+        groups = {g["id"]: g for g in t["groups"]}
+        assert [g["id"] for g in t["groups"]] == ["plan", "specs", "deliverables", "proof", "records"] and groups["records"]["collapsed"], name
+        files = A.tree_files(t)
+        dup = [f for f, k in collections.Counter(files).items() if k > 1]
+        assert not dup, (name, "a file twice", dup)
+        listed = [r["file"] for r in (json.load(open(os.path.join(d, "artifacts.json"), encoding="utf-8")).get("rows") or [])] if os.path.isfile(os.path.join(d, "artifacts.json")) else []
+        assert all(files.count(f) == 1 for f in listed), (name, [f for f in listed if f not in files])
+        by = {n["id"]: n for n in m["nodes"]}
+        step = {e["to"]: by[e["from"]] for e in m["edges"] if e["kind"] == "step" and by.get(e["from"], {}).get("kind") == "engine"}
+        readers = lambda nid: {w for e in m["edges"] if e["kind"] == "handoff" and e["from"] == nid for w in e.get("readers") or []}
+        items = [x for g in t["groups"] for x in A_walk(g["items"])]
+        for x in items:      # makers, readers and statuses are the map's
+            n = by.get(x.get("node"))
+            if not n:
+                continue
+            st = step.get(n["id"])
+            assert x["made_by"] == ({"persona": st["persona"], "workflows": n["workflows"]} if st else None), (name, x["name"], x["made_by"])
+            if "read_by" in x:
+                assert x["read_by"] == len(readers(n["id"])), (name, x["name"])
+            assert x["status"] == (n.get("send") or A.TREE_STATUS.get(n["status"], n["status"]) if n.get("tag") == "Send" else A.TREE_STATUS.get(n["status"], "filed")), (name, x["name"])
+        for x in groups["specs"]["items"]:
+            if x.get("node"):
+                assert x["made_by"] and x["made_by"].get("persona") and x["made_by"].get("workflows"), (name, x["name"], "every spec has its maker")
+        spec_nodes = {n["id"] for n in m["nodes"] if n.get("tag") == "Spec"}
+        assert {x.get("node") for x in groups["specs"]["items"] if x.get("node")} == spec_nodes, name
+        deliver = {n.get("file") for n in m["nodes"] if n["kind"] == "work" and n.get("tag") not in ("Send", "Charter") and n.get("file")}
+        assert not deliver & set(A.tree_files({"groups": [groups["records"]]})), (name, "a deliverable under Records")
+        seen += 1
+    if "j2-20261026-174314" in names:
+        t = A.tree(os.path.join(repo, "j2-20261026-174314"))
+        g = {x["id"]: x for x in t["groups"]}
+        assert [x["name"] for x in g["specs"]["items"]] == ["Product spec", "Design guide", "Copy guide", "Hint method", "Architecture"], g["specs"]["items"]
+        web = next(x for x in g["deliverables"]["items"] if x["name"] == "Website")
+        kids = {k["name"]: k for k in web["children"]}
+        assert kids["Style guide"]["file"] == "style.json" and kids["Style guide"]["made_by"] == {"persona": "Web Developer", "workflows": ["W-6"]}
+        assert kids["Versions"]["count"] == 14 and kids["Versions"]["collapsed"] and kids["Screenshots"]["count"] == 2, kids
+        assert web["made_by"]["persona"] == "Web Developer" and web["version"] == 14 and web["workflows"] == 12, web
+        plan = {x["name"]: x for x in g["plan"]["items"]}
+        assert "zone analyze" in plan["Realization plan"]["note"] and "plan confidence 0.85" in plan["Realization plan"]["note"] and plan["Workflows"]["note"] == "17 workflows"
+        assert plan["Realization plan"]["children"][0]["file"] == "realization.md"
+        assert plan["Realization plan"]["made_by"] == {"function": "Adaptation (scored by the confidence judge)"}, "Adaptation's plan reply, saved by code"
+        # the tab: five collapsible groups with counts, Records closed, each row with maker, status, size and Open
+        html = render_node({"workflows": [], "chat": []}, docs={"docs": {}, "artifacts": {**A.listing(os.path.join(repo, "j2-20261026-174314")), "tree": t}})["artifacts"]
+        assert [re.sub(r"<[^>]+>", "", h).split()[0] for h in re.findall(r"<summary><h3>.*?</h3>", html)] == ["Plan", "Specs", "Deliverables", "Proof", "Records"]
+        assert 'data-key="artg-records">' in html and 'data-key="artg-plan" open>' in html, "Records start collapsed"
+        assert "made by Product Manager (W-1)" in html and "read by 7 workflows" in html and "made by Web Developer (W-6)" in html and 'data-artopen="artifacts/hint-method.md"' in html
+    if "j2-20261027-130930" in names:
+        t = A.tree(os.path.join(repo, "j2-20261027-130930"))
+        prd = next(x for g in t["groups"] if g["id"] == "deliverables" for x in g["items"])
+        sends = {k["name"]: k["status"] for k in prd["children"] if k.get("node", "").startswith("work:W-")}
+        assert sends == {"Email · PRD done": "sent", "Send a test email": "skipped (cap)"}, sends      # under the document they report
+    print(f"artifacts tree: {seen} runs, Plan / Specs / Deliverables / Proof / Records, every artifacts.json file once, every spec with its maker, "
+          "makers, readers and statuses from j2_map.build, no deliverable under Records; 174314: 5 specs, Website with its style guide, "
+          "14 versions, 2 screenshots; 130930: the emails under the PRD with sent and skipped ok")
+
+
+def A_walk(xs):
+    for x in xs:
+        yield x
+        yield from A_walk(x.get("children") or [])
+
+
+def map_logic():
+    """Every run under runs/ with workflows.json: every line has a record (source) that exists in the run's files and points producer ->
+    consumer; every recorded read between two drawn boxes is a line; every workflow is in exactly one stage's circle or under Not recorded;
+    no deliverable sits above one it reads in the Tree; every label comes from its file, its type or its workflow. One row per run."""
+    import j2_map as M
+    import j2_artifacts as A
+    repo = os.path.join(os.path.dirname(os.path.abspath(__file__)), "runs")
+    names = sorted(n for n in os.listdir(repo) if os.path.isfile(os.path.join(repo, n, "workflows.json"))) if os.path.isdir(repo) else []
+    types = {t["file"]: t["label"] for t in A.load_types()["types"] if "*" not in t["file"]}
+    by_type = {t["name"]: t["label"] for t in A.load_types()["types"]}
+    rows_out, bad = [], []
+    keep_dir, j2.RUNS_DIR = j2.RUNS_DIR, repo      # read only: building and drawing a map never writes to a run
+    try:
+        for name in names:
+            d = os.path.join(repo, name)
+            rd = lambda f, dflt=None: json.load(open(os.path.join(d, f), encoding="utf-8")) if os.path.isfile(os.path.join(d, f)) else dflt
+            wfs = {w["id"]: w for w in rd("workflows.json", []) if isinstance(w, dict) and w.get("id")}
+            named = {k: w["id"] for w in wfs.values() for k in (w.get("proposal_id"), w.get("name"), w["id"]) if k}
+            plan = {p_.get("name"): p_ for p_ in (((rd("realization.json") or {}).get("plan") or {}).get("workflows") or []) if isinstance(p_, dict)}
+            atoms = {a["id"]: a for a in (rd("atoms.json") or {}).get("atoms", [])}
+            m = M.build(d)
+            by = {n["id"]: n for n in m["nodes"]}
+            holds = {}
+            for n in m["nodes"]:
+                if n["kind"] == "work":
+                    for w in n.get("workflows") or []:
+                        holds.setdefault(w, set()).add(n["id"])
+            def proven(src):      # the record named by an edge is really in the run's files
+                f, wid, field, val = src.get("file"), src.get("workflow"), src.get("field"), src.get("value")
+                if f == "live run" or not f or not os.path.isfile(os.path.join(d, f)):
+                    return False
+                if wid and wid not in wfs:
+                    return False
+                w = wfs.get(wid) or {}
+                if f == "workflows.json" and field in ("dependencies", "artifact", "stage", "section", "style_guide"):
+                    v = w.get(field)
+                    return val in v if isinstance(v, list) else v == val
+                if f == "realization.json" and field == "inputs_from":
+                    return val in ((plan.get(w.get("proposal_id")) or plan.get(w.get("name")) or {}).get("inputs_from") or [])
+                if f == "atoms.json" and field == "depends_on":
+                    return any(e.get("atom") == val for a in atoms.values() if a.get("workflow") == wid for e in a.get("depends_on") or [])
+                return True      # a whole-file record (goal.json, chat.jsonl, calls.jsonl, audits, artifacts.json, summary.json)
+            no_basis, wrong_way = 0, 0
+            for e in m["edges"]:
+                src = e.get("source")
+                if not src or not proven(src):
+                    no_basis += 1
+                    continue
+                if e["kind"] == "handoff":      # producer -> consumer: the reader makes the target; what it reads made the source
+                    reader, read = src.get("workflow"), src.get("value")
+                    read = named.get(read) or str(read).split(".")[0]
+                    if reader not in by[e["to"]].get("workflows", []) or read not in by[e["from"]].get("workflows", []):
+                        wrong_way += 1
+            # every recorded read between two drawn boxes is a line
+            have = {(e["from"], e["to"]) for e in m["edges"] if e["kind"] == "handoff"}
+            want = set()
+            for wid, w in wfs.items():
+                p_ = plan.get(w.get("proposal_id")) or plan.get(w.get("name")) or {}
+                srcs = [named.get(x) for x in (w.get("dependencies") or []) + (p_.get("inputs_from") or [])]
+                srcs += [str(e.get("atom")).split(".")[0] for a in atoms.values() if a.get("workflow") == wid for e in a.get("depends_on") or []]
+                for s_ in filter(None, srcs):
+                    for a_ in holds.get(s_, ()):
+                        for b_ in holds.get(wid, ()):
+                            if a_ != b_ and s_ != wid:
+                                want.add((a_, b_))
+            missing = len(want - have)
+            # the Tree: each workflow in exactly one stage's circle (or listed as not placed); no box above one it reads
+            t = render_node({"workflows": [], "chat": []}, docs={"docs": {}, "map": m})["tree"]
+            circles = [w for n in t["nodes"] if n["kind"] == "stage" for w in n["workflows"]]
+            listed = {x for s_ in m["not_recorded"] if s_.startswith("workflows not placed on the map: ") for x in s_.split(": ", 1)[1].split(", ")}
+            once = sum(1 for w in wfs if circles.count(w) + (w in listed) != 1)
+            row = {n["id"]: n["row"] for n in t["nodes"]}
+            misplaced = sum(1 for l in t["links"] if l["kind"] == "reads" and row[l["to"]] <= row[l["from"]]) + once
+            # labels: from the file, the file's type, or the workflow (its name, or the field that records it)
+            labels = 0
+            for n in m["nodes"]:
+                if n["kind"] != "work":
+                    continue
+                ok = {types.get(n.get("file")), M.file_label(n.get("file")) if n.get("file") else None, by_type.get(n["id"].split(":")[1])}
+                if not n.get("file"):
+                    ok.add(n.get("output"))      # planned, nothing written yet: named by its stage's output
+                ok |= {(wfs.get(w) or {}).get("name") for w in n.get("workflows") or []}
+                ok |= {M.file_label(f) for w in n.get("workflows") or [] for f, v in (wfs.get(w) or {}).items() if v is True}
+                labels += n["label"] not in ok
+            rows_out.append((name, len(m["edges"]), no_basis + wrong_way, missing, misplaced, labels, t["crossings"]))
+            if no_basis or wrong_way or missing or misplaced or labels:
+                bad.append(rows_out[-1])
+    finally:
+        j2.RUNS_DIR = keep_dir
+    if "--map-logic" in sys.argv or bad:
+        print(f"{'run':<22} {'edges':>5} {'no basis':>8} {'missing reads':>13} {'misplaced':>9} {'labels':>6} {'crossings':>9}")
+        for r in rows_out:
+            print(f"{r[0]:<22} {r[1]:>5} {r[2]:>8} {r[3]:>13} {r[4]:>9} {r[5]:>6} {r[6]:>9}")
+    assert not bad, bad
+    print(f"map logic: {len(rows_out)} runs, every line has a record in the run's files and points producer -> consumer, no recorded read is "
+          "missing, every workflow in one stage's circle, nothing below what reads it, every label from its file, type or workflow ok")
+
+
+def map_tree():
+    """The Map's Tree view (default; "Line" is the metro drawing): Charter, the stages (one per team), their deliverables, a deliverable
+    that reads others below them. Same run, same positions; every workflow sits in the tree or its stage's circle; no two labels
+    overlap; the crossing count is reported. A clicked stage gets its workflows on a circle round it and the rest fades; Esc returns."""
+    import html as htmllib
+    import shutil
+    import threading
+    import j2_map as M
+    import j2_server
+    repo = os.path.join(os.path.dirname(os.path.abspath(__file__)), "runs")
+    names = [n for n in ("j2-20261026-174314", "j2-20261026-155610", "j2-20261027-130930") if os.path.isdir(os.path.join(repo, n))]
+    if not names:
+        print("map tree: runs 174314, 155610 and 130930 not in runs/, the tree checks on them are skipped")
+    report = []
+    for name in names:
+        if not os.path.exists(os.path.join(j2.RUNS_DIR, name)):
+            shutil.copytree(os.path.join(repo, name), os.path.join(j2.RUNS_DIR, name))      # read only: the test's own copy
+        mp = M.build(os.path.join(j2.RUNS_DIR, name))
+        snap = j2.saved_snapshot(name, 0)
+        a, b = render_node(snap, docs={"docs": {}, "map": mp}), render_node(snap, docs={"docs": {}, "map": mp})
+        t = a["tree"]
+        assert t == b["tree"] and a["map"] == b["map"], f"{name}: the same run draws the same tree"
+        assert 'data-view="tree"' in a["map"] and '<svg class="treesvg"' in a["map"] and 'data-mapview="tree" aria-pressed="true"' in a["map"], "Tree is the default"
+        rows = {n["id"]: n["row"] for n in t["nodes"]}
+        files = {n["id"]: n.get("file") for n in mp["nodes"] if n.get("tag") == "Spec"}
+        for n in t["nodes"]:      # a spec is named from its file: artifacts/hint-method.md is "Hint method"
+            if n["id"] in files:
+                base = os.path.splitext(os.path.basename(files[n["id"]]))[0].replace("-", " ").replace("_", " ")
+                assert n["label"] == base[:1].upper() + base[1:], (name, n["id"], n["label"], files[n["id"]])
+        if name == "j2-20261026-174314":
+            lab = {n["id"]: n["label"] for n in t["nodes"]}
+            assert (lab["work:W-1"], lab["work:W-3"], lab["work:W-4"]) == ("Product spec", "Copy guide", "Hint method"), lab
+            assert {"Curriculum", "Content plan"} <= {n["sub"].split(" · ")[0] for n in t["nodes"]}, "the stage output stays as the second line"
+        if "work:style" in rows:      # style.json is written by the first build workflow and read by the later ones: an input of the site
+            assert rows["work:style"] < rows["work:website"] and {"from": "work:style", "to": "work:website", "kind": "reads"} in t["links"], (name, rows)
+            assert not any(l["from"] == "work:website" and l["to"] == "work:style" for l in t["links"]), "never below the site"
+            reads_ = [l["from"] for l in t["links"] if l["to"] == "work:style" and l["kind"] == "reads"]
+            assert rows["work:style"] == max([rows[x] for x in reads_] + [1]) + 1, ("right below the files its maker reads", rows)
+        made = {}
+        for l in t["links"]:
+            if l["kind"] == "made":
+                made.setdefault(l["from"], []).append(rows[l["to"]])
+        assert rows["work:charter"] == 0 and all(n["row"] >= 2 for n in t["nodes"] if n["kind"] == "deck")
+        assert all(rows[s_] == min(r_) - 1 for s_, r_ in made.items()), (name, "each team sits right above the deliverable(s) it made", made, rows)
+        for l in t["links"]:
+            if l["kind"] == "reads":
+                assert rows[l["to"]] > rows[l["from"]], (name, l, "a deliverable sits below every deliverable it reads")
+        boxes = [n["box"] for n in t["nodes"]]
+        for i in range(len(boxes)):
+            for j in range(i + 1, len(boxes)):
+                p, q = boxes[i], boxes[j]
+                assert p[2] <= q[0] or q[2] <= p[0] or p[3] <= q[1] or q[3] <= p[1], (name, t["nodes"][i]["id"], t["nodes"][j]["id"], "labels overlap")
+        same_row = {}
+        for n in t["nodes"]:
+            same_row.setdefault(n["row"], []).append(n)
+        for r in same_row.values():
+            r.sort(key=lambda n: n["x"])
+            assert all(r[k + 1]["box"][0] - r[k]["box"][2] >= 24 - 0.2 for k in range(len(r) - 1)), (name, "at least 24px between labels")
+        # every workflow: in the tree (a deliverable's workflows) and in its stage's circle
+        wids = [w["id"] for w in json.load(open(os.path.join(j2.RUNS_DIR, name, "workflows.json"), encoding="utf-8"))]
+        stages = [n for n in t["nodes"] if n["kind"] == "stage"]
+        circled = set()
+        for st in stages:
+            o = render_node(snap, docs={"docs": {}, "map": mp, "tree": {"open": st["id"]}})
+            ot = o["tree"]
+            assert ot["open"] == st["id"] and sorted(x["id"] for x in ot["ring"]) == sorted(st["workflows"]), (name, st["id"])
+            c, rx, ry = ot["c"], ot["rx"], ot["ry"]
+            assert all(abs(((x["x"] - c["x"]) / rx) ** 2 + ((x["y"] - c["y"]) / ry) ** 2 - 1) < 0.02 for x in ot["ring"]), "evenly on one ring round the stage"
+            svg = o["map"][o["map"].index('<svg class="treesvg"'):o["map"].index("</svg>", o["map"].index('<svg class="treesvg"'))]
+            for n in t["nodes"]:
+                g = re.search(r'<g class="tnode ([^"]*)" data-id="%s"' % re.escape(htmllib.escape(n["id"])), svg)
+                assert g and (("tdim" in g.group(1) and "thide" in g.group(1)) == (n["id"] != st["id"])), (name, st["id"], n["id"], "every other node fades, its words hidden")
+            w_ = st["box"][2] - st["box"][0]
+            shown = [x["box"] for x in ot["ring"]] + [[c["x"] - w_ / 2, c["y"] + st["r"] + 4, c["x"] + w_ / 2, c["y"] + st["r"] + 33]]      # the only words left: the circle's and the stage's
+            for i in range(len(shown)):
+                for j in range(i + 1, len(shown)):
+                    p, q = shown[i], shown[j]
+                    assert p[2] <= q[0] or q[2] <= p[0] or p[3] <= q[1] or q[3] <= p[1], (name, st["id"], "labels in the circle overlap", i, j)
+            assert svg.count('class="tnode twf') == len(st["workflows"]) and svg.count('class="tspoke"') == len(st["workflows"])
+            circled |= {x["id"] for x in ot["ring"]}
+        placed = circled | {w for n in t["nodes"] for w in n["workflows"]}
+        missing = [w for w in wids if w not in placed]
+        assert not missing or all(f"workflows not placed on the map: " in x and all(w in x for w in missing) for x in mp["not_recorded"] if "not placed" in x), (name, missing)
+        assert not missing, (name, "every workflow is in the tree or its stage's circle", missing)
+        # a workflow picked in the circle: its panel (delivers, reads, read by, checks, status, Open) and its own links
+        st = max(stages, key=lambda x: len(x["workflows"]))
+        flows = {w["id"]: w for w in mp["workflows"]}
+        wid = next((w for w in st["workflows"] if flows[w]["reads"]), st["workflows"][0])
+        o = render_node(snap, docs={"docs": {}, "map": mp, "tree": {"open": st["id"], "wf": wid}})["map"]
+        pn = o[o.index('data-wfpanel="%s"' % wid):]
+        pn = pn[:pn.index("</aside>")]
+        assert all(k in pn for k in ("status: ", "delivers: ", "reads: ", "read by: ", "checks: ", f'data-wfcard="{wid}">Open<')), pn
+        grp = re.search(r'<g class="twflinks on" data-wf="%s">(.*?)</g>' % re.escape(wid), o).group(1)      # the picked one's links are drawn; the others' show on hover
+        assert grp.count('class="tlink reads"') == len(flows[wid]["reads"]) and grp.count('class="tlink readby"') == sum(1 for w in flows.values() if wid in w["reads"]), (name, wid)
+        assert o.count('class="twflinks on"') == 1, "only the picked workflow's links are drawn at rest"
+        # the Line toggle: the metro drawing, as before
+        ln = render_node(snap, docs={"docs": {}, "map": mp, "mapview": "line"})["map"]
+        assert 'data-view="line"' in ln and '<svg class="mapsvg"' in ln and 'data-mapview="line" aria-pressed="true"' in ln
+        report.append(f"{name[3:]} {t['crossings']} crossing{'s' if t['crossings'] != 1 else ''}")
+    chrome = j2.j2_check.find_chrome()
+    if chrome and BROWSER and names:      # the real page at 1440x900: the flow on hover, a stage's circle, one panel inside the map card, Esc, Line
+        ui = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "j2_ui.html"), encoding="utf-8").read()
+        name = names[0]
+
+        def probe(js, flags=()):
+            tmp = tempfile.mkdtemp(prefix="j2-tree-")
+            open(os.path.join(tmp, "j2_ui.html"), "w", encoding="utf-8").write(ui.replace("</body>", "<script>setTimeout(() => { try { " + js + " } catch (e) { document.body.setAttribute('data-r', JSON.stringify({error: String(e.stack || e)})); } }, 2500)</script></body>"))
+            keep_here, j2_server.HERE = j2_server.HERE, tmp
+            srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+            threading.Thread(target=srv.serve_forever, daemon=True).start()
+            try:
+                dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--window-size=1440,900", "--virtual-time-budget=10000", *flags, "--dump-dom",
+                                  f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={name}"], capture_output=True, text=True, timeout=180).stdout
+            finally:
+                j2_server.HERE = keep_here
+                srv.shutdown()
+            got = json.loads(htmllib.unescape(re.search(r'data-r="([^"]*)"', dom).group(1)))
+            assert "error" not in got, got
+            return got
+        base = ("const q = s => [...document.querySelectorAll(s)], r = {}, ev = (el, t, rel) => el.dispatchEvent(new MouseEvent(t, {bubbles: true, relatedTarget: rel || null})),"
+                " vis = el => getComputedStyle(el).display !== 'none', touching = id => q('.tedge').filter(e => vis(e) && (e.dataset.from === id || e.dataset.to === id)),"
+                " busiest = q('.tnodes > .tnode.tdeck').sort((a, b) => touching(b.dataset.id).length - touching(a.dataset.id).length)[0], hid = busiest.dataset.id;")
+        js = (base + "const st = q('.tnode.tstage').sort((a, b) => b.querySelectorAll('*').length - a.querySelectorAll('*').length || +b.dataset.x - +a.dataset.x)[0], id = st.dataset.id; r.id = id;"
+              "const s0 = document.querySelector('.treesvg').getBoundingClientRect(); r.fits = [s0.bottom <= innerHeight, s0.top >= 0, document.documentElement.scrollHeight <= innerHeight + 1];"
+              "r.d3 = typeof d3; r.tree = getComputedStyle(document.querySelector('.treesvg')).display; r.line = getComputedStyle(document.querySelector('.mapsvg:not(.mapvert)')).display;"
+              "r.rest = q('.tflow').length; r.hid = hid; ev(busiest, 'mouseover');"
+              "r.flow = q('.tflow').map(c => [c.dataset.from, c.dataset.to, c.classList.contains('fin'), c.querySelector('animateMotion').getAttribute('path'), c.querySelector('animateMotion').getAttribute('dur')]);"
+              "r.edges = touching(hid).map(e => [e.dataset.from, e.dataset.to, e.getAttribute('d'), e.classList.contains('hot')]); ev(busiest, 'mouseout'); r.after0 = q('.tflow').length;"
+              "ev(st, 'click');"
+              "setTimeout(() => { const g = q('.tnode.tstage').find(x => x.dataset.id === id), svg = document.querySelector('.treesvg');"
+              " r.open = g.classList.contains('open'); r.at = g.getAttribute('transform'); r.mid = [+svg.dataset.w / 2, +svg.dataset.h / 2]; r.ring = g.querySelectorAll('.twf').length;"
+              " r.dim = q('.tnodes > .tnode.tdim').length; r.all = q('.tnodes > .tnode').length; r.back = !document.querySelector('[data-treeback]').hidden;"
+              " r.words = q('.tnodes > .tnode.thide .tlab').filter(x => x.getBoundingClientRect().width > 0).length;"
+              " r.gone = q('.tedge').filter(e => vis(e) && e.dataset.from !== id && e.dataset.to !== id).length; r.stagePanel = q('#pane-map .mappanel').map(x => x.dataset.stagepanel || '');"
+              " const w = g.querySelector('.twf'); ev(w, 'mouseover'); r.wflow = q('.tflow').length; r.wlinks = q('.twflinks.hov .tlink').length; ev(w, 'mouseout');"
+              " ev(w, 'click'); setTimeout(() => { const box = r_ => { const b = r_.getBoundingClientRect(); return [b.left, b.top, b.right, b.bottom]; };"
+              " r.twf = q('.tnode.open .twf').map(box); r.svgbox = box(document.querySelector('.treesvg'));"
+              " r.panels = q('#pane-map .mappanel').length; r.pb = box(document.querySelector('.treepanel')); r.card = box(document.querySelector('.treebox')); r.chat = box(document.querySelector('#dview .chat')); r.needs = box(document.getElementById('needs'));"
+              " r.wfcard = !!document.querySelector('.treepanel [data-wfcard]');"
+              " ev(q('.tnodes > .tnode.tdeck')[0], 'click'); r.second = q('#pane-map .mappanel').map(x => x.dataset.panel || x.dataset.wfpanel || x.dataset.stagepanel);"
+              " document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})); r.esc1 = q('#pane-map .mappanel').map(x => x.dataset.stagepanel || x.dataset.panel || x.dataset.wfpanel);"
+              " document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));"
+              " setTimeout(() => { r.z0 = TREE.zoom; const h = q('.tnode.tstage').find(x => x.dataset.id === id); r.after = [q('.tnode.open').length, q('.tdim').length, h.getAttribute('transform') === 'translate(' + h.dataset.x + ',' + h.dataset.y + ')', q('.twf').length, q('#pane-map .mappanel').length];"
+              "  document.querySelector('[data-mapview=line]').click(); r.line2 = getComputedStyle(document.querySelector('.mapsvg:not(.mapvert)')).display; r.tree2 = getComputedStyle(document.querySelector('.treebox')).display;"
+              "  r.z = r.z0; document.querySelector('[data-mapview=tree]').click(); document.body.setAttribute('data-r', JSON.stringify(r)); }, 1500); }, 700); }, 900);")
+        got = probe(js)
+        assert got["d3"] == "object" and got["tree"] == "block" and got["line"] == "none", got
+        assert got["fits"] == [True, True, True], ("the whole tree fits 1440x900 at load, no scrolling", got)
+        # the flow: nothing moves at rest; on hover one dot per lit line, along the line's own path (producer -> consumer), about 1.5 s,
+        # "reads" (into the node) and "read by" (out of it) told apart; leaving the node stops it
+        assert got["rest"] == 0 and got["after0"] == 0, got
+        lines = {(a, b): (d, hot) for a, b, d, hot in got["edges"]}
+        assert got["flow"] and len(got["flow"]) == len(lines) and all(h for _, h in lines.values()), got
+        for a, b, fin, path, dur in got["flow"]:
+            assert (a, b) in lines and path == lines[(a, b)][0] and fin == (b == got["hid"]) and dur == "1.5s", (a, b, fin, got["hid"])
+        assert {f[2] for f in got["flow"]} == {True, False} or len(got["flow"]) == 1, "lines in and lines out, when it has both"
+        # a stage: the middle, its circle, every other node faded with its words hidden, only its own lines drawn, its panel the only one
+        x, y = (float(v) for v in re.match(r"translate\(([\d.]+),([\d.]+)\)", got["at"]).groups())
+        assert got["open"] and abs(x - got["mid"][0]) < 1 and abs(y - got["mid"][1]) < 1 and got["ring"] > 0 and got["back"], got
+        assert got["dim"] == got["all"] - 1 and got["words"] == 0 and got["gone"] == 0 and got["stagePanel"] == [got["id"]], got
+        assert got["wflow"] == got["wlinks"], ("a circle workflow's links flow on hover", got)
+        # the workflow panel: inside the map card, never over the Chat or the Needs you strip; a second item replaces it
+        pb, card, chat, needs = got["pb"], got["card"], got["chat"], got["needs"]
+        inside = pb[0] >= card[0] - 0.5 and pb[1] >= card[1] - 0.5 and pb[2] <= card[2] + 0.5 and pb[3] <= card[3] + 0.5
+        meets = lambda a, b: a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]
+        assert got["panels"] == 1 and got["wfcard"] and inside and not meets(pb, chat) and not meets(pb, needs) and pb[3] <= 900, got
+        assert len(got["second"]) == 1 and got["second"][0].startswith("work:"), ("one panel at a time", got)
+        sv = got["svgbox"]      # the open circle moved (and if needed zoomed out) so no workflow or its words sit under the panel, all still in the map
+        assert got["twf"] and all(not meets(b, pb) and b[0] >= sv[0] - 0.5 and b[2] <= sv[2] + 0.5 and b[1] >= sv[1] - 0.5 and b[3] <= sv[3] + 0.5 for b in got["twf"]), (got["twf"], pb, sv)
+        assert not got["z"] or (abs(got["z"]["k"] - 1) < 1e-6 and abs(got["z"]["x"]) < 0.5 and abs(got["z"]["y"]) < 0.5), ("closing puts the view back", got["z"])
+        assert got["esc1"] == [got["id"]] and got["after"] == [0, 0, True, 0, 0], ("Esc closes the panel, then the stage", got)
+        assert got["line2"] != "none" and got["tree2"] == "none", "the Line toggle shows the metro map"
+        # reduced motion: no dots, small arrowheads on the lit lines instead
+        rm = probe(base + "ev(busiest, 'mouseover'); r.rm = [q('.tflow').length, touching(hid).filter(e => e.getAttribute('marker-end')).length, touching(hid).length];"
+                   "document.body.setAttribute('data-r', JSON.stringify(r));", ("--force-prefers-reduced-motion",))
+        assert rm["rm"][0] == 0 and rm["rm"][1] == rm["rm"][2] > 0, ("reduced motion: arrowheads, nothing moves", rm)
+    print("map tree: Charter, stages, deliverables below what they read; the same run draws the same; every workflow in the tree or its stage's "
+          "circle; no labels overlap, 24px apart; a stage's circle round it with the rest faded, a picked workflow's panel and links, Esc returns; "
+          "Line shows the metro map ok (" + ", ".join(report) + ")")
+
+
 def map_every_workflow():
     """Map: every workflow in workflows.json is on the map (by stage, then section, then output refs) or listed by id under
     not recorded; a realization run's specs are deliverables with their stage's role and "given to" lines to the build
@@ -5923,18 +6280,18 @@ def map_every_workflow():
     m = M.build(r)
     by = {n["id"]: n for n in m["nodes"]}
     work = [n["id"] for n in m["nodes"] if n["kind"] == "work" and n["lane"] == "trunk"]
-    assert work == ["work:charter", "work:W-1", "work:W-2", "work:W-3", "work:website"], work      # Charter -> specs -> Website
-    assert [(by[k]["label"], by[k]["file"], by[k]["status"]) for k in work[1:4]] == [("Product plan", "artifacts/product-spec.md", "filed"),
-        ("Design guide", "artifacts/design-guide.md", "filed"), ("Architecture (HLD + LLD)", "artifacts/architecture.md", "filed")]
-    assert [by[f"step:{a}>{b}"]["team"] for a, b in (("charter", "W-1"), ("W-1", "W-2"), ("W-2", "W-3"), ("W-3", "website"))] == \
-        ["Product Manager", "Design Lead", "Solution Architect", "Web Developer"]
+    assert work == ["work:charter", "work:W-1", "work:W-2", "work:W-3", "work:style", "work:website"], work      # Charter -> specs -> style guide -> Website
+    assert [(by[k]["label"], by[k].get("output"), by[k]["file"], by[k]["status"]) for k in work[1:4]] == [("Product spec", "Product plan", "artifacts/product-spec.md", "filed"),
+        ("Design guide", "Design guide", "artifacts/design-guide.md", "filed"), ("Architecture", "Architecture (HLD + LLD)", "artifacts/architecture.md", "filed")]
+    assert [by[f"step:{a}>{b}"]["team"] for a, b in (("charter", "W-1"), ("W-1", "W-2"), ("charter", "W-3"), ("W-3", "style"), ("style", "website"))] == \
+        ["Product Manager", "Design Lead", "Solution Architect", "Web Developer", "Web Developer"]      # the architecture reads the product spec, not the design guide
     given = {(e["from"], e["to"]): e["label"] for e in m["edges"] if e["kind"] == "handoff"}
-    assert given[("work:W-1", "work:website")] == "given to W-4, W-6, W-7, W-8" and given[("work:W-2", "work:website")] == "given to W-4, W-5, W-7, W-9, W-11" \
-        and given[("work:W-3", "work:website")] == "given to W-4, W-5, W-6, W-7, W-10" and given[("work:W-1", "work:W-3")] == "given to W-3", given
-    site, step = by["work:website"], by["step:W-3>website"]
+    assert given[("work:W-1", "work:W-2")] == "given to W-2" and given[("work:W-1", "work:W-3")] == "given to W-3" and ("work:W-2", "work:W-3") not in given, given
+    assert given[("work:style", "work:website")].startswith("given to W-5, ") and ("work:website", "work:style") not in given, "the style guide feeds the site"
+    site, step = by["work:website"], by["step:style>website"]
     assert {"W-7", "W-9"} <= set(site["workflows"]) and site["status"] == "done_unchecked" and step["unchecked"] == ["W-7", "W-9"], (site, step)
     assert step["detail"].endswith("· 2 done, checks did not pass (W-7, W-9)"), step["detail"]
-    assert (by["work:style"]["file"], by["work:style"]["workflows"], by["work:style"]["lane"]) == ("style.json", ["W-4"], "branch")
+    assert (by["work:style"]["file"], by["work:style"]["workflows"], by["work:style"]["lane"]) == ("style.json", ["W-4"], "trunk")
     keep_dir, j2.RUNS_DIR = j2.RUNS_DIR, repo
     try:
         out = render_node(j2.saved_snapshot("j2-20261026-155610", 0), docs={"docs": {}, "map": m})["map"]
@@ -5965,9 +6322,10 @@ def map_tab():
     saved = json.load(open(os.path.join(run.dir, "map.json")))
     atoms = json.load(open(os.path.join(run.dir, "atoms.json")))["atoms"]
     assert os.path.exists(os.path.join(run.dir, "atoms.json")) and saved["schema"] == "map/1" and saved["run"] == name and not saved["live"]
-    # golden structure: the Requester, then the work in order with a step between each pair
+    # golden structure: the Requester, then the work in an order where each box follows what it reads, a team (step) before each box.
+    # A step's id names the box before it only when the box reads it (else the Charter): the style guide reads the HLD, not the LLD.
     assert [n["id"] for n in saved["nodes"]] == ["person:requester", "fn:identity", "fn:adaptation", "fn:priority", "fn:coordination", "fn:audit", "work:charter", "step:charter>prd", "work:prd", "step:prd>hld",
-        "work:hld", "step:hld>lld", "work:lld", "step:lld>website", "work:website", "step:website>style", "work:style"], [n["id"] for n in saved["nodes"]]
+        "work:hld", "step:hld>lld", "work:lld", "step:charter>style", "work:style", "step:style>website", "work:website"], [n["id"] for n in saved["nodes"]]
     assert [(n["kind"], n["row"]) for n in saved["nodes"]] == [("person", "people")] + [("function", "functions")] * 5 + [(k, "work") for k in
         ("work", "engine", "work", "engine", "work", "engine", "work", "engine", "work", "engine", "work")]
     by = {n["id"]: n for n in saved["nodes"]}
@@ -5979,16 +6337,17 @@ def map_tab():
     for k in ("prd", "hld", "lld", "website"):      # versions and files come from artifacts.json, never invented
         assert by[f"work:{k}"]["version"] == rows[k]["version"] and by[f"work:{k}"]["file"] == rows[k]["file"], k
     assert by["work:charter"]["version"] is None and by["work:charter"]["file"] == "goal.json"
-    assert [by[f"step:{a}>{b}"]["label"] for a, b in (("charter", "prd"), ("prd", "hld"), ("hld", "lld"), ("lld", "website"))] == ["Write", "Write", "Write", "Build"]
-    for k, step in (("prd", "charter>prd"), ("hld", "prd>hld"), ("lld", "hld>lld"), ("website", "lld>website")):      # counts equal the atoms
+    assert [by[f"step:{a}>{b}"]["label"] for a, b in (("charter", "prd"), ("prd", "hld"), ("hld", "lld"), ("style", "website"))] == ["Write", "Write", "Write", "Build"]
+    for k, step in (("prd", "charter>prd"), ("hld", "prd>hld"), ("lld", "hld>lld"), ("website", "style>website")):      # counts equal the atoms
         mine = [a for a in atoms if a["workflow"] in rows[k]["workflows"]]
         ok = sum(1 for a in mine for x in a["verification"] if x["met"] is True)
         tot = sum(1 for a in mine for x in a["verification"] if x["met"] is not None)
         assert by[f"step:{step}"]["detail"] == f"{len(rows[k]['workflows'])} workflows · {ok} of {tot} checks passed", (k, by[f"step:{step}"]["detail"])
-    assert {(e["from"], e["to"], e["basis"]) for e in saved["edges"] if e["kind"] == "handoff"} == {
-        ("work:prd", "work:hld", "recorded"), ("work:prd", "work:lld", "recorded"), ("work:hld", "work:lld", "recorded"),
-        ("work:hld", "work:website", "recorded"), ("work:lld", "work:website", "recorded"), ("work:charter", "work:prd", "declared")}
-    assert sum(1 for e in saved["edges"] if e["kind"] == "step") == 8 + 2      # + the style guide's side job
+    assert {(e["from"], e["to"], e["basis"]) for e in saved["edges"] if e["kind"] == "handoff"} == {      # recorded reads only, producer -> consumer
+        ("work:prd", "work:hld", "recorded"), ("work:prd", "work:lld", "recorded"), ("work:hld", "work:lld", "recorded"), ("work:hld", "work:style", "recorded"),
+        ("work:hld", "work:website", "recorded"), ("work:lld", "work:website", "recorded"), ("work:style", "work:website", "recorded")}
+    assert all(e.get("source") for e in saved["edges"]), "every line carries its record"
+    assert sum(1 for e in saved["edges"] if e["kind"] == "step") == 5 * 2 + 3      # the Charter into each of 5 teams, each team into its box, 3 recorded reads of the box before
     ck = [x for a in atoms for x in a["verification"] if x["met"] is not None]
     assert saved["status"] == {"state": "Done", "state_status": "idle", "checks": {"passed": sum(x["met"] is True for x in ck), "run": len(ck)}}
     assert "version of Charter" in saved["not_recorded"] and "which other function worked on Website (only Audit is recorded)" in saved["not_recorded"] and \
@@ -6021,7 +6380,7 @@ def map_tab():
         per = {f: sum(1 for c in calls if c["fn"] == f and rng["from"] <= c["id"] <= rng["to"]) for f in ("identity", "adaptation", "priority", "coordination", "audit")}
         assert st["made_by"] == {"calls": rng, "functions": {f: n for f, n in per.items() if n}, "basis": "recorded"}, step
         assert {(e["from"][3:], e["n"], e["label"]) for e in saved["edges"] if e["kind"] == "speaks_to" and e["to"] == f"work:{k}"} == {(f, n, "calls") for f, n in per.items() if n}
-    assert next(n for n in saved["nodes"] if n["id"] == "step:lld>website")["made_by"] is None      # the site: not recorded, never guessed
+    assert next(n for n in saved["nodes"] if n["id"] == "step:style>website")["made_by"] is None      # the site: not recorded, never guessed
     # function to work, golden: recorded data only. Identity to the Charter; each function to a document by its calls in the recorded range;
     # the site and a deed get only Audit (its audits in stage-*.json); nothing is a "made" edge any more
     lines = [(e["from"][3:], e["to"][5:], e["n"], e["label"], e["basis"]) for e in saved["edges"] if e["kind"] == "speaks_to" and e["to"].startswith("work:")]
@@ -6039,14 +6398,16 @@ def map_tab():
     assert by["person:requester"]["detail"] == "1 message from you" and by["person:requester"]["status"] == "idle"
     # a plain website run has the Charter and the site only; a PRD-only run has no site
     plain = docs_run(BREW_LAB, 200)
-    assert [n["id"] for n in json.load(open(os.path.join(plain.dir, "map.json")))["nodes"]] == ["person:requester", "fn:identity", "fn:adaptation", "fn:priority", "fn:coordination", "fn:audit", "work:charter", "step:charter>website", "work:website", "step:website>style", "work:style"]
+    assert [n["id"] for n in json.load(open(os.path.join(plain.dir, "map.json")))["nodes"]] == ["person:requester", "fn:identity", "fn:adaptation", "fn:priority", "fn:coordination", "fn:audit", "work:charter", "step:charter>style", "work:style", "step:style>website", "work:website"]
     # an old run: no artifacts.json, atoms.json or map.json; the same boxes, and the gaps are named
     old = os.path.join(j2.RUNS_DIR, "j2-20200102-000000")
     shutil.copytree(run.dir, old)
     for f in ("artifacts.json", "atoms.json", "map.json"):
         os.remove(os.path.join(old, f))
     m_old = M.build(old)
-    assert [(n["id"], n["status"], n["version"]) for n in m_old["nodes"]] == [(n["id"], n["status"], n["version"]) for n in saved["nodes"]]
+    box_ = lambda mp: sorted((n["id"], n["status"], n["version"]) for n in mp["nodes"] if n["kind"] != "engine")
+    assert box_(m_old) == box_(saved), "the same boxes"
+    assert not any(e["kind"] == "handoff" for e in m_old["edges"]), "no atoms.json: no recorded reads, so no read lines (never guessed from run order)"
     assert "artifacts.json (rows rebuilt from the folder)" in m_old["not_recorded"] and "atoms.json (atoms rebuilt from workflows.json)" in m_old["not_recorded"]
     assert not any(os.path.exists(os.path.join(old, f)) for f in ("artifacts.json", "atoms.json", "map.json")), "building a map never writes to an old run"
     os.remove(os.path.join(old, "calls.jsonl"))
@@ -6157,7 +6518,7 @@ def map_tab():
     try:
         for q in ("", f"?run={name}"):
             assert get("/api/map" + q) == saved, q
-        assert [n["id"] for n in get("/api/map?run=j2-20200102-000000")["nodes"]] == [n["id"] for n in saved["nodes"]]
+        assert box_(get("/api/map?run=j2-20200102-000000")) == box_(saved)
         assert get("/api/map?run=j2-20990101-000000")["nodes"] == [] and get("/api/map?run=../x")["nodes"] == []
         assert get("/api/artifacts")["deliverables"] and urllib.request.urlopen(base + "/api/artifact?name=goal.json").read()      # the box's Open view
     finally:
@@ -6223,7 +6584,7 @@ def map_tab():
     # function-to-work lines: drawn under the boxes, faint, highlighted per function (hover, click), only on demand when there are many
     wk = lambda f, t, n, lab="calls": {"from": f, "to": t, "kind": "speaks_to", "label": lab, "n": n, "basis": "recorded"}
     few_w = [wk("fn:identity", "work:t0", None, "wrote the charter"), wk("fn:identity", "work:t1", 2), wk("fn:audit", "work:t1", 1, "audits"), wk("fn:coordination", "work:t3", 4)]
-    o4 = render_node(snap, docs={"docs": {}, "map": {**mp2, "edges": edges + few + few_w}, "mappin": "fn:identity"})["map"]
+    o4 = render_node(snap, docs={"docs": {}, "map": {**mp2, "edges": edges + few + few_w}, "mappin": "fn:identity", "mapview": "line"})["map"]
     s4 = o4[o4.index("<svg class=\"mapsvg"):o4.index("</svg>", o4.index("<svg class=\"mapsvg")) + 6]
     assert re.findall(r'<path class="mapln[^"]*" data-from="([^"]+)" data-to="([^"]+)"', s4) == [("fn:identity", "work:t0"), ("fn:identity", "work:t1"), ("fn:audit", "work:t1"), ("fn:coordination", "work:t3")]
     assert s4.startswith('<svg class="mapsvg" data-pin="fn:identity"') and ">wrote it<" in s4 and re.findall(r'class="maplbl[^"]*" data-from="[^"]+" data-to="[^"]+" x="[^"]+" y="[^"]+">([^<]+)<', s4) == ["wrote it", "2", "1", "4"]
@@ -6264,7 +6625,7 @@ def map_tab():
     out = render_node(snap, docs={"docs": {}, "map": mp})["map"]
     svg = out[out.index("<svg class=\"mapsvg\""):out.index("</svg>", out.index("<svg class=\"mapsvg\"")) + 6]
     assert out.count("data-mapopen=") == 6 and "data-mapopen" not in svg and 'class="mapnode' in svg      # the Open links are in the cards and in the click panel, not on the canvas
-    pn0 = render_node(snap, docs={"docs": {}, "map": mp, "mappin": "work:t0"})["map"]
+    pn0 = render_node(snap, docs={"docs": {}, "map": mp, "mappin": "work:t0", "mapview": "line"})["map"]
     assert pn0.count("data-mapopen=") == 7 and 'class="mappanel" data-panel="work:t0"' in pn0 and 'data-mapopen="f0.md">Open Box 0 with a very long name</a>' in pn0 and "data-mapclose" in pn0 and "v1" in pn0.split('class="mappanel"')[1], "the panel has the link and the details"
     assert "Identity running" in out and "3 of 4 checks passed" in out and 'class="mappill running"' in out and 'class="mappill checks"' in out
     nc = render_node(snap, docs={"docs": {}, "map": {**mp, "status": {**mp["status"], "state": "Crashed", "state_status": "fault", "checks": {"passed": 0, "run": 0}}}})["map"]
@@ -6311,9 +6672,10 @@ def map_tab():
     chrome = j2.j2_check.find_chrome()
     if chrome and BROWSER:
         import subprocess
+        real_line = render_node(snap, docs={"docs": {}, "map": saved, "mapview": "line"})["map"]      # the metro drawing (the Line view)
         css = re.search(r"<style>(.*?)</style>", ui, re.S).group(1)
         page = os.path.join(tempfile.mkdtemp(prefix="j2-map-"), "map.html")
-        open(page, "w", encoding="utf-8").write(f"<html><head><meta name=viewport content='width=device-width'><style>{css}</style></head><body>{real}"
+        open(page, "w", encoding="utf-8").write(f"<html><head><meta name=viewport content='width=device-width'><style>{css}</style></head><body>{real_line}"
             "<script>document.body.setAttribute('data-m', [document.documentElement.scrollWidth, innerWidth, getComputedStyle(document.querySelector('.mapsvgwrap')).display, getComputedStyle(document.querySelector('.mapcards')).display, [...document.querySelectorAll('.mapln')].every(x => x.getBoundingClientRect().width === 0)].join('|'))</script></body></html>")
         for width, want in ((500, "none|block|true"), (1100, "block|none|false")):
             dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", f"--window-size={width},800", "--virtual-time-budget=2000", "--dump-dom", "file://" + page],
@@ -6445,10 +6807,10 @@ def map_tab():
     want = {"person:requester": "Show what needs you", "fn:identity": "Open Chat", "fn:adaptation": "Show messages and calls", "fn:audit": "Open Audit findings", "step:prd>hld": "Open these workflows",
             "work:prd": "Open the document", "work:website": "Open the site preview", "work:charter": "Open the Charter"}
     for i, lab in want.items():
-        o = render_node(snap, docs={"docs": {}, "map": saved, "mappin": i})["map"]
+        o = render_node(snap, docs={"docs": {}, "map": saved, "mappin": i, "mapview": "line"})["map"]
         assert f'data-mapgo="{htmllib.escape(i)}">{lab}</button>' in o and o.count("data-mapgo=") == 1, (i, lab)
     for i in ("fn:priority", "person:requester"):      # a node that waits on you goes to its question in the Chat
-        o = render_node(snap, docs={"docs": {}, "map": mp2, "mappin": i})["map"]
+        o = render_node(snap, docs={"docs": {}, "map": mp2, "mappin": i, "mapview": "line"})["map"]
         assert f'data-mapgo="{i}">Answer in Chat</button>' in o, i
     # a step opens the Workflows view filtered to its workflows; a function opens the tables under the Map filtered to it
     stp = by["step:prd>hld"]
@@ -6516,7 +6878,8 @@ def map_tab():
     cross_runs = [("mock run", run.dir), ("mock run with a send", send_run.dir)] + [(n_, os.path.join(j2.RUNS_DIR, n_)) for n_ in real_names]
     assert len(cross_runs) == 4, "both saved runs are in runs/"
     sm_ = M.build(send_run.dir)
-    assert [n_["id"] for n_ in sm_["nodes"] if n_["row"] == "work" and "style" not in n_["id"]][-2:] == ["step:lld>website", "work:website"] and any(n_.get("tag") == "Send" and n_["lane"] == "branch" for n_ in sm_["nodes"]), "the send sits off the trunk, the site follows the LLD"
+    wo_ = [n_["id"] for n_ in sm_["nodes"] if n_["row"] == "work"]
+    assert wo_.index("work:lld") < wo_.index("work:website") and any(n_.get("tag") == "Send" and n_["lane"] == "branch" for n_ in sm_["nodes"]), "the send sits off the trunk, the site follows the LLD"
     # the outcome line names what is left open; the chip says when the latest Audit wants a revision
     ns_ = render_node(j2.saved_snapshot(send_name, 0), docs={"docs": {}, "map": sm_})["needs"]
     assert "Finished. 1 item left open: test email (dry run)." in ns_, ns_
@@ -6573,8 +6936,10 @@ def map_tab():
             ey_ = float(re.search(r'<rect class="shape" x="[\d.-]+" y="([\d.-]+)"', ng(sv_, d_["id"])).group(1))
             assert ey_ > ty_, (label_, "the side job is drawn below the trunk")
         if "work:website" in trunk_:
-            into_web = [f for f, t in stp_ if t.endswith(">website") and t.startswith("step:")]
-            assert into_web == [trunk_[trunk_.index("work:website") - 1]], (label_, into_web, "the site's step takes the last document as its input")
+            into_web = [f for f, t in stp_ if t.endswith(">website") and t.startswith("step:") and f != "work:charter"]      # the Charter feeds every team
+            prev_ = trunk_[trunk_.index("work:website") - 1]
+            read_ = any(e["kind"] == "handoff" and e["from"] == prev_ and e["to"] == "work:website" for e in mp_["edges"])
+            assert into_web == ([prev_] if read_ else []), (label_, into_web, "the site's step takes the box before it as input only when it reads it")
         for d_ in [x for x in mp_["nodes"] if x["kind"] == "work"]:
             if d_.get("tag") == "Send":
                 assert '<rect class="shape"' in ng(sv_, d_["id"]) and "<polygon" not in ng(sv_, d_["id"]), (label_, d_["id"], "a send ends in a letter icon")
@@ -6633,7 +6998,7 @@ def map_tab():
             threading.Thread(target=srv.serve_forever, daemon=True).start()
             try:
                 dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", f"--window-size={size}", "--virtual-time-budget=12000", "--dump-dom",
-                                      f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={run_name}"], capture_output=True, text=True, timeout=180).stdout
+                                      f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={run_name}&mapview=line"], capture_output=True, text=True, timeout=180).stdout
             finally:
                 j2_server.HERE, j2_server.RUN = keep_here, keep
                 srv.shutdown()
@@ -7027,6 +7392,10 @@ if __name__ == "__main__":
         artifacts_tab()
         map_tab()
         map_every_workflow()
+        if mode == "0":
+            map_tree()
+            map_logic()
+            artifacts_tree()
         docs_repeat_failure()
         docs_intake_and_compare()
         plain_unchanged("f6938b2", slim="0")      # J2_SLIM=0 is the old path, prompt for prompt
