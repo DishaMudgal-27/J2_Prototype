@@ -190,6 +190,15 @@ def tree(d, m=None):
         return {"schema": "artifacts-tree/1", "groups": []}
     m = m or j2_map.build(d)
     lst, types = listing(d), {t["file"]: t for t in load_types()["types"] if "*" not in t["file"]}
+    # versions/1: the same history and handoffs versions.json holds, so a version row can say who made it and why
+    vers = versions(d)
+    vhist = {r["file"]: r for a in vers["artifacts"] for r in a["history"]}
+    vart = {a["file"]: a for a in vers["artifacts"]}
+    vhand = {}      # the handoffs that leave each deliverable, by the file the tree shows it under
+    for h in vers["handoffs"]:
+        f = next((a["file"] for a in vers["artifacts"] if a["artifact"] == h["from_artifact"]), None)
+        if f:
+            vhand.setdefault(f, []).append(h)
     rowsby = {r["file"]: r for r in lst["deliverables"] + lst["records"]}
     by = {n["id"]: n for n in m["nodes"]}
     made_step = {e["to"]: by[e["from"]] for e in m["edges"] if e["kind"] == "step" and by.get(e["from"], {}).get("kind") == "engine"}
@@ -206,12 +215,21 @@ def tree(d, m=None):
         ext = os.path.splitext(f or "")[1]
         return "image" if ext == ".png" else "preview" if ext == ".html" else "text"
 
+    def vfacts(f):
+        """The role that made a deliverable, how many versions it saved and the hand-offs that leave it (versions/1),
+        wherever the tree shows that file. A file versions/1 does not cover gets none of these keys."""
+        a = vart.get(f)
+        return ({"role": a["role"], "versions": a["versions"]} if a else {}) | \
+               ({"handoffs": vhand[f]} if vhand.get(f) else {})
+
     def item(name, f=None, made=None, status="filed", **kw):
+        f0 = f
         if f and (f in used or not os.path.isfile(os.path.join(d, f))):
             f = None      # each file once; a send has no file of its own (its receipt is under Proof)
         if f:
             used.add(f)
-        return {"name": name, "file": f, "made_by": made, "status": status, "size": size(f), "open": opener(f) if f else None, **kw}
+        return {"name": name, "file": f, "made_by": made, "status": status, "size": size(f),
+                "open": opener(f) if f else None, **vfacts(f0), **kw}
 
     def maker(n):
         st = made_step.get(n["id"])
@@ -264,7 +282,7 @@ def tree(d, m=None):
                 vs = [(k, f) for k, f in vs if os.path.basename(f).startswith(t["name"] + "-")]      # several documents: only this one's
             if vs:
                 kids.append({"name": "Versions", "count": len(vs), "collapsed": True,
-                             "children": [item(f"v{k}", f, None, "filed") for k, f in vs]})
+                             "children": [_version_item(item, k, f, vhist) for k, f in reversed(vs)]})
             if t["form"] == "page":
                 shots = sorted((f for f, r in rowsby.items() if r["type"] == "screenshots"), key=_num)
                 if shots:
@@ -600,3 +618,17 @@ def write_versions(d):
     with open(os.path.join(d, "versions.json"), "w", encoding="utf-8") as f:
         json.dump(r, f, indent=2, ensure_ascii=False)
     return r
+
+
+def _version_item(item, n, f, vhist):
+    """One row of a deliverable's Versions list in the tree: who made it and why, from the version history
+    (versions/1), so the tree and versions.json say the same thing. "not recorded" where the run recorded neither."""
+    r = vhist.get(f) or {}
+    made = [m for m in (r.get("made_by") or []) if isinstance(m, dict)]
+    ch = r.get("lines_changed") or {}
+    note = " · ".join(x for x in [r.get("why") or "not recorded",
+                                  f"+{ch['added']}/-{ch['removed']} lines" if ch.get("added") or ch.get("removed")
+                                  else "" if n == 1 else "no line changed"] if x)
+    return item(f"v{n}", f, {"persona": made[0].get("role"), "workflows": sorted({m["workflow"] for m in made
+                                                                                  if m.get("workflow")})}
+                if made else None, "filed", note=note, version=n)

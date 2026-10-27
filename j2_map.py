@@ -540,6 +540,7 @@ def build(d, live=None):
             n["send"] = send_word(n.get("detail"))
     for h in handoffs:
         h["readers"] = re.findall(r"W-\d+", h.get("label") or "") if h.get("basis") == "recorded" else []
+    _versions_on(d, work, handoffs)
     out_nodes = [person] + funcs + order
     for n in out_nodes:
         for k in ("_atoms", "_order", "template", "_team", "_made"):
@@ -562,6 +563,34 @@ def build(d, live=None):
             "nodes": out_nodes, "workflows": flows, "edges": edges + handoffs + speaks + lines + board_edges, "legend": LEGEND, "built_from": built_from,
             "not_recorded": list(dict.fromkeys(nr + ["messages to and from workflow agents (W-n) are not drawn",
                                                      "what the work draws on (Knows row, later version)"]))}
+
+
+VERS_BOX = {"design": "work:style"}      # the box that holds the style guide
+
+
+def _versions_on(d, work, handoffs):
+    """Puts each box's role and how many versions it saved on the box, and each handoff's recorded result on the line
+    between two boxes, from versions/1 (j2_artifacts.versions) - the same record versions.json holds, read once here
+    so the Map, the Artifacts tree and versions.json agree. A run that saved no versions is left as it was."""
+    import j2_artifacts
+    try:
+        v = j2_artifacts.versions(d)
+    except Exception:
+        return
+    by = {VERS_BOX.get(a["artifact"], "work:" + a["artifact"]): a for a in v["artifacts"]}
+    for n in work:
+        a = by.get(n["id"])
+        if a:
+            n["role"], n["versions"] = a["role"], a["versions"]
+            if n.get("version") is None:
+                n["version"] = a["history"][-1]["version"] if a["history"] else None      # the style guide: its only version
+    for h in handoffs:
+        a, b = by.get(h["from"]), by.get(h["to"])
+        rec = a and b and next((x for x in v["handoffs"] if x["from_artifact"] == a["artifact"]
+                                and x["to_artifact"] == b["artifact"]), None)
+        if rec:
+            h.update({"realized": rec["realized"], "evidence": list(rec["evidence"]), "to_role": rec["to_role"],
+                      "from_version": rec["from_version"]})
 
 
 def write(d):
