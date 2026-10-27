@@ -5397,6 +5397,14 @@ def live_sends():
         r = recs(run)
         assert [(x["sent"], x["error"]) for x in r] == [(True, None), (True, None), (False, "cap"), (False, "cap")] and len(got) == 2, r
         assert "J2_SEND_CAP" in r[2]["why"] and len(asks(run)) == 1 and run.outcome.startswith("Done"), run.outcome
+        wfs = {w["id"]: w for w in run.past_workflows + run.workflows}
+        assert [(wfs[x["atom"].split(".")[0]]["status"], wfs[x["atom"].split(".")[0]].get("send_error")) for x in r] == [
+            ("done", None), ("done", None), ("skipped", "cap"), ("skipped", "cap")], "a skipped send is never done"
+        v = next(v for v in json.load(open(os.path.join(run.dir, "atoms.json")))["atoms"] if v["id"] == r[2]["atom"])
+        assert v["status"] == "open" and v["notes"].startswith("Skipped (cap): the cap of 2 live emails"), v["notes"]
+        out = render_node(j2.saved_snapshot(os.path.basename(run.dir), 0), docs={"docs": {}, "map": M.build(run.dir)})
+        assert ">Email · LLD done · skipped (cap)<" in out["map"] and "Email · Website done · skipped (cap)." in out["needs"], out["needs"]
+        assert "checks did not pass" not in out["map"], "a send not sent is not a failed check"
         assert [x["goal"] for x in run.milestone_log] == ["PRD", "HLD", "LLD", "Website"]
         clean(run)
         # No: every send of the run stays a dry run; nothing reaches the server; never asked again
@@ -5415,10 +5423,11 @@ def live_sends():
         r = recs(run)[0]
         assert (r["sent"], r["error"], r["smtp_code"], r["result"]) == (False, "auth", 535, "failed") and not got, r
         v = next(v for v in json.load(open(os.path.join(run.dir, "atoms.json")))["atoms"] if v["id"] == r["atom"])
-        assert v["status"] == "open" and v["notes"] == "Not sent: the SMTP server did not accept the login (auth).", v
-        assert box(run)["status"] == "left_open" and run.outcome.startswith("Done"), run.outcome
+        assert v["status"] == "open" and v["notes"] == "Failed (auth): the SMTP server did not accept the login.", v
+        w = next(w for w in run.past_workflows + run.workflows if w["id"] == r["atom"].split(".")[0])
+        assert (w["status"], w["send_error"]) == ("failed", "auth") and box(run)["status"] == "left_open" and run.outcome.startswith("Done"), run.outcome
         out = render_node(j2.saved_snapshot(os.path.basename(run.dir), 0), docs={"docs": {}, "map": M.build(run.dir)})
-        assert ">Email · PRD done · failed<" in out["map"] and "Finished. Email · PRD done · failed." in out["needs"], out["needs"]
+        assert ">Email · PRD done · failed (auth)<" in out["map"] and "Finished. Email · PRD done · failed (auth)." in out["needs"], out["needs"]
         clean(run)
         # refused: 550 to the recipient
         port, got = server("refuse")
@@ -5439,7 +5448,16 @@ def live_sends():
         run = prd("Yes")
         r = recs(run)[0]
         assert (r["sent"], r["error"]) == (False, "settings") and r["why"] == "J2_SMTP_HOST, J2_SMTP_PASSWORD not set, so nothing is sent", r
-        assert run.outcome.startswith("Done") and "Not sent: J2_SMTP_HOST" in box(run)["detail"]
+        assert run.outcome.startswith("Done") and box(run)["detail"].startswith("Failed (settings): J2_SMTP_HOST")
+        # a brief that asks for updates by email gets milestone emails only, never a test-email deed as well (run 130930 got both)
+        port, got = server()
+        env(port, J2_MILESTONE_EMAILS=None)
+        run = prd("Yes", "Write a PRD for Campus Notes. Send me updates by email as you go." + CAMPUS)
+        assert run.stages == ["prd"] and [x["deed"] for x in recs(run)] == ["milestone_email"] and len(got) == 1, (run.stages, recs(run))
+        body = email.message_from_string(got[0]["data"], policy=email.policy.default).get_content()
+        summ = re.search(r"^Summary: (.*)$", body, re.M).group(1).strip()
+        assert len(summ) <= 200 and (summ.endswith((".", "!", "?")) or summ.endswith("...")), summ
+        clean(run)
         clean(run)
     finally:
         for srv in servers:
@@ -5492,6 +5510,15 @@ def send_deeds():
         assert d("send the PRD by email") == ["send_email"] and d("forward it by e-mail") == ["send_email"]
         assert d("Post it to Slack") == ["send_slack_message"] and d("Slack me the PRD") == ["send_slack_message"]
         assert d("send an email and post to Slack") == ["send_email", "send_slack_message"]
+        assert d("Write a PRD. Send me updates by email as you go.") == [] and d("Send me a test email.") == ["send_email"]      # updates: milestone emails only
+        assert d("Send me updates by email as you go. Also email me the PRD.") == ["send_email"], "another sentence still asks for the deed"
+        # the milestone summary never ends mid-word: the last full sentence that fits, else whole words and "..."
+        long_ = "Students who miss a lecture have no easy way to get good notes; they ask around on group chats and often get nothing. " \
+                "The students affected are undergraduate students at one university. Campus Notes is where they share and find them."
+        assert j2_send.clip(long_) == long_[:long_.index("university.") + 11] and j2_send.clip("short") == "short"
+        assert j2_send.clip("word " * 60) == ("word " * 39).strip() + "..." and len(j2_send.clip("word " * 60)) <= 200
+        assert j2_send.clip("x" * 250).endswith("...") and len(j2_send.clip("x" * 250)) <= 200
+        assert "Summary: " + j2_send.clip(long_) in j2_send.milestone("P", "PRD", 1, (1, 1), long_)["body"]
         for t in ("", None, BREW_LAB, "a Slack link in the footer", "integrate with Slack", "an email field in the form",
                   "show our email address", "Slack is where the team chats", "design a logo"):
             assert d(t) == [], t
@@ -6498,6 +6525,22 @@ def map_tab():
     chip_bad = render_node({**ss_, "workable": ["necessary condition N8 not met: a nav reaches every section"]}, docs={"docs": {}, "map": sm_})["map"]
     assert 'class="mappill checks"' in chip_ok and "needs revision" not in chip_ok, "every check passed and Audit agrees: green"
     assert 'class="mappill checks needsrev"' in chip_bad and "checks passed · Audit: needs revision<" in chip_bad, "the checks passed but the latest Audit says not workable: amber"
+    # two side jobs under one parent (run 130930: W-7 milestone email and W-8 test email, both under the PRD) fan out side by side
+    fan_ = "j2-20261027-130930"
+    if os.path.isdir(os.path.join(repo_runs, fan_)):
+        if not os.path.exists(os.path.join(j2.RUNS_DIR, fan_)):
+            shutil.copytree(os.path.join(repo_runs, fan_), os.path.join(j2.RUNS_DIR, fan_))
+        fo_ = render_node(j2.saved_snapshot(fan_, 0), docs={"docs": {}, "map": M.build(os.path.join(j2.RUNS_DIR, fan_))})
+        fs_ = fo_["map"][fo_["map"].index('<svg class="mapsvg'):fo_["map"].index("</svg>", fo_["map"].index('<svg class="mapsvg')) + 6]
+        assert crossings(fs_) == [] and "could not be drawn without crossing" not in fo_["map"], crossings(fs_)
+        lab_ = {}
+        for id_ in ("work:W-7", "work:W-8"):
+            g_ = ng(fs_, id_)
+            x_, t_ = re.search(r'<text[^>]* x="([\d.]+)"[^>]*>(?:<tspan[^>]*>)?([^<]+)', g_.split("</title>")[1]).groups()
+            lab_[id_] = (float(x_), len(t_) * 5.8 + 6, t_)
+        (x7, w7, t7), (x8, w8, t8) = lab_["work:W-7"], lab_["work:W-8"]
+        assert (t7, t8) == ("Email · PRD done · sent", "Test email · skipped (cap)") and abs(x8 - x7) >= (w7 + w8) / 2, lab_
+        assert "Finished. Email · PRD done · sent. Test email · skipped (cap)." in fo_["needs"], fo_["needs"]
     pages_ = {}
     for label_, dir_ in cross_runs:
         mp_ = M.build(dir_)

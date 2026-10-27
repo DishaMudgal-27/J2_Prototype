@@ -732,7 +732,7 @@ function renderWorkflows(s){
   const tags = Object.fromEntries(s.workflows.map(w => [w.id, outTags(s, w)])), shown = s.workflows.filter(w => (!OTAG || tags[w.id].some(t => t.type === OTAG)) && (!WFSTEP.length || WFSTEP.includes(w.id)));
   const rows = shown.map(w => `<tr><td>${w.id}</td><td style="color:${col(w.id)}"><b>${esc(w.agent || who(w.id)[0])}</b><br><span class="empty">section ${esc(w.section || "")}${w.revises ? " (rewrites " + esc(w.revises) + "'s)" : ""}</span><br>${tagsHTML(tags[w.id])}</td>
     <td>${w.cost}${w.charged === false ? '<br><span class="empty">released</span>' : ""}</td>
-    <td>${envCell(w)}</td><td>${w.cycle}</td><td><span class="pill ${w.status}">${w.status}</span></td></tr>
+    <td>${envCell(w)}</td><td>${w.cycle}</td><td><span class="pill ${w.status}">${w.status}${w.send_error ? ` (${esc(w.send_error)})` : ""}</span></td></tr>
     <tr><td colspan="7"><details data-key="wf-${esc(w.id)}"><summary>Open ${esc(w.id)}: ${(w.atoms || []).length} work atom(s)</summary><div class="wtags">Made: ${tagsHTML(tags[w.id])}</div>${atomCards(s, w)}</details></td></tr>`).join("");
   const groups = OTYPES.map(([k, label]) => [label, s.workflows.filter(w => tags[w.id].some(t => t.type === k)).map(w => w.id)]).filter(g => g[1].length)
     .concat([["No output recorded", s.workflows.filter(w => !tags[w.id].length).map(w => w.id)]].filter(g => g[1].length));
@@ -1111,13 +1111,14 @@ function needsYou(s){
 const needLine = t => { t = dv(mapClean(t)); return esc(t.length > 150 ? t.slice(0, 149) + "…" : t); };
 // One plain line for a finished or saved run: how it ended, with a link to the Report (the full text of the outcome is there, word for word).
 // A send's word from its one line (the atom's note): dry run, sent (live, mock or already sent) or failed (not sent, and why).
-const sendWord = n => /dry run/i.test(n.detail || "") ? "dry run" : /^(Sent|Already sent|The .* was sent)\b/.test(n.detail || "") ? "sent" : /^Not sent:/.test(n.detail || "") ? "failed" : "";
+const sendWord = n => { const d = n.detail || "", e = /^(Skipped|Failed) \((\w+)\)/.exec(d);
+  return /dry run/i.test(d) ? "dry run" : /^(Sent|Already sent|The .* was sent)\b/.test(d) ? "sent" : e ? `${e[1].toLowerCase()} (${e[2]})` : /^Not sent: the cap of/.test(d) ? "skipped (cap)" : /^Not sent:/.test(d) ? "failed" : ""; };      // "Not sent: ..." is an older run's note
 function outcomeLine(s){
   const o = String((s && s.outcome) || ""); if (!o) return "";
   const left = (MAP.nodes || []).filter(n => n.kind === "work" && n.status === "left_open"), mails = left.filter(n => /^Email · /.test(n.label) && /dry run/i.test(n.detail || ""));
-  const real = (MAP.nodes || []).filter(n => n.kind === "work" && /^Email · /.test(n.label) && ["sent", "failed"].includes(sendWord(n)));
+  const real = (MAP.nodes || []).filter(n => n.kind === "work" && n.tag === "Send" && /^(sent|failed|skipped)/.test(sendWord(n)));
   const open = left.filter(n => !mails.includes(n) && !real.includes(n)).map(n => String(n.label).replace(/^send (a |an |the )?/i, "").replace(/^./, c => c.toLowerCase()) + (/dry run/i.test(n.detail || "") ? " (dry run)" : ""));
-  const parts = [...real.map(n => `${n.label} · ${sendWord(n)}`), ...(mails.length ? [`${mails.length} email${mails.length === 1 ? "" : "s"} waiting (dry run)`] : []), ...(open.length ? [`${open.length} item${open.length === 1 ? "" : "s"} left open: ${open.join(", ")}`] : [])];
+  const parts = [...real.map(n => `${String(n.label).replace(/^send (a |an |the )?/i, "").replace(/^./, c => c.toUpperCase())} · ${sendWord(n)}`), ...(mails.length ? [`${mails.length} email${mails.length === 1 ? "" : "s"} waiting (dry run)`] : []), ...(open.length ? [`${open.length} item${open.length === 1 ? "" : "s"} left open: ${open.join(", ")}`] : [])];
   if (parts.length && /^Done/i.test(o)) return `Finished. ${parts.join(". ")}.`;
   return /^Done with open items/i.test(o) ? "Finished. Some items were left open." : /^Done/i.test(o) ? "Finished. Nothing is left open." : /^Stopped|^Crashed/i.test(o) ? "Stopped before the end." : "Finished.";
 }
@@ -1452,7 +1453,10 @@ function renderMap(m){
       return `M${rd(xs)} ${rd(y0)} C${rd(xs)} ${rd(lev)} ${rd(xs)} ${rd(lev)} ${rd(xs + R)} ${rd(lev)} L${rd(xe - R)} ${rd(lev)} C${rd(xe)} ${rd(lev)} ${rd(xe)} ${rd(lev)} ${rd(xe)} ${rd(y1)}`; };
     const title = p => `${name(p.from)} was given to ${p.g.known ? name(p.to) : "the " + name(p.g.box) + " box"}${p.g.basis === "declared" ? " (by order, not recorded)" : ""}`;
     // the layout is tried with growing spacing until no "given to" line or side job passes through a label box (the boxes are estimated from the text)
-    const colW = d => Math.max(dW(d), ...brs.filter(b => b.p === d.id).flatMap(b => [b.s ? wTeam(b.s) : 0, wSub(branchText(b.d))]));      // a deliverable's column: its labels and its side jobs'
+    // side jobs of one parent fan out side by side, centred under it, each as wide as its own labels
+    const bW = b => Math.max(b.s ? wTeam(b.s) : 0, wSub(branchText(b.d)));
+    const sibs = id => brs.filter(b => b.p === id), fanW = id => sibs(id).reduce((a, b) => a + bW(b), 0) + Math.max(sibs(id).length - 1, 0) * 16;
+    const colW = d => Math.max(dW(d), fanW(d.id));      // a deliverable's column: its labels and its side jobs'
     let S = 150; for (let i = 1; i < n; i++){ const s = into[i] && by[into[i]]; S = Math.max(S, s ? wTeam(s) + 12 : 0, Math.max(colW(td[i]), colW(td[i - 1])) + 20); }
     let out;
     for (let tries = 0; tries < 10; tries++, S += 24){
@@ -1485,17 +1489,19 @@ function renderMap(m){
         const R = Math.min(18, Math.abs(xe - xd) / 3);
         push(p, under(s0.x + s0.r / 2 + 1, y, xd, lev - R) + ` C${rd(xd)} ${rd(lev)} ${rd(xd)} ${rd(lev)} ${rd(xd + R)} ${rd(lev)} L${rd(xe - R)} ${rd(lev)} C${rd(xe)} ${rd(lev)} ${rd(xe)} ${rd(lev)} ${rd(xe)} ${rd(lev - R)} L${xe} ${rd(T + e.r + 4)}`); });
       // side jobs: out of the parent's lower right, past its label, down to the team, then the end (a letter icon for a send)
-      // a side job: out of its parent's lower right, round its label, back under the parent, down to the team and the end
-      const hook = (p0, xh, yb, yEnd) => under(p0.x + p0.r / 2 + 1, T + p0.r / 2 + 1, xh, yb - 8)
-        + ` C${rd(xh)} ${rd(yb)} ${rd(xh)} ${rd(yb)} ${rd(xh - 8)} ${rd(yb)} L${rd(p0.x + 8)} ${rd(yb)} C${rd(p0.x)} ${rd(yb)} ${rd(p0.x)} ${rd(yb)} ${rd(p0.x)} ${rd(yb + 8)} L${rd(p0.x)} ${rd(yEnd)}`;
-      brs.forEach(b => { const p0 = pos[b.p], xh = p0.x + dW(by[b.p]) / 2 + 8, gy = rd(brBase + 18), ey = rd(brBase + 54);
-        if (b.s){ pos[b.s.id] = {x: p0.x, y: gy, r: rP(b.s)};
-          ed.push({cls: "mapedge branch", from: b.p, to: b.s.id, d: hook(p0, xh, brBase, gy - rP(b.s) - 4), w: 1.5, title: `side job: ${name(b.p)} to ${name(b.s.id)}`}); }
-        pos[b.d.id] = {x: p0.x, y: ey, r: 12};
-        ed.push({cls: "mapedge branch", from: b.s ? b.s.id : b.p, to: b.d.id, d: b.s ? `M${p0.x} ${rd(gy + rP(b.s) + 15)} L${p0.x} ${rd(ey - 12)}` : hook(p0, xh, brBase, ey - 12), w: 1.5,
+      // a side job: out of its parent's lower right, round its label (and past its siblings), back along under them to its own column, down to the team and the end
+      brs.forEach(b => { const p0 = pos[b.p], sb = sibs(b.p), k = sb.indexOf(b), gy = rd(brBase + 18), ey = rd(brBase + 54);
+        const bx = rd(p0.x - fanW(b.p) / 2 + sb.slice(0, k).reduce((a, o) => a + bW(o) + 16, 0) + bW(b) / 2);      // this job's own column in the fan
+        const xh = Math.max(p0.x + dW(by[b.p]) / 2 + 8, ...sb.map((o, j) => p0.x - fanW(b.p) / 2 + sb.slice(0, j).reduce((a, q) => a + bW(q) + 16, 0) + bW(o) / 2 + 16));
+        const hk = yEnd => under(p0.x + p0.r / 2 + 1, T + p0.r / 2 + 1, xh, brBase - 8)
+          + ` C${rd(xh)} ${rd(brBase)} ${rd(xh)} ${rd(brBase)} ${rd(xh - 8)} ${rd(brBase)} L${rd(bx + 8)} ${rd(brBase)} C${rd(bx)} ${rd(brBase)} ${rd(bx)} ${rd(brBase)} ${rd(bx)} ${rd(brBase + 8)} L${rd(bx)} ${rd(yEnd)}`;
+        if (b.s){ pos[b.s.id] = {x: bx, y: gy, r: rP(b.s)};
+          ed.push({cls: "mapedge branch", from: b.p, to: b.s.id, d: hk(gy - rP(b.s) - 4), w: 1.5, title: `side job: ${name(b.p)} to ${name(b.s.id)}`}); }
+        pos[b.d.id] = {x: bx, y: ey, r: 12};
+        ed.push({cls: "mapedge branch", from: b.s ? b.s.id : b.p, to: b.d.id, d: b.s ? `M${bx} ${rd(gy + rP(b.s) + 15)} L${bx} ${rd(ey - 12)}` : hk(ey - 12), w: 1.5,
           title: `side job: ${name(b.s ? b.s.id : b.p)} to ${name(b.d.id)}`});
-        if (b.s){ const w = wTeam(b.s); boxes.push({id: b.s.id, x0: p0.x - w / 2, x1: p0.x + w / 2, y0: gy + rP(b.s) + 2, y1: gy + rP(b.s) + 14}); }
-        const w2 = wSub(branchText(b.d)); boxes.push({id: b.d.id, x0: p0.x - w2 / 2, x1: p0.x + w2 / 2, y0: ey + 14, y1: ey + 26}); });
+        if (b.s){ const w = wTeam(b.s); boxes.push({id: b.s.id, x0: bx - w / 2, x1: bx + w / 2, y0: gy + rP(b.s) + 2, y1: gy + rP(b.s) + 14}); }
+        const w2 = wSub(branchText(b.d)); boxes.push({id: b.d.id, x0: bx - w2 / 2, x1: bx + w2 / 2, y0: ey + 14, y1: ey + 26}); });
       // the check: no line through a label box (its own end excepted), and no two team labels on top of each other
       const hit = ed.filter(e => e.cls === "mapedge given" || e.cls === "mapedge branch").some(e => { const q = pts(e);
         return boxes.some(bx => bx.id !== e.from && bx.id !== e.to && q.some(([x, y]) => x > bx.x0 && x < bx.x1 && y > bx.y0 && y < bx.y1)); })

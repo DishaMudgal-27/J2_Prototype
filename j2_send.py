@@ -23,8 +23,8 @@ DEEDS = {"send_email": {"channel": "email", "var": "J2_TEST_EMAIL", "words": "te
 TARGET_VAR = {d["channel"]: d["var"] for d in DEEDS.values()}
 MODES = ("dry-run", "mock", "live")      # any other J2_SEND_MODE falls back to dry-run
 SMTP_VARS = ("J2_SMTP_HOST", "J2_SMTP_PORT", "J2_SMTP_USER", "J2_SMTP_PASSWORD", "J2_SMTP_FROM")
-WHY = {"auth": "the SMTP server did not accept the login (auth)", "connection": "could not reach the SMTP server (connection)",
-       "refused": "the SMTP server refused the message (refused)", "smtp": "the SMTP server returned an error (smtp)",
+WHY = {"auth": "the SMTP server did not accept the login", "connection": "could not reach the SMTP server",
+       "refused": "the SMTP server refused the message", "smtp": "the SMTP server returned an error",
        "duplicate": "this email was already sent in this run"}      # plain words by code: never the server's own text
 SENT = []      # the mock recorder: every message a mock send "delivered" (tests read it; reset() empties it)
 
@@ -39,9 +39,11 @@ _SLACK_TARGET = re.compile(r"(?<![\w@])([#@][\w.-]+)")
 
 def detect_deeds(*texts):
     """The sends the brief asks for, in order (email, then Slack); [] when none. A send verb must sit near "email" or
-    "Slack": a mere mention (a Slack link in the footer, an email field) matches nothing."""
+    "Slack": a mere mention (a Slack link in the footer, an email field) matches nothing. A sentence that asks for updates
+    by email (asks_updates) turns on milestone emails only, never a test-email deed as well."""
     text = " ".join(str(t or "") for t in texts)
-    return [k for k, rx in (("send_email", _SEND_EMAIL), ("send_slack_message", _SEND_SLACK)) if rx.search(text)]
+    mail = " ".join(x for x in re.split(r"(?<=[.!?\n])\s*", text) if not _UPDATES.search(x))
+    return [k for k, rx, t in (("send_email", _SEND_EMAIL, mail), ("send_slack_message", _SEND_SLACK, text)) if rx.search(t)]
 
 
 def asks_updates(*texts):
@@ -49,12 +51,24 @@ def asks_updates(*texts):
     return bool(_UPDATES.search(" ".join(str(t or "") for t in texts)))
 
 
+def clip(text, n=200):
+    """At most n characters, never cut mid-word: the last full sentence that fits, else the last whole word and "..."."""
+    text = str(text or "").strip()
+    if len(text) <= n:
+        return text
+    ends = [m.end() for m in re.finditer(r"[.!?](?=\s|$)", text[:n + 1])]
+    if ends:
+        return text[:ends[-1]]
+    cut = text[:n - 3].rsplit(" ", 1)[0].rstrip(" ,;:-")
+    return cut + "..."
+
+
 def milestone(project, goal, version, checks, summary):
     """{subject, body} of a milestone email, by code from the run's own record: no link, no address, no model."""
     clean = lambda t: re.sub(r"\s+", " ", _ADDRESS.sub("[address]", re.sub(r"https?://\S+|www\.\S+", "[link]", str(t or "")))).strip()
     body = [f"Goal: {goal} done", f"Version: {version if version is not None else 'not recorded'}",
             f"Checks passed: {checks[0]} of {checks[1]}" if checks[1] else "Checks passed: none recorded",
-            f"Summary: {clean(summary)[:200] or 'not recorded'}"]
+            f"Summary: {clip(clean(summary)) or 'not recorded'}"]
     return {"subject": f"J2 · {clean(project)} · {goal} done", "body": "\n".join(body)}
 
 
@@ -233,7 +247,8 @@ def check(c, run_dir):
     if rec.get("error") == "duplicate":
         return {"actual": rec.get("result"), "pass": True, "evidence": f"already sent to {rec['to_masked']}; not sent again"}
     if rec.get("error"):
-        return {"actual": rec.get("result"), "pass": None, "evidence": f"Not sent: {rec['why']}"}
+        return {"actual": rec.get("result"), "pass": None,
+                "evidence": f"{'Skipped' if rec.get('result') == 'skipped' else 'Failed'} ({rec['error']}): {rec['why']}"}
     kind, art = rec.get("deed"), rec.get("artifact")
     path = os.path.join(run_dir, art or "")
     if kind not in DEEDS or not art or not os.path.isfile(path):

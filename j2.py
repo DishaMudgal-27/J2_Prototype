@@ -3655,9 +3655,9 @@ class J2Run:
         note = self._send_note(rec, ok, atom, f"The {d['words']} was sent in test mode to the mock recorder only.")
         atom["human_output"] = {"text": note}
         atom["deed"] = {k: rec.get(k) for k in ("channel", "mode", "sent")}
-        wf["status"] = "failed" if ok is False else "done"
+        self._send_status(wf, rec, ok)
         self.save("workflows.json", self.workflows)
-        self.deed_log.append({"kind": kind, "pass": ok, "note": note})
+        self.deed_log.append({"kind": kind, "pass": ok, "note": note, "status": wf["status"]})
         self.post("system", f"{d['label']}: {note}", warning=ok is False)
         if self._advance(self.stage_i + 1):
             return
@@ -3689,6 +3689,15 @@ class J2Run:
     def _send_args(self, atom):
         """What j2_send.send needs to send at most once: the run folder (its receipts), the email's key and the answer."""
         return {"run_dir": self.dir, "key": f"{self.run_id}/{atom['id']}/{atom['goal']}", "confirmed": self.send_confirm is True}
+
+    @staticmethod
+    def _send_status(wf, rec, ok):
+        """A send workflow is done only when it was sent (or is a dry run): a live send that failed is "failed", one skipped
+        (the cap) is "skipped", with the error class beside it (send_error), and its atom stays open."""
+        err = rec.get("error") if rec.get("error") != "duplicate" else None
+        wf["status"] = "failed" if ok is False or (err and rec.get("result") != "skipped") else "skipped" if err else "done"
+        if err:
+            wf["send_error"] = err
 
     @staticmethod
     def _send_note(rec, ok, atom, mock_note):
@@ -3758,7 +3767,7 @@ class J2Run:
         note = self._send_note(rec, ok, atom, "Sent in test mode to the mock recorder only.")
         atom["human_output"] = {"text": note}
         atom["deed"] = {k: rec.get(k) for k in ("channel", "mode", "sent")}
-        wf["status"] = "failed" if ok is False else "done"
+        self._send_status(wf, rec, ok)
         self.past_workflows.append(wf)
         self._recalc_spent()
         self.save("workflows.json", self.workflows)
@@ -3772,7 +3781,8 @@ class J2Run:
                   done=True, to_user=True, next="user")
         base = ("Done: the design documents are workable. Every done-when item, rubric item and necessary condition "
                 "passes in each." if len(self.docset) > 1 else self.out["done"])
-        self.outcome = f"Done with open items: {words}" if any(x["pass"] is False for x in self.deed_log) else f"{base} {words}"
+        self.outcome = f"Done with open items: {words}" if any(x["pass"] is False or x.get("status") != "done" for x in self.deed_log) \
+            else f"{base} {words}"
         self.turn = None
 
     def _identity_intake(self, h):
