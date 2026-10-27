@@ -6032,7 +6032,12 @@ def map_tree():
             assert not any(l["from"] == "work:website" and l["to"] == "work:style" for l in t["links"]), "never below the site"
             reads_ = [l["from"] for l in t["links"] if l["to"] == "work:style" and l["kind"] == "reads"]
             assert rows["work:style"] == max([rows[x] for x in reads_] + [1]) + 1, ("right below the files its maker reads", rows)
-        assert rows["work:charter"] == 0 and all(n["row"] == 1 for n in t["nodes"] if n["kind"] == "stage") and all(n["row"] >= 2 for n in t["nodes"] if n["kind"] == "deck")
+        made = {}
+        for l in t["links"]:
+            if l["kind"] == "made":
+                made.setdefault(l["from"], []).append(rows[l["to"]])
+        assert rows["work:charter"] == 0 and all(n["row"] >= 2 for n in t["nodes"] if n["kind"] == "deck")
+        assert all(rows[s_] == min(r_) - 1 for s_, r_ in made.items()), (name, "each team sits right above the deliverable(s) it made", made, rows)
         for l in t["links"]:
             if l["kind"] == "reads":
                 assert rows[l["to"]] > rows[l["from"]], (name, l, "a deliverable sits below every deliverable it reads")
@@ -6124,15 +6129,16 @@ def map_tree():
               " r.words = q('.tnodes > .tnode.thide .tlab').filter(x => x.getBoundingClientRect().width > 0).length;"
               " r.gone = q('.tedge').filter(e => vis(e) && e.dataset.from !== id && e.dataset.to !== id).length; r.stagePanel = q('#pane-map .mappanel').map(x => x.dataset.stagepanel || '');"
               " const w = g.querySelector('.twf'); ev(w, 'mouseover'); r.wflow = q('.tflow').length; r.wlinks = q('.twflinks.hov .tlink').length; ev(w, 'mouseout');"
-              " ev(w, 'click'); const box = r_ => { const b = r_.getBoundingClientRect(); return [b.left, b.top, b.right, b.bottom]; };"
+              " ev(w, 'click'); setTimeout(() => { const box = r_ => { const b = r_.getBoundingClientRect(); return [b.left, b.top, b.right, b.bottom]; };"
+              " r.twf = q('.tnode.open .twf').map(box); r.svgbox = box(document.querySelector('.treesvg'));"
               " r.panels = q('#pane-map .mappanel').length; r.pb = box(document.querySelector('.treepanel')); r.card = box(document.querySelector('.treebox')); r.chat = box(document.querySelector('#dview .chat')); r.needs = box(document.getElementById('needs'));"
               " r.wfcard = !!document.querySelector('.treepanel [data-wfcard]');"
               " ev(q('.tnodes > .tnode.tdeck')[0], 'click'); r.second = q('#pane-map .mappanel').map(x => x.dataset.panel || x.dataset.wfpanel || x.dataset.stagepanel);"
               " document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})); r.esc1 = q('#pane-map .mappanel').map(x => x.dataset.stagepanel || x.dataset.panel || x.dataset.wfpanel);"
               " document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));"
-              " setTimeout(() => { const h = q('.tnode.tstage').find(x => x.dataset.id === id); r.after = [q('.tnode.open').length, q('.tdim').length, h.getAttribute('transform') === 'translate(' + h.dataset.x + ',' + h.dataset.y + ')', q('.twf').length, q('#pane-map .mappanel').length];"
+              " setTimeout(() => { r.z0 = TREE.zoom; const h = q('.tnode.tstage').find(x => x.dataset.id === id); r.after = [q('.tnode.open').length, q('.tdim').length, h.getAttribute('transform') === 'translate(' + h.dataset.x + ',' + h.dataset.y + ')', q('.twf').length, q('#pane-map .mappanel').length];"
               "  document.querySelector('[data-mapview=line]').click(); r.line2 = getComputedStyle(document.querySelector('.mapsvg:not(.mapvert)')).display; r.tree2 = getComputedStyle(document.querySelector('.treebox')).display;"
-              "  document.querySelector('[data-mapview=tree]').click(); document.body.setAttribute('data-r', JSON.stringify(r)); }, 900); }, 900);")
+              "  r.z = r.z0; document.querySelector('[data-mapview=tree]').click(); document.body.setAttribute('data-r', JSON.stringify(r)); }, 1500); }, 700); }, 900);")
         got = probe(js)
         assert got["d3"] == "object" and got["tree"] == "block" and got["line"] == "none", got
         assert got["fits"] == [True, True, True], ("the whole tree fits 1440x900 at load, no scrolling", got)
@@ -6155,6 +6161,9 @@ def map_tree():
         meets = lambda a, b: a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]
         assert got["panels"] == 1 and got["wfcard"] and inside and not meets(pb, chat) and not meets(pb, needs) and pb[3] <= 900, got
         assert len(got["second"]) == 1 and got["second"][0].startswith("work:"), ("one panel at a time", got)
+        sv = got["svgbox"]      # the open circle moved (and if needed zoomed out) so no workflow or its words sit under the panel, all still in the map
+        assert got["twf"] and all(not meets(b, pb) and b[0] >= sv[0] - 0.5 and b[2] <= sv[2] + 0.5 and b[1] >= sv[1] - 0.5 and b[3] <= sv[3] + 0.5 for b in got["twf"]), (got["twf"], pb, sv)
+        assert not got["z"] or (abs(got["z"]["k"] - 1) < 1e-6 and abs(got["z"]["x"]) < 0.5 and abs(got["z"]["y"]) < 0.5), ("closing puts the view back", got["z"])
         assert got["esc1"] == [got["id"]] and got["after"] == [0, 0, True, 0, 0], ("Esc closes the panel, then the stage", got)
         assert got["line2"] != "none" and got["tree2"] == "none", "the Line toggle shows the metro map"
         # reduced motion: no dots, small arrowheads on the lit lines instead

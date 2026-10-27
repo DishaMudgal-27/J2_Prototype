@@ -1306,8 +1306,12 @@ const tRank = s => { const i = TRANK.indexOf(s); return i < 0 ? 99 : i; };
 const tRd = v => Math.round(v * 10) / 10;
 const treeCurve = (a, b) => { const ym = tRd(a.y + (b.y - a.y) / 2); return `M${tRd(a.x)} ${tRd(a.y)} C${tRd(a.x)} ${ym} ${tRd(b.x)} ${ym} ${tRd(b.x)} ${tRd(b.y)}`; };      // smooth, vertical at both ends
 const treeTrim = (t, n) => { t = String(t ?? ""); return t.length > n ? t.slice(0, n - 1) + "…" : t; };
-function treeSamples(d){ const v = d.slice(1).split(/[ C]+/).map(Number), o = [];      // the points of one "M x y C x y x y x y" curve
-  for (let i = 0; i <= 24; i++){ const s = i / 24, u = 1 - s; o.push([u ** 3 * v[0] + 3 * u * u * s * v[2] + 3 * u * s * s * v[4] + s ** 3 * v[6], u ** 3 * v[1] + 3 * u * u * s * v[3] + 3 * u * s * s * v[5] + s ** 3 * v[7]]); } return o; }
+// one smooth line through a node, its waypoints and the end: a cubic per row, vertical at every point, so the joins are smooth
+const treePath = ps => "M" + tRd(ps[0].x) + " " + tRd(ps[0].y) + ps.slice(1).map((b, i) => treeCurve(ps[i], b).replace(/^M[^C]*/, " ")).join("");
+function treeSamples(d, n = 24){ const v = d.slice(1).split(/[ C]+/).map(Number).filter(x => !isNaN(x)), o = [[v[0], v[1]]];      // the points of an "M x y C ... C ..." line
+  for (let p = 2; p + 5 < v.length; p += 6){ const x0 = v[p - 2], y0 = v[p - 1];
+    for (let i = 1; i <= n; i++){ const s = i / n, u = 1 - s; o.push([u ** 3 * x0 + 3 * u * u * s * v[p] + 3 * u * s * s * v[p + 2] + s ** 3 * v[p + 4], u ** 3 * y0 + 3 * u * u * s * v[p + 1] + 3 * u * s * s * v[p + 3] + s ** 3 * v[p + 5]]); } }
+  return o; }
 function treeCross(p, q){ const o = (a, b, c) => (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
   for (let i = 0; i < p.length - 1; i++) for (let j = 0; j < q.length - 1; j++){ const a = p[i], b = p[i + 1], c = q[j], d = q[j + 1];
     if (o(a, b, c) * o(a, b, d) < -1e-6 && o(c, d, a) * o(c, d, b) < -1e-6) return true; } return false; }
@@ -1319,7 +1323,9 @@ const treeWfStatus = (m, w) => { const box = mapById(m)[w.box] || {};
   if (w.atoms === "abandoned" || w.status === "unfunded") return "not_made";
   if (w.atoms === "open") return w.status === "done" ? "done_unchecked" : m.live ? "running" : "left_open";
   return w.status === "done" ? "filed" : m.live && w.status === "running" ? "running" : "idle"; };
-function mapTree(m){
+let TREEMEMO = {key: null, val: null};      // the layout is worked out once per map (ordering tries many orders), then reused by every repaint
+function mapTree(m){ const key = JSON.stringify([m.nodes, m.edges]); if (TREEMEMO.key !== key) TREEMEMO = {key, val: treeLayout(m)}; return TREEMEMO.val; }
+function treeLayout(m){
   const nodes = m.nodes || [], edges = m.edges || [], by = mapById(m);
   const steps = nodes.filter(n => n.kind === "engine"), decks = nodes.filter(n => n.row === "work" && n.kind === "work"), charter = by["work:charter"];
   const stages = {}, stageOf = {};
@@ -1348,51 +1354,76 @@ function mapTree(m){
   ds.forEach(d => { T.push({id: d.id, kind: "deck", n: d, wf: (d.workflows || []).length, status: d.status}); row[d.id] = 2; });
   for (let k = 0; k < ds.length + 2; k++) ds.forEach(d => { (dep[d.id] || []).forEach(s => { if (row[s] != null) row[d.id] = Math.max(row[d.id], Math.min(row[s] + 1, ds.length + 2)); });
   });
+  Object.keys(stages).forEach(id => { const mine = ds.filter(d => stageOf[d.id] === id).map(d => row[d.id]); if (mine.length) row[id] = Math.min(...mine) - 1; });      // a team sits right above what it made
   const L = [];      // the drawn links: charter to each stage (or to a deliverable no team made), team to deliverable, deliverable to what reads it
   if (charter) Object.keys(stages).forEach(id => L.push({from: charter.id, to: id, kind: "plan"}));
   ds.forEach(d => { if (stageOf[d.id]) L.push({from: stageOf[d.id], to: d.id, kind: "made"}); else if (charter && !(dep[d.id] || new Set()).size) L.push({from: charter.id, to: d.id, kind: "plan"});
     (dep[d.id] || []).forEach(s => L.push({from: s, to: d.id, kind: "reads"})); });
   T.forEach(t => { t.row = row[t.id]; t.r = t.kind === "charter" ? 11 : treeR(t.wf); t.label = label(t.n); t.sub = sub(t.n);
     t.w = Math.round(Math.max(t.label.length * 7.4, t.sub.length * 6.3, 2 * t.r) + 8); });
-  const rows = []; T.forEach(t => (rows[t.row] = rows[t.row] || []).push(t));
+  // a line that skips rows gets a waypoint on each row it passes (no label, a narrow slot), so long lines take their own lanes
+  // when the rows are ordered and are drawn as one smooth curve through their waypoints
+  const V = [], S = [];
+  L.forEach((l, i) => { let prev = l.from; l.via = [];
+    for (let k = row[l.from] + 1; k < row[l.to]; k++){ const id = `~${i}~${k}`; V.push({id, kind: "via", row: k, w: 12, r: 0}); l.via.push(id); S.push({from: prev, to: id, link: i}); prev = id; }
+    S.push({from: prev, to: l.to, link: i}); });
+  const N = [...T, ...V], rows = []; N.forEach(t => (rows[t.row] = rows[t.row] || []).push(t));
   const R = Array.from(rows, r => r || []), ix = {}, up = {}, down = {};
-  L.forEach(l => { (up[l.to] = up[l.to] || []).push(l.from); (down[l.from] = down[l.from] || []).push(l.to); });
+  S.forEach(g => { (up[g.to] = up[g.to] || []).push(g.from); (down[g.from] = down[g.from] || []).push(g.to); });
   const pack = r => { let x = 0; r.forEach(t => { t.x = x + t.w / 2; x += t.w + TGAP; }); const mid = x / 2; r.forEach(t => { t.x -= mid; ix[t.id] = t; }); };
   R.forEach(pack);
   const bary = (t, nb) => { const xs = (nb[t.id] || []).map(i => ix[i]).filter(Boolean).map(o => o.x); return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : t.x; };
-  for (let it = 0; it < 4; it++){      // barycentre sweeps, down then up: fewer crossings before any force runs
+  N.forEach(t => { t.y = TPAD + t.row * TROW; });
+  // crossings between neighbouring rows, segment by segment: two segments cross when their ends swap order (lines that share a node only touch)
+  const end = g => L[g.link], share = (a, b) => a.from === b.from || a.from === b.to || a.to === b.from || a.to === b.to;
+  const byRow = R.map((_, k) => S.filter(g => ix[g.from].row === k));
+  const count = () => { let c = 0; byRow.forEach(gs => { for (let i = 0; i < gs.length; i++) for (let j = i + 1; j < gs.length; j++){ const a = gs[i], b = gs[j];
+    if (a.link === b.link || share(end(a), end(b))) continue; if ((ix[a.from].x - ix[b.from].x) * (ix[a.to].x - ix[b.to].x) < 0) c++; } }); return c; };
+  const order = () => {      // barycentre sweeps, then sifting; returns the crossings left
+  for (let it = 0; it < 6; it++){      // barycentre sweeps, down then up: fewer crossings before any force runs
     for (let k = 1; k < R.length; k++){ R[k].forEach(t => { t.b = bary(t, up); }); R[k].sort((a, b) => a.b - b.b || a.x - b.x); pack(R[k]); }
     for (let k = R.length - 2; k >= 1; k--){ R[k].forEach(t => { t.b = bary(t, down); }); R[k].sort((a, b) => a.b - b.b || a.x - b.x); pack(R[k]); } }
-  T.forEach(t => { t.y = TPAD + t.row * TROW; });
-  const segs = () => L.map(l => [[ix[l.from].x, ix[l.from].y], [ix[l.to].x, ix[l.to].y]]);      // straight stand-ins for the curves, to compare orders
-  const count = () => { const sg = segs(); let k = 0; for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++){ const a = L[i], b = L[j];
-    if (a.from !== b.from && a.from !== b.to && a.to !== b.from && a.to !== b.to && treeCross(sg[i], sg[j])) k++; } return k; };
-  for (let it = 0, best = count(); it < 4; it++){ let better = false;      // then swap neighbours in a row while that removes a crossing
-    for (let k = 1; k < R.length; k++) for (let i = 0; i + 1 < R[k].length; i++){ [R[k][i], R[k][i + 1]] = [R[k][i + 1], R[k][i]]; pack(R[k]);
-      const c = count(); if (c < best){ best = c; better = true; } else { [R[k][i], R[k][i + 1]] = [R[k][i + 1], R[k][i]]; pack(R[k]); } }
+    let best = count();
+  for (let it = 0; it < 8 && best; it++){ let better = false;      // then sifting: each node tried at every place in its row, kept where it crosses least
+    for (let k = 1; k < R.length; k++) for (const t of [...R[k]]){ const r = R[k], from = r.indexOf(t); let at = from;
+      for (let p = 0; p < r.length; p++){ if (p === from) continue; r.splice(r.indexOf(t), 1); r.splice(p, 0, t); pack(r); const c = count(); if (c < best){ best = c; at = p; better = true; } }
+      r.splice(r.indexOf(t), 1); r.splice(at, 0, t); pack(r); }
     if (!better) break; }
-  T.forEach(t => { t.tx = t.x; });
+    return best; };
+  // seeded restarts (fixed seed, so the same run always draws the same): shuffle every row, order again, keep the fewest crossings
+  let rs = 11; const rnd = () => (rs = (rs * 1664525 + 1013904223) % 4294967296) / 4294967296;
+  let best = order(), keep = R.map(r => [...r]);
+  for (let k = 0; k < 24 && best; k++){
+    R.forEach(r => { for (let i = r.length - 1; i > 0; i--){ const j = Math.floor(rnd() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } pack(r); });
+    const c = order(); if (c < best){ best = c; keep = R.map(r => [...r]); } }
+  keep.forEach((r, k) => { R[k].splice(0, R[k].length, ...r); pack(R[k]); });
+  const packed = Object.fromEntries(N.map(t => [t.id, t.x]));
+  N.forEach(t => { t.tx = t.x; });
   if (typeof d3 !== "undefined" && d3.forceSimulation){      // organic but fixed: a seeded random source, a fixed number of ticks, y fixed per row
     let seed = 7; const lcg = () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296;
-    const ns = T.map(t => ({id: t.id, x: t.x, y: t.y, fy: t.y, tx: t.tx, r: t.r}));
+    const ns = N.map(t => ({id: t.id, x: t.x, y: t.y, fy: t.y, tx: t.tx, r: t.r}));
     const sim = d3.forceSimulation(ns).randomSource(lcg).stop()
       .force("x", d3.forceX(d => d.tx).strength(0.2))
-      .force("link", d3.forceLink(L.map(l => ({source: l.from, target: l.to}))).id(d => d.id).distance(TROW).strength(0.06))
+      .force("link", d3.forceLink(S.map(g => ({source: g.from, target: g.to}))).id(d => d.id).distance(TROW).strength(0.06))
       .force("collide", d3.forceCollide(d => d.r + TGAP / 2).iterations(2));
     for (let i = 0; i < 240; i++) sim.tick();
-    ns.forEach((d, i) => { T[i].x = d.x; }); }
-  R.forEach(r => { const mean = r.reduce((a, t) => a + t.x, 0) / (r.length || 1); r.sort((a, b) => a.x - b.x);      // labels never touch: at least 24px apart, the row's centre kept
+    ns.forEach((d, i) => { N[i].x = d.x; }); }
+  const sweep = () => R.forEach(r => { const mean = r.reduce((a, t) => a + t.x, 0) / (r.length || 1);      // labels never touch: at least 24px apart, in the order chosen above, the row's centre kept
     for (let i = 1; i < r.length; i++) r[i].x = Math.max(r[i].x, r[i - 1].x + (r[i - 1].w + r[i].w) / 2 + TGAP);
     const shift = mean - r.reduce((a, t) => a + t.x, 0) / (r.length || 1); r.forEach(t => { t.x += shift; }); });
-  const minX = Math.min(...T.map(t => t.x - t.w / 2)), maxX = Math.max(...T.map(t => t.x + t.w / 2)), off = Math.max(0, (720 - (maxX - minX + 2 * TPAD)) / 2);      // a narrow tree sits in the middle
-  T.forEach(t => { t.x = tRd(t.x - minX + TPAD + off); t.box = [tRd(t.x - t.w / 2), tRd(t.y + t.r + 4), tRd(t.x + t.w / 2), tRd(t.y + t.r + 33)]; });
+  sweep();
+  const drawn = () => { const pts = L.map(l => treeSamples(treePath([l.from, ...l.via, l.to].map(id => ix[id])), 8)); let c = 0;
+    for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++) if (!share(L[i], L[j]) && treeCross(pts[i], pts[j])) c++; return c; };
+  const forced = drawn(); N.forEach(t => { t.fx = t.x; t.x = packed[t.id]; }); sweep();
+  if (drawn() >= forced) N.forEach(t => { t.x = t.fx; });      // the force pass only when it adds no crossing
+  const minX = Math.min(...N.map(t => t.x - t.w / 2)), maxX = Math.max(...N.map(t => t.x + t.w / 2)), off = Math.max(0, (720 - (maxX - minX + 2 * TPAD)) / 2);      // a narrow tree sits in the middle
+  N.forEach(t => { t.x = tRd(t.x - minX + TPAD + off); t.box = [tRd(t.x - t.w / 2), tRd(t.y + t.r + 4), tRd(t.x + t.w / 2), tRd(t.y + t.r + 33)]; });
   const W = Math.round(Math.max(720, maxX - minX + 2 * TPAD)), H = Math.round(TPAD + (R.length - 1) * TROW + 70);
   const at = Object.fromEntries(T.map(t => [t.id, t]));
-  L.forEach(l => { l.d = treeCurve(at[l.from], at[l.to]); });
-  let cross = 0; const pts = L.map(l => treeSamples(l.d));
-  for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++){ const a = L[i], b = L[j];
-    if (a.from === b.from || a.from === b.to || a.to === b.from || a.to === b.to) continue; if (treeCross(pts[i], pts[j])) cross++; }
-  return {nodes: T, links: L, at, W, H, crossings: cross, stages};
+  L.forEach(l => { l.d = treePath([l.from, ...l.via, l.to].map(id => ix[id])); });
+  const pairs = [], pts = L.map(l => treeSamples(l.d));
+  for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++) if (!share(L[i], L[j]) && treeCross(pts[i], pts[j])) pairs.push([[L[i].from, L[i].to], [L[j].from, L[j].to]]);
+  return {nodes: T, links: L, at, W, H, crossings: pairs.length, pairs, stages};
 }
 // the circle round an open stage: its workflows evenly spaced, in workflow order, with curved spokes (positions are relative to the stage).
 // It is stretched to the drawing's shape (wider than tall), so it clears the Charter above and the site below.
@@ -1412,10 +1443,10 @@ function treeHtml(m, other){      // other: the panel of a deliverable picked on
   const dim = id => open && !near.has(id) ? " tdim" : "", hide = id => open && id !== open ? " tdim thide" : "";      // open: only the stage and its circle keep their words
   const ring = open ? treeRing(m, L.stages[open], L.W, L.H) : null, pick = ring && ring.items.find(x => x.id === TREE.wf);
   MAPTREE = {nodes: L.nodes.map(t => ({id: t.id, kind: t.kind, row: t.row, x: t.x, y: t.y, r: t.r, label: t.label, sub: t.sub, box: t.box, workflows: t.kind === "stage" ? t.n.workflows : t.n.workflows || []})),
-    links: L.links.map(l => ({from: l.from, to: l.to, kind: l.kind})), crossings: L.crossings, W: L.W, H: L.H, open, c,
+    links: L.links.map(l => ({from: l.from, to: l.to, kind: l.kind})), crossings: L.crossings, pairs: L.pairs, W: L.W, H: L.H, open, c,
     ring: ring ? ring.items.map(x => ({id: x.id, x: tRd(c.x + x.x), y: tRd(c.y + x.y), status: x.st, box: [c.x + x.lbox[0], c.y + x.lbox[1], c.x + x.lbox[2], c.y + x.lbox[3]].map(tRd)})) : [], R: ring ? ring.R : 0, rx: ring ? ring.rx : 0, ry: ring ? ring.ry : 0};
   const look = st => mapLook(st);
-  const edge = l => `<path class="tedge ${l.kind}${open && l.from !== open && l.to !== open ? " tgone" : ""}" data-from="${esc(l.from)}" data-to="${esc(l.to)}" d="${treeCurve(P(l.from), P(l.to))}"><title>${mapWords(l.kind === "reads" ? `${(by[l.to] || {}).label} reads ${(by[l.from] || {}).label}` : l.kind === "made" ? `${L.at[l.from].label} made ${(by[l.to] || {}).label}` : `the Charter to ${L.at[l.to].label}`)}</title></path>`;
+  const edge = l => `<path class="tedge ${l.kind}${open && l.from !== open && l.to !== open ? " tgone" : ""}" data-from="${esc(l.from)}" data-to="${esc(l.to)}" d="${open && (l.from === open || l.to === open) ? treeCurve(P(l.from), P(l.to)) : l.d}"><title>${mapWords(l.kind === "reads" ? `${(by[l.to] || {}).label} reads ${(by[l.from] || {}).label}` : l.kind === "made" ? `${L.at[l.from].label} made ${(by[l.to] || {}).label}` : `the Charter to ${L.at[l.to].label}`)}</title></path>`;
   const dot = t => { const k = look(t.status), p = P(t.id), aria = `${t.label}: ${t.sub}${t.kind === "stage" ? ", open its workflows" : ", details"}`;
     const glyph = t.kind === "stage" ? [0, 72, 144, 216, 288].map(a => { const q = a * Math.PI / 180 - Math.PI / 2; return `<circle cx="${tRd(t.r * .5 * Math.cos(q))}" cy="${tRd(t.r * .5 * Math.sin(q))}" r="${tRd(Math.max(1.6, t.r * .15))}" class="tglyph"/>`; }).join("")
       : t.kind === "charter" ? `<circle r="${tRd(t.r * .45)}" class="tglyph"/>` : t.n.tag === "Send" ? `<path class="tglyphl" d="M${-t.r * .5} ${-t.r * .3} L0 ${t.r * .15} L${t.r * .5} ${-t.r * .3}"/>` : "";
@@ -1461,33 +1492,69 @@ function treeHtml(m, other){      // other: the panel of a deliverable picked on
 }
 // Tree view at run time: pan and zoom (d3-zoom), the 300 ms move of a stage to the middle and back, and the clicks. renderMap draws
 // the state in TREE; these only animate between two drawn states and then repaint.
-function paintMap(){ paint($("pane-map"), renderMap(MAP)); treeMount(); }
+function paintMap(){ paint($("pane-map"), renderMap(MAP)); treeMount(); treeAvoid(); }
 const treeReduce = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 const treeSvg = () => $("pane-map").querySelector && $("pane-map").querySelector(".treesvg");
 function treeMount(){
   const svg = treeSvg(); if (!svg || svg.__zoom_on || typeof d3 === "undefined" || !d3.zoom) return; svg.__zoom_on = true;
   const view = svg.querySelector(".tview");
-  const zoom = d3.zoom().scaleExtent([0.25, 4]).clickDistance(4).on("zoom", e => { view.setAttribute("transform", e.transform.toString()); TREE.zoom = {k: e.transform.k, x: e.transform.x, y: e.transform.y}; });
+  const zoom = d3.zoom().scaleExtent([0.25, 4]).clickDistance(4).on("zoom", e => { view.setAttribute("transform", e.transform.toString()); if (svg === treeSvg()) TREE.zoom = {k: e.transform.k, x: e.transform.x, y: e.transform.y}; });
   svg.__zoom_b = zoom; const s = d3.select(svg).call(zoom).on("dblclick.zoom", null);
   if (TREE.zoom) s.property("__zoom", d3.zoomIdentity.translate(TREE.zoom.x, TREE.zoom.y).scale(TREE.zoom.k));      // keep the pan and zoom across a repaint, without an event
 }
-function treeFit(){ const svg = treeSvg(); TREE.zoom = null; if (!svg || !svg.__zoom_b) return paintMap();
-  const s = d3.select(svg); (treeReduce() ? s : s.transition().duration(300)).call(svg.__zoom_b.transform, d3.zoomIdentity); }
+// a panel open over the map: pan (and zoom out if it must) so the open stage's circle, words included, sits clear to the left of the
+// panel; when the panel or the stage closes, the view goes back to where it was
+function treeAvoid(){
+  const svg = treeSvg(); if (!svg || !svg.__zoom_b || TREE.moving) return;
+  const pn = $("pane-map").querySelector(".treepanel"), ring = svg.querySelector(".tnode.open .tring");
+  const go = t => treeZoomTo(svg, t);
+  if (!pn || !ring || getComputedStyle(pn).position !== "absolute"){
+    if (TREE.before !== undefined){ const b = TREE.before; delete TREE.before; go(b ? d3.zoomIdentity.translate(b.x, b.y).scale(b.k) : d3.zoomIdentity); }
+    return; }
+  const pr = pn.getBoundingClientRect(), sr = svg.getBoundingClientRect(), z = TREE.zoom || {k: 1, x: 0, y: 0};
+  const dot = svg.querySelector(".tnode.open > .tdot").getBoundingClientRect(), C = {x: (dot.left + dot.right) / 2, y: (dot.top + dot.bottom) / 2};
+  const parts = [...ring.querySelectorAll(".twf")].map(el => el.getBoundingClientRect()).map(b => ({a: b.left - C.x, b: b.right - C.x, c: b.top - C.y, d: b.bottom - C.y}));      // each workflow, words included
+  const L = sr.left + 10, Rt = pr.left - 12, T = sr.top + 10, B = sr.bottom - 10, lo = q => Math.min(...parts.map(q)), hi = q => Math.max(...parts.map(q));
+  const clear = (x, y, f) => parts.every(q => x + f * q.b < pr.left - 8 || x + f * q.a > pr.right + 8 || y + f * q.d < pr.top - 8 || y + f * q.c > pr.bottom + 8)
+    && x + f * lo(q => q.a) >= L && x + f * hi(q => q.b) <= sr.right - 10 && y + f * lo(q => q.c) >= T && y + f * hi(q => q.d) <= B;
+  const plan = f => {      // move left (the ones level with the panel go left of it) or down (the ones beside it go below it), the shorter move first
+    const left = Math.min(C.x, ...parts.filter(q => C.y + f * q.c < pr.bottom + 8 && C.y + f * q.d > pr.top - 8).map(q => Rt - f * q.b));
+    const down = Math.max(C.y, ...parts.filter(q => C.x + f * q.b > pr.left - 8 && C.x + f * q.a < pr.right + 8).map(q => pr.bottom + 10 - f * q.c));
+    return [[C.x - left, left, C.y], [down - C.y, C.x, down]].sort((a, b) => a[0] - b[0]).map(([, x, y]) => ({x, y})).find(p => clear(p.x, p.y, f)) || null; };
+  if (clear(C.x, C.y, 1)) return;      // already clear
+  let f = 1, to = plan(1); while (!to && f > 0.3){ f *= 0.94; to = plan(f); }      // zoom out only as much as it takes
+  if (!to) return;
+  const c = Math.min(sr.width / +svg.dataset.w, sr.height / +svg.dataset.h), ox = sr.left + (sr.width - +svg.dataset.w * c) / 2, oy = sr.top + (sr.height - +svg.dataset.h * c) / 2;
+  const k = z.k * f, ux = ((C.x - ox) / c - z.x) / z.k, uy = ((C.y - oy) / c - z.y) / z.k;      // the stage's centre in drawing coordinates
+  if (TREE.before === undefined) TREE.before = TREE.zoom;
+  go(d3.zoomIdentity.translate((to.x - ox) / c - ux * k, (to.y - oy) / c - uy * k).scale(k));
+}
+// pan and zoom to t in 300 ms, eased (at once with reduced motion); a tab that draws no frames still lands on t
+function treeZoomTo(svg, t){
+  const id = TREE.tween = (TREE.tween || 0) + 1, live = () => TREE.tween === id && svg === treeSvg();      // a newer move, or a repaint, ends this one
+  const set = v => svg.__zoom_b.transform(d3.select(svg), v), a = d3.zoomTransform(svg), t0 = performance.now(); if (treeReduce()) return set(t);
+  let over = false; const end = () => { if (!over){ over = true; if (live()) set(t); } }; setTimeout(end, 450);
+  const frame = now => { if (over) return; if (!live()){ over = true; return; } const e = d3.easeCubicInOut(Math.max(0, Math.min(1, (now - t0) / 300))), m = (p, q) => p + (q - p) * e;
+    set(d3.zoomIdentity.translate(m(a.x, t.x), m(a.y, t.y)).scale(m(a.k, t.k))); if (e < 1) requestAnimationFrame(frame); else end(); };
+  requestAnimationFrame(frame);
+}
+function treeFit(){ const svg = treeSvg(); TREE.zoom = null; delete TREE.before; if (!svg || !svg.__zoom_b) return paintMap(); treeZoomTo(svg, d3.zoomIdentity); }
 function treeCentre(svg){ const W = +svg.dataset.w, H = +svg.dataset.h, z = TREE.zoom || {k: 1, x: 0, y: 0}; return {x: (W / 2 - z.x) / z.k, y: (H / 2 - z.y) / z.k}; }      // the middle of what is on screen, in the drawing's own coordinates
 // move one stage dot from a to b in 300 ms (eased), redrawing the curves that touch it; ring grows (or shrinks) with it; then done()
 function treeMove(id, a, b, opening, done){
   const svg = treeSvg(), g = svg && [...svg.querySelectorAll(".tnode.tstage")].find(x => x.dataset.id === id);
   if (!g || treeReduce()) return done();
+  TREE.moving = true;
   const at = el => ({x: +el.dataset.x, y: +el.dataset.y}), nodes = Object.fromEntries([...svg.querySelectorAll(".tnodes > .tnode")].map(x => [x.dataset.id, at(x)]));
   const near = new Set([id]), es = [...svg.querySelectorAll(".tedge")];
   es.forEach(e => { if (e.dataset.from === id) near.add(e.dataset.to); if (e.dataset.to === id) near.add(e.dataset.from); });
   if (opening){ svg.querySelectorAll(".tnodes > .tnode").forEach(x => { x.classList.toggle("tdim", x.dataset.id !== id); x.classList.toggle("thide", x.dataset.id !== id); }); es.forEach(e => e.classList.toggle("tgone", e.dataset.from !== id && e.dataset.to !== id)); }
   else { svg.querySelectorAll(".tdim,.thide,.tgone").forEach(x => x.classList.remove("tdim", "thide", "tgone")); svg.querySelectorAll(".twflinks").forEach(x => x.remove()); }
   const ring = g.querySelector(".tring"), ease = typeof d3 !== "undefined" && d3.easeCubicInOut ? d3.easeCubicInOut : t => t, t0 = performance.now();
-  let over = false; const end = () => { if (!over){ over = true; done(); } };
+  let over = false; const end = () => { if (!over){ over = true; TREE.moving = false; done(); } };
   setTimeout(end, 450);      // a tab that draws no frames (hidden, or headless) still lands on the end state
   g.parentNode.appendChild(g);      // on top while it moves
-  const frame = now => { const t = Math.min(1, (now - t0) / 300), e = ease(t), p = {x: a.x + (b.x - a.x) * e, y: a.y + (b.y - a.y) * e};
+  const frame = now => { const t = Math.max(0, Math.min(1, (now - t0) / 300)), e = ease(t), p = {x: a.x + (b.x - a.x) * e, y: a.y + (b.y - a.y) * e};
     g.setAttribute("transform", `translate(${tRd(p.x)},${tRd(p.y)})`);
     es.forEach(x => { if (x.dataset.from === id) x.setAttribute("d", treeCurve(p, nodes[x.dataset.to])); else if (x.dataset.to === id) x.setAttribute("d", treeCurve(nodes[x.dataset.from], p)); });
     if (ring){ const s = opening ? e : 1 - e; ring.setAttribute("transform", `scale(${tRd(s * 100) / 100})`); ring.style.opacity = s; }

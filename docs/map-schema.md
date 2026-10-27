@@ -113,16 +113,16 @@ consumer. Nothing is drawn from run order alone, and no rule names a run, a work
 The Map has two views, chosen by the "Tree" / "Line" toggle next to the status chips (Tree is the default; the choice is kept in the
 browser, and `?mapview=line` opens the Line view). Both read the same map.json; at 600px and under both give way to the cards.
 
-**Tree (default).** A top-down layered tree on a dark canvas: the Charter on row 0, the run's stages on row 1 (one per team, named by
-its persona; a team that made two deliverables is one stage), each stage's deliverables below it. A deliverable that reads others
-(a hand-off between deliverables, or a side job's parent) sits below all of them, so the rows are a lattice. A side job made
-by its parent's own workflow (the style guide: `style.json`, written by the first build workflow and read by the later ones) is an
-input of the parent instead: its line runs into the parent, and it sits in the row of the files its maker reads. A spec is named
-from its file (`artifacts/hint-method.md` is "Hint method"), with its stage's output ("Curriculum") on the second line. Each row is ordered by
-barycentre, then neighbours are swapped while that removes a crossing; then a seeded d3-force pass (link, x-centring and collision
-forces; y fixed per row; a fixed seed and 240 ticks) moves nodes along their row, and a last sweep keeps every label at least 24px
-from its neighbours. The same run always draws the same; crossings are allowed but few (the count is on the SVG as
-`data-crossings`). Lines are smooth curves, thin and faint. On hover or focus a node's lines brighten and dots flow along them,
+**Tree (default).** A top-down layered tree on a dark canvas, drawn from the map's own edges: the Charter on row 0; each deliverable
+below every deliverable it reads (a recorded hand-off), so the rows are a lattice; each team (one per persona; steps that share a
+workflow are one team) directly above the top deliverable it made. A spec is named from its file (`artifacts/hint-method.md` is
+"Hint method"), with its stage's output ("Curriculum") on the second line. A line that skips rows gets a waypoint on each row it
+passes, so long lines take their own lanes and are drawn as one smooth curve through them. Each row is ordered by barycentre, then
+by sifting (each node tried at every place in its row, kept where the lines cross least), from the start order and from 24 seeded
+shuffles; the fewest crossings win. Then a seeded d3-force pass (link, x-centring and collision forces; y fixed per row; a fixed
+seed and 240 ticks) moves nodes along their row, kept only if it adds no crossing, and a last sweep keeps every label at least
+24px from its neighbours in the chosen order. The same run always draws the same (the layout is worked out once per map);
+crossings are allowed but few (the count is on the SVG as `data-crossings`). Lines are smooth curves, thin and faint. On hover or focus a node's lines brighten and dots flow along them,
 producer to consumer, about 1.5 s per line: lines into it ("reads") and out of it ("read by") in two calm colours, both in the
 Legend; nothing moves at rest, and with prefers-reduced-motion the lit lines get small arrowheads instead. A dot's size is its workflow count, its label is under
 it, and its status is on the ring only (the same colours and marks as the Line view).
@@ -131,7 +131,8 @@ Clicking a stage moves it to the middle of the view (300 ms, eased; no animation
 20% with its label hidden (restored on close), so only the stage's and the circle's words show; only the stage's own lines are drawn (the
 rest are hidden, not faded), and a workflow's own links show on hover, with the flow. Clicking a workflow there opens its panel
 (over the map's right side, inside the map card; below the map when the map is under 720px wide; one panel at a time: a
-workflow, a deliverable or the open stage, Esc or Close shuts it): status, what it delivers, what it reads, what reads it, checks, an Open button
+workflow, a deliverable or the open stage, Esc or Close shuts it; while it is open the view pans down or left, zooming out only
+as much as it must, so no workflow or its words sit under it, and goes back when it closes): status, what it delivers, what it reads, what reads it, checks, an Open button
 to its card in Workflows, and draws its own "reads" (solid) and "read by" (dashed) links. Esc, Back or a click on empty space
 returns. Drag to pan, wheel or pinch to zoom; Fit resets. A deliverable or the Charter opens the same panel and Open button as in
 the Line view. The library is d3 7.9.0 (ISC), vendored at `vendor/d3.min.js` and served by the app itself: no CDN.
