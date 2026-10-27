@@ -8360,6 +8360,10 @@ class J2Run:
             j2_artifacts.write(self.dir)
         except Exception as e:
             self._event("system", "artifacts_json", f"artifacts.json not written: {e}")
+        try:      # versions.json (versions/1): each deliverable's saved versions and the handoffs between roles
+            j2_artifacts.write_versions(self.dir)
+        except Exception as e:
+            self._event("system", "versions_json", f"versions.json not written: {e}")
         try:      # map.json (schema map/1), built from the files above; same rule: never changes the run
             j2_map.write(self.dir)
         except Exception as e:

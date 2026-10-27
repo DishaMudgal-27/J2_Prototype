@@ -143,6 +143,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 data = f.read()
             return self._send(200, data, "image/png") if ext == ".png" else self._send(200, data, DOCX, os.path.basename(p)) if ext == ".docx" else \
                 self._send(200, data, "text/html" if ext == ".html" else "text/plain")
+        if u.path == "/api/versions":   # version history and handoffs (versions/1), live or saved; empty for a run without them
+            d = j2.saved_dir(run) if run else RUN.dir
+            d = d if d and os.path.isdir(d) else None
+            out = (j2._read(d, "versions.json", None) if run and d else None) or j2_artifacts.versions(d)
+            return self._send(200, json.dumps(out, ensure_ascii=False))
         if u.path == "/api/story":      # the Board story view: what each board question did (story/1), live or saved
             d = j2.saved_dir(run) if run else RUN.dir
             live = None

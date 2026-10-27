@@ -44,18 +44,25 @@ def _stat(d, rel):
     return sha, time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(os.path.getmtime(p)))
 
 
-def _version(d, t, single):
-    """The latest build of a deliverable, from the version files in site/: hld-v3.md, v3.html (a one-document run keeps
-    plain names: v3.md)."""
+def _version_files(d, t, single):
+    """[(version, path relative to the run)] of every saved build of a deliverable, oldest first, from the version
+    files in site/: hld-v3.md, v3.html (a one-document run keeps plain names: v3.md)."""
     site = os.path.join(d, "site")
     if not os.path.isdir(site):
-        return None
+        return []
     if t["form"] == "page":
         pat = r"v(\d+)\.html"
     else:
         pat = rf"{t['name']}-v(\d+)\.md" + (r"|v(\d+)\.md" if single else "")
-    n = [int(next(g for g in m.groups() if g)) for f in os.listdir(site) for m in [re.fullmatch(pat, f)] if m]
-    return max(n) if n else None
+    out = [(int(next(g for g in m.groups() if g)), f"site/{f}")
+           for f in os.listdir(site) for m in [re.fullmatch(pat, f)] if m]
+    return sorted(out)
+
+
+def _version(d, t, single):
+    """The latest build of a deliverable, or None when it saved none."""
+    ns = [n for n, _ in _version_files(d, t, single)]
+    return max(ns) if ns else None
 
 
 def _atoms(d):
@@ -313,3 +320,283 @@ def tree_files(t):
     for g in t.get("groups") or []:
         walk(g["items"])
     return out
+
+
+# ------------------------------------------------------------------------------------------------ version history
+# versions/1: every saved version of each deliverable, who made it, why, and how much changed; then the handoffs
+# between the roles (who built from whose work, and whether the receiving check passed). Code only, no model call,
+# recorded data only: what a run didn't record reads "not recorded" and never a guess.
+# The role names are display labels, in this one place.
+ROLES = {"prd": "Product worker", "hld": "Tech writer", "lld": "Tech writer", "design": "Designer",
+         "website": "UI developer"}
+DESIGN = {"name": "design", "label": "Design (style guide)", "tag": "Design", "file": "style.json", "form": "data"}
+ACCEPTED = re.compile(r"finish as it is|ship as is|as it is|accept", re.I)      # a Requester decision, in their own words
+
+
+def _stage_of(d, docs=None):
+    """workflow id -> the deliverable it built: a document stage from documents.json, else the website (the stage
+    that writes the page). Only what the run recorded."""
+    docs = docs if docs is not None else (_read(d, "documents.json", {}) or {})
+    out = {}
+    for kind, rec in (docs or {}).items():
+        for wid in rec.get("workflows") or []:
+            out[wid] = kind
+    for w in _read(d, "workflows.json", []) or []:
+        out.setdefault(w.get("id"), "website")
+    return out
+
+
+def _diff_lines(d, prev, cur):
+    """{"added", "removed"} between two saved versions (difflib over the files themselves); zeros when either file
+    can't be read, and zeros for a first version (no previous file)."""
+    import difflib
+    def read(f):
+        with open(os.path.join(d, f), encoding="utf-8", errors="replace") as fh:
+            return fh.read().splitlines()
+    if not prev:
+        return {"added": 0, "removed": 0}
+    try:
+        a, b = read(prev), read(cur)
+    except OSError:
+        return {"added": 0, "removed": 0}
+    add = sum(1 for x in difflib.unified_diff(a, b, n=0, lineterm="") if x[:1] == "+" and not x.startswith("+++"))
+    rem = sum(1 for x in difflib.unified_diff(a, b, n=0, lineterm="") if x[:1] == "-" and not x.startswith("---"))
+    return {"added": add, "removed": rem}
+
+
+def _accepted(d):
+    """True when the run recorded the Requester accepting what was built as it is (their own answer in the chat)."""
+    for m in (json.loads(x) for x in _jsonl(d, "chat.jsonl")):
+        if m.get("who") == "user" and ACCEPTED.search(str(m.get("text") or "")):
+            return True
+    for q in (_read(d, "summary.json", {}) or {}).get("questions_to_user") or []:
+        if ACCEPTED.search(str(q.get("answer") or "")):
+            return True
+    return False
+
+
+def _jsonl(d, name):
+    try:
+        with open(os.path.join(d, name), encoding="utf-8") as f:
+            return [ln for ln in f if ln.strip()]
+    except OSError:
+        return []
+
+
+def _made_by(kind, version, wfs, stage, board):
+    """[{workflow, atom, role}] for one saved version: the workflows whose own recorded version is this one inside
+    that deliverable's stage, else the atom a board answer changed it from (board.json). Empty when the run
+    recorded neither."""
+    out = []
+    for w in wfs:
+        if stage.get(w.get("id")) == kind and w.get("version") == version:
+            for a in w.get("atoms") or []:
+                out.append({"workflow": w["id"], "atom": a.get("id"), "role": ROLES.get(kind)})
+            if not (w.get("atoms") or []):
+                out.append({"workflow": w["id"], "atom": None, "role": ROLES.get(kind)})
+    for e in board:
+        up = e.get("artifact_update") or {}
+        if up.get("doc") == kind and up.get("to_version") == version and e.get("answered_by"):
+            out.append({"workflow": e["answered_by"], "atom": e.get("to"), "role": ROLES.get(kind)})
+    return out
+
+
+def _why(kind, version, first, wfs, stage, board, accepted):
+    """Why this version exists, in the run's own words: a board change, a fix, a revise, the first build, the
+    Requester accepting it as it is, else "not recorded"."""
+    for e in board:
+        up = e.get("artifact_update") or {}
+        if up.get("doc") == kind and up.get("to_version") == version:
+            return f"changed by {e['id']}"
+    mine = [w for w in wfs if stage.get(w.get("id")) == kind and w.get("version") == version]
+    for w in mine:
+        if w.get("fixes"):
+            return "fix of " + ", ".join(str(f) for f in w["fixes"])
+        if w.get("revises"):
+            return f"revise of {w['revises']}"
+    if mine:
+        return "built"
+    return "accepted as is" if accepted else "not recorded"
+
+
+def versions(d):
+    """versions/1 for a run folder: one entry per deliverable it saved (prd, hld, lld, design, website), each with
+    its whole history, oldest first, and the handoffs between the roles."""
+    if not d or not os.path.isdir(d):
+        return {"schema": "versions/1", "artifacts": [], "handoffs": [], "not_recorded": ["the run folder"]}
+    types = {t["name"]: t for t in load_types()["types"]}
+    docs = _read(d, "documents.json", {}) or {}
+    wfs = _read(d, "workflows.json", []) or []
+    stage, nr = _stage_of(d, docs), []
+    board = (_read(d, "board.json", {}) or {}).get("entries") or []
+    accepted, out = _accepted(d), []
+    for kind in ("prd", "hld", "lld", "website"):
+        t = types.get(kind)
+        files = _version_files(d, t, len(docs) <= 1) if t else []
+        if not files:
+            continue
+        first, hist, prev = files[0][0], [], None
+        for n, rel in files:
+            sha, when = _stat(d, rel)
+            made = _made_by(kind, n, wfs, stage, board)
+            hist.append({"version": n, "file": rel, "time": when, "sha256": sha,
+                         "made_by": made or "not recorded",
+                         "why": _why(kind, n, first, wfs, stage, board, accepted),
+                         "lines_changed": _diff_lines(d, prev, rel)})
+            if not made:
+                nr.append(f"who made {kind} v{n}")
+            prev = rel
+        out.append({"artifact": kind, "label": t["label"], "tag": t["tag"], "role": ROLES[kind],
+                    "file": t["file"], "versions": len(hist), "history": hist})
+    if os.path.isfile(os.path.join(d, DESIGN["file"])):       # the style guide: one version, by the workflow that wrote it
+        sha, when = _stat(d, DESIGN["file"])
+        owner = ((_read(d, "sections.json", {}) or {}).get("style") or {}).get("owner") \
+            or next((w["id"] for w in wfs if w.get("style_guide") or "style" in str(w.get("name", "")).lower()), None)
+        atom = next((a.get("id") for w in wfs if w.get("id") == owner for a in w.get("atoms") or []), None)
+        made = [{"workflow": owner, "atom": atom, "role": ROLES["design"]}] if owner else None
+        if not made:
+            nr.append("who made the style guide")
+        out.append({"artifact": "design", "label": DESIGN["label"], "tag": DESIGN["tag"], "role": ROLES["design"],
+                    "file": DESIGN["file"], "versions": 1,
+                    "history": [{"version": 1, "file": DESIGN["file"], "time": when, "sha256": sha,
+                                 "made_by": made or "not recorded", "why": "built" if made else "not recorded",
+                                 "lines_changed": {"added": 0, "removed": 0}}]})
+    hand, hnr = handoffs(d, out)
+    return {"schema": "versions/1", "run": os.path.basename(d), "artifacts": out, "handoffs": hand,
+            "roles": dict(ROLES), "not_recorded": nr + hnr}
+
+
+def _audits(d, kind=None):
+    """The audits of one stage, oldest first: the stage file a finished document leaves behind, else the audits of
+    that output in audits.json (a one-document run keeps them there). Re-check entries are not audits."""
+    au = ((_read(d, f"stage-{kind}.json", {}) or {}).get("audits") or []) if kind else []
+    rest = [a for a in (_read(d, "audits.json", []) or []) if (a or {}).get("kind") != "recheck"]
+    return au or ([a for a in rest if a.get("output") == kind] if kind else rest)
+
+
+def _doc_conditions(d, kind):
+    """(result, evidence, note) from the receiving document's own necessary conditions (P1-P8 / H1-H6 / L1-L6) as
+    its last audit recorded them. A warning never blocks, as j2.blocks has it."""
+    au = _audits(d, kind)
+    conds = (au[-1].get("conditions") or []) if au else []
+    if not conds:
+        return "not recorded", [], f"no {kind.upper()} conditions are recorded"
+    ids = [c["id"] for c in conds]
+    bad = [c["id"] for c in conds if not c.get("met") and c.get("severity") != "warn"]
+    return ("fail" if bad else "pass",
+            [f"{c} (audit {len(au)})" for c in bad] or [f"{ids[0]}-{ids[-1]} (audit {len(au)})"],
+            f"{len(ids) - len(bad)} of {len(ids)} conditions met")
+
+
+def _slice_receipts(d, wanted):
+    """(result, evidence, note) from the website atoms' lld-slice receipts: the latest attempt of each, by code."""
+    latest = {}
+    for ln in _jsonl(d, "receipts.jsonl"):
+        r = json.loads(ln)
+        if r.get("type") == "lld-slice" and (not wanted or r.get("atom") in wanted):
+            cur = latest.get(r.get("atom"))
+            if not cur or (r.get("attempt") or 0) >= (cur.get("attempt") or 0):
+                latest[r["atom"]] = r
+    if not latest:
+        return "not recorded", [], "no lld-slice receipt is recorded"
+    bad = [r for r in latest.values() if r.get("pass") is not True]
+    return ("fail" if bad else "pass",
+            [f"{r['atom']}:{r.get('attempt')}" for r in (bad or latest.values())],
+            f"{len(latest) - len(bad)} of {len(latest)} slice check(s) passed")
+
+
+def _rubric(d, rid="R-1"):
+    """(result, evidence, note) from the latest rubric result with this id (R-1: the page follows the style guide)."""
+    au = _audits(d)
+    for i in range(len(au), 0, -1):
+        for r in au[i - 1].get("rubric") or []:
+            if r.get("id") == rid:
+                ok = r["pass"] if r.get("pass") is not None else str(r.get("verdict") or "").startswith("PASS")
+                return ("pass" if ok else "fail"), [f"{rid} (audit {i})"], str(r.get("note") or r.get("evidence") or "")[:120]
+    return "not recorded", [], f"no {rid} result is recorded"
+
+
+def _row_cycle(row, wfs, board):
+    """The cycle a version was made in, from the workflow that made it or the board entry that changed it; None when
+    the run recorded neither."""
+    for m in row.get("made_by") or []:
+        w = wfs.get(m.get("workflow")) or {}
+        if w.get("cycle"):
+            return w["cycle"]
+    for e in board:
+        up = e.get("artifact_update") or {}
+        if row["file"].endswith(f"-v{row['version']}.md") and up.get("to_version") == row["version"] and e.get("cycle"):
+            return e["cycle"]
+    return None
+
+
+def _version_when(hist, wfs, board, cycle, before=None):
+    """The version the consumer actually built from: the newest one made in an earlier cycle, or - when the maker
+    ran in the consumer's own cycle, as the style guide does - the newest one already saved when the consumer wrote
+    its output. "not recorded" when neither the cycles nor the recorded times can tell."""
+    rows = [(r, _row_cycle(r, wfs, board)) for r in hist]
+    older = [r["version"] for r, c in rows if c and cycle and c < cycle]
+    if older:
+        return max(older)
+    same = [r["version"] for r, c in rows
+            if before and r.get("time") and r["time"] <= before and (not c or not cycle or c <= cycle)]
+    return max(same) if same else "not recorded"
+
+
+def handoffs(d, arts):
+    """One row per handoff this run has: Product worker -> Tech writer (prd -> hld, prd -> lld), Tech writer -> UI
+    developer (lld -> website, or hld -> website when the run has no LLD) and Designer -> UI developer (design ->
+    website). consumers are the receiving atoms whose recorded content edges reach the sender's atoms
+    (j2_schema.CONTENT_EDGES). realized comes only from checks the run recorded: the receiving document's own
+    conditions, the website atoms' lld-slice receipts, or the latest R-1 rubric result; anything else is
+    "not recorded", never a pass. Returns (handoffs, what wasn't recorded)."""
+    import j2_schema
+    have = {a["artifact"]: a for a in arts}
+    wfs = {w["id"]: w for w in _read(d, "workflows.json", []) or []}
+    board = (_read(d, "board.json", {}) or {}).get("entries") or []
+    atoms = {v["id"]: v for v in _atoms(d)}
+    stage = _stage_of(d)
+    links = [("prd", "hld"), ("prd", "lld")] + ([("lld", "website")] if "lld" in have else [("hld", "website")]) \
+        + [("design", "website")]
+    out, nr = [], []
+    for src, dst in links:
+        if src not in have or dst not in have:
+            continue
+        if src == "design":      # the style guide is one atom's own output, not a stage
+            src_atoms = {m.get("atom") for m in (have["design"]["history"][0].get("made_by") or []) if m.get("atom")}
+        else:
+            src_atoms = {aid for aid, v in atoms.items() if stage.get(v.get("workflow")) == src}
+        consumers = sorted({aid for aid, v in atoms.items() if stage.get(v.get("workflow")) == dst
+                            and any(e.get("atom") in src_atoms
+                                    and (src == "design" or j2_schema.content_edge(e.get("why")))
+                                    for e in v.get("depends_on") or [])}, key=_num)
+        cycles = [c for c in (wfs.get(atoms[a].get("workflow"), {}).get("cycle") for a in consumers) if c]
+        mine = {a for a in consumers}
+        made = [r["time"] for r in have[dst]["history"]
+                if any((m or {}).get("atom") in mine for m in r.get("made_by") or [])]
+        from_v = _version_when(have[src]["history"], wfs, board, min(cycles) if cycles else None,
+                               min(made) if made else None)
+        if dst in ("hld", "lld"):
+            res, ev, note = _doc_conditions(d, dst)
+        elif src == "lld":
+            res, ev, note = _slice_receipts(d, set(consumers))
+        else:
+            res, ev, note = _rubric(d)
+        if not consumers:
+            res, ev = "not recorded", []
+            note = f"no recorded edge from the {have[src]['tag']} to the {have[dst]['tag']}"
+        if res == "not recorded":
+            nr.append(f"whether {src} -> {dst} was realized ({note})")
+        if from_v == "not recorded":
+            nr.append(f"the {src} version {dst} was built from")
+        out.append({"from_artifact": src, "from_version": from_v, "from_role": ROLES[src], "to_artifact": dst,
+                    "to_role": ROLES[dst], "consumers": consumers, "realized": res, "evidence": ev, "note": note})
+    return out, nr
+
+
+def write_versions(d):
+    """versions.json in the run folder, written where artifacts.json is (additive: nothing else is touched)."""
+    r = versions(d)
+    with open(os.path.join(d, "versions.json"), "w", encoding="utf-8") as f:
+        json.dump(r, f, indent=2, ensure_ascii=False)
+    return r
