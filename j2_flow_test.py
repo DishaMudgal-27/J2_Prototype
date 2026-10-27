@@ -5896,6 +5896,115 @@ def by_fn(fn, rng, calls):
     return sum(1 for c in calls if c["fn"] == fn and rng["from"] <= c["id"] <= rng["to"])
 
 
+def map_tree():
+    """The Map's Tree view (default; "Line" is the metro drawing): Charter, the stages (one per team), their deliverables, a deliverable
+    that reads others below them. Same run, same positions; every workflow sits in the tree or its stage's circle; no two labels
+    overlap; the crossing count is reported. A clicked stage gets its workflows on a circle round it and the rest fades; Esc returns."""
+    import html as htmllib
+    import shutil
+    import threading
+    import j2_map as M
+    import j2_server
+    repo = os.path.join(os.path.dirname(os.path.abspath(__file__)), "runs")
+    names = [n for n in ("j2-20261026-174314", "j2-20261026-155610", "j2-20261027-130930") if os.path.isdir(os.path.join(repo, n))]
+    if not names:
+        print("map tree: runs 174314, 155610 and 130930 not in runs/, the tree checks on them are skipped")
+    report = []
+    for name in names:
+        if not os.path.exists(os.path.join(j2.RUNS_DIR, name)):
+            shutil.copytree(os.path.join(repo, name), os.path.join(j2.RUNS_DIR, name))      # read only: the test's own copy
+        mp = M.build(os.path.join(j2.RUNS_DIR, name))
+        snap = j2.saved_snapshot(name, 0)
+        a, b = render_node(snap, docs={"docs": {}, "map": mp}), render_node(snap, docs={"docs": {}, "map": mp})
+        t = a["tree"]
+        assert t == b["tree"] and a["map"] == b["map"], f"{name}: the same run draws the same tree"
+        assert 'data-view="tree"' in a["map"] and '<svg class="treesvg"' in a["map"] and 'data-mapview="tree" aria-pressed="true"' in a["map"], "Tree is the default"
+        rows = {n["id"]: n["row"] for n in t["nodes"]}
+        assert rows["work:charter"] == 0 and all(n["row"] == 1 for n in t["nodes"] if n["kind"] == "stage") and all(n["row"] >= 2 for n in t["nodes"] if n["kind"] == "deck")
+        for l in t["links"]:
+            if l["kind"] == "reads":
+                assert rows[l["to"]] > rows[l["from"]], (name, l, "a deliverable sits below every deliverable it reads")
+        boxes = [n["box"] for n in t["nodes"]]
+        for i in range(len(boxes)):
+            for j in range(i + 1, len(boxes)):
+                p, q = boxes[i], boxes[j]
+                assert p[2] <= q[0] or q[2] <= p[0] or p[3] <= q[1] or q[3] <= p[1], (name, t["nodes"][i]["id"], t["nodes"][j]["id"], "labels overlap")
+        same_row = {}
+        for n in t["nodes"]:
+            same_row.setdefault(n["row"], []).append(n)
+        for r in same_row.values():
+            r.sort(key=lambda n: n["x"])
+            assert all(r[k + 1]["box"][0] - r[k]["box"][2] >= 24 - 0.2 for k in range(len(r) - 1)), (name, "at least 24px between labels")
+        # every workflow: in the tree (a deliverable's workflows) and in its stage's circle
+        wids = [w["id"] for w in json.load(open(os.path.join(j2.RUNS_DIR, name, "workflows.json"), encoding="utf-8"))]
+        stages = [n for n in t["nodes"] if n["kind"] == "stage"]
+        circled = set()
+        for st in stages:
+            o = render_node(snap, docs={"docs": {}, "map": mp, "tree": {"open": st["id"]}})
+            ot = o["tree"]
+            assert ot["open"] == st["id"] and sorted(x["id"] for x in ot["ring"]) == sorted(st["workflows"]), (name, st["id"])
+            c, rx, ry = ot["c"], ot["rx"], ot["ry"]
+            assert all(abs(((x["x"] - c["x"]) / rx) ** 2 + ((x["y"] - c["y"]) / ry) ** 2 - 1) < 0.02 for x in ot["ring"]), "evenly on one ring round the stage"
+            near = {st["id"]} | {l["from"] for l in t["links"] if l["to"] == st["id"]} | {l["to"] for l in t["links"] if l["from"] == st["id"]}
+            svg = o["map"][o["map"].index('<svg class="treesvg"'):o["map"].index("</svg>", o["map"].index('<svg class="treesvg"'))]
+            for n in t["nodes"]:
+                g = re.search(r'<g class="tnode ([^"]*)" data-id="%s"' % re.escape(htmllib.escape(n["id"])), svg)
+                assert g and (("tdim" in g.group(1)) == (n["id"] not in near)), (name, st["id"], n["id"], "what is not connected fades")
+            assert svg.count('class="tnode twf') == len(st["workflows"]) and svg.count('class="tspoke"') == len(st["workflows"])
+            circled |= {x["id"] for x in ot["ring"]}
+        placed = circled | {w for n in t["nodes"] for w in n["workflows"]}
+        missing = [w for w in wids if w not in placed]
+        assert not missing or all(f"workflows not placed on the map: " in x and all(w in x for w in missing) for x in mp["not_recorded"] if "not placed" in x), (name, missing)
+        assert not missing, (name, "every workflow is in the tree or its stage's circle", missing)
+        # a workflow picked in the circle: its panel (delivers, reads, read by, checks, status, Open) and its own links
+        st = max(stages, key=lambda x: len(x["workflows"]))
+        flows = {w["id"]: w for w in mp["workflows"]}
+        wid = next((w for w in st["workflows"] if flows[w]["reads"]), st["workflows"][0])
+        o = render_node(snap, docs={"docs": {}, "map": mp, "tree": {"open": st["id"], "wf": wid}})["map"]
+        pn = o[o.index('data-wfpanel="%s"' % wid):]
+        pn = pn[:pn.index("</aside>")]
+        assert all(k in pn for k in ("status: ", "delivers: ", "reads: ", "read by: ", "checks: ", f'data-wfcard="{wid}">Open<')), pn
+        assert o.count('class="tlink reads"') == len(flows[wid]["reads"]) and o.count('class="tlink readby"') == sum(1 for w in flows.values() if wid in w["reads"]), (name, wid)
+        # the Line toggle: the metro drawing, as before
+        ln = render_node(snap, docs={"docs": {}, "map": mp, "mapview": "line"})["map"]
+        assert 'data-view="line"' in ln and '<svg class="mapsvg"' in ln and 'data-mapview="line" aria-pressed="true"' in ln
+        report.append(f"{name[3:]} {t['crossings']} crossing{'s' if t['crossings'] != 1 else ''}")
+    chrome = j2.j2_check.find_chrome()
+    if chrome and BROWSER and names:      # the real page: click a stage, its circle forms in the middle and the rest fades; Esc returns; Line shows the metro
+        ui = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "j2_ui.html"), encoding="utf-8").read()
+        name = names[0]
+        js = ("const q = s => [...document.querySelectorAll(s)], st = q('.tnode.tstage').sort((a, b) => +b.dataset.x - +a.dataset.x)[0], id = st.dataset.id, r = {id};"
+              "r.d3 = typeof d3; r.tree = getComputedStyle(document.querySelector('.treesvg')).display; r.line = getComputedStyle(document.querySelector('.mapsvg:not(.mapvert)')).display;"
+              "st.dispatchEvent(new MouseEvent('click', {bubbles: true}));"
+              "setTimeout(() => { const g = q('.tnode.tstage').find(x => x.dataset.id === id), svg = document.querySelector('.treesvg');"
+              " r.open = g.classList.contains('open'); r.at = g.getAttribute('transform'); r.mid = [+svg.dataset.w / 2, +svg.dataset.h / 2]; r.ring = g.querySelectorAll('.twf').length;"
+              " r.dim = q('.tnodes > .tnode.tdim').length; r.all = q('.tnodes > .tnode').length; r.back = !document.querySelector('[data-treeback]').hidden;"
+              " document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));"
+              " setTimeout(() => { const h = q('.tnode.tstage').find(x => x.dataset.id === id); r.after = [q('.tnode.open').length, q('.tdim').length, h.getAttribute('transform') === 'translate(' + h.dataset.x + ',' + h.dataset.y + ')', q('.twf').length];"
+              "  document.querySelector('[data-mapview=line]').click(); r.line2 = getComputedStyle(document.querySelector('.mapsvg:not(.mapvert)')).display; r.tree2 = getComputedStyle(document.querySelector('.treebox')).display;"
+              "  document.querySelector('[data-mapview=tree]').click(); document.body.setAttribute('data-r', JSON.stringify(r)); }, 900); }, 900);")
+        tmp = tempfile.mkdtemp(prefix="j2-tree-")
+        open(os.path.join(tmp, "j2_ui.html"), "w", encoding="utf-8").write(ui.replace("</body>", "<script>setTimeout(() => { try { " + js + " } catch (e) { document.body.setAttribute('data-r', JSON.stringify({error: String(e)})); } }, 2500)</script></body>"))
+        keep_here, j2_server.HERE = j2_server.HERE, tmp
+        srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        try:
+            dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--window-size=1440,900", "--virtual-time-budget=10000", "--dump-dom",
+                              f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={name}"], capture_output=True, text=True, timeout=180).stdout
+        finally:
+            j2_server.HERE = keep_here
+            srv.shutdown()
+        got = json.loads(htmllib.unescape(re.search(r'data-r="([^"]*)"', dom).group(1)))
+        assert "error" not in got and got["d3"] == "object" and got["tree"] == "block" and got["line"] == "none", got
+        x, y = (float(v) for v in re.match(r"translate\(([\d.]+),([\d.]+)\)", got["at"]).groups())
+        assert got["open"] and abs(x - got["mid"][0]) < 1 and abs(y - got["mid"][1]) < 1 and got["ring"] > 0 and got["back"], got
+        assert 0 < got["dim"] < got["all"] and got["after"] == [0, 0, True, 0], got
+        assert got["line2"] != "none" and got["tree2"] == "none", "the Line toggle shows the metro map"
+    print("map tree: Charter, stages, deliverables below what they read; the same run draws the same; every workflow in the tree or its stage's "
+          "circle; no labels overlap, 24px apart; a stage's circle round it with the rest faded, a picked workflow's panel and links, Esc returns; "
+          "Line shows the metro map ok (" + ", ".join(report) + ")")
+
+
 def map_every_workflow():
     """Map: every workflow in workflows.json is on the map (by stage, then section, then output refs) or listed by id under
     not recorded; a realization run's specs are deliverables with their stage's role and "given to" lines to the build
@@ -6311,9 +6420,10 @@ def map_tab():
     chrome = j2.j2_check.find_chrome()
     if chrome and BROWSER:
         import subprocess
+        real_line = render_node(snap, docs={"docs": {}, "map": saved, "mapview": "line"})["map"]      # the metro drawing (the Line view)
         css = re.search(r"<style>(.*?)</style>", ui, re.S).group(1)
         page = os.path.join(tempfile.mkdtemp(prefix="j2-map-"), "map.html")
-        open(page, "w", encoding="utf-8").write(f"<html><head><meta name=viewport content='width=device-width'><style>{css}</style></head><body>{real}"
+        open(page, "w", encoding="utf-8").write(f"<html><head><meta name=viewport content='width=device-width'><style>{css}</style></head><body>{real_line}"
             "<script>document.body.setAttribute('data-m', [document.documentElement.scrollWidth, innerWidth, getComputedStyle(document.querySelector('.mapsvgwrap')).display, getComputedStyle(document.querySelector('.mapcards')).display, [...document.querySelectorAll('.mapln')].every(x => x.getBoundingClientRect().width === 0)].join('|'))</script></body></html>")
         for width, want in ((500, "none|block|true"), (1100, "block|none|false")):
             dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", f"--window-size={width},800", "--virtual-time-budget=2000", "--dump-dom", "file://" + page],
@@ -6633,7 +6743,7 @@ def map_tab():
             threading.Thread(target=srv.serve_forever, daemon=True).start()
             try:
                 dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", f"--window-size={size}", "--virtual-time-budget=12000", "--dump-dom",
-                                      f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={run_name}"], capture_output=True, text=True, timeout=180).stdout
+                                      f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={run_name}&mapview=line"], capture_output=True, text=True, timeout=180).stdout
             finally:
                 j2_server.HERE, j2_server.RUN = keep_here, keep
                 srv.shutdown()
@@ -7027,6 +7137,8 @@ if __name__ == "__main__":
         artifacts_tab()
         map_tab()
         map_every_workflow()
+        if mode == "0":
+            map_tree()
         docs_repeat_failure()
         docs_intake_and_compare()
         plain_unchanged("f6938b2", slim="0")      # J2_SLIM=0 is the old path, prompt for prompt

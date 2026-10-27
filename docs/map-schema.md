@@ -17,6 +17,7 @@ The Knows row is a later version: its node kind is in the schema, nothing is dra
 | live | true when built from a running run |
 | status | `{state, state_status, checks: {passed, run}}`: the top line ("Identity running", "Waiting on you", "Done", "Done with open items", "Stopped", "not recorded") and the checks of every work atom that ran |
 | nodes, edges | below |
+| workflows | presentation only, for the Tree view's circle: `[{id, name, status, box, atoms, checks: {passed, run}, reads}]`, one per workflow in `workflows.json`: the box it sits on (a node id, or null when not placed), the worst status of its atoms, and the workflows it reads (its `dependencies`, then recorded atom edges). Nodes and edges never depend on it. |
 | legend | `[{key, label, drawn}]`: what the drawing explains; `drawn: false` for kinds a later version draws |
 | built_from | the files the map was built from |
 | not_recorded | what the run did not record and the map therefore shows as "not recorded" |
@@ -101,7 +102,25 @@ In a finished run the page says "left open", never "running".
 
 ## The page
 
-**Wide (900px and up): a metro line.** One horizontal trunk: the Charter, the documents and the site are diamonds on the line,
+The Map has two views, chosen by the "Tree" / "Line" toggle next to the status chips (Tree is the default; the choice is kept in the
+browser, and `?mapview=line` opens the Line view). Both read the same map.json; at 600px and under both give way to the cards.
+
+**Tree (default).** A top-down layered tree on a dark canvas: the Charter on row 0, the run's stages on row 1 (one per team, named by
+its persona; a team that made two deliverables is one stage), each stage's deliverables below it. A deliverable that reads others
+(a hand-off between deliverables, or a side job's parent) sits below all of them, so the rows are a lattice. Each row is ordered by
+barycentre, then neighbours are swapped while that removes a crossing; then a seeded d3-force pass (link, x-centring and collision
+forces; y fixed per row; a fixed seed and 240 ticks) moves nodes along their row, and a last sweep keeps every label at least 24px
+from its neighbours. The same run always draws the same; crossings are allowed but few (the count is on the SVG as
+`data-crossings`). Lines are smooth curves, thin and faint, lit on hover. A dot's size is its workflow count, its label is under
+it, and its status is on the ring only (the same colours and marks as the Line view).
+Clicking a stage moves it to the middle of the view (300 ms, eased; no animation with prefers-reduced-motion) with its workflows
+(id, short name, status) evenly round it on a ring stretched to the canvas, joined by curved spokes; everything not connected fades
+to 20%. Clicking a workflow there opens its panel (status, what it delivers, what it reads, what reads it, checks, an Open button
+to its card in Workflows) and draws its own "reads" (solid) and "read by" (dashed) links. Esc, Back or a click on empty space
+returns. Drag to pan, wheel or pinch to zoom; Fit resets. A deliverable or the Charter opens the same panel and Open button as in
+the Line view. The library is d3 7.9.0 (ISC), vendored at `vendor/d3.min.js` and served by the app itself: no CDN.
+
+**Line, wide (900px and up): a metro line.** One horizontal trunk: the Charter, the documents and the site are diamonds on the line,
 evenly spaced; the team that made each one (a ring of five dots, "<Persona> · N workflows") sits on the stretch of line leading into
 it. Under each diamond (or above, when a line or a side job leaves from below): its name and one fact line ("v6 · 13/13 checks", or
 "not recorded"). A side job (a send) leaves its parent diamond on a short branch below the line (above it when a line already

@@ -473,9 +473,21 @@ def build(d, live=None):
         for k in ("_atoms", "_order", "template", "_team", "_parent"):
             n.pop(k, None)
     ch = _checks(atoms)
+    # presentation only, for the Tree view's circle round a stage: each workflow's name, status, the box it sits on, the
+    # workflows it reads (dependencies, then recorded atom edges) and its checks. Nothing here changes a node or an edge.
+    box_of = {wid: n["id"] for n in out_nodes if n["kind"] == "work" for wid in n.get("workflows") or []}
+    flows = []
+    for w in wfs:
+        ats = by_wf.get(w["id"], [])
+        reads = [named[x] for x in w.get("dependencies") or [] if named.get(x) and named[x] != w["id"]]
+        reads += [str(e["atom"]).split(".")[0] for a in ats for e in a.get("depends_on") or []]
+        st = {a.get("status") for a in ats}
+        flows.append({"id": w["id"], "name": w.get("name") or w["id"], "status": w.get("status"), "box": box_of.get(w["id"]),
+                      "atoms": next((x for x in ("verify_failed", "open", "abandoned", "closed") if x in st), None),
+                      "checks": _checks(ats), "reads": sorted({x for x in reads if x != w["id"]}, key=_num)})
     return {"schema": SCHEMA, "run": os.path.basename(d), "live": bool(live),
             "status": {"state": state, "state_status": state_status, "checks": ch},
-            "nodes": out_nodes, "edges": edges + handoffs + speaks + lines + board_edges, "legend": LEGEND, "built_from": built_from,
+            "nodes": out_nodes, "workflows": flows, "edges": edges + handoffs + speaks + lines + board_edges, "legend": LEGEND, "built_from": built_from,
             "not_recorded": list(dict.fromkeys(nr + ["messages to and from workflow agents (W-n) are not drawn",
                                                      "what the work draws on (Knows row, later version)"]))}
 

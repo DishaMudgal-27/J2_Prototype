@@ -19,6 +19,7 @@ import llm
 from j2 import HERE, J2Run, clear_lessons
 
 RUN = J2Run()
+VENDOR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vendor")      # never HERE: tests point HERE at a temp page
 DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
 
@@ -63,6 +64,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if u.path in ("/", "/index.html"):
             with open(os.path.join(HERE, "j2_ui.html"), encoding="utf-8") as f:
                 return self._send(200, f.read(), "text/html")
+        if u.path == "/vendor/d3.min.js":      # the Map's Tree view library, served from this folder (no CDN: the page works offline)
+            with open(os.path.join(VENDOR, "d3.min.js"), "rb") as f:
+                body = f.read()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/javascript; charset=utf-8")
+            self.send_header("Cache-Control", "max-age=3600")
+            self.end_headers()
+            return self.wfile.write(body)
         q = {k: v[0] for k, v in parse_qs(u.query).items()}
         run = q.get("run")              # a saved run's folder name, opened read-only
         if run and run == os.path.basename(RUN.dir) and not os.path.isdir(RUN.dir):

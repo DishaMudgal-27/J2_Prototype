@@ -155,6 +155,15 @@ body.simple #dview{display:flex;flex:0 0 auto}body.simple #dview .dcol{display:n
   .stoggle button[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
   body.sp-preview .schat{display:none}body.sp-preview .sprev{display:block}}
 /* Map: calm graph look, details in a click panel */
+.mapviews{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-left:auto}.mapviews button{border:0;background:transparent;color:var(--ink);padding:2px 12px;font:inherit;font-size:13px;cursor:pointer}.mapviews button[aria-pressed="true"]{background:var(--line);font-weight:600}
+.mapsvgwrap[data-view="tree"] .mapsvg{display:none!important}.mapsvgwrap[data-view="line"] .treebox{display:none}
+.treebox{position:relative;margin:0 0 8px}.treebar{display:flex;gap:10px;align-items:center;margin:0 0 6px}.treebar .sub{color:var(--muted);font-size:12px}.treebar .linkbtn{color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:8px;padding:2px 10px;text-decoration:none}.treebar [hidden]{display:none}
+.treesvg{display:block;width:100%;height:clamp(440px,64vh,760px);background:#16181d;border:1px solid #2a2e35;border-radius:12px;cursor:grab;touch-action:none;font:12px system-ui,sans-serif;user-select:none}.treesvg:active{cursor:grabbing}
+.treesvg .tedge{fill:none;stroke:#8a8f98;stroke-width:1.2;opacity:.32;transition:opacity .3s}.treesvg .tedge.hot{opacity:.95;stroke:#c9ccd1;stroke-width:1.8}
+.treesvg .tnode{cursor:pointer;transition:opacity .3s}.treesvg .tdim{opacity:.2}.treesvg .tlab{fill:#dcddde;font-size:13px;paint-order:stroke;stroke:#16181d;stroke-width:3px;stroke-linejoin:round}.treesvg .tsub{fill:#8a8f98;font-size:11px;paint-order:stroke;stroke:#16181d;stroke-width:3px;stroke-linejoin:round}.treesvg .tglyph{fill:#8a8f98}.treesvg .tglyphl{fill:none;stroke:#8a8f98;stroke-width:1.2}
+.treesvg .tnode:hover .tdot,.treesvg .tnode:focus-visible .tdot,.treesvg .tnode.sel .tdot{filter:drop-shadow(0 0 5px rgba(200,205,215,.6))}.treesvg .tnode:focus{outline:none}
+.treesvg .tspoke{fill:none;stroke:#8a8f98;stroke-width:1;opacity:.45}.treesvg .tlink{fill:none;stroke:#c9ccd1;stroke-width:1.6;opacity:.9}.treesvg .tlink.readby{stroke-dasharray:4 3}
+@media (prefers-reduced-motion: reduce){.treesvg .tnode,.treesvg .tedge{transition:none}}
 .mapsvg{background:var(--panel);border:1px solid var(--line);border-radius:12px}.mapsvg .rowlab{text-transform:uppercase}.mapsvg .mapnode:focus{outline:none}.mapsvg .mapnode:focus-visible circle:first-of-type{stroke-width:3}
 .mappanel{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:10px 0;background:var(--panel)}.mappanelhead{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:4px}.mappanel .sub{color:var(--muted);font-size:13px;margin:2px 0}
 /* ---- Home: Needs you strip, Map, Chat docked right. The rail has Map, Chat and one Internals folder. */
@@ -300,6 +309,7 @@ body.simple .rail.tabs button[aria-selected="true"]{color:var(--muted);backgroun
 <dialog id="detail"><div class="dhead"><b id="dtitle"></b><span class="spacer"></span><button class="ghost" id="dclose">Close</button></div>
   <div class="dbody" id="dbody"></div></dialog>
 </div>
+<script src="vendor/d3.min.js"></script>
 <script>
 const WHO = {user:["Requester (you)","R"],validator:["Validator","V"],identity:["Identity","I"],adaptation:["Adaptation","Ad"],
   priority:["Priority","P"],coordination:["Coordination","C"],builder:["Builder","B"],audit:["Audit","Au"],system:["System","!"]};
@@ -1271,13 +1281,237 @@ function mapTip(m, n){
   if (n.kind === "function") return [mapFn(n), mapState(n), mapClean(n.detail || ""), `${n.calls || 0} AI call${n.calls === 1 ? "" : "s"}${n.seconds ? ", " + n.seconds + " s" : ""}${n.tokens && (n.tokens.input || n.tokens.output) ? ", " + n.tokens.input + " tokens in, " + n.tokens.output + " out" : ""}`].filter(Boolean).join(", ");
   if (n.kind === "engine") return [mapStepSay(m, n), MAPW[n.status], n.detail, mapMade(m, n)].filter(Boolean).join(", ");
   return [n.label, n.version != null ? "version " + n.version : n.kind === "work" ? "version not recorded" : "", MAPW[n.status], n.detail].filter(Boolean).join(", "); }
+// Tree view (the default; "Line" is the metro drawing below). Charter on top, the run's stages (one per team) under it, each stage's
+// deliverables under it; a deliverable that reads others sits below all of them (a lattice). Each row is ordered by barycentre, then a
+// seeded d3-force pass moves nodes along their row (x only: link, x-centring and collision forces, fixed seed and ticks), then a sweep
+// keeps every label at least 24px from its neighbours. The same run always draws the same. Clicking a stage puts it in the middle with
+// its workflows on a circle round it; TREE holds that state so a repaint draws the same picture.
+let MAPVIEW = (() => { const q = new URLSearchParams(location.search).get("mapview"); if (q === "line" || q === "tree") return q;
+  try { const v = localStorage.getItem("j2mapview"); return v === "line" ? "line" : "tree"; } catch (e) { return "tree"; } })();
+const TREE = {open: "", wf: "", c: null, zoom: null};      // the open stage, the workflow picked in its circle, where the stage sits when open, pan and zoom
+let MAPTREE = null;      // the last tree layout (tests read it): nodes with label boxes, the crossing count
+const TROW = 100, TGAP = 24, TPAD = 36;
+const treeR = n => Math.round((8 + 3.2 * Math.sqrt(n || 0)) * 10) / 10;      // a dot's size from its workflow count
+const TRANK = ["fault", "waiting_on_you", "waiting", "done_unchecked", "running", "left_open", "not_made", "filed", "idle"];
+const tRank = s => { const i = TRANK.indexOf(s); return i < 0 ? 99 : i; };
+const tRd = v => Math.round(v * 10) / 10;
+const treeCurve = (a, b) => { const ym = tRd(a.y + (b.y - a.y) / 2); return `M${tRd(a.x)} ${tRd(a.y)} C${tRd(a.x)} ${ym} ${tRd(b.x)} ${ym} ${tRd(b.x)} ${tRd(b.y)}`; };      // smooth, vertical at both ends
+const treeTrim = (t, n) => { t = String(t ?? ""); return t.length > n ? t.slice(0, n - 1) + "…" : t; };
+function treeSamples(d){ const v = d.slice(1).split(/[ C]+/).map(Number), o = [];      // the points of one "M x y C x y x y x y" curve
+  for (let i = 0; i <= 24; i++){ const s = i / 24, u = 1 - s; o.push([u ** 3 * v[0] + 3 * u * u * s * v[2] + 3 * u * s * s * v[4] + s ** 3 * v[6], u ** 3 * v[1] + 3 * u * u * s * v[3] + 3 * u * s * s * v[5] + s ** 3 * v[7]]); } return o; }
+function treeCross(p, q){ const o = (a, b, c) => (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+  for (let i = 0; i < p.length - 1; i++) for (let j = 0; j < q.length - 1; j++){ const a = p[i], b = p[i + 1], c = q[j], d = q[j + 1];
+    if (o(a, b, c) * o(a, b, d) < -1e-6 && o(c, d, a) * o(c, d, b) < -1e-6) return true; } return false; }
+// a workflow's status for its dot in the circle: the same five meanings as the boxes
+const treeWfStatus = (m, w) => { const box = mapById(m)[w.box] || {};
+  if (box.tag === "Send") return box.status;
+  if (w.atoms === "closed") return "filed";
+  if (w.atoms === "verify_failed") return w.status === "done" ? "done_unchecked" : "fault";
+  if (w.atoms === "abandoned" || w.status === "unfunded") return "not_made";
+  if (w.atoms === "open") return w.status === "done" ? "done_unchecked" : m.live ? "running" : "left_open";
+  return w.status === "done" ? "filed" : m.live && w.status === "running" ? "running" : "idle"; };
+function mapTree(m){
+  const nodes = m.nodes || [], edges = m.edges || [], by = mapById(m);
+  const steps = nodes.filter(n => n.kind === "engine"), decks = nodes.filter(n => n.row === "work" && n.kind === "work"), charter = by["work:charter"];
+  const stages = {}, stageOf = {};
+  steps.forEach(s => { const t = mapStepTo(m, s), p = mapPersona(m, s), id = "stage:" + p;
+    const g = stages[id] = stages[id] || {id, kind: "stage", label: p, steps: [], workflows: [], status: "idle", order: 1e9};
+    g.steps.push(s.id); (s.workflows || []).forEach(w => { if (!g.workflows.includes(w)) g.workflows.push(w); });
+    if (tRank(s.status) < tRank(g.status)) g.status = s.status;
+    g.order = Math.min(g.order, nodes.indexOf(s)); if (t) stageOf[t.id] = id; });
+  // what a deliverable reads: recorded hand-offs between deliverables, and a side job's parent (the document it was built from)
+  const dep = {}, isDeck = id => by[id] && by[id].kind === "work" && id !== "work:charter";
+  edges.filter(e => e.kind === "handoff" && isDeck(e.from) && isDeck(e.to) && e.from !== e.to).forEach(e => (dep[e.to] = dep[e.to] || new Set()).add(e.from));
+  steps.filter(s => s.lane === "branch").forEach(s => { const t = mapStepTo(m, s), e = edges.find(x => x.kind === "step" && x.to === s.id && isDeck(x.from)); if (t && e) (dep[t.id] = dep[t.id] || new Set()).add(e.from); });
+  const label = n => n.kind === "stage" ? n.label : n.id === "work:charter" ? "Charter" : treeTrim(n.label, 28);
+  const sub = n => n.kind === "stage" ? `${n.workflows.length} workflow${n.workflows.length === 1 ? "" : "s"}` : n.id === "work:charter" ? "the plan"
+    : n.tag === "Send" ? (sendWord(n) || MAPS[n.status] || "") : [n.version != null ? "v" + n.version : "", MAPS[n.status]].filter(Boolean).join(" · ");
+  const T = [], row = {};
+  if (charter) { T.push({id: charter.id, kind: "charter", n: charter, wf: 0, status: charter.status}); row[charter.id] = 0; }
+  Object.values(stages).sort((a, b) => a.order - b.order).forEach(g => { T.push({id: g.id, kind: "stage", n: g, wf: g.workflows.length, status: g.status}); row[g.id] = 1; });
+  const ds = decks.filter(d => d.id !== "work:charter");
+  ds.forEach(d => { T.push({id: d.id, kind: "deck", n: d, wf: (d.workflows || []).length, status: d.status}); row[d.id] = 2; });
+  for (let k = 0; k < ds.length + 2; k++) ds.forEach(d => { (dep[d.id] || []).forEach(s => { if (row[s] != null) row[d.id] = Math.max(row[d.id], Math.min(row[s] + 1, ds.length + 2)); }); });
+  const L = [];      // the drawn links: charter to each stage (or to a deliverable no team made), team to deliverable, deliverable to what reads it
+  if (charter) Object.keys(stages).forEach(id => L.push({from: charter.id, to: id, kind: "plan"}));
+  ds.forEach(d => { if (stageOf[d.id]) L.push({from: stageOf[d.id], to: d.id, kind: "made"}); else if (charter && !(dep[d.id] || new Set()).size) L.push({from: charter.id, to: d.id, kind: "plan"});
+    (dep[d.id] || []).forEach(s => L.push({from: s, to: d.id, kind: "reads"})); });
+  T.forEach(t => { t.row = row[t.id]; t.r = t.kind === "charter" ? 11 : treeR(t.wf); t.label = label(t.n); t.sub = sub(t.n);
+    t.w = Math.round(Math.max(t.label.length * 7.4, t.sub.length * 6.3, 2 * t.r) + 8); });
+  const rows = []; T.forEach(t => (rows[t.row] = rows[t.row] || []).push(t));
+  const R = rows.map(r => r || []), ix = {}, up = {}, down = {};
+  L.forEach(l => { (up[l.to] = up[l.to] || []).push(l.from); (down[l.from] = down[l.from] || []).push(l.to); });
+  const pack = r => { let x = 0; r.forEach(t => { t.x = x + t.w / 2; x += t.w + TGAP; }); const mid = x / 2; r.forEach(t => { t.x -= mid; ix[t.id] = t; }); };
+  R.forEach(pack);
+  const bary = (t, nb) => { const xs = (nb[t.id] || []).map(i => ix[i]).filter(Boolean).map(o => o.x); return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : t.x; };
+  for (let it = 0; it < 4; it++){      // barycentre sweeps, down then up: fewer crossings before any force runs
+    for (let k = 1; k < R.length; k++){ R[k].forEach(t => { t.b = bary(t, up); }); R[k].sort((a, b) => a.b - b.b || a.x - b.x); pack(R[k]); }
+    for (let k = R.length - 2; k >= 1; k--){ R[k].forEach(t => { t.b = bary(t, down); }); R[k].sort((a, b) => a.b - b.b || a.x - b.x); pack(R[k]); } }
+  T.forEach(t => { t.y = TPAD + t.row * TROW; });
+  const segs = () => L.map(l => [[ix[l.from].x, ix[l.from].y], [ix[l.to].x, ix[l.to].y]]);      // straight stand-ins for the curves, to compare orders
+  const count = () => { const sg = segs(); let k = 0; for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++){ const a = L[i], b = L[j];
+    if (a.from !== b.from && a.from !== b.to && a.to !== b.from && a.to !== b.to && treeCross(sg[i], sg[j])) k++; } return k; };
+  for (let it = 0, best = count(); it < 4; it++){ let better = false;      // then swap neighbours in a row while that removes a crossing
+    for (let k = 1; k < R.length; k++) for (let i = 0; i + 1 < R[k].length; i++){ [R[k][i], R[k][i + 1]] = [R[k][i + 1], R[k][i]]; pack(R[k]);
+      const c = count(); if (c < best){ best = c; better = true; } else { [R[k][i], R[k][i + 1]] = [R[k][i + 1], R[k][i]]; pack(R[k]); } }
+    if (!better) break; }
+  T.forEach(t => { t.tx = t.x; });
+  if (typeof d3 !== "undefined" && d3.forceSimulation){      // organic but fixed: a seeded random source, a fixed number of ticks, y fixed per row
+    let seed = 7; const lcg = () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296;
+    const ns = T.map(t => ({id: t.id, x: t.x, y: t.y, fy: t.y, tx: t.tx, r: t.r}));
+    const sim = d3.forceSimulation(ns).randomSource(lcg).stop()
+      .force("x", d3.forceX(d => d.tx).strength(0.2))
+      .force("link", d3.forceLink(L.map(l => ({source: l.from, target: l.to}))).id(d => d.id).distance(TROW).strength(0.06))
+      .force("collide", d3.forceCollide(d => d.r + TGAP / 2).iterations(2));
+    for (let i = 0; i < 240; i++) sim.tick();
+    ns.forEach((d, i) => { T[i].x = d.x; }); }
+  R.forEach(r => { const mean = r.reduce((a, t) => a + t.x, 0) / (r.length || 1); r.sort((a, b) => a.x - b.x);      // labels never touch: at least 24px apart, the row's centre kept
+    for (let i = 1; i < r.length; i++) r[i].x = Math.max(r[i].x, r[i - 1].x + (r[i - 1].w + r[i].w) / 2 + TGAP);
+    const shift = mean - r.reduce((a, t) => a + t.x, 0) / (r.length || 1); r.forEach(t => { t.x += shift; }); });
+  const minX = Math.min(...T.map(t => t.x - t.w / 2)), maxX = Math.max(...T.map(t => t.x + t.w / 2)), off = Math.max(0, (720 - (maxX - minX + 2 * TPAD)) / 2);      // a narrow tree sits in the middle
+  T.forEach(t => { t.x = tRd(t.x - minX + TPAD + off); t.box = [tRd(t.x - t.w / 2), tRd(t.y + t.r + 4), tRd(t.x + t.w / 2), tRd(t.y + t.r + 33)]; });
+  const W = Math.round(Math.max(720, maxX - minX + 2 * TPAD)), H = Math.round(TPAD + (R.length - 1) * TROW + 70);
+  const at = Object.fromEntries(T.map(t => [t.id, t]));
+  L.forEach(l => { l.d = treeCurve(at[l.from], at[l.to]); });
+  let cross = 0; const pts = L.map(l => treeSamples(l.d));
+  for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++){ const a = L[i], b = L[j];
+    if (a.from === b.from || a.from === b.to || a.to === b.from || a.to === b.to) continue; if (treeCross(pts[i], pts[j])) cross++; }
+  return {nodes: T, links: L, at, W, H, crossings: cross, stages};
+}
+// the circle round an open stage: its workflows evenly spaced, in workflow order, with curved spokes (positions are relative to the stage).
+// It is stretched to the drawing's shape (wider than tall), so it clears the Charter above and the site below.
+function treeRing(m, g, W, H){
+  const ws = (m.workflows || []), ids = [...g.workflows].sort((a, b) => (+String(a).replace(/\D/g, "") || 0) - (+String(b).replace(/\D/g, "") || 0));
+  const n = ids.length, R = Math.max(130, Math.min(340, n * 24)), rx = Math.max(120, Math.min(R * 1.35, W / 2 - 170)), ry = Math.max(90, Math.min(R * .8, H / 2 - 100));
+  return {R, rx, ry, items: ids.map((id, i) => { const a = -Math.PI / 2 + (n > 2 ? Math.PI / n : 0) + 2 * Math.PI * i / Math.max(n, 1), w = ws.find(x => x.id === id) || {id, name: id, status: null, box: null, reads: [], checks: {passed: 0, run: 0}};
+    const box = mapById(m)[w.box], st = treeWfStatus(m, w);
+    return {id, w, a, x: tRd(rx * Math.cos(a)), y: tRd(ry * Math.sin(a)), st, word: (box && box.tag === "Send" && sendWord(box)) || MAPS[st] || w.status || ""}; })};
+}
+function treeHtml(m){
+  const L = mapTree(m), by = mapById(m), open = L.at[TREE.open] && L.at[TREE.open].kind === "stage" ? TREE.open : "";
+  const c = open ? (TREE.c || {x: L.W / 2, y: L.H / 2}) : null, P = id => id === open ? c : L.at[id];
+  const near = new Set(open ? [open, ...L.links.filter(l => l.from === open || l.to === open).flatMap(l => [l.from, l.to])] : []);
+  const dim = id => open && !near.has(id) ? " tdim" : "";
+  const ring = open ? treeRing(m, L.stages[open], L.W, L.H) : null, pick = ring && ring.items.find(x => x.id === TREE.wf);
+  MAPTREE = {nodes: L.nodes.map(t => ({id: t.id, kind: t.kind, row: t.row, x: t.x, y: t.y, r: t.r, label: t.label, sub: t.sub, box: t.box, workflows: t.kind === "stage" ? t.n.workflows : t.n.workflows || []})),
+    links: L.links.map(l => ({from: l.from, to: l.to, kind: l.kind})), crossings: L.crossings, W: L.W, H: L.H, open, c,
+    ring: ring ? ring.items.map(x => ({id: x.id, x: tRd(c.x + x.x), y: tRd(c.y + x.y), status: x.st})) : [], R: ring ? ring.R : 0, rx: ring ? ring.rx : 0, ry: ring ? ring.ry : 0};
+  const look = st => mapLook(st);
+  const edge = l => `<path class="tedge ${l.kind}${dim(l.from) || dim(l.to) ? " tdim" : ""}" data-from="${esc(l.from)}" data-to="${esc(l.to)}" d="${treeCurve(P(l.from), P(l.to))}"><title>${mapWords(l.kind === "reads" ? `${(by[l.to] || {}).label} reads ${(by[l.from] || {}).label}` : l.kind === "made" ? `${L.at[l.from].label} made ${(by[l.to] || {}).label}` : `the Charter to ${L.at[l.to].label}`)}</title></path>`;
+  const dot = t => { const k = look(t.status), p = P(t.id), aria = `${t.label}: ${t.sub}${t.kind === "stage" ? ", open its workflows" : ", details"}`;
+    const glyph = t.kind === "stage" ? [0, 72, 144, 216, 288].map(a => { const q = a * Math.PI / 180 - Math.PI / 2; return `<circle cx="${tRd(t.r * .5 * Math.cos(q))}" cy="${tRd(t.r * .5 * Math.sin(q))}" r="${tRd(Math.max(1.6, t.r * .15))}" class="tglyph"/>`; }).join("")
+      : t.kind === "charter" ? `<circle r="${tRd(t.r * .45)}" class="tglyph"/>` : t.n.tag === "Send" ? `<path class="tglyphl" d="M${-t.r * .5} ${-t.r * .3} L0 ${t.r * .15} L${t.r * .5} ${-t.r * .3}"/>` : "";
+    return `<g class="tnode t${t.kind}${dim(t.id)}${t.id === open ? " open" : ""}${t.id === MAPPIN ? " sel" : ""}" data-id="${esc(t.id)}" data-kind="${t.kind}" data-x="${t.x}" data-y="${t.y}" transform="translate(${tRd(p.x)},${tRd(p.y)})" tabindex="0" role="button" aria-label="${mapWords(aria)}"${t.kind === "stage" ? ` aria-expanded="${t.id === open}"` : ""}>`
+      + `<title>${mapWords(t.kind === "stage" ? `${t.label} · ${t.sub} · ${MAPW[t.status] || ""}` : mapTip(m, t.n))}</title>`
+      + `<circle class="tdot" r="${t.r}" fill="${t.status === "filed" ? "color-mix(in srgb, var(--ok) 22%, #1d2026)" : "#1d2026"}" stroke="${k.stroke}" stroke-width="${Math.max(1.6, k.width)}"${k.dash}/>${glyph}`
+      + mapBadge(t.status, tRd(t.r * .8), tRd(-t.r * .8))
+      + `<text class="tlab" y="${tRd(t.r + 17)}" text-anchor="middle">${mapWords(t.label)}</text><text class="tsub" y="${tRd(t.r + 31)}" text-anchor="middle">${mapWords(t.sub)}</text>`
+      + (t.id === open ? ringHtml(t) : "") + `</g>`; };
+  const ringHtml = t => `<g class="tring">` + ring.items.map(x => { const q = 0.14, cx = tRd(x.x / 2 - x.y * q), cy = tRd(x.y / 2 + x.x * q);
+      return `<path class="tspoke" data-wf="${esc(x.id)}" d="M0 0 Q${cx} ${cy} ${x.x} ${x.y}"/>`; }).join("")
+    + ring.items.map(x => { const k = look(x.st), right = Math.cos(x.a) >= -1e-9, anc = right ? "start" : "end", lx = right ? 13 : -13, ly = -1;      // beside the dot, outward
+      return `<g class="tnode twf${TREE.wf === x.id ? " sel" : ""}" data-wf="${esc(x.id)}" transform="translate(${x.x},${x.y})" tabindex="0" role="button" aria-label="${mapWords(`${x.id} ${x.w.name}: ${x.word}, details`)}">`
+        + `<circle class="tdot" r="7" fill="#1d2026" stroke="${k.stroke}" stroke-width="${Math.max(1.6, k.width)}"${k.dash}/>`
+        + `<text class="tlab" x="${lx}" y="${ly}" text-anchor="${anc}">${mapWords(x.id)} · ${mapWords(treeTrim(x.w.name, 24))}</text><text class="tsub" x="${lx}" y="${ly + 13}" text-anchor="${anc}">${mapWords(x.word)}</text></g>`; }).join("") + `</g>`;
+  // a picked workflow: its own "reads" and "read by" links, to the workflows in the circle or to the box the other one sits on
+  let links = "";
+  if (pick){ const gpos = id => { const r = ring.items.find(x => x.id === id); if (r) return {x: c.x + r.x, y: c.y + r.y};
+      const w = (m.workflows || []).find(x => x.id === id), b = w && w.box && L.at[w.box]; return b ? P(b.id) : null; };
+    const me = {x: c.x + pick.x, y: c.y + pick.y}, readBy = (m.workflows || []).filter(w => (w.reads || []).includes(pick.id)).map(w => w.id);
+    const one = (id, kind) => { const q = gpos(id); if (!q) return ""; const a = kind === "reads" ? q : me, b = kind === "reads" ? me : q, mx = (a.x + b.x) / 2 + (b.y - a.y) * .18, my = (a.y + b.y) / 2 - (b.x - a.x) * .18;
+      return `<path class="tlink ${kind}" data-from="${esc(kind === "reads" ? id : pick.id)}" data-to="${esc(kind === "reads" ? pick.id : id)}" d="M${tRd(a.x)} ${tRd(a.y)} Q${tRd(mx)} ${tRd(my)} ${tRd(b.x)} ${tRd(b.y)}"><title>${mapWords(kind === "reads" ? `${pick.id} reads ${id}` : `${id} reads ${pick.id}`)}</title></path>`; };
+    links = (pick.w.reads || []).map(id => one(id, "reads")).join("") + readBy.map(id => one(id, "readby")).join(""); }
+  const z = TREE.zoom, order = [...L.nodes.filter(t => t.id !== open), ...L.nodes.filter(t => t.id === open)];
+  const svg = `<svg class="treesvg" viewBox="0 0 ${L.W} ${L.H}" data-w="${L.W}" data-h="${L.H}" data-crossings="${L.crossings}" role="group" aria-label="Map, tree view: the Charter, the teams and what each made">`
+    + `<g class="tview"${z ? ` transform="translate(${tRd(z.x)},${tRd(z.y)}) scale(${z.k})"` : ""}><g class="tedges">${L.links.map(edge).join("")}</g><g class="tlinks">${links}</g><g class="tnodes">${order.map(dot).join("")}</g></g></svg>`;
+  const ws = pick && pick.w, readers = ws ? (m.workflows || []).filter(w => (w.reads || []).includes(ws.id)).map(w => w.id) : [];
+  const box = ws && by[ws.box];
+  const panel = ws ? `<aside class="mappanel treepanel" data-wfpanel="${esc(ws.id)}" aria-label="Details of ${esc(ws.id)}"><div class="mappanelhead"><b>${mapWords(ws.id)} · ${mapWords(ws.name)}</b><button type="button" class="linkbtn" data-treewfclose>Close (Esc)</button></div>`
+    + [`status: ${mapWords(pick.word && pick.word !== MAPS[pick.st] ? pick.word : MAPW[pick.st] || pick.st)}${ws.status ? " (workflow " + mapWords(ws.status) + ")" : ""}`, `delivers: ${box ? mapWords(box.label) : "not recorded"}`,
+       `reads: ${(ws.reads || []).length ? ws.reads.map(x => mapWords(x)).join(", ") : "nothing recorded"}`, `read by: ${readers.length ? readers.map(x => mapWords(x)).join(", ") : "nothing recorded"}`,
+       ws.checks && ws.checks.run ? `checks: ${ws.checks.passed} of ${ws.checks.run} passed` : "checks: none recorded"].map(x => `<div class="sub">${x}</div>`).join("")
+    + `<div class="sub"><button type="button" class="gobtn" data-wfcard="${esc(ws.id)}">Open</button>${box ? ` <button type="button" class="linkbtn" data-mapgo="${esc(box.id)}">${mapWords(mapGoLabel(box))}</button>` : ""}</div></aside>` : "";
+  const bar = `<div class="treebar"><button type="button" class="linkbtn" data-treefit>Fit</button><button type="button" class="linkbtn" data-treeback${open ? "" : " hidden"}>Back</button>`
+    + `<span class="sub">${open ? `${mapWords(L.at[open].label)}: ${L.stages[open].workflows.length} workflow${L.stages[open].workflows.length === 1 ? "" : "s"}. Esc, Back or a click on empty space returns.` : "Click a team to open its workflows. Drag to pan, scroll or pinch to zoom."}</span></div>`;
+  return `<div class="treebox">${bar}${svg}${panel}</div>`;
+}
+// Tree view at run time: pan and zoom (d3-zoom), the 300 ms move of a stage to the middle and back, and the clicks. renderMap draws
+// the state in TREE; these only animate between two drawn states and then repaint.
+function paintMap(){ paint($("pane-map"), renderMap(MAP)); treeMount(); }
+const treeReduce = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+const treeSvg = () => $("pane-map").querySelector && $("pane-map").querySelector(".treesvg");
+function treeMount(){
+  const svg = treeSvg(); if (!svg || svg.__zoom_on || typeof d3 === "undefined" || !d3.zoom) return; svg.__zoom_on = true;
+  const view = svg.querySelector(".tview");
+  const zoom = d3.zoom().scaleExtent([0.25, 4]).clickDistance(4).on("zoom", e => { view.setAttribute("transform", e.transform.toString()); TREE.zoom = {k: e.transform.k, x: e.transform.x, y: e.transform.y}; });
+  svg.__zoom_b = zoom; const s = d3.select(svg).call(zoom).on("dblclick.zoom", null);
+  if (TREE.zoom) s.property("__zoom", d3.zoomIdentity.translate(TREE.zoom.x, TREE.zoom.y).scale(TREE.zoom.k));      // keep the pan and zoom across a repaint, without an event
+}
+function treeFit(){ const svg = treeSvg(); TREE.zoom = null; if (!svg || !svg.__zoom_b) return paintMap();
+  const s = d3.select(svg); (treeReduce() ? s : s.transition().duration(300)).call(svg.__zoom_b.transform, d3.zoomIdentity); }
+function treeCentre(svg){ const W = +svg.dataset.w, H = +svg.dataset.h, z = TREE.zoom || {k: 1, x: 0, y: 0}; return {x: (W / 2 - z.x) / z.k, y: (H / 2 - z.y) / z.k}; }      // the middle of what is on screen, in the drawing's own coordinates
+// move one stage dot from a to b in 300 ms (eased), redrawing the curves that touch it; ring grows (or shrinks) with it; then done()
+function treeMove(id, a, b, opening, done){
+  const svg = treeSvg(), g = svg && [...svg.querySelectorAll(".tnode.tstage")].find(x => x.dataset.id === id);
+  if (!g || treeReduce()) return done();
+  const at = el => ({x: +el.dataset.x, y: +el.dataset.y}), nodes = Object.fromEntries([...svg.querySelectorAll(".tnodes > .tnode")].map(x => [x.dataset.id, at(x)]));
+  const near = new Set([id]), es = [...svg.querySelectorAll(".tedge")];
+  es.forEach(e => { if (e.dataset.from === id) near.add(e.dataset.to); if (e.dataset.to === id) near.add(e.dataset.from); });
+  if (opening){ svg.querySelectorAll(".tnodes > .tnode").forEach(x => x.classList.toggle("tdim", !near.has(x.dataset.id))); es.forEach(e => e.classList.toggle("tdim", e.dataset.from !== id && e.dataset.to !== id)); }
+  else { svg.querySelectorAll(".tdim").forEach(x => x.classList.remove("tdim")); }
+  const ring = g.querySelector(".tring"), ease = typeof d3 !== "undefined" && d3.easeCubicInOut ? d3.easeCubicInOut : t => t, t0 = performance.now();
+  let over = false; const end = () => { if (!over){ over = true; done(); } };
+  setTimeout(end, 450);      // a tab that draws no frames (hidden, or headless) still lands on the end state
+  g.parentNode.appendChild(g);      // on top while it moves
+  const frame = now => { const t = Math.min(1, (now - t0) / 300), e = ease(t), p = {x: a.x + (b.x - a.x) * e, y: a.y + (b.y - a.y) * e};
+    g.setAttribute("transform", `translate(${tRd(p.x)},${tRd(p.y)})`);
+    es.forEach(x => { if (x.dataset.from === id) x.setAttribute("d", treeCurve(p, nodes[x.dataset.to])); else if (x.dataset.to === id) x.setAttribute("d", treeCurve(nodes[x.dataset.from], p)); });
+    if (ring){ const s = opening ? e : 1 - e; ring.setAttribute("transform", `scale(${tRd(s * 100) / 100})`); ring.style.opacity = s; }
+    if (over) return; if (t < 1) requestAnimationFrame(frame); else end(); };
+  requestAnimationFrame(frame);
+}
+function treeOpen(id){
+  const svg = treeSvg(); if (!svg) return;
+  if (TREE.open && TREE.open !== id){ TREE.open = ""; TREE.wf = ""; paintMap(); }      // another stage was open: it goes back at once, this one moves
+  const s = treeSvg(), g = [...s.querySelectorAll(".tnode.tstage")].find(x => x.dataset.id === id); if (!g) return;
+  const c = treeCentre(s), from = {x: +g.dataset.x, y: +g.dataset.y};
+  TREE.c = {x: tRd(c.x), y: tRd(c.y)};
+  TREE.open = id; TREE.wf = ""; paintMap();      // draw the open state (its circle), then play the move into it from the tree
+  const s2 = treeSvg(), g2 = s2 && [...s2.querySelectorAll(".tnode.tstage")].find(x => x.dataset.id === id);
+  if (!g2 || treeReduce()) return;
+  g2.setAttribute("transform", `translate(${from.x},${from.y})`); const rg = g2.querySelector(".tring"); if (rg){ rg.setAttribute("transform", "scale(0)"); rg.style.opacity = 0; }
+  s2.querySelectorAll(".tdim").forEach(x => x.classList.remove("tdim"));
+  treeMove(id, from, TREE.c, true, () => { if (TREE.open === id){ $("pane-map").__html = null; paintMap(); } });      // the end state, drawn exactly as a repaint draws it
+}
+function treeClose(){
+  const id = TREE.open; if (!id) return;
+  const svg = treeSvg(), g = svg && [...svg.querySelectorAll(".tnode.tstage")].find(x => x.dataset.id === id);
+  const finish = () => { TREE.open = ""; TREE.wf = ""; TREE.c = null; paintMap(); const n = treeSvg() && [...treeSvg().querySelectorAll(".tnode.tstage")].find(x => x.dataset.id === id); if (n && n.focus) n.focus(); };
+  if (!g) return finish();
+  svg.querySelectorAll(".tlink").forEach(x => x.remove()); const pn = $("pane-map").querySelector(".treepanel"); if (pn) pn.remove();
+  treeMove(id, TREE.c, {x: +g.dataset.x, y: +g.dataset.y}, false, finish);
+}
+// one entry for a click or Enter on the tree: true when the tree handled it
+function treeClick(e){
+  const v = e.target.closest("[data-mapview]"); if (v){ MAPVIEW = v.dataset.mapview; try { localStorage.setItem("j2mapview", MAPVIEW); } catch (x) {} paintMap(); return true; }
+  if (e.target.closest("[data-treefit]")){ treeFit(); return true; }
+  if (e.target.closest("[data-treeback]")){ treeClose(); return true; }
+  if (e.target.closest("[data-treewfclose]")){ TREE.wf = ""; paintMap(); return true; }
+  const w = e.target.closest(".twf"); if (w){ TREE.wf = TREE.wf === w.dataset.wf ? "" : w.dataset.wf; paintMap(); return true; }
+  const n = e.target.closest(".tnode"); if (n){ if (n.dataset.kind === "stage"){ if (TREE.open === n.dataset.id) treeClose(); else treeOpen(n.dataset.id); } else mapSelect(MAPPIN === n.dataset.id ? "" : n.dataset.id); return true; }
+  if (e.target.closest(".treesvg")){ if (TREE.wf){ TREE.wf = ""; paintMap(); } else if (TREE.open) treeClose(); else if (MAPPIN) mapSelect(""); return true; }      // empty space
+  return false;
+}
+function treeHover(e, on){ const n = e.target.closest && e.target.closest(".tnodes > .tnode"), svg = treeSvg(); if (!n || !svg) return false;
+  svg.querySelectorAll(".tedge").forEach(x => x.classList.toggle("hot", on && (x.dataset.from === n.dataset.id || x.dataset.to === n.dataset.id))); return true; }
 function renderMap(m){
   const nodes = m.nodes || [], edges = m.edges || [];
   if (!nodes.length) return `<div class="mapwrap"><p class="empty">Nothing to draw yet.</p></div>`;
   const st = m.status || {}, ck = st.checks || {passed: 0, run: 0}, by = mapById(m), name = id => mapName(m, id);
   const head = `<div class="maphead"><h3>Map</h3><span class="mappill ${esc(st.state_status || "idle")}">${mapWords(st.state || "not recorded")}</span>`
     + (!ck.run ? `<span class="mappill nochecks">No checks yet</span>` : Array.isArray((CTX || {}).workable) && CTX.workable.length && (CTX.audits || []).length
-        ? `<span class="mappill checks needsrev">${ck.passed} of ${ck.run} checks passed · Audit: needs revision</span>` : `<span class="mappill checks">${ck.passed} of ${ck.run} checks passed</span>`) + `</div>`;      // the code's checks can all pass while the latest Audit still says not workable      // no checks run: neutral, never a green "0 of 0"
+        ? `<span class="mappill checks needsrev">${ck.passed} of ${ck.run} checks passed · Audit: needs revision</span>` : `<span class="mappill checks">${ck.passed} of ${ck.run} checks passed</span>`)
+    + `<span class="mapviews" role="group" aria-label="Map view">${[["tree", "Tree"], ["line", "Line"]].map(([k, t]) => `<button type="button" data-mapview="${k}" aria-pressed="${MAPVIEW === k}">${t}</button>`).join("")}</span></div>`;      // the code's checks can all pass while the latest Audit still says not workable      // no checks run: neutral, never a green "0 of 0"
   const work = nodes.filter(n => n.row === "work"), people = nodes.filter(n => n.row === "people"), fns = nodes.filter(n => n.row === "functions"), decks = work.filter(n => n.kind !== "engine"), steps = work.filter(n => n.kind === "engine");
   const cap = (v, k) => Math.min(k, v), rd = v => Math.round(v * 10) / 10, gaps = [...(m.not_recorded || [])], addGap = t => { if (!gaps.includes(t)) gaps.push(t); };
   const given = mapGiven(m), sel = by[MAPPIN] ? MAPPIN : "";
@@ -1600,7 +1834,7 @@ function renderMap(m){
   const legend = `<details class="mapdd mapleg"><summary>Legend</summary><div class="maplegend" aria-label="Legend">${ordered.map(l => `<span data-legend="${esc(l.key)}">${sw(l.key)}${mapWords(MAPLABEL.legend[l.key] || l.label)}</span>`).join("")}</div></details>`;
   given.filter(g => !g.known).forEach(g => gaps.push(`which step used ${name(g.from)} given to ${name(g.box)}: not recorded`));
   const nr = gaps.length ? `<details class="mapnr"><summary>Not recorded (${gaps.length})</summary><ul>${gaps.map(x => `<li>${mapWords(x)}</li>`).join("")}</ul></details>` : "";
-  return `<div class="mapwrap">${head}<div class="mapsvgwrap">${svg}${panel}${under}</div>${cards}${legend}${nr}</div>`;
+  return `<div class="mapwrap">${head}<div class="mapsvgwrap" data-view="${MAPVIEW === "line" ? "line" : "tree"}">${svg}${treeHtml(m)}${panel}${under}</div>${cards}${legend}${nr}</div>`;
 }
 async function openArtifact(f){
   ARTOPEN = f; showTab("artifacts"); await loadArtifacts();
@@ -1619,7 +1853,7 @@ function mapGo(id){
   if (n.kind === "function"){
     if (n.id === "fn:identity") return focusChat();
     if (n.id === "fn:audit") return showTab("audit");
-    MAPFILT = n.id; paint($("pane-map"), renderMap(MAP)); const d = $("pane-map").querySelector(".mapfilt"); if (d && d.scrollIntoView) d.scrollIntoView({block: "nearest"}); return; }
+    MAPFILT = n.id; paintMap(); const d = $("pane-map").querySelector(".mapfilt"); if (d && d.scrollIntoView) d.scrollIntoView({block: "nearest"}); return; }
   if (n.tag === "Site" || n.id === "work:website") return showTab("preview");
   if (n.id === "work:charter") return showTab("charter");
   if (n.file) return openArtifact(n.file);
@@ -1627,7 +1861,7 @@ function mapGo(id){
 async function loadMap(){
   try { const r = await fetch(`/api/map?${runQ().slice(1)}`, {cache:"no-store"}); if (r.ok) Object.assign(MAP, await r.json()); } catch (e) {}
   if (state) paint($("needs"), renderNeeds(state));      // the outcome line names what the Map shows left open
-  paint($("pane-map"), renderMap(MAP));
+  paintMap();
 }
 function mapLight(svg, id){      // hover or focus: light the dot, the lines that touch it and the dots at their other ends; fade the rest ("" clears)
   const els = [...svg.querySelectorAll("[data-from],[data-id]")], hot = new Set(id ? [id] : []);
@@ -1637,20 +1871,23 @@ function mapLight(svg, id){      // hover or focus: light the dot, the lines tha
 const mapNode = e => e.target.closest && e.target.closest(".mapnode");
 const mapSvg = () => $("pane-map").querySelector && $("pane-map").querySelector(".mapsvg");
 function mapSelect(id){      // click or Enter: open this dot's panel (the same one again closes it); the pin keeps its lines lit
-  MAPPIN = id; paint($("pane-map"), renderMap(MAP));
+  MAPPIN = id; paintMap();
   const el = id && $("pane-map").querySelectorAll && [...$("pane-map").querySelectorAll(`.mapnode[data-id="${CSS.escape(id)}"]`)].find(x => x.getClientRects().length); if (el && el.focus) el.focus();
   const pn = id && $("pane-map").querySelector && $("pane-map").querySelector(".mappanel"); if (pn && pn.scrollIntoView) pn.scrollIntoView({block: "nearest"});      // the panel opens below the Map: bring it into view
 }
-const mapHover = (e, on) => { const g = mapNode(e), svg = mapSvg(); if (!g || !svg) return; if (on) svg.dataset.hover = g.dataset.id; else delete svg.dataset.hover;
+const mapHover = (e, on) => { if (treeHover(e, on)) return; const g = mapNode(e), svg = mapSvg(); if (!g || !svg) return; if (on) svg.dataset.hover = g.dataset.id; else delete svg.dataset.hover;
   $("pane-map").querySelectorAll(".mapsvg").forEach(x => mapLight(x, on ? g.dataset.id : MAPPIN)); };      // the wide and the narrow drawing stay in step
 $("pane-map").addEventListener("mouseover", e => mapHover(e, true)); $("pane-map").addEventListener("mouseout", e => mapHover(e, false));
 $("pane-map").addEventListener("focusin", e => mapHover(e, true)); $("pane-map").addEventListener("focusout", e => mapHover(e, false));
-$("pane-map").addEventListener("keydown", e => { const g = mapNode(e); if (g && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); mapSelect(MAPPIN === g.dataset.id ? "" : g.dataset.id); } });
-document.addEventListener("keydown", e => { if (e.key === "Escape" && MAPPIN && !$("pane-map").hidden) mapSelect(""); });
+$("pane-map").addEventListener("keydown", e => { const tn = e.target.closest && e.target.closest(".tnode"); if (tn && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); treeClick(e); return; }
+  const g = mapNode(e); if (g && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); mapSelect(MAPPIN === g.dataset.id ? "" : g.dataset.id); } });
+document.addEventListener("keydown", e => { if (e.key !== "Escape" || $("pane-map").hidden) return;      // Esc: the picked workflow, then the open stage, then the panel
+  if (MAPVIEW === "tree" && TREE.wf){ TREE.wf = ""; paintMap(); } else if (MAPVIEW === "tree" && TREE.open) treeClose(); else if (MAPPIN) mapSelect(""); });
 $("pane-map").addEventListener("click", async e => { const t = e.target.closest("[data-maptab]"); if (t){ e.preventDefault(); showTab(t.dataset.maptab); return; }
+  if (!e.target.closest("[data-mapgo],[data-wfcard],[data-mapopen],[data-mapclose]") && treeClick(e)){ e.preventDefault(); return; }
   if (e.target.closest("[data-mapclose]")){ e.preventDefault(); mapSelect(""); return; }
   const go = e.target.closest("[data-mapgo]"); if (go){ e.preventDefault(); mapGo(go.dataset.mapgo); return; }
-  if (e.target.closest("[data-mapfiltclear]")){ e.preventDefault(); MAPFILT = ""; paint($("pane-map"), renderMap(MAP)); return; }
+  if (e.target.closest("[data-mapfiltclear]")){ e.preventDefault(); MAPFILT = ""; paintMap(); return; }
   const g = mapNode(e); if (g){ e.preventDefault(); mapSelect(MAPPIN === g.dataset.id ? "" : g.dataset.id); return; }
   const b = e.target.closest("[data-mapopen]"); if (!b) return; e.preventDefault();
   await openArtifact(b.dataset.mapopen); });
