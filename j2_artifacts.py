@@ -159,7 +159,7 @@ def served(d, name):
 # exactly once. Nothing names a run, a workflow or a stage: only file kinds (types.json) and the map's own fields.
 TREE_STATUS = {"filed": "filed", "done_unchecked": "checks did not pass", "fault": "failed", "left_open": "open", "running": "open",
                "waiting": "open", "waiting_on_you": "open", "not_made": "not made", "idle": "filed"}
-RECORD_MAKER = {"goal.json": "Client Lead (Identity)", "audits.json": "Quality Reviewer (Audit)", "receipts.jsonl": "Checker (automatic)",
+RECORD_MAKER = {"goal.json": "Client Lead (Identity)", "realization.json": "Adaptation (scored by the confidence judge)", "audits.json": "Quality Reviewer (Audit)", "receipts.jsonl": "Checker (automatic)",
                 "chat.jsonl": "every function (the chat)", "calls.jsonl": "every function (AI calls)"}      # who writes each kind of record
 PROOF = ("receipts.jsonl", "audits.json", "conditions.json")
 RECORD_NAME = {"calls.jsonl": "AI calls", "outputs.jsonl": "Workflow outputs", "map.json": "Map data", "artifacts.json": "Artifact list",
@@ -225,7 +225,7 @@ def tree(d, m=None):
         note = [f"zone {zone}" if zone else "", f"{len(st)} stages: {', '.join(st)}" if st else "",
                 f"plan confidence {rz['plan_confidence']}" if rz.get("plan_confidence") is not None else ""]
         kids = [item("Realization plan (text)", "realization.md", {"function": "code"})] if os.path.isfile(os.path.join(d, "realization.md")) else []
-        plan.append(item("Realization plan", "realization.json", {"function": "code"}, note=" · ".join(x for x in note if x), children=kids))
+        plan.append(item("Realization plan", "realization.json", {"function": RECORD_MAKER["realization.json"]}, note=" · ".join(x for x in note if x), children=kids))
     wfs = _read(d, "workflows.json", []) or []
     if os.path.isfile(os.path.join(d, "workflows.json")):
         plan.append(item("Workflows", "workflows.json", {"function": "Validator (code)"}, note=f"{len(wfs)} workflows"))
