@@ -185,3 +185,21 @@ sent / skipped / failed); **Proof** (check results, audits, necessary conditions
 else the run kept). Every file appears once; each row has its name, who made it (a persona and workflow ids, or the function or code
 for a record), status, size and Open. The map supplies the presentation fields the tree and the page share: `persona` on each team
 step, `send` on each send box and `readers` on each read.
+
+## Agent view (agent/1) and the website's code
+
+**Agent view.** A function's details panel (on the Map) and a workflow's panel (in a stage's circle) have "See conversation and
+thinking"; a function or workflow name in the Chat opens the same view. It is a drawer over the right half of the page (full
+screen on phones), closed by Esc or Close; the Map underneath is unchanged (nothing is added to the canvas). `/api/agent?run=&who=`
+(`j2_agent.view`) builds it from the run's chat.jsonl and calls.jsonl only, through redact(): a Summary (calls, total time, model,
+who it talked to most; tokens small), Conversations (messages sent and received, grouped by counterpart, oldest first, each with
+time and step; a message's recipients are its recorded next, audience, to_user and a leading @name) and Thinking (one card per AI
+call: step and cycle, Was given (the inputs in plain words), Reason (the agent's stated reason, or a builder's from its reply
+record), Reply (sentences, other fields as labelled lines); prompt, system text and raw output only under "Show technical
+details"). Reasons are the agent's own; the model's hidden reasoning is not recorded.
+
+**Code.** Under Deliverables > Website the Artifacts tree has "Code": the full page source (site/index.html) and "By section", one
+row per entry in sections.json, named from the workflow that created it, with its author, "rewritten by W-n · <name>" when a
+later workflow owns it now, and what it holds (lines of HTML, CSS rules, lines of JS). A document's sections (its stage file, or
+sections.json while it is the one in work) show the same way as text. `/api/code?run=&deck=&section=` serves the text read-only,
+through redact(); the page shows it with line numbers, a monospace font, light colouring and a Copy button.
