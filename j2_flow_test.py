@@ -5920,6 +5920,20 @@ def map_tree():
         assert t == b["tree"] and a["map"] == b["map"], f"{name}: the same run draws the same tree"
         assert 'data-view="tree"' in a["map"] and '<svg class="treesvg"' in a["map"] and 'data-mapview="tree" aria-pressed="true"' in a["map"], "Tree is the default"
         rows = {n["id"]: n["row"] for n in t["nodes"]}
+        files = {n["id"]: n.get("file") for n in mp["nodes"] if n.get("tag") == "Spec"}
+        for n in t["nodes"]:      # a spec is named from its file: artifacts/hint-method.md is "Hint method"
+            if n["id"] in files:
+                base = os.path.splitext(os.path.basename(files[n["id"]]))[0].replace("-", " ").replace("_", " ")
+                assert n["label"] == base[:1].upper() + base[1:], (name, n["id"], n["label"], files[n["id"]])
+        if name == "j2-20261026-174314":
+            lab = {n["id"]: n["label"] for n in t["nodes"]}
+            assert (lab["work:W-1"], lab["work:W-3"], lab["work:W-4"]) == ("Product spec", "Copy guide", "Hint method"), lab
+            assert {"Curriculum", "Content plan"} <= {n["sub"].split(" · ")[0] for n in t["nodes"]}, "the stage output stays as the second line"
+        if "work:style" in rows:      # style.json is written by the first build workflow and read by the later ones: an input of the site
+            assert rows["work:style"] < rows["work:website"] and {"from": "work:style", "to": "work:website", "kind": "reads"} in t["links"], (name, rows)
+            assert not any(l["from"] == "work:website" and l["to"] == "work:style" for l in t["links"]), "never below the site"
+            if name == "j2-20261026-174314":
+                assert rows["work:style"] == rows["work:W-2"] == rows["work:W-3"] == rows["work:W-5"], ("beside the files the build reads", rows)
         assert rows["work:charter"] == 0 and all(n["row"] == 1 for n in t["nodes"] if n["kind"] == "stage") and all(n["row"] >= 2 for n in t["nodes"] if n["kind"] == "deck")
         for l in t["links"]:
             if l["kind"] == "reads":

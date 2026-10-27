@@ -1314,6 +1314,8 @@ const treeWfStatus = (m, w) => { const box = mapById(m)[w.box] || {};
   if (w.atoms === "abandoned" || w.status === "unfunded") return "not_made";
   if (w.atoms === "open") return w.status === "done" ? "done_unchecked" : m.live ? "running" : "left_open";
   return w.status === "done" ? "filed" : m.live && w.status === "running" ? "running" : "idle"; };
+// a deliverable's own name: a spec is named from its file (artifacts/hint-method.md is "Hint method"); the rest keep their label
+const treeName = n => n && n.tag === "Spec" && /^artifacts\/[^/]+\.\w+$/.test(n.file || "") ? (t => t.charAt(0).toUpperCase() + t.slice(1))(n.file.split("/").pop().replace(/\.\w+$/, "").replace(/[-_]+/g, " ").trim()) : (n || {}).label;
 function mapTree(m){
   const nodes = m.nodes || [], edges = m.edges || [], by = mapById(m);
   const steps = nodes.filter(n => n.kind === "engine"), decks = nodes.filter(n => n.row === "work" && n.kind === "work"), charter = by["work:charter"];
@@ -1326,16 +1328,24 @@ function mapTree(m){
   // what a deliverable reads: recorded hand-offs between deliverables, and a side job's parent (the document it was built from)
   const dep = {}, isDeck = id => by[id] && by[id].kind === "work" && id !== "work:charter";
   edges.filter(e => e.kind === "handoff" && isDeck(e.from) && isDeck(e.to) && e.from !== e.to).forEach(e => (dep[e.to] = dep[e.to] || new Set()).add(e.from));
-  steps.filter(s => s.lane === "branch").forEach(s => { const t = mapStepTo(m, s), e = edges.find(x => x.kind === "step" && x.to === s.id && isDeck(x.from)); if (t && e) (dep[t.id] = dep[t.id] || new Set()).add(e.from); });
-  const label = n => n.kind === "stage" ? n.label : n.id === "work:charter" ? "Charter" : treeTrim(n.label, 28);
+  // a side job made by its parent's own workflow (the style guide: style.json, written by the first build workflow and read by the later
+  // ones) is an input of the parent, not a child: its edge points into the parent, and it sits in the row of the files its maker reads
+  const flows = Object.fromEntries((m.workflows || []).map(w => [w.id, w])), anchor = {};
+  steps.filter(s => s.lane === "branch").forEach(s => { const t = mapStepTo(m, s), e = edges.find(x => x.kind === "step" && x.to === s.id && isDeck(x.from)); if (!t || !e) return;
+    const own = (t.workflows || []).length && t.workflows.every(w => (by[e.from].workflows || []).includes(w));
+    if (!own) return (dep[t.id] = dep[t.id] || new Set()).add(e.from);
+    (dep[e.from] = dep[e.from] || new Set()).add(t.id);
+    anchor[t.id] = [...new Set(t.workflows.flatMap(w => (flows[w] || {}).reads || []).map(r => (flows[r] || {}).box).filter(b => b && isDeck(b) && b !== t.id && b !== e.from))]; });
+  const label = n => n.kind === "stage" ? n.label : n.id === "work:charter" ? "Charter" : treeTrim(treeName(n), 28);
   const sub = n => n.kind === "stage" ? `${n.workflows.length} workflow${n.workflows.length === 1 ? "" : "s"}` : n.id === "work:charter" ? "the plan"
-    : n.tag === "Send" ? (sendWord(n) || MAPS[n.status] || "") : [n.version != null ? "v" + n.version : "", MAPS[n.status]].filter(Boolean).join(" · ");
+    : n.tag === "Send" ? (sendWord(n) || MAPS[n.status] || "") : [treeName(n) !== n.label ? n.label : "", n.version != null ? "v" + n.version : "", MAPS[n.status]].filter(Boolean).join(" · ");      // a spec's stage output is its second line
   const T = [], row = {};
   if (charter) { T.push({id: charter.id, kind: "charter", n: charter, wf: 0, status: charter.status}); row[charter.id] = 0; }
   Object.values(stages).sort((a, b) => a.order - b.order).forEach(g => { T.push({id: g.id, kind: "stage", n: g, wf: g.workflows.length, status: g.status}); row[g.id] = 1; });
   const ds = decks.filter(d => d.id !== "work:charter");
   ds.forEach(d => { T.push({id: d.id, kind: "deck", n: d, wf: (d.workflows || []).length, status: d.status}); row[d.id] = 2; });
-  for (let k = 0; k < ds.length + 2; k++) ds.forEach(d => { (dep[d.id] || []).forEach(s => { if (row[s] != null) row[d.id] = Math.max(row[d.id], Math.min(row[s] + 1, ds.length + 2)); }); });
+  for (let k = 0; k < ds.length + 2; k++) ds.forEach(d => { (dep[d.id] || []).forEach(s => { if (row[s] != null) row[d.id] = Math.max(row[d.id], Math.min(row[s] + 1, ds.length + 2)); });
+    (anchor[d.id] || []).forEach(a => { if (row[a] != null) row[d.id] = Math.max(row[d.id], row[a]); }); });      // beside the files its maker reads
   const L = [];      // the drawn links: charter to each stage (or to a deliverable no team made), team to deliverable, deliverable to what reads it
   if (charter) Object.keys(stages).forEach(id => L.push({from: charter.id, to: id, kind: "plan"}));
   ds.forEach(d => { if (stageOf[d.id]) L.push({from: stageOf[d.id], to: d.id, kind: "made"}); else if (charter && !(dep[d.id] || new Set()).size) L.push({from: charter.id, to: d.id, kind: "plan"});
@@ -1403,7 +1413,7 @@ function treeHtml(m){
     links: L.links.map(l => ({from: l.from, to: l.to, kind: l.kind})), crossings: L.crossings, W: L.W, H: L.H, open, c,
     ring: ring ? ring.items.map(x => ({id: x.id, x: tRd(c.x + x.x), y: tRd(c.y + x.y), status: x.st, box: [c.x + x.lbox[0], c.y + x.lbox[1], c.x + x.lbox[2], c.y + x.lbox[3]].map(tRd)})) : [], R: ring ? ring.R : 0, rx: ring ? ring.rx : 0, ry: ring ? ring.ry : 0};
   const look = st => mapLook(st);
-  const edge = l => `<path class="tedge ${l.kind}${dim(l.from) || dim(l.to) ? " tdim" : ""}" data-from="${esc(l.from)}" data-to="${esc(l.to)}" d="${treeCurve(P(l.from), P(l.to))}"><title>${mapWords(l.kind === "reads" ? `${(by[l.to] || {}).label} reads ${(by[l.from] || {}).label}` : l.kind === "made" ? `${L.at[l.from].label} made ${(by[l.to] || {}).label}` : `the Charter to ${L.at[l.to].label}`)}</title></path>`;
+  const edge = l => `<path class="tedge ${l.kind}${dim(l.from) || dim(l.to) ? " tdim" : ""}" data-from="${esc(l.from)}" data-to="${esc(l.to)}" d="${treeCurve(P(l.from), P(l.to))}"><title>${mapWords(l.kind === "reads" ? `${treeName(by[l.to])} reads ${treeName(by[l.from])}` : l.kind === "made" ? `${L.at[l.from].label} made ${treeName(by[l.to])}` : `the Charter to ${L.at[l.to].label}`)}</title></path>`;
   const dot = t => { const k = look(t.status), p = P(t.id), aria = `${t.label}: ${t.sub}${t.kind === "stage" ? ", open its workflows" : ", details"}`;
     const glyph = t.kind === "stage" ? [0, 72, 144, 216, 288].map(a => { const q = a * Math.PI / 180 - Math.PI / 2; return `<circle cx="${tRd(t.r * .5 * Math.cos(q))}" cy="${tRd(t.r * .5 * Math.sin(q))}" r="${tRd(Math.max(1.6, t.r * .15))}" class="tglyph"/>`; }).join("")
       : t.kind === "charter" ? `<circle r="${tRd(t.r * .45)}" class="tglyph"/>` : t.n.tag === "Send" ? `<path class="tglyphl" d="M${-t.r * .5} ${-t.r * .3} L0 ${t.r * .15} L${t.r * .5} ${-t.r * .3}"/>` : "";
@@ -1433,7 +1443,7 @@ function treeHtml(m){
   const ws = pick && pick.w, readers = ws ? (m.workflows || []).filter(w => (w.reads || []).includes(ws.id)).map(w => w.id) : [];
   const box = ws && by[ws.box];
   const panel = ws ? `<aside class="mappanel treepanel" data-wfpanel="${esc(ws.id)}" aria-label="Details of ${esc(ws.id)}"><div class="mappanelhead"><b>${mapWords(ws.id)} · ${mapWords(ws.name)}</b><button type="button" class="linkbtn" data-treewfclose>Close (Esc)</button></div>`
-    + [`status: ${mapWords(pick.word && pick.word !== MAPS[pick.st] ? pick.word : MAPW[pick.st] || pick.st)}${ws.status ? " (workflow " + mapWords(ws.status) + ")" : ""}`, `delivers: ${box ? mapWords(box.label) : "not recorded"}`,
+    + [`status: ${mapWords(pick.word && pick.word !== MAPS[pick.st] ? pick.word : MAPW[pick.st] || pick.st)}${ws.status ? " (workflow " + mapWords(ws.status) + ")" : ""}`, `delivers: ${box ? mapWords(treeName(box)) : "not recorded"}`,
        `reads: ${(ws.reads || []).length ? ws.reads.map(x => mapWords(x)).join(", ") : "nothing recorded"}`, `read by: ${readers.length ? readers.map(x => mapWords(x)).join(", ") : "nothing recorded"}`,
        ws.checks && ws.checks.run ? `checks: ${ws.checks.passed} of ${ws.checks.run} passed` : "checks: none recorded"].map(x => `<div class="sub">${x}</div>`).join("")
     + `<div class="sub"><button type="button" class="gobtn" data-wfcard="${esc(ws.id)}">Open</button>${box ? ` <button type="button" class="linkbtn" data-mapgo="${esc(box.id)}">${mapWords(mapGoLabel(box))}</button>` : ""}</div></aside>` : "";

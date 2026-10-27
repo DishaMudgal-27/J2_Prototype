@@ -107,7 +107,10 @@ browser, and `?mapview=line` opens the Line view). Both read the same map.json; 
 
 **Tree (default).** A top-down layered tree on a dark canvas: the Charter on row 0, the run's stages on row 1 (one per team, named by
 its persona; a team that made two deliverables is one stage), each stage's deliverables below it. A deliverable that reads others
-(a hand-off between deliverables, or a side job's parent) sits below all of them, so the rows are a lattice. Each row is ordered by
+(a hand-off between deliverables, or a side job's parent) sits below all of them, so the rows are a lattice. A side job made
+by its parent's own workflow (the style guide: `style.json`, written by the first build workflow and read by the later ones) is an
+input of the parent instead: its line runs into the parent, and it sits in the row of the files its maker reads. A spec is named
+from its file (`artifacts/hint-method.md` is "Hint method"), with its stage's output ("Curriculum") on the second line. Each row is ordered by
 barycentre, then neighbours are swapped while that removes a crossing; then a seeded d3-force pass (link, x-centring and collision
 forces; y fixed per row; a fixed seed and 240 ticks) moves nodes along their row, and a last sweep keeps every label at least 24px
 from its neighbours. The same run always draws the same; crossings are allowed but few (the count is on the SVG as
