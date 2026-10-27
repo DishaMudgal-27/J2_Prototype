@@ -582,8 +582,8 @@ def _versions_on(d, work, handoffs):
         a = by.get(n["id"])
         if a:
             n["role"], n["versions"] = a["role"], a["versions"]
-            if n.get("version") is None:
-                n["version"] = a["history"][-1]["version"] if a["history"] else None      # the style guide: its only version
+            if n.get("version") is None and a["history"]:
+                n["vlatest"] = a["history"][-1]["version"]      # the style guide: the version it saved, which is no stage version
     for h in handoffs:
         a, b = by.get(h["from"]), by.get(h["to"])
         rec = a and b and next((x for x in v["handoffs"] if x["from_artifact"] == a["artifact"]

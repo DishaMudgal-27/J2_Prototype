@@ -534,10 +534,15 @@ def _rubric(d, rid="R-1"):
     return "not recorded", [], f"no {rid} result is recorded"
 
 
+def _makers(row):
+    """The makers a version row records, or none at all when the run recorded none (made_by is "not recorded")."""
+    return [m for m in (row.get("made_by") or []) if isinstance(m, dict)]
+
+
 def _row_cycle(row, wfs, board):
     """The cycle a version was made in, from the workflow that made it or the board entry that changed it; None when
     the run recorded neither."""
-    for m in row.get("made_by") or []:
+    for m in _makers(row):
         w = wfs.get(m.get("workflow")) or {}
         if w.get("cycle"):
             return w["cycle"]
@@ -581,7 +586,7 @@ def handoffs(d, arts):
         if src not in have or dst not in have:
             continue
         if src == "design":      # the style guide is one atom's own output, not a stage
-            src_atoms = {m.get("atom") for m in (have["design"]["history"][0].get("made_by") or []) if m.get("atom")}
+            src_atoms = {m["atom"] for m in _makers(have["design"]["history"][0]) if m.get("atom")}
         else:
             src_atoms = {aid for aid, v in atoms.items() if stage.get(v.get("workflow")) == src}
         consumers = sorted({aid for aid, v in atoms.items() if stage.get(v.get("workflow")) == dst
@@ -591,7 +596,7 @@ def handoffs(d, arts):
         cycles = [c for c in (wfs.get(atoms[a].get("workflow"), {}).get("cycle") for a in consumers) if c]
         mine = {a for a in consumers}
         made = [r["time"] for r in have[dst]["history"]
-                if any((m or {}).get("atom") in mine for m in r.get("made_by") or [])]
+                if any(m.get("atom") in mine for m in _makers(r))]
         from_v = _version_when(have[src]["history"], wfs, board, min(cycles) if cycles else None,
                                min(made) if made else None)
         if dst in ("hld", "lld"):
@@ -624,7 +629,7 @@ def _version_item(item, n, f, vhist):
     """One row of a deliverable's Versions list in the tree: who made it and why, from the version history
     (versions/1), so the tree and versions.json say the same thing. "not recorded" where the run recorded neither."""
     r = vhist.get(f) or {}
-    made = [m for m in (r.get("made_by") or []) if isinstance(m, dict)]
+    made = _makers(r)
     ch = r.get("lines_changed") or {}
     note = " · ".join(x for x in [r.get("why") or "not recorded",
                                   f"+{ch['added']}/-{ch['removed']} lines" if ch.get("added") or ch.get("removed")

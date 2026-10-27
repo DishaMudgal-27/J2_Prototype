@@ -4980,7 +4980,7 @@ def artifact_versions():
     assert ph[0]["from_role"] == "Designer" and ph[0]["to_role"] == "UI developer" and ph[0]["from_version"] == 1, ph[0]
     assert pv["not_recorded"] == [], pv["not_recorded"]
     # a check the run didn't record is "not recorded", never a pass
-    gone = os.path.join(j2.RUNS_DIR, "j2-20200102-000000")
+    gone = os.path.join(j2.RUNS_DIR, "j2-20200201-000000")
     shutil.copytree(run.dir, gone)
     for f in ["audits.json", "receipts.jsonl"] + [x for x in os.listdir(gone) if x.startswith("stage-")]:
         os.remove(os.path.join(gone, f))
@@ -4990,12 +4990,26 @@ def artifact_versions():
     assert len([x for x in gv["not_recorded"] if "was realized" in x]) == len(gv["handoffs"]), gv["not_recorded"]
     assert [a["artifact"] for a in gv["artifacts"]] == [a["artifact"] for a in v["artifacts"]], "the history is still read"
     # an old saved run with no versions.json or artifacts.json opens, and so do the real saved runs in this clone
-    old = os.path.join(j2.RUNS_DIR, "j2-20200103-000000")
+    old = os.path.join(j2.RUNS_DIR, "j2-20200202-000000")
     shutil.copytree(run.dir, old)
     for f in ("versions.json", "artifacts.json", "map.json"):
         os.remove(os.path.join(old, f))
     ov = A.versions(old)
     assert ov["artifacts"] and A.tree(old)["groups"] and j2_map.build(old)["nodes"], ov["run"]
+    for f in ("atoms.json", "documents.json"):      # and with the records that name the makers gone: "not recorded"
+        os.remove(os.path.join(old, f))
+    bare = A.versions(old)
+    assert [a["artifact"] for a in bare["artifacts"]] == [a["artifact"] for a in ov["artifacts"]], bare["artifacts"]
+    docs_ = [(a["artifact"], r) for a in bare["artifacts"] if a["artifact"] in ("prd", "lld")
+             for r in a["history"]]      # documents.json named these makers; board.json still names the one Q-1 changed
+    assert docs_ and all(r["made_by"] == "not recorded" and r["why"] == "not recorded" for _, r in docs_), docs_[:2]
+    assert all(f"who made {k} v{r['version']}" in bare["not_recorded"] for k, r in docs_), bare["not_recorded"][:4]
+    assert all(r["made_by"] == "not recorded" or isinstance(r["made_by"], list)
+               for a in bare["artifacts"] for r in a["history"]), bare["artifacts"][0]
+    hb_ = next(a for a in bare["artifacts"] if a["artifact"] == "hld")["history"][-1]
+    assert hb_["why"] == "changed by Q-1" and [m["workflow"] for m in hb_["made_by"]] == ["W-9"], hb_
+    assert {h["realized"] for h in bare["handoffs"]} == {"not recorded"}, bare["handoffs"]
+    assert A.tree(old)["groups"] and j2_map.build(old)["nodes"], "the tree and the Map still open"
     here = os.path.dirname(os.path.abspath(__file__))
     real = [os.path.join(here, "runs", x) for x in sorted(os.listdir(os.path.join(here, "runs")))[:4]] \
         if os.path.isdir(os.path.join(here, "runs")) else []
@@ -5112,6 +5126,8 @@ def artifact_versions():
             assert g["pane"] <= (390 if kw.get("width") else 1280), (label, g["pane"])
             seen[label] = g["bg"]
         assert seen["1280 light"] != seen["1280 dark"] and seen["390 light"] != seen["390 dark"], seen
+    for f in (gone, old):
+        shutil.rmtree(f, ignore_errors=True)
     print("artifact versions: every deliverable of the demo run has its whole history with the maker, the role and why "
           f"(HLD v{up['to_version']} changed by Q-1, {by['hld']['versions']} versions), the newest row is the one "
           "artifacts.json holds, the four hand-offs are realized from recorded conditions, slice receipts and R-1, a "

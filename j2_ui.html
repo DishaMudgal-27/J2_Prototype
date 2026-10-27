@@ -1439,7 +1439,8 @@ function mapGiven(m){
   });
 }
 const mapHand = g => !g || !g.realized ? "" : `realized: ${g.realized}${(g.evidence || []).length ? " · evidence " + g.evidence.join(", ") : ""}`;
-const mapVers = n => n.kind !== "work" ? "" : [n.role || "", n.version != null && n.versions ? `v${n.version}, ${n.versions} version${n.versions === 1 ? "" : "s"}` : ""].filter(Boolean).join(" · ");
+const mapVers = n => { if (n.kind !== "work") return ""; const v = n.version != null ? n.version : n.vlatest;      // vlatest: a box with no stage version of its own (the style guide)
+  return [n.role || "", v != null && n.versions ? `v${v}, ${n.versions} version${n.versions === 1 ? "" : "s"}` : ""].filter(Boolean).join(" · "); };
 const mapMade = (m, n) => n.made_by ? "made by " + Object.entries(n.made_by.functions || {}).map(([f, c]) => `${mapName(m, "fn:" + f)} ${c}`).join(", ") : "which function made this step: not recorded";
 function mapTip(m, n){
   if (n.kind === "function") return [mapFn(n), mapState(n), mapClean(n.detail || ""), `${n.calls || 0} AI call${n.calls === 1 ? "" : "s"}${n.seconds ? ", " + n.seconds + " s" : ""}${n.tokens && (n.tokens.input || n.tokens.output) ? ", " + n.tokens.input + " tokens in, " + n.tokens.output + " out" : ""}`].filter(Boolean).join(", ");
