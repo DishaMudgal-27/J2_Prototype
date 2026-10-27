@@ -15,6 +15,7 @@ from urllib.parse import parse_qs, urlparse
 import j2
 import j2_artifacts
 import j2_map
+import j2_story
 import llm
 from j2 import HERE, J2Run, clear_lessons
 
@@ -127,6 +128,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 data = f.read()
             return self._send(200, data, "image/png") if ext == ".png" else \
                 self._send(200, data, "text/html" if ext == ".html" else "text/plain")
+        if u.path == "/api/story":      # the Board story view: what each board question did (story/1), live or saved
+            d = j2.saved_dir(run) if run else RUN.dir
+            live = None
+            if not run and (RUN.status in ("running", "waiting") or RUN.paused):
+                live = {"snapshot": RUN.snapshot(), "board": RUN.board}
+            return self._send(200, json.dumps(j2_story.build(d if d and os.path.isdir(d) else None, live),
+                                              ensure_ascii=False))
         if u.path == "/api/board":      # the Board tab: message board entries (board/1), live or saved
             if not run and RUN.status in ("running", "waiting") or (not run and RUN.paused):
                 return self._send(200, json.dumps(RUN.board, ensure_ascii=False))

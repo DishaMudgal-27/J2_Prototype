@@ -10,7 +10,7 @@ const els = {};
 const ctx = vm.createContext({
   document: {getElementById: id => els[id] || (els[id] = el()), querySelector: () => el(), querySelectorAll: () => [],
              body: el(), addEventListener: noop, createElement: el},
-  location: {search: "", href: ""}, localStorage: {getItem: () => null, setItem: noop}, CSS: {escape: x => x},
+  location: {search: "", href: "", hash: ""}, localStorage: {getItem: () => null, setItem: noop}, CSS: {escape: x => x},
   fetch: () => Promise.reject(new Error("no network")), setTimeout: noop, setInterval: noop, requestAnimationFrame: noop,
   console, URLSearchParams, Date, JSON, Math, Set, Map, Promise});
 const src = fs.readFileSync(html, "utf8"), scripts = [...src.matchAll(/<script>([\s\S]*?)<\/script>/g)];
@@ -23,8 +23,9 @@ const out = vm.runInContext(`(s, p, d) => { if (typeof PREVIEWS !== "undefined")
   if (typeof CTX !== "undefined") CTX = s; if (typeof MAP !== "undefined") { Object.assign(MAP, d.map || {}); MAPPIN = d.mappin || ""; MAPFILT = d.mapfilt || ""; WFSTEP = d.wfstep || []; }
   if (typeof ARTS !== "undefined"){ Object.assign(ARTS, d.artifacts || {}); ARTOPEN = d.artopen || ""; Object.assign(ARTTEXT, d.arttext || {}); }
   if (typeof BOARD !== "undefined"){ BOARD.entries.length = 0; BOARD.entries.push(...(d.board || [])); }
+  if (typeof STORY !== "undefined" && d.story){ Object.assign(STORY, d.story); RUNLIST = d.runs || []; STORYCMP = d.storycmp || STORYCMP; }
   if (typeof DOCS !== "undefined"){ Object.assign(DOCS, d.docs); FOCUS = d.focus || {}; Object.assign(REFS, d.refs || {}); (d.open || []).forEach(k => FOLD.add(k)); CHFOCUS = d.chfocus || 0; OTAG = d.otag || ""; STAGE_AUDITS.length = 0; STAGE_AUDITS.push(...(d.stage_audits || [])); }
   renderSimple(s);
   return {simple: $("smsgs").innerHTML, sprog: $("sprog").innerHTML,
-          cards: Object.fromEntries(s.workflows.map(w => [w.id, atomCards(s, w)])), workflows: typeof renderWorkflows === "function" ? renderWorkflows(s) : "", charter: typeof renderCharter === "function" ? renderCharter(s) : "", docs: typeof renderDocs === "function" ? renderDocs() : "", artifacts: typeof renderArtifacts === "function" ? renderArtifacts() : "", map: typeof renderMap === "function" ? renderMap(MAP) : "", board: typeof renderBoard === "function" ? renderBoard() : "", needs: typeof renderNeeds === "function" ? renderNeeds(s) : "", needcount: typeof needsYou === "function" ? needsYou(s).length : -1, branches: typeof MAPBRANCH !== "undefined" ? MAPBRANCH : [], pages: typeof MAPPAGES !== "undefined" ? MAPPAGES : [], given: typeof mapGiven === "function" ? mapGiven(MAP) : []}; }`, ctx)(state, previews, docs);
+          cards: Object.fromEntries(s.workflows.map(w => [w.id, atomCards(s, w)])), workflows: typeof renderWorkflows === "function" ? renderWorkflows(s) : "", charter: typeof renderCharter === "function" ? renderCharter(s) : "", docs: typeof renderDocs === "function" ? renderDocs() : "", artifacts: typeof renderArtifacts === "function" ? renderArtifacts() : "", map: typeof renderMap === "function" ? renderMap(MAP) : "", board: typeof renderBoard === "function" ? renderBoard() : "", story: typeof renderStory === "function" ? renderStory() : "", needs: typeof renderNeeds === "function" ? renderNeeds(s) : "", needcount: typeof needsYou === "function" ? needsYou(s).length : -1, branches: typeof MAPBRANCH !== "undefined" ? MAPBRANCH : [], pages: typeof MAPPAGES !== "undefined" ? MAPPAGES : [], given: typeof mapGiven === "function" ? mapGiven(MAP) : []}; }`, ctx)(state, previews, docs);
 console.log(JSON.stringify(out));

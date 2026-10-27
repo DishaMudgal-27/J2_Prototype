@@ -4928,6 +4928,83 @@ def board_doc_off():
           "the outcome are identical, and no board or re-check record is written ok")
 
 
+STORY_RUN = "j2-20261027-012148"      # the saved demo run the Board story view is checked against
+
+
+def board_story_view():
+    """Message board, the Board story view (story/1, j2_story.py): read-only and recorded data only. The story of the
+    saved demo run (or the same demo built here, when that folder isn't in this clone) has one question, the HLD
+    going v6 -> v7, 12 atoms re-checked and 12 passed, and the page lays it out as one flow strip per question with
+    the deliverable change highlighted, the impact grouped by deliverable, a numbers row computed from the files, a
+    compare picker and a footer from the run's own flags. A run with no board.json has no story and no button."""
+    import shutil
+    import j2_story
+    d = os.path.join(os.path.dirname(os.path.abspath(j2.__file__)), "runs", STORY_RUN)
+    if not os.path.isdir(d):
+        print(f"board story view: {STORY_RUN} isn't in this clone; building the same demo run")
+        d = doc_board_run().dir
+    st = j2_story.build(d)
+    assert st["schema"] == "story/1" and st["has_board"] and len(st["entries"]) == 1, st["entries"]
+    e = st["entries"][0]
+    assert e["id"] == "Q-1" and e["status"] == "answered", e
+    assert e["doubt"]["workflow"] == "W-14" and e["doubt"]["tag"] == "LLD" and e["doubt"]["name"], e["doubt"]
+    assert e["ask"]["atom"] == "W-9.a1" and e["ask"]["tag"] == "HLD" and e["ask"]["question"], e["ask"]
+    assert e["answer"]["text"] and e["answer"]["updated_own_section"], e["answer"]
+    assert e["change"] == {"doc": "hld", "tag": "HLD", "section": "Components", "from_version": 6,
+                          "to_version": 7}, e["change"]
+    assert e["recheck"] == {"atoms": 12, "passed": 12, "failed": 0, "receipts": e["recheck"]["receipts"]}, e["recheck"]
+    assert e["recheck"]["receipts"] > 0, "the re-checks wrote receipts with trigger Q-1"
+    assert st["numbers"] == {"questions": 1, "rechecked": 12, "receipts": e["recheck"]["receipts"],
+                             "duplicate_edges": 0}, st["numbers"]
+    assert {x["deliverable"] for x in e["impact"]} == {"lld", "website"}, e["impact"]
+    assert all(x["name"] and x["result"] == "passed" for x in e["impact"]), e["impact"]
+    assert st["facts"]["versions"]["hld"] == 7 and st["facts"]["status"].startswith("Done"), st["facts"]
+    assert st["flags"]["mock"] is True and st["flags"]["force_question"] == "lld", st["flags"]
+    # a run with no board.json: no story, and the page hides the button (it follows has_board, like the Board tab)
+    plain = next((os.path.join(os.path.dirname(d), x) for x in sorted(os.listdir(os.path.dirname(d)))
+                  if x.startswith("j2-") and not os.path.isfile(os.path.join(os.path.dirname(d), x, "board.json"))), None)
+    if plain:
+        off = j2_story.build(plain)
+        assert not off["has_board"] and off["entries"] == [] and off["numbers"]["questions"] == 0, off["numbers"]
+    ui = open(os.path.join(os.path.dirname(os.path.abspath(j2.__file__)), "j2_ui.html"), encoding="utf-8").read()
+    assert 'id="tab-story" data-tab="story" aria-selected="false" hidden' in ui, "the button starts hidden"
+    assert '$("tab-board").hidden = $("tab-story").hidden = !s.has_board;' in ui, "and follows has_board"
+    assert ui.index('id="tab-story"') < ui.index('id="tab-board"') < ui.index('data-tab="style"'), \
+        "the Board story button is the first entry under Internals"
+    assert "@media (max-width:700px){.storyflow{display:block" in ui, "the strip stacks on a phone"
+    if not shutil.which("node"):
+        print("board story view: node not found, the page render is skipped")
+        return
+    keep, j2.RUNS_DIR = j2.RUNS_DIR, os.path.dirname(d)      # read the saved run where it is (read-only)
+    try:
+        snap = j2.saved_snapshot(os.path.basename(d), 0)
+    finally:
+        j2.RUNS_DIR = keep
+    out = render_node(snap, docs={"docs": {}, "story": st, "runs": [{"id": "other-run", "status": "done"}]})
+    html = out["story"]
+    assert html.count('<section class="storyq"') == 1 and 'data-story="Q-1"' in html, html[:300]
+    assert [m for m in re.findall(r'data-step="(\w+)"', html)] == ["doubt", "ask", "answer", "change", "recheck"], html[:600]
+    assert '<li class="sstep hit" data-step="change">' in html, "the deliverable change is highlighted"
+    assert "W-14 · Technical Designer (LLD)" in html and "W-9.a1 · Solution Architect (HLD)" in html, html[:800]
+    assert "HLD Components</b> v6 → v7" in html and "updated its own section" in html, html
+    assert "12 atoms re-checked, 12 passed, 0 sent to Adaptation" in html, html
+    for group in ('data-group="lld"', 'data-group="website"', 'data-group="reused"'):
+        assert group in html, group
+    assert html.count('class="schip"') == 12 + 0, "one chip per impacted atom"
+    assert html.count('class="pass">passed') == 12, html
+    nums = html.split('class="snums"')[1].split("</div></div>")[0]
+    for n, label in (("1", "questions asked"), ("12", "atoms re-checked"), ("0", "duplicate edges")):
+        assert f"<b>{n}</b>{label}" in nums, (n, label, nums)
+    assert 'id="storycmp"' in html and "other-run" in html and "nothing is compared for you" in html, html[-900:]
+    assert "Mock run (no model call)" in html and "J2_FORCE_QUESTION=lld" in html, html[-400:]
+    STORY_EMPTY = {"schema": "story/1", "entries": [], "numbers": {}, "facts": {}, "flags": {}}
+    empty = render_node(snap, docs={"docs": {}, "story": STORY_EMPTY})["story"]
+    assert "no question was asked" in empty.lower() and "storyq" not in empty, empty
+    print("board story view: the saved demo run tells one question's story (W-14 asks W-9, HLD Components v6 -> v7, "
+          "12 atoms re-checked, 12 passed), the strip highlights the change, the impact is grouped by deliverable, "
+          "every number is computed from the files, and a run with no board.json has no story ok")
+
+
 def board_functions_off():
     """Message board, Part B: the same brief and change request with J2_BOARD unset write no board file, ask
     nothing, and no prompt carries the board fields or the BOARD block (the flag gates all of it; plain_unchanged
@@ -6233,7 +6310,8 @@ def map_tab():
     # ---- Map and Chat are the whole app: the rail, the Needs you strip, and the Map as the navigation
     rail = ui[ui.index('<nav class="rail tabs"'):ui.index("</nav>", ui.index('<nav class="rail tabs"'))]
     top, inside = rail.split('id="railsub"')
-    old_tabs = ["preview", "goal", "workflows", "conflicts", "timeline", "audit", "charter", "docs", "artifacts", "board", "style", "lessons", "playbooks", "report", "rundetails", "runsettings"]
+    # the Board story is the first entry under Internals (shown only when the run has a board); the rest are the old order
+    old_tabs = ["story", "preview", "goal", "workflows", "conflicts", "timeline", "audit", "charter", "docs", "artifacts", "board", "style", "lessons", "playbooks", "report", "rundetails", "runsettings"]
     assert re.findall(r'data-tab="(\w+)"', top) == ["map"] and 'id="gochat"' in top and 'id="internals"' in top and re.findall(r"<span>([^<]+)</span>", top) == ["Map", "Chat", "Internals"], "the rail has Map, Chat and one Internals folder"
     assert re.findall(r'data-tab="(\w+)"', inside) == old_tabs, "every other tab is under Internals, in the old order"
     assert top.count("<svg") == 3 and "<svg" not in inside and ' hidden' in rail.split('id="railsub"')[1].split(">")[0], "one small icon each, none in the folder, folder starts collapsed"
@@ -6836,6 +6914,7 @@ if __name__ == "__main__":
         board_not_mine()
         if mode == "0":      # the board's document changes don't branch on J2_FIXES: four stages, run once
             board_content_edges()
+            board_story_view()
             board_doc_change()
             board_doc_not_owner()
             board_doc_prd()

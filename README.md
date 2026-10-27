@@ -374,6 +374,11 @@ workflow, including a done one from an earlier cycle, or another function.
 - Saved in `board.json` and `board.jsonl`, with `asked_by_role` ("function" or "builder") and `answered_from`
   (`{workflow, version}` or `{function}`). The **Board** tab under Internals lists the entries, and atom cards
   show "Asked / Answered / Used Q-n". With the flag unset, no board files are written and the flow is unchanged.
+- **Board story** (the first entry under Internals, shown only when the run has a `board.json`; also
+  `?view=detail&tab=story` or `#story`): one flow strip per question — Doubt, Ask, Answer, Deliverable change
+  (highlighted), Re-checked by code — then the impact grouped by deliverable, a numbers row and a compare picker
+  for another saved run. Built by code from the run's own files (`j2_story.py`, schema `story/1`, served read-only
+  at `/api/story`); anything the run didn't record reads "not recorded".
 
 **Doc changes from the board.** In a design-document run an answer may correct the document itself:
 `artifact_update` names `{doc, section, text, reason}`.
