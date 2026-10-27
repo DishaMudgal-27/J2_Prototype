@@ -25,6 +25,21 @@ FUNCS = ("identity", "adaptation", "priority", "coordination", "audit")
 NAMES = {"identity": "Identity", "adaptation": "Adaptation", "priority": "Priority", "coordination": "Coordination", "audit": "Audit"}
 # the existing tab that shows each function's work (declared here; a box links to it)
 FN_TAB = {"identity": "charter", "adaptation": "workflows", "priority": "conflicts", "coordination": "timeline", "audit": "audit"}
+# a team's persona when the stage records no role (the realization stages do): from what its step does, else what it makes
+PERSONA_VERB = {"Write": "drafting", "Build": "building", "Send": "sending"}
+PERSONA_TAG = {"PRD": "drafting", "HLD": "drafting", "LLD": "drafting", "Site": "building", "Send": "sending"}
+PERSONA = {"drafting": {"PRD": "Product Analyst", "HLD": "Solution Architect", "LLD": "Technical Designer"}, "building": "Web Developer",
+           "sending": "Messenger"}
+
+
+def send_word(detail):
+    """A send's one word from its atom's note: dry run, sent, skipped (class) or failed (class); "" when it has no note."""
+    d = str(detail or "")
+    m = re.match(r"(Skipped|Failed) \((\w+)\)", d)
+    return "dry run" if re.search(r"dry run", d, re.I) else "sent" if re.match(r"(Sent|Already sent|The .* was sent)\b", d) \
+        else f"{m.group(1).lower()} ({m.group(2)})" if m else "skipped (cap)" if d.startswith("Not sent: the cap of") else "failed" if d.startswith("Not sent:") else ""
+
+
 STEP_VERB = {"doc-sections": "Write", "site-parts": "Build", "send": "Send", "decide": "Write", "style": "Make"}      # what the workflows of that kind do
 LEGEND = [
     {"key": "function", "label": "function", "drawn": True},
@@ -508,6 +523,23 @@ def build(d, live=None):
             st = into.get(b["id"].split(":")[1])
             if st and _after(st, b) == n["id"]:
                 order += [st, b]
+    # presentation: each team's persona (its stage's role, else from what it does or makes; steps that share a workflow are one
+    # team, named as the one with most workflows), a send's word, and each read's reader workflows. The page and the Artifacts tree
+    # both read these, so they always agree.
+    to = {e["from"]: e["to"] for e in edges if e["kind"] == "step" and e["from"].startswith("step:")}
+    for st in steps:
+        tag = (next((n for n in work if n["id"] == to.get(st["id"])), None) or {}).get("tag")
+        p = PERSONA.get(PERSONA_VERB.get(st["label"]) or PERSONA_TAG.get(tag))
+        st["persona"] = st.get("team") or (p if isinstance(p, str) else (p or {}).get(tag) or "Specialist")
+    for st in sorted(steps, key=lambda x: -len(x["workflows"])):
+        for o in steps:
+            if o is not st and len(o["workflows"]) <= len(st["workflows"]) and set(o["workflows"]) & set(st["workflows"]):
+                o["persona"] = st["persona"]
+    for n in work:
+        if n.get("tag") == "Send":
+            n["send"] = send_word(n.get("detail"))
+    for h in handoffs:
+        h["readers"] = re.findall(r"W-\d+", h.get("label") or "") if h.get("basis") == "recorded" else []
     out_nodes = [person] + funcs + order
     for n in out_nodes:
         for k in ("_atoms", "_order", "template", "_team", "_made"):

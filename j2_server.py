@@ -126,6 +126,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if u.path == "/api/artifacts":  # the Artifacts tab: deliverables, then evidence and records (artifacts/types.json)
             d = j2.saved_dir(run) if run else RUN.dir
             return self._send(200, json.dumps(j2_artifacts.listing(d if d and os.path.isdir(d) else None), ensure_ascii=False))
+        if u.path == "/api/artifacts/tree":      # the Artifacts tab as a tree (artifacts-tree/1), made from the same data as the Map
+            d = j2.saved_dir(run) if run else RUN.dir
+            live = {"snapshot": RUN.snapshot(), "stages": list(RUN.stages), "stage_words": j2.J2Run.STAGE_WORDS, "board": RUN.board} \
+                if not run and (RUN.status == "running" or RUN.paused) else None
+            ok = d and os.path.isdir(d)
+            return self._send(200, json.dumps(j2_artifacts.tree(d, j2_map.build(d, live)) if ok else j2_artifacts.tree(None), ensure_ascii=False))
         if u.path == "/api/artifact":   # one file the run's artifact list names, read-only; nothing else is served
             d = j2.saved_dir(run) if run else RUN.dir
             p = j2_artifacts.served(d if d and os.path.isdir(d) else None, q.get("name"))
@@ -134,7 +140,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             ext = os.path.splitext(p)[1]
             with open(p, "rb") as f:
                 data = f.read()
-            return self._send(200, data, "image/png") if ext == ".png" else \
+            return self._send(200, data, "image/png") if ext == ".png" else self._send(200, data, DOCX, os.path.basename(p)) if ext == ".docx" else \
                 self._send(200, data, "text/html" if ext == ".html" else "text/plain")
         if u.path == "/api/board":      # the Board tab: message board entries (board/1), live or saved
             if not run and RUN.status in ("running", "waiting") or (not run and RUN.paused):

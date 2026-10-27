@@ -173,3 +173,15 @@ the Needs you strip; Client Lead (Identity), the Chat; Quality Reviewer (Audit),
 two tables under the Map filtered to them; a team persona's step, the Workflows tab filtered to that step's
 workflows ("Show all" clears it); the Website, the site preview; the Charter, the Charter tab; any other deliverable, its
 document in Artifacts. The page-side state for this (`MAPFILT`, `WFSTEP`) is never stored in map.json.
+
+## The Artifacts tab (artifacts-tree/1)
+
+`/api/artifacts/tree` (and `j2_artifacts.tree(run_dir)`) gives the run's files as a tree, built from the same `j2_map.build` data as
+the Map, so makers, readers and statuses always agree; `/api/artifacts` keeps its flat lists. Groups, each collapsible with a count:
+**Plan** (the Charter, the realization plan with its zone, stages and plan confidence, the workflows); **Specs** (each spec box: its
+file, its team's persona and workflow ids, how many workflows read it); **Deliverables** (each delivered box with its version, team
+and workflow count; under it the style guide it reads, its versions, screenshots and exports, and the sends that report it, with
+sent / skipped / failed); **Proof** (check results, audits, necessary conditions, stage records); **Records** (collapsed: everything
+else the run kept). Every file appears once; each row has its name, who made it (a persona and workflow ids, or the function or code
+for a record), status, size and Open. The map supplies the presentation fields the tree and the page share: `persona` on each team
+step, `send` on each send box and `readers` on each read.

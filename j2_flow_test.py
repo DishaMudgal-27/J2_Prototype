@@ -5824,8 +5824,10 @@ def artifacts_tab():
         assert get(f"/api/artifact?name=site/index.html&run={name}").read().decode().lstrip().lower().startswith("<!doctype")
         assert get("/api/artifact?name=site/shots/v4.png&run=j2-20200101-000000").read()[:4] == b"\x89PNG"
         assert json.loads(get("/api/artifact?name=atoms.json").read())["schema"] == "atom/1"
-        for bad in ("prd.docx", "../j2.py", "/etc/passwd", "site/v1.html", "hld-v1.md", "site/hld-v1.md", "nothing.json", "", "calls.jsonl",
-                    "artifacts.json", "prd.md/../goal.json"):
+        # the tree's own files open too (versions, the Word export, the run's other records); nothing outside the run or unknown
+        assert get("/api/artifact?name=prd.docx").headers["Content-Type"] == j2_server.DOCX and get("/api/artifact?name=site/v1.html").read()
+        assert get("/api/artifact?name=site/hld-v1.md").read().decode().startswith("#") and get("/api/artifact?name=artifacts.json").read()
+        for bad in ("../j2.py", "/etc/passwd", "hld-v1.md", "nothing.json", "", "prd.md/../goal.json", "site/../../j2.py"):
             try:
                 get("/api/artifact?name=" + urllib.request.quote(bad))
                 assert False, f"served {bad!r}"
@@ -5894,6 +5896,81 @@ def j2_ui_idruns(ids):
 
 def by_fn(fn, rng, calls):
     return sum(1 for c in calls if c["fn"] == fn and rng["from"] <= c["id"] <= rng["to"])
+
+
+def artifacts_tree():
+    """The Artifacts tab as a tree (artifacts-tree/1) for every run under runs/: Plan, Specs, Deliverables, Proof, Records; every file in
+    artifacts.json exactly once; every spec has its maker; makers, readers and statuses are j2_map.build's; no deliverable under Records.
+    Run 174314: 5 specs, the Website with its style guide, 14 versions and 2 screenshots. The tab renders it, Records collapsed."""
+    import collections
+    import j2_artifacts as A
+    import j2_map as M
+    repo = os.path.join(os.path.dirname(os.path.abspath(__file__)), "runs")
+    names = sorted(n for n in os.listdir(repo) if os.path.isfile(os.path.join(repo, n, "workflows.json"))) if os.path.isdir(repo) else []
+    seen = 0
+    for name in names:
+        d = os.path.join(repo, name)
+        m = M.build(d)
+        t = A.tree(d, m)
+        groups = {g["id"]: g for g in t["groups"]}
+        assert [g["id"] for g in t["groups"]] == ["plan", "specs", "deliverables", "proof", "records"] and groups["records"]["collapsed"], name
+        files = A.tree_files(t)
+        dup = [f for f, k in collections.Counter(files).items() if k > 1]
+        assert not dup, (name, "a file twice", dup)
+        listed = [r["file"] for r in (json.load(open(os.path.join(d, "artifacts.json"), encoding="utf-8")).get("rows") or [])] if os.path.isfile(os.path.join(d, "artifacts.json")) else []
+        assert all(files.count(f) == 1 for f in listed), (name, [f for f in listed if f not in files])
+        by = {n["id"]: n for n in m["nodes"]}
+        step = {e["to"]: by[e["from"]] for e in m["edges"] if e["kind"] == "step" and by.get(e["from"], {}).get("kind") == "engine"}
+        readers = lambda nid: {w for e in m["edges"] if e["kind"] == "handoff" and e["from"] == nid for w in e.get("readers") or []}
+        items = [x for g in t["groups"] for x in A_walk(g["items"])]
+        for x in items:      # makers, readers and statuses are the map's
+            n = by.get(x.get("node"))
+            if not n:
+                continue
+            st = step.get(n["id"])
+            assert x["made_by"] == ({"persona": st["persona"], "workflows": n["workflows"]} if st else None), (name, x["name"], x["made_by"])
+            if "read_by" in x:
+                assert x["read_by"] == len(readers(n["id"])), (name, x["name"])
+            assert x["status"] == (n.get("send") or A.TREE_STATUS.get(n["status"], n["status"]) if n.get("tag") == "Send" else A.TREE_STATUS.get(n["status"], "filed")), (name, x["name"])
+        for x in groups["specs"]["items"]:
+            if x.get("node"):
+                assert x["made_by"] and x["made_by"].get("persona") and x["made_by"].get("workflows"), (name, x["name"], "every spec has its maker")
+        spec_nodes = {n["id"] for n in m["nodes"] if n.get("tag") == "Spec"}
+        assert {x.get("node") for x in groups["specs"]["items"] if x.get("node")} == spec_nodes, name
+        deliver = {n.get("file") for n in m["nodes"] if n["kind"] == "work" and n.get("tag") not in ("Send", "Charter") and n.get("file")}
+        assert not deliver & set(A.tree_files({"groups": [groups["records"]]})), (name, "a deliverable under Records")
+        seen += 1
+    if "j2-20261026-174314" in names:
+        t = A.tree(os.path.join(repo, "j2-20261026-174314"))
+        g = {x["id"]: x for x in t["groups"]}
+        assert [x["name"] for x in g["specs"]["items"]] == ["Product spec", "Design guide", "Copy guide", "Hint method", "Architecture"], g["specs"]["items"]
+        web = next(x for x in g["deliverables"]["items"] if x["name"] == "Website")
+        kids = {k["name"]: k for k in web["children"]}
+        assert kids["Style guide"]["file"] == "style.json" and kids["Style guide"]["made_by"] == {"persona": "Web Developer", "workflows": ["W-6"]}
+        assert kids["Versions"]["count"] == 14 and kids["Versions"]["collapsed"] and kids["Screenshots"]["count"] == 2, kids
+        assert web["made_by"]["persona"] == "Web Developer" and web["version"] == 14 and web["workflows"] == 12, web
+        plan = {x["name"]: x for x in g["plan"]["items"]}
+        assert "zone analyze" in plan["Realization plan"]["note"] and "plan confidence 0.85" in plan["Realization plan"]["note"] and plan["Workflows"]["note"] == "17 workflows"
+        assert plan["Realization plan"]["children"][0]["file"] == "realization.md"
+        # the tab: five collapsible groups with counts, Records closed, each row with maker, status, size and Open
+        html = render_node({"workflows": [], "chat": []}, docs={"docs": {}, "artifacts": {**A.listing(os.path.join(repo, "j2-20261026-174314")), "tree": t}})["artifacts"]
+        assert [re.sub(r"<[^>]+>", "", h).split()[0] for h in re.findall(r"<summary><h3>.*?</h3>", html)] == ["Plan", "Specs", "Deliverables", "Proof", "Records"]
+        assert 'data-key="artg-records">' in html and 'data-key="artg-plan" open>' in html, "Records start collapsed"
+        assert "made by Product Manager (W-1)" in html and "read by 7 workflows" in html and "made by Web Developer (W-6)" in html and 'data-artopen="artifacts/hint-method.md"' in html
+    if "j2-20261027-130930" in names:
+        t = A.tree(os.path.join(repo, "j2-20261027-130930"))
+        prd = next(x for g in t["groups"] if g["id"] == "deliverables" for x in g["items"])
+        sends = {k["name"]: k["status"] for k in prd["children"] if k.get("node", "").startswith("work:W-")}
+        assert sends == {"Email · PRD done": "sent", "Send a test email": "skipped (cap)"}, sends      # under the document they report
+    print(f"artifacts tree: {seen} runs, Plan / Specs / Deliverables / Proof / Records, every artifacts.json file once, every spec with its maker, "
+          "makers, readers and statuses from j2_map.build, no deliverable under Records; 174314: 5 specs, Website with its style guide, "
+          "14 versions, 2 screenshots; 130930: the emails under the PRD with sent and skipped ok")
+
+
+def A_walk(xs):
+    for x in xs:
+        yield x
+        yield from A_walk(x.get("children") or [])
 
 
 def map_logic():
@@ -7317,6 +7394,7 @@ if __name__ == "__main__":
         if mode == "0":
             map_tree()
             map_logic()
+            artifacts_tree()
         docs_repeat_failure()
         docs_intake_and_compare()
         plain_unchanged("f6938b2", slim="0")      # J2_SLIM=0 is the old path, prompt for prompt
