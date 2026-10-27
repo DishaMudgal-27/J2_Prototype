@@ -158,6 +158,10 @@ body.simple #dview{display:flex;flex:0 0 auto}body.simple #dview .dcol{display:n
 .mapviews{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-left:auto}.mapviews button{border:0;background:transparent;color:var(--ink);padding:2px 12px;font:inherit;font-size:13px;cursor:pointer}.mapviews button[aria-pressed="true"]{background:var(--line);font-weight:600}
 .mapsvgwrap[data-view="tree"] .mapsvg{display:none!important}.mapsvgwrap[data-view="line"] .treebox{display:none}
 .treebox{position:relative;margin:0 0 8px}.treebar{display:flex;gap:10px;align-items:center;margin:0 0 6px}.treebar .sub{color:var(--muted);font-size:12px}.treebar .linkbtn{color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:8px;padding:2px 10px;text-decoration:none}.treebar [hidden]{display:none}
+.treepanel{position:fixed;top:120px;right:24px;width:360px;max-height:calc(100vh - 150px);overflow:auto;box-sizing:border-box;margin:0;z-index:20;box-shadow:0 8px 28px rgba(0,0,0,.4)}      /* beside the map, over the chat column: the map keeps its size */
+@media (max-width:1100px){.treepanel{top:auto;left:0;right:0;bottom:0;width:auto;max-height:55vh;border-radius:14px 14px 0 0;animation:treeup .25s ease-out}}
+@keyframes treeup{from{transform:translateY(100%)}to{transform:none}}@media (prefers-reduced-motion: reduce){.treepanel{animation:none}}
+.treesvg .thide .tlab,.treesvg .thide .tsub{display:none}
 .treesvg{display:block;width:100%;height:clamp(440px,64vh,760px);background:#16181d;border:1px solid #2a2e35;border-radius:12px;cursor:grab;touch-action:none;font:12px system-ui,sans-serif;user-select:none}.treesvg:active{cursor:grabbing}
 .treesvg .tedge{fill:none;stroke:#8a8f98;stroke-width:1.2;opacity:.32;transition:opacity .3s}.treesvg .tedge.hot{opacity:.95;stroke:#c9ccd1;stroke-width:1.8}
 .treesvg .tnode{cursor:pointer;transition:opacity .3s}.treesvg .tdim{opacity:.2}.treesvg .tlab{fill:#dcddde;font-size:13px;paint-order:stroke;stroke:#16181d;stroke-width:3px;stroke-linejoin:round}.treesvg .tsub{fill:#8a8f98;font-size:11px;paint-order:stroke;stroke:#16181d;stroke-width:3px;stroke-linejoin:round}.treesvg .tglyph{fill:#8a8f98}.treesvg .tglyphl{fill:none;stroke:#8a8f98;stroke-width:1.2}
@@ -1385,23 +1389,25 @@ function treeRing(m, g, W, H){
   const n = ids.length, R = Math.max(130, Math.min(340, n * 24)), rx = Math.max(120, Math.min(R * 1.35, W / 2 - 170)), ry = Math.max(90, Math.min(R * .8, H / 2 - 100));
   return {R, rx, ry, items: ids.map((id, i) => { const a = -Math.PI / 2 + (n > 2 ? Math.PI / n : 0) + 2 * Math.PI * i / Math.max(n, 1), w = ws.find(x => x.id === id) || {id, name: id, status: null, box: null, reads: [], checks: {passed: 0, run: 0}};
     const box = mapById(m)[w.box], st = treeWfStatus(m, w);
-    return {id, w, a, x: tRd(rx * Math.cos(a)), y: tRd(ry * Math.sin(a)), st, word: (box && box.tag === "Send" && sendWord(box)) || MAPS[st] || w.status || ""}; })};
+    const word = (box && box.tag === "Send" && sendWord(box)) || MAPS[st] || w.status || "", x = tRd(rx * Math.cos(a)), y = tRd(ry * Math.sin(a)), right = Math.cos(a) >= -1e-9;
+    const lw = Math.max(`${id} · ${treeTrim(w.name, 24)}`.length * 7.4, word.length * 6.3);      // its label beside the dot, outward (see ringHtml)
+    return {id, w, a, x, y, st, word, lbox: right ? [x + 13, y - 13, x + 13 + lw, y + 16] : [x - 13 - lw, y - 13, x - 13, y + 16]}; })};
 }
 function treeHtml(m){
   const L = mapTree(m), by = mapById(m), open = L.at[TREE.open] && L.at[TREE.open].kind === "stage" ? TREE.open : "";
   const c = open ? (TREE.c || {x: L.W / 2, y: L.H / 2}) : null, P = id => id === open ? c : L.at[id];
   const near = new Set(open ? [open, ...L.links.filter(l => l.from === open || l.to === open).flatMap(l => [l.from, l.to])] : []);
-  const dim = id => open && !near.has(id) ? " tdim" : "";
+  const dim = id => open && !near.has(id) ? " tdim" : "", hide = id => open && id !== open ? " tdim thide" : "";      // open: only the stage and its circle keep their words
   const ring = open ? treeRing(m, L.stages[open], L.W, L.H) : null, pick = ring && ring.items.find(x => x.id === TREE.wf);
   MAPTREE = {nodes: L.nodes.map(t => ({id: t.id, kind: t.kind, row: t.row, x: t.x, y: t.y, r: t.r, label: t.label, sub: t.sub, box: t.box, workflows: t.kind === "stage" ? t.n.workflows : t.n.workflows || []})),
     links: L.links.map(l => ({from: l.from, to: l.to, kind: l.kind})), crossings: L.crossings, W: L.W, H: L.H, open, c,
-    ring: ring ? ring.items.map(x => ({id: x.id, x: tRd(c.x + x.x), y: tRd(c.y + x.y), status: x.st})) : [], R: ring ? ring.R : 0, rx: ring ? ring.rx : 0, ry: ring ? ring.ry : 0};
+    ring: ring ? ring.items.map(x => ({id: x.id, x: tRd(c.x + x.x), y: tRd(c.y + x.y), status: x.st, box: [c.x + x.lbox[0], c.y + x.lbox[1], c.x + x.lbox[2], c.y + x.lbox[3]].map(tRd)})) : [], R: ring ? ring.R : 0, rx: ring ? ring.rx : 0, ry: ring ? ring.ry : 0};
   const look = st => mapLook(st);
   const edge = l => `<path class="tedge ${l.kind}${dim(l.from) || dim(l.to) ? " tdim" : ""}" data-from="${esc(l.from)}" data-to="${esc(l.to)}" d="${treeCurve(P(l.from), P(l.to))}"><title>${mapWords(l.kind === "reads" ? `${(by[l.to] || {}).label} reads ${(by[l.from] || {}).label}` : l.kind === "made" ? `${L.at[l.from].label} made ${(by[l.to] || {}).label}` : `the Charter to ${L.at[l.to].label}`)}</title></path>`;
   const dot = t => { const k = look(t.status), p = P(t.id), aria = `${t.label}: ${t.sub}${t.kind === "stage" ? ", open its workflows" : ", details"}`;
     const glyph = t.kind === "stage" ? [0, 72, 144, 216, 288].map(a => { const q = a * Math.PI / 180 - Math.PI / 2; return `<circle cx="${tRd(t.r * .5 * Math.cos(q))}" cy="${tRd(t.r * .5 * Math.sin(q))}" r="${tRd(Math.max(1.6, t.r * .15))}" class="tglyph"/>`; }).join("")
       : t.kind === "charter" ? `<circle r="${tRd(t.r * .45)}" class="tglyph"/>` : t.n.tag === "Send" ? `<path class="tglyphl" d="M${-t.r * .5} ${-t.r * .3} L0 ${t.r * .15} L${t.r * .5} ${-t.r * .3}"/>` : "";
-    return `<g class="tnode t${t.kind}${dim(t.id)}${t.id === open ? " open" : ""}${t.id === MAPPIN ? " sel" : ""}" data-id="${esc(t.id)}" data-kind="${t.kind}" data-x="${t.x}" data-y="${t.y}" transform="translate(${tRd(p.x)},${tRd(p.y)})" tabindex="0" role="button" aria-label="${mapWords(aria)}"${t.kind === "stage" ? ` aria-expanded="${t.id === open}"` : ""}>`
+    return `<g class="tnode t${t.kind}${hide(t.id)}${t.id === open ? " open" : ""}${t.id === MAPPIN ? " sel" : ""}" data-id="${esc(t.id)}" data-kind="${t.kind}" data-x="${t.x}" data-y="${t.y}" transform="translate(${tRd(p.x)},${tRd(p.y)})" tabindex="0" role="button" aria-label="${mapWords(aria)}"${t.kind === "stage" ? ` aria-expanded="${t.id === open}"` : ""}>`
       + `<title>${mapWords(t.kind === "stage" ? `${t.label} · ${t.sub} · ${MAPW[t.status] || ""}` : mapTip(m, t.n))}</title>`
       + `<circle class="tdot" r="${t.r}" fill="${t.status === "filed" ? "color-mix(in srgb, var(--ok) 22%, #1d2026)" : "#1d2026"}" stroke="${k.stroke}" stroke-width="${Math.max(1.6, k.width)}"${k.dash}/>${glyph}`
       + mapBadge(t.status, tRd(t.r * .8), tRd(-t.r * .8))
@@ -1457,8 +1463,8 @@ function treeMove(id, a, b, opening, done){
   const at = el => ({x: +el.dataset.x, y: +el.dataset.y}), nodes = Object.fromEntries([...svg.querySelectorAll(".tnodes > .tnode")].map(x => [x.dataset.id, at(x)]));
   const near = new Set([id]), es = [...svg.querySelectorAll(".tedge")];
   es.forEach(e => { if (e.dataset.from === id) near.add(e.dataset.to); if (e.dataset.to === id) near.add(e.dataset.from); });
-  if (opening){ svg.querySelectorAll(".tnodes > .tnode").forEach(x => x.classList.toggle("tdim", !near.has(x.dataset.id))); es.forEach(e => e.classList.toggle("tdim", e.dataset.from !== id && e.dataset.to !== id)); }
-  else { svg.querySelectorAll(".tdim").forEach(x => x.classList.remove("tdim")); }
+  if (opening){ svg.querySelectorAll(".tnodes > .tnode").forEach(x => { x.classList.toggle("tdim", x.dataset.id !== id); x.classList.toggle("thide", x.dataset.id !== id); }); es.forEach(e => e.classList.toggle("tdim", e.dataset.from !== id && e.dataset.to !== id)); }
+  else { svg.querySelectorAll(".tdim,.thide").forEach(x => x.classList.remove("tdim", "thide")); }
   const ring = g.querySelector(".tring"), ease = typeof d3 !== "undefined" && d3.easeCubicInOut ? d3.easeCubicInOut : t => t, t0 = performance.now();
   let over = false; const end = () => { if (!over){ over = true; done(); } };
   setTimeout(end, 450);      // a tab that draws no frames (hidden, or headless) still lands on the end state
@@ -1480,7 +1486,7 @@ function treeOpen(id){
   const s2 = treeSvg(), g2 = s2 && [...s2.querySelectorAll(".tnode.tstage")].find(x => x.dataset.id === id);
   if (!g2 || treeReduce()) return;
   g2.setAttribute("transform", `translate(${from.x},${from.y})`); const rg = g2.querySelector(".tring"); if (rg){ rg.setAttribute("transform", "scale(0)"); rg.style.opacity = 0; }
-  s2.querySelectorAll(".tdim").forEach(x => x.classList.remove("tdim"));
+  s2.querySelectorAll(".tdim,.thide").forEach(x => x.classList.remove("tdim", "thide"));
   treeMove(id, from, TREE.c, true, () => { if (TREE.open === id){ $("pane-map").__html = null; paintMap(); } });      // the end state, drawn exactly as a repaint draws it
 }
 function treeClose(){

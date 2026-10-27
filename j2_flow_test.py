@@ -5945,11 +5945,16 @@ def map_tree():
             assert ot["open"] == st["id"] and sorted(x["id"] for x in ot["ring"]) == sorted(st["workflows"]), (name, st["id"])
             c, rx, ry = ot["c"], ot["rx"], ot["ry"]
             assert all(abs(((x["x"] - c["x"]) / rx) ** 2 + ((x["y"] - c["y"]) / ry) ** 2 - 1) < 0.02 for x in ot["ring"]), "evenly on one ring round the stage"
-            near = {st["id"]} | {l["from"] for l in t["links"] if l["to"] == st["id"]} | {l["to"] for l in t["links"] if l["from"] == st["id"]}
             svg = o["map"][o["map"].index('<svg class="treesvg"'):o["map"].index("</svg>", o["map"].index('<svg class="treesvg"'))]
             for n in t["nodes"]:
                 g = re.search(r'<g class="tnode ([^"]*)" data-id="%s"' % re.escape(htmllib.escape(n["id"])), svg)
-                assert g and (("tdim" in g.group(1)) == (n["id"] not in near)), (name, st["id"], n["id"], "what is not connected fades")
+                assert g and (("tdim" in g.group(1) and "thide" in g.group(1)) == (n["id"] != st["id"])), (name, st["id"], n["id"], "every other node fades, its words hidden")
+            w_ = st["box"][2] - st["box"][0]
+            shown = [x["box"] for x in ot["ring"]] + [[c["x"] - w_ / 2, c["y"] + st["r"] + 4, c["x"] + w_ / 2, c["y"] + st["r"] + 33]]      # the only words left: the circle's and the stage's
+            for i in range(len(shown)):
+                for j in range(i + 1, len(shown)):
+                    p, q = shown[i], shown[j]
+                    assert p[2] <= q[0] or q[2] <= p[0] or p[3] <= q[1] or q[3] <= p[1], (name, st["id"], "labels in the circle overlap", i, j)
             assert svg.count('class="tnode twf') == len(st["workflows"]) and svg.count('class="tspoke"') == len(st["workflows"])
             circled |= {x["id"] for x in ot["ring"]}
         placed = circled | {w for n in t["nodes"] for w in n["workflows"]}
@@ -5974,11 +5979,17 @@ def map_tree():
         ui = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "j2_ui.html"), encoding="utf-8").read()
         name = names[0]
         js = ("const q = s => [...document.querySelectorAll(s)], st = q('.tnode.tstage').sort((a, b) => +b.dataset.x - +a.dataset.x)[0], id = st.dataset.id, r = {id};"
+              "const s0 = document.querySelector('.treesvg').getBoundingClientRect(); r.fits = [s0.bottom <= innerHeight, s0.top >= 0, document.documentElement.scrollHeight <= innerHeight + 1];"
               "r.d3 = typeof d3; r.tree = getComputedStyle(document.querySelector('.treesvg')).display; r.line = getComputedStyle(document.querySelector('.mapsvg:not(.mapvert)')).display;"
               "st.dispatchEvent(new MouseEvent('click', {bubbles: true}));"
               "setTimeout(() => { const g = q('.tnode.tstage').find(x => x.dataset.id === id), svg = document.querySelector('.treesvg');"
               " r.open = g.classList.contains('open'); r.at = g.getAttribute('transform'); r.mid = [+svg.dataset.w / 2, +svg.dataset.h / 2]; r.ring = g.querySelectorAll('.twf').length;"
               " r.dim = q('.tnodes > .tnode.tdim').length; r.all = q('.tnodes > .tnode').length; r.back = !document.querySelector('[data-treeback]').hidden;"
+              " r.words = q('.tnodes > .tnode.thide .tlab').filter(x => x.getBoundingClientRect().width > 0).length;"
+              " const w = g.querySelector('.twf'); w.dispatchEvent(new MouseEvent('click', {bubbles: true}));"
+              " const pn = document.querySelector('.treepanel'), pr = pn.getBoundingClientRect(), sr = document.querySelector('.treesvg').getBoundingClientRect();"
+              " r.panel = [pr.top >= 0, pr.bottom <= innerHeight, pr.right <= innerWidth, pr.left >= sr.right - 1, pr.height > 100, !!pn.querySelector('[data-wfcard]')];"
+              " document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})); r.panelGone = !document.querySelector('.treepanel');"
               " document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));"
               " setTimeout(() => { const h = q('.tnode.tstage').find(x => x.dataset.id === id); r.after = [q('.tnode.open').length, q('.tdim').length, h.getAttribute('transform') === 'translate(' + h.dataset.x + ',' + h.dataset.y + ')', q('.twf').length];"
               "  document.querySelector('[data-mapview=line]').click(); r.line2 = getComputedStyle(document.querySelector('.mapsvg:not(.mapvert)')).display; r.tree2 = getComputedStyle(document.querySelector('.treebox')).display;"
@@ -5998,7 +6009,9 @@ def map_tree():
         assert "error" not in got and got["d3"] == "object" and got["tree"] == "block" and got["line"] == "none", got
         x, y = (float(v) for v in re.match(r"translate\(([\d.]+),([\d.]+)\)", got["at"]).groups())
         assert got["open"] and abs(x - got["mid"][0]) < 1 and abs(y - got["mid"][1]) < 1 and got["ring"] > 0 and got["back"], got
-        assert 0 < got["dim"] < got["all"] and got["after"] == [0, 0, True, 0], got
+        assert got["dim"] == got["all"] - 1 and got["words"] == 0 and got["after"] == [0, 0, True, 0], got
+        assert got["panel"] == [True] * 6 and got["panelGone"], ("the workflow panel sits beside the map, in view at 1440x900; Esc hides it", got)
+        assert got["fits"] == [True, True, True], ("the whole tree fits 1440x900 at load, no scrolling", got)
         assert got["line2"] != "none" and got["tree2"] == "none", "the Line toggle shows the metro map"
     print("map tree: Charter, stages, deliverables below what they read; the same run draws the same; every workflow in the tree or its stage's "
           "circle; no labels overlap, 24px apart; a stage's circle round it with the rest faded, a picked workflow's panel and links, Esc returns; "

@@ -114,9 +114,10 @@ from its neighbours. The same run always draws the same; crossings are allowed b
 `data-crossings`). Lines are smooth curves, thin and faint, lit on hover. A dot's size is its workflow count, its label is under
 it, and its status is on the ring only (the same colours and marks as the Line view).
 Clicking a stage moves it to the middle of the view (300 ms, eased; no animation with prefers-reduced-motion) with its workflows
-(id, short name, status) evenly round it on a ring stretched to the canvas, joined by curved spokes; everything not connected fades
-to 20%. Clicking a workflow there opens its panel (status, what it delivers, what it reads, what reads it, checks, an Open button
-to its card in Workflows) and draws its own "reads" (solid) and "read by" (dashed) links. Esc, Back or a click on empty space
+(id, short name, status) evenly round it on a ring stretched to the canvas, joined by curved spokes; every other node fades to
+20% with its label hidden (restored on close), so only the stage's and the circle's words show. Clicking a workflow there opens
+its panel (floating beside the map, over the chat column; a sheet from the bottom under 1100px): status, what it delivers, what it reads, what reads it, checks, an Open button
+to its card in Workflows, and draws its own "reads" (solid) and "read by" (dashed) links. Esc, Back or a click on empty space
 returns. Drag to pan, wheel or pinch to zoom; Fit resets. A deliverable or the Charter opens the same panel and Open button as in
 the Line view. The library is d3 7.9.0 (ISC), vendored at `vendor/d3.min.js` and served by the app itself: no CDN.
 
