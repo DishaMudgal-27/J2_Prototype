@@ -374,6 +374,11 @@ workflow, including a done one from an earlier cycle, or another function.
 - Saved in `board.json` and `board.jsonl`, with `asked_by_role` ("function" or "builder") and `answered_from`
   (`{workflow, version}` or `{function}`). The **Board** tab under Internals lists the entries, and atom cards
   show "Asked / Answered / Used Q-n". With the flag unset, no board files are written and the flow is unchanged.
+- **Board story** (the first entry under Internals, shown only when the run has a `board.json`; also
+  `?view=detail&tab=story` or `#story`): one flow strip per question — Doubt, Ask, Answer, Deliverable change
+  (highlighted), Re-checked by code — then the impact grouped by deliverable, a numbers row and a compare picker
+  for another saved run. Built by code from the run's own files (`j2_story.py`, schema `story/1`, served read-only
+  at `/api/story`); anything the run didn't record reads "not recorded".
 
 **Doc changes from the board.** In a design-document run an answer may correct the document itself:
 `artifact_update` names `{doc, section, text, reason}`.
@@ -384,13 +389,19 @@ workflow, including a done one from an earlier cycle, or another function.
   the `.docx` again, and refreshes what reads it (the chain, the charter, the LLD blueprint).
 - It then re-runs that document's conditions (P1-P8 / H1-H6 / L1-L6) and the owner's checks, with no AI call:
   receipts carry `"trigger": "Q-k"` and `audits.json` gets a `{"kind": "recheck"}` entry.
-- The change **propagates by recorded edges only** (`used_by`, transitively: HLD → LLD → website). Each atom it
-  reaches is re-checked and marked `rechecked`; one that fails goes to Adaptation as a revise priced as a fix. No
-  recorded edge means `impact: []` and nothing propagates.
-- Records: `from_version`/`to_version` and `impact` on the entry, `changed_by`/`rechecked_after` on the artifact
-  rows, `stale`/`rechecked` and "Updated by Q-k" on the atoms, an `asks` line between the two deliverables on the
-  Map with the version bump and "re-checked after Q-k", and one chat line: "HLD v6 -> v7 (Q-1). Re-checked: 4
-  passed, 0 sent to Adaptation." The Simple view is unchanged.
+- The change **propagates along content edges only**, from the changed atom and transitively: the named allowlist
+  in `j2_schema.CONTENT_EDGES` (the PRD's requirements, the HLD's components or summary, an LLD slice, a declared
+  dependency) is what says a section was built from another. A manifest listing ("its section, anchor and
+  selectors were listed") and a `board Q-n` edge record what a prompt held, not what the work was built from, so a
+  change never travels along them, and a sibling section of the same document is not impacted without a content
+  edge of its own. No content edge means `impact: []`. Each atom the closure reaches is re-checked and marked
+  `rechecked` (as it is built, if it comes later); one that fails goes to Adaptation as a revise priced as a fix.
+- Records: `from_version`/`to_version` and `impact` on the entry (every atom the closure reached, with what its
+  re-check found), `changed_by`/`rechecked_after` on the artifact rows, `stale`/`rechecked` and "Updated by Q-k" on
+  the atoms, an `asks` line between the two deliverables on the Map with the version bump and "re-checked after
+  Q-k", an **Impact** column on the Board tab, and two chat lines: the change ("HLD v6 -> v7 (Q-1): the Components
+  section is replaced ...") and, when the run stops, the tally, whose numbers are `impact` itself ("HLD v6 -> v7
+  (Q-1). Re-checked: 12 passed, 0 sent to Adaptation."). The Simple view is unchanged.
 
 `J2_FORCE_QUESTION=<comma list>` (mock mode only) is a test switch like `J2_FORCE_AUDIT_FAIL`: each named asker
 asks one question, once per run. A name is a function (`identity`, `adaptation`, `priority`, `coordination`,

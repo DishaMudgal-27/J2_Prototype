@@ -4687,6 +4687,30 @@ def doc_board_run(force="lld", patch=None, budget=1400, demo=False):
     return run
 
 
+def board_content_edges():
+    """Message board, part C: the named allowlist of content edges (j2_schema.CONTENT_EDGES). A document change
+    travels along the reasons that say what a section was built from (the PRD's requirements, the HLD's components
+    or summary, an LLD slice, a declared dependency) and along nothing else: a manifest listing and a board answer
+    record what a prompt held. (atom, reason) pairs are recorded once."""
+    S = j2.j2_schema
+    want = {"the PRD's requirements were in this builder's prompt (charter)": "prd_requirements",
+            "the HLD's components were in this builder's prompt (charter)": "hld_components",
+            "the HLD component summary was in this builder's prompt": "hld_summary",
+            "LLD slice S1, S2: its form fields were in this builder's prompt": "lld_slice",
+            "its workflow depends on Products": "declared_dependency"}
+    for why, name in want.items():
+        assert S.content_edge(why) == name, (why, S.content_edge(why))
+    assert {n for n, _ in S.CONTENT_EDGES} == set(want.values()), S.CONTENT_EDGES
+    for why in (j2.J2Run.MANIFEST_WHY, "board Q-1", "the email reports prd done", "the message is built from prd.md",
+                "declared dependency", "", None):
+        assert S.content_edge(why) is None, why
+    e = lambda a, w: {"atom": a, "why": w}
+    assert S.dedupe_edges([e("W-1.a1", "a"), e("W-1.a1", "a"), e("W-1.a1", "b"), e("W-2.a1", "a")]) == \
+        [e("W-1.a1", "a"), e("W-1.a1", "b"), e("W-2.a1", "a")]
+    print("board content edges: the five named content edges classify, a manifest listing, a board answer and a send "
+          "edge do not, and the same atom and reason are recorded once ok")
+
+
 def board_doc_change():
     """Message board, part C (a): the LLD's Interactive elements builder asks the HLD's Components atom how the
     booking is sent; the HLD owner answers from the brief's address and corrects its own section. Code applies it
@@ -4711,11 +4735,36 @@ def board_doc_change():
     assert "mailto" in json.dumps(run.docs["hld"]["agent_output"]), "documents.json carries the new components"
     conds = json.load(open(os.path.join(run.dir, "conditions-hld.json"), encoding="utf-8"))
     assert [c["id"] for c in conds] == ["H1", "H2", "H3", "H4", "H5", "H6"] and all(c["met"] for c in conds), conds
-    # the impact: recorded edges only, each with its own re-check receipt
+    line = next((x for x in run.chat if x["who"] == "system" and "Re-checked:" in x["text"]
+                 and f"HLD v{up['from_version']} -> v{up['to_version']} (Q-1)" in x["text"]), None)
+    assert line and "sent to Adaptation" in line["text"], [x["text"] for x in run.chat if x["who"] == "system"][-4:]
+    # the impact: the transitive closure over content edges from the changed atom, each with its re-check receipt
+    atomviews = {v["id"]: v for v in json.load(open(os.path.join(run.dir, "atoms.json"), encoding="utf-8"))["atoms"]}
     impact = {x["atom"]: x["result"] for x in e["impact"]}
     assert impact and all(r == "passed" for r in impact.values()), e["impact"]
-    assert "W-13.a1" in impact, "the LLD atoms that used HLD Components are re-checked"
-    assert any(a.startswith(("W-19", "W-20", "W-21", "W-22", "W-23")) for a in impact), "the website atoms too"
+    assert len(impact) == len(e["impact"]), ("each atom once", e["impact"])
+    content = [(x["atom"], j2.j2_schema.content_edge(x["why"])) for x in atomviews["W-9.a1"]["used_by"]]
+    read_me = {a for a, name in content if name}
+    lld_read = {a for a, name in content if name == "hld_components"}
+    assert lld_read and lld_read <= set(impact) and lld_read <= set(run.docs["lld"]["atoms"]), \
+        ("every LLD atom that read the HLD's components is impacted", sorted(lld_read))
+    site_read = {a for a, name in content if name == "hld_summary"}
+    assert len(site_read) > 1 and site_read <= set(impact), \
+        ("every website atom built from the HLD summary is impacted", sorted(site_read))
+    assert read_me == set(impact), (sorted(read_me), sorted(impact))
+    # the chat line reports impact itself, and an edge that only listed a section is not a content edge
+    counts = re.search(r"Re-checked: (\d+) passed, (\d+) sent to Adaptation", line["text"])
+    assert int(counts[1]) + int(counts[2]) == len(impact), (line["text"], e["impact"])
+    assert int(counts[1]) == sum(r == "passed" for r in impact.values()), (line["text"], e["impact"])
+    sib = [a for a in impact if a in ("W-10.a1", "W-11.a1", "W-12.a1")]
+    assert not sib, ("an HLD section the change has no content edge to is not impacted", sib)
+    assert j2.j2_schema.content_edge(j2.J2Run.MANIFEST_WHY) is None and j2.j2_schema.content_edge("board Q-1") is None
+    assert [j2.j2_schema.content_edge(x["why"]) for x in atomviews["W-13.a1"]["depends_on"]
+            if x["atom"] == "W-9.a1"].count("hld_components") == 1, atomviews["W-13.a1"]["depends_on"]
+    for v in atomviews.values():      # the same atom and reason appear once
+        for key in ("depends_on", "used_by"):
+            pairs = [(x["atom"], x["why"]) for x in v[key]]
+            assert len(pairs) == len(set(pairs)), (v["id"], key, pairs)
     recs = [json.loads(ln) for ln in open(os.path.join(run.dir, "receipts.jsonl"), encoding="utf-8")]
     triggered = {r["atom"] for r in recs if r.get("trigger") == "Q-1"}
     assert set(impact) | {"W-9.a1"} <= triggered, (sorted(triggered), sorted(impact))
@@ -4737,16 +4786,20 @@ def board_doc_change():
             "basis": "recorded", "source": {"file": "board.json", "field": "entries", "value": "Q-1"}} in m["edges"], [x for x in m["edges"] if x["kind"] == "asks"]
     hld_node = next(n for n in m["nodes"] if n["id"] == "work:hld")
     assert hld_node["version"] == up["to_version"] and "re-checked after Q-1" in hld_node["detail"], hld_node
-    line = next((x for x in run.chat if x["who"] == "system" and f"HLD v{up['from_version']} -> "
-                 f"v{up['to_version']} (Q-1)" in x["text"]), None)
-    assert line and "Re-checked:" in line["text"] and "sent to Adaptation" in line["text"], line
     assert any(m["who"] == "W-14" and "Q-1:" in m["text"] for m in run.chat), "the ask is in the chat"
     assert any(m["who"] == "W-9" and "(changed the HLD)" in m["text"] for m in run.chat), "the answer is in the chat"
     import shutil
     if shutil.which("node"):
         snap = j2.saved_snapshot(os.path.basename(run.dir), 0)
-        out = render_node(snap, docs={"docs": {"hld": {"text": hld, "asked": True, "workflows": ["W-9"]}}})
+        out = render_node(snap, docs={"docs": {"hld": {"text": hld, "asked": True, "workflows": ["W-9"]}},
+                                      "board": run.board["entries"]})
         assert f"Version {up['to_version']}: Q-1," in out["docs"], "the Documents tab shows the version note"
+        tab = out["board"]
+        assert "<th>Impact</th>" in tab and f'<td data-impact="Q-1">' in tab, tab[:400]
+        cell = tab.split('<td data-impact="Q-1">')[1].split("</td>")[0]
+        for a, r in impact.items():
+            assert a in cell and ("passed" if r == "passed" else "sent to Adaptation") in cell, (a, r, cell)
+        assert f"HLD Components v{up['from_version']} → v{up['to_version']}" in tab, tab[:600]
         for bad in ("Q-1", "re-check", "HLD v", "board"):
             assert bad not in out["simple"], (bad, "the Simple view is unchanged by a board change")
     print("board doc change: the LLD builder asks, the HLD owner corrects its own section, the HLD is re-exported at "
@@ -4875,6 +4928,83 @@ def board_doc_off():
             assert bad not in c["system"] + c["prompt"], (c["id"], c["fn"], bad)
     print(f"board doc off: with J2_BOARD unset the switch changes nothing: {len(a[0])} calls, the three documents and "
           "the outcome are identical, and no board or re-check record is written ok")
+
+
+STORY_RUN = "j2-20261027-012148"      # the saved demo run the Board story view is checked against
+
+
+def board_story_view():
+    """Message board, the Board story view (story/1, j2_story.py): read-only and recorded data only. The story of the
+    saved demo run (or the same demo built here, when that folder isn't in this clone) has one question, the HLD
+    going v6 -> v7, 12 atoms re-checked and 12 passed, and the page lays it out as one flow strip per question with
+    the deliverable change highlighted, the impact grouped by deliverable, a numbers row computed from the files, a
+    compare picker and a footer from the run's own flags. A run with no board.json has no story and no button."""
+    import shutil
+    import j2_story
+    d = os.path.join(os.path.dirname(os.path.abspath(j2.__file__)), "runs", STORY_RUN)
+    if not os.path.isdir(d):
+        print(f"board story view: {STORY_RUN} isn't in this clone; building the same demo run")
+        d = doc_board_run().dir
+    st = j2_story.build(d)
+    assert st["schema"] == "story/1" and st["has_board"] and len(st["entries"]) == 1, st["entries"]
+    e = st["entries"][0]
+    assert e["id"] == "Q-1" and e["status"] == "answered", e
+    assert e["doubt"]["workflow"] == "W-14" and e["doubt"]["tag"] == "LLD" and e["doubt"]["name"], e["doubt"]
+    assert e["ask"]["atom"] == "W-9.a1" and e["ask"]["tag"] == "HLD" and e["ask"]["question"], e["ask"]
+    assert e["answer"]["text"] and e["answer"]["updated_own_section"], e["answer"]
+    assert e["change"] == {"doc": "hld", "tag": "HLD", "section": "Components", "from_version": 6,
+                          "to_version": 7}, e["change"]
+    assert e["recheck"] == {"atoms": 12, "passed": 12, "failed": 0, "receipts": e["recheck"]["receipts"]}, e["recheck"]
+    assert e["recheck"]["receipts"] > 0, "the re-checks wrote receipts with trigger Q-1"
+    assert st["numbers"] == {"questions": 1, "rechecked": 12, "receipts": e["recheck"]["receipts"],
+                             "duplicate_edges": 0}, st["numbers"]
+    assert {x["deliverable"] for x in e["impact"]} == {"lld", "website"}, e["impact"]
+    assert all(x["name"] and x["result"] == "passed" for x in e["impact"]), e["impact"]
+    assert st["facts"]["versions"]["hld"] == 7 and st["facts"]["status"].startswith("Done"), st["facts"]
+    assert st["flags"]["mock"] is True and st["flags"]["force_question"] == "lld", st["flags"]
+    # a run with no board.json: no story, and the page hides the button (it follows has_board, like the Board tab)
+    plain = next((os.path.join(os.path.dirname(d), x) for x in sorted(os.listdir(os.path.dirname(d)))
+                  if x.startswith("j2-") and not os.path.isfile(os.path.join(os.path.dirname(d), x, "board.json"))), None)
+    if plain:
+        off = j2_story.build(plain)
+        assert not off["has_board"] and off["entries"] == [] and off["numbers"]["questions"] == 0, off["numbers"]
+    ui = open(os.path.join(os.path.dirname(os.path.abspath(j2.__file__)), "j2_ui.html"), encoding="utf-8").read()
+    assert 'id="tab-story" data-tab="story" aria-selected="false" hidden' in ui, "the button starts hidden"
+    assert '$("tab-board").hidden = $("tab-story").hidden = !s.has_board;' in ui, "and follows has_board"
+    assert ui.index('id="tab-story"') < ui.index('id="tab-board"') < ui.index('data-tab="style"'), \
+        "the Board story button is the first entry under Internals"
+    assert "@media (max-width:700px){.storyflow{display:block" in ui, "the strip stacks on a phone"
+    if not shutil.which("node"):
+        print("board story view: node not found, the page render is skipped")
+        return
+    keep, j2.RUNS_DIR = j2.RUNS_DIR, os.path.dirname(d)      # read the saved run where it is (read-only)
+    try:
+        snap = j2.saved_snapshot(os.path.basename(d), 0)
+    finally:
+        j2.RUNS_DIR = keep
+    out = render_node(snap, docs={"docs": {}, "story": st, "runs": [{"id": "other-run", "status": "done"}]})
+    html = out["story"]
+    assert html.count('<section class="storyq"') == 1 and 'data-story="Q-1"' in html, html[:300]
+    assert [m for m in re.findall(r'data-step="(\w+)"', html)] == ["doubt", "ask", "answer", "change", "recheck"], html[:600]
+    assert '<li class="sstep hit" data-step="change">' in html, "the deliverable change is highlighted"
+    assert "W-14 · Technical Designer (LLD)" in html and "W-9.a1 · Solution Architect (HLD)" in html, html[:800]
+    assert "HLD Components</b> v6 → v7" in html and "updated its own section" in html, html
+    assert "12 atoms re-checked, 12 passed, 0 sent to Adaptation" in html, html
+    for group in ('data-group="lld"', 'data-group="website"', 'data-group="reused"'):
+        assert group in html, group
+    assert html.count('class="schip"') == 12 + 0, "one chip per impacted atom"
+    assert html.count('class="pass">passed') == 12, html
+    nums = html.split('class="snums"')[1].split("</div></div>")[0]
+    for n, label in (("1", "questions asked"), ("12", "atoms re-checked"), ("0", "duplicate edges")):
+        assert f"<b>{n}</b>{label}" in nums, (n, label, nums)
+    assert 'id="storycmp"' in html and "other-run" in html and "nothing is compared for you" in html, html[-900:]
+    assert "Mock run (no model call)" in html and "J2_FORCE_QUESTION=lld" in html, html[-400:]
+    STORY_EMPTY = {"schema": "story/1", "entries": [], "numbers": {}, "facts": {}, "flags": {}}
+    empty = render_node(snap, docs={"docs": {}, "story": STORY_EMPTY})["story"]
+    assert "no question was asked" in empty.lower() and "storyq" not in empty, empty
+    print("board story view: the saved demo run tells one question's story (W-14 asks W-9, HLD Components v6 -> v7, "
+          "12 atoms re-checked, 12 passed), the strip highlights the change, the impact is grouped by deliverable, "
+          "every number is computed from the files, and a run with no board.json has no story ok")
 
 
 def board_functions_off():
@@ -6782,7 +6912,8 @@ def map_tab():
     # ---- Map and Chat are the whole app: the rail, the Needs you strip, and the Map as the navigation
     rail = ui[ui.index('<nav class="rail tabs"'):ui.index("</nav>", ui.index('<nav class="rail tabs"'))]
     top, inside = rail.split('id="railsub"')
-    old_tabs = ["preview", "goal", "workflows", "conflicts", "timeline", "audit", "charter", "docs", "artifacts", "board", "style", "lessons", "playbooks", "report", "rundetails", "runsettings"]
+    # the Board story is the first entry under Internals (shown only when the run has a board); the rest are the old order
+    old_tabs = ["story", "preview", "goal", "workflows", "conflicts", "timeline", "audit", "charter", "docs", "artifacts", "board", "style", "lessons", "playbooks", "report", "rundetails", "runsettings"]
     assert re.findall(r'data-tab="(\w+)"', top) == ["map"] and 'id="gochat"' in top and 'id="internals"' in top and re.findall(r"<span>([^<]+)</span>", top) == ["Map", "Chat", "Internals"], "the rail has Map, Chat and one Internals folder"
     assert re.findall(r'data-tab="(\w+)"', inside) == old_tabs, "every other tab is under Internals, in the old order"
     assert top.count("<svg") == 3 and "<svg" not in inside and ' hidden' in rail.split('id="railsub"')[1].split(">")[0], "one small icon each, none in the folder, folder starts collapsed"
@@ -7409,6 +7540,8 @@ if __name__ == "__main__":
         board_functions()
         board_not_mine()
         if mode == "0":      # the board's document changes don't branch on J2_FIXES: four stages, run once
+            board_content_edges()
+            board_story_view()
             board_doc_change()
             board_doc_not_owner()
             board_doc_prd()

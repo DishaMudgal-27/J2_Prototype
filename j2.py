@@ -3347,6 +3347,7 @@ class J2Run:
                     resume = {"to": self.turn, "handoff": self.handoff} if self.turn else None
                     self._handoff("identity", kind="question", frm=r["from"], question=r.get("text") or "", resume=resume)
         self.turn, self.done = None, True
+        self._board_tally()      # board/1 part C: what each document change reached, now that nothing is left to build
         if not self.paused:
             self.step = 8
         if self.doc and self.sites and not self.paused:
@@ -6687,8 +6688,13 @@ class J2Run:
     def _record_given(self, w, edges, whole=False):
         self.given[w["id"]] = {"edges": edges, "whole": whole}
 
+    # Every later builder of a stage is given the other sections' summary, so this edge exists between every pair of
+    # atoms of one deliverable. It records what the prompt held, not what the section is built from, so a board
+    # change does not travel along it (_board_edges_from).
+    MANIFEST_WHY = "its section, anchor and selectors were listed in this builder's prompt"
+
     def _manifest_edges(self, w):
-        return [{"atom": x["id"], "why": "its section, anchor and selectors were listed in this builder's prompt"}
+        return [{"atom": x["id"], "why": self.MANIFEST_WHY}
                 for o in self.workflows if o["id"] != w["id"] for x in o.get("atoms") or [] if x.get("agent_output")]
 
     def _doc_atoms(self, kind, heading):
@@ -6969,9 +6975,10 @@ class J2Run:
             return f"{kind}.md is not in the run folder"
         entry["artifact_update"] = {"doc": kind, "section": section, "from_version": v0, "to_version": v1}
         self._board_note(aid, entry["id"])
-        passed, sent = self._board_propagate(entry, aid, kind, v1)
-        self.post("system", f"{kind.upper()} v{v0} -> v{v1} ({entry['id']}). Re-checked: {passed} passed, "
-                            f"{sent} sent to Adaptation.", checks=target["id"])
+        now = sum(self._board_propagate(entry, aid, kind, v1))
+        self.post("system", f"{kind.upper()} v{v0} -> v{v1} ({entry['id']}): the {section} section is replaced and "
+                            f"the {kind.upper()}'s own checks ran again. {now} atom(s) that read it are re-checked "
+                            "now, the rest as they are built.", checks=target["id"])
         return None
 
     def _revise_doc(self, kind, section, text, reason, qid):
@@ -7029,13 +7036,50 @@ class J2Run:
                         a["human_output"] = {**ho, "text": f"{ho.get('text') or ''} Updated by {qid}.".strip()}
                     self.save("workflows.json", self.workflows)
 
+    def _board_tally(self):
+        """One line per document a board answer changed, posted when the run stops: the version bump and what the
+        re-checks found. Its numbers are impact itself (passed + sent to Adaptation = len(impact)); a resumed run
+        that built more posts the new numbers, and nothing is posted twice."""
+        if not j2_board.enabled():
+            return
+        for e in self.board["entries"]:
+            up = e.get("artifact_update") or {}
+            if not up.get("doc"):
+                continue
+            impact = e.get("impact") or []
+            ok = sum(1 for x in impact if x["result"] == "passed")
+            line = (f"{str(up['doc']).upper()} v{up['from_version']} -> v{up['to_version']} ({e['id']}). "
+                    f"Re-checked: {ok} passed, {len(impact) - ok} sent to Adaptation.")
+            if not any(m["who"] == "system" and m["text"] == line for m in self.chat):
+                self.post("system", line)
+
+    def _board_changed_atom(self, e):
+        """The atom whose own section a board answer changed: the atom the question named, or that workflow's."""
+        to = str(e.get("to") or "")
+        if "." in to:
+            return to
+        w = next((x for x in self._all_wfs() if x["id"] == to), None)
+        return next((a["id"] for a in (w or {}).get("atoms") or [] if a.get("agent_output")), None)
+
+    def _board_views(self):
+        """The atom/1 views of this run with content edges only (j2_schema.CONTENT_EDGES): the PRD's requirements,
+        the HLD's components or summary, an LLD slice and a declared dependency say what a section was built from.
+        A manifest listing and a board answer say what a prompt held, so a change never travels along them."""
+        views = {v["id"]: v for v in j2_schema.run_views(self._all_wfs(), self.given)[0]}
+        for v in views.values():
+            for key in ("depends_on", "used_by"):
+                v[key] = [e for e in v[key] if j2_schema.content_edge(e.get("why"))]
+        return views
+
     def _board_propagate(self, entry, aid, kind, version):
         """Items 3 and 4: re-run the changed document's conditions and the owner atom's checks, then follow the
-        recorded used_by edges (nothing else) and re-check every atom that is already closed. A failing atom goes to
-        Adaptation on the existing atom_failed path. Returns (passed, sent to Adaptation)."""
+        recorded used_by edges from the changed atom (nothing else, and never a manifest edge: a sibling section of
+        the same document is not impacted without an edge of its own) and re-check every atom that is already
+        closed. A failing atom goes to Adaptation on the existing atom_failed path. Returns
+        (passed, sent to Adaptation), which is what impact holds."""
         qid = entry["id"]
         self._doc_conditions(kind, qid, version)
-        views = {v["id"]: v for v in j2_schema.run_views(self._all_wfs(), self.given)[0]}
+        views = self._board_views()
         seen, queue, impact = set(), [aid], []
         while queue:                       # transitively, by recorded edges only
             cur = queue.pop(0)
@@ -7069,7 +7113,9 @@ class J2Run:
             self._event(w["id"], "board_recheck_failed", f"{a['id']} failed its checks after {qid}")
             self.board_failed.append({"wid": w["id"], "atoms": [a["id"]], "attempt": a.get("attempts") or 1,
                                       "owner_note": f"its checks failed after the board change {qid}"})
-        return sum(1 for x in impact if x["result"] == "passed"), len(sent)
+        # The counts are impact itself: passed + sent to Adaptation = len(impact). The owner's own re-check is
+        # reported by its checks and the conditions line above, not counted here.
+        return sum(1 for x in impact if x["result"] == "passed"), sum(1 for x in impact if x["result"] != "passed")
 
     def _atom_of(self, aid):
         """(atom, workflow) for an atom id of this run, else (None, None)."""
@@ -7122,10 +7168,10 @@ class J2Run:
     def _board_forward(self, w):
         """Item 4 for an atom built after the change: when its recorded edges reach an atom a board answer changed,
         its own checks have just run against the changed document, so it is marked re-checked and listed in the
-        entry's impact. Recorded edges only."""
+        entry's impact, the same list as the atoms that were re-checked at once. Content edges only."""
         if not (j2_board.enabled() and self.doc_changes):
             return
-        views = {v["id"]: v for v in j2_schema.run_views(self._all_wfs(), self.given)[0]}
+        views = self._board_views()
 
         def reaches(aid, want, seen=None):
             seen = seen if seen is not None else set()
@@ -7138,17 +7184,17 @@ class J2Run:
             if a.get("status") != "passed":
                 continue
             for e in self.board["entries"]:
-                qid, up = e["id"], e.get("artifact_update") or {}
-                if not up.get("doc") or a.get("board_rechecked") == qid or any(x["atom"] == a["id"]
-                                                                              for x in e.get("impact") or []):
+                qid, up, changed = e["id"], e.get("artifact_update") or {}, self._board_changed_atom(e)
+                if not up.get("doc") or not changed or a.get("board_rechecked") == qid \
+                        or any(x["atom"] == a["id"] for x in e.get("impact") or []):
                     continue
-                if reaches(a["id"], e["atom"]):
+                if reaches(a["id"], changed):
                     a["board_rechecked"] = qid
                     e["impact"] = (e.get("impact") or []) + [{"atom": a["id"], "result": "passed"}]
                     self._receipt(a, {"text": f"built after {qid} and its checks passed", "type": "recheck",
-                                      "target": e["atom"]}, a.get("attempts") or 1,
+                                      "target": changed}, a.get("attempts") or 1,
                                   {"actual": True, "pass": True,
-                                   "evidence": f"{a['id']} depends on {e['atom']}, which {qid} changed"}, trigger=qid)
+                                   "evidence": f"{a['id']} depends on {changed}, which {qid} changed"}, trigger=qid)
                     j2_board.write(self.dir, self.board)
                     self.save("workflows.json", self.workflows)
 

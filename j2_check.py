@@ -108,7 +108,18 @@ frames.forEach(f => f.addEventListener('load', () => setTimeout(() => {
 def run_chrome(cmd, timeout, text=True):
     """subprocess.run for headless Chrome, in its own process group. On a timeout the whole group is killed: subprocess.run
     kills only the main process, and the helpers it leaves hold the output pipes open, so a 90s timeout ran for 10+ minutes
-    (and the helpers stayed behind)."""
+    (and the helpers stayed behind).
+
+    Each run also gets its own profile directory. Without one, every headless run shares the default profile with the
+    browser the developer has open, and two of them can wait on the same profile lock until the timeout; a page that
+    loaded in seconds on its own then hangs. A caller that passes --user-data-dir keeps it."""
+    with tempfile.TemporaryDirectory(prefix="j2-chrome-") as profile:
+        if not any(str(a).startswith("--user-data-dir") for a in cmd):
+            cmd = list(cmd[:1]) + [f"--user-data-dir={profile}", "--no-first-run", "--no-default-browser-check"] + list(cmd[1:])
+        return _chrome(cmd, timeout, text)
+
+
+def _chrome(cmd, timeout, text=True):
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=text, start_new_session=True)
     try:
         out, err = p.communicate(timeout=timeout)
@@ -176,7 +187,12 @@ def check(html):
     out.pop("note", None)
     raw = json.loads(m.group(1).replace("&quot;", '"').replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">"))
     errors = []
-    for name, r in sorted(raw.items(), key=lambda x: list(WIDTHS).index(x[0]) if x[0] in WIDTHS else len(WIDTHS)):      # the widths in order, never in the order Chrome finished them
+    # In WIDTHS order, not the order the two frames happened to finish in: a run's recorded mechanical check (and
+    # the prompt Audit reads) is then the same for the same page, whichever width loads first.
+    for name in list(WIDTHS) + [k for k in raw if k not in WIDTHS]:
+        r = raw.get(name)
+        if r is None:
+            continue
         if "error" in r:
             out[name] = {"note": r["error"]}
             continue

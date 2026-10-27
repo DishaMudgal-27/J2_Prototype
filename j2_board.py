@@ -39,7 +39,9 @@ def new_entry(entry_id, asked_by, atom, to, about, question, cycle, attempt, ask
     "function" (one of the five) or "builder"; answered_from is filled in when the answer comes back."""
     return {"id": entry_id, "asked_by": asked_by, "atom": atom, "to": to, "about": about, "question": question,
             "answer": None, "answered_by": None, "status": "open", "artifact_update": None, "used_by": [],
-            "cycle": cycle, "attempt": attempt, "asked_by_role": asked_by_role, "answered_from": None}
+            "cycle": cycle, "attempt": attempt, "asked_by_role": asked_by_role, "answered_from": None,
+            # a change to a document: every atom the content edges reach, with what its re-check found
+            "impact": []}
 
 
 def content_words(text):

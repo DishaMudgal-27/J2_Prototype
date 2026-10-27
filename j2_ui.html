@@ -217,6 +217,25 @@ body.simple .rail.tabs button[aria-selected="true"]{color:var(--muted);backgroun
   .rail.tabs{flex:0 0 auto;width:auto;flex-direction:row;overflow-x:auto;overflow-y:hidden;border-right:0;border-top:1px solid var(--line);padding:6px}
   .rail.tabs>button{flex:0 0 64px}
   .railsub{position:fixed;left:8px;right:8px;bottom:64px;z-index:5;flex-direction:row;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px}.rail.tabs .railsub button{flex:1 1 90px}}
+/* Board story: one horizontal flow strip per board question (board/1), stacked on a phone. Existing tokens only, so
+   light and dark follow the page. */
+.storywrap{padding:4px 0}.storyq{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:10px 12px;margin:0 0 12px}
+.storyq header{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;margin:0 0 8px}.storyq header b{font-size:15px}
+.storyflow{display:flex;gap:8px;align-items:stretch;list-style:none;margin:0;padding:0;overflow-x:auto}
+.sstep{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--panel2);font-size:12.5px;position:relative}
+.sstep b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 2px}
+.sstep+.sstep::before{content:"\2192";position:absolute;left:-12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:12px}
+.sstep.hit{border-color:var(--accent);border-width:2px;background:var(--panel)}.sstep.hit b{color:var(--accent)}
+.simpact{margin:10px 0 0}.simpact h4{margin:8px 0 2px;font-size:13px}
+.sgroup{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:2px 0}.sgroup>b{font:600 11px var(--mono);color:var(--muted);min-width:46px}
+.schip{border:1px solid var(--line);border-left:4px solid var(--c,var(--line));border-radius:6px;padding:2px 7px;font-size:12px;background:var(--panel)}
+.schip span{color:var(--muted)}
+.snums{display:flex;flex-wrap:wrap;gap:8px 18px;border-top:1px solid var(--line);padding:10px 0 0;margin:4px 0 0}
+.snums div{font-size:13px}.snums b{display:block;font:600 18px var(--display)}
+.scmp{border:1px dashed var(--line);border-radius:10px;padding:8px 12px;margin:12px 0 0}.scmp select{max-width:100%}
+.scmp table{border-collapse:collapse;font-size:13px;margin:6px 0 0}.scmp td,.scmp th{border-bottom:1px solid var(--line);padding:2px 12px 2px 0;text-align:left}
+.sfoot{font-size:12.5px;margin:10px 0 0}
+@media (max-width:700px){.storyflow{display:block;overflow:visible}.sstep{margin:0 0 8px}.sstep+.sstep::before{content:"\2193";left:50%;top:-11px;transform:translateX(-50%)}}
 </style>
 </head>
 <body class="simple">
@@ -239,6 +258,7 @@ body.simple .rail.tabs button[aria-selected="true"]{color:var(--muted);backgroun
   <button type="button" id="gochat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><span>Chat</span></button>
   <button type="button" id="internals" aria-expanded="false" aria-controls="railsub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h6l2 2h10v10H3z"/></svg><span>Internals</span></button>
   <div class="railsub" id="railsub" hidden>
+    <button role="tab" id="tab-story" data-tab="story" aria-selected="false" hidden>Board story</button>
     <button role="tab" data-tab="preview" aria-selected="false">Preview</button>
     <button role="tab" data-tab="goal" aria-selected="false">Goal</button>
     <button role="tab" data-tab="workflows" aria-selected="false">Workflows</button>
@@ -272,6 +292,7 @@ body.simple .rail.tabs button[aria-selected="true"]{color:var(--muted);backgroun
     <div class="pane" id="pane-docs" hidden></div>
     <div class="pane" id="pane-artifacts" hidden></div>
     <div class="pane" id="pane-board" hidden></div>
+    <div class="pane" id="pane-story" hidden></div>
     <div class="pane" id="pane-map"></div>
     <div class="pane" id="pane-style" hidden></div>
     <div class="pane" id="pane-lessons" hidden></div>
@@ -355,6 +376,7 @@ const dv = t => String(t ?? "").replace(/\benvelope's\b/gi, "limits'").replace(/
   .replace(/\bdone[-_ ]when list\b/gi, "checklist").replace(/\bdone[-_ ]when\b/gi, "checklist");
 const md = s => esc(dv(s)).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/@(\w+)/g,"<b>@$1</b>");
 let seen = 0, state = null, versions = 0, allChat = [], viewRun = new URLSearchParams(location.search).get("run") || "";
+let RUNLIST = [];        // the saved runs (/api/runs): the header picker and the Board story's compare picker
 const runQ = () => viewRun ? "&run=" + encodeURIComponent(viewRun) : "";
 
 function addMsg(m){
@@ -1088,7 +1110,7 @@ async function poll(){
     $("doclinks").hidden = !(s.doc || (s.docset || []).length) || !(s.files || []).length;
     $("pane-preview").classList.toggle("has-links", !$("doclinks").hidden);
     if (!$("doclinks").hidden) paint($("doclinks"), (s.docset || []).length > 1 ? `<b>Design documents</b> ${docLinks(s)}` : `<b>${esc(s.output_label)}</b> ${fileLinks(s)}`);
-    $("tab-board").hidden = !s.has_board;
+    $("tab-board").hidden = $("tab-story").hidden = !s.has_board;
     $("forced").hidden = !s.force_audit_fail;
     $("testles").hidden = !s.test_lessons;
     $("forced").textContent = `TEST: J2_FORCE_AUDIT_FAIL=${s.force_audit_fail} (cycle 1 Audit result forced)`;
@@ -1109,7 +1131,7 @@ async function poll(){
     paint($("pane-timeline"), renderTimeline(s)); paint($("pane-lessons"), renderLessons(s));
     paint($("pane-style"), renderStyle(s)); paint($("pane-playbooks"), renderPlaybooks(s));
     const dk = s.total + "|" + (s.docset || []).join(); if (dk !== docsKey){ docsKey = dk; loadDocs(); loadArtifacts(); }
-    if (s.has_board) loadBoard();
+    if (s.has_board){ loadBoard(); loadStory(); }
     const mk = s.total + "|" + s.status + "|" + (s.turn || "") + "|" + (s.paused ? s.paused.kind : ""); if (mk !== mapKey && Date.now() - mapT > 1500){ mapKey = mk; mapT = Date.now(); loadMap(); }
     renderSimple(s);
     if (!state || state.status !== s.status || state.total !== s.total) quick(s);
@@ -1159,17 +1181,22 @@ const TABHINT = {preview: "What the team has built so far.", goal: "What you ask
   map: "Who worked with whom, and what each made.", style: "The look and feel the team agreed on.",
   lessons: "What the team learned from earlier runs.", playbooks: "Plans reused from earlier runs of the same kind.",
   report: "A summary of the run.", rundetails: "The agents, the steps and the settings of this run.", runsettings: "What to build, which run to open, and a new run.",
-  board: "Questions the functions and the builders asked, who answered them, and who reused them (recorded data only)."};
+  board: "Questions the functions and the builders asked, who answered them, and who reused them (recorded data only).",
+  story: "What each question on the message board did, step by step, read from this run's own records."};
 function showTab(name){
   document.querySelectorAll(".tabs [role=tab]").forEach(x => x.setAttribute("aria-selected", x.dataset.tab === name));
   const tb = document.querySelector(`.tabs [data-tab="${name}"]`);
   $("wtitle").textContent = tb ? tb.textContent.trim() : name; $("wsub").textContent = TABHINT[name] || ""; $("ver").hidden = name !== "preview";
   // the Map has its own heading, so the title bar is only for the other views
   $("backmap").hidden = name === "map"; document.querySelector("#dview .wbar").hidden = name === "map"; document.querySelector("#dview .work").classList.toggle("mapfit", name === "map"); if (name !== "map"){ $("railsub").hidden = false; $("internals").setAttribute("aria-expanded", "true"); }
-  ["preview","goal","workflows","conflicts","timeline","audit","charter","docs","artifacts","board","map","style","lessons","playbooks","report","rundetails","runsettings"].forEach(t => $("pane-"+t).hidden = t !== name);
+  ["preview","goal","workflows","conflicts","timeline","audit","charter","docs","artifacts","board","story","map","style","lessons","playbooks","report","rundetails","runsettings"].forEach(t => $("pane-"+t).hidden = t !== name);
 }
 document.querySelectorAll(".tabs [role=tab]").forEach(b => b.onclick = () => { if (b.dataset.tab === "workflows" && WFSTEP.length){ WFSTEP = []; if (state) paint($("pane-workflows"), renderWorkflows(state)); } showTab(b.dataset.tab); });
 showTab("map");
+// A deep link to one view: ?tab=story (or #story), so the Board story opens straight from a link.
+(() => { const q = new URLSearchParams(location.search), want = (q.get("tab") || (location.hash || "").replace(/^#/, "")).trim();
+  if (!want || !document.querySelector(`.tabs [data-tab="${want.replace(/[^\w-]/g, "")}"]`)) return;
+  setView("detail", false); showTab(want); })();
 $("gochat").onclick = () => setView("simple", true);      // Chat is the Simple view; any other rail item goes back to the Detailed view
 document.querySelectorAll(".rail [role=tab]").forEach(b => b.addEventListener("click", () => setView("detail", true)));
 $("internals").onclick = () => { const o = $("railsub").hidden; $("railsub").hidden = !o; $("internals").setAttribute("aria-expanded", String(o)); };
@@ -1184,23 +1211,117 @@ const BOARD = {schema: "board/1", entries: []};
 const boardFrom = f => !f ? '<span class="empty">not recorded</span>'
   : f.function ? `${esc(fnName(f.function))} (function)`
   : `${esc(f.workflow)}${f.version ? " v" + esc(f.version) : ""}`;
+// What an answer changed: a section of a document (with the versions), or the answerer's own section.
+const boardUpdate = u => !u ? '<span class="empty">no</span>'
+  : u.doc ? `${esc(String(u.doc).toUpperCase())} ${esc(u.section)}${u.from_version ? ` v${esc(u.from_version)} → v${esc(u.to_version)}` : ""}`
+  : "yes";
+// Impact: every atom the change reached by a content edge, with what its re-check found. Recorded data only.
+const BOARDRES = {passed: "passed", failed: "sent to Adaptation"};
+const boardImpact = e => (e.impact || []).length
+  ? e.impact.map(x => `${esc(x.atom)} <span class="empty">${esc(BOARDRES[x.result] || x.result)}</span>`).join("<br>")
+  : '<span class="empty">none</span>';
 function boardRow(e){
   const st = {open: "open", answered: "answered", unanswered: "unanswered", refused: "refused"}[e.status] || e.status;
   const role = e.asked_by_role ? ` <span class="empty">${esc(e.asked_by_role)}</span>` : "";
   return `<tr data-board="${esc(e.id)}"><td>${esc(e.id)}</td><td>${esc(e.asked_by)}${role}</td><td>${esc(e.to)}</td>`
     + `<td>${esc(e.question)}</td><td>${e.answer ? esc(e.answer) : '<span class="empty">not recorded</span>'}</td>`
     + `<td>${esc(st)}</td><td>${boardFrom(e.answered_from)}</td>`
-    + `<td>${e.artifact_update ? "yes" : '<span class="empty">no</span>'}</td>`
+    + `<td>${boardUpdate(e.artifact_update)}</td><td data-impact="${esc(e.id)}">${boardImpact(e)}</td>`
     + `<td>${(e.used_by || []).length ? esc(e.used_by.join(", ")) : '<span class="empty">none</span>'}</td></tr>`;
 }
 const renderBoard = () => !BOARD.entries.length ? '<p class="empty">No questions asked yet.</p>'
   : `<table class="boardtbl"><thead><tr><th>Q-id</th><th>Asked by</th><th>To</th><th>Question</th><th>Answer</th>`
-    + `<th>Status</th><th>Answered from</th><th>Artifact update</th><th>Used by</th></tr></thead>`
+    + `<th>Status</th><th>Answered from</th><th>Artifact update</th><th>Impact</th><th>Used by</th></tr></thead>`
     + `<tbody>${BOARD.entries.map(boardRow).join("")}</tbody></table>`;
 async function loadBoard(){
   try { const r = await fetch(`/api/board?${runQ().slice(1)}`, {cache:"no-store"}); if (r.ok) Object.assign(BOARD, await r.json()); } catch (e) {}
   paint($("pane-board"), renderBoard());
 }
+// Board story (story/1, j2_story.py): one flow strip per board question, built by code from this run's own files.
+// Read-only and recorded data only: anything the run did not record reads "not recorded".
+const STORY = {entries: [], numbers: {}, facts: {}, flags: {}};
+let STORYCMP = {run: "", facts: null};        // the run picked for the compare card, and its own recorded facts
+const NR = '<span class="empty">not recorded</span>';
+const SCOL = {prd: "--prd", hld: "--hld", lld: "--lld", website: "--site"};      // the deliverable colours of the page
+const sTeam = x => { const p = MAPLABEL.story[x && x.tag] || null;      // the team label of a deliverable's builders
+  return p ? `${p} (${esc(x.tag)})` : x && x.tag ? esc(x.tag) : "" ; };
+// who asked or answered: an atom with its team, or a function by name (a function owns no deliverable)
+const sWho = (x, id) => { const label = sTeam(x);
+  if (!x || !x.atom) return id && !/^W-\d/.test(String(id)) ? `${esc(fnName(id))} <span class="empty">(function)</span>` : NR;
+  return `${esc(id || x.atom)}${label ? " · " + label : ""}`; };
+const sChip = x => `<span class="schip" style="--c:var(${esc(SCOL[x.deliverable] || "--other")})">${esc(x.atom)} `
+  + `<span>${x.name ? esc(x.name) : "name not recorded"}</span> `
+  + (x.result === "passed" ? '<span class="pass">passed</span>'
+     : x.result ? '<span class="fail">sent to Adaptation</span>' : NR) + "</span>";
+function sFlow(e){
+  const ch = e.change, step = (key, label, body, hit) =>
+    `<li class="sstep${hit ? " hit" : ""}" data-step="${key}"><b>${label}</b>${body}</li>`;
+  return `<ol class="storyflow">`
+    + step("doubt", "Doubt", `<div>${sWho(e.doubt, e.doubt.workflow || e.doubt.asked_by)}</div>`
+           + `<div class="empty">${e.doubt.name ? esc(e.doubt.name) : ""}${e.doubt.role ? " · " + esc(e.doubt.role) : ""}</div>`)
+    + step("ask", "Ask", `<div>${esc(e.id)} → ${sWho(e.ask, e.ask.atom)}</div><div>${e.ask.question ? esc(e.ask.question) : NR}</div>`)
+    + step("answer", "Answer", `<div>${e.answer.text ? esc(e.answer.text) : NR}</div>`
+           + (e.answer.updated_own_section ? '<div class="empty">updated its own section</div>' : "")
+           + (e.answer.sent_to_identity ? '<div class="empty">sent to Identity</div>' : ""))
+    + step("change", "Deliverable change", ch
+           ? `<div><b style="display:inline;text-transform:none;letter-spacing:0;font-size:12.5px;color:var(--ink)">`
+             + `${esc(String(ch.doc).toUpperCase())} ${esc(ch.section)}</b> v${esc(ch.from_version)} → v${esc(ch.to_version)}</div>`
+           : '<div class="empty">no document change</div>', true)
+    + step("recheck", "Re-checked by code", `<div>${esc(e.recheck.atoms)} atoms re-checked, ${esc(e.recheck.passed)} `
+           + `passed, ${esc(e.recheck.failed)} sent to Adaptation</div>`
+           + `<div class="empty">${esc(e.recheck.receipts)} receipt(s) with trigger ${esc(e.id)}</div>`)
+    + "</ol>";
+}
+function sImpact(e){
+  const order = ["prd", "hld", "lld", "website"], label = {prd: "PRD", hld: "HLD", lld: "LLD", website: "Website"};
+  const groups = order.concat("other").map(k => [k, e.impact.filter(x => (x.deliverable || "other") === k)]).filter(([, xs]) => xs.length);
+  const reused = (e.reused_by || []).map(x => x.atom ? sChip(x)
+    : `<span class="schip">${esc(fnName(x.id))} <span>function</span></span>`).join(" ");
+  return `<div class="simpact"><h4>Impact by deliverable</h4>`
+    + (groups.length ? groups.map(([k, xs]) => `<div class="sgroup" data-group="${esc(k)}"><b>${esc(label[k] || "Other")}</b>`
+         + xs.map(sChip).join(" ") + "</div>").join("")
+       : '<p class="empty">No atom was re-checked: the recorded edges reach none.</p>')
+    + `<h4>Reused by</h4><div class="sgroup" data-group="reused">${reused || '<span class="empty">no one reused this answer</span>'}</div></div>`;
+}
+const sNums = n => `<div class="snums" data-numbers>`
+  + [["questions asked", n.questions], ["atoms re-checked", n.rechecked], ["receipts with a trigger", n.receipts],
+     ["duplicate edges", n.duplicate_edges]].map(([k, v]) =>
+    `<div><b>${v === undefined || v === null ? "–" : esc(v)}</b>${esc(k)}</div>`).join("") + "</div>";
+function sCompare(){
+  const opts = `<option value="">Compare with run…</option>` + RUNLIST.filter(x => x.id !== STORY.run)
+    .map(x => `<option value="${esc(x.id)}"${x.id === STORYCMP.run ? " selected" : ""}>${esc(x.id)} · ${esc(x.status)}</option>`).join("");
+  const f = STORYCMP.facts, row = (k, v) => `<tr><th>${esc(k)}</th><td>${v}</td></tr>`;
+  const vers = f ? Object.entries(f.versions || {}).map(([k, v]) => `${k.toUpperCase()} ${v === null ? "not recorded" : "v" + esc(v)}`).join(", ") : "";
+  return `<div class="scmp"><label>Compare with another run <select id="storycmp">${opts}</select></label>`
+    + (!f ? '<p class="empty">Pick a saved run to see what it recorded. Only its own facts are shown; nothing is compared for you.</p>'
+       : `<table><tbody>${row("run", esc(f.run))}${row("final status", f.status ? esc(f.status) : NR)}`
+         + `${row("versions", vers || NR)}${row("cycles", f.cycles === null || f.cycles === undefined ? NR : esc(f.cycles))}`
+         + `${row("message board", f.has_board ? `yes · ${esc(f.questions)} question(s)` : "no board recorded")}</tbody></table>`)
+    + "</div>";
+}
+const sFoot = f => `<p class="sfoot empty" data-foot>${f.mock ? "Mock run (no model call)" : f.model ? `Live run · ${esc(f.provider || "")} ${esc(f.model)}` : "Run mode not recorded"}`
+  + ` · ${f.force_question ? `the question came from the test switch J2_FORCE_QUESTION=${esc(f.force_question)}` : "no test switch recorded: the agents asked on their own"}</p>`;
+const renderStory = () => !STORY.entries.length
+  ? '<p class="empty">No question was asked on the message board in this run, so there is no story to tell.</p>'
+  : `<div class="storywrap">` + STORY.entries.map(e => `<section class="storyq" data-story="${esc(e.id)}">`
+      + `<header><b>${esc(e.id)}</b> <span class="code">${esc(e.status || "status not recorded")}</span>`
+      + `<span class="empty">${e.cycle ? "cycle " + esc(e.cycle) : "cycle not recorded"}</span>`
+      + `<span class="empty">${e.ask.about ? "about " + esc(e.ask.about) : ""}</span></header>`
+      + sFlow(e) + sImpact(e) + "</section>").join("")
+    + sNums(STORY.numbers) + sCompare() + sFoot(STORY.flags) + "</div>";
+async function loadStory(){
+  try { const r = await fetch(`/api/story?${runQ().slice(1)}`, {cache:"no-store"}); if (r.ok) Object.assign(STORY, await r.json()); } catch (e) {}
+  paint($("pane-story"), renderStory());
+}
+$("pane-story").addEventListener("change", async e => {
+  if (e.target.id !== "storycmp") return;
+  STORYCMP = {run: e.target.value, facts: null};
+  if (STORYCMP.run){
+    try { const r = await fetch(`/api/story?run=${encodeURIComponent(STORYCMP.run)}`, {cache:"no-store"});
+      if (r.ok) STORYCMP.facts = (await r.json()).facts; } catch (err) {}
+  }
+  paint($("pane-story"), renderStory());
+});
 const artUrl = f => `/api/artifact?name=${encodeURIComponent(f)}${runQ()}`;
 function artRow(r){
   const open = ARTOPEN === r.file, made = (r.workflows || []).length ? `made by ${esc(idRuns(r.workflows))}` : "no workflow recorded";
@@ -1263,6 +1384,7 @@ const MAPLABEL = {
   verb: {Write: "drafting", Build: "building", Send: "sending"},                                     // from what the step's workflows make (map.json), never from its place on the map
   verbTag: {PRD: "drafting", HLD: "drafting", LLD: "drafting", Site: "building", Send: "sending"},     // a step with no recorded kind: the deliverable it leads to says
   team: {drafting: {PRD: "Product Analyst", HLD: "Solution Architect", LLD: "Technical Designer", other: "Specialist"}, building: "Web Developer", sending: "Messenger"},
+  story: {PRD: "Product Analyst", HLD: "Solution Architect", LLD: "Technical Designer", Site: "Web Developer"},      // the Board story names the team of each deliverable's builders
   legend: {function: "Management persona (chip)", engine: "Team (dot cluster)", work: "Deliverable (diamond)", send: "Side job: a send (letter icon)", person: "You", filed: "filed and checked", running: "running now", left_open: "left open",
            waiting_on_you: "waiting on you", fault: "fault", not_made: "not made", handoff: "hand-off", speaks_to: "speaks to", given_to: "given to", done_unchecked: "done · checks did not pass", flow_in: "on hover: reads (flows in)", flow_out: "on hover: read by (flows out)"}};
 const MAPW = {filed: "filed and checked", done_unchecked: "done · checks did not pass", running: "running now", left_open: "left open", waiting: "waiting", waiting_on_you: "waiting on you", fault: "fault", not_made: "not made", idle: ""};
@@ -2087,9 +2209,11 @@ $("pane-workflows").addEventListener("click", e => { const b = e.target.closest(
   $("detail").showModal(); });
 // Saved runs: pick one to open it read-only; the URL keeps ?run= so it can be reloaded or shared locally.
 (async () => { try { const r = await (await fetch("/api/runs")).json();
+  RUNLIST = r.runs || [];                 // the same list the Board story's compare picker offers
   $("runsel").innerHTML = `<option value="">Live run (${esc(r.live)})</option>` + r.runs.filter(x => x.id !== r.live)
     .map(x => `<option value="${esc(x.id)}">${esc(x.id)} · ${esc(x.status)} · ${esc(x.brief.slice(0, 50))}</option>`).join("");
-  $("runsel").value = viewRun; } catch (e) {} })();
+  $("runsel").value = viewRun;
+  if (!$("pane-story").hidden || STORY.entries.length) paint($("pane-story"), renderStory()); } catch (e) {} })();
 $("runsel").onchange = () => { location.search = $("runsel").value ? "?run=" + encodeURIComponent($("runsel").value) : ""; };
 $("pane-playbooks").addEventListener("click", async e => {
   if (e.target.id !== "clear-playbooks" || !confirm("Delete every saved playbook (memory/playbooks.jsonl)? This can't be undone.")) return;
