@@ -13,6 +13,7 @@ import webbrowser
 from urllib.parse import parse_qs, urlparse
 
 import j2
+import j2_agent
 import j2_artifacts
 import j2_map
 import j2_story
@@ -127,6 +128,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if u.path == "/api/artifacts":  # the Artifacts tab: deliverables, then evidence and records (artifacts/types.json)
             d = j2.saved_dir(run) if run else RUN.dir
             return self._send(200, json.dumps(j2_artifacts.listing(d if d and os.path.isdir(d) else None), ensure_ascii=False))
+        if u.path == "/api/agent":      # one agent's conversations and AI calls (agent/1), from the run's chat.jsonl and calls.jsonl
+            d = j2.saved_dir(run) if run else RUN.dir
+            return self._send(200, json.dumps(j2_agent.view(d if d and os.path.isdir(d) else None, q.get("who")), ensure_ascii=False))
+        if u.path == "/api/code":       # the text behind a Code or Sections row of the Artifacts tree, read-only
+            d = j2.saved_dir(run) if run else RUN.dir
+            txt = j2_artifacts.code_text(d if d and os.path.isdir(d) else None, q.get("deck"), q.get("section"))
+            return self._send(200, txt, "text/plain") if txt is not None else self._send(404, "not found", "text/plain")
         if u.path == "/api/artifacts/tree":      # the Artifacts tab as a tree (artifacts-tree/1), made from the same data as the Map
             d = j2.saved_dir(run) if run else RUN.dir
             live = {"snapshot": RUN.snapshot(), "stages": list(RUN.stages), "stage_words": j2.J2Run.STAGE_WORDS, "board": RUN.board} \

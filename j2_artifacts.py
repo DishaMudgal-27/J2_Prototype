@@ -177,6 +177,51 @@ def _lines(d, f):
         return 0
 
 
+def sections_of(d, decks):
+    """{deck id: (record file, {section id: entry})}: a document's sections from its stage-<doc>.json, the one box still in work
+    from sections.json (as j2_map places them)."""
+    out, current = {}, []
+    for n in decks:
+        k = n["id"].split(":", 1)[1]
+        rec = _read(d, f"stage-{k}.json")
+        if isinstance(rec, dict) and isinstance(rec.get("sections"), dict):
+            out[n["id"]] = (f"stage-{k}.json", rec["sections"])
+        else:
+            current.append(n)
+    cur = _read(d, "sections.json")
+    if len(current) == 1 and isinstance(cur, dict) and cur:
+        out[current[0]["id"]] = ("sections.json", cur)
+    return out
+
+
+def _code_summary(text, page):
+    """What a section holds, in plain words: lines of HTML, CSS rules and lines of JS (a page), else lines of text."""
+    text = str(text or "")
+    if not page:
+        n = sum(1 for x in text.splitlines() if x.strip())
+        return f"{n} line{'s' if n != 1 else ''} of text"
+    css = " ".join(re.findall(r"<style[^>]*>(.*?)</style>", text, re.S | re.I))
+    js = "\n".join(re.findall(r"<script[^>]*>(.*?)</script>", text, re.S | re.I))
+    html = re.sub(r"<(style|script)[^>]*>.*?</\1>", "", text, flags=re.S | re.I)
+    k = lambda n, w: f"{n} {w}{'s' if n != 1 else ''}"
+    return ", ".join([k(sum(1 for x in html.splitlines() if x.strip()), "line") + " of HTML", k(css.count("{"), "CSS rule"),
+                      k(sum(1 for x in js.splitlines() if x.strip()), "line") + " of JS"])
+
+
+def code_text(d, deck, section=None):
+    """The text a Code or Sections row opens: the full page (site/index.html) or one section's code or text; None if unknown."""
+    import j2_map
+    if not d or not os.path.isdir(d):
+        return None
+    if section is None:
+        p = os.path.join(d, "site", "index.html")
+        return open(p, encoding="utf-8").read() if deck == "work:website" and os.path.isfile(p) else None
+    m = j2_map.build(d)
+    src = sections_of(d, [n for n in m["nodes"] if n["id"] == deck]).get(deck)
+    e = (src[1] if src else {}).get(section)
+    return None if not isinstance(e, dict) else (e.get("head") or "") + (e.get("body") or "")
+
+
 def tree(d, m=None):
     import j2_map
     if not d or not os.path.isdir(d):
@@ -243,8 +288,36 @@ def tree(d, m=None):
     sends = [n for n in m["nodes"] if n.get("tag") == "Send"]
     placed_send = set()
     out = []
+    secs = sections_of(d, deck)
+    wf_name = {w["id"]: w.get("name") or w["id"] for w in wfs if isinstance(w, dict) and w.get("id")}
+    persona_of = {}
+    for n_ in m["nodes"]:
+        if n_["kind"] == "engine":
+            for w in n_.get("workflows") or []:
+                persona_of.setdefault(w, n_.get("persona"))
     for n in deck:
         kids = []
+        t0 = next((x for x in load_types()["types"] if x["kind"] == "type" and f"work:{x['name']}" == n["id"]), None)
+        page = bool(t0 and t0["form"] == "page")
+        rows_ = []
+        for sid, e in (secs.get(n["id"], (None, {}))[1] or {}).items():
+            if not isinstance(e, dict):
+                continue
+            owner = e.get("owner") or sid
+            made = sid if sid in wf_name else owner      # the workflow that created it (the section is named by it), else its owner
+            text = (e.get("head") or "") + (e.get("body") or "")
+            rows_.append({"name": wf_name.get(made) if sid in wf_name else (e.get("workflow") or sid), "file": None, "status": "filed", "size": len(text.encode("utf-8")),
+                          "made_by": {"persona": persona_of.get(made), "workflows": [made]}, "open": "code" if page else "codetext",
+                          "code": {"deck": n["id"], "section": sid}, "section": sid,
+                          **({"rewritten": {"by": owner, "name": wf_name.get(owner, owner)}} if owner != made else {}),
+                          "note": _code_summary(text, page)})
+        if page and os.path.isfile(os.path.join(d, "site", "index.html")):
+            full = {"name": "Full page source", "file": None, "status": "filed", "size": os.path.getsize(os.path.join(d, "site", "index.html")),
+                    "made_by": None, "open": "code", "code": {"deck": n["id"]}, "note": "site/index.html, read-only"}
+            kids.append({"name": "Code", "count": 1 + len(rows_), "collapsed": False,
+                         "children": [full] + ([{"name": "By section", "count": len(rows_), "collapsed": False, "children": rows_}] if rows_ else [])})
+        elif rows_:
+            kids.append({"name": "Sections", "count": len(rows_), "collapsed": False, "children": rows_})
         for s_ in style:
             if any(e["from"] == s_["id"] and e["to"] == n["id"] for e in reads):
                 kids.append(item(s_["label"], s_.get("file"), maker(s_), status(s_), node=s_["id"], read_by=len(readers(s_["id"]))))

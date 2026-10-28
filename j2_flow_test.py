@@ -6183,6 +6183,175 @@ def artifacts_tree():
           "14 versions, 2 screenshots; 130930: the emails under the PRD with sent and skipped ok")
 
 
+def agent_view():
+    """Agent view (agent/1) and the website's code (Artifacts tree), for every run under runs/: every AI call in exactly one agent's
+    Thinking, every chat message under its sender and each recipient, counts from the files; the Map canvas unchanged; every section in
+    exactly one Code (or Sections) row with its author, "rewritten by" exactly when the owner changed, the full page equal to
+    site/index.html; 174314: 11 code sections, W-14 rewritten by W-16 and W-15 by W-17; no .env value or test address in a response."""
+    import subprocess
+    import threading
+    import types as pytypes
+    import urllib.request
+    import j2_agent as G
+    import j2_artifacts as A
+    import j2_map as M
+    import j2_server
+    here = os.path.dirname(os.path.abspath(__file__))
+    repo = os.path.join(here, "runs")
+    names = sorted(n for n in os.listdir(repo) if os.path.isfile(os.path.join(repo, n, "workflows.json"))) if os.path.isdir(repo) else []
+    base = subprocess.run(["git", "-C", here, "show", "main:j2_map.py"], capture_output=True, text=True)      # the Map before this view
+    old = None
+    if base.returncode == 0:
+        old = pytypes.ModuleType("j2_map_main")
+        old.__file__ = os.path.join(here, "j2_map.py")
+        exec(compile(base.stdout, "j2_map_main", "exec"), old.__dict__)
+    n_calls = n_msgs = 0
+    for name in names:
+        d = os.path.join(repo, name)
+        loaded = G.load(d)
+        chat, calls, _ = loaded
+        whos = sorted({str(c.get("fn")) for c in calls} | {m["who"] for m in chat} | {r for m in chat for r in G.recipients(m)})
+        views = {w: G.view(d, w, loaded) for w in whos}
+        seen = [c["id"] for v in views.values() for c in v.get("thinking") or []]
+        assert sorted(seen, key=str) == sorted((c.get("id") for c in calls), key=str), (name, "every call in exactly one agent's Thinking")
+        for w, v in views.items():
+            assert v.get("summary", {}).get("calls", 0) == sum(1 for c in calls if str(c.get("fn")) == w), (name, w)
+            assert v.get("summary", {}).get("messages", 0) == sum(1 for m in chat if m["who"] == w), (name, w)
+        shown = {w: {m["id"] for g in v.get("conversations") or [] for m in g["messages"]} for w, v in views.items()}
+        for m in chat:
+            assert m.get("id") in shown[m["who"]], (name, m.get("id"), "under its sender")
+            for r in G.recipients(m):
+                assert m.get("id") in shown[r], (name, m.get("id"), r, "under each recipient")
+        n_calls, n_msgs = n_calls + len(calls), n_msgs + len(chat)
+        if old is not None:      # nothing on the Map canvas changes
+            a, b = M.build(d), old.build(d)
+            assert (len(a["nodes"]), len(a["edges"])) == (len(b["nodes"]), len(b["edges"])), (name, "the Map canvas changed")
+        # the code: every section once, with its author, "rewritten by" exactly when the owner differs from the creator
+        t = A.tree(d)
+        rows = [x for g in t["groups"] for x in A_walk(g["items"]) if x.get("code") and x["code"].get("section")]
+        sec = json.load(open(os.path.join(d, "sections.json"), encoding="utf-8")) if os.path.isfile(os.path.join(d, "sections.json")) else {}
+        wids = {w["id"] for w in json.load(open(os.path.join(d, "workflows.json"), encoding="utf-8")) if isinstance(w, dict)}
+        cur = [x for x in rows if x["code"]["section"] in sec and not os.path.isfile(os.path.join(d, f"stage-{x['code']['deck'].split(':')[1]}.json"))]
+        if cur:
+            assert sorted(x["code"]["section"] for x in cur) == sorted(sec), (name, "every section in sections.json exactly once")
+            for x in cur:
+                e = sec[x["code"]["section"]]
+                made = x["code"]["section"] if x["code"]["section"] in wids else e.get("owner")
+                assert x["made_by"] and x["made_by"]["workflows"] == [made], (name, x["name"])
+                assert ("rewritten" in x) == ((e.get("owner") or made) != made), (name, x["name"], "rewritten by exactly when the owner changed")
+                assert A.code_text(d, x["code"]["deck"], x["code"]["section"]) == (e.get("head") or "") + (e.get("body") or "")
+        page = os.path.join(d, "site", "index.html")
+        full = [x for g in t["groups"] for x in A_walk(g["items"]) if x.get("name") == "Full page source"]
+        if full:
+            assert A.code_text(d, full[0]["code"]["deck"]) == open(page, encoding="utf-8").read(), (name, "the full page is site/index.html")
+    if "j2-20261026-174314" in names:
+        t = A.tree(os.path.join(repo, "j2-20261026-174314"))
+        web = next(x for g in t["groups"] if g["id"] == "deliverables" for x in g["items"] if x["name"] == "Website")
+        code = next(k for k in web["children"] if k["name"] == "Code")
+        by = next(k for k in code["children"] if k["name"] == "By section")["children"]
+        assert len(by) == 11 and {x["code"]["section"]: x.get("rewritten", {}).get("by") for x in by if x.get("rewritten")} == {"W-14": "W-16", "W-15": "W-17"}, by
+        v = G.view(os.path.join(repo, "j2-20261026-174314"), "W-8")
+        assert v["thinking"][0]["reason"] and v["thinking"][0]["reply"]["text"], "a builder's stated reason and reply, from its own reply record"
+        html = render_node({"workflows": [], "chat": []}, docs={"docs": {}, "agent": G.view(os.path.join(repo, "j2-20261026-174314"), "adaptation")})["agent"]
+        assert "Strategist (Adaptation)" in html and "Reasons are the agent's own stated reasons; the model's hidden reasoning is not recorded." in html
+        assert "Strategist (Adaptation) &lt;-&gt; Prioritiser (Priority) · 4" in html and "Was given</b> the charter" in html and "Show technical details" in html
+        main_text = re.sub(r'<details class="adtech">.*?</details>', "", html, flags=re.S)
+        assert '{"' not in main_text and "STATE:" not in main_text, "no raw JSON or prompt outside the technical details"
+        # a reply already sent as a message shows once, in Conversations, with a pointer in the Thinking card
+        d74 = os.path.join(repo, "j2-20261026-174314")
+        loaded = G.load(d74)
+        for w in sorted({str(c.get("fn")) for c in loaded[1]}):
+            v = G.view(d74, w, loaded)
+            h = re.sub(r'<details class="adtech">.*?</details>', "", render_node({"workflows": [], "chat": []}, docs={"docs": {}, "agent": v})["agent"], flags=re.S)
+            for g in v["conversations"]:
+                for m in g["messages"]:
+                    if m["sent"]:
+                        t = re.sub(r"\s+", " ", re.sub(r"@[\w-]+[,:]?\s*", "", m["text"])).strip()[:60]
+                        if len(t) >= 20:
+                            assert t not in htmllib_unescape(h.split("<h4>Thinking</h4>", 1)[-1]), (w, t, "a message repeated in its Thinking card")
+        h8 = render_node({"workflows": [], "chat": []}, docs={"docs": {}, "agent": G.view(d74, "W-8", loaded)})["agent"]
+        assert "(sent as its message to Scheduler (Coordination))" in h8 and "Added the number pad" in h8, "the decision sentence stays, the sent message is pointed to"
+        # the status chip: a paused run with no end state reads in plain words; "not recorded" only when nothing is known
+        keep_rd, j2.RUNS_DIR = j2.RUNS_DIR, repo
+        try:
+            chip = lambda st, mp: re.search(r'<span class="mappill [^"]*">([^<]*)</span>', render_node(st, docs={"docs": {}, "map": mp})["map"]).group(1)
+            m74 = M.build(d74)
+            assert m74["status"]["state"] == "not recorded" and chip(j2.saved_snapshot("j2-20261026-174314", 0), m74) == "Paused: waiting for you"
+            assert chip({"workflows": [], "chat": []}, m74) == "not recorded", "nothing about the state known"
+            if "j2-20261027-130930" in names:
+                assert chip(j2.saved_snapshot("j2-20261027-130930", 0), M.build(os.path.join(repo, "j2-20261027-130930"))) == "Done"
+        finally:
+            j2.RUNS_DIR = keep_rd
+    # the responses: served through redact(), never a .env value or the full test address
+    keep = j2_server.RUN
+    srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    bad = [v for v in j2_server.secrets() if v] + [x for x in [os.environ.get("J2_TEST_EMAIL")] if x and "@" in x]
+    try:
+        for name in [n for n in names if n in ("j2-20261026-174314", "j2-20261027-130930")]:
+            for q in ["/api/agent?who=adaptation", "/api/agent?who=identity", "/api/agent?who=W-8", "/api/agent?who=user", "/api/code?deck=work:website",
+                      "/api/code?deck=work:website&section=W-8", "/api/artifacts/tree"]:
+                try:
+                    body = urllib.request.urlopen(f"http://127.0.0.1:{srv.server_address[1]}{q}&run={name}" if "?" in q else f"http://127.0.0.1:{srv.server_address[1]}{q}?run={name}", timeout=60).read().decode()
+                except urllib.error.HTTPError as e:
+                    assert e.code == 404, (q, e.code)
+                    continue
+                assert not any(b in body for b in bad), (name, q, "a secret or the full test address in a response")
+    finally:
+        srv.shutdown()
+        j2_server.RUN = keep
+    chrome = j2.j2_check.find_chrome()
+    if chrome and BROWSER and "j2-20261026-174314" in names:      # the real page: the drawer from a Map panel and from the Chat, Esc, the code view
+        import html as htmllib
+        import shutil
+        import tempfile as tf
+        if not os.path.exists(os.path.join(j2.RUNS_DIR, "j2-20261026-174314")):      # the test's own read-only copy, where the page looks
+            shutil.copytree(os.path.join(repo, "j2-20261026-174314"), os.path.join(j2.RUNS_DIR, "j2-20261026-174314"))
+        ui = open(os.path.join(here, "j2_ui.html"), encoding="utf-8").read()
+        js = ("const q = s => [...document.querySelectorAll(s)], r = {}, svgsig = () => q('#pane-map svg *').length;"
+              "r.map0 = svgsig(); mapSelect('fn:adaptation');"
+              "const b = document.querySelector('#pane-map [data-agent=\"adaptation\"]'); r.btn = b ? b.textContent : null; b.click();"
+              "setTimeout(() => { const d = document.getElementById('agentdrawer'), x = d.getBoundingClientRect(); r.open = !d.hidden; r.box = [x.left, x.top, x.right, x.bottom, innerWidth, innerHeight];"
+              " r.text = d.innerText.slice(0, 4000); r.map1 = svgsig();"
+              " r.panels = q('#pane-map .mappanel').filter(x => x.getBoundingClientRect().width > 0).length;"
+              " document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})); r.closed = d.hidden; r.panel = !!document.querySelector('#pane-map .mappanel');"
+              " const c = document.querySelector('#msgs [data-agent^=\"W-\"]'); r.chatbtn = c ? c.dataset.agent : null; c.click();"
+              " setTimeout(() => { r.wf = d.hidden ? '' : d.querySelector('h3').textContent; document.querySelector('[data-agentclose]').click(); r.closed2 = d.hidden;"
+              "  showTab('artifacts'); loadArtifacts().then(() => { const o = document.querySelector('[data-artcode=\"work:website|W-8\"]'); o.click();"
+              "   setTimeout(() => { const pre = document.querySelector('#pane-artifacts pre.code'); r.code = pre ? [pre.querySelectorAll('.ln').length, getComputedStyle(pre).fontFamily, !!document.querySelector('[data-codecopy]'), pre.querySelector('.hlt') ? 1 : 0] : null;"
+              "    document.body.setAttribute('data-r', JSON.stringify(r)); }, 900); }); }, 900); }, 900);")
+        tmp = tf.mkdtemp(prefix="j2-agent-")
+        open(os.path.join(tmp, "j2_ui.html"), "w", encoding="utf-8").write(ui.replace("</body>", "<script>setTimeout(() => { try { " + js + " } catch (e) { document.body.setAttribute('data-r', JSON.stringify({error: String(e.stack || e)})); } }, 2500)</script></body>"))
+        keep_here, j2_server.HERE = j2_server.HERE, tmp
+        srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        try:
+            dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--window-size=1440,900", "--virtual-time-budget=12000", "--dump-dom",
+                              f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run=j2-20261026-174314&mapview=line"], capture_output=True, text=True, timeout=180).stdout
+        finally:
+            j2_server.HERE = keep_here
+            srv.shutdown()
+        got = json.loads(htmllib.unescape(re.search(r'data-r="([^"]*)"', dom).group(1)))
+        assert "error" not in got and got["btn"] == "See conversation and thinking" and got["open"], got
+        l, t_, r_, b_, w_, h_ = got["box"]
+        assert abs(l - w_ / 2) < 2 and t_ == 0 and abs(r_ - w_) < 1 and abs(b_ - h_) < 1, ("the drawer is the right half, full height", got["box"])
+        assert got["map1"] == got["map0"], "the Map underneath is unchanged"
+        for k in ("Summary", "Conversations", "Thinking", "Was given", "Reason", "Reply", "Reasons are the agent's own stated reasons"):
+            assert k in got["text"], k
+        assert got["panels"] == 0, ("opening the drawer closes the map's details panel: one panel at a time", got["panels"])
+        assert got["closed"] and not got["panel"], "Esc closes the drawer; the map's panel was already closed"
+        assert got["chatbtn"] and got["wf"].startswith(got["chatbtn"] + " · ") and got["closed2"], ("a name in the Chat opens it; Close closes it", got)
+        assert got["code"] and got["code"][0] > 100 and "mono" in got["code"][1].lower() and got["code"][2] and got["code"][3], ("code with line numbers, monospace, copy, colouring", got["code"])
+    print(f"agent view: {len(names)} runs, {n_calls} AI calls each in one agent's Thinking, {n_msgs} chat messages under sender and recipients, "
+          "the Map canvas unchanged, every section once with its author and rewritten-by when the owner changed, the full page is "
+          "site/index.html; 174314: 11 code sections, W-14 by W-16, W-15 by W-17; no secret in a response ok")
+
+
+def htmllib_unescape(t):
+    import html as htmllib
+    return htmllib.unescape(t)
+
+
 def A_walk(xs):
     for x in xs:
         yield x
@@ -7612,6 +7781,7 @@ if __name__ == "__main__":
             map_tree()
             map_logic()
             artifacts_tree()
+            agent_view()
         docs_repeat_failure()
         docs_intake_and_compare()
         plain_unchanged("f6938b2", slim="0")      # J2_SLIM=0 is the old path, prompt for prompt
