@@ -6172,6 +6172,31 @@ def agent_view():
         assert "Strategist (Adaptation) &lt;-&gt; Prioritiser (Priority) · 4" in html and "Was given</b> the charter" in html and "Show technical details" in html
         main_text = re.sub(r'<details class="adtech">.*?</details>', "", html, flags=re.S)
         assert '{"' not in main_text and "STATE:" not in main_text, "no raw JSON or prompt outside the technical details"
+        # a reply already sent as a message shows once, in Conversations, with a pointer in the Thinking card
+        d74 = os.path.join(repo, "j2-20261026-174314")
+        loaded = G.load(d74)
+        for w in sorted({str(c.get("fn")) for c in loaded[1]}):
+            v = G.view(d74, w, loaded)
+            h = re.sub(r'<details class="adtech">.*?</details>', "", render_node({"workflows": [], "chat": []}, docs={"docs": {}, "agent": v})["agent"], flags=re.S)
+            for g in v["conversations"]:
+                for m in g["messages"]:
+                    if m["sent"]:
+                        t = re.sub(r"\s+", " ", re.sub(r"@[\w-]+[,:]?\s*", "", m["text"])).strip()[:60]
+                        if len(t) >= 20:
+                            assert t not in htmllib_unescape(h.split("<h4>Thinking</h4>", 1)[-1]), (w, t, "a message repeated in its Thinking card")
+        h8 = render_node({"workflows": [], "chat": []}, docs={"docs": {}, "agent": G.view(d74, "W-8", loaded)})["agent"]
+        assert "(sent as its message to Scheduler (Coordination))" in h8 and "Added the number pad" in h8, "the decision sentence stays, the sent message is pointed to"
+        # the status chip: a paused run with no end state reads in plain words; "not recorded" only when nothing is known
+        keep_rd, j2.RUNS_DIR = j2.RUNS_DIR, repo
+        try:
+            chip = lambda st, mp: re.search(r'<span class="mappill [^"]*">([^<]*)</span>', render_node(st, docs={"docs": {}, "map": mp})["map"]).group(1)
+            m74 = M.build(d74)
+            assert m74["status"]["state"] == "not recorded" and chip(j2.saved_snapshot("j2-20261026-174314", 0), m74) == "Paused: waiting for you"
+            assert chip({"workflows": [], "chat": []}, m74) == "not recorded", "nothing about the state known"
+            if "j2-20261027-130930" in names:
+                assert chip(j2.saved_snapshot("j2-20261027-130930", 0), M.build(os.path.join(repo, "j2-20261027-130930"))) == "Done"
+        finally:
+            j2.RUNS_DIR = keep_rd
     # the responses: served through redact(), never a .env value or the full test address
     keep = j2_server.RUN
     srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
@@ -6203,6 +6228,7 @@ def agent_view():
               "const b = document.querySelector('#pane-map [data-agent=\"adaptation\"]'); r.btn = b ? b.textContent : null; b.click();"
               "setTimeout(() => { const d = document.getElementById('agentdrawer'), x = d.getBoundingClientRect(); r.open = !d.hidden; r.box = [x.left, x.top, x.right, x.bottom, innerWidth, innerHeight];"
               " r.text = d.innerText.slice(0, 4000); r.map1 = svgsig();"
+              " r.panels = q('#pane-map .mappanel').filter(x => x.getBoundingClientRect().width > 0).length;"
               " document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})); r.closed = d.hidden; r.panel = !!document.querySelector('#pane-map .mappanel');"
               " const c = document.querySelector('#msgs [data-agent^=\"W-\"]'); r.chatbtn = c ? c.dataset.agent : null; c.click();"
               " setTimeout(() => { r.wf = d.hidden ? '' : d.querySelector('h3').textContent; document.querySelector('[data-agentclose]').click(); r.closed2 = d.hidden;"
@@ -6227,12 +6253,18 @@ def agent_view():
         assert got["map1"] == got["map0"], "the Map underneath is unchanged"
         for k in ("Summary", "Conversations", "Thinking", "Was given", "Reason", "Reply", "Reasons are the agent's own stated reasons"):
             assert k in got["text"], k
-        assert got["closed"] and got["panel"], "Esc closes the drawer first, the panel stays"
+        assert got["panels"] == 0, ("opening the drawer closes the map's details panel: one panel at a time", got["panels"])
+        assert got["closed"] and not got["panel"], "Esc closes the drawer; the map's panel was already closed"
         assert got["chatbtn"] and got["wf"].startswith(got["chatbtn"] + " · ") and got["closed2"], ("a name in the Chat opens it; Close closes it", got)
         assert got["code"] and got["code"][0] > 100 and "mono" in got["code"][1].lower() and got["code"][2] and got["code"][3], ("code with line numbers, monospace, copy, colouring", got["code"])
     print(f"agent view: {len(names)} runs, {n_calls} AI calls each in one agent's Thinking, {n_msgs} chat messages under sender and recipients, "
           "the Map canvas unchanged, every section once with its author and rewritten-by when the owner changed, the full page is "
           "site/index.html; 174314: 11 code sections, W-14 by W-16, W-15 by W-17; no secret in a response ok")
+
+
+def htmllib_unescape(t):
+    import html as htmllib
+    return htmllib.unescape(t)
 
 
 def A_walk(xs):
