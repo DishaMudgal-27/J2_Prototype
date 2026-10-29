@@ -393,10 +393,13 @@ def atom_block(atom_id, calls, receipts):
     recs = [r for r in receipts or [] if r.get("atom") == atom_id and r.get("type") == CHECK_TYPE]
     recs = [r for r in recs if r.get("attempt") == max(x.get("attempt") or 0 for x in recs)] if recs else []
     if recs:
+        # one row for every template this atom was held to on its last attempt (a site builder that also wrote the
+        # style guide has two): a fail decides it, and the row names each template and part.
         worst = next((r for r in recs if r.get("pass") is False), recs[0])
-        out = {"template": template_name(worst.get("template")) or NOT_RECORDED, "section": worst.get("target"),
-               "match": _verdict(all(r.get("pass") for r in recs) if None not in
-                                 [r.get("pass") for r in recs] else None),
+        states = [r.get("pass") for r in recs]
+        out = {"template": " + ".join(dict.fromkeys(template_name(r.get("template")) or NOT_RECORDED for r in recs)),
+               "section": " + ".join(dict.fromkeys(str(r.get("target")) for r in recs)),
+               "match": _verdict(False if False in states else None if all(x is None for x in states) else True),
                "evidence": f"{atom_id}:{worst.get('attempt')}", "note": worst.get("evidence")}
     else:
         out = {"template": NOT_RECORDED, "section": None, "match": NOT_RECORDED,

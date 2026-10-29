@@ -2612,6 +2612,30 @@ def list_runs(limit=60):
     return out
 
 
+def _saved_views(d, wfs, calls):
+    """The atom/1 views of a saved run: the ones atoms.json holds, else rebuilt from workflows.json. With
+    J2_TEMPLATES=1 a view with no Template block of its own (a run recorded before templates, or without the flag)
+    gets one built from what that folder did record, so every row reads "not recorded" instead of nothing."""
+    blocks = saved_templates(d, wfs, calls)
+    views = _read(d, "atoms.json", {}).get("atoms")
+    if not views:
+        return j2_schema.run_views(wfs, ended=True, templates=blocks)[0]
+    if not blocks:
+        return views
+    out = []
+    for v in views:
+        if "template" in v or v.get("id") not in blocks:
+            out.append(v)
+            continue
+        new = {}
+        for k, val in v.items():      # the block sits where the view keeps it: after the defined output
+            new[k] = val
+            if k == "defined_output":
+                new["template"] = blocks[v["id"]]
+        out.append(new)
+    return out
+
+
 def saved_templates(d, wfs, calls):
     """{atom id: the atom/1 Template block} for a saved run folder, from the records it kept. None with the flag off,
     so an old run read without J2_TEMPLATES=1 is exactly what it always was."""
@@ -2645,9 +2669,7 @@ def saved_snapshot(name, since=0):
             "steps": STEPS, "goal": _read(d, "goal.json"), "stamped": True, "workflows": wfs,
             "budget": b.get("granted") or BUDGET, "spent": b.get("used") or 0, "conflicts": _read(d, "conflicts.json", []),
             "audits": audits, "versions": versions, "cycle": s.get("cycles") or 0, "calls": s.get("ai_calls") or len(calls),
-            "atoms_v1": {v["id"]: v for v in (_read(d, "atoms.json", {}).get("atoms")
-                                              or j2_schema.run_views(wfs, ended=True,
-                                                                     templates=saved_templates(d, wfs, calls))[0])},
+            "atoms_v1": {v["id"]: v for v in _saved_views(d, wfs, calls)},
             "templates": j2_templates.enabled() or any("template" in (v or {}) for v in
                                                        (_read(d, "atoms.json", {}).get("atoms") or [])),
             "error": None, "done": True, "turn": None, "cycle_turns": 0, "max_turns": MAX_TURNS, "paused": None,
