@@ -7670,6 +7670,82 @@ def left_bar():
           + (f"; real page, {seen['browser']} runs: rows, highlight, sections, dimmed tab, Map link, Run details line ok" if seen.get("browser") else " ok"))
 
 
+def left_bar_toggle():
+    """Left bar hamburger: static (always): the toggle sits before the bar, the choice is kept in a try/catch localStorage, the breakpoint is 1200px, no All views
+    button. With Chrome (--browser), on a saved run: at 1440x900 the bar is open and the hamburger collapses and reopens it, the choice survives a reload (a second
+    Chrome run on the same profile), the badge shows only when Needs you has items, and there is no horizontal scroll open or collapsed; at 800px the bar starts
+    collapsed, opens over the content, Esc, a click outside or picking a tab closes it, a click inside it does not, and again no horizontal scroll."""
+    import html as htmllib
+    import shutil
+    import socket
+    import threading
+    import j2_server
+    here = os.path.dirname(os.path.abspath(__file__))
+    ui = open(os.path.join(here, "j2_ui.html"), encoding="utf-8").read()
+    assert ui.index('id="railtoggle"') < ui.index('<nav class="rail tabs"') and 'id="railmenu"' not in ui and "All views" not in ui, "the hamburger comes first; no All views button"
+    assert 'try { localStorage.setItem("j2bar"' in ui and 'try { v = localStorage.getItem("j2bar")' in ui and "(min-width:1200px)" in ui, "remembered per viewer in try/catch; 1200px"
+    chrome = j2.j2_check.find_chrome()
+    repo = os.path.join(here, "runs")
+    run = "j2-20261026-174314" if os.path.isdir(os.path.join(repo, "j2-20261026-174314")) else None
+    if not (chrome and BROWSER and run):
+        print("left bar toggle: static checks ok (browser steps skipped: Chrome not found, no saved run, or --fast without --browser)")
+        return
+    note = ("(async () => { const q = s => [...document.querySelectorAll(s)], wait = ms => new Promise(r => setTimeout(r, ms)), vis = e => !!e && e.getClientRects().length > 0, rc = e => e.getBoundingClientRect(),"
+            " tg = document.getElementById('railtoggle'), bar = document.getElementById('rail'), st = () => ({open: !document.getElementById('dview').classList.contains('railoff'), bar: vis(bar), tog: vis(tg), exp: tg.getAttribute('aria-expanded'),"
+            " bw: vis(bar) ? Math.round(rc(bar).width) : 0, left: vis(bar) ? Math.round(rc(bar).left) : null, pos: getComputedStyle(bar).position, sw: [document.documentElement.scrollWidth, innerWidth],"
+            " body: [document.body.scrollWidth, innerWidth], col: Math.round(rc(document.querySelector('#dview .dcol')).width), badge: [vis(document.getElementById('barbadge')), document.getElementById('barbadge').textContent],"
+            " stored: (() => { try { return localStorage.getItem('j2bar'); } catch (e) { return 'err'; } })()}), r = {}; await wait(1500);")
+    steps = {
+        "wide1": "r.a = st(); tg.click(); r.b = st(); paint($('needs'), renderNeeds({paused: {msg: 1, questions: [{question: 'Q?'}]}})); barBadge(); r.c = st(); paint($('needs'), renderNeeds({})); barBadge(); r.d = st();"
+                 " paint($('needs'), renderNeeds({paused: {msg: 1, questions: [{question: 'Q?'}, {question: 'R?'}]}})); barBadge(); r.e = st(); r.label = tg.getAttribute('aria-label');",
+        "wide2": "r.a = st(); tg.click(); r.b = st();",
+        "narrow": "r.a = st(); tg.click(); r.b = st(); document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})); r.esc = st(); tg.click();"
+                  " document.getElementById('needs').click(); r.out = st(); tg.click(); q('.rshead')[0].click(); r.inside = st(); q('#rail [data-tab=goal]')[0].click(); r.tab = st(); r.stored = st().stored;",
+    }
+    port = socket.socket(); port.bind(("127.0.0.1", 0)); p_ = port.getsockname()[1]; port.close()
+    tmp = tempfile.mkdtemp(prefix="j2-bartoggle-")
+    os.symlink(os.path.join(here, "vendor"), os.path.join(tmp, "vendor"))
+    pick = ";".join(f"if (s === '{k}') {{ {note} {v} document.body.setAttribute('data-r', JSON.stringify(r)); }})(); }}" for k, v in steps.items())
+    page = ui.replace("</body>", "<script>setTimeout(() => { const s = new URLSearchParams(location.search).get('step'); " + pick + " }, 500)</script></body>")
+    open(os.path.join(tmp, "j2_ui.html"), "w", encoding="utf-8").write(page)
+    keep_here, runs_ = j2_server.HERE, j2.RUNS_DIR
+    j2_server.HERE, j2.RUNS_DIR = tmp, repo
+    srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", p_), j2_server.Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+
+    def probe(step, size, profile):
+        dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", f"--user-data-dir={profile}", "--no-first-run", f"--window-size={size}", "--virtual-time-budget=25000", "--dump-dom",
+                          f"http://127.0.0.1:{p_}/?view=detail&run={run}&step={step}"], capture_output=True, text=True, timeout=120).stdout
+        hit = re.search(r'data-r="([^"]*)"', dom)
+        assert hit, (step, "the page did not finish its steps", dom[-300:])
+        return json.loads(htmllib.unescape(hit.group(1)))
+    prof_w, prof_n = tempfile.mkdtemp(prefix="j2-barprof-"), tempfile.mkdtemp(prefix="j2-barprof-")
+    try:
+        w1 = probe("wide1", "1440,900", prof_w)
+        w2 = probe("wide2", "1440,900", prof_w)      # a second Chrome run on the same profile: the reload
+        n1 = probe("narrow", "800,900", prof_n)
+    finally:
+        srv.shutdown()
+        j2_server.HERE, j2.RUNS_DIR = keep_here, runs_
+        for d in (tmp, prof_w, prof_n):
+            shutil.rmtree(d, ignore_errors=True)
+    noscroll = lambda st: st["sw"][0] <= st["sw"][1] and st["body"][0] <= st["body"][1]
+    a, b = w1["a"], w1["b"]
+    assert a["open"] and a["bar"] and a["tog"] and 230 <= a["bw"] <= 250 and a["exp"] == "true" and a["badge"][0] is False, ("1440: open by default, hamburger shown, no badge while the bar is open", a)
+    assert not b["open"] and not b["bar"] and b["tog"] and b["exp"] == "false" and b["stored"] == "0" and b["col"] > a["col"] + 150, ("1440: the hamburger collapses the bar, only it shows, the content widens", a["col"], b)
+    assert noscroll(a) and noscroll(b), ("1440: no horizontal scroll, open or collapsed", a["sw"], b["sw"])
+    assert b["badge"][0] == (b["badge"][1] != "0") and w1["c"]["badge"] == [True, "1"] and w1["d"]["badge"][0] is False and w1["e"]["badge"] == [True, "2"] and "2 waiting on you" in w1["label"], ("the badge shows the number of Needs you items, only when there are some", w1["c"], w1["d"], w1["e"])
+    assert not w2["a"]["open"] and not w2["a"]["bar"] and w2["a"]["tog"] and w2["a"]["stored"] == "0", ("the collapsed choice survives a reload", w2["a"])
+    assert w2["b"]["open"] and w2["b"]["bar"] and w2["b"]["stored"] == "1" and noscroll(w2["a"]) and noscroll(w2["b"]), ("the hamburger reopens it, and that is remembered", w2["b"])
+    a, b = n1["a"], n1["b"]
+    assert not a["open"] and not a["bar"] and a["tog"] and noscroll(a), ("800: collapsed by default", a)
+    assert b["open"] and b["bar"] and b["pos"] == "fixed" and b["left"] == 0 and b["bw"] <= 240 and noscroll(b), ("800: the open bar overlays the content, no horizontal scroll", b)
+    assert not n1["esc"]["open"] and not n1["out"]["open"] and n1["inside"]["open"] and not n1["tab"]["open"], ("800: Esc, a click outside and a picked tab close it; a click inside does not", n1["esc"], n1["out"], n1["inside"], n1["tab"])
+    assert n1["stored"] in (None, "err"), ("800: a narrow overlay is not remembered", n1["stored"])
+    print("left bar toggle: hamburger collapses and reopens the bar at 1440x900, choice kept across a reload, badge only with Needs you items, no horizontal scroll open or collapsed "
+          "at 1440 and 800; at 800 the bar starts collapsed, overlays, closes on Esc, outside click and a picked tab ok")
+
+
 def map_every_workflow():
     """Map: every workflow in workflows.json is on the map (by stage, then section, then output refs) or listed by id under
     not recorded; a realization run's specs are deliverables with their stage's role and "given to" lines to the build
@@ -8208,7 +8284,7 @@ def map_tab():
     top, inside = rail.split('id="railsub"')
     # the Board story is the first entry under Internals (shown only when the run has a board); the rest are the old order
     old_tabs = ["story", "preview", "goal", "workflows", "conflicts", "priorities", "timeline", "audit", "charter", "docs", "artifacts", "board", "style", "lessons", "playbooks", "report", "rundetails", "runsettings"]
-    assert re.findall(r'data-tab="(\w+)"', top) == ["map"] and 'id="gochat"' in top and 'id="internals"' not in top and "Internals" not in rail and re.findall(r"<span>([^<]+)</span>", top) == ["Map", "Chat", "All views"], "the rail has Map and Chat rows (and, on a phone only, an All views button); no Internals folder"
+    assert re.findall(r'data-tab="(\w+)"', top) == ["map"] and 'id="gochat"' in top and 'id="internals"' not in top and "Internals" not in rail and re.findall(r"<span>([^<]+)</span>", top) == ["Map", "Chat"], "the rail has Map and Chat rows; no Internals folder"
     assert re.findall(r'data-tab="(\w+)"', inside) == old_tabs, "every other tab is under Internals, in the old order"
     assert "<svg" not in rail and ' hidden' not in rail.split('id="railsub"')[1].split(">")[0], "no icon rail; the sections are always shown"
     dvh = ui[ui.index('<div id="dview">'):ui.index('<dialog id="detail">')]
@@ -8459,7 +8535,7 @@ def map_tab():
         finally:
             shutil.rmtree(ended, ignore_errors=True)
         assert a["home"] == "map" and a["count"] == "1" and "Needs you" in a["needs"] and "Add credits?" in a["needs"] and "Answer in Chat" in a["needs"], a
-        assert a["layout"] == [True, True, True] and a["rail"] == ["Map", "Chat", "All views"] and a["sub"] is False and a["back0"] is True, a      # strip above the map, chat docked on the right, no Back link on the home
+        assert a["layout"] == [True, True, True] and a["rail"] == ["Map", "Chat"] and a["sub"] is False and a["back0"] is True, a      # strip above the map, chat docked on the right, no Back link on the home
         assert a["focus"] == "true|9999", a      # the strip's button focuses the question in the Chat
         assert a["tabs"] == {t: f"{t}|false|false" for t in old_tabs}, a      # every old tab opens from the sections, with a Back to map link
         assert a["back"] == "map|true", a
@@ -8509,8 +8585,8 @@ def map_tab():
         def phone_probe(run_name, view):
             js = ("setTimeout(() => { const d = document.querySelector('iframe').contentDocument, W = d.documentElement.clientWidth, r = {W, sw: d.documentElement.scrollWidth, out: []};"
                   "d.querySelectorAll('body *').forEach(e => { const b = e.getBoundingClientRect(); if (b.width && b.height && (b.right > W + 0.5 || b.left < -0.5)) r.out.push((e.id || e.className || e.tagName) + ' ' + Math.round(b.left) + '-' + Math.round(b.right)); });"
-                  "const rail = d.querySelector('.rail.tabs').getBoundingClientRect(), main = d.querySelector(" + json.dumps("#sview" if view == "simple" else "#dview .dcol") + ").getBoundingClientRect();"
-                  "r.rail = [rail.top >= main.bottom - 1, Math.abs(rail.bottom - d.documentElement.clientHeight) <= 1, rail.height > 0];"
+                  "const rail = d.querySelector('.rail.tabs').getBoundingClientRect(), tg = d.getElementById('railtoggle').getBoundingClientRect();"
+                  "r.rail = [rail.height === 0, tg.width > 0 && tg.left >= 0 && tg.right <= W && tg.top >= 0, d.getElementById('railtoggle').getAttribute('aria-expanded') === 'false'];"
                   "document.body.setAttribute('data-r', JSON.stringify(r)); }, 6000)")
             page = (f'<!doctype html><body style="margin:0"><iframe src="/?view={view}&run={run_name}" style="width:360px;height:800px;border:0;display:block"></iframe>'
                     f'<script>{js}</script></body>')
@@ -8534,7 +8610,7 @@ def map_tab():
         for v_ in ("simple", "detail"):
             p_ = phone_probe(name, v_)
             assert p_["W"] == 360 and p_["sw"] == 360 and p_["out"] == [], (v_, p_)      # no sideways scroll, nothing past either edge
-            assert p_["rail"] == [True, True, True], (v_, p_)      # the rail is along the bottom, below the screen's content
+            assert p_["rail"] == [True, True, True], (v_, p_)      # on a phone the bar starts collapsed: only the hamburger shows, inside the screen
         # Run settings: New run posts to /api/reset; choosing a saved run opens it
         e_ = home_probe(name, base_js + "let posted = ''; window.fetch = (u, o) => { if (String(u).includes('/api/reset')) posted = (o && o.method) || 'GET'; return new Promise(() => {}); }; showTab('runsettings'); document.getElementById('reset').click(); r.posted = posted;")
         assert e_["posted"] == "POST", e_
@@ -8840,6 +8916,7 @@ if __name__ == "__main__":
             map_line()
             map_logic()
             left_bar()
+            left_bar_toggle()
             map_readback()
             map_shapes()
             artifacts_tree()

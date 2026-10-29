@@ -196,12 +196,19 @@ body.simple #dview{display:flex;flex:0 0 auto}body.simple #dview .dcol{display:n
 #backmap{display:block;margin:0 0 2px;font-size:13px}#backmap[hidden]{display:none}
 /* ---- Detailed view layout: icon rail, one title, two soft cards (message board + output), a collapsed Run details row.
    Everything is scoped to #dview so the Simple view is untouched. System serif for headings, no web fonts. */
+/* Left bar toggle: the hamburger sits top-left over the bar; collapsed, only it shows (the badge counts what Needs you); below 1200px the open bar overlays the content */
+#railtoggle{position:absolute;top:10px;left:8px;z-index:30;width:36px;height:36px;padding:0;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+#railtoggle svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}#railtoggle:focus-visible{outline:2px solid var(--vio);outline-offset:1px}
+.barbadge{position:absolute;top:-6px;right:-6px;min-width:16px;padding:0 4px;box-sizing:border-box;border-radius:99px;background:var(--validator);color:var(--on);font:600 11px/16px var(--mono);text-align:center}
+.barbadge[hidden],#dview:not(.railoff) .barbadge{display:none}
+#dview{position:relative}#dview.railoff{padding-left:56px}#dview.railoff>.rail.tabs{display:none}
+@media (max-width:1199px){.rail.tabs{position:fixed;top:0;bottom:0;left:0;z-index:20;flex:none;width:min(240px,86vw);box-sizing:border-box;background:var(--panel);box-shadow:0 8px 28px rgba(0,0,0,.4)}}
 #dview{--vio:#6b45b3;--serif:ui-serif,Georgia,"Times New Roman",serif;--gut:24px}
 @media (prefers-color-scheme:dark){#dview{--vio:#ab8cec}}
 body:not(.simple) #dview{display:flex;flex:1;min-height:0}
 #dview h1,#dview h2,#dview h3,#dview h4{font-family:var(--serif);font-weight:600}
-.rail.tabs{flex:0 0 240px;width:240px;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:4px;padding:10px 8px;border-bottom:0;border-right:1px solid var(--line);overflow-y:auto}
-.rail.tabs button{display:block;width:100%;border:0;border-radius:8px;padding:6px 8px;font:500 13px/1.3 var(--body);text-align:left;color:var(--muted)}#railmenu{display:none!important}
+.rail.tabs{flex:0 0 240px;width:240px;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:4px;padding:54px 8px 10px;border-bottom:0;border-right:1px solid var(--line);overflow-y:auto}
+.rail.tabs button{display:block;width:100%;border:0;border-radius:8px;padding:6px 8px;font:500 13px/1.3 var(--body);text-align:left;color:var(--muted)}
 .rail.tabs button svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .rail.tabs button:hover{color:var(--ink)}
 .rail.tabs button[aria-selected="true"],.rail.tabs #gochat[aria-current="page"]{color:var(--vio);background:color-mix(in srgb,var(--vio) 13%,transparent);font-weight:600}
@@ -223,10 +230,8 @@ body.simple .rail.tabs button[aria-selected="true"]{color:var(--muted);backgroun
 #dview .pane:not(.preview){width:100%;max-width:880px;margin:0 auto}
 @media (max-width:900px){#dview .dcol{overflow:auto}#dview main{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(460px,70vh) minmax(420px,70vh);flex:none}}
 @media (max-width:600px){
-  #dview{--gut:12px}body:not(.simple) #dview{flex-direction:column-reverse}
-  .rail.tabs{flex:0 0 auto;width:auto;flex-direction:row;overflow-x:auto;overflow-y:hidden;border-right:0;border-top:1px solid var(--line);padding:6px}
-  .rail.tabs>button{flex:0 0 auto;width:auto}.rail.tabs{width:auto}#railmenu{display:block!important}.railsub:not(.open){display:none}
-  .railsub{position:fixed;left:8px;right:8px;bottom:64px;z-index:5;flex-direction:row;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px}.rail.tabs .railsub button{flex:1 1 90px}}
+  #dview{--gut:12px}
+}
 /* Board story: one horizontal flow strip per board question (board/1), stacked on a phone. Existing tokens only, so
    light and dark follow the page. */
 .storywrap{padding:4px 0}.storyq{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:10px 12px;margin:0 0 12px}
@@ -263,10 +268,10 @@ body.simple .rail.tabs button[aria-selected="true"]{color:var(--muted);backgroun
   </main>
 </div>
 <div id="dview">
-<nav class="rail tabs" role="tablist" aria-label="Sections" aria-orientation="vertical">
+<button type="button" id="railtoggle" aria-controls="rail" aria-expanded="true" aria-label="Menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="barbadge" id="barbadge" hidden></span></button>
+<nav class="rail tabs" id="rail" role="tablist" aria-label="Sections" aria-orientation="vertical">
   <button role="tab" data-tab="map" aria-selected="true"><span>Map</span></button>
   <button type="button" id="gochat"><span>Chat</span></button>
-  <button type="button" id="railmenu" aria-expanded="false" aria-controls="railsub"><span>All views</span></button>
   <div class="railsub" id="railsub">
     <button role="tab" id="tab-story" data-tab="story" aria-selected="false" hidden>Board story</button>
     <button role="tab" data-tab="preview" aria-selected="false">Preview</button>
@@ -1151,7 +1156,7 @@ async function poll(){
     $("mem").textContent = s.memory ? `memory on · ${s.lessons.length} lesson(s)` : "memory off";
     $("ph").hidden = !s.placeholders.length;
     $("ph").textContent = `Placeholder md: ${s.placeholders.join(", ")}`;
-    paint($("needs"), renderNeeds(s)); $("needs").classList.toggle("on", needsYou(s).length > 0);
+    paint($("needs"), renderNeeds(s)); $("needs").classList.toggle("on", needsYou(s).length > 0); barBadge();
     if (s.versions !== versions){
       versions = s.versions;
       $("ver").innerHTML = Array.from({length:versions}, (_,i) => `<option value="v${i+1}">v${i+1}</option>`).join("") || "<option>no site yet</option>";
@@ -1221,7 +1226,7 @@ function showTab(name){
   const tb = document.querySelector(`.tabs [data-tab="${name}"]`);
   $("wtitle").textContent = tb ? tb.textContent.trim() : name; $("wsub").textContent = TABHINT[name] || ""; $("ver").hidden = name !== "preview";
   // the Map has its own heading, so the title bar is only for the other views
-  $("backmap").hidden = name === "map"; document.querySelector("#dview .wbar").hidden = name === "map"; document.querySelector("#dview .work").classList.toggle("mapfit", name === "map"); if (name !== "map") railReveal(name); $("railsub").classList.remove("open"); $("railmenu").setAttribute("aria-expanded", "false");
+  $("backmap").hidden = name === "map"; document.querySelector("#dview .wbar").hidden = name === "map"; document.querySelector("#dview .work").classList.toggle("mapfit", name === "map"); if (name !== "map") railReveal(name);
   ["preview","goal","workflows","conflicts","priorities","timeline","audit","charter","docs","artifacts","board","story","map","style","lessons","playbooks","report","rundetails","runsettings"].forEach(t => $("pane-"+t).hidden = t !== name);
 }
 document.querySelectorAll(".tabs [role=tab]").forEach(b => b.onclick = () => { if (b.dataset.tab === "workflows" && WFSTEP.length){ WFSTEP = []; if (state) paint($("pane-workflows"), renderWorkflows(state)); } showTab(b.dataset.tab); });
@@ -1232,7 +1237,15 @@ showTab("map");
   setView("detail", false); showTab(want); })();
 $("gochat").onclick = () => setView("simple", true);      // Chat is the Simple view; any other rail item goes back to the Detailed view
 document.querySelectorAll(".rail [role=tab]").forEach(b => b.addEventListener("click", () => setView("detail", true)));
-$("railmenu").onclick = () => { const o = !$("railsub").classList.contains("open"); $("railsub").classList.toggle("open", o); $("railmenu").setAttribute("aria-expanded", String(o)); };
+// Left bar toggle: open from 1200px up, collapsed below; a choice made on a wide screen is remembered (a narrow overlay always starts closed)
+const BARWIDE = matchMedia("(min-width:1200px)"), barOpen = () => !$("dview").classList.contains("railoff");
+function barSet(open, keep){ $("dview").classList.toggle("railoff", !open); $("railtoggle").setAttribute("aria-expanded", String(open)); if (keep && BARWIDE.matches) try { localStorage.setItem("j2bar", open ? "1" : "0"); } catch (x) {} }
+function barInit(){ let v = null; try { v = localStorage.getItem("j2bar"); } catch (x) {} barSet(BARWIDE.matches && v !== "0", false); }
+function barBadge(){ const n = +(document.getElementById("needcount") || {}).textContent || 0; $("barbadge").textContent = n; $("barbadge").hidden = !n; $("railtoggle").setAttribute("aria-label", n ? `Menu, ${n} waiting on you` : "Menu"); }
+$("railtoggle").onclick = () => barSet(!barOpen(), true);
+BARWIDE.addEventListener("change", barInit); barInit();
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !BARWIDE.matches && barOpen()){ e.stopImmediatePropagation(); barSet(false); $("railtoggle").focus(); } }, true);
+document.addEventListener("click", e => { if (!BARWIDE.matches && barOpen() && (!e.target.closest(".rail, #railtoggle") || e.target.closest(".rail [role=tab], #gochat"))) barSet(false); });
 $("backmap").onclick = () => showTab("map");
 // Artifacts: read-only list driven by artifacts/types.json (/api/artifacts): deliverables, then evidence and records.
 const ARTS = {deliverables: [], records: [], tree: null}, ARTTEXT = {};      // ARTTEXT: file -> text already fetched for an open row
@@ -2457,7 +2470,7 @@ function mapGo(id){
 }
 async function loadMap(){
   try { const r = await fetch(`/api/map?${runQ().slice(1)}`, {cache:"no-store"}); if (r.ok) Object.assign(MAP, await r.json()); } catch (e) {}
-  if (state) paint($("needs"), renderNeeds(state));      // the outcome line names what the Map shows left open
+  if (state){ paint($("needs"), renderNeeds(state)); barBadge(); }      // the outcome line names what the Map shows left open
   paintMap(); railPaint(); loadPlan();
 }
 function mapLight(svg, id){      // hover or focus: light the dot, the lines that touch it and the dots at their other ends; fade the rest ("" clears)
