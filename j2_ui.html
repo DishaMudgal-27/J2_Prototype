@@ -1824,12 +1824,12 @@ function treeHtml(m, other){      // other: the panel of a deliverable picked on
     + `<div class="sub"><button type="button" class="gobtn" data-wfcard="${esc(ws.id)}">Open</button> <button type="button" class="linkbtn" data-agent="${esc(ws.id)}">See conversation and thinking</button>${box ? ` <button type="button" class="linkbtn" data-mapgo="${esc(box.id)}">${mapWords(mapGoLabel(box))}</button>` : ""}</div></aside>` : "";
   const tid = open || fteam, g = tid && L.stages[tid], made = g ? g.steps.map(id => mapStepTo(m, by[id])).filter(Boolean) : [];
   const bar = `<div class="treebar"><button type="button" class="linkbtn" data-treefit>Fit</button><button type="button" class="linkbtn" data-treeback${tid ? "" : " hidden"}>Back</button>`
-    + `<span class="sub">${pick ? `${mapWords(pick.id)} focused: what it read above, what it made below, the team's workflows beside it. Esc, Back, a click on it or on empty space returns to the team.`
+    + `<span class="sub">${pick ? `${mapWords(pick.id)} focused: what it read above, what it made below, the team's workflows beside it. Esc, Back or empty space returns to the team; a click on it opens its details.`
       : open ? `${mapWords(L.at[open].label)}: ${L.stages[open].workflows.length} workflow${L.stages[open].workflows.length === 1 ? "" : "s"}, what it reads on the left and made on the right. Click a workflow to focus it. Esc, Back or a click on empty space returns.`
-      : fteam ? `${mapWords(L.at[fteam].label)} focused: what it reads above, what it made below, the teams beside it. Click it again, Esc, Back or empty space returns.` : "Click a team to focus it. Drag to pan, scroll or pinch to zoom."}</span></div>`;
+      : fteam ? `${mapWords(L.at[fteam].label)} focused: what it reads above, what it made below, the teams beside it. Click it again to open its workflows; Esc, Back or empty space returns.` : "Click a team to focus it. Drag to pan, scroll or pinch to zoom."}</span></div>`;
   const stagePanel = g && !pick ? `<aside class="mappanel treepanel" data-stagepanel="${esc(tid)}" aria-label="Details of ${esc(g.label)}"><div class="mappanelhead"><b>${mapWords(g.label)}</b><button type="button" class="linkbtn" data-treeback>Close (Esc)</button></div>`
     + [`${g.workflows.length} workflow${g.workflows.length === 1 ? "" : "s"}: ${g.workflows.map(x => mapWords(x)).join(", ")}`, `made: ${made.map(x => mapWords(x.label)).join(", ") || "not recorded"}`, MAPW[g.status] || ""].filter(Boolean).map(x => `<div class="sub">${x}</div>`).join("")
-    + `<div class="sub">${fteam ? `<button type="button" class="gobtn" data-treeopen="${esc(fteam)}">Open its workflows</button> ` : ""}<button type="button" class="linkbtn" data-mapgo="${esc(g.steps[0])}">${mapWords(mapGoLabel(by[g.steps[0]]))}</button>${open ? " Click a workflow in the circle to focus it." : ""}</div></aside>` : "";
+    + `<div class="sub">${fteam ? `<button type="button" class="gobtn" data-treeopen="${esc(fteam)}">Open its workflows</button> ` : ""}${open ? `<button type="button" class="linkbtn" data-mapgo="${esc(g.steps[0])}">${mapWords(mapGoLabel(by[g.steps[0]]))}</button> Click a workflow in the circle to focus it.` : ""}</div></aside>` : "";
   return `<div class="treebox">${bar}${svg}${panel || (other || "").replace('class="mappanel"', 'class="mappanel treepanel"') || stagePanel}</div>`;
 }
 // Tree view at run time: pan and zoom (d3-zoom), the 300 ms move of a stage to the middle and back, and the clicks. renderMap draws
@@ -1917,9 +1917,9 @@ function treeClick(e){
   if (e.target.closest("[data-treeback]")){ if (TREE.wf) treeFocus(""); else if (TREE.open) treeClose(); else treeFocusTeam(""); return true; }
   const o = e.target.closest("[data-treeopen]"); if (o){ treeOpen(o.dataset.treeopen); return true; }
   if (e.target.closest("[data-treewfclose]")){ treeFocus(""); return true; }
-  const w = e.target.closest(".twf"); if (w){ treeFocus(TREE.wf === w.dataset.wf ? "" : w.dataset.wf); return true; }
-  const n = e.target.closest(".tnode"); if (n){ const id = n.dataset.id;
-    if (n.dataset.kind === "stage"){ if (TREE.open === id) treeClose(); else treeFocusTeam(TREE.focus === id ? "" : id); } else { if (TREE.wf) TREE.wf = ""; mapSelect(MAPPIN === id ? "" : id); } return true; }
+  const w = e.target.closest(".twf"); if (w){ if (TREE.wf === w.dataset.wf){ TREE.nopanel = false; paintMap(); } else treeFocus(w.dataset.wf); return true; }      // the focused workflow stays focused, its details open
+  const n = e.target.closest(".tnode"); if (n){ const id = n.dataset.id;      // a second click on the focused team opens it; only Esc, Back and empty space clear
+    if (n.dataset.kind === "stage"){ if (TREE.focus === id) treeOpen(id); else if (TREE.open !== id) treeFocusTeam(id); } else { if (TREE.wf) TREE.wf = ""; mapSelect(MAPPIN === id ? "" : id); } return true; }
   if (e.target.closest(".treesvg")){ if (TREE.wf) treeFocus(""); else if (TREE.open) treeClose(); else if (TREE.focus) treeFocusTeam(""); else if (MAPPIN) mapSelect(""); return true; }      // empty space
   return false;
 }

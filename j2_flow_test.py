@@ -6920,6 +6920,9 @@ def map_focus():
                     seen["focus edges"] += 1
                 return nodes
 
+            sid0 = sorted(stages)[0]      # a focused team's panel has one open button (a second click on the team does the same), no second link
+            pm = render_node(snap, docs={"docs": {}, "map": m, "tree": {"focus": sid0}})["map"]
+            assert pm.count("data-treeopen=") == 1 and "Open these workflows" not in pm and "Open its workflows" in pm, (name, sid0, "one open button")
             for sid, F in fa["stages"].items():      # a team focused in the Tree
                 nodes = geometry(F, "team " + sid)
                 ins, outs = io[sid]
@@ -7008,16 +7011,16 @@ def map_focus():
                 shutil.copytree(os.path.join(repo, name), os.path.join(j2.RUNS_DIR, name))      # read only: the test's own copy
             js = (base + "go(["
                   "() => { r.tree0 = pos(); r.treeEdges = q('.tedge').filter(vis).map(e => e.getAttribute('d')); ev(stage(), 'click'); },"
-                  "() => { r.teamFlags = [q('.treesvg.tfocused').length, q('.tpill').length, q('[data-treeopen]').length, q('.tflow').length]; snap('team'); r.teamPeers = q('.tnode.tstage.tfit').length; ev(q('.tpill')[0], 'click'); },"
-                  "() => { r.cleared = [q('.treesvg.tfocused').length, same(r.tree0)]; ev(stage(), 'click'); },"
-                  "() => { ev(q('[data-treeopen]')[0], 'click'); },"
+                  "() => { r.teamFlags = [q('.treesvg.tfocused').length, q('.tpill').length, q('[data-treeopen]').length, q('.tflow').length, q('.treepanel a, .treepanel [data-mapgo]').length]; r.teamPanelText = q('.treepanel')[0].textContent; snap('team'); r.teamPeers = q('.tnode.tstage.tfit').length; ev(q('.tpill')[0], 'click'); },"
+                  "() => { r.reopened = [q('.tnode.open').length, q('.tring .twf').length, q('.treesvg.tfocused').length]; ev(q('[data-treeback]')[0], 'click'); },"
+                  "() => { r.reclosed = same(r.tree0); ev(stage(), 'click'); },"
+                  "() => { ev(q('.tpill')[0], 'click'); },"
                   "() => { snap('oval'); r.oval0 = pos(); r.ring = q('.tring .twf').length; r.ovalFocused = q('.treesvg.tfocused').length; ev(w8(), 'click'); r.sync = [q('.treesvg.tmoving').length, q('.tpill').length]; },"
                   "() => { snap('wf'); r.wfFlags = [q('.treesvg.tfocused').length, q('.treepanel [data-wfcard]').length, q('.treepanel [data-agent]').length]; ev(q('.tfit.twf').find(x => x.dataset.wf !== 'W-8'), 'click'); },"
                   "() => { r.moved = q('.tpill.twf').map(x => x.dataset.wf); esc(); },"
                   "() => { r.esc = [q('.tpill.twf').length, q('.tring .twf').length, same(r.oval0)]; ev(w8(), 'click'); },"
                   "() => { ev(q('.tpill.twf')[0], 'click'); },"
-                  "() => { r.again = [q('.tpill.twf').length, same(r.oval0)]; ev(w8(), 'click'); },"
-                  "() => { ev(q('[data-treeback]')[0], 'click'); },"
+                  "() => { r.again = [q('.tpill.twf').length, q('.treepanel [data-wfcard]').length, q('.treesvg.tfocused').length]; ev(q('[data-treeback]')[0], 'click'); },"
                   "() => { r.back = [q('.tpill.twf').length, q('.tnode.open').length, same(r.oval0)]; ev(w8(), 'click'); },"
                   "() => { ev(q('.treesvg')[0], 'click'); },"
                   "() => { r.empty = [q('.tpill.twf').length, q('.tnode.open').length, same(r.oval0)]; esc(); },"
@@ -7031,10 +7034,11 @@ def map_focus():
                   "]);")
             got = probe(name, js)
             assert all(re.fullmatch(r"M[-\d. ]+ (L[-\d. ]+|A[-\d. ]+)", d) for d in got["treeEdges"]), (name, "the Tree's edges on the page are lines or arcs")
-            assert got["teamFlags"][:3] == [1, 1, 1] and got["cleared"] == [0, True], (name, "a team is focused by a click, and a second click clears it", got["teamFlags"], got["cleared"])
+            assert got["teamFlags"][:3] == [1, 1, 1] and got["teamFlags"][4] == 0 and got["teamPanelText"].count("Open") == 1 and "Open these workflows" not in got["teamPanelText"], (name, "a team is focused by a click; its panel has one open button", got["teamFlags"], got["teamPanelText"])
+            assert got["reopened"][0] == 1 and got["reopened"][1] > 0 and got["reopened"][2] == 1 and got["reclosed"], (name, "a second click on the focused team opens it; Back returns to the Tree", got["reopened"], got["reclosed"])
             assert got["ring"] > 0 and got["ovalFocused"] == 1 and got["sync"] == [1, 1], (name, "the team is opened; the glide starts at once", got["ring"], got["sync"])
             assert got["wfFlags"] == [1, 1, 1] and got["moved"] and got["moved"] != ["W-8"], (name, "W-8 is focused, with its panel and See conversation and thinking; another workflow moves the focus", got["wfFlags"], got["moved"])
-            assert got["esc"] == [0, got["ring"], True] and got["again"] == [0, True] and got["back"] == [0, 1, True] and got["empty"] == [0, 1, True], (name, "Esc, a second click, Back and empty space clear the workflow focus and the nodes return", got["esc"], got["again"], got["back"], got["empty"])
+            assert got["esc"] == [0, got["ring"], True] and got["again"] == [1, 1, 1] and got["back"] == [0, 1, True] and got["empty"] == [0, 1, True], (name, "Esc, Back and empty space clear the workflow focus and the nodes return; a second click keeps the focus and shows its details", got["esc"], got["again"], got["back"], got["empty"])
             assert got["closed"] == [0, 0, True] and got["escTeam"] == [0, True] and got["backTeam"] == [0, True] and got["emptyTeam"] == [0, True], (name, "the Tree comes back", got["closed"], got["escTeam"], got["backTeam"], got["emptyTeam"])
             for state in ("team", "oval", "wf"):
                 s_ = got[state]
