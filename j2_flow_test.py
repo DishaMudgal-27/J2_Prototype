@@ -6136,7 +6136,7 @@ def artifacts_tree():
         assert all(files.count(f) == 1 for f in listed), (name, [f for f in listed if f not in files])
         by = {n["id"]: n for n in m["nodes"]}
         step = {e["to"]: by[e["from"]] for e in m["edges"] if e["kind"] == "step" and by.get(e["from"], {}).get("kind") == "engine"}
-        readers = lambda nid: {w for e in m["edges"] if e["kind"] == "handoff" and e["from"] == nid for w in e.get("readers") or []}
+        readers = lambda nid: {w for e in m["edges"] if e["kind"] in ("step", "handoff") and e["from"] == nid and by[e["to"]]["kind"] == "engine" for w in e.get("readers") or []}      # a read ends at the team that read it
         items = [x for g in t["groups"] for x in A_walk(g["items"])]
         for x in items:      # makers, readers and statuses are the map's
             n = by.get(x.get("node"))
@@ -6225,7 +6225,7 @@ def agent_view():
         n_calls, n_msgs = n_calls + len(calls), n_msgs + len(chat)
         if old is not None:      # nothing on the Map canvas changes
             a, b = M.build(d), old.build(d)
-            assert (len(a["nodes"]), len(a["edges"])) == (len(b["nodes"]), len(b["edges"])), (name, "the Map canvas changed")
+            assert len(a["nodes"]) == len(b["nodes"]) and len(a["edges"]) <= len(b["edges"]), (name, "the Map canvas changed")      # main still drew artifact -> artifact lines; map-shapes drops them
         # the code: every section once, with its author, "rewritten by" exactly when the owner differs from the creator
         t = A.tree(d)
         rows = [x for g in t["groups"] for x in A_walk(g["items"]) if x.get("code") and x["code"].get("section")]
@@ -6276,8 +6276,8 @@ def agent_view():
         try:
             chip = lambda st, mp: re.search(r'<span class="mappill [^"]*">([^<]*)</span>', render_node(st, docs={"docs": {}, "map": mp})["map"]).group(1)
             m74 = M.build(d74)
-            assert m74["status"]["state"] == "not recorded" and chip(j2.saved_snapshot("j2-20261026-174314", 0), m74) == "Paused: waiting for you"
-            assert chip({"workflows": [], "chat": []}, m74) == "not recorded", "nothing about the state known"
+            assert m74["status"]["state"] == "Waiting on you" and chip(j2.saved_snapshot("j2-20261026-174314", 0), m74) == "Waiting on you"      # map-shapes: the last Identity question still waits
+            assert chip({"workflows": [], "chat": []}, {**m74, "status": {**m74["status"], "state": "not recorded", "state_status": "idle"}, "nodes": [{**n, "status": "idle"} if n["status"] in ("waiting_on_you", "waiting", "running") else n for n in m74["nodes"]]}) == "not recorded", "nothing about the state known"
             if "j2-20261027-130930" in names:
                 assert chip(j2.saved_snapshot("j2-20261027-130930", 0), M.build(os.path.join(repo, "j2-20261027-130930"))) == "Done"
         finally:
@@ -6358,6 +6358,16 @@ def A_walk(xs):
         yield from A_walk(x.get("children") or [])
 
 
+def ctr(g):
+    """The centre of a node's shape in the Map's SVG: a rounded square or envelope (rect), or a circle."""
+    m = re.search(r'<rect class="shape" x="(-?[\d.]+)" y="(-?[\d.]+)" width="([\d.]+)" height="([\d.]+)"', g)
+    if m:
+        x, y, w, h = (float(v) for v in m.groups())
+        return x + w / 2, y + h / 2
+    m = re.search(r'<circle class="shape" cx="(-?[\d.]+)" cy="(-?[\d.]+)"', g)
+    return float(m.group(1)), float(m.group(2))
+
+
 def map_logic():
     """Every run under runs/ with workflows.json: every line has a record (source) that exists in the run's files and points producer ->
     consumer; every recorded read between two drawn boxes is a line; every workflow is in exactly one stage's circle or under Not recorded;
@@ -6400,19 +6410,35 @@ def map_logic():
                 if f == "atoms.json" and field == "depends_on":
                     return any(e.get("atom") == val for a in atoms.values() if a.get("workflow") == wid for e in a.get("depends_on") or [])
                 return True      # a whole-file record (goal.json, chat.jsonl, calls.jsonl, audits, artifacts.json, summary.json)
+            # the rule: between two artifacts there is always the team that read one and made the other. A read is drawn artifact -> team,
+            # what the team made team -> artifact; the Charter (an artifact) goes only to a team.
+            kind_of = {n["id"]: n["kind"] for n in m["nodes"]}
+            reads_e = [e for e in m["edges"] if e["kind"] in ("step", "handoff") and kind_of.get(e["from"]) == "work"]
+            made_e = [e for e in m["edges"] if e["kind"] == "step" and kind_of.get(e["to"]) == "work"]
+            art_to_art = sum(1 for e in m["edges"] if e["kind"] in ("step", "handoff") and kind_of.get(e["from"]) == "work" and kind_of.get(e["to"]) == "work")
+            read_not_to_team = sum(1 for e in reads_e if kind_of.get(e["to"]) != "engine")
+            made_not_from_team = sum(1 for e in made_e if kind_of.get(e["from"]) != "engine")
             no_basis, wrong_way = 0, 0
+            team_made = {e["from"]: e["to"] for e in made_e if kind_of.get(e["from"]) == "engine"}
             for e in m["edges"]:
-                src = e.get("source")
-                if not src or not proven(src):
+                if e["kind"] not in ("step", "handoff"):
+                    continue
+                srcs = e.get("sources") or ([e["source"]] if e.get("source") else [])
+                if not srcs or not all(proven(x) for x in srcs):
                     no_basis += 1
                     continue
-                if e["kind"] == "handoff":      # producer -> consumer: the reader makes the target; what it reads made the source
-                    reader, read = src.get("workflow"), src.get("value")
-                    read = named.get(read) or str(read).split(".")[0]
-                    if reader not in by[e["to"]].get("workflows", []) or read not in by[e["from"]].get("workflows", []):
+                if kind_of.get(e["from"]) == "work" and kind_of.get(e["to"]) == "engine" and e["from"] != "work:charter":
+                    # producer -> consumer: every record names a workflow of this team that read what the artifact holds
+                    for src in srcs:
+                        read = named.get(src.get("value")) or str(src.get("value")).split(".")[0]
+                        if src.get("workflow") not in by[e["to"]].get("workflows", []) or read not in by[e["from"]].get("workflows", []):
+                            wrong_way += 1
+                elif kind_of.get(e["from"]) == "engine" and kind_of.get(e["to"]) == "work":
+                    a_, b_ = set(by[e["from"]].get("workflows", [])), set(by[e["to"]].get("workflows", []))
+                    if (a_ or b_) and not a_ & b_:
                         wrong_way += 1
-            # every recorded read between two drawn boxes is a line
-            have = {(e["from"], e["to"]) for e in m["edges"] if e["kind"] == "handoff"}
+            # every recorded read between two drawn artifacts is a line from the artifact to the team (never to another artifact)
+            have = {(e["from"], e["to"]) for e in reads_e if e["from"] != "work:charter"}
             want = set()
             for wid, w in wfs.items():
                 p_ = plan.get(w.get("proposal_id")) or plan.get(w.get("name")) or {}
@@ -6421,16 +6447,23 @@ def map_logic():
                 for s_ in filter(None, srcs):
                     for a_ in holds.get(s_, ()):
                         for b_ in holds.get(wid, ()):
-                            if a_ != b_ and s_ != wid:
-                                want.add((a_, b_))
+                            if a_ != b_ and s_ != wid and b_ in team_made.values():
+                                want.add((a_, next(k for k, v in team_made.items() if v == b_)))
             missing = len(want - have)
-            # the Tree: each workflow in exactly one stage's circle (or listed as not placed); no box above one it reads
+            # the Charter is not given a line to every team: only to a team that reads nothing else
+            charter_busy = sum(1 for e in m["edges"] if e["from"] == "work:charter" and e["kind"] == "step" and any(x["to"] == e["to"] and x["from"] != "work:charter" for x in reads_e))
+            # the Tree: each workflow in exactly one stage's circle (or listed as not placed); artifacts and teams alternate; no box above one it reads
             t = render_node({"workflows": [], "chat": []}, docs={"docs": {}, "map": m})["tree"]
             circles = [w for n in t["nodes"] if n["kind"] == "stage" for w in n["workflows"]]
             listed = {x for s_ in m["not_recorded"] if s_.startswith("workflows not placed on the map: ") for x in s_.split(": ", 1)[1].split(", ")}
-            once = sum(1 for w in wfs if circles.count(w) + (w in listed) != 1)
+            dropped = sum(1 for w in wfs if circles.count(w) + (w in listed) == 0)
+            twice = sum(1 for w in wfs if circles.count(w) + (w in listed) > 1)
             row = {n["id"]: n["row"] for n in t["nodes"]}
-            misplaced = sum(1 for l in t["links"] if l["kind"] == "reads" and row[l["to"]] <= row[l["from"]]) + once
+            tk = {n["id"]: n["kind"] for n in t["nodes"]}
+            side = lambda k: "team" if k == "stage" else "artifact"
+            tree_bad = sum(1 for l in t["links"] if side(tk[l["from"]]) == side(tk[l["to"]]))      # artifact to artifact, or team to team
+            misplaced = sum(1 for l in t["links"] if not l.get("side") and row[l["to"]] <= row[l["from"]]) + tree_bad      # a side line runs along its own row
+            no_basis += sum(1 for n in m["nodes"] for src in (n.get("team_reads") or {}).get("sources", []) if not proven(src))
             # labels: from the file, the file's type, or the workflow (its name, or the field that records it)
             labels = 0
             for n in m["nodes"]:
@@ -6442,18 +6475,192 @@ def map_logic():
                 ok |= {(wfs.get(w) or {}).get("name") for w in n.get("workflows") or []}
                 ok |= {M.file_label(f) for w in n.get("workflows") or [] for f, v in (wfs.get(w) or {}).items() if v is True}
                 labels += n["label"] not in ok
-            rows_out.append((name, len(m["edges"]), no_basis + wrong_way, missing, misplaced, labels, t["crossings"]))
-            if no_basis or wrong_way or missing or misplaced or labels:
+            rows_out.append((name, len(m["edges"]), no_basis + wrong_way, missing, misplaced, labels, t["crossings"],
+                             art_to_art + tree_bad, read_not_to_team, made_not_from_team, dropped, twice, charter_busy))
+            if no_basis or wrong_way or missing or misplaced or labels or art_to_art or read_not_to_team or made_not_from_team or dropped or twice or charter_busy:
                 bad.append(rows_out[-1])
     finally:
         j2.RUNS_DIR = keep_dir
+    cols = ("edges", "artifact->artifact", "read not to a team", "made not from a team", "no basis / wrong way", "missing reads", "workflows dropped",
+            "workflows twice", "charter line to a busy team", "misplaced", "labels", "crossings")
+    pick = lambda r: (r[1], r[7], r[8], r[9], r[2], r[3], r[10], r[11], r[12], r[4], r[5], r[6])
     if "--map-logic" in sys.argv or bad:
-        print(f"{'run':<22} {'edges':>5} {'no basis':>8} {'missing reads':>13} {'misplaced':>9} {'labels':>6} {'crossings':>9}")
+        print(f"{'run':<22}" + "".join(f" {c[:12]:>12}" for c in cols))
         for r in rows_out:
-            print(f"{r[0]:<22} {r[1]:>5} {r[2]:>8} {r[3]:>13} {r[4]:>9} {r[5]:>6} {r[6]:>9}")
+            print(f"{r[0]:<22}" + "".join(f" {v:>12}" for v in pick(r)))
+    tot = [sum(pick(r)[i] for r in rows_out) for i in range(len(cols))]
+    print("map logic counts over %d runs (all must be 0 except edges and crossings): " % len(rows_out) + " | ".join(f"{c} {v}" for c, v in zip(cols, tot)))
     assert not bad, bad
-    print(f"map logic: {len(rows_out)} runs, every line has a record in the run's files and points producer -> consumer, no recorded read is "
-          "missing, every workflow in one stage's circle, nothing below what reads it, every label from its file, type or workflow ok")
+    print("map logic: no artifact -> artifact line, every read ends at a team and every made line starts at one, every line has a record in the run's "
+          "files and points producer -> consumer, no recorded read is missing, every workflow once, the Charter not drawn to a team that reads "
+          "something else, nothing below what reads it, every label from its file, type or workflow ok")
+
+
+def map_readback():
+    """An artifact its own team made and other workflows of that team read (team_reads, from the records) sits beside the team on its row
+    with a "made" line and a dashed "read back" line, never in the row of the team's plain outputs; an artifact nobody on the team reads
+    stays a plain output. Checked on a synthetic run (made-up names) and, from the raw records, on every saved run under runs/."""
+    import j2_map as M
+    keep_dir, d = j2.RUNS_DIR, tempfile.mkdtemp(prefix="j2-readback-")
+    wf = lambda i, stage, art, deps=(): {"id": f"W-{i}", "name": f"zq-{i}", "stage": stage, "artifact": f"artifacts/{art}.md", "status": "done", "dependencies": list(deps)}
+    # Ledger Co: W-1 makes ledger, W-2 (same team) reads it and makes report; Brand Co: W-3 makes tone, W-4 (same team) and W-5 (other team) read it
+    json.dump([wf(1, "business", "zq-ledger"), wf(2, "business", "zq-report", ["W-1"]), wf(3, "marketing", "zq-tone"),
+               wf(4, "marketing", "zq-flyer", ["W-3"]), wf(5, "sales", "zq-pitch", ["W-3"])], open(os.path.join(d, "workflows.json"), "w"))
+    json.dump({"goal": "zq"}, open(os.path.join(d, "goal.json"), "w"))      # the Charter every team is given
+    for a in ("zq-ledger", "zq-report", "zq-tone", "zq-flyer", "zq-pitch"):
+        os.makedirs(os.path.join(d, "artifacts"), exist_ok=True)
+        open(os.path.join(d, "artifacts", a + ".md"), "w").write("x")
+    def check(m, label):
+        tree = render_node({"workflows": [], "chat": []}, docs={"docs": {}, "map": m})["tree"]
+        at = {n["id"]: n for n in tree["nodes"]}
+        made = {l["to"]: l["from"] for l in tree["links"] if l["kind"] == "made"}
+        back = {l["from"]: l for l in tree["links"] if l["kind"] == "back"}
+        return tree, at, made, back
+    try:
+        m = M.build(d)
+        lab = {n["label"]: n for n in m["nodes"] if n["kind"] == "work"}
+        assert {k for k, n in lab.items() if n.get("team_reads")} == {"Zq ledger", "Zq tone"}, {k: n.get("team_reads") for k, n in lab.items()}
+        assert lab["Zq tone"]["team_reads"]["made_by"] == ["W-3"] and lab["Zq tone"]["team_reads"]["read_by"] == ["W-4"], lab["Zq tone"]["team_reads"]
+        tree, at, made, back = check(m, "synthetic")
+        ids = {n["label"]: n["id"] for n in tree["nodes"]}
+        assert set(back) == {ids["Zq ledger"], ids["Zq tone"]}, back
+        for a in ("Zq ledger", "Zq tone"):
+            n, team = at[ids[a]], at[made[ids[a]]]
+            assert n["row"] == team["row"] and n["y"] == team["y"] and n["x"] > team["x"], (a, n, team)      # beside its team, to its right
+            assert back[n["id"]]["to"] == team["id"] and back[n["id"]]["side"], back
+        assert "made by W-3, read by W-4, same team" in back[ids["Zq tone"]]["tip"] and "made by W-1, read by W-2" in back[ids["Zq ledger"]]["tip"], back
+        for a in ("Zq report", "Zq flyer", "Zq pitch"):      # nobody on the team reads it: a plain output one row below its team
+            assert ids[a] not in back and at[ids[a]]["row"] == at[made[ids[a]]]["row"] + 1, (a, at[ids[a]])
+        assert any(l["from"] == ids["Zq tone"] and l["kind"] == "reads" and at[l["to"]]["label"] == "Sales Lead" for l in tree["links"]), "its normal line to the other team stays"
+        assert not any(l["from"] in back and l["to"] in back for l in tree["links"]), "no artifact -> artifact line"
+        assert tree["crossings"] == 0, tree["pairs"]
+        syn = [n["label"] for n in tree["nodes"] if n["kind"] == "deck"]
+    finally:
+        j2.RUNS_DIR = keep_dir
+    repo = os.path.join(os.path.dirname(os.path.abspath(__file__)), "runs")
+    found = {}
+    for name in sorted(n for n in os.listdir(repo) if os.path.isfile(os.path.join(repo, n, "workflows.json"))) if os.path.isdir(repo) else []:
+        r = os.path.join(repo, name)
+        wfs = {w["id"]: w for w in json.load(open(os.path.join(r, "workflows.json"))) if isinstance(w, dict) and w.get("id")}
+        named = {k: w["id"] for w in wfs.values() for k in (w.get("proposal_id"), w.get("name"), w["id"]) if k}
+        plan = {p_.get("name"): p_ for p_ in (((j2._read(r, "realization.json", None) or {}).get("plan") or {}).get("workflows") or []) if isinstance(p_, dict)}
+        atoms = {a["id"]: a for a in (j2._read(r, "atoms.json", None) or {}).get("atoms", [])}
+        m = M.build(r)
+        tree, at, made, back = check(m, name)
+        node = {n["id"]: n for n in m["nodes"]}
+        def reads(w):      # the raw records, not the map: what workflow w lists
+            p_ = plan.get(wfs[w].get("proposal_id")) or plan.get(wfs[w].get("name")) or {}
+            got = [named.get(x) for x in (wfs[w].get("dependencies") or []) + (p_.get("inputs_from") or [])]
+            return {x for x in got + [str(e.get("atom")).split(".")[0] for a in atoms.values() if a.get("workflow") == w for e in a.get("depends_on") or []] if x}
+        want = {}
+        for aid, sid in made.items():
+            mk, team = set(node[aid].get("workflows") or []), set(at[sid]["workflows"])
+            rd = sorted((w for w in team - mk if reads(w) & mk), key=lambda x: int(x.split("-")[1]))
+            if mk and rd:
+                want[aid] = rd
+        assert set(back) == set(want), (name, set(back) ^ set(want))
+        for aid, rd in want.items():
+            n, team = at[aid], at[made[aid]]
+            assert n["row"] == team["row"] and n["x"] > team["x"] and back[aid]["to"] == team["id"], (name, aid)
+            assert f"read by {', '.join(rd)}, same team" in back[aid]["tip"], (name, back[aid]["tip"])
+        for aid, sid in made.items():
+            assert aid in want or at[aid]["row"] > at[sid]["row"], (name, aid, "a plain output sits below its team")
+        if want:
+            found[name] = sorted(want)
+    print(f"map read-back: synthetic run (beside, loop, normal line to another team, {len(syn)} artifacts, unread ones plain); "
+          f"{len(found)} saved runs have a team-read artifact, each drawn beside its team with the loop: " + ", ".join(f"{k} {'+'.join(v)}" for k, v in found.items()))
+
+
+def map_shapes():
+    """The Map's rule and shapes, on every saved run: a read is drawn artifact -> team and what a team made team -> artifact; the Charter has a
+    line only to a team that reads nothing else, and a note on its panel says every team reads it; an artifact is a rounded square, an action an
+    envelope, a team a circle with a dot cluster, the Charter a circle with a centre dot (Tree, Line and the team's own circle); the status is on
+    the outline of every shape; the legend names them; a run waiting on a Requester question is "Waiting on you" in map.json and in the chip."""
+    import collections
+    import html as htmllib
+    import j2_map as M
+    repo = os.path.join(os.path.dirname(os.path.abspath(__file__)), "runs")
+    names = sorted(n for n in os.listdir(repo) if os.path.isfile(os.path.join(repo, n, "workflows.json"))) if os.path.isdir(repo) else []
+    stroke = {"filed": "var(--ok)", "fault": "var(--bad)", "waiting": "var(--validator)", "waiting_on_you": "var(--validator)", "done_unchecked": "var(--validator)",
+              "not_made": "var(--line)", "idle": "var(--line)"}
+    dash = {"left_open": ' stroke-dasharray="6 4"', "done_unchecked": ' stroke-dasharray="2 3"'}
+    seen = collections.Counter()
+    keep_dir, j2.RUNS_DIR = j2.RUNS_DIR, repo
+    try:
+        for name in names:
+            d = os.path.join(repo, name)
+            m = M.build(d)
+            by = {n["id"]: n for n in m["nodes"]}
+            reads = collections.defaultdict(list)
+            for e in m["edges"]:
+                if e["kind"] in ("step", "handoff") and by[e["from"]]["kind"] == "work":
+                    assert by[e["to"]]["kind"] == "engine", (name, e, "a read ends at a team")
+                    reads[e["to"]].append(e["from"])
+            for n in m["nodes"]:      # every team has an input: the Charter only when it has no other
+                if n["kind"] == "engine" and by.get(n["id"]):
+                    others = [a for a in reads[n["id"]] if a != "work:charter"]
+                    assert bool(others) != ("work:charter" in reads[n["id"]]), (name, n["id"], reads[n["id"]], "the Charter only to a team that reads nothing else")
+            for e in m["edges"]:
+                if e["kind"] in ("step", "handoff") and e["from"] != "work:charter" and by[e["from"]]["kind"] == "work":
+                    assert e.get("sources") and e["readers"], (name, e, "a read keeps its records and the workflows that read")
+            snap = {"workflows": [], "chat": []}
+            tree = render_node(snap, docs={"docs": {}, "map": m, "mappin": "work:charter"})["map"]
+            if "work:charter" in by:
+                assert "Every team reads the charter." in tree, (name, "the Charter's panel says every team reads it")
+                assert by["work:charter"]["note"] == "Every team reads the charter."
+            svg = tree[tree.index('<svg class="treesvg"'):tree.index("</svg>", tree.index('<svg class="treesvg"'))]
+            for mt in re.finditer(r'<g class="tnode (t(?:charter|stage|deck))[ "][^>]*data-id="([^"]+)"[^>]*>(.*?)</g>', svg, re.S):
+                kind, nid, body = mt.group(1), htmllib.unescape(mt.group(2)), mt.group(3)
+                n = by.get(nid)
+                if kind == "tcharter":
+                    assert '<circle class="tdot"' in body and body.count('class="tglyph"') == 1 and "<rect" not in body, (name, "Charter: a circle with a centre dot")
+                elif kind == "tstage":
+                    assert '<circle class="tdot"' in body and body.count('class="tglyph"') == 5, (name, nid, "team: a circle with a dot cluster")
+                elif n and n.get("tag") == "Send":
+                    assert '<rect class="tdot"' in body and 'class="tglyphl"' in body and "<circle" not in body, (name, nid, "action: an envelope")
+                else:
+                    assert re.search(r'<rect class="tdot" x="-[\d.]+" y="-[\d.]+" width="[\d.]+" height="[\d.]+" rx="[\d.]+"', body) and "<circle" not in body, (name, nid, "artifact: a rounded square")
+                if n and kind != "tstage":      # the status stays on the outline of every shape
+                    st = n["status"]
+                    assert f'stroke="{stroke.get(st, "var(--muted)")}"' in body and (dash.get(st, "") in body), (name, nid, st, "status on the outline")
+                seen[kind] += 1
+            line = render_node(snap, docs={"docs": {}, "map": m, "mapview": "line"})["map"]
+            wide = line.split('<svg class="mapsvg mapvert"')[0]
+            for mt in re.finditer(r'<g class="mapnode[^"]*" data-id="([^"]+)".*?(?=<g class="mapnode|</svg>)', wide, re.S):
+                nid, body = htmllib.unescape(mt.group(1)), mt.group(0)
+                n = by.get(nid)
+                if not n:
+                    continue
+                if n["kind"] == "work" and nid == "work:charter":
+                    assert '<circle class="shape"' in body and 'class="youdot"' in body, (name, "Line: Charter is a circle with a centre dot")
+                elif n["kind"] == "work" and n.get("tag") == "Send":
+                    assert '<rect class="shape"' in body and "<path d=\"M" in body and "<polygon" not in body, (name, nid, "Line: an action is an envelope")
+                elif n["kind"] == "work":
+                    assert re.search(r'<rect class="shape" x="-?[\d.]+" y="-?[\d.]+" width="[\d.]+" height="[\d.]+" rx="[\d.]+"', body) and "<polygon" not in body, (name, nid, "Line: an artifact is a rounded square")
+                elif n["kind"] == "engine":
+                    assert body.count('class="teamdot"') == 5 and "<polygon" not in body, (name, nid, "Line: a team has the dot cluster")
+                seen["line:" + n["kind"]] += 1
+            leg = line[line.index('<div class="maplegend"'):]
+            leg = leg[:leg.index("</div>")]
+            for k, word in (("charter", "Charter (circle, centre dot)"), ("engine", "Team (circle with a dot cluster)"), ("work", "Artifact: a spec, document, site or code (rounded square)"),
+                            ("send", "Action: an email or message (letter icon)")):
+                drawn = any((x["id"] == "work:charter") if k == "charter" else x["kind"] == "engine" if k == "engine" else x["kind"] == "work" and x["id"] != "work:charter"
+                            and (x.get("tag") == "Send") == (k == "send") for x in m["nodes"] if k in ("charter", "engine", "work", "send"))
+                assert (word in leg) == drawn, (name, k, "the legend names the shapes the map draws")
+            # the state: a run whose last Identity message (a system note after it does not count) still waits on the Requester is "Waiting on you"
+            chat = [json.loads(x) for x in open(os.path.join(d, "chat.jsonl"), encoding="utf-8")] if os.path.isfile(os.path.join(d, "chat.jsonl")) else []
+            last = next((x for x in reversed(chat) if x.get("who") != "system" and not x.get("meta")), {})
+            waiting = bool(last.get("pause") and last.get("who") == "identity")
+            assert (m["status"]["state"] == "Waiting on you") == waiting and (by["person:requester"]["status"] == "waiting_on_you") == waiting, (name, m["status"], waiting)
+            if waiting:
+                assert 'class="mappill' in tree and ">Waiting on you<" in tree, (name, "the chip agrees with map.json")
+                seen["waiting"] += 1
+    finally:
+        j2.RUNS_DIR = keep_dir
+    assert seen["tdeck"] and seen["tstage"] and seen["tcharter"] and seen["line:engine"] and seen["line:work"] and seen["waiting"], seen
+    print(f"map shapes: {len(names)} runs, a read goes artifact -> team -> artifact, the Charter only to teams with no other input and a note on its panel, "
+          f"rounded square / envelope / dot cluster / centre dot in the Tree and the Line with the status on the outline, the legend, a paused run says Waiting on you "
+          f"({seen['tdeck']} artifacts, {seen['tstage']} teams drawn in the Tree) ok")
 
 
 def map_tree():
@@ -6489,16 +6696,16 @@ def map_tree():
             lab = {n["id"]: n["label"] for n in t["nodes"]}
             assert (lab["work:W-1"], lab["work:W-3"], lab["work:W-4"]) == ("Product spec", "Copy guide", "Hint method"), lab
             assert {"Curriculum", "Content plan"} <= {n["sub"].split(" · ")[0] for n in t["nodes"]}, "the stage output stays as the second line"
-        if "work:style" in rows:      # style.json is written by the first build workflow and read by the later ones: an input of the site
-            assert rows["work:style"] < rows["work:website"] and {"from": "work:style", "to": "work:website", "kind": "reads"} in t["links"], (name, rows)
-            assert not any(l["from"] == "work:website" and l["to"] == "work:style" for l in t["links"]), "never below the site"
-            reads_ = [l["from"] for l in t["links"] if l["to"] == "work:style" and l["kind"] == "reads"]
-            assert rows["work:style"] == max([rows[x] for x in reads_] + [1]) + 1, ("right below the files its maker reads", rows)
-        made = {}
+        if "work:style" in rows:      # style.json is made by a build team that also reads it: no line runs from one artifact to the next
+            assert not any({l["from"], l["to"]} == {"work:style", "work:website"} for l in t["links"]), (name, "no artifact -> artifact line")
+        kind_ = {n["id"]: n["kind"] for n in t["nodes"]}
+        for l in t["links"]:      # artifacts and teams alternate: a read goes from an artifact to a team, a made line from a team to an artifact
+            assert (l["kind"], kind_[l["from"]] == "stage", kind_[l["to"]] == "stage") in (("reads", False, True), ("made", True, False), ("plan", False, True), ("back", False, True)), (name, l)
+        made, side = {}, {l["from"] for l in t["links"] if l["kind"] == "back"}      # a team-read artifact sits beside its team, not below it
         for l in t["links"]:
-            if l["kind"] == "made":
+            if l["kind"] == "made" and l["to"] not in side:
                 made.setdefault(l["from"], []).append(rows[l["to"]])
-        assert rows["work:charter"] == 0 and all(n["row"] >= 2 for n in t["nodes"] if n["kind"] == "deck")
+        assert rows["work:charter"] == 0 and all(n["row"] >= 2 for n in t["nodes"] if n["kind"] == "deck" and n["id"] not in side)
         assert all(rows[s_] == min(r_) - 1 for s_, r_ in made.items()), (name, "each team sits right above the deliverable(s) it made", made, rows)
         for l in t["links"]:
             if l["kind"] == "reads":
@@ -6669,9 +6876,9 @@ def map_every_workflow():
         ("Design guide", "Design guide", "artifacts/design-guide.md", "filed"), ("Architecture", "Architecture (HLD + LLD)", "artifacts/architecture.md", "filed")]
     assert [by[f"step:{a}>{b}"]["team"] for a, b in (("charter", "W-1"), ("W-1", "W-2"), ("charter", "W-3"), ("W-3", "style"), ("style", "website"))] == \
         ["Product Manager", "Design Lead", "Solution Architect", "Web Developer", "Web Developer"]      # the architecture reads the product spec, not the design guide
-    given = {(e["from"], e["to"]): e["label"] for e in m["edges"] if e["kind"] == "handoff"}
-    assert given[("work:W-1", "work:W-2")] == "given to W-2" and given[("work:W-1", "work:W-3")] == "given to W-3" and ("work:W-2", "work:W-3") not in given, given
-    assert given[("work:style", "work:website")].startswith("given to W-5, ") and ("work:website", "work:style") not in given, "the style guide feeds the site"
+    given = {(e["from"], e["to"]): e["label"] for e in m["edges"] if e["kind"] in ("step", "handoff") and e["from"].startswith("work:")}      # a read: artifact -> the team that read it
+    assert given[("work:W-1", "step:W-1>W-2")] == "read by W-2" and given[("work:W-1", "step:charter>W-3")] == "read by W-3" and not any(a == "work:W-2" and b == "step:charter>W-3" for a, b in given), given
+    assert given[("work:style", "step:style>website")].startswith("read by W-5, ") and not any(a == "work:website" for a, _ in given), "the style guide feeds the site's team"
     site, step = by["work:website"], by["step:style>website"]
     assert {"W-7", "W-9"} <= set(site["workflows"]) and site["status"] == "done_unchecked" and step["unchecked"] == ["W-7", "W-9"], (site, step)
     assert step["detail"].endswith("· 2 done, checks did not pass (W-7, W-9)"), step["detail"]
@@ -6727,11 +6934,16 @@ def map_tab():
         ok = sum(1 for a in mine for x in a["verification"] if x["met"] is True)
         tot = sum(1 for a in mine for x in a["verification"] if x["met"] is not None)
         assert by[f"step:{step}"]["detail"] == f"{len(rows[k]['workflows'])} workflows · {ok} of {tot} checks passed", (k, by[f"step:{step}"]["detail"])
-    assert {(e["from"], e["to"], e["basis"]) for e in saved["edges"] if e["kind"] == "handoff"} == {      # recorded reads only, producer -> consumer
-        ("work:prd", "work:hld", "recorded"), ("work:prd", "work:lld", "recorded"), ("work:hld", "work:lld", "recorded"), ("work:hld", "work:style", "recorded"),
-        ("work:hld", "work:website", "recorded"), ("work:lld", "work:website", "recorded"), ("work:style", "work:website", "recorded")}
+    # every read is drawn from the artifact to the team that read it (never artifact to artifact), recorded reads only, producer -> consumer; the
+    # box just before a team on the trunk is a straight step line, every other read a hand-off line
+    assert {(e["from"], e["to"], e["basis"]) for e in saved["edges"] if e["kind"] == "handoff"} == {
+        ("work:prd", "step:hld>lld", "recorded"), ("work:hld", "step:charter>style", "recorded"), ("work:hld", "step:style>website", "recorded"),
+        ("work:lld", "step:style>website", "recorded")}
+    assert not [e for e in saved["edges"] if e["kind"] in ("step", "handoff") and e["from"].startswith("work:") and e["to"].startswith("work:")], "no artifact -> artifact line"
     assert all(e.get("source") for e in saved["edges"]), "every line carries its record"
-    assert sum(1 for e in saved["edges"] if e["kind"] == "step") == 5 * 2 + 3      # the Charter into each of 5 teams, each team into its box, 3 recorded reads of the box before
+    assert sum(1 for e in saved["edges"] if e["kind"] == "step") == 1 + 3 + 5      # the Charter into the one team that reads nothing else, 3 reads of the box before, each team into its box
+    assert [e["to"] for e in saved["edges"] if e["from"] == "work:charter" and e["kind"] == "step"] == ["step:charter>prd"], "the Charter is not drawn to a team that reads something else"
+    assert by["work:charter"]["note"] == "Every team reads the charter."
     ck = [x for a in atoms for x in a["verification"] if x["met"] is not None]
     assert saved["status"] == {"state": "Done", "state_status": "idle", "checks": {"passed": sum(x["met"] is True for x in ck), "run": len(ck)}}
     assert "version of Charter" in saved["not_recorded"] and "which other function worked on Website (only Audit is recorded)" in saved["not_recorded"] and \
@@ -6989,9 +7201,9 @@ def map_tab():
     tops_ = {}      # every node's centre and top in the wide drawing
     for g_ in s4.split('<g class="mapnode')[1:]:
         id_ = htmllib.unescape(re.search(r'data-id="([^"]+)"', g_).group(1))
-        m1 = re.search(r'points="([\d.]+),([\d.]+) ([\d.]+),([\d.]+)', g_) or None
+        m1 = re.search(r'<rect class="shape" x="(-?[\d.]+)" y="(-?[\d.]+)" width="([\d.]+)"', g_) or None      # an artifact is a rounded square, an action an envelope
         m2 = re.search(r'class="teamhit" cx="([\d.]+)" cy="([\d.]+)" r="([\d.]+)"', g_)
-        if m1: tops_[id_] = (float(m1.group(1)), float(m1.group(2)))
+        if m1: tops_[id_] = (float(m1.group(1)) + float(m1.group(3)) / 2, float(m1.group(2)))
         elif m2: tops_[id_] = (float(m2.group(1)), float(m2.group(2)) - float(m2.group(3)))
     for lp in re.findall(r'<path class="mapln[^"]*" data-from="[^"]+" data-to="([^"]+)" d="([^"]+)"', s4):      # a chip's line ends just above the team that made the deliverable, or the deliverable
         ex_, ey_ = (float(v) for v in re.findall(r"-?[\d.]+", lp[1])[-2:])
@@ -7016,7 +7228,7 @@ def map_tab():
     assert ">No checks yet<" in nc and 'class="mappill nochecks"' in nc and 'class="mappill checks"' not in nc and "0 of 0" not in nc, "a run with no checks is not shown as a green chip"
     box = lambda i: ng(svg, f"work:t{i}")
     assert 'stroke-dasharray="6 4"' in box(2) and "stroke-dasharray" not in box(0)                       # dashed = left open
-    assert box(1).count("<polygon") == 2 and box(0).count("<polygon") == 1 and "<circle class=\"shape\"" not in box(0)      # deliverables are diamonds; a double outline = running now
+    assert box(1).count('<rect class="shape"') == 2 and box(0).count('<rect class="shape"') == 1 and "<circle class=\"shape\"" not in box(0)      # artifacts are rounded squares; a double outline = running now
     assert 'stroke="var(--bad)" stroke-width="4"' in box(3) and ">!</text>" in box(3)                       # thick red edge plus "!"
     assert 'fill="none" stroke="var(--line)"' in box(4) and ">!</text>" not in box(4)                      # hollow = not made
     assert 'stroke="var(--validator)" stroke-width="4"' in box(5) and ">?</text>" in box(5) and "version not recorded" in box(5)
@@ -7124,7 +7336,9 @@ def map_tab():
     drawn = re.findall(r'<path class="mapedge given[^"]*" data-from="([^"]+)" data-to="([^"]+)"', wide(rg["map"]))
     assert drawn and all(b.startswith("step:") for _, b in drawn) and len(drawn) == len([g for g in gv if not g["chain"]]), drawn
     assert "work:" not in " ".join(b for _, b in drawn) and "which step used" not in rg["map"], "every consumer is known on the real map"
-    cut = {**saved, "edges": [e for e in saved["edges"] if not (e["kind"] == "step" and e["to"] == "work:lld")]}      # no step recorded for the LLD: the line stays on the box and the gap is listed
+    team_box = {e["from"]: e["to"] for e in saved["edges"] if e["kind"] == "step" and e["from"].startswith("step:")}
+    older = {**saved, "edges": [e for e in saved["edges"] if e["kind"] != "handoff"] + [{**e, "to": team_box[e["to"]]} for e in saved["edges"] if e["kind"] == "handoff"]}      # an older map: a read ends on the artifact
+    cut = {**older, "edges": [e for e in older["edges"] if not (e["kind"] == "step" and e["to"] == "work:lld")]}      # no step recorded for the LLD: the line stays on the box and the gap is listed
     oc = render_node(snap, docs={"docs": {}, "map": cut})
     gc = [g for g in oc["given"] if g["box"] == "work:lld"]
     assert gc and all(not g["known"] and g["to"] == "work:lld" for g in gc), gc
@@ -7309,36 +7523,39 @@ def map_tab():
             if by_[tgt_].get("lane") == "branch":
                 continue
             src_ = "work:" + htmllib.unescape(sid).split(">")[0].split(":")[1]
-            dx_, dy_ = (float(v) for v in re.search(r'points="([\d.]+),[\d.]+ [\d.]+,([\d.]+)', ng(sv_, tgt_)).groups())
-            sx_ = float(re.search(r'points="([\d.]+),', ng(sv_, src_)).group(1))
+            dx_, dy_ = ctr(ng(sv_, tgt_))
+            sx_ = ctr(ng(sv_, src_))[0]
             assert abs(py_ - dy_) < 0.6 and sx_ < px_ < dx_, (label_, sid, "the team sits on the stretch of line leading into the deliverable it made")
         # side jobs: never in the trunk; the site's step takes the last document; drawn below the trunk
         stp_ = [(e["from"], e["to"]) for e in mp_["edges"] if e["kind"] == "step"]
         trunk_ = [n_["id"] for n_ in mp_["nodes"] if n_["kind"] == "work" and n_.get("lane") == "trunk"]
         for d_ in [x for x in mp_["nodes"] if x["kind"] == "work" and x.get("tag") == "Send"]:
             assert d_["lane"] == "branch" and not any(f == d_["id"] for f, _ in stp_), (label_, d_["id"], "a send is a side job: nothing is built from it")
-            ty_ = float(re.search(r'points="[\d.]+,[\d.]+ [\d.]+,([\d.]+)', ng(sv_, "work:website")).group(1))
+            ty_ = ctr(ng(sv_, "work:website"))[1]
             ey_ = float(re.search(r'<rect class="shape" x="[\d.-]+" y="([\d.-]+)"', ng(sv_, d_["id"])).group(1))
             assert ey_ > ty_, (label_, "the side job is drawn below the trunk")
         if "work:website" in trunk_:
             into_web = [f for f, t in stp_ if t.endswith(">website") and t.startswith("step:") and f != "work:charter"]      # the Charter feeds every team
             prev_ = trunk_[trunk_.index("work:website") - 1]
-            read_ = any(e["kind"] == "handoff" and e["from"] == prev_ and e["to"] == "work:website" for e in mp_["edges"])
+            read_ = any(e["kind"] in ("step", "handoff") and e["from"] == prev_ and e["to"].startswith("step:") and e["to"].endswith(">website") for e in mp_["edges"])
             assert into_web == ([prev_] if read_ else []), (label_, into_web, "the site's step takes the box before it as input only when it reads it")
         for d_ in [x for x in mp_["nodes"] if x["kind"] == "work"]:
             if d_.get("tag") == "Send":
                 assert '<rect class="shape"' in ng(sv_, d_["id"]) and "<polygon" not in ng(sv_, d_["id"]), (label_, d_["id"], "a send ends in a letter icon")
                 continue
-            assert '<polygon class="shape"' in ng(sv_, d_["id"]) and '<circle class="shape"' not in ng(sv_, d_["id"]), (label_, d_["id"], "a deliverable is a diamond")
+            if d_["id"] == "work:charter":
+                assert '<circle class="shape"' in ng(sv_, d_["id"]) and 'class="youdot"' in ng(sv_, d_["id"]), (label_, "the Charter is a circle with a centre dot")
+            else:
+                assert '<rect class="shape"' in ng(sv_, d_["id"]) and "<polygon" not in ng(sv_, d_["id"]) and '<circle class="shape"' not in ng(sv_, d_["id"]), (label_, d_["id"], "an artifact is a rounded square")
         sv_v = o_[o_.index('<svg class="mapsvg mapvert"'):o_.index("</svg>", o_.index('<svg class="mapsvg mapvert"'))]
         assert crossings(sv_v) == [], (label_, "narrow drawing", crossings(sv_v))
         pages_[label_] = [(htmllib.unescape(a_["from"]), htmllib.unescape(a_["to"]), a_["page"]) for a_ in render_node(sn_, docs={"docs": {}, "map": mp_})["pages"]]
-        # label sides, no exceptions: a deliverable's name and fact line below its diamond, a team's line above the trunk
+        # label sides, no exceptions: a deliverable's name and fact line below its shape, a team's line above the trunk
         for d_ in [x for x in mp_["nodes"] if x["kind"] == "work" and x.get("lane") == "trunk"]:
-            g_ = ng(sv_, d_["id"]); cy_ = float(re.search(r'points="[\d.]+,[\d.]+ [\d.]+,([\d.]+)', g_).group(1))
+            g_ = ng(sv_, d_["id"]); cy_ = ctr(g_)[1]
             ys_ = [float(y) for y in re.findall(r'<text[^>]* y="([\d.]+)"', g_.split("</title>")[1]) if True]
             ys_ = [y for y, t_ in zip(ys_, re.findall(r'<text[^>]*>([^<]*)<', g_.split("</title>")[1])) if t_ not in ("!", "?")]
-            assert len(ys_) == 2 and all(y > cy_ for y in ys_), (label_, d_["id"], "name and fact line below the diamond")
+            assert len(ys_) == 2 and all(y > cy_ for y in ys_), (label_, d_["id"], "name and fact line below the artifact")
         for sid in [x["id"] for x in mp_["nodes"] if x["kind"] == "engine" and x.get("lane") == "trunk"]:
             g_ = ng(sv_, sid); cy_ = float(re.search(r'class="teamhit" cx="[\d.]+" cy="([\d.]+)"', g_).group(1))
             ys_ = [float(y) for y in re.findall(r'<text class="sub"[^>]* y="([\d.]+)"', g_)]
@@ -7780,6 +7997,8 @@ if __name__ == "__main__":
         if mode == "0":
             map_tree()
             map_logic()
+            map_readback()
+            map_shapes()
             artifacts_tree()
             agent_view()
         docs_repeat_failure()

@@ -231,7 +231,11 @@ def tree(d, m=None):
     rowsby = {r["file"]: r for r in lst["deliverables"] + lst["records"]}
     by = {n["id"]: n for n in m["nodes"]}
     made_step = {e["to"]: by[e["from"]] for e in m["edges"] if e["kind"] == "step" and by.get(e["from"], {}).get("kind") == "engine"}
-    reads = [e for e in m["edges"] if e["kind"] == "handoff"]
+    # who reads what, for the tree's Makers and Readers: the map draws a read from the artifact to the team (the step) that read it,
+    # and the team to what it made, so an artifact's reader is the artifact its team made
+    made_by_team = {e["from"]: e["to"] for e in m["edges"] if e["kind"] == "step" and by.get(e["from"], {}).get("kind") == "engine"}
+    reads = [{**e, "to": made_by_team[e["to"]]} for e in m["edges"] if e["kind"] in ("step", "handoff") and e["from"] != "work:charter"
+             and by.get(e["from"], {}).get("kind") == "work" and e["to"] in made_by_team]
     used = set()
 
     def size(f):

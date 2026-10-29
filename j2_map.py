@@ -264,11 +264,11 @@ def build(d, live=None):
     by_wf = {}
     for a in atoms:
         by_wf.setdefault(a["workflow"], []).append(a)
-    nodes, handoffs = [], []
+    nodes = []
     # the charter: Identity's, from goal.json
     if os.path.isfile(os.path.join(d, "goal.json")):
         nodes.append({"id": "work:charter", "kind": "work", "row": "work", "label": "Charter", "tag": "Charter", "color": "--charter",
-                      "status": "filed", "version": None, "detail": "the plan every workflow reads", "file": "goal.json",
+                      "status": "filed", "version": None, "detail": "the plan every workflow reads", "note": "Every team reads the charter.", "file": "goal.json",
                       "workflows": [], "_order": -1})
         nr.append("version of Charter")
     # one node per deliverable the run built
@@ -416,12 +416,12 @@ def build(d, live=None):
             for x, src in reads.get(wid, []):
                 for a in on.get(x, []):
                     if a != b["id"]:
-                        r = readers.setdefault((a, b["id"]), {"ids": [], "source": src})
+                        r = readers.setdefault((a, b["id"]), {"ids": [], "source": src, "sources": []})
                         if wid not in r["ids"]:
                             r["ids"].append(wid)
-    for (a, b), r in readers.items():
-        handoffs.append({"from": a, "to": b, "kind": "handoff", "label": f"given to {', '.join(sorted(r['ids'], key=_num))}", "n": len(r["ids"]),
-                         "basis": "recorded", "source": r["source"]})
+                        if src not in r["sources"]:
+                            r["sources"].append(src)
+    # (the reads are drawn below, from the artifact to the team that read it: never artifact to artifact)
     # the trunk (Line view): every deliverable but a send, in an order where each comes after what it reads (run order breaks ties)
     pre = {n["id"]: {a for a, b in readers if b == n["id"]} for n in work}
     trunk, left = [], sorted([n for n in work if n.get("template") != "send"], key=lambda n: n["_order"])
@@ -455,9 +455,13 @@ def build(d, live=None):
         steps.append({"id": sid, "kind": "engine", "row": "work", "label": STEP_VERB.get(b.get("template"), "Make"), "status": b["status"],
                       "version": None, "detail": detail, "file": None, "workflows": b["workflows"], "tag": None, "color": None, "lane": b["lane"],
                       "team": b.get("_team"), "unchecked": bad})
-        if a:
-            edges.append({"from": a, "to": sid, "kind": "step", "label": None, "n": wf, "basis": "recorded", "source": readers[(a, b["id"])]["source"]})
-        if "work:charter" in tids:
+        ins = sorted([x for x, y in readers if y == b["id"]], key=lambda x: min((_num(w) for w in readers[(x, b["id"])]["ids"]), default=0))
+        for x in ins:       # every artifact one of this team's workflows read: A -> team, with the records that say so
+            r = readers[(x, b["id"])]
+            edges.append({"from": x, "to": sid, "kind": "step" if x == a else "handoff", "label": "read by " + ", ".join(sorted(r["ids"], key=_num)),
+                          "n": len(r["ids"]), "basis": "recorded", "source": r["source"], "sources": r["sources"],
+                          "readers": sorted(r["ids"], key=_num)})
+        if not ins and "work:charter" in tids:      # every team reads the charter (a note on the Charter): a line only to a team that reads nothing else
             edges.append({"from": "work:charter", "to": sid, "kind": "step", "label": None, "n": wf, "basis": "recorded", "source": {"file": "goal.json", "field": "charter"}})
         made = b.get("_made")
         if made:
@@ -484,7 +488,7 @@ def build(d, live=None):
     # the Requester
     chat = _jsonl(d, "chat.jsonl") if not live else (snap.get("chat") or [])
     mine = [m for m in chat if m.get("who") == "user"]
-    last = chat[-1] if chat else {}
+    last = next((m for m in reversed(chat) if m.get("who") != "system"), {})      # a system note after Identity's question is not an answer
     waiting = bool(snap.get("paused")) if live else bool(last.get("pause") and last.get("who") == "identity")
     person = {"id": "person:requester", "kind": "person", "row": "people", "label": "You",
               "status": "waiting_on_you" if waiting else "idle", "version": None, "tag": None, "color": "--user", "file": None,
@@ -535,11 +539,21 @@ def build(d, live=None):
         for o in steps:
             if o is not st and len(o["workflows"]) <= len(st["workflows"]) and set(o["workflows"]) & set(st["workflows"]):
                 o["persona"] = st["persona"]
+    # an artifact one of a team's workflows made and other workflows of the same team read (not the makers themselves): team_reads
+    # names both, with the records that say so. The Tree draws it beside its team with a read-back line.
+    team_of = {to[st["id"]]: st["persona"] for st in steps if to.get(st["id"])}
+    crew = {}
+    for st in steps:
+        crew.setdefault(st["persona"], set()).update(st["workflows"])
+    for n in work:
+        mk = set(n.get("workflows") or [])
+        got = {w: [s for x, s in reads.get(w, []) if x in mk] for w in crew.get(team_of.get(n["id"]), set()) - mk}
+        got = {w: s for w, s in got.items() if s}
+        if mk and got:
+            n["team_reads"] = {"made_by": sorted(mk, key=_num), "read_by": sorted(got, key=_num), "sources": [s for w in sorted(got, key=_num) for s in got[w]]}
     for n in work:
         if n.get("tag") == "Send":
             n["send"] = send_word(n.get("detail"))
-    for h in handoffs:
-        h["readers"] = re.findall(r"W-\d+", h.get("label") or "") if h.get("basis") == "recorded" else []
     out_nodes = [person] + funcs + order
     for n in out_nodes:
         for k in ("_atoms", "_order", "template", "_team", "_made"):
@@ -559,7 +573,7 @@ def build(d, live=None):
                       "checks": _checks(ats), "reads": sorted({x for x in reads if x != w["id"]}, key=_num)})
     return {"schema": SCHEMA, "run": os.path.basename(d), "live": bool(live),
             "status": {"state": state, "state_status": state_status, "checks": ch},
-            "nodes": out_nodes, "workflows": flows, "edges": edges + handoffs + speaks + lines + board_edges, "legend": LEGEND, "built_from": built_from,
+            "nodes": out_nodes, "workflows": flows, "edges": edges + speaks + lines + board_edges, "legend": LEGEND, "built_from": built_from,
             "not_recorded": list(dict.fromkeys(nr + ["messages to and from workflow agents (W-n) are not drawn",
                                                      "what the work draws on (Knows row, later version)"]))}
 
