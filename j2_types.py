@@ -83,7 +83,7 @@ def format_for(model=BuilderReply, fields=None):
     """(reply-format text, JSON Schema) for a reply model: the line the prompt asks for and the schema its
     <reply_schema> tag carries. fields limits it to the ones this builder is asked for (BASE_FIELDS, plus the board's
     and the slice's when they apply), in the model's own order, so the prompt and the schema always agree."""
-    want = [f for f in (fields or list(model.model_fields)) if f in model.model_fields]
+    want = [f for f in model.model_fields if fields is None or f in fields]      # always the model's own order
     parts = []
     for name in want:
         f = model.model_fields[name]

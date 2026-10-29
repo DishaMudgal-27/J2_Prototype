@@ -156,7 +156,16 @@ def check_output(kind, section, text, where=None):
     rules = rules_for(kind, section)
     if not load_template(kind) or not rules:
         return {"pass": None, "rules": [], "evidence": f"no output template rule for {kind} {section!r}"}
-    body = text if kind in ("website", "design") else j2.md_section(str(text or ""), section)
+    page, head_only = str(text or ""), False
+    if kind == "website":      # a page: the atom's own marked section, as code assembled it into the file
+        sid = str(where.get("sid") or section or "")
+        m = re.search(r"<!-- J2:%s start[^>]*-->(.*?)<!-- J2:%s end" % (re.escape(sid), re.escape(sid)), page, re.S)
+        body = m.group(1) if m else None
+        head_only = body is None and f"<!-- J2:{sid} head start" in page
+    elif kind == "design":
+        body = text
+    else:
+        body = j2.md_section(page, section)
     out = []
 
     def add(rule, met, note):
@@ -168,7 +177,10 @@ def check_output(kind, section, text, where=None):
             add(r, body is not None, f"heading {section!r} " + ("found" if body is not None else "not found"))
         elif name in ("min-words", "section-not-empty"):
             n, need = _words(body), max(1, int(r.get("words") or 1))
-            add(r, body is not None and n >= need, f"{section!r} has {n} word(s), needs {need}")
+            if body is None and kind == "website":      # head tags only, or no section of its own: nothing to count
+                add(r, None, f"no section body for {section!r} in the page")
+            else:
+                add(r, body is not None and n >= need, f"{section!r} has {n} word(s), needs {need}")
         elif name in ("ids-unique", "ids-sequential"):
             ids = j2.md_ids(body or "", r["prefix"])
             dup = sorted({i for i in ids if ids.count(i) > 1})
@@ -222,9 +234,17 @@ def check_output(kind, section, text, where=None):
                     "; ".join(bad) if bad else f"all {len(items)} {key[:-1]}(s) have {', '.join(parts)}")
         elif name == "section-markers":
             sid = where.get("sid") or section
-            page = str(text or "")
-            ok = f"<!-- J2:{sid} start" in page and f"<!-- J2:{sid} end" in page
-            add(r, ok, f"section {sid} is " + ("between its markers in the page" if ok else "not between its markers"))
+            add(r, None if head_only else body is not None,
+                f"section {sid} writes head tags only, no body in the page" if head_only else
+                f"section {sid} is " + ("between its markers in the page" if body is not None
+                                        else "not between its markers"))
+        elif name == "anchor-present" and kind == "website":
+            sel = str(section or "")
+            if not sel.startswith(("#", ".")):      # this atom recorded no anchor of its own: the rule can't run
+                add(r, None, "no anchor recorded for this section")
+            else:
+                n = len(j2.PageScan(page).matching(sel))
+                add(r, n == 1, f"{n} element(s) match {sel!r}, expected 1")
         elif name == "anchor-present":
             sel = str(section or "")
             if not sel.startswith(("#", ".")):      # this atom recorded no anchor of its own: the rule can't run
@@ -387,3 +407,16 @@ def atom_block(atom_id, calls, receipts):
 def atom_blocks(atoms, calls, receipts):
     """{atom id: Template block} for every atom id given."""
     return {a: atom_block(a, calls, receipts) for a in atoms or []}
+
+
+def output_template_tag(kind, atom, sid=None, style=False):
+    """The <output_template> body: the artifact template this atom is held to, the part it writes and the rules code
+    will check on it (the same rules the template-match check runs, so the builder is told exactly what is checked)."""
+    out = {"template": template_name(kind), "artifact": kind}
+    checks = atom_checks(atom or {}, kind, sid, style)
+    out["parts"] = [{"section": c["target"], "rules": rules_for(c["template"], c["target"])
+                     if c["template"] != "design" else rules_for("design", c["target"])} for c in checks]
+    if not checks:
+        out["parts"] = [{"section": sid, "rules": rules_for(kind, sid)}]
+    out["sections_in_order"] = template_sections(kind)
+    return json.dumps(out, ensure_ascii=False)
