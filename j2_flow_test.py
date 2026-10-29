@@ -6844,6 +6844,143 @@ def map_tree():
           "Line shows the metro map ok (" + ", ".join(report) + ")")
 
 
+def left_bar():
+    """Left bar: the Internals tabs regrouped into Conflicts (pinned, only when the run has conflicts), the five functions, Artifacts, Actions, Other and Settings.
+    Every run under runs/ (browser-free): every tab sits in exactly one section and Other is empty; the conflicts and the actions of the run are each listed once
+    (the conflicts with the functions they are between, the actions with a state); a function header's status comes from the run's records (conflicts.json,
+    audits.json, workflows.json); a tab the table does not name goes to the function whose Map node carries it, else to Other; every artifact row in the Artifacts tab
+    shows its Audit status. With Chrome (--browser): the rail widens to 240px, a section opens and closes and remembers it, a tab opened from elsewhere opens its section,
+    an action opens the Map's panel, a conflict's links open its functions."""
+    import collections
+    import copy
+    import html as htmllib
+    import threading
+    import j2_map as M
+    import j2_artifacts as A
+    import j2_server
+    here = os.path.dirname(os.path.abspath(__file__))
+    repo = os.path.join(here, "runs")
+    names = sorted(n for n in os.listdir(repo) if os.path.isfile(os.path.join(repo, n, "workflows.json"))) if os.path.isdir(repo) else []
+    ui = open(os.path.join(here, "j2_ui.html"), encoding="utf-8").read()
+    rail = ui[ui.index('id="railsub"'):ui.index("</nav>", ui.index('id="railsub"'))]
+    tabs = re.findall(r'data-tab="(\w+)"', rail)
+    assert len(tabs) == len(set(tabs)) >= 16, tabs
+    plural = lambda n, w: f"{n} {w}{'' if n == 1 else 's'}"
+    keep_dir, j2.RUNS_DIR = j2.RUNS_DIR, repo
+    seen = collections.Counter()
+    order = ["conflicts", "identity", "adaptation", "priority", "coordination", "audit", "artifacts", "actions", "other", "settings"]
+    try:
+        for name in names:
+            d = os.path.join(repo, name)
+            m = M.build(d)
+            rd_ = lambda f, dflt: json.load(open(os.path.join(d, f))) if os.path.isfile(os.path.join(d, f)) else dflt
+            snap = {"workflows": rd_("workflows.json", []), "chat": [], "call_log": [], "conflicts": rd_("conflicts.json", []), "goal": rd_("goal.json", None),
+                    "audits": [a for a in rd_("audits.json", []) if (a or {}).get("kind") != "recheck"]}
+            model = render_node(snap, docs={"docs": {}, "map": m, "railtabs": tabs})["rail"]
+            assert [x["id"] for x in model] == order, (name, "the sections, in order")
+            sec = {x["id"]: x for x in model}
+            placed = [t["tab"] for x in model for t in x["tabs"]]
+            assert sorted(placed) == sorted(tabs), (name, "every tab is in exactly one section")
+            assert sec["other"]["tabs"] == [] and not sec["other"]["shown"], (name, "Other is empty", sec["other"]["tabs"])
+            conf = [c for c in (json.load(open(os.path.join(d, "conflicts.json"))) if os.path.isfile(os.path.join(d, "conflicts.json")) else [])]
+            assert sec["conflicts"]["shown"] == bool(conf), (name, "Conflicts is there only when the run has conflicts")
+            assert [i["id"] for i in sec["conflicts"]["items"]] == [c["id"] for c in conf] and all(i["fns"] == c["between"] for i, c in zip(sec["conflicts"]["items"], conf)), (name, "each conflict once, with the functions it is between")
+            closed = sum(1 for c in conf if c.get("status") == "settled")
+            assert sec["priority"]["status"] == f"{plural(len(conf), 'conflict')}, {closed} settled", (name, sec["priority"]["status"])
+            sends = [n for n in m["nodes"] if n["kind"] == "work" and n.get("tag") == "Send"]
+            assert sorted(i["id"] for i in sec["actions"]["items"]) == sorted(n["id"] for n in sends), (name, "each action once")
+            for i in sec["actions"]["items"]:
+                assert i["state"], (name, i)
+                seen["state " + i["state"]] += 1
+            seen["actions"] += len(sends)
+            seen["conflicts"] += len(conf)
+            results = {}      # the findings: a check that failed in some audit; fixed when it passes in the latest audit that has it
+            for a in sorted(snap["audits"], key=lambda a: a["cycle"]):
+                for i_, r in enumerate(a.get("results", []) + a.get("extra_issues", [])):
+                    k_ = r.get("id") or f"x{a['cycle']}-{i_}"
+                    bad_ = r.get("pass") is False or r.get("verdict") == "FAIL"
+                    if bad_:
+                        results.setdefault(k_, {})
+                    if k_ in results:
+                        results[k_]["last"] = not bad_
+            n_, fx_ = len(results), sum(1 for r in results.values() if r["last"])
+            want = (f"{plural(n_, 'finding')}, {fx_} fixed" + (f", {n_ - fx_} open" if n_ - fx_ else "")) if n_ else ("no findings" if snap["audits"] else "no audits yet")
+            assert sec["audit"]["status"] == want, (name, "the Audit header counts the findings of the run's audits", sec["audit"]["status"], want)
+            wf = snap["workflows"]
+            assert sec["coordination"]["status"] == (f"{sum(1 for w in wf if w.get('status') == 'done')} of {len(wf)} workflows done" if wf else "no workflows yet"), (name, sec["coordination"]["status"])
+            for k in ("identity", "adaptation", "priority", "coordination", "audit"):
+                assert sec[k]["persona"] and sec[k]["name"] in ("Identity", "Adaptation", "Priority", "Coordination", "Audit"), (name, k)
+            assert sec["audit"]["persona"] == "Quality Reviewer + Validator"
+            # every artifact row shows its Audit status
+            t = A.tree(d, m)
+            rows = []
+            walk = lambda xs: [rows.append(x) or walk(x.get("children") or []) for x in xs]
+            for g in t["groups"]:
+                walk(g["items"])
+            rows = [x for x in rows if x.get("count") is None]
+            html = render_node(snap, docs={"docs": {}, "artifacts": {**A.listing(d), "tree": t}})["artifacts"]
+            assert html.count('class="artaudit"') == len(rows) > 0, (name, "every artifact row shows its Audit status", html.count('class="artaudit"'), len(rows))
+            seen["artifact rows"] += len(rows)
+            seen["runs"] += 1
+        # a tab the table does not name: the function whose Map node carries it, else Other
+        name = "j2-20261026-174314" if "j2-20261026-174314" in names else names[0]
+        m = copy.deepcopy(M.build(os.path.join(repo, name)))
+        next(n for n in m["nodes"] if n["id"] == "fn:audit")["tab"] = "futuretab"
+        snap = {"workflows": [], "chat": []}
+        got = {x["id"]: x for x in render_node(snap, docs={"docs": {}, "map": m, "railtabs": tabs + ["futuretab", "orphantab"]})["rail"]}
+        assert [t["tab"] for t in got["audit"]["tabs"] if t["how"] == "function node tab"] == ["futuretab"] and [t["tab"] for t in got["other"]["tabs"]] == ["orphantab"] and got["other"]["shown"], "derived placement, then Other"
+    finally:
+        j2.RUNS_DIR = keep_dir
+    chrome = j2.j2_check.find_chrome()
+    if chrome and BROWSER and names:
+        with_c = next((n for n in names if os.path.isfile(os.path.join(repo, n, "conflicts.json")) and json.load(open(os.path.join(repo, n, "conflicts.json")))
+                       and any(x["tag"] == "Send" for x in M.build(os.path.join(repo, n))["nodes"] if x.get("tag"))), None)
+        js = ("(async () => { const q = s => [...document.querySelectorAll(s)], wait = ms => new Promise(r => setTimeout(r, ms)), r = {}, rc = el => el.getBoundingClientRect(), vis = el => !!el && el.getClientRects().length > 0;"
+              " await wait(1500); const rail = document.querySelector('#dview .rail'); r.w0 = rc(rail).width; document.getElementById('internals').click(); await wait(100); r.w1 = rc(rail).width; r.sw = [document.documentElement.scrollWidth, innerWidth];"
+              " r.secs = q('.rsec').filter(x => !x.hidden).map(x => x.dataset.sec + ':' + x.querySelector('.rshead').getAttribute('aria-expanded')).join(' ');"
+              " r.owned = q('#railsub [data-tab]').every(b => b.closest('.rsec') && q('#railsub [data-tab=\"' + b.dataset.tab + '\"]').length === 1); r.tabsN = q('#railsub [data-tab]').length;"
+              " const head = id => q('.rsec[data-sec=\"' + id + '\"] .rshead')[0]; head('adaptation').click(); r.open1 = [head('adaptation').getAttribute('aria-expanded'), vis(q('#rsb-adaptation')[0]), localStorage.getItem('j2railopen')]; head('adaptation').click(); r.open2 = [head('adaptation').getAttribute('aria-expanded'), vis(q('#rsb-adaptation')[0]), localStorage.getItem('j2railopen')];"
+              " showTab('lessons'); r.reveal = [head('adaptation').getAttribute('aria-expanded'), vis(q('[data-tab=lessons]')[0])]; q('[data-tab=goal]')[0].click(); r.goal = [vis(document.getElementById('pane-goal')), q('[data-tab=goal]')[0].getAttribute('aria-selected')];"
+              " const ac = q('[data-railact]')[0]; if (ac){ ac.click(); await wait(100); r.act = [vis(document.getElementById('pane-map')), MAPPIN === ac.dataset.railact, q('.mappanel').length]; mapSelect(''); }"
+              " const fl = q('[data-railfn]')[0]; if (fl){ q('.rsec[data-sec=\"conflicts\"] .rshead')[0].getAttribute('aria-expanded'); fl.click(); r.fn = [document.querySelector('.tabs [aria-selected=true]').dataset.tab, fl.dataset.railfn]; q('[data-railgo]')[0].click(); r.go = vis(document.getElementById('pane-conflicts')); const pl = q('[data-railsec]')[0]; pl.click(); r.prio = head('conflicts').getAttribute('aria-expanded'); }"
+              " r.confOpen = head('conflicts') ? head('conflicts').getAttribute('aria-expanded') : null; r.priLink = q('[data-railsec]').length;"
+              " document.getElementById('internals').click(); await wait(100); r.w2 = rc(rail).width; document.body.setAttribute('data-r', JSON.stringify(r)); })()")
+        tmp = tempfile.mkdtemp(prefix="j2-leftbar-")
+        open(os.path.join(tmp, "j2_ui.html"), "w", encoding="utf-8").write(ui.replace("</body>", "<script>setTimeout(() => { " + js + " }, 2000)</script></body>"))
+        os.symlink(os.path.join(here, "vendor"), os.path.join(tmp, "vendor"))
+
+        def probe(run):
+            keep_here, j2.RUNS_DIR_, j2_server.HERE = j2_server.HERE, j2.RUNS_DIR, tmp
+            j2.RUNS_DIR = repo
+            srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+            threading.Thread(target=srv.serve_forever, daemon=True).start()
+            try:
+                dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--window-size=1440,900", "--virtual-time-budget=20000", "--dump-dom",
+                                  f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={run}"], capture_output=True, text=True, timeout=120).stdout
+            finally:
+                j2.RUNS_DIR, j2_server.HERE = j2.RUNS_DIR_, keep_here
+                srv.shutdown()
+            hit_ = re.search(r'data-r="([^"]*)"', dom)
+            assert hit_, ("the page did not finish its steps", dom[-300:])
+            return json.loads(htmllib.unescape(hit_.group(1)))
+        for run in dict.fromkeys([n for n in ("j2-20261026-174314", with_c) if n]):
+            r = probe(run)
+            assert r["w0"] < 100 and 230 <= r["w1"] <= 250 and r["w2"] < 100, (run, "the rail widens to about 240px while the groups are open", r["w0"], r["w1"], r["w2"])
+            assert r["sw"][0] <= r["sw"][1] and r["owned"] and r["tabsN"] == len(tabs), (run, "no horizontal scroll; every tab is in exactly one section", r)
+            assert r["open1"][:2] == ["true", True] and '"adaptation":true' in r["open1"][2] and r["open2"][:2] == ["false", False] and '"adaptation":false' in r["open2"][2], (run, "a section opens and closes and remembers it", r["open1"], r["open2"])
+            assert r["reveal"] == ["true", True] and r["goal"] == [True, "true"], (run, "a tab opened from elsewhere opens its section; a tab click opens its pane", r["reveal"], r["goal"])
+            assert (("conflicts:true" in r["secs"]) if run == with_c else ("conflicts" not in r["secs"])) and "artifacts:true" in r["secs"], (run, "Conflicts (when the run has any) and Artifacts start open", r["secs"])
+            if "act" in r:
+                assert r["act"][0] and r["act"][1] and r["act"][2] >= 1, (run, "an action opens the Map's panel", r["act"])
+            if "fn" in r:
+                assert r["fn"][0] and r["go"] and r["prio"] == "true", (run, "a conflict's function link and the conflict open their tabs; Priority links to Conflicts", r["fn"], r["go"], r["prio"])
+            seen["browser"] += 1
+    print(f"left bar: {seen['runs']} runs: every one of the {len(tabs)} tabs in exactly one section, Other empty; {seen['conflicts']} conflicts and {seen['actions']} actions each listed once "
+          f"(action states: {', '.join(f'{k[6:]} {v}' for k, v in sorted(seen.items()) if k.startswith('state '))}); {seen['artifact rows']} artifact rows each with an Audit status; "
+          "a tab outside the table goes to its function's node, else Other"
+          + (f"; real page, {seen['browser']} runs: rail widens to 240px, sections open, close and remember, a tab opened from elsewhere opens its section, actions and conflict links work" if seen.get("browser") else "") + " ok")
+
+
 def map_every_workflow():
     """Map: every workflow in workflows.json is on the map (by stage, then section, then output refs) or listed by id under
     not recorded; a realization run's specs are deliverables with their stage's role and "given to" lines to the build
@@ -7997,6 +8134,7 @@ if __name__ == "__main__":
         if mode == "0":
             map_tree()
             map_logic()
+            left_bar()
             map_readback()
             map_shapes()
             artifacts_tree()

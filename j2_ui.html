@@ -187,6 +187,10 @@ body.simple #dview{display:flex;flex:0 0 auto}body.simple #dview .dcol{display:n
 .msg.flash .bubble{outline:2px solid var(--vio);outline-offset:2px}.msg:focus{outline:none}
 .railsub{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line);margin-top:4px;padding-top:6px}.railsub[hidden]{display:none}
 .rail.tabs .railsub button{display:block;padding:5px 2px;border-radius:8px;font-size:11px}
+.rail.tabs .railsub .rshead{display:block;width:100%;text-align:left;padding:5px 6px;font-weight:600}.rail.tabs .railsub .rshead[aria-expanded="false"]::before{content:"▸ "}.rail.tabs .railsub .rshead[aria-expanded="true"]::before{content:"▾ "}
+.rsec{border-top:1px solid var(--line);padding:2px 0}.rsec[hidden],.rsbody[hidden]{display:none}.rsec.rsneed .rshead{color:var(--validator)}.rspers{font-weight:400;color:var(--muted)}.rsstat{display:block;font-weight:400;color:var(--muted);font-size:10.5px;padding-left:14px}
+.rsbody{padding:0 0 4px 12px}.rsitem{font-size:11px;padding:2px 4px;color:var(--muted)}.rail.tabs .railsub .rsrow,.rail.tabs .railsub .linkbtn{display:inline;padding:0;border:0;background:none;color:var(--ink);text-align:left;text-decoration:underline dotted;font-size:11px}.rslinks{padding-left:6px}.artaudit{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:0 6px}
+@media (min-width:901px){.rail.tabs.wide{flex-basis:240px;width:240px}.rail.tabs.wide .railsub{align-items:stretch}.rail.tabs.wide .railsub [data-tab]{text-align:left;padding-left:8px}}
 #backmap{display:block;margin:0 0 2px;font-size:13px}#backmap[hidden]{display:none}
 /* ---- Detailed view layout: icon rail, one title, two soft cards (message board + output), a collapsed Run details row.
    Everything is scoped to #dview so the Simple view is untouched. System serif for headings, no web fonts. */
@@ -1131,7 +1135,7 @@ async function poll(){
     }
     paint($("pane-goal"), renderGoal(s)); paint($("pane-workflows"), renderWorkflows(s));
     paint($("pane-conflicts"), renderConflicts(s)); paint($("pane-audit"), renderAudit(s));
-    paint($("reportbody"), renderReport(s));
+    paint($("reportbody"), renderReport(s)); railPaint();
     paint($("pane-charter"), renderCharter(s));
     paint($("pane-timeline"), renderTimeline(s)); paint($("pane-lessons"), renderLessons(s));
     paint($("pane-style"), renderStyle(s)); paint($("pane-playbooks"), renderPlaybooks(s));
@@ -1193,7 +1197,7 @@ function showTab(name){
   const tb = document.querySelector(`.tabs [data-tab="${name}"]`);
   $("wtitle").textContent = tb ? tb.textContent.trim() : name; $("wsub").textContent = TABHINT[name] || ""; $("ver").hidden = name !== "preview";
   // the Map has its own heading, so the title bar is only for the other views
-  $("backmap").hidden = name === "map"; document.querySelector("#dview .wbar").hidden = name === "map"; document.querySelector("#dview .work").classList.toggle("mapfit", name === "map"); if (name !== "map"){ $("railsub").hidden = false; $("internals").setAttribute("aria-expanded", "true"); }
+  $("backmap").hidden = name === "map"; document.querySelector("#dview .wbar").hidden = name === "map"; document.querySelector("#dview .work").classList.toggle("mapfit", name === "map"); if (name !== "map"){ $("railsub").hidden = false; $("internals").setAttribute("aria-expanded", "true"); railReveal(name); } railWide();
   ["preview","goal","workflows","conflicts","timeline","audit","charter","docs","artifacts","board","story","map","style","lessons","playbooks","report","rundetails","runsettings"].forEach(t => $("pane-"+t).hidden = t !== name);
 }
 document.querySelectorAll(".tabs [role=tab]").forEach(b => b.onclick = () => { if (b.dataset.tab === "workflows" && WFSTEP.length){ WFSTEP = []; if (state) paint($("pane-workflows"), renderWorkflows(state)); } showTab(b.dataset.tab); });
@@ -1204,7 +1208,7 @@ showTab("map");
   setView("detail", false); showTab(want); })();
 $("gochat").onclick = () => setView("simple", true);      // Chat is the Simple view; any other rail item goes back to the Detailed view
 document.querySelectorAll(".rail [role=tab]").forEach(b => b.addEventListener("click", () => setView("detail", true)));
-$("internals").onclick = () => { const o = $("railsub").hidden; $("railsub").hidden = !o; $("internals").setAttribute("aria-expanded", String(o)); };
+$("internals").onclick = () => { const o = $("railsub").hidden; $("railsub").hidden = !o; $("internals").setAttribute("aria-expanded", String(o)); railWide(); };
 $("backmap").onclick = () => showTab("map");
 // Artifacts: read-only list driven by artifacts/types.json (/api/artifacts): deliverables, then evidence and records.
 const ARTS = {deliverables: [], records: [], tree: null}, ARTTEXT = {};      // ARTTEXT: file -> text already fetched for an open row
@@ -1353,7 +1357,7 @@ function artNode(x){
     x.read_by != null ? `read by ${x.read_by} workflow${x.read_by === 1 ? "" : "s"}` : "", x.rewritten ? `rewritten by ${x.rewritten.by} · ${x.rewritten.name}` : "", x.note].filter(Boolean).map(esc).join(" · ");
   const line = `<span class="artname"><b>${esc(x.name)}</b>${x.count != null ? ` <span class="artcount">${x.count}</span>` : ""}</span>`
     + (x.count == null ? ` <span class="empty">${artMade(x.made_by)}</span> <span class="artst st-${esc(String(x.status || "").split(" ")[0])}">${esc(x.status || "")}</span>` : "")
-    + (x.size != null ? ` <span class="empty">${artSize(x.size)}</span>` : "") + (facts ? ` <span class="empty">${facts}</span>` : "")
+    + (x.count == null ? ` <span class="artaudit">${esc(auditWord(x, CTX))}</span>` : "") + (x.size != null ? ` <span class="empty">${artSize(x.size)}</span>` : "") + (facts ? ` <span class="empty">${facts}</span>` : "")
     + (x.code ? ` <button type="button" class="linkbtn" data-artcode="${esc(ck)}" aria-expanded="${open}">${open ? "Close" : "Open"}</button>`
       : x.file ? (big ? ` <span class="empty">too large to open here</span>` : ` <button type="button" class="linkbtn" data-artopen="${esc(x.file)}" aria-expanded="${open}">${open ? "Close" : "Open"}</button>`) : "");
   if (!kids.length) return `<div class="artrow artleaf" data-art="${esc(x.file || x.name)}">${line}${body}</div>`;
@@ -1369,7 +1373,7 @@ const renderArtifacts = () => {
 async function loadArtifacts(){
   try { const r = await fetch(`/api/artifacts?${runQ().slice(1)}`, {cache:"no-store"}); if (r.ok) Object.assign(ARTS, await r.json()); } catch (e) {}
   try { const r = await fetch(`/api/artifacts/tree?${runQ().slice(1)}`, {cache:"no-store"}); if (r.ok) ARTS.tree = await r.json(); } catch (e) {}
-  paint($("pane-artifacts"), renderArtifacts());
+  paint($("pane-artifacts"), renderArtifacts()); railPaint();
 }
 $("pane-artifacts").addEventListener("click", async e => { const cc = e.target.closest("[data-codecopy]"); if (cc){ e.preventDefault(); try { await navigator.clipboard.writeText(CODE[cc.dataset.codecopy] || ""); cc.textContent = "Copied"; } catch (err) { cc.textContent = "Copy failed"; } return; }
   const c = e.target.closest("[data-artcode]"); if (c){ e.preventDefault(); const k = c.dataset.artcode, [deck, sec] = k.split("|"); ARTOPEN = ARTOPEN === "code:" + k ? "" : "code:" + k; paint($("pane-artifacts"), renderArtifacts());
@@ -2246,7 +2250,7 @@ function mapGo(id){
 async function loadMap(){
   try { const r = await fetch(`/api/map?${runQ().slice(1)}`, {cache:"no-store"}); if (r.ok) Object.assign(MAP, await r.json()); } catch (e) {}
   if (state) paint($("needs"), renderNeeds(state));      // the outcome line names what the Map shows left open
-  paintMap();
+  paintMap(); railPaint();
 }
 function mapLight(svg, id){      // hover or focus: light the dot, the lines that touch it and the dots at their other ends; fade the rest ("" clears)
   const els = [...svg.querySelectorAll("[data-from],[data-id]")], hot = new Set(id ? [id] : []);
@@ -2351,6 +2355,73 @@ $("pane-lessons").addEventListener("click", async e => {
 });
 $("box").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey){ e.preventDefault(); send(); }});
 $("reset").onclick = async () => { await fetch("/api/reset", {method:"POST"}); location.search = ""; };
+// ---- Left bar: the Internals tabs in sections. A tab is placed by RAILSEC (the one declared table); a tab it does not name goes to the function whose Map node
+// carries it as its tab (FN_TAB in j2_map.py), else to Other. The function headers, the conflicts and the actions come from the run's records (state and Map).
+const RAILSEC = {conflicts: "conflicts", goal: "identity", charter: "identity", report: "identity", lessons: "adaptation", playbooks: "adaptation", workflows: "coordination", timeline: "coordination",
+  board: "coordination", story: "coordination", audit: "audit", preview: "artifacts", docs: "artifacts", artifacts: "artifacts", style: "artifacts", runsettings: "settings", rundetails: "settings"};
+const RAILORDER = [["conflicts", "Conflicts"], ["identity", "Identity"], ["adaptation", "Adaptation"], ["priority", "Priority"], ["coordination", "Coordination"], ["audit", "Audit"],
+  ["artifacts", "Artifacts"], ["actions", "Actions"], ["other", "Other"], ["settings", "Settings"]];
+let RAILOPEN = {}; try { RAILOPEN = JSON.parse(localStorage.getItem("j2railopen") || "{}") || {}; } catch (e) { RAILOPEN = {}; }      // per viewer: a section the viewer opened or closed
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+function auditFindings(audits){      // a finding is a check that failed in some audit; fixed = failed once and passes in the latest audit that has it
+  const seen = {}; [...audits].filter(a => a && a.cycle != null).sort((x, y) => x.cycle - y.cycle).forEach(a => (a.results || []).concat(a.extra_issues || []).forEach((r, i) => { const id = r.id || `x${a.cycle}-${i}`; if (r.pass === false || r.verdict === "FAIL") (seen[id] = seen[id] || {}).failed = true; if (seen[id]) seen[id].last = r.pass !== false && r.verdict !== "FAIL"; }));
+  const all = Object.values(seen); return {n: all.length, fixed: all.filter(x => x.last).length, open: all.filter(x => !x.last).length};
+}
+const auditWord = (x, s) => { const pool = [...STAGE_AUDITS, ...((s && s.audits) || [])];      // the Audit status of an artifact row: the Site and documents by version, the Charter by the validator, else not audited
+  if (x.version != null){ const a = pool.filter(p => p.version === x.version).sort((p, q) => q.cycle - p.cycle)[0];
+    if (a) return a.all_pass ? "audit passed" : `audit: ${plural((a.results || []).concat(a.extra_issues || []).filter(r => r.pass === false).length, "finding")} open`; return pool.length ? "not in the latest audit" : "not audited"; }
+  return x.file === "goal.json" ? (s && s.stamped ? "validated" : "not validated") : "not audited"; };
+function railModel(s, m, tabs){
+  s = s || {}; m = m || {}; const nodes = m.nodes || [], conf = s.conflicts || [], wfs = s.workflows || [];
+  const fnTab = Object.fromEntries(nodes.filter(n => n.kind === "function" && n.tab).map(n => [n.tab, String(n.id).replace("fn:", "")]));
+  const place = t => RAILSEC[t] ? [RAILSEC[t], "declared table"] : fnTab[t] ? [fnTab[t], "function node tab"] : ["other", "fallback"];
+  const closedC = conf.filter(c => c.status === "settled").length, openC = conf.length - closedC, af = auditFindings([...STAGE_AUDITS, ...(s.audits || [])]);
+  const acts = nodes.filter(n => n.kind === "work" && n.tag === "Send").map(n => { const w = sendWord(n);
+    return {id: n.id, label: mapClean(n.label), state: n.status === "waiting_on_you" ? "waiting for you" : n.status === "fault" || /^(failed|skipped)/.test(w) ? "blocked" : w === "sent" ? "sent" : w || (MAPW[n.status] || n.status || "")}; });
+  const waitFn = fn => nodes.some(n => n.id === "fn:" + fn && n.status === "waiting_on_you");
+  const needs = {identity: needsYou(s).length > 0 || waitFn("identity"), conflicts: conf.some(c => c.user_question && !c.user_answer), actions: acts.some(a => a.state === "waiting for you")};
+  const artN = ((ARTS.tree || {}).groups || []).reduce((n, g) => n + (g.count || 0), 0), pers = MAPLABEL.persona;
+  const stat = {conflicts: `${openC} open, ${closedC} settled`, identity: needs.identity ? "waiting on you" : s.goal ? `charter ${s.stamped ? "validated" : "recorded"}, ${plural((s.goal.done_when || []).length, "checklist item")}` : "no charter yet",
+    adaptation: wfs.length ? `${plural(wfs.length, "workflow")} planned` : "no workflows yet", priority: `${plural(conf.length, "conflict")}, ${closedC} settled`,
+    coordination: wfs.length ? `${wfs.filter(w => w.status === "done").length} of ${wfs.length} workflows done` : "no workflows yet",
+    audit: af.n ? `${plural(af.n, "finding")}, ${af.fixed} fixed${af.open ? `, ${af.open} open` : ""}` : (s.audits || []).length ? "no findings" : "no audits yet",
+    artifacts: artN ? plural(artN, "artifact") : "", actions: acts.length ? `${plural(acts.length, "action")}: ${["sent", "waiting for you", "blocked"].map(k => [k, acts.filter(a => a.state === k).length]).filter(x => x[1]).map(x => x[1] + " " + x[0]).join(", ") || "none sent yet"}` : "none", other: "", settings: ""};
+  const at = {}; (tabs || []).forEach(t => { const [sec, how] = place(t); (at[sec] = at[sec] || []).push({tab: t, how}); });
+  return RAILORDER.map(([id, name]) => ({id, name, persona: id === "audit" ? pers.audit + " + Validator" : pers[id] || "", status: stat[id], tabs: at[id] || [], needs: !!needs[id],
+    items: id === "conflicts" ? conf.map(c => ({kind: "conflict", id: c.id, text: `${c.id} · ${c.subject || c.topic || ""}`, state: c.status === "settled" ? "settled" : "open", fns: c.between || []})) : id === "actions" ? acts.map(a => ({kind: "action", ...a})) : [],
+    open: id in RAILOPEN ? !!RAILOPEN[id] : id === "conflicts" || id === "artifacts" || !!needs[id],
+    shown: id === "conflicts" ? conf.length > 0 : id === "other" ? (at.other || []).length > 0 : true}));
+}
+const railFirst = (model, fn) => ((model.find(x => x.id === fn) || {}).tabs || [])[0];
+function railItems(sec){
+  const fl = f => `<button type="button" class="linkbtn" data-railfn="${esc(f)}">${esc(fnName(f))}</button>`;
+  if (sec.id === "priority") return sec.shownConflicts ? `<button type="button" class="linkbtn" data-railsec="conflicts">See the conflicts</button>` : "";
+  return sec.items.map(i => i.kind === "conflict" ? `<div class="rsitem"><button type="button" class="rsrow" data-railgo="conflicts">${esc(i.text)}</button> <span class="empty">${esc(i.state)}</span><div class="rslinks">${i.fns.map(fl).join(" vs ")}</div></div>`
+    : `<div class="rsitem"><button type="button" class="rsrow" data-railact="${esc(i.id)}">${esc(i.label)}</button> <span class="empty">${esc(i.state)}</span></div>`).join("");
+}
+function railMount(){
+  const sub = $("railsub"); if (!sub || !sub.querySelectorAll || sub.__rail) return; sub.__rail = true;
+  const g = document.createElement("div"); g.id = "railgroups"; g.innerHTML = RAILORDER.map(([id, name]) => `<section class="rsec" data-sec="${id}" hidden><button type="button" class="rshead" aria-expanded="false" aria-controls="rsb-${id}"><span class="rsname">${name}</span> <span class="rspers"></span><span class="rsstat"></span></button><div class="rsbody" id="rsb-${id}" hidden><div class="rsdyn"></div></div></section>`).join("");
+  sub.appendChild(g); railPaint();
+}
+function railSetOpen(id, on, keep){ const sec = document.querySelector(`.rsec[data-sec="${id}"]`); if (!sec) return; sec.querySelector(".rshead").setAttribute("aria-expanded", String(on)); sec.querySelector(".rsbody").hidden = !on; if (keep){ RAILOPEN[id] = on; try { localStorage.setItem("j2railopen", JSON.stringify(RAILOPEN)); } catch (e) {} } }
+function railPaint(){
+  const g = document.getElementById("railgroups"); if (!g) return; const sub = $("railsub"), tabs = [...sub.querySelectorAll("[data-tab]")];
+  const model = railModel(typeof state !== "undefined" ? state : CTX, MAP, tabs.map(b => b.dataset.tab)); const by = Object.fromEntries(tabs.map(b => [b.dataset.tab, b]));
+  model.forEach(sec => { const el = g.querySelector(`.rsec[data-sec="${sec.id}"]`), body = el.querySelector(".rsbody"); el.hidden = !sec.shown; el.classList.toggle("rsneed", sec.needs);
+    el.querySelector(".rspers").textContent = sec.persona ? " · " + sec.persona : ""; el.querySelector(".rsstat").textContent = sec.status;
+    sec.shownConflicts = model[0].shown; el.querySelector(".rsdyn").innerHTML = railItems(sec);
+    sec.tabs.forEach(t => { const b = by[t.tab]; if (b && b.parentNode !== body) body.insertBefore(b, el.querySelector(".rsdyn")); if (b) b.dataset.how = t.how; });
+    if (!el.__init){ el.__init = true; railSetOpen(sec.id, sec.open, false); } else if (sec.needs && !(sec.id in RAILOPEN)) railSetOpen(sec.id, true, false); });
+}
+function railReveal(name){ const b = document.querySelector(`#railsub [data-tab="${name}"]`), sec = b && b.closest && b.closest(".rsec"); if (sec) railSetOpen(sec.dataset.sec, true, false); }
+function railWide(){ const r = document.querySelector("#dview .rail"); if (r && r.classList) r.classList.toggle("wide", !$("railsub").hidden); }
+$("railsub").addEventListener("click", e => { const h = e.target.closest(".rshead"); if (h){ const id = h.closest(".rsec").dataset.sec; railSetOpen(id, h.getAttribute("aria-expanded") !== "true", true); return; }
+  const go = e.target.closest("[data-railgo]"); if (go){ showTab(go.dataset.railgo); return; }
+  const sc = e.target.closest("[data-railsec]"); if (sc){ railSetOpen(sc.dataset.railsec, true, false); const el = document.querySelector(`.rsec[data-sec="${sc.dataset.railsec}"]`); if (el && el.scrollIntoView) el.scrollIntoView({block: "nearest"}); return; }
+  const fn = e.target.closest("[data-railfn]"); if (fn){ const model = railModel(state, MAP, [...$("railsub").querySelectorAll("[data-tab]")].map(b => b.dataset.tab)), t = railFirst(model, fn.dataset.railfn); railSetOpen(fn.dataset.railfn, true, false); if (t) showTab(t.tab); return; }
+  const ac = e.target.closest("[data-railact]"); if (ac){ showTab("map"); mapSelect(ac.dataset.railact); } });
+railMount();
 poll();
 </script>
 </body>
