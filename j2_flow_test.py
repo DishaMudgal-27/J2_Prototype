@@ -6798,7 +6798,7 @@ def map_tree():
               " document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})); r.esc1 = q('#pane-map .mappanel').map(x => x.dataset.stagepanel || x.dataset.panel || x.dataset.wfpanel);"
               " document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));"
               " setTimeout(() => { r.z0 = TREE.zoom; const h = q('.tnode.tstage').find(x => x.dataset.id === id); r.after = [q('.tnode.open').length, q('.tdim').length, h.getAttribute('transform') === 'translate(' + h.dataset.x + ',' + h.dataset.y + ')', q('.twf').length, q('#pane-map .mappanel').length];"
-              "  document.querySelector('[data-mapview=line]').click(); r.line2 = getComputedStyle(document.querySelector('.mapsvg:not(.mapvert)')).display; r.tree2 = getComputedStyle(document.querySelector('.treebox')).display;"
+              "  document.querySelector('[data-mapview=line]').click(); r.line2 = [...document.querySelectorAll('.mapsvg')].some(x => getComputedStyle(x).display !== 'none') ? 'block' : 'none'; r.tree2 = getComputedStyle(document.querySelector('.treebox')).display;"
               "  r.z = r.z0; document.querySelector('[data-mapview=tree]').click(); document.body.setAttribute('data-r', JSON.stringify(r)); }, 1500); }, 700); }, 900); }, 900);")
         got = probe(js)
         assert got["d3"] == "object" and got["tree"] == "block" and got["line"] == "none", got
@@ -7066,6 +7066,75 @@ def map_focus():
     print(f"map focus: {seen['runs']} runs: every edge of the Tree ({seen['tree edges']}) and of {seen['teams']} focused teams, {seen['ovals']} open teams and {seen['workflows']} focused workflows ({seen['focus edges']} edges) is one line or one arc, none through a shape or a label, "
           f"no overlaps; every recorded input and output ({seen['reads']} reads, {seen['made']} outputs of workflows) a labelled shape; same run, same picture"
           + (f"; real page, {seen['browser']} runs: team, open team and workflow focus, Esc / Back / a second click / empty space return, nodes glide, reduced motion sits at once" if seen.get("browser") else "") + " ok")
+
+
+def map_line():
+    """Map, Line view, on every saved run, on the real page (--browser; skipped without Chrome): on open the drawing fits the card (content box inside it
+    with a margin and filling at least 85% of one side, or, when the labels would be under 11px, fitted by width with the height to pan), no horizontal
+    page scroll; + and - stay between 0.25x and 4x of the fit; Fit after a wheel zoom and a pan gives back the very same transform, twice; a click on a
+    dot (and Esc) keeps the transform; a narrower card refits (and picks the tall drawing when the wide one would have labels under 11px)."""
+    import threading
+    import html as htmllib
+    import j2_server
+    chrome = j2.j2_check.find_chrome()
+    here = os.path.dirname(os.path.abspath(__file__))
+    repo = os.path.join(here, "runs")
+    names = sorted(n for n in os.listdir(repo) if os.path.isfile(os.path.join(repo, n, "workflows.json"))) if os.path.isdir(repo) else []
+    if not (chrome and BROWSER and names):
+        print("map line: skipped (Chrome not found, or --fast without --browser)")
+        return
+    ui = open(os.path.join(here, "j2_ui.html"), encoding="utf-8").read()
+    # the first fit may precede the last font metrics by a fraction of a pixel, so Fit (after a short wait) is the reference transform
+    js = ("(async () => { const names = %s, out = {}, wait = ms => new Promise(r => setTimeout(r, ms)), q = s => [...document.querySelectorAll(s)], tr = s => s.querySelector('.lview').getAttribute('transform'),"
+          " cur = () => q('.mapsvgwrap[data-view=line] .mapsvg').find(x => x.clientWidth), click = el => el.dispatchEvent(new MouseEvent('click', {bubbles: true}));"
+          " const measure = s => { const g = s.querySelector('.lview'), c = s.getBoundingClientRect(), b = g.getBoundingClientRect(); return {fit: s.dataset.fit, font: +s.dataset.fontpx, rel: +s.dataset.rel, card: [c.left, c.top, c.right, c.bottom], box: [b.left, b.top, b.right, b.bottom], layout: s.closest('.mapsvgwrap').dataset.layout, sw: document.documentElement.scrollWidth, iw: innerWidth}; };"
+          " for (const name of names){ try { const m = await (await fetch('/api/map?run=' + name, {cache: 'no-store'})).json(); for (const k of Object.keys(MAP)) delete MAP[k]; Object.assign(MAP, m); MAPPIN = ''; LINE.zoom = {}; paintMap();"
+          "   const s = cur(), r = {nodes: (m.nodes || []).length, edges: (m.edges || []).length}; if (!s){ out[name] = {error: 'no line drawing'}; continue; }"
+          "   r.fit0 = measure(s); await wait(100); click(q('[data-linefit]')[0]); r.t0 = tr(s);"
+          "   const c = s.getBoundingClientRect(); s.dispatchEvent(new WheelEvent('wheel', {deltaY: -400, clientX: c.left + c.width / 2, clientY: c.top + c.height / 2, bubbles: true, cancelable: true})); r.wheel = +s.dataset.rel;"
+          "   s.__zoom_b.translateBy(d3.select(s), 40, -30); r.moved = tr(s) !== r.t0; click(q('[data-linefit]')[0]); r.fit1 = tr(s) === r.t0;"
+          "   click(q('[data-linezoom]')[0]); r.plus = +s.dataset.rel; for (let i = 0; i < 12; i++) click(q('[data-linezoom]')[0]); r.max = +s.dataset.rel; for (let i = 0; i < 30; i++) click(q('[data-linezoom]')[1]); r.min = +s.dataset.rel;"
+          "   click(q('[data-linefit]')[0]); r.fit2 = tr(s) === r.t0; s.__zoom_b.scaleBy(d3.select(s), 2); const t2 = tr(s), z2 = +s.dataset.rel;"
+          "   const id = q('.mapsvg .mapnode').find(x => x.closest('.mapsvg') === s).dataset.id; mapSelect(id); r.keep = [tr(cur()) === t2, +cur().dataset.rel === z2, q('.mappanel').length]; document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})); r.esc = [tr(cur()) === t2, q('.mappanel').length]; click(q('[data-linefit]')[0]);"
+          "   if (name === names[0] || m.nodes.length > 0){ const w = q('.mapsvgwrap[data-view=line]')[0], w0 = w.clientWidth; /* the resize observer calls the same lineMount(true) */ w.style.width = '560px'; lineMount(true); const s2 = cur(); r.narrow = measure(s2); w.style.width = ''; lineMount(true); r.back = [measure(cur()).layout, tr(cur()) === r.t0, w.clientWidth === w0, !!w.__ro]; }"
+          "   out[name] = r; } catch (e) { out[name] = {error: String(e.stack || e)}; } }"
+          " document.body.setAttribute('data-r', JSON.stringify(out)); })()") % json.dumps(names)
+    tmp = tempfile.mkdtemp(prefix="j2-line-")
+    open(os.path.join(tmp, "j2_ui.html"), "w", encoding="utf-8").write(ui.replace("</body>", "<script>setTimeout(() => { " + js + " }, 2500)</script></body>"))
+    os.symlink(os.path.join(here, "vendor"), os.path.join(tmp, "vendor"))
+    keep_dir, keep_here, j2.RUNS_DIR, j2_server.HERE = j2.RUNS_DIR, j2_server.HERE, repo, tmp
+    srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--window-size=1440,900", "--virtual-time-budget=600000", "--dump-dom",
+                          f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&mapview=line&run={names[0]}"], capture_output=True, text=True, timeout=590).stdout
+    finally:
+        j2.RUNS_DIR, j2_server.HERE = keep_dir, keep_here
+        srv.shutdown()
+    hit_ = re.search(r'data-r="([^"]*)"', dom)
+    assert hit_, ("the page did not finish its steps", dom[-300:])
+    got = json.loads(htmllib.unescape(hit_.group(1)))
+    assert sorted(got) == names, "every run was measured"
+    M_ = 12
+    inside = lambda f, all_: f["box"][0] >= f["card"][0] + M_ - 1.5 and f["box"][2] <= f["card"][2] - M_ + 1.5 and (not all_ or (f["box"][1] >= f["card"][1] + M_ - 1.5 and f["box"][3] <= f["card"][3] - M_ + 1.5))
+    fills = lambda f: max((f["box"][2] - f["box"][0]) / (f["card"][2] - f["card"][0]), (f["box"][3] - f["box"][1]) / (f["card"][3] - f["card"][1]))
+    kinds = {"all": 0, "width": 0}
+    for name, r in got.items():
+        assert "error" not in r, (name, r)
+        for label, f in (("open", r["fit0"]), ("narrower card", r["narrow"])):
+            assert f["fit"] in ("all", "width"), (name, label, f["fit"])
+            assert inside(f, f["fit"] == "all"), (name, label, "the content box is inside the card with a margin", f["box"], f["card"])
+            assert f["fit"] == "width" or fills(f) >= 0.85, (name, label, "fills 85% of one side", fills(f))
+            assert f["fit"] == "all" or (f["box"][2] - f["box"][0]) / (f["card"][2] - f["card"][0]) >= 0.85, (name, label, "fitted by width: the width is filled")
+            assert f["font"] >= 11 or f["fit"] == "width", (name, label, "labels are 11px or more, or the height pans", f["font"])
+            assert f["sw"] <= f["iw"], (name, label, "no horizontal page scroll")
+        kinds[r["fit0"]["fit"]] += 1
+        assert r["moved"] and r["fit1"] and r["fit2"], (name, "Fit after zoom and pan gives back the same transform, every time", r)
+        assert r["wheel"] > 1 and r["plus"] == 1.5 and abs(r["max"] - 4) < 1e-6 and abs(r["min"] - 0.25) < 1e-6, (name, "wheel zooms in, + is 1.5x, the range is 0.25x to 4x", r["wheel"], r["plus"], r["max"], r["min"])
+        assert r["keep"] == [True, True, 1] and r["esc"] == [True, 0], (name, "a click on a dot opens its panel and keeps the view; Esc closes it", r["keep"], r["esc"])
+        assert r["back"] == [r["fit0"]["layout"], True, True, True], (name, "the card back to its width: the same drawing, the same fit; the card is watched for resizes", r["back"])
+    print(f"map line: {len(got)} runs on the real page: fitted inside the card with a margin ({kinds['all']} fill it, {kinds['width']} fit by width with the height to pan), labels 11px or more at fit "
+          "(or the pan fallback), no horizontal scroll; wheel, + and - (0.25x to 4x), Fit after zoom and pan gives back the same transform; a click on a dot keeps the view; a narrower card refits ok")
 
 
 def map_every_workflow():
@@ -7469,7 +7538,7 @@ def map_tab():
     assert 'class="mapcard st-fault"' in cards and "<b>!</b>" in cards and "<b>?</b>" in cards and "left open" in cards and "running now" in cards
     ui = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "j2_ui.html"), encoding="utf-8").read()
     assert "@media (max-width:600px){.mapsvgwrap{display:none}.mapcards{display:block}}" in ui and ".mapcards{display:none}" in ui
-    assert ".mapsvg{width:100%;height:auto" in ui and "st-running{border-style:double" in ui and "st-left_open{border-style:dashed" in ui
+    assert ".mapsvg{width:100%;height:clamp(440px,64vh,760px)" in ui and "st-running{border-style:double" in ui and "st-left_open{border-style:dashed" in ui
     assert ui.index('data-tab="map"') < ui.index('id="railsub"') < ui.index('data-tab="docs"') < ui.index('data-tab="artifacts"') < ui.index('data-tab="style"'), "Map is the first rail entry; every other tab sits in the Internals folder"
     empty = render_node(snap, docs={"docs": {}, "map": {"nodes": [], "edges": []}})["map"]
     assert "Nothing to draw yet." in empty
@@ -7887,19 +7956,19 @@ def map_tab():
         newest = os.path.join(j2.RUNS_DIR, "j2-29990101-000001")      # sorts first, so the selector (newest 60) always lists it
         shutil.copytree(run.dir, newest)
         assert home_probe("j2-29990101-000001", base_js + "showTab('runsettings'); r.val = document.getElementById('runsel').value;")["val"] == "j2-29990101-000001", "the selector shows the run that is open"
-        fx = ("const sv = [...document.querySelectorAll('.mapsvg')].find(x => x.getClientRects().length); const lines = [...sv.querySelectorAll('path.mapedge')].filter(p => parseFloat(getComputedStyle(p).opacity) > 0.01).map(p => { const L = p.getTotalLength(), o = []; for (let i = 0; i <= L; i += 2) { const t = p.getPointAtLength(i); o.push([t.x, t.y]); } return {id: p.dataset.from + ' > ' + p.dataset.to, o}; });"
+        fx = ("document.querySelectorAll('.mapsvgwrap').forEach(w => w.dataset.layout = 'h'); const sv = [...document.querySelectorAll('.mapsvg')].find(x => x.getClientRects().length); const lines = [...sv.querySelectorAll('path.mapedge')].filter(p => parseFloat(getComputedStyle(p).opacity) > 0.01).map(p => { const L = p.getTotalLength(), o = []; for (let i = 0; i <= L; i += 2) { const t = p.getPointAtLength(i); o.push([t.x, t.y]); } return {id: p.dataset.from + ' > ' + p.dataset.to, o}; });"
               "const texts = [...sv.querySelectorAll('text')].filter(t => parseFloat(getComputedStyle(t).opacity) > 0.01 && t.textContent.trim()).map(t => ({t: t.textContent.trim(), b: t.getBBox()}));"
               "r.n = texts.length; r.hits = []; for (const x of texts) { for (const l of lines) if (l.o.some(([px, py]) => px > x.b.x - 1 && px < x.b.x + x.b.width + 1 && py > x.b.y && py < x.b.y + x.b.height)) r.hits.push(x.t + ' on ' + l.id); }"
               "for (let i = 0; i < texts.length; i++) for (let j = i + 1; j < texts.length; j++) { const a = texts[i].b, b = texts[j].b; if (a.x < b.x + b.width - 1 && b.x < a.x + a.width - 1 && a.y < b.y + b.height - 1 && b.y < a.y + a.height - 1) r.hits.push(texts[i].t + ' over ' + texts[j].t); }")
         for rn in (name, send_name, *real_names):
             d_ = home_probe(rn, base_js + fx)
             assert d_["n"] > 20 and d_["hits"] == [], (rn, d_["hits"])      # no label sits on a line or on another label
-        # the wide drawing fits the map pane at 1440x900 with no scroll inside it; under 900px the narrow drawing is shown instead
+        # the Line view shows the wide or the tall drawing at 1440x900 with no horizontal scroll; under 900px the narrow drawing is shown instead
         fit_js = ("const p = document.getElementById('pane-map'), w = document.querySelector('.mapsvg:not(.mapvert)'), v = document.querySelector('.mapsvg.mapvert');"
-                  "r.fit = [p.scrollHeight, p.clientHeight, w.getClientRects().length > 0, v.getClientRects().length > 0];")
+                  "r.fit = [p.scrollWidth, p.clientWidth, w.getClientRects().length > 0, v.getClientRects().length > 0];")
         for rn in (name, send_name, *real_names):
             f1 = home_probe(rn, base_js + fit_js, "1440,900")["fit"]
-            assert f1[2] is True and f1[3] is False and f1[0] <= f1[1] + 1, (rn, f1)      # wide drawing shown, and it fits
+            assert f1[2] != f1[3] and f1[0] <= f1[1] + 1, (rn, f1)      # one drawing is shown (the wide one when the card holds it at 11px labels, else the tall one), no horizontal scroll
         f2 = home_probe(real_names[0], base_js + fit_js, "860,900")["fit"]
         assert f2[2] is False and f2[3] is True, f2      # under 900px: the vertical drawing
         # phone width: nothing wider than 360px on the Simple view or the home, and the rail is along the bottom. Headless Chrome's
@@ -8221,6 +8290,7 @@ if __name__ == "__main__":
         if mode == "0":
             map_tree()
             map_focus()
+            map_line()
             map_logic()
             map_readback()
             map_shapes()
