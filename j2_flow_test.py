@@ -5313,13 +5313,13 @@ def atom_templates():
               "const t = card.querySelector('[data-block=\"template\"]');"
               "r.rows = t ? [...t.querySelectorAll('[data-tmplrow]')].map(x => x.dataset.tmplrow) : [];"
               "r.shown = !!t && t.getClientRects().length > 0;"
-              "r.text = t ? t.innerText.replace(/\\s+/g, ' ').trim().slice(0, 900) : '';"
+              "r.text = t ? t.textContent.replace(/\\s+/g, ' ').trim().slice(0, 900) : '';"
               "const ver = card.querySelector('[data-block=\"verification\"]'), out = card.querySelector('[data-block=\"expected_output\"]');"
               "r.between = !!t && !!ver && !!out && out.getBoundingClientRect().top < t.getBoundingClientRect().top"
               " && t.getBoundingClientRect().top < ver.getBoundingClientRect().top;"
               "r.chips = t ? [...t.querySelectorAll('[data-tmpl-st]')].map(x => x.textContent.trim()) : [];"
               "r.links = t ? [...t.querySelectorAll('[data-link]')].map(x => x.dataset.link) : [];"
-              "r.simple = document.getElementById('sview').innerText.includes('Prompt template');")
+              "r.simple = document.getElementById('sview').textContent.includes('Prompt template');")
         tmp = tempfile.mkdtemp(prefix="j2-tmpl-")
         ui = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "j2_ui.html"), encoding="utf-8").read()
         open(os.path.join(tmp, "j2_ui.html"), "w", encoding="utf-8").write(
@@ -5346,7 +5346,7 @@ def atom_templates():
         assert got["blocks"].index("template") + 1 == got["blocks"].index("verification"), got["blocks"]
         assert got["chips"] and all(x in ("pass", "fail", "not recorded") for x in got["chips"]), got["chips"]
         assert set(got["links"]) >= {"call", "receipt"}, got["links"]
-        assert "builder/1" in got["text"] and "BuilderReply/1" in got["text"], got["text"]
+        assert "builder/1" in got["text"] and "BuilderReply/1" in got["text"], repr(got["text"])
         assert got["simple"] is False, "the Simple view has no Template block"
     print("atom templates: with the flag off nothing is recorded; with it on the Still Point run ends Done and all "
           f"{len(blocks) - len(head_only)} built atoms read prompt pass, reply pass, output pass against "
