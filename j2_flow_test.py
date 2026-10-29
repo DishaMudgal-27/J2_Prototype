@@ -7467,12 +7467,13 @@ def map_line():
 
 
 def left_bar():
-    """Left bar: the Internals tabs regrouped into Conflicts (pinned, only when the run has conflicts), the five functions, Artifacts, Actions, Other and Settings.
-    Every run under runs/ (browser-free): every tab sits in exactly one section and Other is empty; the conflicts and the actions of the run are each listed once
-    (the conflicts with the functions they are between, the actions with a state); a function header's status comes from the run's records (conflicts.json,
-    audits.json, workflows.json); a tab the table does not name goes to the function whose Map node carries it, else to Other; every artifact row in the Artifacts tab
-    shows its Audit status. With Chrome (--browser): the rail widens to 240px, a section opens and closes and remembers it, a tab opened from elsewhere opens its section,
-    an action opens the Map's panel, a conflict's links open its functions."""
+    """Left bar: Map and Chat as two plain rows, then the tabs in sections (Conflicts pinned and only when the run has conflicts, the five functions, Artifacts, Actions,
+    Other, Settings); no icon rail and no Internals folder. Every run under runs/ (browser-free): every tab sits in exactly one section and Other is empty; Workflows is
+    under Adaptation and Priorities under Priority; Priority's header and view come from the run's decisions, priced workflows and conflicts (a run with none says so);
+    the Workflows view lists every workflow once, by cycle, each with a link to its place in the Map's Tree; the tabs whose data this run lacks are dimmed with their reason
+    and exactly those; the conflicts and the actions of the run are each listed once; no artifact row says "not audited" and the ones a record names show their Audit
+    status. With Chrome (--browser): Map and Chat rows, the active one highlighted, sections open and close and remember it, a dimmed tab still opens, a workflow's Map
+    link focuses it in the Tree, the Run details line has the run id and budget."""
     import collections
     import copy
     import html as htmllib
@@ -7484,9 +7485,10 @@ def left_bar():
     repo = os.path.join(here, "runs")
     names = sorted(n for n in os.listdir(repo) if os.path.isfile(os.path.join(repo, n, "workflows.json"))) if os.path.isdir(repo) else []
     ui = open(os.path.join(here, "j2_ui.html"), encoding="utf-8").read()
-    rail = ui[ui.index('id="railsub"'):ui.index("</nav>", ui.index('id="railsub"'))]
-    tabs = re.findall(r'data-tab="(\w+)"', rail)
-    assert len(tabs) == len(set(tabs)) >= 16, tabs
+    nav = ui[ui.index('<nav class="rail tabs"'):ui.index("</nav>", ui.index('<nav class="rail tabs"'))]
+    assert 'id="internals"' not in ui and "Internals" not in nav and "<svg" not in nav, "no Internals folder and no icon rail"
+    tabs = re.findall(r'data-tab="(\w+)"', nav[nav.index('id="railsub"'):])
+    assert len(tabs) == len(set(tabs)) >= 17 and "priorities" in tabs, tabs
     plural = lambda n, w: f"{n} {w}{'' if n == 1 else 's'}"
     keep_dir, j2.RUNS_DIR = j2.RUNS_DIR, repo
     seen = collections.Counter()
@@ -7494,29 +7496,82 @@ def left_bar():
     try:
         for name in names:
             d = os.path.join(repo, name)
-            m = M.build(d)
             rd_ = lambda f, dflt: json.load(open(os.path.join(d, f))) if os.path.isfile(os.path.join(d, f)) else dflt
-            snap = {"workflows": rd_("workflows.json", []), "chat": [], "call_log": [], "conflicts": rd_("conflicts.json", []), "goal": rd_("goal.json", None),
-                    "audits": [a for a in rd_("audits.json", []) if (a or {}).get("kind") != "recheck"]}
-            model = render_node(snap, docs={"docs": {}, "map": m, "railtabs": tabs})["rail"]
+            m = M.build(d)
+            rows_ = [json.loads(x) for x in open(os.path.join(d, "chat.jsonl"), encoding="utf-8") if x.strip()] if os.path.isfile(os.path.join(d, "chat.jsonl")) else []
+            chat = [x for x in rows_ if not x.get("meta")]
+            summ, report, wfs = rd_("summary.json", {}), rd_("report.json", None), rd_("workflows.json", [])
+            site = os.path.join(d, "site")
+            versions = len([f for f in os.listdir(site) if re.fullmatch(r"v\d+\.(?:html|md)", f)]) if os.path.isdir(site) else 0
+            docfiles = [k for k in ("prd", "hld", "lld") if os.path.isfile(os.path.join(d, k + ".md"))]
+            b_ = summ.get("budget") or {}
+            snap = {"workflows": wfs, "chat": chat, "call_log": [], "conflicts": rd_("conflicts.json", []), "goal": rd_("goal.json", None), "stamped": True,
+                    "audits": [a for a in rd_("audits.json", []) if (a or {}).get("kind") != "recheck"], "report": report, "outcome": summ.get("outcome"), "versions": versions,
+                    "docset": list(rd_("documents.json", {})), "style": rd_("style.json", None), "memory": False, "budget": b_.get("granted") or j2.BUDGET, "spent": b_.get("used") or 0,
+                    "lessons_used": (summ.get("lessons") or {}).get("used", []), "lessons_saved": (summ.get("lessons") or {}).get("saved", []),
+                    "playbooks_used": (summ.get("playbooks") or {}).get("used", []), "playbook_saved": (summ.get("playbooks") or {}).get("saved")}
+            t = A.tree(d, m)
+            docs_ = {k: {"asked": "", "text": open(os.path.join(d, k + ".md"), encoding="utf-8").read()} for k in docfiles}
+            plan = M.plan_view(d)
+            out = render_node(snap, docs={"docs": docs_, "map": m, "railtabs": tabs, "plan": plan, "artifacts": {**A.listing(d), "tree": t}})
+            model = out["rail"]
             assert [x["id"] for x in model] == order, (name, "the sections, in order")
             sec = {x["id"]: x for x in model}
-            placed = [t["tab"] for x in model for t in x["tabs"]]
+            placed = [t_["tab"] for x in model for t_ in x["tabs"]]
             assert sorted(placed) == sorted(tabs), (name, "every tab is in exactly one section")
             assert sec["other"]["tabs"] == [] and not sec["other"]["shown"], (name, "Other is empty", sec["other"]["tabs"])
-            conf = [c for c in (json.load(open(os.path.join(d, "conflicts.json"))) if os.path.isfile(os.path.join(d, "conflicts.json")) else [])]
+            assert [t_["tab"] for t_ in sec["adaptation"]["tabs"]] == ["workflows", "lessons", "playbooks"] or sorted(t_["tab"] for t_ in sec["adaptation"]["tabs"]) == ["lessons", "playbooks", "workflows"], (name, "Workflows is under Adaptation")
+            assert [t_["tab"] for t_ in sec["priority"]["tabs"]] == ["priorities"] and "workflows" not in [t_["tab"] for t_ in sec["coordination"]["tabs"]], (name, "Priorities under Priority")
+            assert sorted(t_["tab"] for t_ in sec["coordination"]["tabs"]) == ["board", "story", "timeline"], (name, "Coordination keeps Timeline, Board, Board story")
+            conf = snap["conflicts"]
             assert sec["conflicts"]["shown"] == bool(conf), (name, "Conflicts is there only when the run has conflicts")
-            assert [i["id"] for i in sec["conflicts"]["items"]] == [c["id"] for c in conf] and all(i["fns"] == c["between"] for i, c in zip(sec["conflicts"]["items"], conf)), (name, "each conflict once, with the functions it is between")
-            closed = sum(1 for c in conf if c.get("status") == "settled")
-            assert sec["priority"]["status"] == f"{plural(len(conf), 'conflict')}, {closed} settled", (name, sec["priority"]["status"])
+            assert [i["id"] for i in sec["conflicts"]["items"]] == [c["id"] for c in conf] and all(i["fns"] == c["between"] for i, c in zip(sec["conflicts"]["items"], conf)), (name, "each conflict once, with its functions")
+            # Priorities, from the records
+            dec = [x for x in chat if x.get("who") == "priority" and x.get("decision")]
+            has = bool(dec or wfs)
+            bm = ((report or {}).get("metrics") or {}).get("budget") or {}
+            total, spent = bm.get("total", snap["budget"]), bm.get("spent", snap["spent"])
+            cuts = sum(1 for c in conf if isinstance(c.get("adaptation_final"), list) and isinstance(c.get("priority_final"), list)
+                       for p in c["adaptation_final"] if not any(q.get("name") == p.get("name") for q in c["priority_final"]))
+            ndef = sum(1 for w in wfs if w.get("status") == "held") + cuts
+            want = f"{spent} of {total} credits · {ndef} deferred" if has else "no ranking records"
+            assert sec["priority"]["status"] == want and out["prio"]["status"] == want, (name, "Priority's header comes from the records", sec["priority"]["status"], want)
+            cycles = sorted({(x.get("cycle") or 1) for x in dec} | {(w.get("cycle") or 1) for w in wfs})
+            if has:
+                assert out["priorities"].count("<details") == len(cycles) and all(f"<b>Cycle {c}</b>" in out["priorities"] for c in cycles), (name, "one block per cycle")
+                assert out["priorities"].count("<li><b>GRANT") + out["priorities"].count("<li><b>COUNTER") + out["priorities"].count("<li><b>REFUSE") == len(dec), (name, "every decision once")
+                assert sum(len(c["ranked"]) for c in out["prio"]["per"]) == sum(1 for w in wfs if w.get("status") != "held") and sum(len(c["deferred"]) for c in out["prio"]["per"]) == ndef, (name, "funded and deferred work")
+            else:
+                assert "No ranking records" in out["priorities"], (name, "a run with no ranking records says so")
+            seen["with ranking" if has else "no ranking"] += 1
+            # Workflows: every workflow once, with a link to a stage of the Tree
+            wv = out["workflows"]
+            assert "data-planview" in wv and "Workflows by cycle" in wv and "Replans" in wv, (name, "the Workflows view")
+            stage_of = {w_: n["id"] for n in out["tree"]["nodes"] if n["kind"] == "stage" for w_ in n["workflows"]}
+            lost = " ".join(x for x in m["not_recorded"] if x.startswith("workflows not placed on the map"))
+            for w in wfs:
+                if w["id"] in stage_of:
+                    assert wv.count(f'data-wfmap="{w["id"]}"') == 1 and f'data-wfmap="{w["id"]}" data-stage="{htmllib.escape(stage_of[w["id"]], quote=True)}"' in wv, (name, w["id"], "every workflow the Map draws links to its team")
+                else:      # the Map itself lists it under Not recorded: there is no node to link to
+                    assert f'data-wfmap="{w["id"]}"' not in wv and re.search(rf"\b{re.escape(w['id'])}\b", lost), (name, w["id"], "a workflow the Map does not draw says so and is in the Map's Not recorded")
+                    seen["workflows not on the map"] += 1
+            assert wv.count("not on the map") == sum(1 for w in wfs if w["id"] not in stage_of), (name, "each such workflow says so once")
+            assert (plan["found"] and all(f"<b>{htmllib.escape(x['id'])}</b>" in wv for x in plan["stages"])) or (not plan["found"] and "not recorded for this run" in wv), (name, "the stages, or that they are not recorded")
+            seen["workflows linked"] += len(wfs)
+            seen["with plan"] += plan["found"]
+            # dimmed tabs: exactly those whose data this run lacks
+            lacks = {"goal": not snap["goal"], "charter": not snap["goal"], "report": not report and not summ.get("outcome"), "workflows": not wfs, "priorities": not has, "timeline": not chat,
+                     "audit": not snap["audits"], "preview": not versions, "docs": not snap["docset"] and not docfiles, "artifacts": not any(g["count"] for g in t["groups"]),
+                     "style": not snap["style"], "lessons": not (snap["lessons_used"] or snap["lessons_saved"]), "playbooks": not (snap["playbooks_used"] or snap["playbook_saved"])}
+            dimmed = {t_["tab"] for x in model for t_ in x["tabs"] if t_["dim"]}
+            assert dimmed == {k for k, v in lacks.items() if v}, (name, "dimmed tabs are the ones with no data", dimmed ^ {k for k, v in lacks.items() if v})
+            assert all(t_["dim"] for x in model for t_ in x["tabs"] if t_["tab"] in ("lessons", "playbooks") and lacks[t_["tab"]]) and not any(t_["dim"] for x in model for t_ in x["tabs"] if t_["tab"] in ("rundetails", "runsettings", "conflicts", "map")), (name, "reasons given; the settings are never dimmed")
+            seen["dimmed"] += len(dimmed)
             sends = [n for n in m["nodes"] if n["kind"] == "work" and n.get("tag") == "Send"]
-            assert sorted(i["id"] for i in sec["actions"]["items"]) == sorted(n["id"] for n in sends), (name, "each action once")
-            for i in sec["actions"]["items"]:
-                assert i["state"], (name, i)
-                seen["state " + i["state"]] += 1
+            assert sorted(i["id"] for i in sec["actions"]["items"]) == sorted(n["id"] for n in sends) and all(i["state"] for i in sec["actions"]["items"]), (name, "each action once, with a state")
             seen["actions"] += len(sends)
             seen["conflicts"] += len(conf)
-            results = {}      # the findings: a check that failed in some audit; fixed when it passes in the latest audit that has it
+            results = {}      # Audit: a finding is a check that failed in some audit; fixed when it passes in the latest audit that has it
             for a in sorted(snap["audits"], key=lambda a: a["cycle"]):
                 for i_, r in enumerate(a.get("results", []) + a.get("extra_issues", [])):
                     k_ = r.get("id") or f"x{a['cycle']}-{i_}"
@@ -7526,31 +7581,30 @@ def left_bar():
                     if k_ in results:
                         results[k_]["last"] = not bad_
             n_, fx_ = len(results), sum(1 for r in results.values() if r["last"])
-            want = (f"{plural(n_, 'finding')}, {fx_} fixed" + (f", {n_ - fx_} open" if n_ - fx_ else "")) if n_ else ("no findings" if snap["audits"] else "no audits yet")
-            assert sec["audit"]["status"] == want, (name, "the Audit header counts the findings of the run's audits", sec["audit"]["status"], want)
-            wf = snap["workflows"]
-            assert sec["coordination"]["status"] == (f"{sum(1 for w in wf if w.get('status') == 'done')} of {len(wf)} workflows done" if wf else "no workflows yet"), (name, sec["coordination"]["status"])
-            for k in ("identity", "adaptation", "priority", "coordination", "audit"):
-                assert sec[k]["persona"] and sec[k]["name"] in ("Identity", "Adaptation", "Priority", "Coordination", "Audit"), (name, k)
-            assert sec["audit"]["persona"] == "Quality Reviewer + Validator"
-            # every artifact row shows its Audit status
-            t = A.tree(d, m)
+            wantA = (f"{plural(n_, 'finding')}, {fx_} fixed" + (f", {n_ - fx_} open" if n_ - fx_ else "")) if n_ else ("no findings" if snap["audits"] else "no audits yet")
+            assert sec["audit"]["status"] == wantA, (name, sec["audit"]["status"], wantA)
+            assert sec["coordination"]["status"] == (f"{sum(1 for w in wfs if w.get('status') == 'done')} of {len(wfs)} workflows done" if wfs else "no workflows yet"), name
+            # artifact rows: an Audit status only where a record names the artifact
             rows = []
             walk = lambda xs: [rows.append(x) or walk(x.get("children") or []) for x in xs]
             for g in t["groups"]:
                 walk(g["items"])
             rows = [x for x in rows if x.get("count") is None]
-            html = render_node(snap, docs={"docs": {}, "artifacts": {**A.listing(d), "tree": t}})["artifacts"]
-            assert html.count('class="artaudit"') == len(rows) > 0, (name, "every artifact row shows its Audit status", html.count('class="artaudit"'), len(rows))
+            html = out["artifacts"]
+            audited = {a.get("version") for a in snap["audits"]}
+            want_n = sum(1 for x in rows if (x.get("version") is not None and x["version"] in audited) or (x.get("file") == "goal.json" and snap["goal"]))
+            assert "not audited" not in html and html.count('class="artaudit"') == want_n, (name, "no row says not audited; the rows a record names show their status", html.count('class="artaudit"'), want_n)
             seen["artifact rows"] += len(rows)
+            seen["artifact audit"] += want_n
             seen["runs"] += 1
         # a tab the table does not name: the function whose Map node carries it, else Other
         name = "j2-20261026-174314" if "j2-20261026-174314" in names else names[0]
         m = copy.deepcopy(M.build(os.path.join(repo, name)))
         next(n for n in m["nodes"] if n["id"] == "fn:audit")["tab"] = "futuretab"
-        snap = {"workflows": [], "chat": []}
-        got = {x["id"]: x for x in render_node(snap, docs={"docs": {}, "map": m, "railtabs": tabs + ["futuretab", "orphantab"]})["rail"]}
-        assert [t["tab"] for t in got["audit"]["tabs"] if t["how"] == "function node tab"] == ["futuretab"] and [t["tab"] for t in got["other"]["tabs"]] == ["orphantab"] and got["other"]["shown"], "derived placement, then Other"
+        got = {x["id"]: x for x in render_node({"workflows": [], "chat": []}, docs={"docs": {}, "map": m, "railtabs": tabs + ["futuretab", "orphantab"]})["rail"]}
+        assert [t_["tab"] for t_ in got["audit"]["tabs"] if t_["how"] == "function node tab"] == ["futuretab"] and [t_["tab"] for t_ in got["other"]["tabs"]] == ["orphantab"] and got["other"]["shown"], "derived placement, then Other"
+        e_ = render_node({"workflows": [], "chat": []}, docs={"docs": {}, "map": m, "railtabs": tabs})
+        assert "No ranking records" in e_["priorities"] and e_["prio"]["status"] == "no ranking records" and all(x["dim"] for y in e_["rail"] for x in y["tabs"] if x["tab"] == "priorities"), "a run with no ranking records says so"
     finally:
         j2.RUNS_DIR = keep_dir
     chrome = j2.j2_check.find_chrome()
@@ -7558,49 +7612,62 @@ def left_bar():
         with_c = next((n for n in names if os.path.isfile(os.path.join(repo, n, "conflicts.json")) and json.load(open(os.path.join(repo, n, "conflicts.json")))
                        and any(x["tag"] == "Send" for x in M.build(os.path.join(repo, n))["nodes"] if x.get("tag"))), None)
         js = ("(async () => { const q = s => [...document.querySelectorAll(s)], wait = ms => new Promise(r => setTimeout(r, ms)), r = {}, rc = el => el.getBoundingClientRect(), vis = el => !!el && el.getClientRects().length > 0;"
-              " await wait(1500); const rail = document.querySelector('#dview .rail'); r.w0 = rc(rail).width; document.getElementById('internals').click(); await wait(100); r.w1 = rc(rail).width; r.sw = [document.documentElement.scrollWidth, innerWidth];"
+              " await wait(1500); const rail = document.querySelector('#dview .rail'); r.w = rc(rail).width; r.sw = [document.documentElement.scrollWidth, innerWidth]; r.gone = [!document.getElementById('internals'), rail.querySelectorAll('svg').length];"
+              " r.rows = q('.rail.tabs > button').filter(vis).map(b => b.textContent.trim()); const hl = el => getComputedStyle(el).backgroundColor !== 'rgba(0, 0, 0, 0)';"
+              " r.mapOn = [q('.rail [data-tab=map]')[0].getAttribute('aria-selected'), hl(q('.rail [data-tab=map]')[0]), hl(document.getElementById('gochat'))];"
               " r.secs = q('.rsec').filter(x => !x.hidden).map(x => x.dataset.sec + ':' + x.querySelector('.rshead').getAttribute('aria-expanded')).join(' ');"
               " r.owned = q('#railsub [data-tab]').every(b => b.closest('.rsec') && q('#railsub [data-tab=\"' + b.dataset.tab + '\"]').length === 1); r.tabsN = q('#railsub [data-tab]').length;"
-              " const head = id => q('.rsec[data-sec=\"' + id + '\"] .rshead')[0]; head('adaptation').click(); r.open1 = [head('adaptation').getAttribute('aria-expanded'), vis(q('#rsb-adaptation')[0]), localStorage.getItem('j2railopen')]; head('adaptation').click(); r.open2 = [head('adaptation').getAttribute('aria-expanded'), vis(q('#rsb-adaptation')[0]), localStorage.getItem('j2railopen')];"
-              " showTab('lessons'); r.reveal = [head('adaptation').getAttribute('aria-expanded'), vis(q('[data-tab=lessons]')[0])]; q('[data-tab=goal]')[0].click(); r.goal = [vis(document.getElementById('pane-goal')), q('[data-tab=goal]')[0].getAttribute('aria-selected')];"
-              " const ac = q('[data-railact]')[0]; if (ac){ ac.click(); await wait(100); r.act = [vis(document.getElementById('pane-map')), MAPPIN === ac.dataset.railact, q('.mappanel').length]; mapSelect(''); }"
-              " const fl = q('[data-railfn]')[0]; if (fl){ q('.rsec[data-sec=\"conflicts\"] .rshead')[0].getAttribute('aria-expanded'); fl.click(); r.fn = [document.querySelector('.tabs [aria-selected=true]').dataset.tab, fl.dataset.railfn]; q('[data-railgo]')[0].click(); r.go = vis(document.getElementById('pane-conflicts')); const pl = q('[data-railsec]')[0]; pl.click(); r.prio = head('conflicts').getAttribute('aria-expanded'); }"
-              " r.confOpen = head('conflicts') ? head('conflicts').getAttribute('aria-expanded') : null; r.priLink = q('[data-railsec]').length;"
-              " document.getElementById('internals').click(); await wait(100); r.w2 = rc(rail).width; document.body.setAttribute('data-r', JSON.stringify(r)); })()")
+              " const head = id => q('.rsec[data-sec=\"' + id + '\"] .rshead')[0]; head('adaptation').click(); r.open1 = [head('adaptation').getAttribute('aria-expanded'), vis(q('#rsb-adaptation')[0]), localStorage.getItem('j2railopen')]; head('adaptation').click(); r.open2 = [head('adaptation').getAttribute('aria-expanded'), localStorage.getItem('j2railopen')];"
+              " showTab('lessons'); r.reveal = [head('adaptation').getAttribute('aria-expanded'), vis(q('[data-tab=lessons]')[0])]; r.dim = q('#railsub [data-dim]').map(b => b.dataset.tab + '=' + b.dataset.dim + '|' + b.title);"
+              " const dm = q('#railsub [data-dim]')[0]; if (dm){ dm.click(); r.dimClick = [vis(document.getElementById('pane-' + dm.dataset.tab)), dm.getAttribute('aria-selected')]; }"
+              " q('[data-tab=priorities]')[0].click(); r.prio = [vis(document.getElementById('pane-priorities')), document.getElementById('pane-priorities').textContent.length > 20];"
+              " q('[data-tab=workflows]')[0].click(); await wait(200); const wl = q('#pane-workflows [data-wfmap]')[0]; r.wfn = q('#pane-workflows [data-wfmap]').length; if (wl){ wl.click(); await wait(500); r.wfmap = [vis(document.getElementById('pane-map')), TREE.wf === wl.dataset.wfmap, TREE.open === wl.dataset.stage, q('.treesvg.tfocused').length]; }"
+              " showTab('rundetails'); r.mode = document.getElementById('mode').textContent;"
+              " const ac = q('[data-railact]')[0]; if (ac){ ac.click(); await wait(100); r.act = [vis(document.getElementById('pane-map')), MAPPIN === ac.dataset.railact]; mapSelect(''); }"
+              " const fl = q('[data-railfn]')[0]; if (fl){ fl.click(); r.fn = document.querySelector('.tabs [aria-selected=true]').dataset.tab; q('[data-railgo]')[0].click(); r.go = vis(document.getElementById('pane-conflicts')); const pl = q('[data-railsec]')[0]; pl.click(); r.prioLink = head('conflicts').getAttribute('aria-expanded'); }"
+              " document.getElementById('gochat').click(); await wait(100); r.chatOn = [document.getElementById('gochat').getAttribute('aria-current'), hl(document.getElementById('gochat'))]; document.body.setAttribute('data-r', JSON.stringify(r)); })()")
         tmp = tempfile.mkdtemp(prefix="j2-leftbar-")
         open(os.path.join(tmp, "j2_ui.html"), "w", encoding="utf-8").write(ui.replace("</body>", "<script>setTimeout(() => { " + js + " }, 2000)</script></body>"))
         os.symlink(os.path.join(here, "vendor"), os.path.join(tmp, "vendor"))
 
         def probe(run):
-            keep_here, j2.RUNS_DIR_, j2_server.HERE = j2_server.HERE, j2.RUNS_DIR, tmp
+            keep_here, runs_, j2_server.HERE = j2_server.HERE, j2.RUNS_DIR, tmp
             j2.RUNS_DIR = repo
             srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
             threading.Thread(target=srv.serve_forever, daemon=True).start()
             try:
-                dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--window-size=1440,900", "--virtual-time-budget=20000", "--dump-dom",
+                dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--window-size=1440,900", "--virtual-time-budget=25000", "--dump-dom",
                                   f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={run}"], capture_output=True, text=True, timeout=120).stdout
             finally:
-                j2.RUNS_DIR, j2_server.HERE = j2.RUNS_DIR_, keep_here
+                j2.RUNS_DIR, j2_server.HERE = runs_, keep_here
                 srv.shutdown()
             hit_ = re.search(r'data-r="([^"]*)"', dom)
             assert hit_, ("the page did not finish its steps", dom[-300:])
             return json.loads(htmllib.unescape(hit_.group(1)))
         for run in dict.fromkeys([n for n in ("j2-20261026-174314", with_c) if n]):
             r = probe(run)
-            assert r["w0"] < 100 and 230 <= r["w1"] <= 250 and r["w2"] < 100, (run, "the rail widens to about 240px while the groups are open", r["w0"], r["w1"], r["w2"])
-            assert r["sw"][0] <= r["sw"][1] and r["owned"] and r["tabsN"] == len(tabs), (run, "no horizontal scroll; every tab is in exactly one section", r)
-            assert r["open1"][:2] == ["true", True] and '"adaptation":true' in r["open1"][2] and r["open2"][:2] == ["false", False] and '"adaptation":false' in r["open2"][2], (run, "a section opens and closes and remembers it", r["open1"], r["open2"])
-            assert r["reveal"] == ["true", True] and r["goal"] == [True, "true"], (run, "a tab opened from elsewhere opens its section; a tab click opens its pane", r["reveal"], r["goal"])
+            assert 230 <= r["w"] <= 250 and r["sw"][0] <= r["sw"][1] and r["gone"] == [True, 0] and r["rows"][:2] == ["Map", "Chat"], (run, "a plain 240px column with Map and Chat first; no Internals, no icons", r["w"], r["gone"], r["rows"])
+            assert r["mapOn"] == ["true", True, False] and r["chatOn"][0] == "page" and r["chatOn"][1], (run, "the active row is highlighted", r["mapOn"], r["chatOn"])
+            assert r["owned"] and r["tabsN"] == len(tabs), (run, "every tab is in exactly one section", r)
+            assert r["open1"][:2] == ["true", True] and '"adaptation":true' in r["open1"][2] and r["open2"][0] == "false" and '"adaptation":false' in r["open2"][1], (run, "a section opens and closes and remembers it", r["open1"], r["open2"])
+            assert r["reveal"] == ["true", True], (run, "a tab opened from elsewhere opens its section")
+            assert all("|" in x and x.split("=")[1].split("|")[0] == x.split("|")[1] for x in r["dim"]), (run, "a dimmed row has its reason as its tooltip", r["dim"])
+            if "dimClick" in r:
+                assert r["dimClick"] == [True, "true"], (run, "a dimmed tab is still clickable", r["dimClick"])
+            assert r["prio"] == [True, True], (run, "the Priorities view opens", r["prio"])
+            if r["wfn"]:
+                assert r["wfmap"] == [True, True, True, 1], (run, "a workflow's Map link opens its team and focuses it in the Tree", r["wfmap"])
+            assert "run " + run in r["mode"] and "credits" in r["mode"], (run, "Run details keeps the configuration: run id, model, budget", r["mode"])
             assert (("conflicts:true" in r["secs"]) if run == with_c else ("conflicts" not in r["secs"])) and "artifacts:true" in r["secs"], (run, "Conflicts (when the run has any) and Artifacts start open", r["secs"])
             if "act" in r:
-                assert r["act"][0] and r["act"][1] and r["act"][2] >= 1, (run, "an action opens the Map's panel", r["act"])
+                assert r["act"] == [True, True], (run, "an action opens the Map's panel", r["act"])
             if "fn" in r:
-                assert r["fn"][0] and r["go"] and r["prio"] == "true", (run, "a conflict's function link and the conflict open their tabs; Priority links to Conflicts", r["fn"], r["go"], r["prio"])
+                assert r["go"] and r["prioLink"] == "true", (run, "a conflict's links open its tabs; Priority links to Conflicts", r["fn"], r["go"], r["prioLink"])
             seen["browser"] += 1
-    print(f"left bar: {seen['runs']} runs: every one of the {len(tabs)} tabs in exactly one section, Other empty; {seen['conflicts']} conflicts and {seen['actions']} actions each listed once "
-          f"(action states: {', '.join(f'{k[6:]} {v}' for k, v in sorted(seen.items()) if k.startswith('state '))}); {seen['artifact rows']} artifact rows each with an Audit status; "
-          "a tab outside the table goes to its function's node, else Other"
-          + (f"; real page, {seen['browser']} runs: rail widens to 240px, sections open, close and remember, a tab opened from elsewhere opens its section, actions and conflict links work" if seen.get("browser") else "") + " ok")
+    print(f"left bar: {seen['runs']} runs: Map and Chat rows, no icon rail, no Internals; every one of the {len(tabs)} tabs in exactly one section, Other empty; Priorities ({seen['with ranking']} runs with ranking records, "
+          f"{seen['no ranking']} without) and the Workflows view ({seen['workflows linked']} workflows, each linked to its Map team ({seen['workflows not on the map']} the Map itself lists as not placed, shown as such), {seen['with plan']} runs with a plan record) render from the records; {seen['dimmed']} dimmed tabs, exactly the ones with no data; "
+          f"{seen['conflicts']} conflicts and {seen['actions']} actions each once; {seen['artifact rows']} artifact rows, {seen['artifact audit']} with an Audit status where a record names them, none \"not audited\""
+          + (f"; real page, {seen['browser']} runs: rows, highlight, sections, dimmed tab, Map link, Run details line ok" if seen.get("browser") else " ok"))
 
 
 def map_every_workflow():
@@ -8005,7 +8072,7 @@ def map_tab():
     ui = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "j2_ui.html"), encoding="utf-8").read()
     assert "@media (max-width:600px){.mapsvgwrap{display:none}.mapcards{display:block}}" in ui and ".mapcards{display:none}" in ui
     assert ".mapsvg{width:100%;height:clamp(440px,64vh,760px)" in ui and "st-running{border-style:double" in ui and "st-left_open{border-style:dashed" in ui
-    assert ui.index('data-tab="map"') < ui.index('id="railsub"') < ui.index('data-tab="docs"') < ui.index('data-tab="artifacts"') < ui.index('data-tab="style"'), "Map is the first rail entry; every other tab sits in the Internals folder"
+    assert ui.index('data-tab="map"') < ui.index('id="railsub"') < ui.index('data-tab="docs"') < ui.index('data-tab="artifacts"') < ui.index('data-tab="style"'), "Map is the first rail entry; every other tab sits in the sections below it"
     empty = render_node(snap, docs={"docs": {}, "map": {"nodes": [], "edges": []}})["map"]
     assert "Nothing to draw yet." in empty
     real = render_node(snap, docs={"docs": {}, "map": saved})["map"]
@@ -8140,10 +8207,10 @@ def map_tab():
     rail = ui[ui.index('<nav class="rail tabs"'):ui.index("</nav>", ui.index('<nav class="rail tabs"'))]
     top, inside = rail.split('id="railsub"')
     # the Board story is the first entry under Internals (shown only when the run has a board); the rest are the old order
-    old_tabs = ["story", "preview", "goal", "workflows", "conflicts", "timeline", "audit", "charter", "docs", "artifacts", "board", "style", "lessons", "playbooks", "report", "rundetails", "runsettings"]
-    assert re.findall(r'data-tab="(\w+)"', top) == ["map"] and 'id="gochat"' in top and 'id="internals"' in top and re.findall(r"<span>([^<]+)</span>", top) == ["Map", "Chat", "Internals"], "the rail has Map, Chat and one Internals folder"
+    old_tabs = ["story", "preview", "goal", "workflows", "conflicts", "priorities", "timeline", "audit", "charter", "docs", "artifacts", "board", "style", "lessons", "playbooks", "report", "rundetails", "runsettings"]
+    assert re.findall(r'data-tab="(\w+)"', top) == ["map"] and 'id="gochat"' in top and 'id="internals"' not in top and "Internals" not in rail and re.findall(r"<span>([^<]+)</span>", top) == ["Map", "Chat", "All views"], "the rail has Map and Chat rows (and, on a phone only, an All views button); no Internals folder"
     assert re.findall(r'data-tab="(\w+)"', inside) == old_tabs, "every other tab is under Internals, in the old order"
-    assert top.count("<svg") == 3 and "<svg" not in inside and ' hidden' in rail.split('id="railsub"')[1].split(">")[0], "one small icon each, none in the folder, folder starts collapsed"
+    assert "<svg" not in rail and ' hidden' not in rail.split('id="railsub"')[1].split(">")[0], "no icon rail; the sections are always shown"
     dvh = ui[ui.index('<div id="dview">'):ui.index('<dialog id="detail">')]
     panes = re.findall(r'<div class="pane[^"]*" id="pane-(\w+)"( hidden)?', dvh)
     assert [n for n, h in panes if not h] == ["map"] and {n for n, _ in panes} == set(old_tabs) | {"map"}, "the home shows only the Map pane; every old pane still exists"
@@ -8387,14 +8454,14 @@ def map_tab():
                 " msgs = () => document.getElementById('msgs').children.length + '/' + document.getElementById('smsgs').children.length + '|' + document.getElementById('needs').textContent.replace(/\\s+/g, ' ') + '|' + document.getElementById('runsel').value;"
                 "r.m0 = msgs(); r.home0 = rs(); document.getElementById('gochat').click(); r.railchat = chats; r.simple = rs(); r.railleft = rect('.rail.tabs').right <= rect('#sview').left + 1; r.m1 = msgs();"
                 "document.querySelector('.rail [data-tab=map]').click(); r.back = rs() + '|' + vis(); r.m2 = msgs(); document.getElementById('gochat').click(); r.m3 = msgs(); document.querySelector('.rail [data-tab=map]').click(); r.m4 = msgs(); r.same = (window.j2mark === 1) + '|' + (location.href === where);"
-                "document.getElementById('internals').click(); r.toggled = document.getElementById('railsub').hidden;"
+                "r.toggled = !document.getElementById('internals') && !document.querySelector('.rail svg');"
                 "showTab('runsettings'); document.getElementById('to-simple').click(); r.tosimple = rs(); document.querySelector('.rail [data-tab=map]').click();")
         finally:
             shutil.rmtree(ended, ignore_errors=True)
         assert a["home"] == "map" and a["count"] == "1" and "Needs you" in a["needs"] and "Add credits?" in a["needs"] and "Answer in Chat" in a["needs"], a
-        assert a["layout"] == [True, True, True] and a["rail"] == ["Map", "Chat", "Internals"] and a["sub"] is True and a["back0"] is True, a      # strip above the map, chat docked on the right, no Back link on the home
+        assert a["layout"] == [True, True, True] and a["rail"] == ["Map", "Chat", "All views"] and a["sub"] is False and a["back0"] is True, a      # strip above the map, chat docked on the right, no Back link on the home
         assert a["focus"] == "true|9999", a      # the strip's button focuses the question in the Chat
-        assert a["tabs"] == {t: f"{t}|false|false" for t in old_tabs}, a      # every old tab opens from Internals, with a Back to map link
+        assert a["tabs"] == {t: f"{t}|false|false" for t in old_tabs}, a      # every old tab opens from the sections, with a Back to map link
         assert a["back"] == "map|true", a
         sw = by["step:prd>hld"]["workflows"]
         n = a["nodes"]
@@ -8403,7 +8470,7 @@ def map_tab():
         assert n["fn:audit"]["pane"] == "audit" and n["step:prd>hld"]["pane"] == "workflows" and n["step:prd>hld"]["wf"] == ",".join(sw), n
         assert n["work:prd"]["pane"] == "artifacts" and n["work:prd"]["art"] == "prd.md" and n["work:website"]["pane"] == "preview" and n["work:charter"]["pane"] == "charter", n
         assert a["wfnote"] is True and a["wfcleared"] == 0, a      # "Show all" clears the step filter
-        assert b["none"].startswith("Needs you 0 Nothing needs you right now.") and b["none"].endswith("See report|0") and b["person"] == "needs" and b["chats"] == 1 and b["railchat"] == 1 and b["toggled"] is False, b
+        assert b["none"].startswith("Needs you 0 Nothing needs you right now.") and b["none"].endswith("See report|0") and b["person"] == "needs" and b["chats"] == 1 and b["railchat"] == 1 and b["toggled"] is True, b
         # the rail's Chat opens the Simple view with the rail kept and Chat lit; Map goes back to the unchanged home; same run, same messages, no reload
         assert b["home0"] == "false|false|true|" + b["home0"].split("|")[3] + "|false|600" and float(b["home0"].split("|")[3]) > 0, b
         assert b["simple"] == "true|true|true|0|page|500" and b["railleft"] is True, b
@@ -8427,7 +8494,7 @@ def map_tab():
               "r.n = texts.length; r.hits = []; for (const x of texts) { for (const l of lines) if (l.o.some(([px, py]) => px > x.b.x - 1 && px < x.b.x + x.b.width + 1 && py > x.b.y && py < x.b.y + x.b.height)) r.hits.push(x.t + ' on ' + l.id); }"
               "for (let i = 0; i < texts.length; i++) for (let j = i + 1; j < texts.length; j++) { const a = texts[i].b, b = texts[j].b; if (a.x < b.x + b.width - 1 && b.x < a.x + a.width - 1 && a.y < b.y + b.height - 1 && b.y < a.y + a.height - 1) r.hits.push(texts[i].t + ' over ' + texts[j].t); }")
         for rn in (name, send_name, *real_names):
-            d_ = home_probe(rn, base_js + fx)
+            d_ = home_probe(rn, base_js + fx, "1444,900")      # the card is as wide as it was with the 76px rail at 1280
             assert d_["n"] > 20 and d_["hits"] == [], (rn, d_["hits"])      # no label sits on a line or on another label
         # the Line view shows the wide or the tall drawing at 1440x900 with no horizontal scroll; under 900px the narrow drawing is shown instead
         fit_js = ("const p = document.getElementById('pane-map'), w = document.querySelector('.mapsvg:not(.mapvert)'), v = document.querySelector('.mapsvg.mapvert');"
