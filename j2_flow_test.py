@@ -7070,8 +7070,9 @@ def map_focus():
 
 def map_line():
     """Map, Line view, on every saved run, on the real page (--browser; skipped without Chrome): on open the drawing fits the card (content box inside it
-    with a margin and filling at least 85% of one side, or, when the labels would be under 11px, fitted by width with the height to pan), no horizontal
-    page scroll; + and - stay between 0.25x and 4x of the fit; Fit after a wheel zoom and a pan gives back the very same transform, twice; a click on a
+    with a margin and filling at least 85% of one side) but never with a label under 11px (then it is held at 11px and the side that overflows pans, from
+    the margin); no horizontal page scroll; the legend and Not recorded list sit in a collapsed overlay chip in the card corner that covers nothing at fit and
+    remembers its state; + and - stay between 0.25x and 4x of the fit; Fit after a wheel zoom and a pan gives back the very same transform, twice; a click on a
     dot (and Esc) keeps the transform; a narrower card refits (and picks the tall drawing when the wide one would have labels under 11px)."""
     import threading
     import html as htmllib
@@ -7087,7 +7088,7 @@ def map_line():
     # the first fit may precede the last font metrics by a fraction of a pixel, so Fit (after a short wait) is the reference transform
     js = ("(async () => { const names = %s, out = {}, wait = ms => new Promise(r => setTimeout(r, ms)), q = s => [...document.querySelectorAll(s)], tr = s => s.querySelector('.lview').getAttribute('transform'),"
           " cur = () => q('.mapsvgwrap[data-view=line] .mapsvg').find(x => x.clientWidth), click = el => el.dispatchEvent(new MouseEvent('click', {bubbles: true}));"
-          " const measure = s => { const g = s.querySelector('.lview'), c = s.getBoundingClientRect(), b = g.getBoundingClientRect(); return {fit: s.dataset.fit, font: +s.dataset.fontpx, rel: +s.dataset.rel, card: [c.left, c.top, c.right, c.bottom], box: [b.left, b.top, b.right, b.bottom], layout: s.closest('.mapsvgwrap').dataset.layout, sw: document.documentElement.scrollWidth, iw: innerWidth}; };"
+          " const rc = el => { const b = el.getBoundingClientRect(); return [b.left, b.top, b.right, b.bottom]; }, measure = s => { const g = s.querySelector('.lview'), c = s.getBoundingClientRect(), b = g.getBoundingClientRect(); return {fit: s.dataset.fit, font: +s.dataset.fontpx, rel: +s.dataset.rel, card: [c.left, c.top, c.right, c.bottom], box: [b.left, b.top, b.right, b.bottom], layout: s.closest('.mapsvgwrap').dataset.layout, sw: document.documentElement.scrollWidth, iw: innerWidth, ih: innerHeight, k: +s.dataset.k, chip: rc(q('.maplay')[0]), nodes: [...s.querySelectorAll('.mapnode')].map(rc)}; };"
           " for (const name of names){ try { const m = await (await fetch('/api/map?run=' + name, {cache: 'no-store'})).json(); for (const k of Object.keys(MAP)) delete MAP[k]; Object.assign(MAP, m); MAPPIN = ''; LINE.zoom = {}; paintMap();"
           "   const s = cur(), r = {nodes: (m.nodes || []).length, edges: (m.edges || []).length}; if (!s){ out[name] = {error: 'no line drawing'}; continue; }"
           "   r.fit0 = measure(s); await wait(100); click(q('[data-linefit]')[0]); r.t0 = tr(s);"
@@ -7097,6 +7098,7 @@ def map_line():
           "   click(q('[data-linefit]')[0]); r.fit2 = tr(s) === r.t0; s.__zoom_b.scaleBy(d3.select(s), 2); const t2 = tr(s), z2 = +s.dataset.rel;"
           "   const id = q('.mapsvg .mapnode').find(x => x.closest('.mapsvg') === s).dataset.id; mapSelect(id); r.keep = [tr(cur()) === t2, +cur().dataset.rel === z2, q('.mappanel').length]; document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})); r.esc = [tr(cur()) === t2, q('.mappanel').length]; click(q('[data-linefit]')[0]);"
           "   if (name === names[0] || m.nodes.length > 0){ const w = q('.mapsvgwrap[data-view=line]')[0], w0 = w.clientWidth; /* the resize observer calls the same lineMount(true) */ w.style.width = '560px'; lineMount(true); const s2 = cur(); r.narrow = measure(s2); w.style.width = ''; lineMount(true); r.back = [measure(cur()).layout, tr(cur()) === r.t0, w.clientWidth === w0, !!w.__ro]; }"
+          "   const d = q('.maplay')[0]; r.lay0 = [d.open, localStorage.getItem('j2maplay')]; d.open = true; await wait(60); r.lay1 = [MAPLAY, localStorage.getItem('j2maplay')]; paintMap(); r.lay2 = q('.maplay')[0].open; q('.maplay')[0].open = false; await wait(60); r.lay3 = [MAPLAY, localStorage.getItem('j2maplay'), q('.maplay')[0].open, q('.legnarrow').length];"
           "   out[name] = r; } catch (e) { out[name] = {error: String(e.stack || e)}; } }"
           " document.body.setAttribute('data-r', JSON.stringify(out)); })()") % json.dumps(names)
     tmp = tempfile.mkdtemp(prefix="j2-line-")
@@ -7116,25 +7118,32 @@ def map_line():
     got = json.loads(htmllib.unescape(hit_.group(1)))
     assert sorted(got) == names, "every run was measured"
     M_ = 12
-    inside = lambda f, all_: f["box"][0] >= f["card"][0] + M_ - 1.5 and f["box"][2] <= f["card"][2] - M_ + 1.5 and (not all_ or (f["box"][1] >= f["card"][1] + M_ - 1.5 and f["box"][3] <= f["card"][3] - M_ + 1.5))
-    fills = lambda f: max((f["box"][2] - f["box"][0]) / (f["card"][2] - f["card"][0]), (f["box"][3] - f["box"][1]) / (f["card"][3] - f["card"][1]))
-    kinds = {"all": 0, "width": 0}
+    kinds = {"all": 0, "pan": 0}
+    meets_ = lambda p, q_: p[0] < q_[2] and q_[0] < p[2] and p[1] < q_[3] and q_[1] < p[3]
     for name, r in got.items():
         assert "error" not in r, (name, r)
         for label, f in (("open", r["fit0"]), ("narrower card", r["narrow"])):
-            assert f["fit"] in ("all", "width"), (name, label, f["fit"])
-            assert inside(f, f["fit"] == "all"), (name, label, "the content box is inside the card with a margin", f["box"], f["card"])
-            assert f["fit"] == "width" or fills(f) >= 0.85, (name, label, "fills 85% of one side", fills(f))
-            assert f["fit"] == "all" or (f["box"][2] - f["box"][0]) / (f["card"][2] - f["card"][0]) >= 0.85, (name, label, "fitted by width: the width is filled")
-            assert f["font"] >= 11 or f["fit"] == "width", (name, label, "labels are 11px or more, or the height pans", f["font"])
+            c_, b_ = f["card"], f["box"]
+            assert f["fit"] in ("all", "pan"), (name, label, f["fit"])
+            assert f["font"] >= 11 and f["k"] > 0, (name, label, "labels are never under 11px at fit", f["font"])
+            for lo, hi, ax in ((0, 2, "horizontally"), (1, 3, "vertically")):      # an axis that fits: inside the card with a margin; one that does not: starts at the margin and pans
+                inside_ = b_[lo] >= c_[lo] + M_ - 1.5 and b_[hi] <= c_[hi] - M_ + 1.5
+                assert inside_ or abs(b_[lo] - (c_[lo] + M_)) <= 1.5, (name, label, "the content box is inside the card or starts at its margin and pans", ax, b_, c_)
+            if f["fit"] == "all":
+                assert b_[0] >= c_[0] + M_ - 1.5 and b_[2] <= c_[2] - M_ + 1.5 and b_[1] >= c_[1] + M_ - 1.5 and b_[3] <= c_[3] - M_ + 1.5, (name, label, "fitted: inside the card", b_, c_)
+                assert max((b_[2] - b_[0]) / (c_[2] - c_[0]), (b_[3] - b_[1]) / (c_[3] - c_[1])) >= 0.85, (name, label, "fills 85% of one side")
             assert f["sw"] <= f["iw"], (name, label, "no horizontal page scroll")
+            ch_ = f["chip"]
+            assert c_[0] <= ch_[0] and ch_[2] <= c_[2] and c_[1] <= ch_[1] and ch_[3] <= c_[3] and ch_[3] <= f["ih"], (name, label, "the legend chip is in the card and on screen", ch_, c_)
+            assert not any(meets_(ch_, n_) for n_ in f["nodes"]), (name, label, "the legend chip covers no node or label at fit", ch_)
         kinds[r["fit0"]["fit"]] += 1
+        assert r["lay0"][0] is False and r["lay0"][1] in (None, "0") and r["lay1"] == [True, "1"] and r["lay2"] is True and r["lay3"] == [False, "0", False, 1], (name, "the legend overlay starts closed, remembers its state, keeps it over a repaint", r["lay0"], r["lay1"], r["lay2"], r["lay3"])
         assert r["moved"] and r["fit1"] and r["fit2"], (name, "Fit after zoom and pan gives back the same transform, every time", r)
         assert r["wheel"] > 1 and r["plus"] == 1.5 and abs(r["max"] - 4) < 1e-6 and abs(r["min"] - 0.25) < 1e-6, (name, "wheel zooms in, + is 1.5x, the range is 0.25x to 4x", r["wheel"], r["plus"], r["max"], r["min"])
         assert r["keep"] == [True, True, 1] and r["esc"] == [True, 0], (name, "a click on a dot opens its panel and keeps the view; Esc closes it", r["keep"], r["esc"])
         assert r["back"] == [r["fit0"]["layout"], True, True, True], (name, "the card back to its width: the same drawing, the same fit; the card is watched for resizes", r["back"])
-    print(f"map line: {len(got)} runs on the real page: fitted inside the card with a margin ({kinds['all']} fill it, {kinds['width']} fit by width with the height to pan), labels 11px or more at fit "
-          "(or the pan fallback), no horizontal scroll; wheel, + and - (0.25x to 4x), Fit after zoom and pan gives back the same transform; a click on a dot keeps the view; a narrower card refits ok")
+    print(f"map line: {len(got)} runs on the real page: fitted inside the card with a margin ({kinds['all']} fill it, {kinds['pan']} are held at 11px labels and pan), no label under 11px at fit, "
+          "no horizontal page scroll, the legend chip in the card corner covering nothing; wheel, + and - (0.25x to 4x), Fit after zoom and pan gives back the same transform; a click on a dot keeps the view; a narrower card refits ok")
 
 
 def map_every_workflow():
