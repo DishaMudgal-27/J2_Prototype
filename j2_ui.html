@@ -173,6 +173,8 @@ body.simple #dview{display:flex;flex:0 0 auto}body.simple #dview .dcol{display:n
 .treesvg .tgone,.treesvg .twflinks{display:none}.treesvg .twflinks.on,.treesvg .twflinks.hov{display:inline}
 .treesvg .tedge.hot.fin,.treesvg .tlink.hot.fin{stroke:var(--flowin);opacity:.95}.treesvg .tedge.hot.fout,.treesvg .tlink.hot.fout{stroke:var(--flowout);opacity:.95}
 .treesvg .tflow{pointer-events:none}.treesvg .tflow.fin,.treesvg .tarr.fin{fill:var(--flowin)}.treesvg .tflow.fout,.treesvg .tarr.fout{fill:var(--flowout)}
+.treesvg .tfocuspill{filter:drop-shadow(0 0 6px rgba(200,205,215,.45))}.treesvg .tedges,.treesvg .tring .tspoke{transition:opacity .25s}.treesvg.tmoving .tedges,.treesvg.tmoving .tring .tspoke{opacity:0}
+.treesvg .fedge{opacity:.6;stroke-width:1.5}.treesvg .fedge.readby{stroke-dasharray:4 3}
 .treesvg .tspoke{fill:none;stroke:#8a8f98;stroke-width:1;opacity:.45}.treesvg .tlink{fill:none;stroke:#c9ccd1;stroke-width:1.6;opacity:.9}.treesvg .tlink.readby{stroke-dasharray:4 3}
 @media (prefers-reduced-motion: reduce){.treesvg .tnode,.treesvg .tedge{transition:none}}
 .mapsvg{background:var(--panel);border:1px solid var(--line);border-radius:12px}.mapsvg .rowlab{text-transform:uppercase}.mapsvg .mapnode:focus{outline:none}.mapsvg .mapnode:focus-visible circle:first-of-type{stroke-width:3}
@@ -1461,7 +1463,13 @@ const treeR = n => Math.round((8 + 3.2 * Math.sqrt(n || 0)) * 10) / 10;      // 
 const TRANK = ["fault", "waiting_on_you", "waiting", "done_unchecked", "running", "left_open", "not_made", "filed", "idle"];
 const tRank = s => { const i = TRANK.indexOf(s); return i < 0 ? 99 : i; };
 const tRd = v => Math.round(v * 10) / 10;
-const treeCurve = (a, b) => { const ym = tRd(a.y + (b.y - a.y) / 2); return `M${tRd(a.x)} ${tRd(a.y)} C${tRd(a.x)} ${ym} ${tRd(b.x)} ${ym} ${tRd(b.x)} ${tRd(b.y)}`; };      // smooth, vertical at both ends
+// the one line style of the Tree, its circle and a focused workflow: a cubic whose control points lie along the flow (ax "v": down, "h": across, "r": straight out from a centre;
+// none: the longer way), so a line leaves and enters level with the flow and never has a corner
+const flowCurve = (a, b, ax) => { if (ax === "r") return `M${tRd(a.x)} ${tRd(a.y)} C${tRd(a.x + (b.x - a.x) / 3)} ${tRd(a.y + (b.y - a.y) / 3)} ${tRd(a.x + (b.x - a.x) * 2 / 3)} ${tRd(a.y + (b.y - a.y) * 2 / 3)} ${tRd(b.x)} ${tRd(b.y)}`;      // "r": radial, straight along the flow
+  ax = ax || (Math.abs(b.x - a.x) > Math.abs(b.y - a.y) ? "h" : "v"); const k = tRd((ax === "h" ? b.x - a.x : b.y - a.y) / 2);
+  return ax === "h" ? `M${tRd(a.x)} ${tRd(a.y)} C${tRd(a.x + k)} ${tRd(a.y)} ${tRd(b.x - k)} ${tRd(b.y)} ${tRd(b.x)} ${tRd(b.y)}`
+    : `M${tRd(a.x)} ${tRd(a.y)} C${tRd(a.x)} ${tRd(a.y + k)} ${tRd(b.x)} ${tRd(b.y - k)} ${tRd(b.x)} ${tRd(b.y)}`; };
+const treeCurve = (a, b) => flowCurve(a, b, "v");
 const treeTrim = (t, n) => { t = String(t ?? ""); return t.length > n ? t.slice(0, n - 1) + "…" : t; };
 // one smooth line through a node, its waypoints and the end: a cubic per row, vertical at every point, so the joins are smooth
 const treePath = ps => "M" + tRd(ps[0].x) + " " + tRd(ps[0].y) + ps.slice(1).map((b, i) => treeCurve(ps[i], b).replace(/^M[^C]*/, " ")).join("");
@@ -1598,8 +1606,8 @@ function treeLayout(m){
   const W = Math.round(Math.max(720, maxX - minX + 2 * TPAD)), H = Math.round(TPAD + (R.length - 1) * TROW + 70);
   const at = Object.fromEntries(T.map(t => [t.id, t]));
   L.forEach(l => { const a = ix[l.from], b = ix[l.to];
-    l.d = !l.side ? treePath([l.from, ...l.via, l.to].map(id => ix[id])) : l.kind === "made" ? `M${tRd(a.x + a.r)} ${tRd(a.y)} L${tRd(b.x - b.r)} ${tRd(b.y)}`      // beside: straight across, and a short loop back over the top
-      : `M${tRd(a.x - a.r * .4)} ${tRd(a.y - a.r)} Q${tRd((a.x + b.x) / 2)} ${tRd(a.y - a.r - 36)} ${tRd(b.x + b.r * .4)} ${tRd(b.y - b.r)}`; });
+    l.d = !l.side ? treePath([l.from, ...l.via, l.to].map(id => ix[id])) : l.kind === "made" ? flowCurve({x: a.x + a.r, y: a.y}, {x: b.x - b.r, y: b.y}, "h")      // beside: across, and a short loop back over the top
+      : `M${tRd(a.x - a.r * .4)} ${tRd(a.y - a.r)} C${tRd(a.x - a.r * .4)} ${tRd(a.y - a.r - 48)} ${tRd(b.x + b.r * .4)} ${tRd(b.y - b.r - 48)} ${tRd(b.x + b.r * .4)} ${tRd(b.y - b.r)}`; });
   const pairs = [], pts = LL.map(l => treeSamples(l.d));
   for (let i = 0; i < LL.length; i++) for (let j = i + 1; j < LL.length; j++) if (!share(LL[i], LL[j]) && treeCross(pts[i], pts[j])) pairs.push([[LL[i].from, LL[i].to], [LL[j].from, LL[j].to]]);
   return {nodes: T, links: L, at, W, H, crossings: pairs.length, pairs, stages};
@@ -1615,34 +1623,97 @@ function treeRing(m, g, W, H){
     const lw = Math.max(`${id} · ${treeTrim(w.name, 24)}`.length * 7.4, word.length * 6.3);      // its label beside the dot, outward (see ringHtml)
     return {id, w, a, x, y, st, word, lbox: right ? [x + 13, y - 13, x + 13 + lw, y + 16] : [x - 13 - lw, y - 13, x - 13, y + 16]}; })};
 }
+// A focused workflow, in place (click one in a team's circle). What it read from other teams: labelled squares in a row above it; what it made
+// (an action is an envelope): a row below it; the team's workflows it reads from: a column on its left; the ones that read it: a column on its
+// right. Every line is one flowCurve from a side of its box to a side of the other; the columns stand outside the rows, and the rows stand
+// clear of the columns' ends, so no line runs through a box or a label. Every other node goes out to the edge of the canvas, in the order of
+// its angle round the focus, faded and without words. A pure function of the map (and where the circle's centre sat), so a run draws the same.
+const FOC = {pillH: 46, stack: 38, gap: 24, pad: 60, minW: 720, minH: 480};
+const wfNum = id => +String(id).replace(/\D/g, "") || 0;
+function treeFocusOf(m, L, wid, c){
+  const wfs = m.workflows || [], w = wfs.find(x => x.id === wid); if (!w) return null;
+  const g = Object.values(L.stages).find(s => s.workflows.includes(wid)) || null, mine = new Set(g ? g.workflows : []), named = Object.fromEntries(wfs.map(x => [x.id, x]));
+  const byNum = (a, b) => wfNum(a) - wfNum(b), reads = w.reads || [], by = mapById(m);
+  c = c || {x: L.W / 2, y: L.H / 2};
+  const pin = reads.filter(r => mine.has(r) && named[r]).sort(byNum), pout = wfs.filter(x => mine.has(x.id) && x.id !== wid && (x.reads || []).includes(wid) && !pin.includes(x.id)).map(x => x.id).sort(byNum);
+  const virt = r => { const nm = named[r] ? named[r].name : r; return {id: "wf:" + r, kind: "deck", label: treeTrim(r + " · " + nm, 28), sub: "not on the map", status: "not_made", r: 11, w: 190, n: {id: "wf:" + r, kind: "work", label: r + " · " + nm, status: "not_made", detail: "not on the map", tag: ""}}; };
+  const ins = [];      // what it read from other teams, by the deliverable that holds it (a read of a workflow with no box is shown as such)
+  reads.filter(r => !mine.has(r) || !named[r]).forEach(r => { const b = named[r] && named[r].box, t = b && L.at[b] ? L.at[b] : virt(r); let a = ins.find(x => x.id === t.id); if (!a) ins.push(a = {id: t.id, t, by: []}); a.by.push(r); });
+  ins.sort((a, b) => byNum(a.by[0], b.by[0]));
+  const outs = [...new Set([...(w.out || []), ...(w.box ? [w.box] : [])])].filter(id => L.at[id] && !ins.some(x => x.id === id)).map(id => ({id, t: L.at[id]}));
+  const st = treeWfStatus(m, w), box = by[w.box], word = (box && box.tag === "Send" && sendWord(box)) || MAPS[st] || w.status || "";
+  const l1 = `${wid} · ${treeTrim(w.name, 30)}`, l2 = `${word} · ${g ? g.label : "not in a team"}`, pw = Math.round(Math.max(180, l1.length * 7.4, l2.length * 6.3) + 28), ph = FOC.pillH;
+  const peerOf = (id, side) => { const x = named[id], s = treeWfStatus(m, x), b = by[x.box], wd = (b && b.tag === "Send" && sendWord(b)) || MAPS[s] || x.status || "";
+    const lab = `${id} · ${treeTrim(x.name, 20)}`; return {id, side, st: s, label: lab, sub: wd, lw: Math.round(Math.max(lab.length * 7.4, wd.length * 6.3))}; };
+  const left = pin.map(id => peerOf(id, -1)), right = pout.map(id => peerOf(id, 1));
+  const cell = (list, up) => list.map(a => { const r = Math.min(15, a.t.r), cw = Math.max(a.t.w, 2 * r + 8); return Object.assign(a, {r, cw, up}); });
+  const rowIn = cell(ins, true), rowOut = cell(outs, false), rowW = row => row.reduce((s, a) => s + a.cw, 0) + Math.max(0, row.length - 1) * FOC.gap;
+  const half = Math.max(pw / 2 + 100, rowW(rowIn) / 2, rowW(rowOut) / 2), colX = half + 40 + 7;
+  const hs = (Math.max(left.length, right.length, 1) - 1) * FOC.stack + 30, rmax = Math.max(0, ...rowIn.map(a => a.r), ...rowOut.map(a => a.r)), DY = Math.max(150, hs / 2 + rmax + 60);
+  const N = [], E = [], X = 0, Y = 0, K = id => id, spread = (i, n, span) => (i - (n - 1) / 2) * (n > 1 ? Math.min(span / (n - 1), 26) : 0);
+  const pill = {x: X, y: Y, w: pw, h: ph, box: [X - pw / 2, Y - ph / 2, X + pw / 2, Y + ph / 2]};
+  const place = (row, y) => { let x = X - rowW(row) / 2; row.forEach(a => { a.x = x + a.cw / 2; a.y = y; x += a.cw + FOC.gap; }); };
+  place(rowIn, Y - DY); place(rowOut, Y + DY);
+  const art = (a, role) => { const t = a.t, r = a.r, dot = [a.x - r, a.y - r, a.x + r, a.y + r], lab = a.up ? [a.x - a.cw / 2, a.y - r - 33, a.x + a.cw / 2, a.y - r - 4] : [a.x - a.cw / 2, a.y + r + 4, a.x + a.cw / 2, a.y + r + 33];
+    N.push({id: a.id, role, x: a.x, y: a.y, r, label: t.label, sub: t.sub, status: t.status, tag: (t.n || {}).tag || "", dot, lbox: lab, box: [Math.min(dot[0], lab[0]), Math.min(dot[1], lab[1]), Math.max(dot[2], lab[2]), Math.max(dot[3], lab[3])], t}); };
+  rowIn.forEach(a => art(a, "in")); rowOut.forEach(a => art(a, "out"));
+  const peer = (p, i, n) => { const x = X + p.side * colX, y = Y + (i - (n - 1) / 2) * FOC.stack, out = p.side < 0 ? [x - 13 - p.lw, y - 13, x - 13, y + 16] : [x + 13, y - 13, x + 13 + p.lw, y + 16];
+    N.push({id: p.id, role: p.side < 0 ? "peer-in" : "peer-out", x, y, r: 7, label: p.label, sub: p.sub, status: p.st, dot: [x - 7, y - 7, x + 7, y + 7], lbox: out, box: [Math.min(x - 7, out[0]), y - 13, Math.max(x + 7, out[2]), y + 16], side: p.side}); };
+  left.forEach((p, i) => peer(p, i, left.length)); right.forEach((p, i) => peer(p, i, right.length));
+  N.push({id: wid, role: "focus", x: X, y: Y, r: 0, label: l1, sub: l2, status: st, dot: pill.box, lbox: pill.box, box: pill.box});
+  const nodeOf = Object.fromEntries(N.map(n => [n.id, n]));
+  rowIn.forEach((a, i) => { const px = X + spread(i, rowIn.length, pw - 40); E.push({from: a.id, to: wid, kind: "reads", d: flowCurve({x: a.x, y: a.y + a.r}, {x: px, y: pill.box[1]}, "v"), tip: `${wid} reads ${a.t.label} (${a.by.join(", ")})`}); });
+  rowOut.forEach((a, i) => { const px = X + spread(i, rowOut.length, pw - 40); E.push({from: wid, to: a.id, kind: "made", d: flowCurve({x: px, y: pill.box[3]}, {x: a.x, y: a.y - a.r}, "v"), tip: `${wid} made ${a.t.label}`}); });
+  left.forEach((p, i) => { const n = nodeOf[p.id]; E.push({from: p.id, to: wid, kind: "reads", d: flowCurve({x: n.x + 7, y: n.y}, {x: pill.box[0], y: Y + spread(i, left.length, ph - 12) / 2}, "h"), tip: `${wid} reads ${p.id}`}); });
+  right.forEach((p, i) => { const n = nodeOf[p.id]; E.push({from: wid, to: p.id, kind: "readby", d: flowCurve({x: pill.box[2], y: Y + spread(i, right.length, ph - 12) / 2}, {x: n.x - 7, y: n.y}, "h"), tip: `${p.id} reads ${wid}`}); });
+  // the canvas: the content and 90 round it (at least 720 x 480), then everything else on the border, evenly, in the order of its angle round the focus
+  const shown = new Set(N.map(n => n.id)), prevAt = id => id === (g && g.id) ? c : L.at[id] ? L.at[id] : null;
+  const items = g ? treeRing(m, g, L.W, L.H).items : [], others = [...L.nodes.filter(t => !shown.has(t.id)).map(t => ({id: t.id, r: t.r, p: prevAt(t.id) || c, ring: false})),
+    ...(g ? g.workflows : []).filter(id => !shown.has(id)).map(id => { const it = items.find(x => x.id === id); return {id, r: 7, p: it ? {x: c.x + it.x, y: c.y + it.y} : c, ring: true}; })];
+  let x0 = Math.min(...N.map(n => n.box[0])), x1 = Math.max(...N.map(n => n.box[2])), y0 = Math.min(...N.map(n => n.box[1])), y1 = Math.max(...N.map(n => n.box[3]));
+  let W = Math.max(FOC.minW, Math.round(x1 - x0 + 2 * FOC.pad)), H = Math.max(FOC.minH, Math.round(y1 - y0 + 2 * FOC.pad));
+  const mg = 30; while (2 * (W + H - 4 * mg) / Math.max(1, others.length) < 72){ W += 40; H += 30; }
+  const dx = Math.round((W - (x1 - x0)) / 2 - x0), dy = Math.round((H - (y1 - y0)) / 2 - y0), mv = (n, a, b) => { n[a] += dx; n[b] += dy; };
+  N.forEach(n => { mv(n, "x", "y"); ["dot", "lbox", "box"].forEach(k => { n[k] = n[k].map((v, i) => tRd(v + (i % 2 ? dy : dx))); }); n.x = tRd(n.x); n.y = tRd(n.y); });
+  E.forEach(e => { e.d = e.d.replace(/(-?[\d.]+) (-?[\d.]+)/g, (_, a, b) => `${tRd(+a + dx)} ${tRd(+b + dy)}`); });
+  pill.x += dx; pill.y += dy; pill.box = pill.box.map((v, i) => tRd(v + (i % 2 ? dy : dx)));
+  const cx = pill.x, cy = pill.y, P = 2 * (W - 2 * mg) + 2 * (H - 2 * mg), at = s => { s = ((s % P) + P) % P;      // a point on the border, from the left-middle going up and clockwise
+    const w_ = W - 2 * mg, h_ = H - 2 * mg, seg = [[mg, H / 2, mg, mg], [mg, mg, mg + w_, mg], [mg + w_, mg, mg + w_, mg + h_], [mg + w_, mg + h_, mg, mg + h_], [mg, mg + h_, mg, H / 2]];
+    for (const q of seg){ const len = Math.hypot(q[2] - q[0], q[3] - q[1]); if (s <= len) return {x: q[0] + (q[2] - q[0]) * s / len, y: q[1] + (q[3] - q[1]) * s / len}; s -= len; } return {x: mg, y: H / 2}; };
+  others.forEach(o => { o.a = Math.atan2(o.p.y - c.y, o.p.x - c.x); }); others.sort((a, b) => a.a - b.a || (a.id < b.id ? -1 : 1));
+  const pos = {}; N.forEach(n => { pos[n.id] = {x: n.x, y: n.y}; });
+  others.forEach((o, i) => { const q = at((i + 0.5) / others.length * P); o.x = tRd(q.x); o.y = tRd(q.y); pos[o.id] = {x: o.x, y: o.y}; });
+  return {wid, stage: g && g.id, W, H, pill, nodes: N, edges: E, others, pos, word, st, l1, l2, expect: {peersIn: pin, peersOut: pout, ins: ins.map(a => a.id), outs: outs.map(a => a.id)}};
+}
+const treeFocusAll = m => { const L = mapTree(m); return Object.fromEntries((m.workflows || []).map(w => [w.id, treeFocusOf(m, L, w.id, null)])); };
 function treeHtml(m, other){      // other: the panel of a deliverable picked on the tree (only one panel shows at a time)
   const L = mapTree(m), by = mapById(m), open = L.at[TREE.open] && L.at[TREE.open].kind === "stage" ? TREE.open : "";
-  const c = open ? (TREE.c || {x: L.W / 2, y: L.H / 2}) : null, P = id => id === open ? c : L.at[id];
+  const c = open ? (TREE.c || {x: L.W / 2, y: L.H / 2}) : null, P = id => foc && foc.pos[id] ? foc.pos[id] : id === open ? c : L.at[id];
   const near = new Set(open ? [open, ...L.links.filter(l => l.from === open || l.to === open).flatMap(l => [l.from, l.to])] : []);
-  const dim = id => open && !near.has(id) ? " tdim" : "", hide = id => open && id !== open ? " tdim thide" : "";      // open: only the stage and its circle keep their words
   const ring = open ? treeRing(m, L.stages[open], L.W, L.H) : null, pick = ring && ring.items.find(x => x.id === TREE.wf);
+  const foc = pick ? treeFocusOf(m, L, pick.id, c) : null, fart = foc ? Object.fromEntries(foc.nodes.filter(n => n.role === "in" || n.role === "out").map(n => [n.id, n])) : {};
+  const hide = id => foc ? (fart[id] ? "" : " tdim thide") : open && id !== open ? " tdim thide" : "";      // open: only the stage and its circle keep their words; focused: only what the workflow read and made
   MAPTREE = {nodes: L.nodes.map(t => ({id: t.id, kind: t.kind, row: t.row, x: t.x, y: t.y, r: t.r, label: t.label, sub: t.sub, box: t.box, workflows: t.kind === "stage" ? t.n.workflows : t.n.workflows || []})),
     links: L.links.map(l => ({from: l.from, to: l.to, kind: l.kind, side: !!l.side, tip: l.tip})), crossings: L.crossings, pairs: L.pairs, W: L.W, H: L.H, open, c,
-    ring: ring ? ring.items.map(x => ({id: x.id, x: tRd(c.x + x.x), y: tRd(c.y + x.y), status: x.st, box: [c.x + x.lbox[0], c.y + x.lbox[1], c.x + x.lbox[2], c.y + x.lbox[3]].map(tRd)})) : [], R: ring ? ring.R : 0, rx: ring ? ring.rx : 0, ry: ring ? ring.ry : 0};
+    ring: ring ? ring.items.map(x => ({id: x.id, x: tRd(c.x + x.x), y: tRd(c.y + x.y), status: x.st, box: [c.x + x.lbox[0], c.y + x.lbox[1], c.x + x.lbox[2], c.y + x.lbox[3]].map(tRd)})) : [], R: ring ? ring.R : 0, rx: ring ? ring.rx : 0, ry: ring ? ring.ry : 0, focus: foc};
   const look = st => mapLook(st);
-  const edge = l => `<path class="tedge ${l.kind}${open && (l.kind === "back" || l.from !== open && l.to !== open) ? " tgone" : ""}" data-from="${esc(l.from)}" data-to="${esc(l.to)}" d="${open && (l.from === open || l.to === open) ? treeCurve(P(l.from), P(l.to)) : l.d}"><title>${mapWords(l.kind === "back" ? l.tip : l.kind === "reads" ? `${(by[l.to] || {}).label} reads ${(by[l.from] || {}).label}` : l.kind === "made" ? `${L.at[l.from].label} made ${(by[l.to] || {}).label}` : `the Charter to ${L.at[l.to].label}`)}</title></path>`;
-  const dot = t => { const k = look(t.status), p = P(t.id), aria = `${t.label}: ${t.sub}${t.kind === "stage" ? ", open its workflows" : ", details"}`;
+  const edge = l => `<path class="tedge ${l.kind}${foc || open && (l.kind === "back" || l.from !== open && l.to !== open) ? " tgone" : ""}" data-from="${esc(l.from)}" data-to="${esc(l.to)}" d="${open && (l.from === open || l.to === open) ? treeCurve(P(l.from), P(l.to)) : l.d}"><title>${mapWords(l.kind === "back" ? l.tip : l.kind === "reads" ? `${(by[l.to] || {}).label} reads ${(by[l.from] || {}).label}` : l.kind === "made" ? `${L.at[l.from].label} made ${(by[l.to] || {}).label}` : `the Charter to ${L.at[l.to].label}`)}</title></path>`;
+  const dot = t => { const k = look(t.status), p = P(t.id), up = fart[t.id] && fart[t.id].role === "in", aria = `${t.label}: ${t.sub}${t.kind === "stage" ? ", open its workflows" : ", details"}`;
     const glyph = t.kind === "stage" ? [0, 72, 144, 216, 288].map(a => { const q = a * Math.PI / 180 - Math.PI / 2; return `<circle cx="${tRd(t.r * .5 * Math.cos(q))}" cy="${tRd(t.r * .5 * Math.sin(q))}" r="${tRd(Math.max(1.6, t.r * .15))}" class="tglyph"/>`; }).join("")
       : t.kind === "charter" ? `<circle r="${tRd(Math.max(2.6, t.r * .26))}" class="tglyph"/>` : t.n.tag === "Send" ? `<path class="tglyphl" d="M${tRd(-t.r * 1.2)} ${tRd(-t.r * .75)} L0 ${tRd(t.r * .1)} L${tRd(t.r * 1.2)} ${tRd(-t.r * .75)}"/>` : "";
     const fill = t.status === "filed" ? "color-mix(in srgb, var(--ok) 22%, #1d2026)" : "#1d2026", ln = `stroke="${k.stroke}" stroke-width="${Math.max(1.6, k.width)}"${k.dash}`;
     const body = t.kind === "stage" || t.kind === "charter" ? `<circle class="tdot" r="${t.r}" fill="${fill}" ${ln}/>`      // a team or the Charter: a circle
       : t.n.tag === "Send" ? `<rect class="tdot" x="${tRd(-t.r * 1.2)}" y="${tRd(-t.r * .8)}" width="${tRd(t.r * 2.4)}" height="${tRd(t.r * 1.6)}" rx="3" fill="${fill}" ${ln}/>`      // an action: an envelope
       : `<rect class="tdot" x="${-t.r}" y="${-t.r}" width="${2 * t.r}" height="${2 * t.r}" rx="${tRd(t.r * .3)}" fill="${fill}" ${ln}/>`;      // an artifact: a rounded square
-    return `<g class="tnode t${t.kind}${hide(t.id)}${t.id === open ? " open" : ""}${t.id === MAPPIN ? " sel" : ""}" data-id="${esc(t.id)}" data-kind="${t.kind}" data-x="${t.x}" data-y="${t.y}" transform="translate(${tRd(p.x)},${tRd(p.y)})" tabindex="0" role="button" aria-label="${mapWords(aria)}"${t.kind === "stage" ? ` aria-expanded="${t.id === open}"` : ""}>`
+    return `<g class="tnode t${t.kind}${hide(t.id)}${t.id === open ? " open" : ""}${t.id === MAPPIN ? " sel" : ""}${fart[t.id] ? " tfit" : ""}" data-id="${esc(t.id)}" data-k="${esc(t.id)}" data-ax="${tRd(p.x)}" data-ay="${tRd(p.y)}" data-kind="${t.kind}" data-x="${t.x}" data-y="${t.y}" transform="translate(${tRd(p.x)},${tRd(p.y)})" tabindex="0" role="button" aria-label="${mapWords(aria)}"${t.kind === "stage" ? ` aria-expanded="${t.id === open}"` : ""}>`
       + `<title>${mapWords(t.kind === "stage" ? `${t.label} · ${t.sub} · ${MAPW[t.status] || ""}` : mapTip(m, t.n))}</title>`
       + `${body}${glyph}`
       + mapBadge(t.status, tRd(t.r * .8), tRd(-t.r * .8))
-      + `<text class="tlab" y="${tRd(t.r + 17)}" text-anchor="middle">${mapWords(t.label)}</text><text class="tsub" y="${tRd(t.r + 31)}" text-anchor="middle">${mapWords(t.sub)}</text>`
-      + (t.id === open ? ringHtml(t) : "") + `</g>`; };
-  const ringHtml = t => `<g class="tring">` + ring.items.map(x => { const q = 0.14, cx = tRd(x.x / 2 - x.y * q), cy = tRd(x.y / 2 + x.x * q);
-      return `<path class="tspoke" data-wf="${esc(x.id)}" d="M0 0 Q${cx} ${cy} ${x.x} ${x.y}"/>`; }).join("")
+      + `<text class="tlab" y="${tRd(up ? -(t.r + 20) : t.r + 17)}" text-anchor="middle">${mapWords(t.label)}</text><text class="tsub" y="${tRd(up ? -(t.r + 6) : t.r + 31)}" text-anchor="middle">${mapWords(t.sub)}</text>`
+      + `</g>`; };
+  const ringHtml = () => `<g class="tring" data-ox="${c.x}" data-oy="${c.y}" transform="translate(${c.x},${c.y})">` + ring.items.map(x => `<path class="tspoke" data-from="${esc(open)}" data-to="${esc(x.id)}" d="${flowCurve({x: 0, y: 0}, {x: x.x, y: x.y}, "r")}"/>`).join("")
     + ring.items.map(x => { const k = look(x.st), right = Math.cos(x.a) >= -1e-9, anc = right ? "start" : "end", lx = right ? 13 : -13, ly = -1;      // beside the dot, outward
-      return `<g class="tnode twf${TREE.wf === x.id ? " sel" : ""}" data-wf="${esc(x.id)}" transform="translate(${x.x},${x.y})" tabindex="0" role="button" aria-label="${mapWords(`${x.id} ${x.w.name}: ${x.word}, details`)}">`
+      return `<g class="tnode twf${TREE.wf === x.id ? " sel" : ""}" data-wf="${esc(x.id)}" data-k="${esc(x.id)}" data-ax="${tRd(c.x + x.x)}" data-ay="${tRd(c.y + x.y)}" transform="translate(${x.x},${x.y})" tabindex="0" role="button" aria-label="${mapWords(`${x.id} ${x.w.name}: ${x.word}, details`)}">`
         + `<circle class="tdot" r="7" fill="#1d2026" stroke="${k.stroke}" stroke-width="${Math.max(1.6, k.width)}"${k.dash}/>`
         + [0, 72, 144, 216, 288].map(a => { const q = a * Math.PI / 180 - Math.PI / 2; return `<circle cx="${tRd(3.1 * Math.cos(q))}" cy="${tRd(3.1 * Math.sin(q))}" r="1" class="tglyph"/>`; }).join("")
         + `<text class="tlab" x="${lx}" y="${ly}" text-anchor="${anc}">${mapWords(x.id)} · ${mapWords(treeTrim(x.w.name, 24))}</text><text class="tsub" x="${lx}" y="${ly + 13}" text-anchor="${anc}">${mapWords(x.word)}</text></g>`; }).join("") + `</g>`;
@@ -1652,14 +1723,27 @@ function treeHtml(m, other){      // other: the panel of a deliverable picked on
   if (ring){ const gpos = id => { const r = ring.items.find(x => x.id === id); if (r) return {x: c.x + r.x, y: c.y + r.y};
       const w = (m.workflows || []).find(x => x.id === id), b = w && w.box && L.at[w.box]; return b ? P(b.id) : null; };
     links = ring.items.map(it => { const me = {x: c.x + it.x, y: c.y + it.y}, readBy = (m.workflows || []).filter(w => (w.reads || []).includes(it.id)).map(w => w.id);
-      const one = (id, kind) => { const q = gpos(id); if (!q) return ""; const a = kind === "reads" ? q : me, b = kind === "reads" ? me : q, mx = (a.x + b.x) / 2 + (b.y - a.y) * .18, my = (a.y + b.y) / 2 - (b.x - a.x) * .18;
-        return `<path class="tlink ${kind}" data-from="${esc(kind === "reads" ? id : it.id)}" data-to="${esc(kind === "reads" ? it.id : id)}" d="M${tRd(a.x)} ${tRd(a.y)} Q${tRd(mx)} ${tRd(my)} ${tRd(b.x)} ${tRd(b.y)}"><title>${mapWords(kind === "reads" ? `${it.id} reads ${id}` : `${id} reads ${it.id}`)}</title></path>`; };
-      return `<g class="twflinks${pick === it ? " on" : ""}" data-wf="${esc(it.id)}">` + (it.w.reads || []).map(id => one(id, "reads")).join("") + readBy.map(id => one(id, "readby")).join("") + `</g>`; }).join(""); }
-  const z = TREE.zoom, order = [...L.nodes.filter(t => t.id !== open), ...L.nodes.filter(t => t.id === open)];
-  const svg = `<svg class="treesvg" viewBox="0 0 ${L.W} ${L.H}" data-w="${L.W}" data-h="${L.H}" data-crossings="${L.crossings}" role="group" aria-label="Map, tree view: the Charter, the teams and what each made">`
-    + `<g class="tview"${z ? ` transform="translate(${tRd(z.x)},${tRd(z.y)}) scale(${z.k})"` : ""}><g class="tedges">${L.links.map(edge).join("")}</g><g class="tlinks">${links}</g><g class="tnodes">${order.map(dot).join("")}</g><g class="tflows"></g></g>`
+      const one = (id, kind) => { const q = gpos(id); if (!q) return ""; const a = kind === "reads" ? q : me, b = kind === "reads" ? me : q;
+        return `<path class="tlink ${kind}" data-from="${esc(kind === "reads" ? id : it.id)}" data-to="${esc(kind === "reads" ? it.id : id)}" d="${flowCurve(a, b)}"><title>${mapWords(kind === "reads" ? `${it.id} reads ${id}` : `${id} reads ${it.id}`)}</title></path>`; };
+      return `<g class="twflinks" data-wf="${esc(it.id)}">` + (it.w.reads || []).map(id => one(id, "reads")).join("") + readBy.map(id => one(id, "readby")).join("") + `</g>`; }).join(""); }
+  // a focused workflow: its own group of labelled things (the workflow, the ones it reads and is read by) and the other circle workflows as faded dots
+  const fwf = (id, x, y, body, cls, aria) => `<g class="tnode twf${TREE.wf === id ? " sel" : ""}${cls}" data-wf="${esc(id)}" data-k="${esc(id)}" data-ax="${x}" data-ay="${y}" transform="translate(${x},${y})" tabindex="0" role="button" aria-label="${mapWords(aria)}">${body}</g>`;
+  const focusHtml = () => `<g class="tring tfocus" data-ox="0" data-oy="0">` + foc.nodes.filter(n => n.role === "focus" || n.role.startsWith("peer")).map(n => {
+      const it = ring.items.find(x => x.id === n.id), k = look(n.status);
+      if (n.role === "focus") return fwf(n.id, n.x, n.y, `<rect class="tdot tfocuspill" x="${-foc.pill.w / 2}" y="${-foc.pill.h / 2}" width="${foc.pill.w}" height="${foc.pill.h}" rx="12" fill="#1d2026" stroke="${k.stroke}" stroke-width="${Math.max(2, k.width)}"${k.dash}/>`
+        + `<text class="tlab" y="-3" text-anchor="middle">${mapWords(n.label)}</text><text class="tsub" y="13" text-anchor="middle">${mapWords(n.sub)}</text>`, " tfit tfocuspillg", `${n.id} ${it.w.name}: ${n.sub}, focused, press Enter to return`);
+      const lx = n.side < 0 ? -13 : 13, anc = n.side < 0 ? "end" : "start";
+      return fwf(n.id, n.x, n.y, `<circle class="tdot" r="7" fill="#1d2026" stroke="${k.stroke}" stroke-width="${Math.max(1.6, k.width)}"${k.dash}/>`
+        + [0, 72, 144, 216, 288].map(a => { const q = a * Math.PI / 180 - Math.PI / 2; return `<circle cx="${tRd(3.1 * Math.cos(q))}" cy="${tRd(3.1 * Math.sin(q))}" r="1" class="tglyph"/>`; }).join("")
+        + `<text class="tlab" x="${lx}" y="-1" text-anchor="${anc}">${mapWords(n.label)}</text><text class="tsub" x="${lx}" y="12" text-anchor="${anc}">${mapWords(n.sub)}</text>`, " tfit", `${n.id} ${it.w.name}: ${n.sub}, ${n.role === "peer-in" ? "read by " + foc.wid : "reads " + foc.wid}, focus it`);
+    }).join("") + foc.others.filter(o => o.ring).map(o => { const it = ring.items.find(x => x.id === o.id), k = look(it.st);
+      return fwf(o.id, o.x, o.y, `<circle class="tdot" r="7" fill="#1d2026" stroke="${k.stroke}" stroke-width="${Math.max(1.6, k.width)}"${k.dash}/>`, " tdim thide", `${o.id} ${it.w.name}: ${it.word}, focus it`); }).join("") + `</g>`;
+  const focusEdges = foc ? foc.edges.map(e => `<path class="tedge fedge ${e.kind}" data-from="${esc(e.from)}" data-to="${esc(e.to)}" d="${e.d}"><title>${mapWords(e.tip)}</title></path>`).join("") : "";
+  const z = TREE.zoom, order = [...L.nodes.filter(t => t.id !== open), ...L.nodes.filter(t => t.id === open)], VW = foc ? foc.W : L.W, VH = foc ? foc.H : L.H;
+  const svg = `<svg class="treesvg${foc ? " tfocused" : ""}" viewBox="0 0 ${VW} ${VH}" data-w="${VW}" data-h="${VH}" data-crossings="${L.crossings}" role="group" aria-label="Map, tree view: the Charter, the teams and what each made">`
+    + `<g class="tview"${z ? ` transform="translate(${tRd(z.x)},${tRd(z.y)}) scale(${z.k})"` : ""}><g class="tedges">${L.links.map(edge).join("")}${focusEdges}</g><g class="tlinks">${links}</g><g class="tnodes">${order.map(dot).join("")}${open ? (foc ? focusHtml() : ringHtml()) : ""}</g><g class="tflows"></g></g>`
     + `<defs>${["fin", "fout"].map(k => `<marker id="tarr-${k}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path class="tarr ${k}" d="M0 0 L8 4 L0 8 z"/></marker>`).join("")}</defs></svg>`;
-  const ws = pick && pick.w, readers = ws ? (m.workflows || []).filter(w => (w.reads || []).includes(ws.id)).map(w => w.id) : [];
+  const ws = pick && !TREE.nopanel && pick.w, readers = ws ? (m.workflows || []).filter(w => (w.reads || []).includes(ws.id)).map(w => w.id) : [];
   const box = ws && by[ws.box];
   const panel = ws ? `<aside class="mappanel treepanel" data-wfpanel="${esc(ws.id)}" aria-label="Details of ${esc(ws.id)}"><div class="mappanelhead"><b>${mapWords(ws.id)} · ${mapWords(ws.name)}</b><button type="button" class="linkbtn" data-treewfclose>Close (Esc)</button></div>`
     + [`status: ${mapWords(pick.word && pick.word !== MAPS[pick.st] ? pick.word : MAPW[pick.st] || pick.st)}${ws.status ? " (workflow " + mapWords(ws.status) + ")" : ""}`, `delivers: ${box ? mapWords(box.label) : "not recorded"}`,
@@ -1667,9 +1751,9 @@ function treeHtml(m, other){      // other: the panel of a deliverable picked on
        ws.checks && ws.checks.run ? `checks: ${ws.checks.passed} of ${ws.checks.run} passed` : "checks: none recorded"].map(x => `<div class="sub">${x}</div>`).join("")
     + `<div class="sub"><button type="button" class="gobtn" data-wfcard="${esc(ws.id)}">Open</button> <button type="button" class="linkbtn" data-agent="${esc(ws.id)}">See conversation and thinking</button>${box ? ` <button type="button" class="linkbtn" data-mapgo="${esc(box.id)}">${mapWords(mapGoLabel(box))}</button>` : ""}</div></aside>` : "";
   const bar = `<div class="treebar"><button type="button" class="linkbtn" data-treefit>Fit</button><button type="button" class="linkbtn" data-treeback${open ? "" : " hidden"}>Back</button>`
-    + `<span class="sub">${open ? `${mapWords(L.at[open].label)}: ${L.stages[open].workflows.length} workflow${L.stages[open].workflows.length === 1 ? "" : "s"}. Esc, Back or a click on empty space returns.` : "Click a team to open its workflows. Drag to pan, scroll or pinch to zoom."}</span></div>`;
+    + `<span class="sub">${foc ? `${mapWords(foc.wid)} focused: what it read above, what it made below, the team's workflows beside it. Esc, Back, a click on it or on empty space returns to the team.` : open ? `${mapWords(L.at[open].label)}: ${L.stages[open].workflows.length} workflow${L.stages[open].workflows.length === 1 ? "" : "s"}. Esc, Back or a click on empty space returns.` : "Click a team to open its workflows. Drag to pan, scroll or pinch to zoom."}</span></div>`;
   const g = open && L.stages[open], made = g ? g.steps.map(id => mapStepTo(m, by[id])).filter(Boolean) : [];
-  const stagePanel = g ? `<aside class="mappanel treepanel" data-stagepanel="${esc(open)}" aria-label="Details of ${esc(g.label)}"><div class="mappanelhead"><b>${mapWords(g.label)}</b><button type="button" class="linkbtn" data-treeback>Close (Esc)</button></div>`
+  const stagePanel = g && !foc ? `<aside class="mappanel treepanel" data-stagepanel="${esc(open)}" aria-label="Details of ${esc(g.label)}"><div class="mappanelhead"><b>${mapWords(g.label)}</b><button type="button" class="linkbtn" data-treeback>Close (Esc)</button></div>`
     + [`${g.workflows.length} workflow${g.workflows.length === 1 ? "" : "s"}: ${g.workflows.map(x => mapWords(x)).join(", ")}`, `made: ${made.map(x => mapWords(x.label)).join(", ") || "not recorded"}`, MAPW[g.status] || ""].filter(Boolean).map(x => `<div class="sub">${x}</div>`).join("")
     + `<div class="sub"><button type="button" class="gobtn" data-mapgo="${esc(g.steps[0])}">${mapWords(mapGoLabel(by[g.steps[0]]))}</button> Click a workflow in the circle for its details.</div></aside>` : "";
   return `<div class="treebox">${bar}${svg}${panel || (other || "").replace('class="mappanel"', 'class="mappanel treepanel"') || stagePanel}</div>`;
@@ -1690,14 +1774,14 @@ function treeMount(){
 // panel; when the panel or the stage closes, the view goes back to where it was
 function treeAvoid(){
   const svg = treeSvg(); if (!svg || !svg.__zoom_b || TREE.moving) return;
-  const pn = $("pane-map").querySelector(".treepanel"), ring = svg.querySelector(".tnode.open .tring");
+  const foc = svg.classList.contains("tfocused"), pn = $("pane-map").querySelector(".treepanel"), ring = foc ? svg.querySelector(".tfocus") : svg.querySelector(".tring");
   const go = t => treeZoomTo(svg, t);
   if (!pn || !ring || getComputedStyle(pn).position !== "absolute"){
     if (TREE.before !== undefined){ const b = TREE.before; delete TREE.before; go(b ? d3.zoomIdentity.translate(b.x, b.y).scale(b.k) : d3.zoomIdentity); }
     return; }
   const pr = pn.getBoundingClientRect(), sr = svg.getBoundingClientRect(), z = TREE.zoom || {k: 1, x: 0, y: 0};
-  const dot = svg.querySelector(".tnode.open > .tdot").getBoundingClientRect(), C = {x: (dot.left + dot.right) / 2, y: (dot.top + dot.bottom) / 2};
-  const parts = [...ring.querySelectorAll(".twf")].map(el => el.getBoundingClientRect()).map(b => ({a: b.left - C.x, b: b.right - C.x, c: b.top - C.y, d: b.bottom - C.y}));      // each workflow, words included
+  const dot = (foc ? svg.querySelector(".tfocuspill") : svg.querySelector(".tnode.open > .tdot")).getBoundingClientRect(), C = {x: (dot.left + dot.right) / 2, y: (dot.top + dot.bottom) / 2};
+  const parts = (foc ? [...svg.querySelectorAll(".tfit")] : [...ring.querySelectorAll(".twf")]).map(el => el.getBoundingClientRect()).map(b => ({a: b.left - C.x, b: b.right - C.x, c: b.top - C.y, d: b.bottom - C.y}));      // each workflow, words included
   const L = sr.left + 10, Rt = pr.left - 12, T = sr.top + 10, B = sr.bottom - 10, lo = q => Math.min(...parts.map(q)), hi = q => Math.max(...parts.map(q));
   const clear = (x, y, f) => parts.every(q => x + f * q.b < pr.left - 8 || x + f * q.a > pr.right + 8 || y + f * q.d < pr.top - 8 || y + f * q.c > pr.bottom + 8)
     && x + f * lo(q => q.a) >= L && x + f * hi(q => q.b) <= sr.right - 10 && y + f * lo(q => q.c) >= T && y + f * hi(q => q.d) <= B;
@@ -1734,14 +1818,14 @@ function treeMove(id, a, b, opening, done){
   es.forEach(e => { if (e.dataset.from === id) near.add(e.dataset.to); if (e.dataset.to === id) near.add(e.dataset.from); });
   if (opening){ svg.querySelectorAll(".tnodes > .tnode").forEach(x => { x.classList.toggle("tdim", x.dataset.id !== id); x.classList.toggle("thide", x.dataset.id !== id); }); es.forEach(e => e.classList.toggle("tgone", e.dataset.from !== id && e.dataset.to !== id)); }
   else { svg.querySelectorAll(".tdim,.thide,.tgone").forEach(x => x.classList.remove("tdim", "thide", "tgone")); svg.querySelectorAll(".twflinks").forEach(x => x.remove()); }
-  const ring = g.querySelector(".tring"), ease = typeof d3 !== "undefined" && d3.easeCubicInOut ? d3.easeCubicInOut : t => t, t0 = performance.now();
+  const ring = svg.querySelector(".tring"), ease = typeof d3 !== "undefined" && d3.easeCubicInOut ? d3.easeCubicInOut : t => t, t0 = performance.now();
   let over = false; const end = () => { if (!over){ over = true; TREE.moving = false; done(); } };
   setTimeout(end, 450);      // a tab that draws no frames (hidden, or headless) still lands on the end state
   g.parentNode.appendChild(g);      // on top while it moves
   const frame = now => { const t = Math.max(0, Math.min(1, (now - t0) / 300)), e = ease(t), p = {x: a.x + (b.x - a.x) * e, y: a.y + (b.y - a.y) * e};
     g.setAttribute("transform", `translate(${tRd(p.x)},${tRd(p.y)})`);
     es.forEach(x => { if (x.dataset.from === id) x.setAttribute("d", treeCurve(p, nodes[x.dataset.to])); else if (x.dataset.to === id) x.setAttribute("d", treeCurve(nodes[x.dataset.from], p)); });
-    if (ring){ const s = opening ? e : 1 - e; ring.setAttribute("transform", `scale(${tRd(s * 100) / 100})`); ring.style.opacity = s; }
+    if (ring){ const s = opening ? e : 1 - e; ring.setAttribute("transform", `translate(${tRd(p.x)},${tRd(p.y)}) scale(${tRd(s * 100) / 100})`); ring.style.opacity = s; }
     if (over) return; if (t < 1) requestAnimationFrame(frame); else end(); };
   requestAnimationFrame(frame);
 }
@@ -1754,7 +1838,7 @@ function treeOpen(id){
   TREE.open = id; TREE.wf = ""; MAPPIN = ""; paintMap();      // draw the open state (its circle), then play the move into it from the tree
   const s2 = treeSvg(), g2 = s2 && [...s2.querySelectorAll(".tnode.tstage")].find(x => x.dataset.id === id);
   if (!g2 || treeReduce()) return;
-  g2.setAttribute("transform", `translate(${from.x},${from.y})`); const rg = g2.querySelector(".tring"); if (rg){ rg.setAttribute("transform", "scale(0)"); rg.style.opacity = 0; }
+  g2.setAttribute("transform", `translate(${from.x},${from.y})`); const rg = s2.querySelector(".tring"); if (rg){ rg.setAttribute("transform", `translate(${from.x},${from.y}) scale(0)`); rg.style.opacity = 0; }
   s2.querySelectorAll(".tdim,.thide,.tgone").forEach(x => x.classList.remove("tdim", "thide", "tgone"));
   treeMove(id, from, TREE.c, true, () => { if (TREE.open === id){ $("pane-map").__html = null; paintMap(); } });      // the end state, drawn exactly as a repaint draws it
 }
@@ -1766,15 +1850,39 @@ function treeClose(){
   svg.querySelectorAll(".tlink").forEach(x => x.remove()); const pn = $("pane-map").querySelector(".treepanel"); if (pn) pn.remove();
   treeMove(id, TREE.c, {x: +g.dataset.x, y: +g.dataset.y}, false, finish);
 }
+// focus a workflow of the open team (id), or go back to the team's circle (""): every node glides from where it was to where the new drawing puts
+// it (300 ms, eased; the lines fade in once they land); with reduced motion the new drawing is just there
+function treeSpots(svg){ const pos = {}; svg.querySelectorAll("[data-k]").forEach(el => { pos[el.dataset.k] = {x: +el.dataset.ax, y: +el.dataset.ay}; }); return {pos, vb: [+svg.dataset.w, +svg.dataset.h]}; }
+function treeFocus(id){
+  const svg = treeSvg(), prev = svg && svg.querySelector("[data-k]") ? treeSpots(svg) : null, was = TREE.wf;
+  TREE.wf = id; TREE.nopanel = false; MAPPIN = ""; TREE.zoom = null; paintMap();
+  if (prev && !treeReduce()) treeGlide(prev, id || was);
+  const n = treeSvg() && [...treeSvg().querySelectorAll(".twf")].find(x => x.dataset.wf === (id || was)); if (n && n.focus) n.focus();
+}
+function treeGlide(prev, key){
+  const svg = treeSvg(); if (!svg) return;
+  const els = [...svg.querySelectorAll("[data-k]")], ring = svg.querySelector(".tring"), o = ring ? {x: +ring.dataset.ox, y: +ring.dataset.oy} : {x: 0, y: 0}, vb = [+svg.dataset.w, +svg.dataset.h];
+  const at = el => ({x: +el.dataset.ax, y: +el.dataset.ay}), off = el => el.closest(".tring") ? o : {x: 0, y: 0}, origin = prev.pos[key] || {x: prev.vb[0] / 2, y: prev.vb[1] / 2};
+  const put = (el, p) => el.setAttribute("transform", `translate(${tRd(p.x - off(el).x)},${tRd(p.y - off(el).y)})`), id = TREE.glide = (TREE.glide || 0) + 1;
+  const from = els.map(el => prev.pos[el.dataset.k] || origin), fresh = els.map(el => !prev.pos[el.dataset.k]);
+  const live = () => TREE.glide === id && svg === treeSvg(), ease = typeof d3 !== "undefined" && d3.easeCubicInOut ? d3.easeCubicInOut : t => t, t0 = performance.now();
+  svg.classList.add("tmoving"); TREE.moving = true; svg.setAttribute("viewBox", `0 0 ${prev.vb[0]} ${prev.vb[1]}`); els.forEach((el, i) => { put(el, from[i]); if (fresh[i]) el.style.opacity = 0; });
+  let over = false; const end = () => { if (over) return; over = true; if (live()){ els.forEach(el => { put(el, at(el)); el.style.opacity = ""; }); svg.setAttribute("viewBox", `0 0 ${vb[0]} ${vb[1]}`); svg.classList.remove("tmoving"); TREE.moving = false; } };
+  setTimeout(end, 450);      // a tab that draws no frames still lands on the end state
+  const frame = now => { if (over) return; if (!live()){ over = true; return; } const t = Math.max(0, Math.min(1, (now - t0) / 300)), e = ease(t), m = (a, b) => a + (b - a) * e;
+    els.forEach((el, i) => { const q = at(el); put(el, {x: m(from[i].x, q.x), y: m(from[i].y, q.y)}); if (fresh[i]) el.style.opacity = e; });
+    svg.setAttribute("viewBox", `0 0 ${tRd(m(prev.vb[0], vb[0]))} ${tRd(m(prev.vb[1], vb[1]))}`); if (t < 1) requestAnimationFrame(frame); else end(); };
+  requestAnimationFrame(frame);
+}
 // one entry for a click or Enter on the tree: true when the tree handled it
 function treeClick(e){
   const v = e.target.closest("[data-mapview]"); if (v){ MAPVIEW = v.dataset.mapview; try { localStorage.setItem("j2mapview", MAPVIEW); } catch (x) {} paintMap(); return true; }
   if (e.target.closest("[data-treefit]")){ treeFit(); return true; }
-  if (e.target.closest("[data-treeback]")){ treeClose(); return true; }
-  if (e.target.closest("[data-treewfclose]")){ TREE.wf = ""; paintMap(); return true; }
-  const w = e.target.closest(".twf"); if (w){ TREE.wf = TREE.wf === w.dataset.wf ? "" : w.dataset.wf; MAPPIN = ""; paintMap(); return true; }
+  if (e.target.closest("[data-treeback]")){ if (TREE.wf) treeFocus(""); else treeClose(); return true; }
+  if (e.target.closest("[data-treewfclose]")){ treeFocus(""); return true; }
+  const w = e.target.closest(".twf"); if (w){ treeFocus(TREE.wf === w.dataset.wf ? "" : w.dataset.wf); return true; }
   const n = e.target.closest(".tnode"); if (n){ if (n.dataset.kind === "stage"){ if (TREE.open === n.dataset.id) treeClose(); else treeOpen(n.dataset.id); } else { TREE.wf = ""; mapSelect(MAPPIN === n.dataset.id ? "" : n.dataset.id); } return true; }
-  if (e.target.closest(".treesvg")){ if (TREE.wf){ TREE.wf = ""; paintMap(); } else if (TREE.open) treeClose(); else if (MAPPIN) mapSelect(""); return true; }      // empty space
+  if (e.target.closest(".treesvg")){ if (TREE.wf) treeFocus(""); else if (TREE.open) treeClose(); else if (MAPPIN) mapSelect(""); return true; }      // empty space
   return false;
 }
 // hover or focus: the node's lines (or a circle workflow's links) brighten and dots flow along them, producer to consumer, in about 1.5 s;
@@ -1797,7 +1905,8 @@ function treeFlow(svg, id, wf){
 function treeHover(e, on){ const svg = treeSvg(), w = e.target.closest && e.target.closest(".twf"), n = !w && e.target.closest && e.target.closest(".tnodes > .tnode");
   if (!svg || (!w && !n)) return false;
   const el = w || n; if (!on && e.relatedTarget && el.contains(e.relatedTarget)) return true;      // moving inside the same dot
-  treeFlow(svg, on && n ? n.dataset.id : "", on && w ? w.dataset.wf : ""); return true; }
+  const foc = svg.classList.contains("tfocused");      // focused: a workflow's lines are ordinary lines of the drawing, lit by its id
+  treeFlow(svg, on && n ? n.dataset.id : on && w && foc ? w.dataset.wf : "", on && w && !foc ? w.dataset.wf : ""); return true; }
 // Agent view (agent/1, /api/agent): who one agent talked to and how it decided, from the run's own chat.jsonl and calls.jsonl.
 // A drawer over the right half of the page (full screen on phones); the Map underneath is unchanged. Plain words by default;
 // prompts, system text and raw output only under "Show technical details".
@@ -1852,7 +1961,7 @@ function renderAgent(v){
   return head + summary + talks + think;
 }
 async function openAgent(id){
-  if (MAPPIN || TREE.wf){ MAPPIN = ""; TREE.wf = ""; paintMap(); }      // one panel at a time: the drawer replaces the map's details panel
+  if (MAPPIN || TREE.wf){ MAPPIN = ""; TREE.nopanel = !!TREE.wf; paintMap(); }      // one panel at a time: the drawer replaces the map's details panel (a focused workflow stays focused)
   document.body.classList.add("agentopen");
   const d = $("agentdrawer"); AGENTVIEW = {who: id, found: false, loading: true};
   d.innerHTML = `<div class="adhead"><h3>${esc(agentName(id, {}))}</h3><button type="button" class="linkbtn" data-agentclose>Close (Esc)</button></div><p class="empty">Loading…</p>`; d.hidden = false;
@@ -2267,7 +2376,7 @@ $("pane-map").addEventListener("focusin", e => mapHover(e, true)); $("pane-map")
 $("pane-map").addEventListener("keydown", e => { const tn = e.target.closest && e.target.closest(".tnode"); if (tn && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); treeClick(e); return; }
   const g = mapNode(e); if (g && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); mapSelect(MAPPIN === g.dataset.id ? "" : g.dataset.id); } });
 document.addEventListener("keydown", e => { if (e.key !== "Escape" || $("pane-map").hidden) return;      // Esc: the picked workflow, then the open stage, then the panel
-  if (MAPVIEW === "tree" && TREE.wf){ TREE.wf = ""; paintMap(); } else if (MAPPIN) mapSelect(""); else if (MAPVIEW === "tree" && TREE.open) treeClose(); });
+  if (MAPVIEW === "tree" && TREE.wf) treeFocus(""); else if (MAPPIN) mapSelect(""); else if (MAPVIEW === "tree" && TREE.open) treeClose(); });
 $("pane-map").addEventListener("click", async e => { const t = e.target.closest("[data-maptab]"); if (t){ e.preventDefault(); showTab(t.dataset.maptab); return; }
   if (!e.target.closest("[data-mapgo],[data-wfcard],[data-mapopen],[data-mapclose]") && treeClick(e)){ e.preventDefault(); return; }
   if (e.target.closest("[data-mapclose]")){ e.preventDefault(); mapSelect(""); return; }

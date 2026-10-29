@@ -6755,9 +6755,7 @@ def map_tree():
         pn = o[o.index('data-wfpanel="%s"' % wid):]
         pn = pn[:pn.index("</aside>")]
         assert all(k in pn for k in ("status: ", "delivers: ", "reads: ", "read by: ", "checks: ", f'data-wfcard="{wid}">Open<')), pn
-        grp = re.search(r'<g class="twflinks on" data-wf="%s">(.*?)</g>' % re.escape(wid), o).group(1)      # the picked one's links are drawn; the others' show on hover
-        assert grp.count('class="tlink reads"') == len(flows[wid]["reads"]) and grp.count('class="tlink readby"') == sum(1 for w in flows.values() if wid in w["reads"]), (name, wid)
-        assert o.count('class="twflinks on"') == 1, "only the picked workflow's links are drawn at rest"
+        assert 'class="treesvg tfocused"' in o and o.count('class="tnode twf') == len(st["workflows"]) and 'class="tspoke"' not in o, (name, wid, "a picked workflow is focused in place")
         # the Line toggle: the metro drawing, as before
         ln = render_node(snap, docs={"docs": {}, "map": mp, "mapview": "line"})["map"]
         assert 'data-view="line"' in ln and '<svg class="mapsvg"' in ln and 'data-mapview="line" aria-pressed="true"' in ln
@@ -6793,13 +6791,13 @@ def map_tree():
               "r.edges = touching(hid).map(e => [e.dataset.from, e.dataset.to, e.getAttribute('d'), e.classList.contains('hot')]); ev(busiest, 'mouseout'); r.after0 = q('.tflow').length;"
               "ev(st, 'click');"
               "setTimeout(() => { const g = q('.tnode.tstage').find(x => x.dataset.id === id), svg = document.querySelector('.treesvg');"
-              " r.open = g.classList.contains('open'); r.at = g.getAttribute('transform'); r.mid = [+svg.dataset.w / 2, +svg.dataset.h / 2]; r.ring = g.querySelectorAll('.twf').length;"
+              " r.open = g.classList.contains('open'); r.at = g.getAttribute('transform'); r.mid = [+svg.dataset.w / 2, +svg.dataset.h / 2]; r.ring = q('.tring .twf').length;"
               " r.dim = q('.tnodes > .tnode.tdim').length; r.all = q('.tnodes > .tnode').length; r.back = !document.querySelector('[data-treeback]').hidden;"
               " r.words = q('.tnodes > .tnode.thide .tlab').filter(x => x.getBoundingClientRect().width > 0).length;"
               " r.gone = q('.tedge').filter(e => vis(e) && e.dataset.from !== id && e.dataset.to !== id).length; r.stagePanel = q('#pane-map .mappanel').map(x => x.dataset.stagepanel || '');"
-              " const w = g.querySelector('.twf'); ev(w, 'mouseover'); r.wflow = q('.tflow').length; r.wlinks = q('.twflinks.hov .tlink').length; ev(w, 'mouseout');"
+              " const w = q('.tring .twf')[0]; ev(w, 'mouseover'); r.wflow = q('.tflow').length; r.wlinks = q('.twflinks.hov .tlink').length; ev(w, 'mouseout');"
               " ev(w, 'click'); setTimeout(() => { const box = r_ => { const b = r_.getBoundingClientRect(); return [b.left, b.top, b.right, b.bottom]; };"
-              " r.twf = q('.tnode.open .twf').map(box); r.svgbox = box(document.querySelector('.treesvg'));"
+              " r.focused = q('.treesvg.tfocused').length; r.twf = q('.tfit').map(box); r.svgbox = box(document.querySelector('.treesvg'));"
               " r.panels = q('#pane-map .mappanel').length; r.pb = box(document.querySelector('.treepanel')); r.card = box(document.querySelector('.treebox')); r.chat = box(document.querySelector('#dview .chat')); r.needs = box(document.getElementById('needs'));"
               " r.wfcard = !!document.querySelector('.treepanel [data-wfcard]');"
               " ev(q('.tnodes > .tnode.tdeck')[0], 'click'); r.second = q('#pane-map .mappanel').map(x => x.dataset.panel || x.dataset.wfpanel || x.dataset.stagepanel);"
@@ -6831,7 +6829,7 @@ def map_tree():
         assert got["panels"] == 1 and got["wfcard"] and inside and not meets(pb, chat) and not meets(pb, needs) and pb[3] <= 900, got
         assert len(got["second"]) == 1 and got["second"][0].startswith("work:"), ("one panel at a time", got)
         sv = got["svgbox"]      # the open circle moved (and if needed zoomed out) so no workflow or its words sit under the panel, all still in the map
-        assert got["twf"] and all(not meets(b, pb) and b[0] >= sv[0] - 0.5 and b[2] <= sv[2] + 0.5 and b[1] >= sv[1] - 0.5 and b[3] <= sv[3] + 0.5 for b in got["twf"]), (got["twf"], pb, sv)
+        assert got["focused"] == 1 and got["twf"] and all(not meets(b, pb) and b[0] >= sv[0] - 0.5 and b[2] <= sv[2] + 0.5 and b[1] >= sv[1] - 0.5 and b[3] <= sv[3] + 0.5 for b in got["twf"]), (got["twf"], pb, sv)
         assert not got["z"] or (abs(got["z"]["k"] - 1) < 1e-6 and abs(got["z"]["x"]) < 0.5 and abs(got["z"]["y"]) < 0.5), ("closing puts the view back", got["z"])
         assert got["esc1"] == [got["id"]] and got["after"] == [0, 0, True, 0, 0], ("Esc closes the panel, then the stage", got)
         assert got["line2"] != "none" and got["tree2"] == "none", "the Line toggle shows the metro map"
@@ -6842,6 +6840,195 @@ def map_tree():
     print("map tree: Charter, stages, deliverables below what they read; the same run draws the same; every workflow in the tree or its stage's "
           "circle; no labels overlap, 24px apart; a stage's circle round it with the rest faded, a picked workflow's panel and links, Esc returns; "
           "Line shows the metro map ok (" + ", ".join(report) + ")")
+
+
+def map_focus():
+    """Map, workflow focus (Tree, a team's circle): clicking a workflow expands it in place. Browser-free, on every saved run: focus data exists for
+    every workflow; each recorded read is a labelled shape (a team-mate as a dot on the left, another team's deliverable as a square above, an
+    unplaced one marked as such) and each thing it made is a labelled shape below (an action an envelope), the status on the outline; no label
+    or shape overlaps another or leaves the canvas; no line runs through a shape or a label; the same run draws the same; Esc (no workflow
+    picked) draws the circle as before. With Chrome (--browser): runs 174314 and 155610, W-8 clicked: the same checks on the real page, the
+    nodes glide (and sit at once with reduced motion), Esc and Back return."""
+    import html as htmllib
+    import shutil
+    import threading
+    import j2_map as M
+    import j2_server
+    repo = os.path.join(os.path.dirname(os.path.abspath(__file__)), "runs")
+    names = sorted(n for n in os.listdir(repo) if os.path.isfile(os.path.join(repo, n, "workflows.json"))) if os.path.isdir(repo) else []
+
+    def samples(d, n=24):      # the points of an "M x y C ..." line
+        v = [float(x) for x in d[1:].replace("C", " ").split()]
+        pts = [(v[0], v[1])]
+        for p in range(2, len(v) - 5, 6):
+            x0, y0 = v[p - 2], v[p - 1]
+            for i in range(1, n + 1):
+                s_ = i / n
+                u = 1 - s_
+                pts.append((u ** 3 * x0 + 3 * u * u * s_ * v[p] + 3 * u * s_ * s_ * v[p + 2] + s_ ** 3 * v[p + 4], u ** 3 * y0 + 3 * u * u * s_ * v[p + 1] + 3 * u * s_ * s_ * v[p + 3] + s_ ** 3 * v[p + 5]))
+        return pts
+    meets = lambda a, b: a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]
+    keep_dir, j2.RUNS_DIR = j2.RUNS_DIR, repo
+    seen = {"runs": 0, "workflows": 0, "reads": 0, "made": 0, "peers": 0, "lines": 0}
+    try:
+        for name in names:
+            m = M.build(os.path.join(repo, name))
+            snap = {"workflows": [], "chat": []}
+            a = render_node(snap, docs={"docs": {}, "map": m, "focusall": True})
+            b = render_node(snap, docs={"docs": {}, "map": m, "focusall": True})
+            fa = a["focusall"]
+            assert fa == b["focusall"], (name, "the same run draws the same focus")
+            flows = {w["id"]: w for w in m["workflows"]}
+            assert set(fa) == set(flows) and all(fa.values()), (name, "focus data exists for every workflow", set(flows) - set(fa))
+            for wid, F in fa.items():
+                w = flows[wid]
+                nodes = {n["id"]: n for n in F["nodes"]}
+                role = lambda r: [n["id"] for n in F["nodes"] if n["role"] == r]
+                assert nodes[wid]["role"] == "focus" and nodes[wid]["label"].startswith(wid), (name, wid)
+                for r in w["reads"]:      # every recorded read is shown and labelled: a team-mate, the deliverable that holds it, or itself marked unplaced
+                    own = flows[r]["box"]
+                    assert r in role("peer-in") or (own and own in role("in")) or f"wf:{r}" in role("in"), (name, wid, r, "a recorded read is not drawn")
+                    seen["reads"] += 1
+                for o in set(w["out"]) | ({w["box"]} if w["box"] else set()):
+                    assert o in role("out") or o in role("in"), (name, wid, o, "a recorded output is not drawn")
+                    seen["made"] += 1
+                for x in flows.values():      # a team-mate that reads it is drawn on the right
+                    if wid in x["reads"] and x["id"] != wid and x["id"] in role("peer-in") + role("peer-out") + [n for n in F["others"]]:
+                        pass
+                for n in F["nodes"]:
+                    assert n["label"].strip() and n["lbox"][2] > n["lbox"][0] and n["status"] is not None, (name, wid, n["id"], "labelled, with a status")
+                    if n["role"] in ("in", "out"):
+                        assert (n["tag"] == "Send") == (n["id"] in {x["id"] for x in m["nodes"] if x.get("tag") == "Send"}), (name, wid, n["id"], "an action is an envelope")
+                boxes = [(n["id"], n["box"]) for n in F["nodes"]] + [(o["id"], [o["x"] - o["r"], o["y"] - o["r"], o["x"] + o["r"], o["y"] + o["r"]]) for o in F["others"]]
+                for i in range(len(boxes)):
+                    assert boxes[i][1][0] >= 0 and boxes[i][1][1] >= 0 and boxes[i][1][2] <= F["W"] and boxes[i][1][3] <= F["H"], (name, wid, boxes[i][0], "inside the canvas")
+                    for j in range(i + 1, len(boxes)):
+                        assert not meets(boxes[i][1], boxes[j][1]), (name, wid, boxes[i][0], boxes[j][0], "shapes or labels overlap")
+                for e in F["edges"]:      # a line never crosses a shape or a label (its own ends touch their own shape)
+                    pts = samples(e["d"])
+                    assert {e["from"], e["to"]} <= set(nodes), (name, wid, e)
+                    for id_, bx in boxes:
+                        if id_ in (e["from"], e["to"]):
+                            n = nodes[id_]
+                            if n["role"] == "focus":
+                                continue
+                            bx = n["lbox"]
+                        assert not any(bx[0] + 1 < x < bx[2] - 1 and bx[1] + 1 < y < bx[3] - 1 for x, y in pts), (name, wid, e["from"], e["to"], id_, "a line runs through a shape or label")
+                    seen["lines"] += 1
+                seen["peers"] += len(role("peer-in")) + len(role("peer-out"))
+                seen["workflows"] += 1
+            seen["runs"] += 1
+        # the two named runs: W-8 in 174314 and 155610
+        for name, ins, outs in (("j2-20261026-174314", {"work:W-2", "work:W-3"}, {"work:website"}), ("j2-20261026-155610", None, {"work:website"})):
+            if name not in names:
+                continue
+            m = M.build(os.path.join(repo, name))
+            snap = {"workflows": [], "chat": []}
+            F = render_node(snap, docs={"docs": {}, "map": m, "focusall": True})["focusall"]["W-8"]
+            got_in = {n["id"] for n in F["nodes"] if n["role"] == "in"}
+            if ins:
+                assert got_in == ins and {n["id"] for n in F["nodes"] if n["role"] == "out"} == outs, (name, got_in)
+                assert "W-7" in {n["id"] for n in F["nodes"] if n["role"] == "peer-in"}, "W-8 reads W-7, in its team"
+                assert {"W-9", "W-10", "W-11", "W-14"} <= {n["id"] for n in F["nodes"] if n["role"] == "peer-out"}
+            # drawn: the picked workflow is focused, everything else is faded; with nothing picked the circle is drawn as before
+            st = next(n for n in render_node(snap, docs={"docs": {}, "map": m})["tree"]["nodes"] if n["kind"] == "stage" and "W-8" in n["workflows"])
+            o = render_node(snap, docs={"docs": {}, "map": m, "tree": {"open": st["id"], "wf": "W-8"}})
+            svg = o["map"][o["map"].index('<svg class="treesvg'):o["map"].index("</svg>", o["map"].index('<svg class="treesvg'))]
+            assert 'class="treesvg tfocused"' in svg and o["tree"]["focus"]["wid"] == "W-8" and f'viewBox="0 0 {F["W"]} {F["H"]}"' in svg, name
+            for n in F["nodes"]:
+                assert htmllib.escape(n["label"]) in svg or n["label"] in svg, (name, n["label"], "labelled on the page")
+            assert svg.count('class="tedge fedge') == len(F["edges"]) and svg.count("tdim thide") >= len(F["others"]), name
+            assert "tring" in svg and svg.count('class="tspoke"') == 0
+            plain = render_node(snap, docs={"docs": {}, "map": m, "tree": {"open": st["id"]}})["map"]
+            back = render_node(snap, docs={"docs": {}, "map": m, "tree": {"open": st["id"], "wf": ""}})["map"]
+            assert plain == back and 'class="tspoke"' in plain and "tfocused" not in plain, (name, "Esc draws the circle as before")
+    finally:
+        j2.RUNS_DIR = keep_dir
+    chrome = j2.j2_check.find_chrome()
+    shot = []
+    if chrome and BROWSER and names:
+        ui = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "j2_ui.html"), encoding="utf-8").read()
+        probes = {}
+
+        def probe(name, js, flags=()):
+            tmp = tempfile.mkdtemp(prefix="j2-focus-")
+            open(os.path.join(tmp, "j2_ui.html"), "w", encoding="utf-8").write(ui.replace("</body>", "<script>window.onerror = (m, u, l, c, e) => document.body.setAttribute('data-r', JSON.stringify({error: String(m) + ' ' + (e && e.stack || '')})); setTimeout(() => { try { " + js + " } catch (e) { document.body.setAttribute('data-r', JSON.stringify({error: String(e.stack || e)})); } }, 2500)</script></body>"))
+            keep_here, j2_server.HERE = j2_server.HERE, tmp
+            srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+            threading.Thread(target=srv.serve_forever, daemon=True).start()
+            try:
+                dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--window-size=1440,900", "--virtual-time-budget=20000", *flags, "--dump-dom",
+                                  f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={name}"], capture_output=True, text=True, timeout=180).stdout
+            finally:
+                j2_server.HERE = keep_here
+                srv.shutdown()
+            hit = re.search(r'data-r="([^"]*)"', dom)
+            assert hit, ("the page did not finish its steps", dom[-400:])
+            got = json.loads(htmllib.unescape(hit.group(1)))
+            assert "error" not in got, got
+            return got
+        base = ("const q = s => [...document.querySelectorAll(s)], r = {}, ev = (el, t) => el.dispatchEvent(new MouseEvent(t, {bubbles: true})), vis = el => getComputedStyle(el).display !== 'none',"
+                " rc = el => { const b = el.getBoundingClientRect(); return [b.left, b.top, b.right, b.bottom]; }, stage = () => q('.tnode.tstage').find(x => (MAPTREE.nodes.find(n => n.id === x.dataset.id) || {workflows: []}).workflows.includes('W-8')),"
+                " pos = () => Object.fromEntries(q('[data-k]').map(e => [e.dataset.k, [e.dataset.ax, e.dataset.ay, e.getAttribute('transform')]])),"
+                " settled = () => q('[data-k]').every(e => { const o = e.closest('.tring') ? [+e.closest('.tring').dataset.ox, +e.closest('.tring').dataset.oy] : [0, 0]; const t = v => Math.round(v * 10) / 10; return e.getAttribute('transform') === 'translate(' + t(+e.dataset.ax - o[0]) + ',' + t(+e.dataset.ay - o[1]) + ')'; });")
+        measure = ("const nodes = q('.treesvg .tnode').filter(vis), items = nodes.map(n => ({id: n.dataset.wf || n.dataset.id, dot: rc(n.querySelector('.tdot')), texts: [...n.querySelectorAll('text')].filter(vis).map(rc)}));"
+                   "r.items = items; r.edges = q('.fedge').filter(vis).map(e => { const L = e.getTotalLength(), m = e.getScreenCTM(); const pts = []; for (let i = 0; i <= 60; i++){ const p = e.getPointAtLength(L * i / 60); pts.push([m.a * p.x + m.c * p.y + m.e, m.b * p.x + m.d * p.y + m.f]); } return {from: e.dataset.from, to: e.dataset.to, pts}; });")
+        for name in ("j2-20261026-174314", "j2-20261026-155610"):
+            if name not in names:
+                continue
+            if not os.path.exists(os.path.join(j2.RUNS_DIR, name)):
+                shutil.copytree(os.path.join(repo, name), os.path.join(j2.RUNS_DIR, name))      # read only: the test's own copy
+            js = (base + "const st0 = stage(); r.stage = st0.dataset.id; ev(st0, 'click');"
+                  "setTimeout(() => { r.oval = pos(); r.ovalRing = q('.tring .twf').length; const w8 = q('.tring .twf').find(x => x.dataset.wf === 'W-8'); ev(w8, 'click');"
+                  " r.sync = [q('.treesvg.tmoving').length, q('.tfocuspillg').length, q('.tfocuspillg').map(e => e.getAttribute('transform'))[0], q('.treesvg')[0].getAttribute('viewBox')];"
+                  " setTimeout(() => { r.focused = q('.treesvg.tfocused').length; r.settled = settled(); r.moving = q('.treesvg.tmoving').length; r.vb = q('.treesvg')[0].getAttribute('viewBox'); r.data = [q('.treesvg')[0].dataset.w, q('.treesvg')[0].dataset.h];" + measure +
+                  " r.panel = q('.treepanel [data-wfcard]').length; r.agent = q('.treepanel [data-agent]').length; r.fit = rc(q('.treesvg')[0]); r.pillrc = rc(q('.tfocuspill')[0]);"
+                  " r.faded = q('.tnode.thide').length; r.hiddenLabels = q('.tnode.thide .tlab').filter(vis).length;"
+                  " ev(q('.tfit').find(x => x.dataset.wf !== 'W-8' && x.dataset.wf), 'click');"
+                  " setTimeout(() => { r.moved = q('.tfocuspillg')[0] && q('.tfocuspillg')[0].dataset.wf; const pill2 = q('.tfocuspillg')[0]; r.focusLabel = pill2 && pill2.querySelector('.tlab').textContent;"
+                  " document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));"
+                  " setTimeout(() => { r.escFocused = q('.treesvg.tfocused').length; r.escRing = q('.tring .twf').length; r.escSettled = settled(); r.escOpen = q('.tnode.open').length; r.back = pos();"
+                  " const w2 = q('.tring .twf').find(x => x.dataset.wf === 'W-8'); ev(w2, 'click');"
+                  " setTimeout(() => { r.again = q('.treesvg.tfocused').length; ev(q('.tfocuspillg')[0], 'click');"
+                  " setTimeout(() => { r.clickAgain = q('.treesvg.tfocused').length; ev(q('.tring .twf').find(x => x.dataset.wf === 'W-8'), 'click');"
+                  " setTimeout(() => { ev(q('[data-treeback]')[0], 'click');"
+                  " setTimeout(() => { r.backBtn = [q('.treesvg.tfocused').length, q('.tnode.open').length]; ev(q('.tring .twf').find(x => x.dataset.wf === 'W-8'), 'click');"
+                  " setTimeout(() => { ev(q('.treesvg')[0], 'click');"
+                  " setTimeout(() => { r.emptyClick = [q('.treesvg.tfocused').length, q('.tnode.open').length]; document.body.setAttribute('data-r', JSON.stringify(r)); }, 600); }, 600); }, 600); }, 600); }, 600); }, 600); }, 600); }, 600); }, 600); }, 900);")
+            got = probe(name, js)
+            assert got["ovalRing"] > 0 and got["sync"][0] == 1 and got["sync"][1] == 1, (name, "the glide starts at once", got["sync"])
+            assert got["focused"] == 1 and got["settled"] and got["moving"] == 0 and got["vb"] == f"0 0 {got['data'][0]} {got['data'][1]}", (name, "the nodes land on the drawing", got["vb"], got["data"])
+            assert got["panel"] == 1 and got["agent"] == 1, (name, "the details panel and See conversation and thinking are there for the focused workflow")
+            assert got["faded"] > 0 and got["hiddenLabels"] == 0, (name, "everything else fades, without words")
+            items = got["items"]
+            rects_ = [(it["id"], k, r_) for it in items for k, r_ in [("dot", it["dot"])] + [("text", t) for t in it["texts"]]]
+            for i in range(len(rects_)):
+                for j in range(i + 1, len(rects_)):
+                    a_, b_ = rects_[i], rects_[j]
+                    if a_[0] == b_[0]:
+                        continue
+                    assert not meets(a_[2], b_[2]), (name, "on the page, shapes or labels overlap", a_[:2], b_[:2])
+            assert len(got["edges"]) > 0
+            for e in got["edges"]:
+                for it in items:
+                    for k, bx in [("dot", it["dot"])] + [("text", t) for t in it["texts"]]:
+                        if it["id"] in (e["from"], e["to"]) and k == "dot":
+                            continue
+                        assert not any(bx[0] + 1 < x < bx[2] - 1 and bx[1] + 1 < y < bx[3] - 1 for x, y in e["pts"]), (name, e["from"], e["to"], it["id"], k, "on the page, a line runs through a shape or a label")
+            assert got["moved"] != "W-8" and got["moved"], (name, "clicking another workflow moves the focus", got["moved"])
+            assert got["escFocused"] == 0 and got["escRing"] == got["ovalRing"] and got["escSettled"] and got["escOpen"] == 1, (name, "Esc returns to the circle", {k: got[k] for k in got if k.startswith("esc") or k in ("moved", "again", "focusLabel")})
+            assert all(got["back"][k][:2] == got["oval"][k][:2] for k in got["oval"]), (name, "the nodes animate back to where they were")
+            assert got["again"] == 1 and got["clickAgain"] == 0 and got["backBtn"] == [0, 1] and got["emptyClick"] == [0, 1], (name, got["again"], got["clickAgain"], got["backBtn"], got["emptyClick"])
+            seen["browser"] = seen.get("browser", 0) + 1
+        # reduced motion: no animation, the same layout
+        name = "j2-20261026-174314" if "j2-20261026-174314" in names else ""
+        if name:
+            rm = probe(name, base + "ev(stage(), 'click'); setTimeout(() => { ev(q('.tring .twf').find(x => x.dataset.wf === 'W-8'), 'click'); r.moving = q('.treesvg.tmoving').length; r.settled = settled(); r.focused = q('.treesvg.tfocused').length; r.vb = q('.treesvg')[0].getAttribute('viewBox'); r.data = [q('.treesvg')[0].dataset.w, q('.treesvg')[0].dataset.h];"
+                       " document.body.setAttribute('data-r', JSON.stringify(r)); }, 900);", ("--force-prefers-reduced-motion",))
+            assert rm["moving"] == 0 and rm["settled"] and rm["focused"] == 1 and rm["vb"] == f"0 0 {rm['data'][0]} {rm['data'][1]}", ("reduced motion: the layout is there at once", rm)
+    print(f"map focus: {seen['workflows']} workflows in {seen['runs']} runs have focus data; every recorded read ({seen['reads']}) and output ({seen['made']}) is a labelled shape, "
+          f"{seen['peers']} team-mates beside; no shapes or labels overlap, none of {seen['lines']} lines runs through one; same run, same picture; Esc returns"
+          + (f"; real page: W-8 on {seen['browser']} runs glides, moves, returns by Esc, Back, a second click and empty space; reduced motion sits at once" if seen.get("browser") else "") + " ok")
 
 
 def map_every_workflow():
@@ -7996,6 +8183,7 @@ if __name__ == "__main__":
         map_every_workflow()
         if mode == "0":
             map_tree()
+            map_focus()
             map_logic()
             map_readback()
             map_shapes()
