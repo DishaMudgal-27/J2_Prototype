@@ -590,3 +590,22 @@ def write(d):
     with open(os.path.join(d, "map.json"), "w", encoding="utf-8") as f:
         json.dump(m, f, indent=2, ensure_ascii=False)
     return m
+
+def plan_view(d):
+    """What the Strategist (Adaptation) planned, from realization.json: the stages it chose with their reasons, and the replans. {"found": False} for a run with no plan record."""
+    rz = _read(d, "realization.json") if d else None
+    if not isinstance(rz, dict) or not isinstance(rz.get("plan"), dict):
+        return {"found": False}
+    p, conf = rz["plan"], rz.get("stages") or {}
+    stages = []
+    for s in p.get("stages") or []:
+        sid = s.get("id")
+        stages.append({"id": sid, "thinking": s.get("thinking") or "", "goal": s.get("goal") or "", "zone": (conf.get(sid) or {}).get("zone"),
+                       "confidence": (conf.get(sid) or {}).get("confidence"),
+                       "why": [{"name": f.get("name"), "why": f.get("why")} for f in p.get("factors") or [] if sid in (f.get("stages") or []) and f.get("why")],
+                       "workflows": [w.get("name") for w in p.get("workflows") or [] if w.get("stage") == sid]})
+    a = p.get("analysis") or {}
+    replans = [{"round": r.get("round"), "faults": len(r.get("plan_faults") or []),
+                "changes": [{"workflow": c.get("workflow"), "remedy": c.get("remedy")} for c in r.get("changes") or []]} for r in rz.get("rounds") or [] if (r.get("round") or 0) > 0]
+    return {"found": True, "chosen": a.get("chosen") or "", "options": a.get("options") or [], "zone": (p.get("certainty_assessment") or {}).get("zone"),
+            "confidence": rz.get("plan_confidence"), "stages": stages, "replans": replans}
