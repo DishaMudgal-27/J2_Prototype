@@ -5313,7 +5313,7 @@ def atom_templates():
               "const t = card.querySelector('[data-block=\"template\"]');"
               "r.rows = t ? [...t.querySelectorAll('[data-tmplrow]')].map(x => x.dataset.tmplrow) : [];"
               "r.shown = !!t && t.getClientRects().length > 0;"
-              "r.text = t ? t.innerText.replace(/\\s+/g, ' ').trim().slice(0, 200) : '';"
+              "r.text = t ? t.innerText.replace(/\\s+/g, ' ').trim().slice(0, 900) : '';"
               "const ver = card.querySelector('[data-block=\"verification\"]'), out = card.querySelector('[data-block=\"expected_output\"]');"
               "r.between = !!t && !!ver && !!out && out.getBoundingClientRect().top < t.getBoundingClientRect().top"
               " && t.getBoundingClientRect().top < ver.getBoundingClientRect().top;"
