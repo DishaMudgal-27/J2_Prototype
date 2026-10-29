@@ -5189,6 +5189,7 @@ def atom_templates():
     A prompt sent without its <reply_schema> tag fails the prompt row and names the tag. The templates themselves are
     checked against the section constants and the conditions they come from, and a run recorded without the flag
     reads back as "not recorded", never a pass."""
+    import html as htmllib
     import shutil
     import j2_templates as TM
     import j2_types
@@ -5297,6 +5298,56 @@ def atom_templates():
         assert snap["templates"] is True
         simple = render_node(snap, docs={"docs": {}})["simple"]      # the Simple view is untouched
         assert "Prompt template" not in simple and "data-tmplrow" not in simple and "BuilderReply" not in simple
+    # the real page in Chrome: the Template block is there, between Defined output and Verification, and visible
+    chrome = j2.j2_check.find_chrome()
+    if chrome and BROWSER:
+        import threading
+        import urllib.request
+        import j2_server
+        name = os.path.basename(run.dir)
+        wid = run.workflows[0]["id"]
+        js = ("const q = s => [...document.querySelectorAll(s)]; showTab('workflows');"
+              "q('#pane-workflows details.atom').forEach(d => { d.open = true; });"
+              "const card = document.querySelector('details.atom'); r.atom = card ? card.dataset.key : null;"
+              "r.blocks = [...card.querySelectorAll('[data-block]')].map(b => b.dataset.block);"
+              "const t = card.querySelector('[data-block=\"template\"]');"
+              "r.rows = t ? [...t.querySelectorAll('[data-tmplrow]')].map(x => x.dataset.tmplrow) : [];"
+              "r.shown = !!t && t.getClientRects().length > 0;"
+              "r.text = t ? t.innerText.replace(/\\s+/g, ' ').trim().slice(0, 200) : '';"
+              "const ver = card.querySelector('[data-block=\"verification\"]'), out = card.querySelector('[data-block=\"expected_output\"]');"
+              "r.between = !!t && !!ver && !!out && out.getBoundingClientRect().top < t.getBoundingClientRect().top"
+              " && t.getBoundingClientRect().top < ver.getBoundingClientRect().top;"
+              "r.chips = t ? [...t.querySelectorAll('[data-tmpl-st]')].map(x => x.textContent.trim()) : [];"
+              "r.links = t ? [...t.querySelectorAll('[data-link]')].map(x => x.dataset.link) : [];"
+              "r.simple = document.getElementById('sview').innerText.includes('Prompt template');")
+        tmp = tempfile.mkdtemp(prefix="j2-tmpl-")
+        ui = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "j2_ui.html"), encoding="utf-8").read()
+        open(os.path.join(tmp, "j2_ui.html"), "w", encoding="utf-8").write(
+            ui.replace("</body>", "<script>setTimeout(() => { const r = {}; try { " + js
+                       + " } catch (e) { r.error = String(e); } document.body.setAttribute('data-r', "
+                       "JSON.stringify(r)); }, 4500)</script></body>"))
+        keep_here, j2_server.HERE = j2_server.HERE, tmp
+        keep_run, j2_server.RUN = j2_server.RUN, run
+        srv = j2_server.http.server.ThreadingHTTPServer(("127.0.0.1", 0), j2_server.Handler)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        try:
+            dom = chrome_dom([chrome, "--headless=new", "--disable-gpu", "--window-size=1280,900",
+                              "--virtual-time-budget=14000", "--dump-dom",
+                              f"http://127.0.0.1:{srv.server_address[1]}/?view=detail&run={name}"],
+                             timeout=180).stdout
+        finally:
+            j2_server.HERE, j2_server.RUN = keep_here, keep_run
+            srv.shutdown()
+        got = json.loads(htmllib.unescape(re.search(r'data-r="([^"]*)"', dom).group(1)))
+        assert "error" not in got, got
+        assert got["rows"] == ["prompt", "reply", "output"] and got["shown"] is True, got
+        assert got["between"] is True, got["blocks"]
+        assert got["blocks"].index("template") == got["blocks"].index("expected_output") + 1, got["blocks"]
+        assert got["blocks"].index("template") + 1 == got["blocks"].index("verification"), got["blocks"]
+        assert got["chips"] and all(x in ("pass", "fail", "not recorded") for x in got["chips"]), got["chips"]
+        assert set(got["links"]) >= {"call", "receipt"}, got["links"]
+        assert "builder/1" in got["text"] and "BuilderReply/1" in got["text"], got["text"]
+        assert got["simple"] is False, "the Simple view has no Template block"
     print("atom templates: with the flag off nothing is recorded; with it on the Still Point run ends Done and all "
           f"{len(blocks) - len(head_only)} built atoms read prompt pass, reply pass, output pass against "
           f"{len(kinds)} artifact templates (head-tags-only sections: {head_only or 'none'}), a prompt without its "
