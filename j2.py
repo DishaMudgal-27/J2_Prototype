@@ -2150,7 +2150,8 @@ PRD_INTAKE = ("J2.a for a PRD: is there enough information to write it? You need
               "the Requester what that group does in the product; if they don't say, record its actions as []. When a "
               "success measure is a number, ask for its measurement window (\"over what time?\") in the same question "
               "as the number, unless the brief gives one. done_when is the checklist for the PRD: checkable items for its sections (Problem, "
-              "Users, Goals, Requirements, Success metrics, Out of scope), each checkable by reading the document; mark "
+              "Users, Goals, Requirements, Success metrics, Out of scope), each checkable by reading the document and "
+              "each checking one thing (a section that needs two checks gets two items); mark "
               "core=true for the problem, the requirements and the success metrics. facts: the exact strings from the "
               "brief or the answers that the PRD must contain (product name, numbers, feature names). Done-when may not "
               "refer to the Requester, Audit, verification, approval or launch. Keep everything the brief asks for; if "
@@ -3457,7 +3458,11 @@ class J2Run:
                 "send_confirm": self._identity_send_confirm}.get(h.get("kind"), self._identity_question)(h)
 
     CHARTER_FMT = ('{"statement": str, "site_name": str, "audience": str, "standards": [str], "rules": [str], '
-                   '"done_when": [str], "core": [bool] (one per done-when item, same order: true for the business '
+                   '"done_when": [str] (one outcome per item: one thing the site shows or lets a visitor do, that '
+                   'passes or fails on its own; two features, or a feature and a separate rule, are two items; a '
+                   'form\'s field list, an exact list of facts for one section, and the placeholder rule for a missing '
+                   'fact stay inside their item; each item names its subject, never "it" or "this"), '
+                   '"core": [bool] (one per done-when item, same order: true for the business '
                    'name and location, contact details, prices, hours, ordering and the no-errors check; these are '
                    'never left out for budget), "business_type": str (one or two words, e.g. "florist"), "visitor_needs": [str] '
                    '(what this business\'s visitors need, as confirmed), '
@@ -3888,7 +3893,11 @@ class J2Run:
         if change:
             feedback += (f"\nTHE REQUESTER ASKED FOR A CHANGE AFTER THE GOAL WAS REACHED: {change}\nJ2.a for the change: "
                          "is there enough information to make it? If not, ask. If yes, return the updated charter: keep "
-                         "everything already in it and add or adjust done-when items so the change is checkable. "
+                         "everything already in it, and keep every existing done-when item word for word. Add one new "
+                         "done-when item for each separate outcome the change asks for: a change naming three features "
+                         "gives three new items. Reword an existing item only when the change alters that exact "
+                         "outcome; a reworded item counts as new. Each new item stands on its own: name the feature it "
+                         "is about, and copy the Requester's exact words for labels and examples. "
                          f"CURRENT CHARTER: {json.dumps(self.goal, ensure_ascii=False)}")
 
         def mock():
@@ -3951,7 +3960,10 @@ class J2Run:
                       "List in facts every concrete fact from the brief and the answers: dates, times, prices, ages, "
                       "addresses, names, emails, phone numbers, counts, each copied exactly (code checks each one is in "
                       "the brief or the answers, and that the site shows it exactly). "
-                      "Every done-when item must be checkable by reading the site file itself. Content facts only the "
+                      "Every done-when item must be checkable by reading the site file itself. Write one item per "
+                      "outcome: if one part could pass while another fails, or one could be dropped and the other kept, "
+                      "they are separate items (e.g. \"a gallery with a category filter and a full-screen view\" is "
+                      "three items; \"a form asking for name, email and phone\" is one). Content facts only the "
                       "Requester knows (phone numbers, prices, addresses) are questions for the Requester: ask for them. "
                       "Only if the Requester has said they can't supply a fact yet, record it in to_be_confirmed with the "
                       "number of the done-when item it blocks: that item is not met until they confirm it. Done-when "
