@@ -724,7 +724,7 @@ function constraintsHTML(v){
 function docBody(kind, text){
   const seen = {};
   return text.split("\n").map(l => { if (!l.trim()) return "";
-    const h = l.match(/^#{1,6}\s+(.*)$/); if (h) return `<h4>${md(h[1])}</h4>`;
+    const h = l.match(/^#{1,6}\s+(.*)$/); if (h) return `<h4>${md(h[1])}</h4>` + (/^##\s/.test(l) ? `<p class="doctpl">${tplSecLine(kind, null, h[1].trim())}</p>` : "");
     const id = (l.match(ITEM_AT) || [])[1], first = id && !seen[id]; if (first) seen[id] = 1;
     return `<p class="dl${first && FOCUS.kind === kind && FOCUS.item === id ? " hit" : ""}"${first ? ` id="doc-${kind}-${esc(id)}"` : ""}>${md(l.replace(/^\s*[-*]\s+/, "• ").replace(/`/g, ""))}</p>`; }).join("");
 }
@@ -793,6 +793,31 @@ function tplLine(a, s){
   const href = t.artifact && t.section ? libHref(t.artifact, t.section, t.kind === "generic" ? "generic" : t.name, t.kind === "generic" ? 1 : t.version) : `/library?q=${encodeURIComponent(t.name)}`;
   return `<span class="tplline" data-tplline="${esc(t.action)}">Template: <span class="code">${esc(t.name)} v${esc(t.version)}</span> · ${esc(t.action)}`
     + ` · <button type="button" class="linkbtn" data-link="tplview" data-atom="${esc(a.id)}">this run</button> · <a href="${href}" data-link="catalog">library</a></span>`;
+}
+// The same line for a deliverable's section (Artifacts tab, Documents view): the run's decision by artifact and the workflow
+// that wrote the section (its rewriter when one did), or by artifact and section heading; "style" is the design decision.
+const DECK_ART = {"work:prd": "prd", "work:hld": "hld", "work:lld": "lld", "work:website": "website"};
+function tplDecision(artifact, wid, section){
+  const ds = (LIB.decisions || []).filter(d => d.artifact === artifact && (!wid || d.workflow === wid) && (!section || d.section === section));
+  return ds.length ? ds[ds.length - 1] : null;
+}
+function tplWhy(wid){
+  if (!(CTX && CTX.has_templates)) return TPL_WHY.before;
+  const w = ((CTX && CTX.workflows) || []).find(x => x.id === wid);
+  return w && (w.atoms || []).some(a => (a.results || []).some(r => /^artifact-/.test(String(r.type)))) ? TPL_WHY.nr : TPL_WHY.none;
+}
+function tplSecLine(artifact, wid, section){
+  const d = tplDecision(artifact, wid, section);
+  if (!d) return `<span class="tplline" data-tplline="none">Template: <span class="empty">${tplWhy(wid)}</span></span>`;
+  const name = d.kind === "generic" ? "generic" : d.template, ver = d.kind === "generic" ? 1 : d.version;
+  return `<span class="tplline" data-tplline="${esc(d.action)}">Template: <span class="code">${esc(d.template)} v${esc(d.version)}</span> · ${esc(d.action)}`
+    + ` · <button type="button" class="linkbtn" data-tplgo="${esc(d.atom)}|${esc(d.artifact)}">this run</button> · <a href="${libHref(d.artifact, d.section, name, ver)}" data-link="catalog">library</a></span>`;
+}
+function tplGo(atomId, artifact){      // the run's Library tab, with that decision's template open
+  setView("detail", true); showTab("library"); LIB.focus = atomId;
+  loadLibrary().then(() => { const ds = LIB.decisions || [], d = ds.find(x => x.atom === atomId && (artifact ? x.artifact === artifact : x.artifact !== "design")) || ds.find(x => x.atom === atomId);
+    if (d) openTemplate(d.artifact, d.section, d.kind === "generic" ? "generic" : d.template, d.kind === "generic" ? 1 : d.version);
+    else { const el = document.querySelector(`[data-tplrow="${atomId}"]`); if (el && el.scrollIntoView) el.scrollIntoView({block: "center"}); } });
 }
 function artifactRows(a){
   const got = ART_TYPES.map(t => artLast(a, t));
@@ -1518,7 +1543,9 @@ function artNode(x, g){
     x.rewritten ? `rewritten by ${x.rewritten.by} · ${x.rewritten.name}` : "", x.note].filter(Boolean).map(esc)].join(" · ");
   const btn = x.code ? `<button type="button" class="linkbtn" data-artcode="${esc(ck)}" aria-expanded="${open}">${open ? "Close" : "Open"}</button>`
     : x.file ? (big ? `<span class="empty">too large to open here</span>` : `<button type="button" class="linkbtn" data-artopen="${esc(x.file)}" aria-expanded="${open}">${open ? "Close" : "Open"}</button>`) : "";
-  return `<div class="artrow" data-art="${esc(x.file || x.name)}"${x.node ? ` data-node="${esc(x.node)}"` : ""}${x.code && x.code.section ? ` data-sec="${esc(x.code.deck)}|${esc(x.code.section)}"` : ""}><span class="artdot" style="background:var(${ARTDOT[g]})"></span><div class="artwho"><b>${esc(x.name)}</b><span class="artby">${by}</span></div>`
+  const sec = x.code && x.code.section, art = sec ? (sec === "style" ? "design" : DECK_ART[x.code.deck]) : x.node === "work:style" ? "design" : null;
+  const tpl = !art ? "" : `<span class="artby">${sec === "style" || x.node === "work:style" ? tplSecLine("design", null, "Style guide") : tplSecLine(art, x.rewritten ? x.rewritten.by : sec, null)}</span>`;
+  return `<div class="artrow" data-art="${esc(x.file || x.name)}"${x.node ? ` data-node="${esc(x.node)}"` : ""}${x.code && x.code.section ? ` data-sec="${esc(x.code.deck)}|${esc(x.code.section)}"` : ""}><span class="artdot" style="background:var(${ARTDOT[g]})"></span><div class="artwho"><b>${esc(x.name)}</b><span class="artby">${by}</span>${tpl}</div>`
     + `<span class="artr">${artTag(auditWord(x, CTX) || x.status || "")}${btn}</span></div>` + artBody(x, open, ck) + (kids.length ? `<div class="artsub">${kids.map(k => artNode(k, g)).join("")}</div>` : "");
 }
 const renderArtTree = t => t.groups.map(g => `<section class="artgroup" data-group="${esc(g.id)}"><h3 class="arthead">${esc(g.label)} <span class="artcount">${g.count}</span></h3><div class="artcard">`
@@ -1543,6 +1570,8 @@ async function loadLibrary(){
   try { const r = await fetch(`/api/run-templates?${runQ().slice(1)}`, {cache: "no-store"}); if (r.ok) LIB.decisions = (await r.json()).decisions || []; } catch (e) {}
   LIB.loaded = true; paint($("pane-library"), renderLibrary());
   if (state) paint($("pane-workflows"), renderWorkflows(state));      // the Template lines read the decisions just loaded
+  if (ARTS.tree) paint($("pane-artifacts"), renderArtifacts());
+  if (Object.keys(DOCS).length) paint($("pane-docs"), renderDocs());
 }
 async function openTemplate(artifact, section, name, version){
   const sl = name === "generic" ? "generic" : slugOf(name);
@@ -1676,6 +1705,7 @@ if (CAT.on){
   if (o.length === 4 && /^v\d+$/.test(o[3])) CAT.open = [o[0], o[1], o[2], +o[3].slice(1)];
   loadCatalog();
 }
+document.addEventListener("click", e => { const tg = e.target.closest("[data-tplgo]"); if (!tg) return; e.preventDefault(); const [atom, art] = tg.dataset.tplgo.split("|"); tplGo(atom, art); });
 $("pane-artifacts").addEventListener("click", async e => { const cc = e.target.closest("[data-codecopy]"); if (cc){ e.preventDefault(); try { await navigator.clipboard.writeText(CODE[cc.dataset.codecopy] || ""); cc.textContent = "Copied"; } catch (err) { cc.textContent = "Copy failed"; } return; }
   const c = e.target.closest("[data-artcode]"); if (c){ e.preventDefault(); const k = c.dataset.artcode, [deck, sec] = k.split("|"); ARTOPEN = ARTOPEN === "code:" + k ? "" : "code:" + k; paint($("pane-artifacts"), renderArtifacts());
     if (ARTOPEN && CODE[k] === undefined){ try { const x = await fetch(`/api/code?deck=${encodeURIComponent(deck)}${sec ? "&section=" + encodeURIComponent(sec) : ""}${runQ()}`, {cache: "no-store"}); CODE[k] = x.ok ? await x.text() : "Could not open this code."; } catch (err) { CODE[k] = "Could not open this code."; } paint($("pane-artifacts"), renderArtifacts()); }
