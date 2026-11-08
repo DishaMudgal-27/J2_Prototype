@@ -244,12 +244,12 @@ a{color:var(--accent)}
 body:not(.simple) #dview{display:flex;flex:1;min-height:0}
 #dview h1,#dview h2,#dview h3,#dview h4{font-family:var(--serif);font-weight:600}
 .rail.tabs{flex:0 0 240px;width:240px;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:4px;padding:54px 8px 10px;border-bottom:0;border-right:1px solid var(--line);overflow-y:auto}
-.rail.tabs button{display:block;width:100%;border:0;border-radius:8px;padding:6px 8px;font:500 13px/1.3 var(--body);text-align:left;color:var(--muted)}
+.rail.tabs button,.rail.tabs .ritem{display:block;width:100%;border:0;border-radius:8px;padding:6px 8px;font:500 13px/1.3 var(--body);text-align:left;color:var(--muted)}.rail.tabs .ritem{text-decoration:none;background:none}
 .rail.tabs button svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.rail.tabs button:hover{color:var(--ink)}
-.rail.tabs button[aria-selected="true"],.rail.tabs #gochat[aria-current="page"]{color:var(--vio);background:color-mix(in srgb,var(--vio) 13%,transparent);font-weight:600}
+.rail.tabs button:hover,.rail.tabs .ritem:hover{color:var(--ink)}
+.rail.tabs button[aria-selected="true"],.rail.tabs .ritem[aria-selected="true"],.rail.tabs #gochat[aria-current="page"]{color:var(--vio);background:color-mix(in srgb,var(--vio) 13%,transparent);font-weight:600}
 body.simple .rail.tabs button[aria-selected="true"]{color:var(--muted);background:none;font-weight:500}
-.rail.tabs button:focus-visible,.rdrow:focus-visible{outline:2px solid var(--vio);outline-offset:1px}
+.rail.tabs button:focus-visible,.rail.tabs .ritem:focus-visible,.rdrow:focus-visible{outline:2px solid var(--vio);outline-offset:1px}
 .dcol{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
 #dview header.dtop{align-items:flex-end;gap:10px;padding:18px var(--gut) 8px;border-bottom:0;background:none}
 #dview h1{font-size:28px;line-height:1.1;margin:0}
@@ -317,7 +317,7 @@ svg path[data-edge].hot,svg.focusing path[data-edge].lit{opacity:1!important;str
 .nodrift .tnode,.nodrift .cnode,.nodrift .mapnode{animation:none!important}
 @media (prefers-reduced-motion:reduce){.treesvg .tnodes>.tnode,.consvg .cnodes>.cnode,.mapsvg .mapnode{animation:none}}
 /* /library: the template catalog outside any run (the same page; the run views stay hidden) */
-#libpage{display:none}body.libpage{display:block}body.libpage #sview,body.libpage #dview{display:none}body.libpage #libpage{display:block;max-width:1100px;margin:0 auto;padding:18px 24px 40px}
+#libpage{display:none}body.libpage #sview,body.libpage #dview>.dcol,body.libpage #railsub{display:none}body.libpage{flex-direction:row}body.libpage #dview{display:flex;flex:1;min-height:0}body.libpage #libpage{display:block;flex:1;min-width:0;overflow-y:auto;padding:18px 24px 40px}body.libpage #libpage>*{max-width:1100px;margin-left:auto;margin-right:auto}
 .libhead{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:0 0 10px}.libhead h1{margin:0;font-size:22px}.libhead input[type=search]{min-width:min(320px,100%);padding:4px 8px;font:inherit;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px}
 .libviews [role=tab]{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:3px 10px;font:inherit;cursor:pointer}.libviews [aria-selected="true"]{font-weight:700;border-color:var(--ink)}
 .librun{border:1px solid var(--line);border-radius:10px;padding:6px 12px;margin:8px 0;background:var(--panel)}.librun>summary{cursor:pointer}.librun .libgroup{margin:4px 0 4px 12px}.librun .libgroup b{display:inline-block;min-width:70px}
@@ -328,7 +328,6 @@ svg path[data-edge].hot,svg.focusing path[data-edge].lit{opacity:1!important;str
 try { var tp = localStorage.getItem("j2theme"); document.documentElement.dataset.theme = tp === "light" ? "light" : tp === "system" && matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"; } catch (e) { document.documentElement.dataset.theme = "dark"; }</script>
 </head>
 <body class="simple">
-<div id="libpage"></div>
 <div id="sview">
   <header class="shead"><b id="stitle">Your website team</b><span class="meta" id="sotype"></span><span class="spacer"></span><a href="/library" class="slink" id="to-library">Template library</a> <a href="?view=detail" class="slink" id="to-detail">See how it works</a></header>
   <main class="smain">
@@ -347,6 +346,7 @@ try { var tp = localStorage.getItem("j2theme"); document.documentElement.dataset
 <nav class="rail tabs" id="rail" role="tablist" aria-label="Sections" aria-orientation="vertical">
   <button role="tab" data-tab="map" aria-selected="true"><span>Map</span></button>
   <button type="button" id="gochat"><span>Chat</span></button>
+  <a id="golib" class="ritem" href="/library" aria-selected="false"><span>Template library</span></a>
   <div class="railsub" id="railsub">
     <button role="tab" id="tab-story" data-tab="story" aria-selected="false" hidden>Board story</button>
     <button role="tab" data-tab="preview" aria-selected="false">Preview</button>
@@ -360,7 +360,7 @@ try { var tp = localStorage.getItem("j2theme"); document.documentElement.dataset
     <button role="tab" data-tab="docs" aria-selected="false">Documents</button>
     <button role="tab" data-tab="artifacts" aria-selected="false">Artifacts</button>
     <button role="tab" id="tab-board" data-tab="board" aria-selected="false" hidden>Board</button>
-    <button role="tab" id="tab-library" data-tab="library" aria-selected="false" hidden>Library</button>
+    <button role="tab" id="tab-library" data-tab="library" aria-selected="false" hidden>Templates (this run)</button>
     <button role="tab" data-tab="lessons" aria-selected="false">Lessons</button>
     <button role="tab" data-tab="playbooks" aria-selected="false">Playbooks</button>
     <button role="tab" data-tab="report" aria-selected="false">Report</button>
@@ -368,6 +368,7 @@ try { var tp = localStorage.getItem("j2theme"); document.documentElement.dataset
     <button role="tab" data-tab="runsettings" aria-selected="false">Run settings</button>
   </div>
 </nav>
+<div id="libpage"></div>
 <div class="dcol">
 <section class="needs" id="needs" aria-label="Needs you" tabindex="-1"></section>
 <main>
@@ -813,7 +814,7 @@ function tplSecLine(artifact, wid, section){
   return `<span class="tplline" data-tplline="${esc(d.action)}">Template: <span class="code">${esc(d.template)} v${esc(d.version)}</span> · ${esc(d.action)}`
     + ` · <button type="button" class="linkbtn" data-tplgo="${esc(d.atom)}|${esc(d.artifact)}">this run</button> · <a href="${libHref(d.artifact, d.section, name, ver)}" data-link="catalog">library</a></span>`;
 }
-function tplGo(atomId, artifact){      // the run's Library tab, with that decision's template open
+function tplGo(atomId, artifact){      // the run's Templates (this run) tab, with that decision's template open
   setView("detail", true); showTab("library"); LIB.focus = atomId;
   loadLibrary().then(() => { const ds = LIB.decisions || [], d = ds.find(x => x.atom === atomId && (artifact ? x.artifact === artifact : x.artifact !== "design")) || ds.find(x => x.atom === atomId);
     if (d) openTemplate(d.artifact, d.section, d.kind === "generic" ? "generic" : d.template, d.kind === "generic" ? 1 : d.version);
@@ -1372,6 +1373,7 @@ showTab("map");
   if (!want || !document.querySelector(`.tabs [data-tab="${want.replace(/[^\w-]/g, "")}"]`)) return;
   setView("detail", false); showTab(want); })();
 $("gochat").onclick = () => setView("simple", true);      // Chat is the Simple view; any other rail item goes back to the Detailed view
+$("golib").href = "/library" + (viewRun ? "?run=" + encodeURIComponent(viewRun) : "");      // the shared template library, remembering this run
 document.querySelectorAll(".rail [role=tab]").forEach(b => b.addEventListener("click", () => setView("detail", true)));
 // Left bar toggle: open from 1200px up, collapsed below; a choice made on a wide screen is remembered (a narrow overlay always starts closed)
 const BARWIDE = matchMedia("(min-width:1200px)"), barOpen = () => !$("dview").classList.contains("railoff");
@@ -1381,7 +1383,7 @@ function barBadge(){ const n = +(document.getElementById("needcount") || {}).tex
 $("railtoggle").onclick = () => barSet(!barOpen(), true);
 BARWIDE.addEventListener("change", barInit); barInit();
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !BARWIDE.matches && barOpen()){ e.stopImmediatePropagation(); barSet(false); $("railtoggle").focus(); } }, true);
-document.addEventListener("click", e => { if (!BARWIDE.matches && barOpen() && (!e.target.closest(".rail, #railtoggle") || e.target.closest(".rail [role=tab], #gochat"))) barSet(false); });
+document.addEventListener("click", e => { if (!BARWIDE.matches && barOpen() && (!e.target.closest(".rail, #railtoggle") || e.target.closest(".rail [role=tab], #gochat, #golib"))) barSet(false); });
 $("backmap").onclick = () => showTab("map");
 // Artifacts: read-only list driven by artifacts/types.json (/api/artifacts): deliverables, then evidence and records.
 const ARTS = {deliverables: [], records: [], tree: null}, ARTTEXT = {};      // ARTTEXT: file -> text already fetched for an open row
@@ -1650,7 +1652,7 @@ async function libClick(e){
 $("pane-library").addEventListener("click", libClick);
 // ---- /library: the shared template library outside any run, read from library/ only (/api/catalog), so it works on a
 // fresh clone with no runs/. Two views (by run, by artifact), a search box (business or template name), a "Hide mock" box
-// (off by default), and the same viewer as the run's Library tab, opened in place.
+// (off by default), and the same viewer as the run's Templates (this run) tab, opened in place.
 const CAT = {on: location.pathname === "/library", loaded: false, groups: {}, runs: [], dir: "", view: "run", q: "", hideMock: false, open: null};
 const catMatch = (...texts) => { const q = CAT.q.trim().toLowerCase(); return !q || texts.some(t => String(t || "").toLowerCase().includes(q)); };
 const catCount = (r, a) => (r.counts || {})[a] || 0;
@@ -1698,6 +1700,12 @@ async function loadCatalog(){
 }
 if (CAT.on){
   document.body.classList.add("libpage"); document.title = "J2 template library";
+  // the rail: Template library is the selected item; Map and Chat go back to the run this page was opened from (?run=), or the home page
+  const back = view => `/?${viewRun ? "run=" + encodeURIComponent(viewRun) + "&" : ""}view=${view}`;
+  $("golib").setAttribute("aria-selected", "true"); $("golib").setAttribute("aria-current", "page"); $("gochat").setAttribute("aria-current", "false");
+  document.querySelectorAll("#rail [role=tab]").forEach(x => x.setAttribute("aria-selected", "false"));
+  document.querySelector('#rail [data-tab="map"]').onclick = () => { location.href = back("detail"); };
+  $("gochat").onclick = () => { location.href = back("simple"); };
   LIB.pane = () => $("catbody"); LIB.render = renderCatBody;
   const q = new URLSearchParams(location.search);
   CAT.q = q.get("business") || q.get("q") || ""; CAT.hideMock = q.get("mock") === "hide"; CAT.view = q.get("view") === "artifact" ? "artifact" : "run";
