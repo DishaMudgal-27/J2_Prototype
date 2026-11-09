@@ -95,7 +95,7 @@ def rows(d, types=None):
     atoms, docs, out = _atoms(d), _read(d, "documents.json", {}) or {}, []
     board = _board(d, atoms)
     for t in types["types"]:
-        files = [os.path.relpath(p, d) for p in sorted(glob.glob(os.path.join(d, t["file"])), key=_num)] \
+        files = [os.path.relpath(p, d).replace(os.sep, "/") for p in sorted(glob.glob(os.path.join(d, t["file"])), key=_num)] \
             if "*" in t["file"] else [t["file"]] if os.path.isfile(os.path.join(d, t["file"])) else []
         wf = []
         if t["kind"] == "type":
