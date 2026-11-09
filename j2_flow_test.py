@@ -9213,8 +9213,8 @@ def map_tab():
     rail = ui[ui.index('<nav class="rail tabs"'):ui.index("</nav>", ui.index('<nav class="rail tabs"'))]
     top, inside = rail.split('id="railsub"')
     # the Board story is the first entry under Internals (shown only when the run has a board); the rest are the old order
-    old_tabs = ["story", "preview", "goal", "workflows", "conflicts", "priorities", "timeline", "audit", "charter", "docs", "artifacts", "board", "library", "lessons", "playbooks", "report", "rundetails", "runsettings"]      # the Style guide is under Artifacts > Specs
-    assert re.findall(r'data-tab="(\w+)"', top) == ["map"] and 'id="gochat"' in top and 'id="internals"' not in top and "Internals" not in rail and re.findall(r"<span>([^<]+)</span>", top) == ["Map", "Chat"], "the rail has Map and Chat rows; no Internals folder"
+    old_tabs = ["story", "preview", "goal", "planmap", "workflows", "conflicts", "priorities", "timeline", "audit", "charter", "docs", "artifacts", "board", "library", "lessons", "playbooks", "report", "rundetails", "runsettings"]      # the Style guide is under Artifacts > Specs
+    assert re.findall(r'data-tab="(\w+)"', top) == ["map"] and 'id="gochat"' in top and 'id="internals"' not in top and "Internals" not in rail and re.findall(r"<span>([^<]+)</span>", top) == ["Map", "Chat", "Template library"], "the rail has Map, Chat and Template library rows; no Internals folder"
     assert re.findall(r'data-tab="(\w+)"', inside) == old_tabs, "every other tab is under Internals, in the old order"
     assert "<svg" not in rail and ' hidden' not in rail.split('id="railsub"')[1].split(">")[0], "no icon rail; the sections are always shown"
     dvh = ui[ui.index('<div id="dview">'):ui.index('<dialog id="detail">')]
