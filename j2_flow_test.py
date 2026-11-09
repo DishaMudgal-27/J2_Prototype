@@ -3400,7 +3400,7 @@ def atom_cards_render():
         card = card[card.index(f'data-key="atom-{a["id"]}"'):]
         card = card[:card.index("Run details")]
         blocks = re.findall(r'data-block="([a-z_]+)"', card)
-        assert blocks == ["goal", "how", "constraints", "context", "expected_output", "verification", "human_output",
+        assert blocks == ["goal", "how", "constraints", "context", "expected_output", "template_line", "verification", "human_output",
                           "agent_output", "result"], blocks
         assert all(f"<b>{x}</b>" in card for x in ("Notes", "Workflow output", "Result")) and "<b>Human output</b>" not in card
         assert re.findall(r'<h4 class="agroup">([^<]*)<', card) == ["1. Particles", "2. Defined output and verification",
